@@ -1,8 +1,18 @@
 # ADR-118: bounded typed-row INNER JOIN
 
-Status: Accepted for implementation; source and runtime qualification pending. Date: 2026-10-07. Owner: QueryExecution integration owner. This is a first operator slice under existing REQ-REL-004 and REQ-QUERY-007; it does not close either requirement or the full SQL workstream.
+Status: Source joined with local native operation evidence; public RF3, complete negative inventory and original Linux qualification pending. Date: 2026-10-07. Owner: QueryExecution integration owner. This is a first operator slice under existing REQ-REL-004 and REQ-QUERY-007; it does not close either requirement or the full SQL workstream.
 
 ## Product boundary
+
+```mermaid
+flowchart LR
+    Caller[SQL SDK or MCP caller] --> Request[Authorized request grain]
+    Request --> View[Single node-local ZoneTree read view]
+    View --> Policy[Both typed schemas and persisted policies]
+    Policy --> Work[Budgeted left scan and right primary-key probes]
+    Work --> Page[Safe projection and ordered bounded page]
+    Page --> Result[Exact source identities and committed cut]
+```
 
 Implement one read-only SQL INNER JOIN for two typed relational Collection resources inside the single PartitionRef already present in a query request. The left relation is an explicitly opted-in bounded collection scan. For each visible left row, the executor probes the right relation by its declared non-null Text primary key through the existing canonical document key. The left join column must also be declared Text. The right source column in ON must be exactly the right table's declared primary-key column. This is a primary-key indexed nested-loop join; it does not require a new secondary index encoding or another storage engine.
 
@@ -147,3 +157,187 @@ client protocol qualification is introduced. Root owns build/format/unit/scalar,
 real process recovery, actual Aspire RF3 SDK/MCP, original Linux artifacts and
 stage commit/push. Luna owns the guarded implementation packet only.
 
+## RF3 budget fixture contract frozen before implementation
+
+TASK-REL-004-INNER-JOIN-007 completes the public-caller part of
+AC-REL-004-JOIN-004/006 and AC-QUERY-007-JOIN-002. The existing RF3 fixture has
+no database-limit selector. Add a test-only `ClusterFixture(DatabaseLimits)`
+constructor and validate that immutable typed value before creating any Aspire
+builder or resource. A missing override preserves the standard fixture. Map
+all twenty current `DatabaseLimits` properties, with invariant numeric encoding,
+to each named RF3 container's `KeyLoad__DatabaseLimits__<Property>` environment
+configuration before `BuildAsync`. Reuse the server's current typed options
+binding and startup validation. This is Aspire resource configuration; do not
+write the test process environment, change production defaults, introduce a
+join-specific setting, or add a server test hook.
+
+The root integration owner owns shared changes to
+`tests/KeyLoad.IntegrationTests/ClusterFixture.cs`,
+`Features/ClusterReplication/Contracts/ClusterFixtureProtocol.cs` and
+`Features/ClusterReplication/Helpers/ClusterFixtureComposition.cs` under that
+project. A cohesive `ClusterFixtureDatabaseLimits` helper in the same Helpers
+folder may own the complete typed mapping if needed for the existing type
+limits. Luna owns a guarded private implementation packet and separate
+`RelationalSqlRf3Join*BudgetTests` cases plus cohesive helpers under
+`Features/RelationalStorage/`. No other fixture or production path changes.
+
+Use three separately owned, nonparallel native TUnit flows: cumulative left
+scan/right probe work; combined raw query-read bytes; complete serialized joined
+page bytes. Each flow starts the genuine Aspire RF3 fixture, seeds declared
+schemas and exact rows with SDK commits, and sends the over-budget Q2 query
+through both the SDK and official MCP on discovered endpoints. Both callers
+must return the existing safe `BudgetExceeded` category. Read all seeded source
+rows back through the real SDK and compare exact identity, JSON and revision;
+no failure query may mutate them. Then query a separate small healthy partition
+through both callers on the same live fixture and compare its complete expected
+page and ordered source identities. Keep each individually read-back source
+within its applicable budget and each seed/configuration command below the
+unchanged write admission limits. A combined read/page may exceed a limit even
+when its individual seed/read operations fit; never lower a fixture limit so
+setup or the state oracle becomes the rejected operation.
+
+Native unit cases retain exact measured boundary/boundary+1 arithmetic. These
+RF3 cases prove real typed configuration propagation and SDK/MCP failure plus
+healthy follow-up, not an inferred exact native byte count. Preserve membership,
+read cuts, signed image/source qualification, existing deadlines and joined
+fixture shutdown. Root reviews every diff, runs the native build and owning
+unit/scalar/RF3 gates, and retains original Linux evidence before acceptance.
+Frontend, public contracts, storage format and production configuration changes
+are N/A: this stage only exercises existing current operation limits.
+
+## Native R270 corrections before the next source join
+
+The first owning native cohort executed 605 cases: 574 passed and 31 failed.
+Four failures are new Q2 fixture/oracle defects; the remaining failures cascade
+from schema export of the newly appended capability arrays. These observations
+are failed local development evidence, not acceptance.
+
+TASK-REL-004-INNER-JOIN-008 repairs AC-REL-004-JOIN-001/003/004/005 without
+changing storage, authority or Q1 error contracts. The two newly appended
+`QueryCapabilityManifest` version arrays at native IDs 16 and 17 are required
+initialized constructor arguments. They have no optional `default` struct value
+for the native JSON Schema exporter to serialize. Existing fields, aliases and
+the actual populated Q1/Q2 capability result remain unchanged. Luna owns only
+the guarded Abstractions contract correction and its source review; root owns
+all native serialization, catalog/compiler and real caller verification.
+
+The unit owner repairs only `SqlInnerJoinExecutionTests` and
+`SqlInnerJoinBudgetTests`, with a cohesive native-byte measurement helper if
+the existing type limit requires it. AST join keys use canonical JSON pointers;
+the work fixture declares its intentionally null/missing foreign key nullable.
+Every persisted principal update must advance its policy epoch and consume a
+successful typed operation result before the next query. Preserve both resource
+and field-use denials, unchanged-state checks and exact redaction assertions.
+
+A syntactically valid SQL LIMIT above MaxResults retains the existing parser's
+Validation result, for both Q1 and Q2. The same over-limit typed AST must fail
+BudgetExceeded in canonical normalization. Strengthen the existing result-count
+flow to prove both outcomes, unchanged persisted state and the exact successful
+boundary query afterward; do not change production parsing merely to satisfy an
+incorrect new oracle. Root joins the guarded repairs, repeats the complete
+owning normal/scalar cohort and recovery, then retains original Linux/RF3 and
+schema evidence. No failed assertion, safety bound, check or criterion is waived.
+
+The root review additionally permits one cohesive
+`UnitTests/Features/QueryExecution/Assertions/SqlInnerJoinPageAssertions.cs`
+extraction of the existing complete pair-row oracle. Preserve every source,
+revision, JSON and redaction assertion exactly. Keep vocabulary declarations on
+separate readable lines; combining declarations cannot serve as a code-size
+bypass. Root owns this guarded extraction and the final type-limit/native gate.
+
+## Native R272 fixture and schema corrections
+
+The next owning cohort executed 605 cases: 602 passed and three failed. Extend
+TASK-REL-004-INNER-JOIN-008 only to repair these observed fixture/oracle defects
+under AC-REL-004-JOIN-003/005 and AC-QUERY-007-JOIN-002. No production admission,
+authorization, projection, readiness, or error contract changes are permitted.
+
+The unit MCP catalog oracle must enumerate the exact new optional InnerJoin,
+Selection.SourceAlias, and QueryRow.Sources schema members and their native
+nullable types, nested fields and unchanged required-member lists. Keep the
+existing tool hints, Q1 caller operation and page oracle. Ownership is
+`UnitTests/Features/QueryExecution/ClientApi/Assertions/PartitionQueryMcpCatalogAssertions.cs`,
+the matching `Contracts/PartitionQueryMcpProtocol.cs`, and one cohesive
+`PartitionQueryMcpInnerJoinSchemaAssertions.cs` helper in that Assertions folder
+if required by type/method limits. Reuse the owning schema inspection API; do
+not ignore unexpected fields or replace native schema export.
+
+`SqlInnerJoinExecutionTests` must explicitly give raw-read grants for both join
+columns while independently testing their field-use grants. The final reader
+still lacks the projected name's raw-read grant, so the exact redacted-field
+oracle remains only `r.name`, with a null projected value and no private name
+disclosure. Retain persisted policy-epoch advancement, both resource/field-use
+denials, unchanged store positions and the successful administrator query.
+
+`SqlInnerJoinLifecycleTests` must keep all 32 actual joins and 32 atomic paired
+generation commits, but bound the simultaneous reader workers by the existing
+configured MaxConcurrentQueries. The read-cut test must not accidentally become
+an over-admission test. Join every original reader and writer task before
+asserting every returned pair's consistent generation and source revisions;
+no retry, dropped operation, raised production default or detached work is
+allowed. The real close/reopen operation remains intact. A final healthy query
+after the writer settles must observe its final paired generation.
+
+Three Luna owners prepare separately guarded private packets for these exact
+files. Root reviews and joins them, then performs a fresh complete Release
+build, normal/scalar owning cohorts, real process recovery and formatter checks.
+Record the failed R272 receipt and successful follow-up separately. Authentic
+RF3 and Linux gates remain mandatory before acceptance.
+
+The original R275 normal cohort passed 603/605. Its remaining Q2 catalog failure
+is an exact type assertion on the native nullable object schema after successful
+nullable-type validation. TASK-REL-004-INNER-JOIN-008 additionally owns the unit
+`PartitionQueryMcpInnerJoinSchemaAssertions.cs` and the matching integration
+helper/`PartitionQueryMcpSchemaAssertions.cs` correction for this actual native
+shape. Preserve the original schema, exact nullable type inventory, all nested
+properties, required fields, hints and real Q1 operation/page. A nullable object
+shape must be checked as the already admitted object/null union, rather than
+incorrectly required to be a separate nonnullable branch. Do not relax other
+objects, admit an extra branch or modify the exporter/public contracts. The
+independent serialization allocation failure belongs to its owning existing
+InternalSerialization performance criterion and is not a join behavior defect.
+
+The parallel R277/R278 follow-up cohorts each passed 604/605; their sole failure
+is the new unit source-revision assertion. Native JSON Schema exports a `long`
+using the existing integer/string representation admitted by the integration
+schema oracle. The unit join helper must reuse that exact current primitive
+inventory: integer alone or exactly integer plus string, without null, duplicate
+types or additional alternatives. Every string/object/array assertion remains
+strict. This corrects the oracle for the existing official serializer options;
+it adds no public representation, fallback or schema normalization. The actual
+catalog/query flow and complete normal/scalar follow-up remain required.
+
+TASK-REL-004-INNER-JOIN-009 repairs a source-review finding under the unchanged
+AC-REL-004-JOIN-001/002/005 and AC-QUERY-007-JOIN-001/002. Q2 projections bind
+declared relational column paths directly after removing the source alias.
+`id` is admitted only as the declared primary key; `revision` and non-primary
+`id` remain reserved by the existing typed-row schema. Only Q1 retains its
+existing metadata-path binding. Root owns the one-line `SqlJoinSyntax` join and
+the new `SqlInnerJoinDeclaredProjectionTests` whole-operation regression. The
+case seeds real ZoneTree schemas and rows, executes this ADR's exact accepted
+SQL and admitted declared values distinct from left-row metadata, compares complete SQL/AST
+pages, checks every literal projection and Sources/cut, preserves committed
+position and performs a healthy Q1 metadata read. Add its exact normal/scalar
+identities to the contributor registry and native selectors. No language form,
+wire/storage format, production limit, authority or topology changes. Root
+builds, runs owning normal/scalar and recovery, then retains original Linux
+and SDK/official-MCP RF3 evidence. Source review and a local pass cannot close
+the remaining negative-form, admitted RF3 cancellation or full SQL gates.
+
+The original R287/R288 normal/scalar cohorts each passed 605/606. The added
+fixture had ignored failed ConfigureResource results and attempted reserved
+columns; it never reached the join. Keep both original failures. The fixture
+must consume both actual successful configuration results, preserve the exact
+accepted `r.id` query, and use admitted `source_revision` data for the distinct
+declared-value oracle. Production schema validation remains unchanged.
+
+Final Stage VII development evidence is R290 full Release with 4,174 inputs,
+zero drift/warnings/errors, R294 native formatter, R291/R292 owning normal/scalar
+each 606/606 and R293 indexed/idempotency real process recovery 2/2, with zero
+source/DLL/PDB drift or skipped cases. Exact original log/TRX hashes and all
+failed observations remain in `docs/implementation/status.json`. The whole
+declared-column operation now executes and passes. The reviewed private 52-flow
+unsupported inventory is a following source stage; it is not executed evidence.
+New Q2 SDK/official-MCP RF3 and current-source Linux gates remain open. The
+latest original 4c48909 Linux cohort predates Q2 and fails 7 of 158 RF3 operations;
+it cannot qualify these additions. This ADR is not marked Implemented.

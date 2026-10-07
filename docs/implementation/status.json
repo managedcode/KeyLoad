@@ -17,45 +17,119 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage VI: R255 full native Release4,145 inputs passed with0 source drift/warnings/errors from fresh official R239 restore; R256/R257 owning normal/scalar10/10 each and R258 indexed/idempotency real process recovery2/2 pass with0 source/assembly drift or skips. R259 full native formatter passes after one layout-only correction. Whole-operation query factory, indexed-document restore/dedup, actual TUnit compile-root/import guard and strict six-resource membership configuration are integrated. Original failed R236/R246/R250/R254 observations retained. Stage V original Linux unit/scalar each2767/2768 and recovery235/235; RF3 completed122/132 with10 failures. Complete current-source Linux/RF3, sixteen-module functional coverage, endurance and remaining original-task acceptance stay open.",
+    "verificationStage": "Stage VII: Q2/AST2 bounded same-partition Text-primary-key INNER JOIN, whole committed document/index scan, strict native MCP schema and exact functional contributor/selector joins are live. R290 full Release passes4,174 inputs with zero drift/warnings/errors; R291/R292 owning normal/scalar each606/606 and R293 real indexed/idempotency process recovery2/2 pass with zero source/assembly drift or skips. R294 full native formatter passes. Latest authentic Stage VI Linux4c48909 normal/scalar each2771/2771 and recovery236/236 pass; RF3 has7 failures among158 operations. Current-source full Linux/RF3, full SQL/protocol, sixteen-module functional coverage, endurance and original-task gates remain open.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
       "Complete reviewed functional operation inventory and actual source-bound coverage; load/comparison/shape tests remain excluded"
     ],
     "latestOriginalLinux": {
-      "sourceCommit": "f38513b6f122f99202792a9c5ba5f2c349bfa860",
-      "runId": 37578573276,
+      "sourceCommit": "4c48909fc244f8a1399ec45b11e2ef7f89145602",
+      "runId": 37590715245,
       "runAttempt": 1,
-      "unitPassed": 2767,
-      "unitTotal": 2768,
-      "scalarPassed": 2767,
-      "scalarTotal": 2768,
-      "recoveryPassed": 235,
-      "recoveryTotal": 235,
-      "rf3Passed": 122,
-      "rf3Total": 132,
-      "rf3Failed": 10,
-      "sameJobSourceImageIdentityAvailable": true,
+      "conclusion": "failure",
+      "verifyJobId": 112691308536,
+      "rf3JobId": 112691267500,
+      "unitPassed": 2771,
+      "unitTotal": 2771,
+      "scalarPassed": 2771,
+      "scalarTotal": 2771,
+      "recoveryPassed": 236,
+      "recoveryTotal": 236,
+      "rf3Passed": 151,
+      "rf3Total": 158,
+      "rf3Failed": 7,
+      "failedOutsideRf3": 0,
+      "skipped": 0,
+      "originalReportHashes": {
+        "normal": {
+          "tunitSha256": "ea5d8d9947c2dfc9e2c139e9807efac63608ac6f386943774ec4eccbc83ba231",
+          "trxSha256": "44df0b41780cb1276fd7369b12b381c5c604b201cfcdb716592cd4d0d8fa4c13"
+        },
+        "scalar": {
+          "tunitSha256": "a44a6bc9d2b1958bd7fa9d86ded0e393669ed9ee88b05af9d61382b50d63b071",
+          "trxSha256": "c0f71b1fdbfd9b96bfd55bd84163a9df34abb7d454a1f302c5a608e63175fc8f"
+        },
+        "recovery": {
+          "tunitSha256": "70707359d0518feb286be418974d0a75eb22c4978de8a0f27513d2d93b72565b",
+          "trxSha256": "686757d3f4d41e406004a4e1283c117a4faec7254fb025df4712fff8bbcb5e7c"
+        },
+        "rf3": {
+          "tunitSha256": "b118da21d2b2b7feebffa49fb7176c707fb7a6811881b5245d9f5c7387ed98e7",
+          "trxSha256": "42766f1e836f864edeae5f0870733b90bcaa6696450d320891e4492a38a08cf5"
+        }
+      },
+      "rf3Failures": [
+        {
+          "methodName": "AcSeries013Through016PartialPurgeReplaysHidesAndSurvivesFollowerRestart",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3RecoveryTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
+        },
+        {
+          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/TwoRf3MembershipProfileTests.cs",
+          "exceptionType": "System.AggregateException",
+          "message": "One or more errors occurred. (A task was canceled.) (Offline filesystem operation failed.)"
+        },
+        {
+          "methodName": "AcDue003NoQuorumDefersRecurringOccurrenceUntilTwoVotersReturn",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/DueNoQuorumRf3Tests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReplicaRestartTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
+        },
+        {
+          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PhysicalShardCatalogRf3MismatchTests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3FollowerRestartTests.cs",
+          "exceptionType": "System.Net.Http.HttpRequestException",
+          "message": "Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The Orleans request could not complete.\",\"errorCode\":\"OwnershipLost\"}"
+        }
+      ],
+      "sameJobVerifySourceImageIdentityStepPassed": true,
+      "crossJobBinaryIdentityInferred": false,
+      "sourceImageBoundary": "Verify and RF3 jobs retain separate compiled identities; KeyLoad.Orleans DLL/MVID/PDB and one generated LoggerMessage document differ. The shared source SHA does not establish a shared binary cohort.",
       "coverageCollected": false,
-      "qualification": "Original Stage V Linux normal/scalar each have one failed C1 negative fixture; recovery passes235. RF3 reports132 terminal unfiltered TUnit-discovered cases with10 failures; no independent source census is inferred. Coverage/descriptor/merge skipped after RF3 failure. Dirty Stage VI fixes require a fresh delivered-source Linux run.",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37578573276"
+      "productCoveragePercent": null,
+      "expectedIndependentSourceCensusAvailable": false,
+      "receiptSha256": "8fe48a1f71a7fe003df475630ce3323f78971281cca542e8744456cfc2520f60",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37590715245",
+      "qualification": "Authenticated original Stage VI Linux TUnit/TRX reports agree. Full build, formatter, analyzers, normal/scalar/recovery pass; RF3 has seven failed operations. Coverage collection, descriptor and merge skipped. Q2 additions are later source and receive no qualification from this run."
     },
     "currentBuild": {
-      "compileInputs": 4145,
+      "run": "R290",
+      "compileInputs": 4174,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "83c47088356160d55bfc7a0a6376ea5e6d7060e990b913a5f309532b826d6431",
+      "logSha256": "5063bd5c50ecb45faa0a47bd062ca07aa55aa4add33a6e06cd26b9f05f66952b",
       "passed": true,
-      "qualification": "R255 full native local Release from fresh official R239 restored inputs for final Stage VI; complete delivered-source Linux/RF3 remain open"
+      "qualification": "Full native local Release after the final Stage VII fixture correction; original delivered-source Linux and RF3 qualification remain open"
     },
     "currentFormatter": {
-      "compileInputs": 4145,
+      "run": "R294",
+      "compileInputs": 4174,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "qualification": "R259 full native source-bound final Stage VI formatter; no source changed, not functional or Linux proof"
+      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -485,11 +559,11 @@
       }
     },
     "nextPreparedStages": [
-      "ADR-118 Q2 bounded relational INNER JOIN reviewed immutable R4 source; guarded join/native bounds/RF3/Linux qualification pending",
-      "ADR-119 explicit TUnit-owned local six-silo image reviewed immutable R3 source; guarded join/native selectors/actual image-six-silo-cleanup lifecycle proof pending",
-      "TASK-CUT-DOCUMENT-INDEX-SCAN frozen with immutable R1 real concurrent document/index test source; review/join/native execution pending; snapshot/segment overhead remains open",
-      "Original host/container package graph capture contract proposal under review; no producer joined or original Linux archive graph qualification inferred",
-      "Current follower survivor OwnershipLost and canceled RF3 flows require source/phase-correlated actual Aspire reproduction; no speculative auth relaxation"
+      "ADR119 reviewed private15-file C# TUnit-owned standard RF3/six-silo fresh-image preparation and safe joined cleanup; not live or executed yet",
+      "Reviewed private52-case real-ZoneTree Q2 unsupported grammar/key/source/order/version whole-flow inventory; not live or executed yet",
+      "TASK-TUNIT-DOCKER-JOIN-007 frozen child/readers ownership and output-bound correction; private implementation in progress; dedicated real-Docker cancellation fault remains unqualified",
+      "ProductAdmission source mode reviewed privately; actual full descriptor original-admit/controlled-denial/immutability/re-admit/cleanup and complete inventory/census remain unimplemented/unqualified",
+      "Original RF3 readiness/OwnershipLost/cancelled flows require actual source/phase-correlated Aspire reproduction; readiness route exists, no absent-route cause or authorization relaxation inferred"
     ],
     "stageFourOriginalLinux": {
       "sourceCommit": "a11d4404607763726ce247d09a1653102031840c",
@@ -657,6 +731,408 @@
       "linuxQualified": false,
       "fullRf3Qualified": false,
       "productCoveragePercent": null
+    },
+    "stageSixOriginalLinux": {
+      "sourceCommit": "4c48909fc244f8a1399ec45b11e2ef7f89145602",
+      "runId": 37590715245,
+      "runAttempt": 1,
+      "conclusion": "failure",
+      "verifyJobId": 112691308536,
+      "rf3JobId": 112691267500,
+      "unitPassed": 2771,
+      "unitTotal": 2771,
+      "scalarPassed": 2771,
+      "scalarTotal": 2771,
+      "recoveryPassed": 236,
+      "recoveryTotal": 236,
+      "rf3Passed": 151,
+      "rf3Total": 158,
+      "rf3Failed": 7,
+      "failedOutsideRf3": 0,
+      "skipped": 0,
+      "originalReportHashes": {
+        "normal": {
+          "tunitSha256": "ea5d8d9947c2dfc9e2c139e9807efac63608ac6f386943774ec4eccbc83ba231",
+          "trxSha256": "44df0b41780cb1276fd7369b12b381c5c604b201cfcdb716592cd4d0d8fa4c13"
+        },
+        "scalar": {
+          "tunitSha256": "a44a6bc9d2b1958bd7fa9d86ded0e393669ed9ee88b05af9d61382b50d63b071",
+          "trxSha256": "c0f71b1fdbfd9b96bfd55bd84163a9df34abb7d454a1f302c5a608e63175fc8f"
+        },
+        "recovery": {
+          "tunitSha256": "70707359d0518feb286be418974d0a75eb22c4978de8a0f27513d2d93b72565b",
+          "trxSha256": "686757d3f4d41e406004a4e1283c117a4faec7254fb025df4712fff8bbcb5e7c"
+        },
+        "rf3": {
+          "tunitSha256": "b118da21d2b2b7feebffa49fb7176c707fb7a6811881b5245d9f5c7387ed98e7",
+          "trxSha256": "42766f1e836f864edeae5f0870733b90bcaa6696450d320891e4492a38a08cf5"
+        }
+      },
+      "rf3Failures": [
+        {
+          "methodName": "AcSeries013Through016PartialPurgeReplaysHidesAndSurvivesFollowerRestart",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3RecoveryTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
+        },
+        {
+          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/TwoRf3MembershipProfileTests.cs",
+          "exceptionType": "System.AggregateException",
+          "message": "One or more errors occurred. (A task was canceled.) (Offline filesystem operation failed.)"
+        },
+        {
+          "methodName": "AcDue003NoQuorumDefersRecurringOccurrenceUntilTwoVotersReturn",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/DueNoQuorumRf3Tests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReplicaRestartTests.cs",
+          "exceptionType": "System.OperationCanceledException",
+          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
+        },
+        {
+          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PhysicalShardCatalogRf3MismatchTests.cs",
+          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+          "message": "A task was canceled."
+        },
+        {
+          "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3FollowerRestartTests.cs",
+          "exceptionType": "System.Net.Http.HttpRequestException",
+          "message": "Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The Orleans request could not complete.\",\"errorCode\":\"OwnershipLost\"}"
+        }
+      ],
+      "sameJobVerifySourceImageIdentityStepPassed": true,
+      "crossJobBinaryIdentityInferred": false,
+      "sourceImageBoundary": "Verify and RF3 jobs retain separate compiled identities; KeyLoad.Orleans DLL/MVID/PDB and one generated LoggerMessage document differ. The shared source SHA does not establish a shared binary cohort.",
+      "coverageCollected": false,
+      "productCoveragePercent": null,
+      "expectedIndependentSourceCensusAvailable": false,
+      "receiptSha256": "8fe48a1f71a7fe003df475630ce3323f78971281cca542e8744456cfc2520f60",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37590715245",
+      "qualification": "Authenticated original Stage VI Linux TUnit/TRX reports agree. Full build, formatter, analyzers, normal/scalar/recovery pass; RF3 has seven failed operations. Coverage collection, descriptor and merge skipped. Q2 additions are later source and receive no qualification from this run."
+    },
+    "stageSevenDevelopment": {
+      "tasks": [
+        "TASK-REL-004-INNER-JOIN-001..009",
+        "TASK-CUT-DOCUMENT-INDEX-SCAN",
+        "TASK-CQ-Q2-CONTRIBUTOR-SELECTION",
+        "bounded follower-survivor phase diagnostic"
+      ],
+      "normal": {
+        "run": "R291",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e7b0a15e2e98d4bc84e001214e06d8d290bd6e60bd2894872ef4950f1f9ba7bc",
+        "trxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "scalar": {
+        "run": "R292",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "faf83c01e8bb160b4e50f362a19fe7920ad42e627e7de546a1777a75db83d0a7",
+        "trxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "recovery": {
+        "run": "R293",
+        "passed": 2,
+        "total": 2,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 427,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "d4eb829b818331bb4e94169f457ab8040b042327224b1859821d3c3a29e8afab",
+        "trxSha256": "add6d831c82e3ffcf4a13c5364641ce48134d6670a76286618e06f938bf649fd",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "build": {
+        "run": "R290",
+        "compileInputs": 4174,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "5063bd5c50ecb45faa0a47bd062ca07aa55aa4add33a6e06cd26b9f05f66952b",
+        "passed": true,
+        "qualification": "Full native local Release after the final Stage VII fixture correction; original delivered-source Linux and RF3 qualification remain open"
+      },
+      "formatter": {
+        "run": "R294",
+        "compileInputs": 4174,
+        "inputDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "owningUnitClassCount": 118,
+      "owningUnitFilterCharacters": 3314,
+      "functionalContributorRegistry": {
+        "schemaVersion": 1,
+        "total": 94,
+        "perSuite": {
+          "unit": 41,
+          "unit-scalar": 41,
+          "rf3": 11,
+          "recovery": 1
+        },
+        "sha256": "2af8f3208a32dd1291e9ea373c5e3d689a19d79dff7f7b030dff83153a32c2bd",
+        "measuredCoverage": false
+      },
+      "originalFailedObservationsRetained": [
+        {
+          "run": "R270",
+          "observation": "capability exporter cascade and four new fixtures",
+          "originalLogSha256": "405438771fcdeb3a7300493cd52a2e2e087dc68648ef351d8e3a09abf353a7bb",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "dc6846be7193681916d70f6b2e11584eb1207ad6d300b478869ba4be3c26cacc",
+              "counters": {
+                "total": "605",
+                "executed": "605",
+                "passed": "574",
+                "failed": "31",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R272",
+          "observation": "three new fixture/schema defects",
+          "originalLogSha256": "e72f5257d757d29c2ace790ba294fde604e7089c4ad224ecab23c1667487bde7",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "e2886c4744a72a37e573bc067e3037783c203b3d0d369b3dad528f6abc14232a",
+              "counters": {
+                "total": "605",
+                "executed": "605",
+                "passed": "602",
+                "failed": "3",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R275",
+          "observation": "nullable native schema oracle and unexplained336B allocation observation",
+          "originalLogSha256": "9cc5f4e1f0f0fdae8b758c39dd80fe216cba1de0508512369eff67c2fc2d275e",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "e6fd7536b924f2fb15131965c2cc31abaa71d449e334640d9d8b2a627c6fb11b",
+              "counters": {
+                "total": "605",
+                "executed": "605",
+                "passed": "603",
+                "failed": "2",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R277",
+          "observation": "new source revision integer/string oracle",
+          "originalLogSha256": "9dd8f999bca989939b216060d2877eeb41580b557bd645f445ea5a1a2ca10f13",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "a8d9932fa87f1ecfc25a5ff7f4a97b1e9898bc9155ed7a8b353ae798773271a3",
+              "counters": {
+                "total": "605",
+                "executed": "605",
+                "passed": "604",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R278",
+          "observation": "same source revision oracle",
+          "originalLogSha256": "097c8e9cbbdd94e6464308459439431426d5b9f5acd995eb5b0a9bb827854d03",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "26400812d6cf568187edfafffcac7595dc53f6a23731425d1905cbf65f85e4e8",
+              "counters": {
+                "total": "605",
+                "executed": "605",
+                "passed": "604",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R282",
+          "observation": "caller used unsupported scalar selection; rejected before native discovery, no TRX or case outcome",
+          "originalLogSha256": "07b6b265eb41cfb4c539de9717299469686dc01fbd435ffbfbf07dae0eac3bd5",
+          "nativeExitCode": 1,
+          "originalTrx": []
+        },
+        {
+          "run": "R285",
+          "observation": "seven whitespace diagnostics in the switch-expression body",
+          "originalLogSha256": "3bb95af0955d0c19c29249dbb805c0f3c0ae26ecf68e6acacb6431c9a5875767",
+          "nativeExitCode": 2,
+          "originalTrx": []
+        },
+        {
+          "run": "R287",
+          "observation": "new positive fixture ignored rejected reserved-column schema",
+          "originalLogSha256": "bac277bfb808808dca6af5e9f400e749734303257358c68b41202b462d8953db",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "330c8f7857cc2cbc011f750406a0e45f7a58fb0900387309d3e99e553f5c42db",
+              "counters": {
+                "total": "606",
+                "executed": "606",
+                "passed": "605",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "run": "R288",
+          "observation": "same new positive fixture setup failure",
+          "originalLogSha256": "2522965904d47b1f0347448eb7fc2c13642e14c46b33c3df84b8f29bd2b7ab35",
+          "nativeExitCode": 2,
+          "originalTrx": [
+            {
+              "sha256": "a711b21879153be525af2e1bda513535f4e073bd38c6ec00b140908472b288e2",
+              "counters": {
+                "total": "606",
+                "executed": "606",
+                "passed": "605",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        }
+      ],
+      "allocationObservation": "R275 baseline-only336B difference is unexplained. Unchanged exact allocation cases pass later broad normal/scalar; no production fix or reliability qualification inferred.",
+      "fullUnsupportedInventoryExecuted": false,
+      "admittedRf3CancellationQualified": false,
+      "q2Rf3Executed": false,
+      "linuxQualified": false,
+      "fullRf3Qualified": false,
+      "productCoveragePercent": null,
+      "qualification": "Source-bound local development only. No power-loss, full product coverage, original acceptance closure or delivered Linux qualification inferred."
     }
   },
   "TIME-PROVIDER-001": {
@@ -924,7 +1400,7 @@
     "status": "in_progress",
     "decision": "docs/ADR/ADR-065-full-sql-client-compatibility.md",
     "conformance": "docs/implementation/sql-client-conformance.json",
-    "sourceStage": "bounded_line_and_nested_block_comments_shared_internal_reader_and_conservative_SDK_outcome_repair",
+    "sourceStage": "Q2_AST2_closed_same_partition_Text_primary_key_INNER_JOIN_joined_with_source_bound_local_whole_operation_regressions",
     "sourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
     "sourceDelivery": {
       "sourceRevision": "a693f7c9acd4a2c7130e5e63650d2802c379ead1",
@@ -1178,6 +1654,51 @@
       ],
       "completeCohortQualified": false,
       "websiteQualified": false
+    },
+    "stageSevenJoin": {
+      "decision": "docs/ADR/ADR-118-bounded-relational-inner-join.md",
+      "profile": "Q2.InnerJoin.v1",
+      "defaultDialect": 1,
+      "defaultAstVersion": 1,
+      "normal": {
+        "run": "R291",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e7b0a15e2e98d4bc84e001214e06d8d290bd6e60bd2894872ef4950f1f9ba7bc",
+        "trxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "scalar": {
+        "run": "R292",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "faf83c01e8bb160b4e50f362a19fe7920ad42e627e7de546a1777a75db83d0a7",
+        "trxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "q2PublicRf3Executed": false,
+      "remaining": [
+        "genuine52-flow unsupported inventory execution",
+        "admitted server-work RF3 cancellation",
+        "fresh-image SDK/official-MCP RF3 and Linux qualification",
+        "arbitrary joins/FK/full SQL/native client protocol"
+      ],
+      "fullSqlComplete": false,
+      "nativeClientProtocolQualified": false
     }
   },
   "KL-001": {
@@ -1407,8 +1928,40 @@
     "preparedConcurrentScan": {
       "task": "TASK-CUT-DOCUMENT-INDEX-SCAN",
       "contract": "docs/Features/StorageRecovery/NativeReadCuts.md",
-      "sourcePacketSha256": "6c763caa1533841258820040459481ac58fb31e5090c73e8f77d53bc2670878f",
-      "qualification": "Private source proposal only, no live join or native execution; snapshot/segment overhead and full original acceptance remain open."
+      "sourcePacketSha256": "0b12a55a0ce7c1b04472dfe433e89592a4169b20b47ada0c3dd9feeb524b7138",
+      "qualification": "The whole scan operation passes within both606-case owning native cohorts. Snapshot/segment overhead at required scales, complete original acceptance and fresh Linux/RF3 remain open.",
+      "sourceJoined": true,
+      "normal": {
+        "run": "R291",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e7b0a15e2e98d4bc84e001214e06d8d290bd6e60bd2894872ef4950f1f9ba7bc",
+        "trxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "scalar": {
+        "run": "R292",
+        "passed": 606,
+        "total": 606,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4175,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "faf83c01e8bb160b4e50f362a19fe7920ad42e627e7de546a1777a75db83d0a7",
+        "trxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "verifiedOperation": "one literal old document/index committed cut held against a real pending atomic replace/delete/insert; release and join original scan/writer, exact new state/receipt, current-format reopen/identity and healthy write"
     }
   },
   "KL-005": {
@@ -3156,7 +3709,7 @@
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ],
-    "sourceStage": "accepted_current_native_format_contract; implementation_and_exact_source_qualification_pending",
+    "sourceStage": "accepted_current_native_format_contract_with_current_source_local_internal_serialization_regressions",
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
@@ -3250,7 +3803,7 @@
         "runtimeQualified": false
       }
     },
-    "verificationStage": "Current-source build, formatter, analyzers, normal/scalar/recovery/RF3 and Linux delivery evidence are not recorded here; qualification remains pending.",
+    "verificationStage": "R290 full Release and R294 format pass; current InternalSerialization/query/typed-row/scan owning normal/scalar606/606 and real indexed/idempotency process recovery2/2 pass. This is a subset, not the complete current-format recovery/RF3 or original Linux gate; no migration or legacy format path is added.",
     "coverage": "unmeasured",
     "crap": "unmeasured"
   },
@@ -5155,9 +5708,9 @@
     "functionalCoverageDevelopment": {
       "loadTestsExcluded": true,
       "completeWorkflowTestsRequired": true,
-      "sameCompilationIdentity": "source_bound_native_manifest_and_central_tool_metadata_joined_actual_current_collection_pending",
+      "sameCompilationIdentity": "Final local native owning cohorts retain exact source/DLL/PDB hashes; complete product collection same-job identity remains required",
       "currentCoveragePercent": null,
-      "scope": "Query_exact25_cases_103_sources_reviewed_complete16_module_RF3_native_collection_and_binary_merge_pending",
+      "scope": "Historical first PartitionQuery25-case/103-source profile retained below; current registry94whole-flow selections41normal41scalar1recovery11RF3; complete16-module/server collection, census, descriptor/admission/merge pending",
       "fullBuildPassed": true,
       "currentNativeCollectionPassed": false,
       "sourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
@@ -5169,185 +5722,434 @@
       "queryNormalAttempt": "25_of_25_actual_complete_Query_flows_passed_Aspire_R22",
       "latestBuildAttempt": "R25_native_full_Release_passed_0_errors_0_warnings_0_build_source_drift_later_shared_Mongo_edits_require_fresh_build",
       "queryScalarAttempt": "25_of_25_same_complete_Query_flows_passed_Aspire_R22",
-      "currentSourceVerification": "rejected_shared_checkout_HEAD_changed_during_execution_preserved_all_originals",
+      "currentSourceVerification": "R290 full build and R294 formatter; owning normal/scalar606/606, indexed/idempotency real process recovery2/2, zero source/assembly drift; no complete product collection inferred",
       "nativeImageToolingOperation": "actual_complete_altered_occupied_healthy_materialization_flow_passed_Aspire_R25_original_inputs_and_native_exit_readers_verified_excluded_product_coverage",
       "sqlGraphPathOperation": "actual_extra_statement_rejection_unchanged_position_healthy_same_engine_retry_full_path_and_cut_passed_normal_and_scalar_R25",
-      "recoveryContributorAttempt": "Aspire_prepare_native5_probe_failed_original_exit1_before_requested_recovery_runner_no_test_report_no_pass"
+      "recoveryContributorAttempt": "Aspire_prepare_native5_probe_failed_original_exit1_before_requested_recovery_runner_no_test_report_no_pass",
+      "stageSevenSelection": {
+        "schemaVersion": 1,
+        "total": 94,
+        "perSuite": {
+          "unit": 41,
+          "unit-scalar": 41,
+          "rf3": 11,
+          "recovery": 1
+        },
+        "sha256": "2af8f3208a32dd1291e9ea373c5e3d689a19d79dff7f7b030dff83153a32c2bd",
+        "measuredCoverage": false
+      }
     },
     "currentCheckpoint": {
       "original104Acceptance": {
         "total": 104,
-        "fullyClosed": 1,
-        "closure": "only full mapped criteria and required evidence close an acceptance",
-        "inProgress": 103,
-        "pending": 0
+        "fullyClosed": 3,
+        "inProgress": 101,
+        "pending": 0,
+        "closedTasks": [
+          "KL-007",
+          "KL-010",
+          "KL-012"
+        ],
+        "closure": "Only complete task-specific mapped criteria and required original evidence close acceptance; in-progress includes missing implementation."
       },
       "codeDelivery": {
-        "currentBuild": "R163 full native C# Release passed4,116 inputs, zero drift/warnings/errors; log SHA256c09bf6e10ccd78c1e0a44b5e6eed3275e50cc468a03760554b9316a6a8606afd",
-        "formatter": "R165 full native formatter passed4,116 inputs, zero drift and native exit0",
-        "verificationScope": "R163 full native C# Release passed4,116 compile inputs with zero drift/warnings/errors; R165 full native formatter passed with zero drift. R153 real public partition-query SDK/MCP1/1 and R164 full discovery/query schema/Saga cohort6/6 passed on Aspire-owned Docker RF3 with4,117 source inputs and394 assembly paths, zero drift and no skips. Corrected R168/R169 native immutable local image prepare/verify/cleanup/repeated-absence lifecycle passed. These are local development receipts; complete current Linux RF3, functional product coverage and full task gates remain open.",
-        "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory",
-        "qualityReview": {
-          "sourceFindings": [
-            "Bounded immutable Docker COPY snapshot replaces mutable-checkout build context; original producer/readers join before exclusive raw tail retention and cleanup.",
-            "Pinned Aspire13.6 SHA256 setter clears Tag; exact native resolved-image assertion and six-resource changed-digest rejection/restoration operation verified.",
-            "KL-007 all19 mapped operations pass in original259 Linux normal/scalar/full235 recovery with same-job compiled image identity and zero33-file owned-source drift.",
-            "Existing ClusterFixture healthy wait now precedes Docker image inspection; actual public SDK/MCP partition-query operation passed.",
-            "Actual captured native output sets correct graph/query/placement oracles without changing production metadata or authorization; final official discovery/Saga cohort6/6 passed.",
-            "Stale public deterministic saga-timeout command assumption removed: replay uses the actual admitted command, and a distinct stale timeout remains RevisionConflict.",
-            "Native local image cleanup duplicated executable token repaired; real prepare/verify/cleanup/repeated-absence flow passed with scoped non-force removal."
-          ],
-          "sdkAnalyzersAndOwnedComplexity": "full Release build0warnings0errors; existing400file/200type/64method/depth3 limits enforced",
-          "analyzerConfig": "unchanged central .editorconfig, warning severity and consumers; no suppression or analyzer package changes",
-          "canonicalFormat": "passed",
-          "CSharpier": "N/A: repository-selected formatter is dotnet format",
-          "thirdPartyAnalyzerSkills": "reviewed against existing config; no new Roslynator/Meziantou/StyleCop package needed for scoped fixes",
-          "CRAP": "unmeasured without complete same-source functional coverage; no passing score inferred",
-          "workflowYamlAndNativeOrder": "PyYAML6.0.3 parse, original suite entry and identity prepare/verify/always-retention order passed",
-          "staticGovernanceAndDiff": "passed"
-        }
+        "sourceStage": "Stage VII current checkout based on4c48909",
+        "currentBuild": {
+          "run": "R290",
+          "compileInputs": 4174,
+          "inputDrift": 0,
+          "warnings": 0,
+          "errors": 0,
+          "logSha256": "5063bd5c50ecb45faa0a47bd062ca07aa55aa4add33a6e06cd26b9f05f66952b",
+          "passed": true,
+          "qualification": "Full native local Release after the final Stage VII fixture correction; original delivered-source Linux and RF3 qualification remain open"
+        },
+        "formatter": {
+          "run": "R294",
+          "compileInputs": 4174,
+          "inputDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+        },
+        "owningNormal": {
+          "run": "R291",
+          "passed": 606,
+          "total": 606,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 541,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "e7b0a15e2e98d4bc84e001214e06d8d290bd6e60bd2894872ef4950f1f9ba7bc",
+          "trxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "owningScalar": {
+          "run": "R292",
+          "passed": 606,
+          "total": 606,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 541,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "faf83c01e8bb160b4e50f362a19fe7920ad42e627e7de546a1777a75db83d0a7",
+          "trxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "owningProcessRecovery": {
+          "run": "R293",
+          "passed": 2,
+          "total": 2,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 427,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "d4eb829b818331bb4e94169f457ab8040b042327224b1859821d3c3a29e8afab",
+          "trxSha256": "add6d831c82e3ffcf4a13c5364641ce48134d6670a76286618e06f938bf649fd",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "governance": "Current static check passed: preserved root policy,27 projects,4 modules,local policies and unchanged empty skill inventory",
+        "qualityReview": "Bounded real native operations, schema/authority/cancellation/cut/reopen/receipt oracles preserved. Current file400/type200/method64/depth3 analyzer limits pass with no suppression; numeric CRAP remains unmeasured.",
+        "qualification": "Complete current-source Linux and RF3 remain open; local owning subsets are not global acceptance."
       },
       "currentArchitectureDecisions": {
-        "reviewed": 111,
-        "mermaidFences": 116,
-        "actualSvgRendersPassed": 116,
-        "indexEntriesVerified": 111,
-        "activeOldWorkflowFilenameReferences": 0,
-        "sourceBinding": "R116 rebind: all current112 ADR source hashes retained; all116 current Mermaid fence bytes match original native-rendered R4 inputs exactly. This is unchanged-diagram source binding, not new database/runtime qualification.",
-        "currentAdrFiles": 112
+        "currentAdrFiles": 114,
+        "currentMermaidFences": 118,
+        "sourceReview": "ADR118 first Q2 join and ADR119 test-owned image/CLI lifetime contracts updated; source review is not full implementation/runtime qualification.",
+        "currentCompleteSvgRenderingQualified": false,
+        "qualification": "Prior R116 diagram/render counts remain historical in the retained preceding checkpoint; no current full-ADR rendering or runtime claim inferred."
       },
       "nativeQualification": {
-        "physicalNativeId8Omission": "passed",
-        "physicalRF3Id7MissingFieldFlow": "open",
-        "functionalCoverageAndCRAP": "Open and unmeasured. Original Linux876c and local R115 complete unit census passed. The complete current functional inventory still requires current normal/scalar source/image binding, exact CLR/MTP identities, reviewed owning REQ/AC flow mappings and the complete sixteen-module/RF3-server coverage cohort. Load/comparison runs are excluded.",
-        "scalarRecoveryRF3AndLinuxDelivery": "open",
-        "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
-        "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
-        "completeUnit": "R115 full native uninstrumented unit: 2,763/2,763 passed; zero failed/skipped/source drift/assembly drift. R116 adds one bounded bootstrap flow; its six governor cases pass normal/scalar. Fresh complete R116 same-image normal/scalar required for the final coverage inventory.",
-        "focusedCurrentFixtures": {
-          "ClusterRouting": "R107218/218 passed; TRX SHA256145e4fa04cebed567b59497f4d80b48429c1b6ef14510b48b1adb6f44b88087c",
-          "ColdDiagnostics": "R107 fresh-process1/1 passed; TRX SHA2569aa036e548dff39a9c999c8bfce173d5bc60ea8e2f25d506303446c678225666",
-          "DocumentMutationImageReads": "R1062/2 passed",
-          "ReplicaNativePersistence": "R1068/8 passed",
-          "ReaderCapability": "R1062/2 passed",
-          "NativeSagaJobs": "R107 focused4/5 failure is historical. Every case passes in the R115 complete normal report and original Linux876c complete normal/scalar reports; RF3 native-jobs qualification remains open.",
-          "sourceAndAssemblyDrift": 0,
+        "latestOriginalLinux": {
+          "sourceCommit": "4c48909fc244f8a1399ec45b11e2ef7f89145602",
+          "runId": 37590715245,
+          "runAttempt": 1,
+          "conclusion": "failure",
+          "verifyJobId": 112691308536,
+          "rf3JobId": 112691267500,
+          "unitPassed": 2771,
+          "unitTotal": 2771,
+          "scalarPassed": 2771,
+          "scalarTotal": 2771,
+          "recoveryPassed": 236,
+          "recoveryTotal": 236,
+          "rf3Passed": 151,
+          "rf3Total": 158,
+          "rf3Failed": 7,
+          "failedOutsideRf3": 0,
           "skipped": 0,
-          "MaterializerLifecycle": "R113 native 4/4 passed; real converted journal fault preserves same terminal task/exception, committed-prefix reopen and physical-owner closure; TRX SHA25614d8ccfbc9ff7129310f251e6078adc8b1da9222e2d77c0dc0f570a8c30657a1"
-        },
-        "currentRecovery": {
-          "runner": "native_TUnit_test_owned_Aspire_entry",
-          "passed": 235,
-          "total": 235,
-          "failed": 0,
-          "skipped": 0,
-          "sourceDrift": 0,
-          "assemblyDrift": 0,
-          "trxSha256": "d97c0d9cd6a80a5537b85ea1e63d53dd9775f54ff6fad98c5253525d90ddd1b1",
-          "logSha256": "8a0de4f8a87608f95ab6dc8ee4a814a9051434d8cef64336857b1e4c2cc454c1",
-          "qualification": "local_native_process_recovery_development_only; exact_source_Linux_RF3_endurance_and_power_loss_gates_remain_open"
-        },
-        "currentNormalUnit": {
-          "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
-          "passed": 2763,
-          "total": 2763,
-          "failed": 0,
-          "skipped": 0,
-          "sourceDrift": 0,
-          "assemblyDrift": 0,
-          "trxSha256": "b201dd24354f4492ef3192d59ea5c04dc032375661152f2bf8e467f32c3785e6",
-          "logSha256": "c91f559be641901ed46a7752b9dd756209bb85f2eb255aa2a415b7823288a1ef",
-          "qualification": "local_native_TUnit_development; preceding_delivery_before_R116_Core_admission_change"
-        },
-        "latestOriginalLinuxVerify": {
-          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
-          "runId": 37554329420,
-          "jobId": 112576973966,
-          "normalPassed": 2765,
-          "normalTotal": 2765,
-          "scalarPassed": 2765,
-          "scalarTotal": 2765,
-          "recoveryPassed": 235,
-          "recoveryTotal": 235,
-          "failed": 0,
-          "skipped": 0,
-          "sameJobSourceImageIdentityPassed": true,
-          "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
-          "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
-          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
-        },
-        "admissionBootstrapDevelopment": {
-          "stage": "R116",
-          "normalPassed": 6,
-          "scalarPassed": 6,
-          "skipped": 0,
-          "sourceDrift": 0,
-          "assemblyDrift": 0,
-          "normalTrxSha256": "36cdac7d4bb14e8ae188344dbc8f895c6ba690033bbd8d8411e9d5b5f0b195c4",
-          "scalarTrxSha256": "f6562efd569b6014ff7bf7b911d13e1539ebba8265fa3754a2b481584850b622",
-          "implementation": "BootstrapPhysicalShardCatalog uses existing bounded reserved control lane; data/control exhaustion, exact rejection state, idempotent release and healthy follow-up covered",
-          "originalRf3CaseChanged": false,
-          "rf3RuntimeQualified": false
-        },
-        "localNativeIdentityPrepareVerify": "R116 native production/source and Unit/Recovery/Integration DLL/PDB receipt prepare+verify passed; manifest SHA2562f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09. Local uncommitted-source identity inspection is not original same-job Linux delivery qualification.",
-        "focusedLocalDockerRf3Stage": {
-          "tasks": [
-            "TASK-TEST-LOCAL-STARTED-IMAGE-ORDER",
-            "TASK-MCP-NATIVE-SCHEMA-EVIDENCE",
-            "TASK-MCP-NATIVE-SCHEMA-ORACLE",
-            "TASK-JOBS-S1-AUTONOMOUS-RF3"
-          ],
-          "nativeExitCode": 0,
-          "passed": 6,
-          "total": 6,
-          "failed": 0,
-          "skipped": 0,
-          "sourceInputs": 4117,
-          "assemblyInputs": 394,
-          "sourceDrift": 0,
-          "assemblyDrift": 0,
-          "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
-          "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
-          "cases": [
+          "originalReportHashes": {
+            "normal": {
+              "tunitSha256": "ea5d8d9947c2dfc9e2c139e9807efac63608ac6f386943774ec4eccbc83ba231",
+              "trxSha256": "44df0b41780cb1276fd7369b12b381c5c604b201cfcdb716592cd4d0d8fa4c13"
+            },
+            "scalar": {
+              "tunitSha256": "a44a6bc9d2b1958bd7fa9d86ded0e393669ed9ee88b05af9d61382b50d63b071",
+              "trxSha256": "c0f71b1fdbfd9b96bfd55bd84163a9df34abb7d454a1f302c5a608e63175fc8f"
+            },
+            "recovery": {
+              "tunitSha256": "70707359d0518feb286be418974d0a75eb22c4978de8a0f27513d2d93b72565b",
+              "trxSha256": "686757d3f4d41e406004a4e1283c117a4faec7254fb025df4712fff8bbcb5e7c"
+            },
+            "rf3": {
+              "tunitSha256": "b118da21d2b2b7feebffa49fb7176c707fb7a6811881b5245d9f5c7387ed98e7",
+              "trxSha256": "42766f1e836f864edeae5f0870733b90bcaa6696450d320891e4492a38a08cf5"
+            }
+          },
+          "rf3Failures": [
             {
-              "name": "AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints",
-              "outcome": "Passed"
+              "methodName": "AcSeries013Through016PartialPurgeReplaysHidesAndSurvivesFollowerRestart",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3RecoveryTests.cs",
+              "exceptionType": "System.OperationCanceledException",
+              "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
             },
             {
-              "name": "AcMcpGw001RemovedAndRecursiveToolsFailBeforeExecution",
-              "outcome": "Passed"
+              "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/TwoRf3MembershipProfileTests.cs",
+              "exceptionType": "System.AggregateException",
+              "message": "One or more errors occurred. (A task was canceled.) (Offline filesystem operation failed.)"
             },
             {
-              "name": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
-              "outcome": "Passed"
+              "methodName": "AcDue003NoQuorumDefersRecurringOccurrenceUntilTwoVotersReturn",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/DueNoQuorumRf3Tests.cs",
+              "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+              "message": "A task was canceled."
             },
             {
-              "name": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
-              "outcome": "Passed"
+              "methodName": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReplicaRestartTests.cs",
+              "exceptionType": "System.OperationCanceledException",
+              "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
             },
             {
-              "name": "AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision",
-              "outcome": "Passed"
+              "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs",
+              "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+              "message": "A task was canceled."
             },
             {
-              "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
-              "outcome": "Passed"
+              "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PhysicalShardCatalogRf3MismatchTests.cs",
+              "exceptionType": "System.Threading.Tasks.TaskCanceledException",
+              "message": "A task was canceled."
+            },
+            {
+              "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+              "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3FollowerRestartTests.cs",
+              "exceptionType": "System.Net.Http.HttpRequestException",
+              "message": "Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The Orleans request could not complete.\",\"errorCode\":\"OwnershipLost\"}"
             }
           ],
-          "imageConfigId": "sha256:5e31fd353af9b79977930a1ed016483a2e49c5923ceac33028bf3f577e5dc9df",
-          "inputDigest": "sha256:2b7976f6d2f08ba09b761c5f61e3a8908fb72f71086e7b603c83db8d53533fd5",
-          "publicPartitionQuery": {
-            "passed": 1,
-            "total": 1,
-            "logSha256": "839a688027b9790891513158d94bef7bcacf1f82a8a6454047b4bd814b8de070",
-            "trxSha256": "6d90ce4252b8984b245c91a4335ad9e3ec729cdb3eab4b90c56be73e0bc77c24"
+          "sameJobVerifySourceImageIdentityStepPassed": true,
+          "crossJobBinaryIdentityInferred": false,
+          "sourceImageBoundary": "Verify and RF3 jobs retain separate compiled identities; KeyLoad.Orleans DLL/MVID/PDB and one generated LoggerMessage document differ. The shared source SHA does not establish a shared binary cohort.",
+          "coverageCollected": false,
+          "productCoveragePercent": null,
+          "expectedIndependentSourceCensusAvailable": false,
+          "receiptSha256": "8fe48a1f71a7fe003df475630ce3323f78971281cca542e8744456cfc2520f60",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37590715245",
+          "qualification": "Authenticated original Stage VI Linux TUnit/TRX reports agree. Full build, formatter, analyzers, normal/scalar/recovery pass; RF3 has seven failed operations. Coverage collection, descriptor and merge skipped. Q2 additions are later source and receive no qualification from this run."
+        },
+        "currentSourceOwningNormal": {
+          "run": "R291",
+          "passed": 606,
+          "total": 606,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 541,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "e7b0a15e2e98d4bc84e001214e06d8d290bd6e60bd2894872ef4950f1f9ba7bc",
+          "trxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "currentSourceOwningScalar": {
+          "run": "R292",
+          "passed": 606,
+          "total": 606,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 541,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "faf83c01e8bb160b4e50f362a19fe7920ad42e627e7de546a1777a75db83d0a7",
+          "trxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "currentSourceOwningRecovery": {
+          "run": "R293",
+          "passed": 2,
+          "total": 2,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4175,
+          "assemblyInputs": 427,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "nativeExitCode": 0,
+          "logSha256": "d4eb829b818331bb4e94169f457ab8040b042327224b1859821d3c3a29e8afab",
+          "trxSha256": "add6d831c82e3ffcf4a13c5364641ce48134d6670a76286618e06f938bf649fd",
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "completeCurrentSourceLinux": "open",
+        "completeCurrentSourceRf3": "open",
+        "q2PublicRf3": "not_executed",
+        "functionalCoverageAndCRAP": "Unmeasured. Registry94 selections and partial local operations do not replace the complete same-source16-module/server collector, full census and native ProductAdmission flow.",
+        "enduranceAndPowerLoss": "open"
+      }
+    },
+    "historicalCurrentCheckpoints": [
+      {
+        "sourceStage": "preceding_R163_local_checkpoint",
+        "checkpoint": {
+          "original104Acceptance": {
+            "total": 104,
+            "fullyClosed": 1,
+            "closure": "only full mapped criteria and required evidence close an acceptance",
+            "inProgress": 103,
+            "pending": 0
           },
-          "originalStartupFailure": "R151 Docker inspect ran before asynchronous resource creation; original failed log and TRX retained; current healthy wait precedes actual image inspection under unchanged2min startup token",
-          "qualification": "actual owned local Docker image through native TUnit fixtures; AppHost owns RF3 resources/readiness/discovered SDK and official MCP clients/shutdown; local development, not delivered Linux/full product qualification",
-          "linuxQualified": false
+          "codeDelivery": {
+            "currentBuild": "R163 full native C# Release passed4,116 inputs, zero drift/warnings/errors; log SHA256c09bf6e10ccd78c1e0a44b5e6eed3275e50cc468a03760554b9316a6a8606afd",
+            "formatter": "R165 full native formatter passed4,116 inputs, zero drift and native exit0",
+            "verificationScope": "R163 full native C# Release passed4,116 compile inputs with zero drift/warnings/errors; R165 full native formatter passed with zero drift. R153 real public partition-query SDK/MCP1/1 and R164 full discovery/query schema/Saga cohort6/6 passed on Aspire-owned Docker RF3 with4,117 source inputs and394 assembly paths, zero drift and no skips. Corrected R168/R169 native immutable local image prepare/verify/cleanup/repeated-absence lifecycle passed. These are local development receipts; complete current Linux RF3, functional product coverage and full task gates remain open.",
+            "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory",
+            "qualityReview": {
+              "sourceFindings": [
+                "Bounded immutable Docker COPY snapshot replaces mutable-checkout build context; original producer/readers join before exclusive raw tail retention and cleanup.",
+                "Pinned Aspire13.6 SHA256 setter clears Tag; exact native resolved-image assertion and six-resource changed-digest rejection/restoration operation verified.",
+                "KL-007 all19 mapped operations pass in original259 Linux normal/scalar/full235 recovery with same-job compiled image identity and zero33-file owned-source drift.",
+                "Existing ClusterFixture healthy wait now precedes Docker image inspection; actual public SDK/MCP partition-query operation passed.",
+                "Actual captured native output sets correct graph/query/placement oracles without changing production metadata or authorization; final official discovery/Saga cohort6/6 passed.",
+                "Stale public deterministic saga-timeout command assumption removed: replay uses the actual admitted command, and a distinct stale timeout remains RevisionConflict.",
+                "Native local image cleanup duplicated executable token repaired; real prepare/verify/cleanup/repeated-absence flow passed with scoped non-force removal."
+              ],
+              "sdkAnalyzersAndOwnedComplexity": "full Release build0warnings0errors; existing400file/200type/64method/depth3 limits enforced",
+              "analyzerConfig": "unchanged central .editorconfig, warning severity and consumers; no suppression or analyzer package changes",
+              "canonicalFormat": "passed",
+              "CSharpier": "N/A: repository-selected formatter is dotnet format",
+              "thirdPartyAnalyzerSkills": "reviewed against existing config; no new Roslynator/Meziantou/StyleCop package needed for scoped fixes",
+              "CRAP": "unmeasured without complete same-source functional coverage; no passing score inferred",
+              "workflowYamlAndNativeOrder": "PyYAML6.0.3 parse, original suite entry and identity prepare/verify/always-retention order passed",
+              "staticGovernanceAndDiff": "passed"
+            }
+          },
+          "currentArchitectureDecisions": {
+            "reviewed": 111,
+            "mermaidFences": 116,
+            "actualSvgRendersPassed": 116,
+            "indexEntriesVerified": 111,
+            "activeOldWorkflowFilenameReferences": 0,
+            "sourceBinding": "R116 rebind: all current112 ADR source hashes retained; all116 current Mermaid fence bytes match original native-rendered R4 inputs exactly. This is unchanged-diagram source binding, not new database/runtime qualification.",
+            "currentAdrFiles": 112
+          },
+          "nativeQualification": {
+            "physicalNativeId8Omission": "passed",
+            "physicalRF3Id7MissingFieldFlow": "open",
+            "functionalCoverageAndCRAP": "Open and unmeasured. Original Linux876c and local R115 complete unit census passed. The complete current functional inventory still requires current normal/scalar source/image binding, exact CLR/MTP identities, reviewed owning REQ/AC flow mappings and the complete sixteen-module/RF3-server coverage cohort. Load/comparison runs are excluded.",
+            "scalarRecoveryRF3AndLinuxDelivery": "open",
+            "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
+            "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
+            "completeUnit": "R115 full native uninstrumented unit: 2,763/2,763 passed; zero failed/skipped/source drift/assembly drift. R116 adds one bounded bootstrap flow; its six governor cases pass normal/scalar. Fresh complete R116 same-image normal/scalar required for the final coverage inventory.",
+            "focusedCurrentFixtures": {
+              "ClusterRouting": "R107218/218 passed; TRX SHA256145e4fa04cebed567b59497f4d80b48429c1b6ef14510b48b1adb6f44b88087c",
+              "ColdDiagnostics": "R107 fresh-process1/1 passed; TRX SHA2569aa036e548dff39a9c999c8bfce173d5bc60ea8e2f25d506303446c678225666",
+              "DocumentMutationImageReads": "R1062/2 passed",
+              "ReplicaNativePersistence": "R1068/8 passed",
+              "ReaderCapability": "R1062/2 passed",
+              "NativeSagaJobs": "R107 focused4/5 failure is historical. Every case passes in the R115 complete normal report and original Linux876c complete normal/scalar reports; RF3 native-jobs qualification remains open.",
+              "sourceAndAssemblyDrift": 0,
+              "skipped": 0,
+              "MaterializerLifecycle": "R113 native 4/4 passed; real converted journal fault preserves same terminal task/exception, committed-prefix reopen and physical-owner closure; TRX SHA25614d8ccfbc9ff7129310f251e6078adc8b1da9222e2d77c0dc0f570a8c30657a1"
+            },
+            "currentRecovery": {
+              "runner": "native_TUnit_test_owned_Aspire_entry",
+              "passed": 235,
+              "total": 235,
+              "failed": 0,
+              "skipped": 0,
+              "sourceDrift": 0,
+              "assemblyDrift": 0,
+              "trxSha256": "d97c0d9cd6a80a5537b85ea1e63d53dd9775f54ff6fad98c5253525d90ddd1b1",
+              "logSha256": "8a0de4f8a87608f95ab6dc8ee4a814a9051434d8cef64336857b1e4c2cc454c1",
+              "qualification": "local_native_process_recovery_development_only; exact_source_Linux_RF3_endurance_and_power_loss_gates_remain_open"
+            },
+            "currentNormalUnit": {
+              "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+              "passed": 2763,
+              "total": 2763,
+              "failed": 0,
+              "skipped": 0,
+              "sourceDrift": 0,
+              "assemblyDrift": 0,
+              "trxSha256": "b201dd24354f4492ef3192d59ea5c04dc032375661152f2bf8e467f32c3785e6",
+              "logSha256": "c91f559be641901ed46a7752b9dd756209bb85f2eb255aa2a415b7823288a1ef",
+              "qualification": "local_native_TUnit_development; preceding_delivery_before_R116_Core_admission_change"
+            },
+            "latestOriginalLinuxVerify": {
+              "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+              "runId": 37554329420,
+              "jobId": 112576973966,
+              "normalPassed": 2765,
+              "normalTotal": 2765,
+              "scalarPassed": 2765,
+              "scalarTotal": 2765,
+              "recoveryPassed": 235,
+              "recoveryTotal": 235,
+              "failed": 0,
+              "skipped": 0,
+              "sameJobSourceImageIdentityPassed": true,
+              "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
+              "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
+              "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
+            },
+            "admissionBootstrapDevelopment": {
+              "stage": "R116",
+              "normalPassed": 6,
+              "scalarPassed": 6,
+              "skipped": 0,
+              "sourceDrift": 0,
+              "assemblyDrift": 0,
+              "normalTrxSha256": "36cdac7d4bb14e8ae188344dbc8f895c6ba690033bbd8d8411e9d5b5f0b195c4",
+              "scalarTrxSha256": "f6562efd569b6014ff7bf7b911d13e1539ebba8265fa3754a2b481584850b622",
+              "implementation": "BootstrapPhysicalShardCatalog uses existing bounded reserved control lane; data/control exhaustion, exact rejection state, idempotent release and healthy follow-up covered",
+              "originalRf3CaseChanged": false,
+              "rf3RuntimeQualified": false
+            },
+            "localNativeIdentityPrepareVerify": "R116 native production/source and Unit/Recovery/Integration DLL/PDB receipt prepare+verify passed; manifest SHA2562f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09. Local uncommitted-source identity inspection is not original same-job Linux delivery qualification.",
+            "focusedLocalDockerRf3Stage": {
+              "tasks": [
+                "TASK-TEST-LOCAL-STARTED-IMAGE-ORDER",
+                "TASK-MCP-NATIVE-SCHEMA-EVIDENCE",
+                "TASK-MCP-NATIVE-SCHEMA-ORACLE",
+                "TASK-JOBS-S1-AUTONOMOUS-RF3"
+              ],
+              "nativeExitCode": 0,
+              "passed": 6,
+              "total": 6,
+              "failed": 0,
+              "skipped": 0,
+              "sourceInputs": 4117,
+              "assemblyInputs": 394,
+              "sourceDrift": 0,
+              "assemblyDrift": 0,
+              "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
+              "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
+              "cases": [
+                {
+                  "name": "AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints",
+                  "outcome": "Passed"
+                },
+                {
+                  "name": "AcMcpGw001RemovedAndRecursiveToolsFailBeforeExecution",
+                  "outcome": "Passed"
+                },
+                {
+                  "name": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
+                  "outcome": "Passed"
+                },
+                {
+                  "name": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
+                  "outcome": "Passed"
+                },
+                {
+                  "name": "AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision",
+                  "outcome": "Passed"
+                },
+                {
+                  "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
+                  "outcome": "Passed"
+                }
+              ],
+              "imageConfigId": "sha256:5e31fd353af9b79977930a1ed016483a2e49c5923ceac33028bf3f577e5dc9df",
+              "inputDigest": "sha256:2b7976f6d2f08ba09b761c5f61e3a8908fb72f71086e7b603c83db8d53533fd5",
+              "publicPartitionQuery": {
+                "passed": 1,
+                "total": 1,
+                "logSha256": "839a688027b9790891513158d94bef7bcacf1f82a8a6454047b4bd814b8de070",
+                "trxSha256": "6d90ce4252b8984b245c91a4335ad9e3ec729cdb3eab4b90c56be73e0bc77c24"
+              },
+              "originalStartupFailure": "R151 Docker inspect ran before asynchronous resource creation; original failed log and TRX retained; current healthy wait precedes actual image inspection under unchanged2min startup token",
+              "qualification": "actual owned local Docker image through native TUnit fixtures; AppHost owns RF3 resources/readiness/discovered SDK and official MCP clients/shutdown; local development, not delivered Linux/full product qualification",
+              "linuxQualified": false
+            }
+          }
         }
       }
-    }
+    ]
   },
   "AdminDashboard": {
     "title": "Read-only адміністративна панель бази даних",

@@ -26,6 +26,7 @@ internal static class ClusterFixtureProtocol
     internal const string EphemeralArgument = "--KeyLoad:Ephemeral=true";
     internal const string SnapshotThresholdArgument = "--KeyLoad:SnapshotThreshold=16";
     internal const string CommandBytesSetting = "KeyLoad__CommandAdmission__MaxRetainedBytes";
+    internal const string DatabaseLimitsSettingPrefix = "KeyLoad__DatabaseLimits__";
     internal const string HttpBodyBytesSetting = "KeyLoad__HttpAdmission__MaxBodyBytes";
     internal const string HttpControlBodyBytesSetting = "KeyLoad__HttpAdmission__MaxControlBodyBytes";
     internal const string HttpReservedBytesSetting = "KeyLoad__HttpAdmission__MaxReservedBytes";

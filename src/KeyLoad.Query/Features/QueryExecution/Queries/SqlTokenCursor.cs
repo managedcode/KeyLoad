@@ -5,11 +5,16 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Owns one SQL token position shared by projection and expression parsing.</summary>
 internal sealed class SqlTokenCursor(List<SqlToken> tokens)
 {
+    private const int LookaheadOffset = 1;
     private int offset;
 
     internal SqlToken Current => tokens[offset];
 
     internal bool Is(string text) => !Current.Quoted && string.Equals(Current.Text, text, StringComparison.OrdinalIgnoreCase);
+
+    internal bool IsNext(string text) => offset + LookaheadOffset < tokens.Count
+        && !tokens[offset + LookaheadOffset].Quoted
+        && string.Equals(tokens[offset + LookaheadOffset].Text, text, StringComparison.OrdinalIgnoreCase);
 
     internal bool Eat(string text)
     {

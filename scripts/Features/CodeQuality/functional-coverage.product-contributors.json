@@ -404,6 +404,334 @@
       "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
     },
     {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
+      "instanceName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "measures the real left scan and right probes, admits the exact work bound, rejects over-bound work without changing committed position, and completes a healthy join"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
+      "instanceName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "measures actual ZoneTree scan/probe bytes, admits the exact read-byte bound, rejects omitted-probe and one-byte-short budgets without mutation, and repeats the healthy join"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
+      "instanceName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "admits the exact serialized page including both source identities, rejects one byte below without store mutation, and confirms identical healthy output"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
+      "instanceName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "admits two actual joined rows, rejects a request requiring a third with BudgetExceeded and unchanged position, then rereads both rows"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
+      "methodName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "cancels the original query token only after observed native range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
+      "methodName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "expires the configured query deadline after observed native range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "instanceName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes SQL and AST Q2 against real ZoneTree rows; verifies exact ordinal matches, projections, both source identities/revisions, access path and cut while null, missing, empty, unmatched and overlong keys emit no pairs"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
+      "instanceName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-QUERY-007-JOIN-001",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "rejects Q1 join, unknown SQL/AST versions and EXPLAIN before storage position changes, then executes and verifies a healthy Q2 result"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
+      "instanceName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-QUERY-007-JOIN-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes a Q1 alias named inner, rejects the join under Q1 without changing position, then executes the same join under Q2"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
+      "instanceName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-003",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "uses persisted resource and field-use grants; asserts each denied attempt is PermissionDenied with unchanged position, then checks the permitted join redacts the private projected field and a root-authorized healthy read succeeds"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinLifecycleTests",
+      "methodName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
+      "instanceName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "runs concurrent actual commits and joins; each returned page has matching left/right generation and source revisions from one committed read cut"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinLifecycleTests",
+      "methodName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
+      "instanceName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "reopens canonical ZoneTree after a committed pair and verifies joined values, source revisions and a cut at or after the commit"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinOrdinalOrderTests",
+      "methodName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
+      "instanceName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "proves Unicode key byte order differs from ordinal SQL order and verifies the real joined results follow ordinal SQL ordering"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinRowAuthorizationTests",
+      "methodName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
+      "instanceName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-003",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "checks row-level denial on either join side omits rows without changing position, confirms root visibility, persists ownership changes, and verifies the authorized reader then sees both pairs"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.DocumentIndexCommittedScanTests",
+      "methodName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+      "instanceName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+      "requirements": [
+        "REQ-CUT-005"
+      ],
+      "acceptance": [
+        "AC-CUT-DOCUMENT-INDEX-SCAN-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "scans canonical document and scalar-index records in a real ZoneTree read callback while an atomic writer blocks at the committed read gate; compares old and new document/index state to an independent model, joins scan and writer, reopens exact committed state, then applies and verifies a healthy command"
+    },
+    {
       "suite": "unit-scalar",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
       "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
@@ -806,6 +1134,334 @@
       "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
     },
     {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
+      "instanceName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "measures the real left scan and right probes, admits the exact work bound, rejects over-bound work without changing committed position, and completes a healthy join"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
+      "instanceName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "measures actual ZoneTree scan/probe bytes, admits the exact read-byte bound, rejects omitted-probe and one-byte-short budgets without mutation, and repeats the healthy join"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
+      "instanceName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "admits the exact serialized page including both source identities, rejects one byte below without store mutation, and confirms identical healthy output"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinBudgetTests",
+      "methodName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
+      "instanceName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "admits two actual joined rows, rejects a request requiring a third with BudgetExceeded and unchanged position, then rereads both rows"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
+      "methodName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "cancels the original query token only after observed native range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
+      "methodName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "expires the configured query deadline after observed native range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "instanceName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes SQL and AST Q2 against real ZoneTree rows; verifies exact ordinal matches, projections, both source identities/revisions, access path and cut while null, missing, empty, unmatched and overlong keys emit no pairs"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
+      "instanceName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-QUERY-007-JOIN-001",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "rejects Q1 join, unknown SQL/AST versions and EXPLAIN before storage position changes, then executes and verifies a healthy Q2 result"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
+      "instanceName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-QUERY-007-JOIN-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes a Q1 alias named inner, rejects the join under Q1 without changing position, then executes the same join under Q2"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
+      "methodName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
+      "instanceName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-003",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "uses persisted resource and field-use grants; asserts each denied attempt is PermissionDenied with unchanged position, then checks the permitted join redacts the private projected field and a root-authorized healthy read succeeds"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinLifecycleTests",
+      "methodName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
+      "instanceName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "runs concurrent actual commits and joins; each returned page has matching left/right generation and source revisions from one committed read cut"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinLifecycleTests",
+      "methodName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
+      "instanceName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "reopens canonical ZoneTree after a committed pair and verifies joined values, source revisions and a cut at or after the commit"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinOrdinalOrderTests",
+      "methodName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
+      "instanceName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "proves Unicode key byte order differs from ordinal SQL order and verifies the real joined results follow ordinal SQL ordering"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinRowAuthorizationTests",
+      "methodName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
+      "instanceName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-003",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "checks row-level denial on either join side omits rows without changing position, confirms root visibility, persists ownership changes, and verifies the authorized reader then sees both pairs"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.DocumentIndexCommittedScanTests",
+      "methodName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+      "instanceName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+      "requirements": [
+        "REQ-CUT-005"
+      ],
+      "acceptance": [
+        "AC-CUT-DOCUMENT-INDEX-SCAN-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "scans canonical document and scalar-index records in a real ZoneTree read callback while an atomic writer blocks at the committed read gate; compares old and new document/index state to an independent model, joins scan and writer, reopens exact committed state, then applies and verifies a healthy command"
+    },
+    {
       "suite": "rf3",
       "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests",
       "methodName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
@@ -897,6 +1553,194 @@
       "operationOutcomeAndState": "SDK and official MCP establish revisions one and two, reject a stale explicit replacement as RevisionConflict without changing persisted revision-two content, then successfully read that same state."
     },
     {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinTests",
+      "methodName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+      "instanceName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "configures the typed right schema and commits a two-pair seed through the SDK; compares direct and unified SQL pages from SDK and official MCP for access path, cut, exact row JSON, pair identities and source revisions"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinAuthorizationTests",
+      "methodName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+      "instanceName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-003",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "uses persisted right-resource and join-field-use policies; asserts SDK and official MCP denials and non-disclosure, unchanged source rows, then equal healthy direct/unified pages through both clients"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinCancellationTests",
+      "methodName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+      "instanceName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "cancels the original token on SDK and official MCP direct/unified join calls, checks their cancellation outcomes, then checks each healthy caller route returns the joined page at or beyond the seed cut"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinReadCutTests",
+      "methodName": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+      "instanceName": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-002",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "interleaves atomic pair-generation commits with SDK and official MCP direct/unified reads; each page must represent the complete previous or next pair generation and final pages agree across all four routes"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "methodName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "instanceName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "applies a real RF3 scan-work limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "methodName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "instanceName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "applies a real RF3 raw read-byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "methodName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "instanceName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-004",
+        "AC-REL-004-JOIN-006",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Query",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "applies a real RF3 serialized joined-page byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+    },
+    {
       "suite": "recovery",
       "className": "KeyLoad.RecoveryTests.Features.DocumentStorage.CommandIdempotencyProcessRecoveryTests",
       "methodName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
@@ -917,6 +1761,56 @@
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "Two distinct actual CrashHost processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinDeclaredProjectionTests",
+      "methodName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
+      "instanceName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-REL-004-JOIN-002",
+        "AC-REL-004-JOIN-005",
+        "AC-QUERY-007-JOIN-001",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy Q1 metadata read"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinDeclaredProjectionTests",
+      "methodName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
+      "instanceName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
+      "requirements": [
+        "REQ-REL-004",
+        "REQ-QUERY-007"
+      ],
+      "acceptance": [
+        "AC-REL-004-JOIN-001",
+        "AC-REL-004-JOIN-002",
+        "AC-REL-004-JOIN-005",
+        "AC-QUERY-007-JOIN-001",
+        "AC-QUERY-007-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Query",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy Q1 metadata read"
     }
   ]
 }

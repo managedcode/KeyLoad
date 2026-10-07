@@ -264,12 +264,12 @@ jobs:
             '--KeyLoadTests:ReportTrx=true',
             '--KeyLoadTests:CoverageSettings=scripts/Features/CodeQuality/functional-coverage.production.settings.xml',
             '--KeyLoadTests:CoverageFormat=coverage')
-          & node @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+          & node @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/(PartitionQueryAuthorizationTests|PartitionQueryCancellationTests|PartitionQueryContractTests|PartitionQueryGrantTests|PartitionQueryMcpContractTests|PartitionQueryMergeTests|PartitionQueryPublicAuthorizationTests|PartitionQueryPublicBudgetTests|PartitionQueryPublicContractTests|PartitionQueryPublicMergeTests|SqlInnerJoinBudgetTests|SqlInnerJoinCancellationTests|SqlInnerJoinDeclaredProjectionTests|SqlInnerJoinExecutionTests|SqlInnerJoinLifecycleTests|SqlInnerJoinOrdinalOrderTests|SqlInnerJoinRowAuthorizationTests|DocumentIndexCommittedScanTests)/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit/coverage.coverage'
           $unitExitCode = $LASTEXITCODE
           "unit_exit_code=$unitExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & node @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+          & node @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/(PartitionQueryAuthorizationTests|PartitionQueryCancellationTests|PartitionQueryContractTests|PartitionQueryGrantTests|PartitionQueryMcpContractTests|PartitionQueryMergeTests|PartitionQueryPublicAuthorizationTests|PartitionQueryPublicBudgetTests|PartitionQueryPublicContractTests|PartitionQueryPublicMergeTests|SqlInnerJoinBudgetTests|SqlInnerJoinCancellationTests|SqlInnerJoinDeclaredProjectionTests|SqlInnerJoinExecutionTests|SqlInnerJoinLifecycleTests|SqlInnerJoinOrdinalOrderTests|SqlInnerJoinRowAuthorizationTests|DocumentIndexCommittedScanTests)/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit-scalar' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit-scalar/coverage.coverage'
           $scalarExitCode = $LASTEXITCODE
@@ -281,7 +281,7 @@ jobs:
           $recoveryExitCode = $LASTEXITCODE
           "recovery_exit_code=$recoveryExitCode" | Add-Content $env:GITHUB_OUTPUT
           & node @common '--KeyLoadTests:Suite=rf3' `
-            '--KeyLoadTests:Filter=/*/*/(PartitionQueryPublicRf3Tests)|(McpDocumentCrudParityTests)/*' `
+            '--KeyLoadTests:Filter=/*/*/(PartitionQueryPublicRf3Tests|McpDocumentCrudParityTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/coverage.coverage' `
             '--KeyLoadTests:NativeCoverage:ServerMode=rf3-original-node-v1' `

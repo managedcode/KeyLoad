@@ -62,6 +62,17 @@ internal sealed class SqlOperationCompilerTests
     }
 
     [Test]
+    public async Task AcJoinUnifiedCallRejectsTheNondefaultQueryDialectAsUnsupported()
+    {
+        var supported = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
+        var request = supported with { QueryDialectVersion = 2 };
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(supported),
+            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
+    }
+
+    [Test]
     public async Task AcAiSql006CompiledPayloadOwnsItsBytesAfterTheBoundDocumentIsDisposed()
     {
         var item = McpCanonicalTestData.Commands()[0];

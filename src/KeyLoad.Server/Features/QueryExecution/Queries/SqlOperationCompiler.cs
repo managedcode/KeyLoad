@@ -22,6 +22,8 @@ internal static class SqlOperationCompiler
         { throw SqlOperationSyntax.UnsupportedInput(); }
         if (request.AllowFullScan || request.Cursor is not null)
         { throw SqlOperationSyntax.InvalidInput(); }
+        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
+        { throw SqlOperationSyntax.UnsupportedInput(); }
         var name = reader.Identifier();
         reader.Need(SqlOperationSyntax.OpenParenthesis);
         reader.Need(SqlOperationSyntax.ParameterPrefix);
@@ -50,7 +52,7 @@ internal static class SqlOperationCompiler
     {
         if (request.Partition is null)
         { throw SqlOperationSyntax.InvalidInput(); }
-        var query = new QueryRequest(request.Partition, request.Sql, request.Parameters, request.AllowFullScan, request.Cursor);
+        var query = new QueryRequest(request.Partition, request.Sql, request.Parameters, request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
         var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(query, JsonDefaults.Options) };
         cancellationToken.ThrowIfCancellationRequested();

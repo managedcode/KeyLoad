@@ -229,5 +229,41 @@ ordinal order and cumulative existing work/byte/result/deadline limits. The
 linked ADR owns exact public optional metadata, version inventories, source
 roles, error/reopen/concurrency and real Aspire RF3 SDK/official-MCP flows. Q1 and
 AST1 operations stay current. Arbitrary/distributed joins, FK semantics, full SQL
-and native SQL client protocol remain required and open. Source/runtime evidence
-for this first operator is pending; no plan task closes from its contract alone.
+and native SQL client protocol remain required and open. This first operator's
+source is joined; local native evidence is recorded below. Current-source public
+RF3/Linux qualification remains pending; its contract alone closes no plan task.
+
+TASK-REL-004-INNER-JOIN-007 additionally maps AC-QUERY-007-JOIN-002 and the
+existing relational limit/caller criteria to actual RF3 work, read-byte and
+result-byte rejection followed by a healthy join. ADR-118 freezes the complete
+typed test-fixture limit mapping, exact shared/test source ownership and state
+oracle before code. Existing unit boundary arithmetic and all current query,
+authorization, cancellation and complete-suite gates remain mandatory.
+
+TASK-REL-004-INNER-JOIN-008 maps the native R270 corrections in ADR-118 to the
+same AC-REL-004-JOIN-001/003/004/005 and AC-QUERY-007-JOIN-002. Required initialized
+capability arrays preserve native schema export; repaired persisted policy epochs,
+canonical AST pointers and nullable edge fixtures must exercise successful real
+operations. SQL retains its existing over-limit Validation result while the typed
+AST proves BudgetExceeded, unchanged state and a healthy boundary query. This
+correction adds no language, storage, authority or qualification exception.
+
+The same task also owns the three observed R272 failures: exact additive MCP
+schema enumeration, independent join-key raw-read/field-use grants with safe
+projected-name redaction, and 32 concurrent-cut joins scheduled within the
+existing reader admission limit. ADR-118 freezes exact file ownership, every
+retained operation/state oracle, joined task cleanup and final healthy read
+before these corrections. The failed 602/605 cohort is development evidence;
+normal/scalar follow-up, recovery and real RF3/Linux qualification are required.
+
+Stage VII source includes TASK-REL-004-INNER-JOIN-009's admitted declared-column
+repair and real ZoneTree whole-flow regression. It executes the exact accepted
+`r.id` SQL, literal complete projections, SQL/AST page parity, source identities
+and committed cut, unchanged position and healthy Q1 metadata read. R290 full
+Release and R294 formatter pass; R291/R292 owning normal/scalar each 606/606 and
+R293 real indexed/idempotency process recovery 2/2 pass without source/assembly
+drift or skips. See the exact hashes and failed-original retention in the
+[status tracker](../implementation/status.json). The private 52-flow rejection
+inventory, admitted server-work RF3 cancellation, actual new SDK/official-MCP
+RF3 and current-source Linux qualification remain open. No full SQL, native
+client protocol, complete product coverage or parent REQ closure is inferred.

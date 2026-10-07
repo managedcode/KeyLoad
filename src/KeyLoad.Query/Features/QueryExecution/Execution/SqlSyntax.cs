@@ -1,11 +1,14 @@
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Canonical Q1 syntax tokens, numeric limits, and stable error details.</summary>
+/// <summary>Canonical Q1/Q2 syntax tokens, numeric limits, and stable error details.</summary>
 internal static class SqlSyntax
 {
     internal const string Explain = "EXPLAIN";
     internal const string Select = "SELECT";
     internal const string From = "FROM";
+    internal const string Inner = "INNER";
+    internal const string Join = "JOIN";
+    internal const string On = "ON";
     internal const string Events = "EVENTS";
     internal const string QueueMessages = "QUEUE_MESSAGES";
     internal const string As = "AS";
@@ -48,6 +51,8 @@ internal static class SqlSyntax
     internal const string DepthBudgetDetail = "The SQL depth budget is exceeded.";
     internal const string UnsupportedSyntaxDetail = "The SQL statement contains unsupported syntax.";
     internal const string InvalidDetail = "The SQL statement is invalid for the supported Q1 dialect.";
+    internal const string UnsupportedDialectDetail = "The selected query dialect is unsupported.";
+    internal const string UnsupportedJoinDetail = "The query dialect does not support joins.";
     internal const int DefaultLimit = 100;
 
     internal static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Validation, InvalidDetail);

@@ -50,6 +50,18 @@ internal static class ClusterFixtureComposition
         }
     }
 
+    internal static void ConfigureTestOverrides(IDistributedApplicationTestingBuilder builder, long? commandBytes,
+        HttpAdmissionLimits? httpAdmission, DatabaseLimits? databaseLimits)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ConfigureCommandAdmission(builder, commandBytes);
+        ConfigureHttpAdmission(builder, httpAdmission);
+        if (databaseLimits is not null)
+        {
+            ClusterFixtureDatabaseLimits.Configure(builder, databaseLimits);
+        }
+    }
+
     internal static Dictionary<string, string> GetContainerNames(DistributedApplicationModel model)
     {
         ArgumentNullException.ThrowIfNull(model);

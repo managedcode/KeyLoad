@@ -91,6 +91,7 @@ internal static class NativeContractAliases
     internal const string HttpAdmissionLimits = "keyload.contract.http-admission-limits.v1";
     internal const string HttpAdmissionStatus = "keyload.contract.http-admission-status.v1";
     internal const string InPredicate = "keyload.contract.in-predicate.v1";
+    internal const string InnerJoinClause = "keyload.contract.inner-join-clause.v1";
     internal const string IndexDefinition = "keyload.contract.index-definition.v1";
     internal const string InspectMessageRequest = "keyload.contract.inspect-message-request.v1";
     internal const string KeyValueRecord = "keyload.contract.key-value-record.v1";
@@ -133,6 +134,7 @@ internal static class NativeContractAliases
     internal const string QueryPage = "keyload.contract.query-page.v1";
     internal const string QueryRequest = "keyload.contract.query-request.v1";
     internal const string QueryRow = "keyload.contract.query-row.v1";
+    internal const string QueryRowSource = "keyload.contract.query-row-source.v1";
     internal const string QueueCounters = "keyload.contract.queue-counters.v1";
     internal const string QueueLaneRef = "keyload.contract.queue-lane-ref.v1";
     internal const string QueuePolicy = "keyload.contract.queue-policy.v1";

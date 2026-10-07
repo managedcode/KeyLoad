@@ -24,11 +24,17 @@ internal static class PartitionQueryMcpProtocol
     internal const string RedactedFields = "redactedFields";
     internal const string Alias = "alias";
     internal const string Projection = "projection";
+    internal const string Path = "path";
     internal const string Filter = "filter";
     internal const string Order = "order";
     internal const string Limit = "limit";
     internal const string Explain = "explain";
     internal const string ModelSource = "modelSource";
+    internal const string InnerJoin = "innerJoin";
+    internal const string SourceAlias = "sourceAlias";
+    internal const string LeftKeyPath = "leftKeyPath";
+    internal const string RightKeyPath = "rightKeyPath";
+    internal const string Sources = "sources";
     internal const string TenantId = "tenantId";
     internal const string DatabaseId = "databaseId";
     internal const string TransactionDomainId = "transactionDomainId";

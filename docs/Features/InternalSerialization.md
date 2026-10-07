@@ -104,3 +104,18 @@ production serialization semantics remain unchanged. The original full-suite
 336B baseline-only difference remains retained as a failed run; this correction
 requires fresh complete Aspire normal/scalar reports and exact-source Linux
 qualification before claiming the gate.
+
+TASK-IS-PERF005-MEASUREMENT-OWNER preserves REQ/AC-IS-PERF005 after the original
+R275 native cohort observed 262,480 baseline bytes and 262,144 admission bytes.
+The Sol worker owns only `NativeWireSupportedScalarAllocationTests.cs` and a
+cohesive feature-local measurement/lifetime helper if needed. Diagnose the
+actual runtime initialization/measurement boundary using unchanged compiled
+native cases before preparing a guarded correction. Both original 4,096-call
+workloads, exact zero/equality assertions, terminal/nullable domains and unchanged
+production Normalize/Require APIs remain mandatory. Keep measurement synchronous
+on its owning thread, join any original worker before disposal, and retain every
+failed native result. No tolerance, minimum/median selection, retries until green,
+outlier removal, diagnostic suppression or production workaround is permitted.
+Root owns final whole-cohort normal/scalar and exact-source Linux qualification;
+these allocation controls do not contribute product coverage or public speed
+claims. ADR-060 already owns this unchanged serialization boundary.

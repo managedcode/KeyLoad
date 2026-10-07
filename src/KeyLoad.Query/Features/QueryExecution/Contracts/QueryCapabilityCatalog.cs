@@ -1,9 +1,13 @@
+using System.Collections.Immutable;
+
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Defines the immutable Q1 capability vocabulary and exposes the current operation limits.</summary>
+/// <summary>Defines the immutable Q1/Q2 capability vocabulary and exposes the current operation limits.</summary>
 internal static class QueryCapabilityCatalog
 {
     private const int ManifestVersion = 1;
+    private const int Q1DialectVersion = 1;
+    private const int Q2DialectVersion = 2;
     private const string QueryDialectVersion = "Q1";
     private const string AtomicPartitionScope = "atomicPartition";
     private const string DecimalScalarType = "decimal";
@@ -23,9 +27,12 @@ internal static class QueryCapabilityCatalog
     private const string DocumentChangeFeedCapability = "documentChangeFeed";
     private const string ScalarLiveQueryCapability = "scalarLiveQuery";
     private const string ModelViewsCapability = "modelViewsV1";
+    private const string InnerJoinCapability = "Q2.InnerJoin.v1";
+    private static readonly ImmutableArray<int> SupportedVersions = [Q1DialectVersion, Q2DialectVersion];
+    private static readonly ImmutableArray<int> SupportedDialects = [Q1DialectVersion, Q2DialectVersion];
 
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
         [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile]);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability], SupportedVersions, SupportedDialects);
 }

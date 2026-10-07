@@ -173,3 +173,39 @@ TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 joins temporary-directory creation to the 
 TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 inventory validation preserves native multi-case declaring classes and byte-preserving benchmark transfer namespaces. Distinct declaring classes still obey the frozen positive selector identity contract. The exact physical ComparisonTests source path/hash establishes moved-case ownership; preserved UnitTests namespaces are not functional coverage authority. Case identities remain unique and all functional census/positive-group parity and exclusion checks remain mandatory.
 
 The 2026-10-07 report-display amendment to TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 records the declared CLR `className` from original TRX separately from exact original MTP `nativeReportClassName` on each functional inventory row. Native TUnit tree selectors use the former; fixture display suffixes remain untouched in the latter. The linked CodeQuality contract freezes the extra field's bounds, one-to-one report/TRX/source joins, unchanged moved-case shape and mandatory successful census/group parity. Ordered stages are contract freeze, private two-script producer repair and native draft reconciliation, one coherent inventory/producer/workflow join, strict build/format/parser checks, and original complete Linux coverage plus ProductAdmission qualification. Root owns integration; the Luna worker owns only `functional-coverage.native-merge.contributors.ps1` and `functional-coverage.native-merge.functional-report.ps1` within the existing stage. Rollback removes the coherent amendment without introducing a fallback alias reader. Public APIs, persisted formats, dependencies and all existing thresholds are unchanged; failed draft evidence remains unqualified.
+
+
+## Q2 whole-operation contributor integration
+
+TASK-CQ-Q2-CONTRIBUTOR-044 and AC-CQ-Q2-CONTRIBUTOR-001 continue REQ-CQ-009 /
+AC-CQ-044/046/047 under the matching CodeQuality contract frozen 2026-10-07.
+Root joins the 37 additional exact operation rows in the existing product
+contributor registry and the native report reader as one coherent stage. The
+Luna reader owner extends only the exact RF3 display/CLR/fixture/native-ID join
+for the four constructor-data Q2 classes and the one parameterless budget
+class; preserve the two existing exact mappings, original TRX/source checks,
+rejection behaviour, schemas and bounds. It is current pinned-TUnit identity,
+not a stored database format or compatibility path.
+
+Ordered stages: freeze this feature/ADR contract; review disjoint guarded JSON
+and one-script proposals; run strict build/format and native whole-flow tests;
+require original complete Linux normal/scalar/recovery/RF3 and the required
+ProductAdmission original-admit/controlled-denial/immutability/re-admit/cleanup
+operation before qualification. Source review is the explicit exception for
+unchanged strict native-ID denial branches, with genuine matching RF3/report
+results mandatory. Root owns final source/report/compiled-image verification,
+status and delivery. Rollout and source rollback keep registry and reader
+coherent; all numeric coverage, no-decrease, provenance and original-report
+gates remain mandatory. No source-only inventory check qualifies execution.
+
+The Stage VII audit confirms ProductAdmission is specified but absent from the
+current Product/ToolingProof entry and CI. NativeCoverageMergeTests proves CLI
+tooling collection/merge, not product admission. Implementation and the required
+whole native-evidence flow remain mandatory open work, alongside the complete
+inventory/census descriptor amendment. Root repairs the three existing CI
+functional collection selectors to consume the 92-row Q2 registry coherently;
+all ordinary suites, server collectors, source/image/report identity, module
+completeness and numeric gates stay intact. The separate AC-CQ-018 first-profile
+contract is preserved. Luna owns a private one-workflow selector patch, root
+reviews and joins it before delivery; no fabricated native evidence or coverage
+claim is permitted. A rollback removes registry, reader and selectors together.

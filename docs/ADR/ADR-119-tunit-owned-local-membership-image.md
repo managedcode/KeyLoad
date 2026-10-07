@@ -3,10 +3,22 @@
 Status: Accepted; implementation and native runtime qualification pending.
 
 Feature contracts: TestInfrastructure REQ/AC-TEST-015, NativeTUnitEntry
-REQ/AC-TUNIT-ENTRY-005 and ClusterRouting/PartitionTransfer
+REQ/AC-TUNIT-ENTRY-005/006/007 and ClusterRouting/PartitionTransfer
 AC-MEMBERSHIP-001/002/006. This refines ADR-074/117 prerequisite ownership and
 ADR-106 six-silo membership. No public database, dependency, persistence or
 membership protocol changes are authorized.
+
+```mermaid
+flowchart LR
+    Case[TUnit selected case] --> Prepare[Image prerequisite AppHost]
+    Prepare --> Producer[Original immutable image producer and readers]
+    Producer --> Topology[RF3 or six-silo Aspire topology]
+    Topology --> Proof[Actual container and image identities]
+    Proof --> Clients[Real SDK and official MCP operations]
+    Clients --> Shutdown[Joined nodes and application shutdown]
+    Shutdown --> Locks[Every owned store lock released]
+    Locks --> Cleanup[Exact owned tag cleanup]
+```
 
 The native caller selects `Suite=rf3`, a nonblank bounded filter and
 `LocalRf3Image:Enabled=true`. Initially the only supported owned-image filter is
@@ -84,3 +96,88 @@ failed stage retains original evidence and removes only successfully settled
 owned resources. Rollback is an ordinary source revert of this explicit local
 refinement, preserving ADR-117 direct TUnit and the strict GitHub route. No data
 migration, legacy support, widened deadline or qualification bypass is introduced.
+
+## Standard RF3 owned-image extension frozen 2026-10-07
+
+TASK-TUNIT-LOCAL-RF3-IMAGE-006 additionally implements REQ/AC-TUNIT-ENTRY-006
+and existing REQ/AC-TEST-015. Admit exactly the existing six-silo selector above
+and this standard RF3 selector:
+
+    /*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*
+
+The standard `ClusterFixture`, including its typed database-limit overload, owns
+the same explicit image session before its Aspire builder/start and disposes the
+session only after joined three-node shutdown, store-lock checks and application
+disposal. Preserve all existing physical node/membership constants and SDK/MCP
+operations. Use the exact standard expected-name set from current fixture APIs
+for modeled and actual image proof. A database-limit selection changes resource
+configuration only; it cannot change image/source identity or global environment.
+The selected TUnit case/session remains the infrastructure owner. No outer runner
+AppHost, hand-started containers or already-running foreign image can substitute
+for the original owned preparation/start/verify/client/stop/cleanup flow.
+
+The Sol worker owns a freshly guarded private packet for the original stage map
+plus `IntegrationTests/ClusterFixture.cs`, its existing ClusterReplication
+composition/lifecycle helpers, and necessary cohesive local-session helpers in
+that slice. Root owns shared composition joins. Existing R3 private source may
+inform the implementation but must be rebound to current source/contract hashes;
+it is not live or runtime-qualified. Keep the native Aspire environment API's
+actual enumerable key/value contract, original producer/readers and cleanup.
+
+Native TUnit selection whole-process regressions must prove both exact accepted
+selectors and unchanged missing/partial/mixed/GitHub/unsupported denials. Actual
+RF3 proof must run the eight selected schema/join operations on the current
+owned image, retain original reports and complete cleanup; six-silo membership
+is its own case and gate. Keep every original per-case/start/cleanup timeout,
+source snapshot bound, tag ownership rule and safe failure. No selected case,
+resource, assertion, receipt or qualification gate may be silently dropped.
+
+## Original Docker child ownership correction
+
+TASK-TUNIT-DOCKER-JOIN-007 implements REQ/AC-TUNIT-ENTRY-007 within the existing
+RF3 image proof. Source review found `ContainerRuntimeDocker.RunAsync` could
+leave its started Docker child and original readers unjoined when its caller
+token cancels. Root freezes this repair before implementation. The Sol owner
+may change only that helper and necessary cohesive ClusterReplication
+`Processes/` helpers, reusing the existing owned-process lifetime/failure
+observer instead of duplicating their implementation. Preserve original
+Docker arguments, exit/result shapes, inspector validation, physical membership,
+polling/start/cleanup thresholds and the current caller-token semantics.
+
+Create the real child and all reader/exit tasks inside one observed ownership
+scope. On cancellation, reader failure or setup failure after start, retain
+the initiating exception, terminate only that owned child tree and join the
+actual original exit/readers before disposal; retain independent cleanup
+failures. Never synthesize successful output, swallow cleanup failure or detach
+the original task behind a timeout. Reuse existing finite process-output and
+settlement bounds; an absent applicable bound requires a concrete amendment
+before introducing a new default. Process-helper tests exercise actual owned
+children and are infrastructure evidence, not database coverage.
+
+Root owns integration and the real native Docker/Aspire validation: unchanged
+schema/join and six-silo selections must pass with actual image/container
+identity and settled resources, followed by a healthy inspection. A dedicated
+Docker cancellation scenario requires an existing deterministic native-child
+observation boundary or an explicitly frozen test-owned composition refinement;
+no fake Docker provider, production test hook or new implicitly admitted RF3
+selector. Keep that fault branch unqualified until genuine runtime evidence
+exists. Frontend, public APIs, persisted data and database authority are N/A.
+Rollback removes this helper repair only; original strict image cleanup and
+all Linux/fault qualification gates remain required.
+
+The TASK-TUNIT-DOCKER-JOIN-007 bound amendment explicitly adopts the existing
+16,384-character native-verifier ceiling separately for Docker stdout and
+stderr. Each reader must fail on the first extra character; successful output
+must never be truncated before inspector validation. Preserve every caller
+deadline. Reuse the existing one-second TERM grace and five-second settlement
+observation/escalation policy: the latter records failure and escalates while
+ownership continues until actual exit and readers settle; it is not permission
+to abandon work after five seconds. The existing lifetime helper may accept
+nullable original tasks for a setup failure after Process.Start, observing only
+tasks actually created and the real process state. Never substitute completed
+placeholder tasks for missing original exit/readers. Exact owners are
+ContainerRuntimeDocker.cs and LocalImageOwnedProcessLifetime.cs with necessary
+cohesive Processes helpers only. The native verifier's existing caller/output
+behavior remains unchanged. The dedicated real-Docker cancellation fault branch
+remains unqualified until its genuine observation/composition seam is frozen
+and executed; source repair and real Node process tests do not certify it.

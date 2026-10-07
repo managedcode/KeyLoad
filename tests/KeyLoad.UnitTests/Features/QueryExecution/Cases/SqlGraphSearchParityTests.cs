@@ -154,7 +154,11 @@ internal sealed class SqlGraphSearchParityTests
         var manifest = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Capabilities;
 
         await Assert.That(manifest.SqlDialect).IsEqualTo("Q1");
+        await Assert.That(manifest.AstVersion).IsEqualTo(1);
+        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo([1, 2]);
+        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo([1, 2]);
         await Assert.That(manifest.ReadProfiles).Contains("graph-search-v1");
+        await Assert.That(manifest.ReadProfiles).Contains("Q2.InnerJoin.v1");
     }
 
     [Test]

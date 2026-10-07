@@ -26,18 +26,32 @@ internal static class QueryAstDiscriminatorNames
 /// <param name="Limit">The maximum number of rows to return.</param>
 /// <param name="Explain">Whether to return query plan information.</param>
 /// <param name="ModelSource">Optional read-only event or queue source binding.</param>
+/// <param name="InnerJoin">Optional Q2 typed-row INNER JOIN.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.SelectQuery)]
 public sealed record SelectQuery([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string? Alias, [property: Orleans.Id(2)] ImmutableArray<Selection> Projection, [property: Orleans.Id(3)] Predicate? Filter,
     [property: Orleans.Id(4)] ImmutableArray<Ordering> Order, [property: Orleans.Id(5)] int Limit, [property: Orleans.Id(6)] bool Explain = false,
-    [property: Orleans.Id(7), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ModelQuerySource? ModelSource = null);
+    [property: Orleans.Id(7), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ModelQuerySource? ModelSource = null,
+    [property: Orleans.Id(8), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] InnerJoinClause? InnerJoin = null);
 
 /// <summary>Selects one field path and assigns it an output alias.</summary>
 /// <param name="Path">The field path to select.</param>
 /// <param name="Alias">The name used for the selected value in the result.</param>
+/// <param name="SourceAlias">The optional source alias used only by Q2 joined projections.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.Selection)]
-public sealed record Selection([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Alias);
+public sealed record Selection([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Alias,
+    [property: Orleans.Id(2), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? SourceAlias = null);
+
+/// <summary>Defines one admitted right collection and exact equality key pair for a bounded inner join.</summary>
+/// <param name="Collection">The right typed collection name.</param>
+/// <param name="Alias">The right source alias.</param>
+/// <param name="LeftKeyPath">The left typed key column.</param>
+/// <param name="RightKeyPath">The right typed primary-key column.</param>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(NativeContractAliases.InnerJoinClause)]
+public sealed record InnerJoinClause([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string Alias,
+    [property: Orleans.Id(2)] string LeftKeyPath, [property: Orleans.Id(3)] string RightKeyPath);
 
 /// <summary>Specifies the ordering of query rows by one field path.</summary>
 /// <param name="Path">The field path used for ordering.</param>
@@ -161,8 +175,12 @@ public sealed record AstQueryRequest([property: Orleans.Id(0)] PartitionRef Part
 /// <param name="ReadOnly">Whether queries described by this manifest are read-only.</param>
 /// <param name="MaxCandidateBytes">The maximum bytes consumed by candidate evaluation.</param>
 /// <param name="ReadProfiles">The available read profiles.</param>
+/// <param name="SupportedAstVersions">The exact supported AST versions.</param>
+/// <param name="SupportedQueryDialectVersions">The exact supported query-language versions.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.QueryCapabilityManifest)]
 public sealed record QueryCapabilityManifest([property: Orleans.Id(0)] int ProtocolVersion, [property: Orleans.Id(1)] int AstVersion, [property: Orleans.Id(2)] string SqlDialect, [property: Orleans.Id(3)] string Scope,
     [property: Orleans.Id(4)] string NumericPolicy, [property: Orleans.Id(5)] string MissingPolicy, [property: Orleans.Id(6)] ImmutableArray<string> Adapters, [property: Orleans.Id(7)] ImmutableArray<string> Predicates, [property: Orleans.Id(8)] int MaxRows, [property: Orleans.Id(9)] int MaxCandidates,
-    [property: Orleans.Id(10)] int MaxBytes, [property: Orleans.Id(11)] int MaxDepth, [property: Orleans.Id(12)] bool FullScanRequiresOptIn, [property: Orleans.Id(13)] bool ReadOnly, [property: Orleans.Id(14)] long MaxCandidateBytes, [property: Orleans.Id(15)] ImmutableArray<string> ReadProfiles);
+    [property: Orleans.Id(10)] int MaxBytes, [property: Orleans.Id(11)] int MaxDepth, [property: Orleans.Id(12)] bool FullScanRequiresOptIn, [property: Orleans.Id(13)] bool ReadOnly, [property: Orleans.Id(14)] long MaxCandidateBytes, [property: Orleans.Id(15)] ImmutableArray<string> ReadProfiles,
+    [property: Orleans.Id(16)] ImmutableArray<int> SupportedAstVersions,
+    [property: Orleans.Id(17)] ImmutableArray<int> SupportedQueryDialectVersions);

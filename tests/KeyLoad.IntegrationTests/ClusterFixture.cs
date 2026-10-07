@@ -18,6 +18,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly long? commandBytes;
     private readonly HttpAdmissionLimits? httpAdmission;
+    private readonly DatabaseLimits? databaseLimits;
     private ClusterFixtureDiagnostics? diagnostics;
     private ContainerRuntimeControl? containerRuntime;
     private NativeCoverageRf3FixtureOwner? coverage;
@@ -41,6 +42,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(httpAdmission);
         this.httpAdmission = httpAdmission;
     }
+
+    /// <summary>Creates an RF3 fixture with the server's typed database execution limits.</summary>
+    /// <param name="databaseLimits">The validated limits applied to every Aspire RF3 node.</param>
+    internal ClusterFixture(DatabaseLimits databaseLimits)
+        => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
 
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
     public string Root { get; private set; } = Path.Combine(Path.GetTempPath(),
@@ -72,8 +78,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             }
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
-            ClusterFixtureComposition.ConfigureCommandAdmission(builder, commandBytes);
-            ClusterFixtureComposition.ConfigureHttpAdmission(builder, httpAdmission);
+            ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits);
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);

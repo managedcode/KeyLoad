@@ -31,6 +31,12 @@ internal static class PartitionQueryMcpProtocol
     internal const string Limit = "limit";
     internal const string Explain = "explain";
     internal const string ModelSource = "modelSource";
+    internal const string InnerJoin = "innerJoin";
+    internal const string LeftKeyPath = "leftKeyPath";
+    internal const string RightKeyPath = "rightKeyPath";
+    internal const string Path = "path";
+    internal const string SourceAlias = "sourceAlias";
+    internal const string Sources = "sources";
     internal const string AdditionalProperties = "additionalProperties";
     internal const string Reference = "reference";
     internal const string Row = "row";

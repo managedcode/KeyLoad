@@ -51,6 +51,16 @@ new test and helpers. Snapshot/segment-movement overhead at the required scales,
 full task-local RF3 and complete KL-004 acceptance remain separate open gates;
 this one concurrency flow must not be used to claim those measurements.
 
+This whole-operation scan is now joined. Final local R291/R292 owning normal
+and scalar cohorts each pass 606/606, including the literal old/new document and
+index state, real pending atomic writer, original task/barrier cleanup, exact
+receipt and reopened identity plus a healthy follow-up. R290 full Release and
+R294 native formatter pass with no source drift; both native test cohorts also
+retain unchanged DLL/PDB identities and zero skips. Exact original hashes are
+under KL-004 and TEST-PIPELINE-001 in the status tracker. This is development
+evidence for AC-CUT-DOCUMENT-INDEX-SCAN-001 only. Required snapshot/segment
+overhead, full KL-004 acceptance and current-source Linux/RF3 remain open.
+
 | Requirement | Acceptance and mapped real-provider TUnit tests |
 |---|---|
 | REQ-CUT-001: capture one exact canonical cut | AC-CUT-001: capture only from this runtime's live `Read` callback while its read gate is held; lease captures Position and scalar format/key-codec/node/incarnation/durability/pause/read-generation fields from that cut, excluding signing material. Later committed insert/update/delete leaves the old snapshot exact while a fresh ordinary read sees all changes. `NativeReadCutConsistencyTests`. |

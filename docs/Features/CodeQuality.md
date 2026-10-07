@@ -1661,3 +1661,72 @@ TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 native-identity refinement: preserve every
 TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 report-display refinement, frozen 2026-10-07: each functional inventory case retains two exact original identities. `className` is the declared CLR name from native TRX `TestMethod.className` and selects the native TUnit tree class. The additional required `nativeReportClassName` is the original fully qualified MTP group namespace/class display string, including any fixture suffix. Keep each original method/argument display name and source path/hash/positive line range. The native report and TRX must reconcile one-to-one through that explicit inventory row; return the declared case identity for census/group parity. Never strip suffixes, normalize display strings, guess aliases or rewrite either report. The new field is a nonempty string of at most 512 characters without `|`, CR, LF or NUL; preserve every other exact functional-case key and bound. Moved benchmark records keep their existing shape and exclusion rules.
 
 The pinned TUnit 1.72.16 native tree builds its class path from `ClassMetadata.Name = Type.Name`; its MTP report may separately display `RequestCqrsBoundaryTests(RequestCqrsClusterFixture)`, while original TRX declares `RequestCqrsBoundaryTests`. This is an observed native report distinction, not a legacy format. Successful same-image normal/scalar full censuses and all ten positive group reports must match both stored identities and retain complete, disjoint case parity. The failed R111 report may inform the private draft but cannot qualify the final current inventory. Root freezes and joins; the Luna producer worker owns only the required inventory-shape and native report-to-TRX join changes in the existing CodeQuality scripts. The existing native ProductAdmission whole-flow remains mandatory, with no authored reports, added collector or coverage claim.
+
+
+### Q2 operation contributor join, frozen 2026-10-07
+
+TASK-CQ-Q2-CONTRIBUTOR-044 implements REQ-CQ-009 and AC-CQ-044/046/047.
+AC-CQ-Q2-CONTRIBUTOR-001 requires the existing canonical product contributor
+registry to retain its 55 original rows and add only the 39 exact whole-operation
+identities reviewed under ADR-118 and AC-CUT-DOCUMENT-INDEX-SCAN-001. The result
+is 41 unit, 41 unit-scalar, one recovery and eleven RF3 rows. These are selection
+records, never passing outcomes or measured coverage. The separate first
+AC-CQ-018 PartitionQuery profile and its filter remain unchanged.
+
+The current pinned TUnit reports have two identities: the declared CLR class
+and the original report's constructor-data display class. Extend the native
+functional-report reader's exact RF3 class inventory to the four declared
+RelationalSqlRf3JoinTests, RelationalSqlRf3JoinAuthorizationTests,
+RelationalSqlRf3JoinCancellationTests and RelationalSqlRf3JoinReadCutTests in
+KeyLoad.IntegrationTests.Features.RelationalStorage. Their admitted display is
+exactly the respective class name followed by `(ClusterFixture)`; each original
+native test ID must name the exact KeyLoad.IntegrationTests.ClusterFixture
+constructor identity already used by the existing two entries. Add the exact
+parameterless RelationalSqlRf3JoinBudgetTests display separately; its native ID
+must have no constructor-data suffix. Retain the existing two mappings.
+Unknown namespace/class/display/fixture/native-ID combinations remain rejected;
+no generic suffix stripping, normalization, inferred fixture or report rewriting
+is allowed. Every test still matches its original TRX and exact registered case.
+
+Root owns registry, requirement/ADR and final integration. Luna owns only the
+existing functional-coverage.native-merge.functional-report.ps1 reader. Freeze,
+review guarded source, then run native build/format, actual whole-operation
+unit/scalar/recovery/RF3 and the required post-descriptor original
+ProductAdmission flow. Required evidence is complete same-image original native
+reports and TRX, exact source bounds and the unchanged admit/controlled-denial/
+original-immutability/re-admit/cleanup regression. Original Q2 native report
+identities and every successful cohort are still unqualified until actual
+execution; source metadata is not execution evidence. Existing strict ID denial
+branches receive an explicit source-review exception for this additive class
+inventory, with original Linux ProductAdmission/RF3 results required before
+qualification. Preserve all bounds, schemas, 80/70/90 and no-decrease gates.
+Roll out registry and reader together; a coherent source rollback removes the
+additive class selection, never introduces an alternate reader. Database bytes,
+public APIs, dependencies, collector settings and topology are unchanged.
+
+The Stage VII source audit found that the current merge entry accepts only
+Product and ToolingProof, and CI has no ProductAdmission operation. The required
+admit/controlled-denial/immutability/re-admit/cleanup flow is specified above;
+its implementation and native execution remain open. NativeCoverageMergeTests
+currently exercises actual CLI tooling collection/merge and must not be cited as
+that missing product admission flow. The current descriptor is schema-v1 with
+four cohort slots; the complete inventory/census amendment is still required.
+
+For the additive Q2 registry join, root updates only the existing CI functional
+collection selectors to the exact 41 normal, 41 scalar, one recovery and eleven
+RF3 candidates. Use the original PartitionQuery class selection plus the six
+original Q2 operation classes, SqlInnerJoinDeclaredProjectionTests and
+DocumentIndexCommittedScanTests; RF3 adds its four Q2
+constructor-data classes and the parameterless budget class. Preserve full
+uninstrumented suites, native server collection, all source/image/report checks,
+limits, module completeness and skipped-on-failure semantics. The separate
+AC-CQ-018 first-profile contract and its filter remain unchanged. This selector
+repair cannot qualify complete-module coverage or the missing admission flow.
+
+TASK-REL-004-INNER-JOIN-009 contributes the exact
+`AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup`
+normal/scalar operation under AC-REL-004-JOIN-001/002/005 and
+AC-QUERY-007-JOIN-001/002. It checks the actual successful schema results,
+admitted primary-key/source_revision data, complete SQL/AST pages and literal
+projections, Sources/cut, unchanged state and healthy Q1 metadata semantics.
+The registry and CI selector are joined together; they do not measure coverage.

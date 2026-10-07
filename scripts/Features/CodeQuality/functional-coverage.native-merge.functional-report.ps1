@@ -4,6 +4,13 @@ $script:FcNativeFunctionalReport = [ordered]@{
     Rf3ClassAliases = [ordered]@{
         'KeyLoad.IntegrationTests.Features.QueryExecution|PartitionQueryPublicRf3Tests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests'
         'KeyLoad.IntegrationTests.Features.DocumentStorage|McpDocumentCrudParityTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests'
+        'KeyLoad.IntegrationTests.Features.RelationalStorage|RelationalSqlRf3JoinTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinTests'
+        'KeyLoad.IntegrationTests.Features.RelationalStorage|RelationalSqlRf3JoinAuthorizationTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinAuthorizationTests'
+        'KeyLoad.IntegrationTests.Features.RelationalStorage|RelationalSqlRf3JoinCancellationTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinCancellationTests'
+        'KeyLoad.IntegrationTests.Features.RelationalStorage|RelationalSqlRf3JoinReadCutTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinReadCutTests'
+    }
+    Rf3ParameterlessClassAliases = [ordered]@{
+        'KeyLoad.IntegrationTests.Features.RelationalStorage|RelationalSqlRf3JoinBudgetTests' = 'KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests'
     }
     Invalid = 'The original native TUnit report does not match its contributors or has an unsuccessful outcome.'
     RootRequired = @('schemaVersion','assemblyName','machineName','timestamp','tunitVersion','operatingSystem',
@@ -26,16 +33,28 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
         Assert-FcNativeFunctionalGroup $group
         $displayClass = [string] $group.namespace + '|' + [string] $group.className
         $qualifiedClass = [string] $group.namespace + '.' + [string] $group.className
+        $rf3HasConstructorData = $false
         if ($Suite -ceq 'rf3') {
-            if (-not $script:FcNativeFunctionalReport.Rf3ClassAliases.Contains($displayClass)) { throw $script:FcNativeFunctionalReport.Invalid }
-            $qualifiedClass = [string] $script:FcNativeFunctionalReport.Rf3ClassAliases[$displayClass]
+            if ($script:FcNativeFunctionalReport.Rf3ClassAliases.Contains($displayClass)) {
+                $qualifiedClass = [string] $script:FcNativeFunctionalReport.Rf3ClassAliases[$displayClass]
+                $rf3HasConstructorData = $true
+            }
+            elseif ($script:FcNativeFunctionalReport.Rf3ParameterlessClassAliases.Contains($displayClass)) {
+                $qualifiedClass = [string] $script:FcNativeFunctionalReport.Rf3ParameterlessClassAliases[$displayClass]
+            }
+            else { throw $script:FcNativeFunctionalReport.Invalid }
         }
         foreach ($test in $group.tests) {
             Assert-FcNativeFunctionalTest $test
             if ($test.className -cne $group.className) { throw $script:FcNativeFunctionalReport.Invalid }
             if ($Suite -ceq 'rf3') {
-                $nativeId = $qualifiedClass + '(' + $script:FcNativeFunctionalReport.Rf3Fixture + ').1.1.' +
-                    $test.methodName + '.1.1.0'
+                if ($rf3HasConstructorData) {
+                    $nativeId = $qualifiedClass + '(' + $script:FcNativeFunctionalReport.Rf3Fixture + ').1.1.' +
+                        $test.methodName + '.1.1.0'
+                }
+                else {
+                    $nativeId = $qualifiedClass + '.1.1.' + $test.methodName + '.1.1.0'
+                }
                 if ($test.id -cne $nativeId) { throw $script:FcNativeFunctionalReport.Invalid }
             }
             $key = Get-FcNativeTrxKey $qualifiedClass ([string] $test.methodName) ([string] $test.displayName)

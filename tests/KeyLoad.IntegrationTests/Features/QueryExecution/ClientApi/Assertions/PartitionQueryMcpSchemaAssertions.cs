@@ -19,8 +19,6 @@ internal static class PartitionQueryMcpSchemaAssertions
         PartitionQueryMcpProtocol.PolicyEpoch, PartitionQueryMcpProtocol.SchemaVersion, PartitionQueryMcpProtocol.AccessPath];
     private static readonly string[] EntityFields = [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
         McpDiscoveryProtocol.Id];
-    private static readonly string[] QueryRowFields = [PartitionQueryMcpProtocol.EntityId, PartitionQueryMcpProtocol.Revision,
-        PartitionQueryMcpProtocol.Json, PartitionQueryMcpProtocol.Redacted, PartitionQueryMcpProtocol.RedactedFields];
 
     internal static async Task VerifyAsync(JsonElement input, JsonElement output)
     {
@@ -32,12 +30,18 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyPrimitiveAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.AstVersion), McpDiscoveryProtocol.Integer);
         await VerifyPrimitiveAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.AllowFullScan), McpDiscoveryProtocol.Boolean);
         await VerifyPartitionArrayAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Partitions));
-        await VerifyObjectAsync(Resolve(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Query)),
+        var query = Resolve(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Query));
+        await VerifyObjectAsync(query,
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit,
-                PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource],
+                PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource, PartitionQueryMcpProtocol.InnerJoin],
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit]);
+        var queryFields = query.GetProperty(McpDiscoveryProtocol.Properties);
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyProjectionAsync(input,
+            queryFields.GetProperty(PartitionQueryMcpProtocol.Projection));
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyInnerJoinAsync(input,
+            queryFields.GetProperty(PartitionQueryMcpProtocol.InnerJoin));
         await VerifyDictionaryAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Parameters));
         await VerifyPageAsync(output);
     }
@@ -53,7 +57,8 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyObjectAsync(rows, RowFields, RowFields);
         var rowProperties = rows.GetProperty(McpDiscoveryProtocol.Properties);
         await VerifyEntityAsync(root, rowProperties.GetProperty(PartitionQueryMcpProtocol.Reference));
-        await VerifyQueryRowAsync(root, rowProperties.GetProperty(PartitionQueryMcpProtocol.Row));
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyQueryRowAsync(root,
+            rowProperties.GetProperty(PartitionQueryMcpProtocol.Row));
         var leaves = Resolve(root, properties.GetProperty(PartitionQueryMcpProtocol.Leaves).GetProperty(PartitionQueryMcpProtocol.Items));
         await VerifyObjectAsync(leaves, WitnessFields, WitnessFields);
         await VerifyPartitionAsync(root, leaves.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(McpDiscoveryProtocol.Partition));
@@ -78,19 +83,6 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(PartitionQueryMcpProtocol.Id), McpDiscoveryProtocol.String);
     }
 
-    private static async Task VerifyQueryRowAsync(JsonElement root, JsonElement schema)
-    {
-        schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, QueryRowFields,
-            [PartitionQueryMcpProtocol.EntityId, PartitionQueryMcpProtocol.Revision, PartitionQueryMcpProtocol.Json]);
-        var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
-        await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.EntityId), McpDiscoveryProtocol.String);
-        await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.Revision), McpDiscoveryProtocol.Integer);
-        await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.Json), McpDiscoveryProtocol.String);
-        await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.Redacted), McpDiscoveryProtocol.Boolean);
-        await VerifyStringArrayAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.RedactedFields));
-    }
-
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
@@ -111,22 +103,27 @@ internal static class PartitionQueryMcpSchemaAssertions
         }
     }
 
-    private static async Task VerifyStringArrayAsync(JsonElement root, JsonElement schema)
+    internal static async Task VerifyStringArrayAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
         await VerifyExactTypeSetAsync(root, schema, McpDiscoveryProtocol.Array, McpDiscoveryProtocol.Null);
         await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Items), McpDiscoveryProtocol.String);
     }
 
-    private static async Task VerifyPrimitiveAsync(JsonElement root, JsonElement schema, string expected)
+    internal static async Task VerifyPrimitiveAsync(JsonElement root, JsonElement schema, string expected)
     {
         schema = Resolve(root, schema);
         await Assert.That(HasType(schema, expected)).IsTrue();
     }
 
-    private static async Task VerifyObjectAsync(JsonElement schema, string[] fields, string[] required)
+    internal static async Task VerifyObjectAsync(JsonElement schema, string[] fields, string[] required)
     {
         await Assert.That(HasType(schema, McpDiscoveryProtocol.Object)).IsTrue();
+        await VerifyObjectShapeAsync(schema, fields, required);
+    }
+
+    internal static async Task VerifyObjectShapeAsync(JsonElement schema, string[] fields, string[] required)
+    {
         await Assert.That(schema.GetProperty(McpDiscoveryProtocol.AdditionalProperties).ValueKind)
             .IsEqualTo(JsonValueKind.False);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject().Select(item => item.Name).ToHashSet(StringComparer.Ordinal);
@@ -136,7 +133,7 @@ internal static class PartitionQueryMcpSchemaAssertions
         await Assert.That(actualRequired.SetEquals(required)).IsTrue();
     }
 
-    private static JsonElement Resolve(JsonElement root, JsonElement schema)
+    internal static JsonElement Resolve(JsonElement root, JsonElement schema)
     {
         for (var depth = 0; depth < MaximumReferenceDepth && schema.TryGetProperty(McpDiscoveryProtocol.ReferenceKeyword, out var reference); depth++)
         {
@@ -152,7 +149,7 @@ internal static class PartitionQueryMcpSchemaAssertions
         return schema;
     }
 
-    private static bool HasType(JsonElement schema, string expected)
+    internal static bool HasType(JsonElement schema, string expected)
     {
         if (expected == McpDiscoveryProtocol.Integer)
         { return HasDirectType(schema, expected, allowNullType: false); }
@@ -207,7 +204,7 @@ internal static class PartitionQueryMcpSchemaAssertions
             && types.Count(item => item.GetString() == McpDiscoveryProtocol.Null) == 1;
     }
 
-    private static async Task VerifyExactTypeSetAsync(JsonElement root, JsonElement schema, string first, string second)
+    internal static async Task VerifyExactTypeSetAsync(JsonElement root, JsonElement schema, string first, string second)
     {
         schema = Resolve(root, schema);
         var type = schema.GetProperty(McpDiscoveryProtocol.Type);

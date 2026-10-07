@@ -6,31 +6,32 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 
-/// <summary>A bounded Q1 parser. Unsupported syntax is rejected, never passed through to storage.</summary>
+/// <summary>A bounded Q1/Q2 parser. Unsupported syntax is rejected, never passed through to storage.</summary>
 public sealed class SqlParser
 {
     private const int MinimumPositiveCount = 1;
     private const long FirstOrdinalLong = 1L;
-    private const int FirstElementIndex = 0;
-    private const int SinglePathSegment = 1;
+    private const int DefaultDialectVersion = 1;
+    private const int JoinDialectVersion = 2;
 
     private readonly SqlTokenCursor cursor;
     private readonly DatabaseLimits limits;
     private readonly QueryExecutionOptions execution;
     private readonly IOptions<DatabaseLimits> operationLimitsOptions;
+    private readonly int dialectVersion;
     private string? alias;
 
     /// <summary>Creates a parser with the configured SQL byte and token limits.</summary>
-    /// <param name="sql">Q1 SQL text.</param>
+    /// <param name="sql">SQL text in the selected bounded query dialect.</param>
     /// <param name="limitsOptions">Centrally validated database query limits.</param>
     /// <param name="executionOptions">Centrally validated query structure limits.</param>
     public SqlParser(string sql, IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> executionOptions)
-        : this(sql, limitsOptions, executionOptions, null)
+        : this(sql, limitsOptions, executionOptions, null, DefaultDialectVersion)
     {
     }
 
     internal SqlParser(string sql, IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> executionOptions,
-        ReadExecutionBudget? budget)
+        ReadExecutionBudget? budget, int dialectVersion = DefaultDialectVersion)
     {
         ArgumentNullException.ThrowIfNull(sql);
         ArgumentNullException.ThrowIfNull(limitsOptions);
@@ -40,6 +41,11 @@ public sealed class SqlParser
         execution = executionOptions.Value;
         execution.Validate();
         operationLimitsOptions = limitsOptions;
+        if (dialectVersion is not (DefaultDialectVersion or JoinDialectVersion))
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedDialectDetail);
+        }
+        this.dialectVersion = dialectVersion;
         if (sql.Length > limits.MaxQueryBytes || Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.ByteBudgetDetail);
@@ -57,9 +63,17 @@ public sealed class SqlParser
         cursor.Need(SqlSyntax.From);
         var (collection, modelSource) = ReadSource();
         ReadAlias();
-        projection = projection.Select(p => p with { Path = BoundPath(p.Path) }).ToList();
+        var joinSyntax = new SqlJoinSyntax(cursor, dialectVersion);
+        var join = joinSyntax.ReadJoin(alias);
+        if (join is not null && StringComparer.Ordinal.Equals(join.Collection, collection))
+        {
+            throw SqlSyntax.Invalid();
+        }
+        projection = projection.Select(p => join is null
+            ? p with { Path = SqlJoinSyntax.BoundPath(p.Path, alias), SourceAlias = null }
+            : SqlJoinSyntax.BindProjection(p, alias, join)).ToList();
         var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias).Parse() : null;
-        var order = ReadOrder();
+        var order = ReadOrder(join);
         var limit = ReadLimit();
         cursor.Eat(SqlSyntax.Semicolon);
         if (cursor.Current.Kind != SqlTokenKind.End)
@@ -71,7 +85,7 @@ public sealed class SqlParser
         {
             throw SqlSyntax.Invalid();
         }
-        return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource);
+        return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource, join);
     }
 
     private (string Collection, ModelQuerySource? Source) ReadSource()
@@ -155,27 +169,14 @@ public sealed class SqlParser
         {
             alias = cursor.Identifier();
         }
-        else if (cursor.Current.Kind == SqlTokenKind.Identifier && !cursor.Is(SqlSyntax.Where) && !cursor.Is(SqlSyntax.Order) && !cursor.Is(SqlSyntax.Limit))
+        else if (cursor.Current.Kind == SqlTokenKind.Identifier && !cursor.Is(SqlSyntax.Where) && !cursor.Is(SqlSyntax.Order)
+            && !cursor.Is(SqlSyntax.Limit) && (!cursor.Is(SqlSyntax.Inner) || !cursor.IsNext(SqlSyntax.Join)))
         {
             alias = cursor.Identifier();
         }
     }
 
-    private string BoundPath(string path)
-    {
-        if (path == SqlSyntax.Star)
-        {
-            return path;
-        }
-        var parts = JsonData.PathSegments(path).ToList();
-        if (alias is not null && parts.Count > MinimumPositiveCount && parts[FirstElementIndex] == alias)
-        {
-            parts.RemoveAt(FirstElementIndex);
-        }
-        return parts.Count == SinglePathSegment && parts[FirstElementIndex] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision ? SqlSyntax.MetadataPrefix + parts[FirstElementIndex] : JsonData.Path(parts.ToArray());
-    }
-
-    private List<Ordering> ReadOrder()
+    private List<Ordering> ReadOrder(InnerJoinClause? join)
     {
         var order = new List<Ordering>();
         if (cursor.Eat(SqlSyntax.Order))
@@ -183,7 +184,9 @@ public sealed class SqlParser
             cursor.Need(SqlSyntax.By);
             do
             {
-                var field = BoundPath(JsonData.Path(cursor.Path().ToArray()));
+                var raw = cursor.Path();
+                var field = join is null ? SqlJoinSyntax.BoundPath(JsonData.Path(raw.ToArray()), alias)
+                    : SqlJoinSyntax.BoundOrderPath(raw, alias);
                 var descending = cursor.Eat(SqlSyntax.Desc);
                 if (!descending)
                 {

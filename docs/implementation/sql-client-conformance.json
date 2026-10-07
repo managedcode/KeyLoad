@@ -35,9 +35,9 @@
     {
       "id": "SQLC-JOIN",
       "name": "joins, subqueries, correlated queries, CTEs including recursive/data modifying",
-      "syntax": "ADR-118 accepted closed Q2 INNER equijoin contract; guarded source implementation/native qualification pending; all other join/subquery/CTE forms pending",
-      "execution": "One authorized bounded same-partition canonical ZoneTree read-cut target; no execution qualification claimed before actual native gates",
-      "evidence": "AC-REL-004-JOIN-001..006 and AC-QUERY-007-JOIN-001/002 frozen in ADR-118/RelationalStorage/QueryExecution; complete AC-SQLC-006 remains open"
+      "syntax": "Closed Q2/AST2 Text primary-key INNER equijoin source joined; all other join/subquery/CTE forms remain pending",
+      "execution": "Real ZoneTree single authorized committed cut, literal SQL/AST projections, ordinal ordering, both source identities, policy/redaction, cumulative bounds, cancellation and reopen exercised in owning local normal/scalar; public RF3/Linux and remaining negative inventories pending",
+      "evidence": "ADR118/RelationalStorage/QueryExecution mapped subcriteria; R291/R292 owning606/606 with zero drift/skips. No full REQ/AC-SQLC-006 closure, full SQL or native SQL protocol inferred."
     },
     {
       "id": "SQLC-GROUP",
@@ -168,7 +168,7 @@
     ],
     "q2Profile": "Q2.InnerJoin.v1",
     "q2Scope": "Explicit projection, one same-partition INNER equijoin from a Text column to the second typed collection's nonnullable Text primary key; left primary-key ordinal ascending order, explicit full-scan opt-in and bounded LIMIT",
-    "sourceStage": "accepted contract before guarded implementation join; native execution qualification pending",
+    "sourceStage": "guarded Q2 source joined; local owning normal/scalar606/606pass with exact native source/DLL/PDB binding; current public RF3/Linux qualification pending",
     "q2Unsupported": [
       "WHERE/cursor",
       "self or multiple joins",
@@ -181,7 +181,13 @@
       "CALL with nondefault query dialect"
     ],
     "fullSqlComplete": false,
-    "nativeClientProtocolQualified": false
+    "nativeClientProtocolQualified": false,
+    "localDevelopmentEvidence": {
+      "normalTrxSha256": "523837cecb848838ed013f6cdaa6352a4f72e813c0576b683937f50efe97621c",
+      "scalarTrxSha256": "55357a69d0c777973beaec0ba6e5b7b175480a7329acc250361281e6fd6f30ab",
+      "fullSqlComplete": false,
+      "nativeClientProtocolQualified": false
+    }
   },
   "textIndexFoundation": {
     "repository": "https://github.com/ZoneTree/ZoneTree.FullTextSearch",

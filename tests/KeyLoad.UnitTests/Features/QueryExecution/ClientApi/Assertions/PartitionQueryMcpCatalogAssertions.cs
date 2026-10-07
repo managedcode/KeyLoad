@@ -49,9 +49,15 @@ internal static class PartitionQueryMcpCatalogAssertions
         var query = Resolve(schema, properties.GetProperty(PartitionQueryMcpProtocol.Query));
         await VerifyObjectAsync(query, [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias,
                 PartitionQueryMcpProtocol.Projection, PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order,
-                PartitionQueryMcpProtocol.Limit, PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource],
+                PartitionQueryMcpProtocol.Limit, PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource,
+                PartitionQueryMcpProtocol.InnerJoin],
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit]);
+        var queryProperties = query.GetProperty(McpSchemaInspector.Properties);
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyProjectionAsync(schema,
+            queryProperties.GetProperty(PartitionQueryMcpProtocol.Projection));
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyInnerJoinAsync(schema,
+            queryProperties.GetProperty(PartitionQueryMcpProtocol.InnerJoin));
         var parameters = Resolve(schema, properties.GetProperty(PartitionQueryMcpProtocol.Parameters));
         await Assert.That(McpSchemaInspector.HasType(parameters, PartitionQueryMcpProtocol.ObjectType)).IsTrue();
     }
@@ -77,7 +83,8 @@ internal static class PartitionQueryMcpCatalogAssertions
         var properties = item.GetProperty(McpSchemaInspector.Properties);
         await VerifyEntityAsync(root, properties.GetProperty(Reference));
         var queryRow = Resolve(root, properties.GetProperty(Row));
-        await VerifyObjectAsync(queryRow, [EntityId, PartitionQueryMcpProtocol.Revision, Json, Redacted, RedactedFields],
+        await VerifyObjectAsync(queryRow, [EntityId, PartitionQueryMcpProtocol.Revision, Json, Redacted, RedactedFields,
+                PartitionQueryMcpProtocol.Sources],
             [EntityId, PartitionQueryMcpProtocol.Revision, Json]);
         var rowProperties = queryRow.GetProperty(McpSchemaInspector.Properties);
         await VerifyPrimitiveAsync(root, rowProperties.GetProperty(EntityId), McpSchemaInspector.String);
@@ -86,6 +93,8 @@ internal static class PartitionQueryMcpCatalogAssertions
         await VerifyPrimitiveAsync(root, rowProperties.GetProperty(Redacted), PartitionQueryMcpProtocol.BooleanType);
         await Assert.That(McpSchemaInspector.HasType(Resolve(root,
             rowProperties.GetProperty(RedactedFields)), McpSchemaInspector.Array)).IsTrue();
+        await PartitionQueryMcpInnerJoinSchemaAssertions.VerifySourcesAsync(root,
+            rowProperties.GetProperty(PartitionQueryMcpProtocol.Sources));
     }
 
     private static async Task VerifyLeavesAsync(JsonElement root, JsonElement schema)

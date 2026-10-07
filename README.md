@@ -338,40 +338,38 @@ The accepted tasks are **KL-007** storage codecs, **KL-010** document CRUD/CAS a
 source, including real process retries and task-specific SDK/MCP RF3 operations.
 Their acceptance does not qualify the remaining features or the complete cluster.
 
-The [latest completed Linux RF3 cohort](https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652868979)
-recorded **122/132**, with ten failed operations. Coverage collection and merge
-were skipped after that failure. The [same run's Linux verify job](https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652908001)
-passed normal and scalar **2,767/2,768** and recovery **235/235**, without skips.
-Its sole unit failure is an incorrect expected rejection in the C1 fixture; the
-correction passes locally and awaits fresh complete Linux verification.
-Local Stage V passed **99/99** owning unit
-operations in each mode and actual Aspire RF3 SDK/MCP admission, backup/restore
-and queue dispatch flows, in separately retained source/image cohorts.
+The [latest completed Linux RF3 cohort](https://github.com/managedcode/KeyLoad/actions/runs/37590715245/job/112691267500)
+recorded **151/158**, with seven failed operations. Coverage collection and merge
+were skipped after that failure. The [same run's Linux verify job](https://github.com/managedcode/KeyLoad/actions/runs/37590715245/job/112691308536)
+passed normal and scalar **2,771/2,771** and recovery **236/236**, without skips.
+These results bind to Stage VI commit `4c48909`; they do not qualify later edits.
+Stage VII has joined bounded Q2/AST2 relational INNER JOIN, real concurrent
+committed document/index scanning, strict native MCP schema oracles and exact
+functional contributor selection. The final full Release build and formatter
+pass with zero warnings, errors or source drift. Owning normal/scalar operations
+each pass **606/606**, and real indexed/idempotency process recovery passes
+**2/2**, with unchanged source/DLL/PDB identities and no skips. These are local
+owning subsets. New public Q2 RF3 and complete current-source Linux qualification
+remain open; the Stage VI results above predate these additions.
 
-Stage VI has joined whole-operation query-factory, indexed-document backup/dedup,
-scalar-index process-recovery and six-resource membership configuration work.
-A fresh isolated restore now selects all **264** package/version archives from
-NuGet.org with zero unresolved package/license inventory rows. The corrected
-compile-identity target passes actual native builds with both package-root forms
-and rejects a counterfeit defining import. The complete Release build and native
-formatter pass; owning native normal/scalar flows each pass **10/10**, and real
-indexed/idempotency process recovery passes **2/2**, without source/assembly drift
-or skips. These are focused local results; a new complete Linux run is required.
-Bounded Q2 relational INNER JOIN and a
-TUnit-owned fresh-image six-silo flow have frozen contracts and private source
-stages; neither is runtime-qualified yet. KL-075 scaling, full SQL/client protocol,
-complete Linux RF3, functional coverage, endurance and release gates remain open.
-The [implementation status](docs/implementation/status.json) retains original
-failures, source hashes and each qualification boundary.
+Three GPT-6.1 Sol workers prepare disjoint implementation and whole-operation
+verification batches while the integration owner runs stable compiled cohorts.
+The next reviewed source packets contain **52 JOIN rejection scenarios** and
+TUnit-owned fresh-image preparation/shutdown for standard RF3 and six silos;
+these packets have not been integrated or executed yet. Full SQL/client protocol,
+FK, KL-075 scaling, complete RF3, functional coverage, endurance and release gates
+remain open. The [implementation status](docs/implementation/status.json) retains
+original failures, source/report hashes and each qualification boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation
-flows only. The current Query profile binds exactly 25 named cases and 103 source
-files; fresh current-source coverage is pending. Scoped local KeyCodec coverage
-records **202/203 executable lines** across three files, with all19 native cases
-passing normal and scalar. Its branch coverage is unmeasured. The complete
-sixteen-module/RF3-server cohort remains unmeasured. See the
-[coverage contract](docs/Features/CodeQuality.md) for source/contributor binding,
-native report preservation and complete-operation test requirements.
+flows only. The current registry selects **94 contributors**: 41 normal, 41
+scalar, one recovery and eleven RF3 cases. Selection is not measured coverage.
+The first historical Query profile bound 25 cases and 103 source files. Scoped
+local KeyCodec coverage records **202/203 executable lines** across three files,
+with all 19 native cases passing normal and scalar; branch coverage is unmeasured.
+The complete sixteen-module/RF3-server product cohort remains **unmeasured**.
+See the [coverage contract](docs/Features/CodeQuality.md) for source/contributor
+binding, native report preservation and the required product-admission flow.
 
 | Ready to try (in source, covered by tests) | Still in progress |
 |---|---|
@@ -387,13 +385,13 @@ Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTre
 Native Orleans [runtime adoption](docs/Features/ClusterRouting/RuntimeAdoption.md)
 and [journal-backed Durable Jobs](docs/Features/ClusterRouting/RuntimeJournal.md)
 are being integrated. The source includes due-work wakeups, bounded telemetry,
-local lifecycle ownership and saga timeout jobs; current-source build and runtime
-qualification remain in progress. Native
+local lifecycle ownership and saga timeout jobs. The current solution build
+passes; complete native runtime qualification remains in progress. Native
 job restart/adoption and real SDK/MCP RF3 fault qualification remain open.
 
 Runtime timeouts, retries and resource limits use centrally validated typed options. The [configuration contract](docs/ADR/ADR-113-centralized-runtime-options.md)
-also covers the SDK, CLI and Aspire host; complete build and runtime verification
-of the current source remain pending.
+also covers the SDK, CLI and Aspire host. The full current solution builds;
+complete runtime and original Linux qualification remain pending.
 
 For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
 

@@ -46,7 +46,7 @@ internal sealed class PartitionQueryPublicContractTests
             valid with { Partitions = oversizedParts }));
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
             valid with { Query = valid.Query with { Explain = true } }));
-        var badAst = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { AstVersion = 2 }));
+        var badAst = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { AstVersion = 3 }));
         var badVersion = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Version = 2 }));
 
         await Assert.That(empty.Code).IsEqualTo(ErrorCode.Validation);

@@ -25,3 +25,20 @@ defines the exact selector, typed handoff, source/image admission, six actual
 container proof, SDK/MCP no-dispatch flow, failure joins and unchanged bounds.
 TASK-TUNIT-LOCAL-MEMBERSHIP-IMAGE freezes the ordered source/test stages there.
 The default GitHub route and Linux delivery gates remain mandatory.
+
+REQ-TUNIT-ENTRY-006: the explicit standard RF3 Q2/schema batch also owns fresh
+image preparation and cleanup through its native C# fixture. AC-TUNIT-ENTRY-006:
+the exact second selector, typed handoff, three actual container identities,
+eight whole operations, failure joins and source/image/cleanup bounds are frozen
+in ADR-119. TASK-TUNIT-LOCAL-RF3-IMAGE-006 maps to the existing native selection
+whole-process tests and these real SDK/official-MCP cases; it authorizes their
+current local runtime qualification while retaining the separate Linux gate.
+
+REQ-TUNIT-ENTRY-007: the fixture's real Docker CLI subprocess remains owned
+through cancellation and failure. AC-TUNIT-ENTRY-007: every started original
+process, exit wait and stdout/stderr reader settles before the helper returns
+or throws; preserve the initiating cancellation and all cleanup failures, and
+run a healthy native Docker inspection afterward. No detached timeout or
+synthetic Docker executable qualifies this operation. TASK-TUNIT-DOCKER-JOIN-007
+and its exact source/test stages are frozen in ADR-119. Local fixture evidence
+does not replace the original Linux RF3 and source/image gates.

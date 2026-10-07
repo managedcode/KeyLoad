@@ -13,6 +13,8 @@ namespace KeyLoad.Query;
 public sealed partial class QueryEngine
 {
     private const int InitialSequence = 0;
+    private const int DefaultDialectVersion = 1;
+    private const int JoinDialectVersion = 2;
     private const int FirstElementIndex = 0;
     private const string QueryCursorIsInvalidDetail = "The query cursor is invalid.";
     private const int InitialCursorOffset = 0;
@@ -59,8 +61,9 @@ public sealed partial class QueryEngine
     /// <returns>A bounded page with authorized continuation metadata.</returns>
     public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
-        => Execute(principalId, budget => new(request.Partition, new SqlParser(request.Sql, database.OperationLimitsOptions, executionOptions, budget).Parse(), request.Parameters,
-            request.AllowFullScan, request.Cursor), timeProvider, cancellationToken);
+        => Execute(principalId, budget => new(request.Partition,
+            new SqlParser(request.Sql, database.OperationLimitsOptions, executionOptions, budget, request.QueryDialectVersion).Parse(), request.Parameters,
+            request.AllowFullScan, request.Cursor, AstVersion: request.QueryDialectVersion == JoinDialectVersion ? JoinDialectVersion : DefaultDialectVersion), timeProvider, cancellationToken);
 
     /// <summary>Executes a bounded Q1.Search.v1 statement through the canonical graph-search engine.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
@@ -95,14 +98,13 @@ public sealed partial class QueryEngine
         }
         var hash = QueryHash(request);
         budget.Check();
-        return database.WithQueryView(principalId, request.Partition, query.Collection,
-            (view, principal, resource) => ExecuteView(view, principal, resource, request, hash, budget,
-                timeProvider ?? database.EvaluationClock));
+        return RelationalInnerJoinDispatch.Execute(this, principalId, request, hash, budget,
+            timeProvider ?? database.EvaluationClock);
     }
 
     internal static string QueryHash(AstQueryRequest request) => QueryRequestIdentity.Hash(request);
     internal void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)
-        => QueryFieldAuthorization.Validate(database, principal, resource, request);
+        => QueryFieldAuthorization.Bind(database, principal, resource, request);
     internal QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
     {
