@@ -125,3 +125,20 @@ failures remain visible and RF3/endurance/power-loss gates remain separate.
 Verification comprises the existing native source-ownership regressions,
 workflow static checks, and the original Linux artifacts. Rollback removes only
 the additive workflow receipt steps; no storage or runtime rollback is needed.
+
+TASK-KEYCODEC-COVERAGE-GAPS implements the existing REQ/AC-KEYCODEC-002/003 in
+StorageRecovery. Root freezes the source-bound199/203 local line baseline and
+reviews the final join; cli_static_collection Luna owns only
+`UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs`.
+First add independent persisted NaN/infinity, unterminated text/binary, invalid
+decimal digit and30-digit vectors to one whole rejection/unchanged-bytes/healthy
+roundtrip operation. Then build and execute the original native codec cases in
+normal/scalar mode and collect actual scoped coverage with unchanged source and
+test/product DLL/PDB identity. Root updates the real native case roster and
+retains current-source Linux normal/scalar and full recovery originals before
+KL-007 closure. Constant-only token files are executable-coverage N/A; a native
+report without branch outcomes cannot establish branch coverage. Keep the final
+decimal representability guard even if the preceding canonical-domain checks
+make it unreachable; coverage does not authorize altering the implementation or
+adding artificial private calls. Production storage/format/trust/topology and
+dependency changes are N/A. Rollback removes only the added regression flow.

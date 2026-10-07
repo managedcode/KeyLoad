@@ -319,3 +319,33 @@ response is introduced. Public API, persistence and dependencies are unchanged.
 Original failed assertions remain failures. Fix their owning schema/oracle only
 after actual payload evidence establishes the defect; no compatibility reader
 or permissive integer/nullability fallback is authorized.
+
+TASK-MCP-NATIVE-SCHEMA-ORACLE implements REQ/AC-CLIENT-006, AC-MCP-001 and
+REQ-GRAPH-010 / AC-GRAPH-009 using original876c run37546085722 input captures and
+the unchanged JsonDefaults.Web decoder/exporter. Root freezes and joins the
+ClientApi contract; ci_failure_evidence Luna owns only the existing
+IntegrationTests GraphIncomingMcpSchemaAssertions,
+PartitionQueryMcpSchemaAssertions and McpGraphPathInputSchemaAssertions.
+First review exact integer string/integer, Labels array/null and optional
+computed AtomicPartitionId string/null projections against native metadata.
+Then correct exact-set oracles, rejecting duplicates/extra types while retaining
+all required fields, item schemas, hints, bounded references and actual official
+SDK discovery/invocation flows. The four required PartitionRef constructor
+identity fields and recomputed authority are unchanged. Input/output use the
+same native exporter options; source review cannot qualify an uncaptured output
+execution. Root joins full build/quality review and actual Aspire RF3/Linux
+originals. No public API, persistence, topology, dependency or trust change,
+compatibility reader or permissive type fallback is introduced. Rollback restores
+only prior test oracles; original failed outcomes remain historical failures.
+
+TASK-MCP-NATIVE-FAILURE-CODE maps REQ/AC-CLIENT-006 and AC-MCP-003/005/007 to
+the existing official-client success/error flows. Root owns the ClientApi
+contract and join; ci_failure_evidence Luna changes only McpCallerAssertions.cs.
+Reuse the existing closed enum validation to append actual safe errorCode and
+its mapped HTTP status to the unchanged failed-success assertion, bounded below
+128 UTF-8 bytes. Unknown/malformed envelopes use fixed Unclassified text; no
+detail, result, request ID, credentials, new signature or alternate decoder.
+First review the native envelope, then build and execute real Aspire RF3 flows,
+retaining exact-source Linux originals. The known timeout failure remains
+unqualified until its actual cause and full saga outcomes are verified. No
+production/trust/persistence/dependency change. Rollback removes only the reason.

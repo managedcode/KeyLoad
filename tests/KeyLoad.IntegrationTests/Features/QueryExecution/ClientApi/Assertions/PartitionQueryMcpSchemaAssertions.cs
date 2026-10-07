@@ -95,8 +95,8 @@ internal static class PartitionQueryMcpSchemaAssertions
     {
         schema = Resolve(root, schema);
         await VerifyObjectAsync(schema, [.. PartitionFields, PartitionQueryMcpProtocol.AtomicPartitionId], PartitionFields);
-        await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
-            .GetProperty(PartitionQueryMcpProtocol.AtomicPartitionId), McpDiscoveryProtocol.String);
+        await VerifyExactTypeSetAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
+            .GetProperty(PartitionQueryMcpProtocol.AtomicPartitionId), McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null);
         foreach (var field in PartitionFields)
         { await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String); }
     }
@@ -151,6 +151,8 @@ internal static class PartitionQueryMcpSchemaAssertions
 
     private static bool HasType(JsonElement schema, string expected)
     {
+        if (expected == McpDiscoveryProtocol.Integer)
+        { return HasDirectType(schema, expected, allowNullType: false); }
         if (HasDirectType(schema, expected, allowNullType: false))
         { return true; }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
@@ -188,11 +190,29 @@ internal static class PartitionQueryMcpSchemaAssertions
         { return false; }
 
         var types = actual.EnumerateArray().ToArray();
+        if (!allowNullType && expected == McpDiscoveryProtocol.Integer)
+        {
+            return types.Length == 2 && types.All(item => item.ValueKind == JsonValueKind.String)
+                && types.Count(item => item.GetString() == expected) == 1
+                && types.Count(item => item.GetString() == McpDiscoveryProtocol.String) == 1;
+        }
         if (types.Length == 1)
         { return types[0].ValueKind == JsonValueKind.String && types[0].GetString() == expected; }
         return allowNullType && types.Length == 2
             && types.All(item => item.ValueKind == JsonValueKind.String)
             && types.Count(item => item.GetString() == expected) == 1
             && types.Count(item => item.GetString() == McpDiscoveryProtocol.Null) == 1;
+    }
+
+    private static async Task VerifyExactTypeSetAsync(JsonElement root, JsonElement schema, string first, string second)
+    {
+        schema = Resolve(root, schema);
+        var type = schema.GetProperty(McpDiscoveryProtocol.Type);
+        await Assert.That(type.ValueKind).IsEqualTo(JsonValueKind.Array);
+        var types = type.EnumerateArray().ToArray();
+        await Assert.That(types.Length).IsEqualTo(2);
+        await Assert.That(types.All(item => item.ValueKind == JsonValueKind.String)).IsTrue();
+        await Assert.That(types.Count(item => item.GetString() == first)).IsEqualTo(1);
+        await Assert.That(types.Count(item => item.GetString() == second)).IsEqualTo(1);
     }
 }

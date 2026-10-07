@@ -17,11 +17,44 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Projects and CI separated; full Release build, formatter, governance and focused Aspire regressions passed; full Linux suites remain unqualified",
+    "verificationStage": "R122 full Release build passed with zero drift/warnings/errors; current codec19 normal/scalar passed locally; original876c Linux full unit/scalar/recovery passed and RF3 failed15/155; fresh current-source complete Linux gates remain open",
     "remaining": [
-      "Complete exact-source Linux unit/scalar/recovery/RF3 qualification",
-      "Local complete suites remain failed/unqualified: Unix socket paths exceed the macOS limit; adaptive full-text fallback timed out; recovery native-text child arguments fail before the requested stage"
-    ]
+      "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
+      "Resolve actual RF3 failures; local focused diagnostics did not deploy because the intended server image setting was absent",
+      "Complete reviewed functional operation inventory and actual source-bound coverage; load/comparison/shape tests remain excluded"
+    ],
+    "latestOriginalLinux": {
+      "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+      "runId": 37546085722,
+      "unitPassed": 2763,
+      "unitTotal": 2763,
+      "scalarPassed": 2763,
+      "scalarTotal": 2763,
+      "recoveryPassed": 235,
+      "recoveryTotal": 235,
+      "rf3Passed": 140,
+      "rf3Total": 155,
+      "rf3Failed": 15,
+      "sameJobVerifyImageIdentityAvailable": false,
+      "qualification": "original historical source; current repairs require a fresh run",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
+    },
+    "currentBuild": {
+      "passed": true,
+      "compileInputs": 4111,
+      "inputDrift": 0,
+      "warnings": 0,
+      "errors": 0,
+      "logSha256": "f1ff5bb762236dd24d1d3eebd498d0df790d8d0bb792d9e96b456ce9c3499e15",
+      "qualification": "native local full Release build; runtime acceptance remains open"
+    },
+    "currentFormatter": {
+      "passed": true,
+      "compileInputs": 4111,
+      "inputDrift": 0,
+      "nativeExitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -194,7 +227,19 @@
     },
     "evidence": [
       "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
-    ]
+    ],
+    "currentNativeOracleStage": {
+      "tasks": [
+        "TASK-MCP-NATIVE-SCHEMA-ORACLE",
+        "TASK-MCP-NATIVE-FAILURE-CODE"
+      ],
+      "sourceJoined": true,
+      "canonicalBuildPassed": true,
+      "rf3Qualified": false,
+      "scope": "three original official-client schema oracles match exact native integer/string and nullable computed-field type sets; success assertions retain failure and expose only closed safe error code with mapped status",
+      "originalRf3Evidence": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722",
+      "remaining": "fresh official SDK discovery/query/incoming-graph operation flows and actual safe failure-code observation; no actual domain failure cause inferred"
+    }
   },
   "DATABASE-COMPOSITION-001": {
     "title": "Одна база для агентів: пов'язані моделі та SQL composition",
@@ -842,7 +887,7 @@
       },
       "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "remaining": [
-        "exact_owned_source_Linux_normal_and_scalar18_case_parity_and_ADR005_recovery_open_existing_store_evidence"
+        "exact_owned_source_Linux_normal_and_scalar19_case_parity_same_job_native_image_identity_and_ADR005_recovery_open_existing_store_evidence"
       ],
       "earlierDeliveredSource": {
         "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
@@ -879,9 +924,9 @@
           "AC-KEYCODEC-003",
           "AC-KEYCODEC-004"
         ],
-        "mappedCaseCount": 18,
+        "mappedCaseCount": 19,
         "ownedSourceClosureFiles": 33,
-        "ownedSourceClosureSha256": "428c81c5ba3db5f08bc79630fe18816fdc6d417ce12ecb89546d68579e327563",
+        "ownedSourceClosureSha256": "3cea58036b9e3889a917da3e457c13309856775455c8f4e3b7582f0acebea27c",
         "unrelatedSuiteFailuresCannotBeRelabelled": true,
         "separateProductGates": [
           "complete_storage_RF3",
@@ -902,13 +947,16 @@
         "mappedSkipped": 0,
         "ownedSourceClosureFiles": 33,
         "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
-        "currentOwnedSourceDrift": 0,
+        "currentOwnedSourceDrift": 1,
         "priorManifestMismatch": "sole UnitTests.csproj entry reflects benchmark-case ownership move; current frozen refresh matches all33 exact876c paths",
         "wholeRecoveryPassed": 235,
         "wholeRecoveryTotal": 235,
         "originalTestArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
         "independentCompiledImageReceiptAvailable": false,
-        "qualification": "original_Linux_full_normal_scalar_recovery_pass; same_job_compiled_image_task_identity_remains_open"
+        "qualification": "original_Linux_18_case_full_normal_scalar_recovery_pass; current19_case_source_and_same_job_compiled_image_task_acceptance_remain_open",
+        "currentOwnedSourceChangedPaths": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
+        ]
       },
       "previousOwnedSourceLinux": {
         "runIds": [
@@ -936,6 +984,31 @@
         "localPreparePassed": true,
         "localManifestSha256": "2f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09",
         "localVerifyPassed": true
+      },
+      "currentNativeOperationEvidence": {
+        "stage": "R121_actual_native19_case_flow_after922; final_R122_build_passed_with_unchanged33_owned_sources",
+        "normalPassed": 19,
+        "normalTotal": 19,
+        "scalarPassed": 19,
+        "scalarTotal": 19,
+        "skipped": 0,
+        "sourceInputs": 4112,
+        "assemblyInputs": 386,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "normalTrxSha256": "36c2672431c463a6642c97f234bacd86f2e6cc634fcbf3c4e93f78f66072a7d3",
+        "scalarTrxSha256": "46c08e6944c3eb199639ae39d2b17caf37df793f255cca87293c2bfe4e49c474",
+        "nativeCoverageSha256": "8cbe4b8d4389079ff80ce57e5b388d826b75a7da1167e56b5ec91ff4d74aa17b",
+        "coberturaSha256": "963e42d837b0264dba1d31dad927c72558c855505ea3826c6e0b0c3f0d8bd942",
+        "collectorVersion": "18.11.2",
+        "scopedCoveredExecutableLines": 202,
+        "scopedExecutableLines": 203,
+        "scope": "three executable KeyCodec files; two compile-time-constant token files have no executable lines",
+        "branchCoverage": "unmeasured; original native report contains no branch-outcome rows",
+        "remainingLine": "KeyCodecDecimal.cs:72 retained defensive parse guard; preceding domain checks appear to make it unreachable; source reasoning is not runtime coverage",
+        "analysisSha256": "291276377369bd23154af7f7f7f516873496c5bf708cbb0971b5600973eed9e0",
+        "linuxQualified": false,
+        "fullProductCoverageQualified": false
       }
     }
   },

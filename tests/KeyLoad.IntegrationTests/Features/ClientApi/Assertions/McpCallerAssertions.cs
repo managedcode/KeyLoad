@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using ManagedCode.Communication;
@@ -9,6 +10,8 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Verifies observable native SDK envelopes without replacing server behavior or exposing private failures.</summary>
 internal static class McpCallerAssertions
 {
+    private const int FailureReasonUtf8ByteLimit = 128;
+    private const string UnclassifiedMcpError = "MCP error Unclassified.";
     internal static ImmutableArray<string> ProblemFields { get; } =
     [McpCallerProtocol.ProblemType, McpCallerProtocol.ProblemTitle, McpCallerProtocol.ProblemStatus,
         McpCallerProtocol.ProblemDetail, McpCallerProtocol.ProblemCode];
@@ -29,13 +32,30 @@ internal static class McpCallerAssertions
             && Enum.IsDefined(parsed) && string.Equals(parsed.ToString(), actual, StringComparison.Ordinal)
             ? parsed.ToString() : "Unclassified";
 
+    private static string SafeMcpFailureReason(CallToolResult reply)
+    {
+        if (reply.StructuredContent is not { } envelope || envelope.ValueKind != JsonValueKind.Object
+            || !envelope.TryGetProperty(McpCallerProtocol.Error, out var problem)
+            || problem.ValueKind != JsonValueKind.Object
+            || !problem.TryGetProperty(McpCallerProtocol.ProblemCode, out var errorCode)
+            || errorCode.ValueKind != JsonValueKind.String)
+        { return UnclassifiedMcpError; }
+
+        var code = ClosedErrorCode(errorCode.GetString());
+        if (code == "Unclassified" || !Enum.TryParse<ErrorCode>(code, out var parsed))
+        { return UnclassifiedMcpError; }
+        var reason = string.Concat("MCP safe error code ", code, " status ",
+            Errors.Status(parsed).ToString(CultureInfo.InvariantCulture), ".");
+        return Encoding.UTF8.GetByteCount(reason) < FailureReasonUtf8ByteLimit ? reason : UnclassifiedMcpError;
+    }
+
     /// <summary>Requires the exact success wrapper, a nonempty execution GUID and a bounded native text summary.</summary>
     /// <typeparam name="T">The public canonical result type.</typeparam>
     /// <param name="reply">The actual official SDK response.</param>
     /// <returns>The canonical value and the operation's actual execution identifier.</returns>
     internal static async Task<McpCallReceipt<T>> SuccessAsync<T>(CallToolResult reply)
     {
-        await Assert.That(reply.IsError is true).IsFalse();
+        await Assert.That(reply.IsError is true).IsFalse().Because(SafeMcpFailureReason(reply));
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
         await VerifyKeysAsync(envelope, [McpCallerProtocol.Result, McpCallerProtocol.RequestId]);
         var id = envelope.GetProperty(McpCallerProtocol.RequestId).GetGuid();

@@ -1,13 +1,15 @@
 # BackupRestore
 
-TASK-SQLC-NATIVE-JOIN / AC-SQLC-011 under
-[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md) closes the omitted restore
-caller for ADR-060's two-argument native backup verifier. This remains the
-BackupRestore slice under REQ-BACKUP-002 / AC-BACKUP-002 and AC-IS-004. Root joins
-the existing private staged restore; BackupRestoreStagingJoinTests adds genuine
-absent/empty-target positive byte/source/readability/identity/pause/cleanup proof,
-with all delivered NativeBackupCut negatives and recovery checks retained.
-No new format or migration is defined; exact-source GitHub execution is pending.
+The native staged-restore caller remains in the BackupRestore slice under
+REQ-BACKUP-002 / AC-BACKUP-002. `BackupRestoreStagingJoinTests` directly invokes
+the native ZoneTree restore; despite its historical `AcSqlc011` method label, it
+does not execute a SQL client operation and is not evidence for AC-SQLC-011.
+Its absent/empty-target flows support AC-BACKUP-002 clean-target publication and
+the identity/paused-dispatch portion of AC-BACKUP-003, with byte/readability and
+cleanup assertions. They do not establish every old cursor/lease invalidation or
+operator-reconciliation requirement. Delivered NativeBackupCut negatives and
+recovery checks remain distinct. No new format or migration is defined;
+exact-source GitHub execution is pending.
 
 AC-CQ-018 preserves the complete original ManagedCode file-storage transfer byte
 oracle in ArtifactTests through ordered content equivalence under pinned TUnit.
@@ -70,13 +72,15 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | Requirement | Measurable acceptance | Existing or planned evidence |
 |---|---|---|
 | REQ-BACKUP-001: produce and package a verifiable offline backup | AC-BACKUP-001 passes when a backup includes its manifest/checksums, archives in bounded pieces, and round-trips canonical files. Separate planned resource verification must measure bounded streaming/peak-memory behavior before making a memory-bound claim. | Existing test source: `ArtifactTests.ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt` checks multi-piece round trip and copy. Planned real-file resource-bound verification; current GitHub TUnit qualification pending. |
-| REQ-BACKUP-002: restore only verified data to a clean target | AC-BACKUP-002 passes when a valid backup restores canonical data to a clean location; missing/tampered files and nonempty or unsafe destinations fail without publishing a usable partial database. | Authored real-operation source includes `CliBackupRestoreInvalidCatalogTests`, `CliBackupRestoreLengthMismatchTests`, `CliBackupRestoreMissingInputTests`, `CliBackupRestoreFlowTests`, `ArtifactTests`, and `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`. These cover noncanonical catalog rejection, actual rejected output restore, missing required inputs, nonempty destination, original-byte/state preservation, and healthy restore/reopen controls. Exact-source Linux execution remains pending; path-traversal/reparse-specific and resource-bound evidence remains distinct and open. |
+| REQ-BACKUP-002: restore only verified data to a clean target | AC-BACKUP-002 passes when a valid backup restores canonical data to a clean location; missing/tampered files and nonempty or unsafe destinations fail without publishing a usable partial database. | Authored real-operation source includes `CliBackupRestoreInvalidCatalogTests`, `CliBackupRestoreLengthMismatchTests`, `CliBackupRestoreMissingInputTests`, `CliBackupRestoreFlowTests`, `BackupRestoreStagingJoinTests`, `ArtifactTests`, and `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`. StagingJoin directly tests native ZoneTree restore into absent/empty targets and supports this AC's clean-target behavior; its `AcSqlc011` name does not make it an SQL-client test. These cases cover noncanonical catalog rejection, actual rejected output restore, missing required inputs, nonempty destination, original-byte/state preservation, and healthy restore/reopen controls. Exact-source Linux execution remains pending; path-traversal/reparse-specific and resource-bound evidence remains distinct and open. |
 | REQ-BACKUP-003: fence old identity and pause delivery after restore | AC-BACKUP-003 passes when restore produces a different incarnation, sets dispatch paused, and invalidates old cursor/lease identities until explicit operator reconciliation. | Existing `VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`; planned auth/feed/lease token invalidation and explicit resume integration cases. |
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
 | REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
 | REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | Authored complete real CLI flow: `CliBackupRestoreLengthMismatchTests.AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup`, plus `CliBackupRestoreMissingInputTests.AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair`; see TASK-BACKUP-UNPACK-PUBLICATION-001, TASK-BACKUP-CLI-MISSING-INPUT-002 and [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source and tests exist; actual execution and all required Linux qualification remain pending. |
 
 ### Functional CLI operation coverage
+
+`BackupRestoreStagingJoinTests.AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte` and `AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte` each have two trailing-separator cases. Their bodies directly call the native restore API, reopen the target, verify new identity/incarnation, paused dispatch, restored data and exact archive bytes. Map them to REQ-BACKUP-002 / AC-BACKUP-002 and the identity/pause portion of REQ-BACKUP-003 / AC-BACKUP-003 only. They do not exercise SQL, so the source's AC-SQLC-011 label is not an acceptance mapping. The cases do not close the complete cursor/lease fencing and operator reconciliation parts of AC-BACKUP-003. Their original native report rows remain failed-cohort historical evidence until current-source normal/scalar qualification.
 
 TASK-GENERAL-OPTIONS-RESTORE-INPUT-001 maps REQ-BACKUP-002 / AC-BACKUP-002 to
 `MissingBackupManifestTests`: the real embedded restore normalizes only a missing

@@ -42,6 +42,38 @@ internal sealed class KeyCodecMalformedContractTests
     }
 
     [Test]
+    public async Task PersistedMalformedScalarsPreserveBytesAndHealthyCompositeRoundTrips()
+    {
+        var repeatedPositiveDigits = string.Concat(Enumerable.Repeat("02", 30));
+        var repeatedNegativeDigits = string.Concat(Enumerable.Repeat("FD", 30));
+        var vectors = new[]
+        {
+            Convert.FromHexString("0132FFF0000000000000"), Convert.FromHexString("0132000FFFFFFFFFFFFF"),
+            Convert.FromHexString("0132FFF8000000000001"), Convert.FromHexString("01320007FFFFFFFFFFFE"),
+            Convert.FromHexString("015061"), Convert.FromHexString("016061"),
+            Convert.FromHexString("013102400B00"), Convert.FromHexString("013100BFF4FF"),
+            Convert.FromHexString("01310240" + repeatedPositiveDigits + "00"),
+            Convert.FromHexString("013100BF" + repeatedNegativeDigits + "FF")
+        };
+        foreach (var input in vectors)
+        {
+            var original = input.ToArray();
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => KeyCodec.Decode(input));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(failure.Message).IsEqualTo("Invalid encoded key.");
+            await Assert.That(input.SequenceEqual(original)).IsTrue();
+        }
+
+        object?[] expected = ["healthy\0key", 42L, -1234.50m, new byte[] { 0, 0xA5 }];
+        var decoded = KeyCodec.Decode(KeyCodec.Encode(expected));
+        await Assert.That(decoded.Length).IsEqualTo(expected.Length);
+        for (var index = 0; index < expected.Length; index++)
+        {
+            await KeyCodecNormalizedAssertions.AssertEquivalentAsync(expected[index], decoded[index]);
+        }
+    }
+
+    [Test]
     public async Task EmptyAndUnknownVersionsRemainFormatUnsupported()
     {
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode([]),

@@ -5,7 +5,7 @@
 The accepted [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#2026-10-04-v1-validation-and-ownership-completion)
 preserves valid durable key bytes and defines explicit normalization, arity and
 safe malformed-input errors. KL-007 maps to the four measurable criteria below,
-with 18 exact KeyCodec cases and the owning codec/native storage source closure.
+with19 exact KeyCodec cases and the owning codec/native storage source closure.
 Task closure requires all mapped cases on current-source Linux normal/scalar,
 matching identities and the ADR-005 recovery/open-existing-store CI check. A
 failure elsewhere remains a failed overall suite and cannot erase an independently
@@ -31,6 +31,40 @@ without a new collector, manifest schema, case subset or qualification gate.
 Retain failed suite outcomes; the complete recovery stage must still pass.
 Rollback removes only the additive receipt steps. Codec bytes, topology, suite
 scope, individual deadlines and all separately required product gates stay fixed.
+
+TASK-KEYCODEC-COVERAGE-GAPS extends the existing REQ/AC-KEYCODEC-002/003 rejection
+flows without changing the supported bytes or adding a new acceptance gate.
+The source-bound local native R117 report executes all18 existing cases and
+records199/203 lines across the three executable codec files. Its four uncovered
+lines are nonfinite persisted doubles, escaped payload exhaustion, decimal digit
+overflow and the final decimal representability guard. The two token files contain
+compile-time constants only and have no executable coverage denominator. The
+native report contains no branch-outcome rows: branch coverage is unmeasured.
+
+Root owns the evidence and joins; cli_static_collection Luna owns only
+`tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs`.
+Add a complete reject/unchanged-input/healthy-roundtrip flow using independent
+literal NaN/infinity, unterminated text/binary, invalid decimal digit and30-digit
+persisted vectors. Assert the existing exact typed safe error, unchanged input
+bytes and an exact valid composite roundtrip after rejection. Keep the final
+decimal guard and review the canonical digit/exponent/scale invariant; do not add
+private hooks or alter production code to force an unreachable defensive path.
+Root reviews the bounded test, builds, runs native normal/scalar and collects
+fresh native coverage with source/DLL/PDB identity. Obtain its actual case identity
+from the original runner and update the mapped case count; do not fabricate one.
+Current-source Linux normal/scalar and full recovery remain the closure gates.
+SDK/MCP/frontend/dependency changes are N/A. Rollback removes only this added
+regression flow; the original18 cases and all product gates remain mandatory.
+
+The added rejection/unchanged-bytes/healthy-roundtrip case passes in local native
+normal and scalar runs,19/19 in each with the same original identities and no
+source or DLL/PDB drift. Native scoped coverage records202/203 executable lines
+across the three codec files. The remaining line is the retained defensive decimal
+parse guard; the preceding canonical coefficient/exponent/scale checks imply an
+exact nonzero decimal with the required sign and scale. This is source reasoning,
+not an executed failure path. The two constant-only files remain executable N/A
+and branch coverage remains unmeasured. Current33-file/19-case Linux normal,
+scalar, compiled identity and full recovery evidence is still required.
 
 | Requirement | Measurable acceptance and owned TUnit mapping |
 |---|---|
@@ -234,16 +268,21 @@ null failure, rejected-commit and reopen obligation. This test-source correction
 does not change storage behavior or establish runtime qualification.
 
 REQ-STORAGE-010 maps AC-CQ-015 and AC-SQ-002/003/004/006/007 plus AC-REP-004 to
-the accepted preserving seven-file storage test-source stage. Existing real
-frame/checkpoint/scoped read/partition-host/lock/reopen assertions remain complete;
-deterministic bytes, awaited equivalent file APIs and cancellation completion,
-standard marker-exception constructors and cohesive internal types satisfy the
-enabled policy. The journal repair retains its real synchronous Flush(true)
-barrier through an awaited complete truncate/flush/dispose operation. Explicit
-IAtomicStore dispatch and view identity remain tested. Exact scope, acceptance,
-method/assertion audit, rollback and required GitHub proof are in CQ015's
-[CodeQuality](CodeQuality.md) acceptance and execution contract. ADR033/032 suffice for this
-test-source-only refinement; production/data/API/ownership contracts stay exact.
+the accepted preserving seven-file storage test-source stage. These references
+preserve the named implementation/source constraints; they do not establish
+provider behavior or any behavioral AC-SQ criterion. REQ-STORAGE-008 owns the
+functional ZoneTree provider contract, including AC-SQ-008; a source-preservation
+stage under REQ-STORAGE-010 is not evidence that AC-SQ-008 has passed. Existing
+real frame/checkpoint/scoped read/partition-host/lock/reopen assertions remain
+complete; deterministic bytes, awaited equivalent file APIs and cancellation
+completion, standard marker-exception constructors and cohesive internal types
+satisfy the enabled policy. The journal repair retains its real synchronous
+Flush(true) barrier through an awaited complete truncate/flush/dispose operation.
+Explicit IAtomicStore dispatch and view identity remain tested. Exact scope,
+acceptance, method/assertion audit, rollback and required GitHub proof are in
+CQ015's [CodeQuality](CodeQuality.md) acceptance and execution contract. ADR033/032
+suffice for this test-source-only refinement; production/data/API/ownership
+contracts stay exact.
 
 Node-local journals, owned values, committed read cuts, checkpoint/recovery and
 bounded provider work. [ADR-035](../ADR/ADR-035-memory-performance.md) defines the
@@ -373,6 +412,12 @@ flowchart LR
 
 This feature and its linked ADRs define the precise pass/fail conditions, disjoint ownership, rollout, rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
 
+
+### Current case-to-acceptance clarifications
+
+The protected-principal cases in `tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/PartitionHostRecoveryTests.cs` map to REQ-AUTH-002 / AC-AUTH-002 in [Authorization](Authorization.md): the real pending-image path rejects missing/modified protected state on repeated host-open attempts and accepts a valid protected principal after installation. The same cases support REQ-STORAGE-004 / AC-REP-004 for the physical host's verified pending-image recovery and ownership path. They are local host/store evidence, not quorum or RF3 evidence, and are not generic format-corruption cases.
+
+`OfflineRegularFileEntryTypeTests`, `OfflineRegularFileIdentityTests`, `OfflineRegularFileLockTests` and `OfflineRegularFileDuplicateLockTests` carry the obsolete source label `AC-EPOCH-012`. Their observed regular-entry, identity, BCL lock-interoperation and native-handle lifetime behavior is supporting primitive evidence for current REQ-STORAGE-015 / AC-SG009P-001..004. These methods do not invoke the guarded Release CrashHost protocol; they cannot establish the complete AC-SG009P process, strict-request, receipt, or original-reader settlement contract by themselves. The exact method-by-method observed claims and this limitation are recorded in the case-level traceability proposal.
 
 REQ-STORAGE-015 also maps AC-SG009P-001..004 / TASK-ISO-SG009P-C/T/R/I under
 ADR-059. Canonical directory is lexical normalized ordinal equality, without a

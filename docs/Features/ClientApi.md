@@ -242,3 +242,42 @@ and uploaded `artifacts/qualification/mcp-schema-evidence/` ownership. Root owns
 contract, review, native RF3 evidence and delivery; a Luna worker prepares the
 guarded helper/calls. Schema capture alone is diagnostic evidence, not a passing
 operation or an authorization to relax assertions or alter production schemas.
+
+TASK-MCP-NATIVE-SCHEMA-ORACLE repairs the three test observations established by
+the original876c official-client captures in run37546085722. It retains
+REQ/AC-CLIENT-006, AC-MCP-001 and REQ-GRAPH-010 / AC-GRAPH-009. JsonDefaults.Web
+accepts quoted integers and the native schema projection copies those options;
+integer schemas therefore have the exact string/integer type set. Nullable
+Labels has the exact array/null set with string items. PartitionRef's optional
+computed AtomicPartitionId is getter-only: its captured string/null input
+projection cannot supply authority or replace the four required constructor
+identity fields. Their required set and the computed output value remain fixed.
+
+Root owns the contract and joins. ci_failure_evidence Luna owns only
+GraphIncomingMcpSchemaAssertions, PartitionQueryMcpSchemaAssertions and
+McpGraphPathInputSchemaAssertions in their current IntegrationTests slices.
+Compare exact allowed sets, rejecting duplicates and extra types; distinguish
+the optional computed metadata field from required identity strings. Preserve
+all property/required-member/item/effect-hint/catalog checks and native official
+client flows. Native output uses the same unchanged exporter options; review its
+current source shape and retain output execution as unqualified until the actual
+RF3 flow passes. No production schema, decoder, public contract, dependency or
+trust change is authorized by this test repair. Root builds, reviews, executes
+the real Aspire RF3 SDK flows and retains exact-source Linux original reports.
+Rollback removes only the oracle corrections, preserving captured failure
+evidence and every mandatory suite. UI/storage changes are N/A.
+
+TASK-MCP-NATIVE-FAILURE-CODE supports REQ/AC-CLIENT-006 and AC-MCP-003/005/007
+after the original876c saga-timeout RF3 invocation returned IsError without its
+safe classification in the failed assertion. Root freezes and joins; a Luna
+worker owns only IntegrationTests/Features/ClientApi/Assertions/McpCallerAssertions.cs.
+The existing SuccessAsync assertion may read only the actual StructuredContent
+errorCode, reuse its closed canonical enum validation and append that code with
+the mapped HTTP status. Malformed/unknown envelopes produce fixed Unclassified
+text. Keep the reason below128 UTF-8 bytes; never print detail, result, request ID,
+tool arguments or credentials. No parallel Problem decoder, changed signatures,
+guessed expected code or relaxed success/error assertions. The original test
+identity/call-site supplies operation context; CallToolResult contains no tool
+name. Root builds and retains actual official-client Aspire RF3/Linux outcomes;
+this observation cannot qualify the saga or repair its unknown initiating cause.
+Production/format/dependency changes are N/A. Rollback removes only this reason.
