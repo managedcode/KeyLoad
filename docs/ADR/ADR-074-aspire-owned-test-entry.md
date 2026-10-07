@@ -43,6 +43,28 @@ contract, join, solution build and evidence; a Luna worker owns only those two
 file relocations and the comparison project change. No new tests are needed for
 a byte-preserving move; retain existing discovery/assertions and required gates.
 
+## Native local-image context realization
+
+TASK-TEST-LOCAL-CONTEXT-REALIZATION implements the existing REQ/AC-TEST-015
+immutable-context and owned-cleanup requirements; ADR-117 supplies the current
+native TUnit entry and fixture infrastructure ownership. The producer must not
+build from a mutable checkout after merely hashing it. Root owns the contract
+and final joins; unpack_atomicity Luna owns local-image-context.mjs, the new
+local-image-snapshot.mjs, local-server-image.mjs and the single real TUnit/Node
+LocalRf3ImageContextSnapshotTests.cs under their existing TestInfrastructure slice.
+
+Stages: admit existing exact COPY metadata and20,000-file/512-MiB limits; stream
+regular no-follow/stat-checked files into an exclusive owned snapshot with exact
+modes and an actual copied-byte digest; build only that snapshot; settle producer
+and readers; clean the owned snapshot. Test genuine filesystem rejection, copy,
+original mutation, unchanged snapshot, cleanup and healthy reuse without a fake
+Docker path. Root then builds/verifies a real image and executes the original
+Aspire RF3 SDK/MCP flows. Cleanup of a proven owned tag remains possible after
+checkout edits; current-source validation before database startup stays strict.
+No new receipt, package, topology, API or database format. Rollback removes only
+this cohesive implementation and cannot qualify the retired mutable-context
+behavior. Full source-bound Linux and every existing gate remain required.
+
 ## Decision and boundaries
 
 `KeyLoad.AppHost --KeyLoadTests:Suite=<suite>` composes one actual Aspire

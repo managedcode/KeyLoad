@@ -20,6 +20,25 @@ shutdown joining. Do not introduce another database or move storage ownership.
 | REQ-CUT-003: owned bytes and runtime lifetime | AC-CUT-003: native CurrentKey/CurrentValue are immediately copied before user callbacks; logical values retain existing native header stripping. No view/native iterator/native memory/signing key is returned. Only one active traversal uses a lease; concurrent/reentrant traversal fails explicitly. Sequential prefix visits preserve the same snapshot and cumulative limits. Dispose closes admission and joins actual traversal/leases before tree shutdown, releases iterator before its slot, and preserves primary plus cleanup failures. Repeated disposal never releases a live iterator's slot or closes a settled handle again. Whole-tree snapshot installation rejects ResourceExhausted before mutation while a lease is active; ordinary compaction preserves the leased tree. Actual callback overlap, store shutdown, cancellation, replacement rejection and reopen are covered by `NativeReadCutLifetimeTests` and `NativeReadCutReplacementTests`. |
 | REQ-CUT-004: exact provider limitations and unchanged authority | AC-CUT-004: capture uses pinned ZoneTree `IteratorType.Snapshot`, not a durable checkpoint or replica image. It is not restartable or a token authority. No WAL, canonical record, native format, public wire, cache authorization or replication acknowledgement changes. Complete Aspire unit/scalar/recovery/RF3 and exact-source Linux gates remain required. |
 
+TASK-CUT-SHUTDOWN-STATE strengthens the existing AC-CUT-003 shutdown/reopen
+oracle as supporting KL-008 lifetime evidence. The existing real traversal,
+cancellation and original-task joining already execute; a non-null reopened
+value alone does not establish exact state preservation. Root owns integration
+and evidence; ci_failure_evidence Luna owns only
+`UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs` and, if
+needed for the existing200-line type bound, one new cohesive
+`Assertions/NativeReadCutStoreStateAssertions.cs` in the same slice. Preserve
+every original callback, task, cancellation, deadline and cleanup assertion.
+Capture the actual committed bytes, position and complete StoreIdentity before
+shutdown; after joined disposal/reopen assert those exact values, including
+signing-key bytes. Commit and read a distinct healthy value, then reopen again
+and assert the updated value/position with unchanged identity. No fake native
+failure, new hook or added duplicate shutdown scenario. Root builds, runs native
+normal/scalar and the owning real storage flows, then retains original Linux
+normal/scalar/recovery evidence. No format, dependency, public API or RF3 contract
+change; rollback removes only this stronger oracle. This does not qualify the
+helper-only aggregate-exception test as a product-operation contributor.
+
 Capture is synchronous and native snapshot freeze/rotation and `Next` have no
 cancellation API. Elapsed checks detect and reject overruns after those calls;
 they do not interrupt a blocked native call or promise a hard wall-time bound.

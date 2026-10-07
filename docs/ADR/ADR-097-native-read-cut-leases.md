@@ -46,6 +46,20 @@ read/write gate rejects before state changes or waiting. Sequential prefix visit
 share one snapshot, one active traversal and cumulative record/byte/advance/time
 budgets; returned counters describe cumulative work across every visit.
 
+TASK-CUT-SHUTDOWN-STATE maps existing REQ/AC-CUT-003 to stronger exact-state
+oracles in the already executing shutdown/reopen case, as KL-008 lifetime
+evidence. Root owns integration; ci_failure_evidence Luna owns only existing
+NativeReadCutLifetimeTests.cs and, if numeric limits require it, one cohesive
+NativeReadCutStoreStateAssertions.cs under StorageRecovery/Assertions.
+Preserve original traversal/cancellation/join/deadline/cleanup behavior. Capture
+committed bytes/position/full identity, assert them after joined shutdown and
+reopen, perform a healthy write/read, reopen again and assert updated state with
+the original identity. No hook, fake failure or duplicated lifetime scenario.
+Root reviews/builds and runs native normal/scalar plus the owning real-provider
+flows, retaining exact-source Linux recovery and original source/image evidence.
+No package, format, public API or topology change; rollback removes only the
+stronger test oracle. Other KL-039 and product gates remain independently open.
+
 L2-B remains responsible for same-cut outbox/policy/applied metadata and retention,
 ordered delta catch-up, validated catalog switch and interrupted-build recovery.
 Neither this primitive nor L1 leased generations alone closes the original

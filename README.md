@@ -335,23 +335,21 @@ Discovery exposes static operation documentation. Each invocation checks current
 The original 104-task plan has **0 fully accepted, 104 in progress and 0 pending**.
 KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
 fanout, recovery and movement acceptance remains open. The joined stage has
-passed the local Release build with zero analyzer errors and warnings. The current
-native process-recovery suite passed **235/235**, with no skips. The latest full
-uninstrumented unit report passed **2,763/2,763**. The [original Linux run at
-876c5237](https://github.com/managedcode/KeyLoad/actions/runs/37546085722)
-also passed normal and scalar **2,763/2,763** and recovery **235/235** without skips.
-The subsequent RF3 bootstrap admission and membership-image assertion fixes pass
-the local Release build and focused normal/scalar tests; their complete current-source
-reruns remain open. RF3, functional coverage, scale and release qualification remain
+passed the local Release build with zero analyzer errors and warnings. The
+[original Linux run at 922a9f39](https://github.com/managedcode/KeyLoad/actions/runs/37550611380)
+passed normal and scalar **2,764/2,764**, recovery **235/235** and same-job native
+source/test-image identity verification, without skips. Later native codec and
+cross-process ownership regressions pass locally; their original Linux results
+remain pending. RF3, functional coverage, scale and release qualification remain
 open. The [implementation status](docs/implementation/status.json) records each
 source and report boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation
 flows only. The current Query profile binds exactly 25 named cases and 103 source
-files; fresh current-source coverage is pending. The earlier local prototype
-passed normal/scalar modes and measured 773 of 3,540 lines and 451 of 2,372 branches;
-those historical reports do not qualify the later source or the complete
-sixteen-module/RF3-server cohort, whose coverage remains unmeasured. See the
+files; fresh current-source coverage is pending. Scoped local KeyCodec coverage
+records **202/203 executable lines** across three files, with all19 native cases
+passing normal and scalar. Its branch coverage is unmeasured. The complete
+sixteen-module/RF3-server cohort remains unmeasured. See the
 [coverage contract](docs/Features/CodeQuality.md) for source/contributor binding,
 native report preservation and complete-operation test requirements.
 

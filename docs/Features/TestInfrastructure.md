@@ -56,8 +56,9 @@ Local entry runs are development evidence; delivered-source Linux gates remain.
 REQ-TEST-015 / AC-TEST-015 extends [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md)
 with an explicit `KeyLoadTests:LocalRf3Image:Enabled=true` development mode,
 accepted only with `Suite=rf3` and an explicit nonblank bounded development filter.
-The outer AppHost owns a bounded executable image
-preparation resource and the native TUnit runner waits for its successful completion.
+Following the owner's native-entry correction in ADR-117, image preparation is
+bounded prerequisite work for the native TUnit fixtures; it cannot launch an
+outer AppHost test runner or execute database workloads.
 The tested child AppHost owns exactly three Docker nodes, readiness, discovered
 SDK/MCP endpoints, scoped faults and complete shutdown; no idle outer cluster is
 created. Unknown, non-RF3, protocol-cohort or mixed GitHub/local modes reject before
@@ -97,6 +98,27 @@ original Docker build-output tail remain available for diagnosing failure.
 Retain the original development receipt and native test reports. Local results cannot
 qualify delivered-source Linux CI, registry image provenance or website metrics;
 the existing GitHub image producer and verifiers remain mandatory and unchanged.
+
+TASK-TEST-LOCAL-CONTEXT-REALIZATION implements this existing REQ/AC-TEST-015
+snapshot and cleanup contract. Root freezes and owns the joins; unpack_atomicity
+Luna owns only `scripts/Features/TestInfrastructure/local-image-context.mjs`,
+the new cohesive `local-image-snapshot.mjs`, `local-server-image.mjs` and
+`tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/LocalRf3ImageContextSnapshotTests.cs`.
+First admit the exact existing input metadata and limits, then stream admitted
+regular files into an exclusive invocation context with no-follow/stat checks,
+preserving paths and file/directory modes. Hash the bytes actually copied; retain
+no unbounded array of input buffers. Build Docker only from this context, join
+the original producer and readers, and remove only the owned snapshot after
+settlement. Image cleanup uses original receipt/daemon identity rather than
+mutable checkout bytes; startup verification still rejects changed current inputs.
+The real TUnit/Node filesystem flow rejects a symlink without publishing a partial
+snapshot, creates the bounded context, changes the original input, verifies the
+frozen copy/digest/modes, cleans it and successfully repeats the operation. No
+fake Docker, source-text tests or bound change. Root then prepares an actual
+image and verifies real Aspire RF3 clients/cleanup; filesystem proof alone cannot
+qualify Docker or Linux delivery. Dependencies, receipt schema, default GitHub
+path and database contracts remain unchanged. Rollback removes this helper/join
+as one unit and cannot admit a mutable-context build as compliant.
 
 TASK-TEST-LOCAL-RF3-CONTRACT (root) precedes TASK-TEST-LOCAL-RF3-IMAGE
 (dependency_closeout). The worker owns AppHost Features/TestInfrastructure local

@@ -80,6 +80,41 @@ UnitTests/Features/StorageRecovery. Root owns this spec, ADR/task graph and fina
 evidence. Physical placement, apply/replication/native WAL authority and public
 JSON stay unchanged. UI/SDK/MCP schema work N/A: no new wire operation.
 
+## KL-008 distinct-process storage ownership
+
+REQ-STORAGE-008 includes the KL-008 exclusive physical-owner requirement in the
+architecture backlog. AC-STORAGE-OWNER-001 makes that existing requirement
+measurable: while a parent owns a real current-format ZoneTreeStore, an actual
+Release CrashHost existing-store inspection in a separate process fails with the
+existing safe IOException receipt. The child and both original output readers
+must settle before inspection returns. Identity bytes, committed value and
+position remain exact, and the parent can commit and read a subsequent value.
+A second child is still denied while that parent is open. After actual parent
+disposal, child inspection and ordinary parent reopen succeed with the exact
+identity, updated value and position. Retain readable canonical journal bytes
+across denied opens; do not force reads through the active exclusive lock handle
+or require asynchronously maintained physical tree files to stay unchanged.
+
+TASK-STORAGE-OWNER-PROCESS is test-first under
+[ADR-046](../ADR/ADR-046-storage-private-owners.md). Root owns this criterion,
+source/evidence joins and delivery. The unpack_atomicity Luna worker owns one new
+`tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StorageOwnerProcessTests.cs`
+and reuses the existing ZoneTreeExistingStoreFixture, inspector process and safe
+receipt assertions. Keep its real30-second child deadline,8-KiB output bounds,
+strict protocol, outer node-owner lock and original exit/readers cleanup. No
+fake parent rejection, new child variant, production hook, swallowed failure or
+deadline increase. If existing APIs cannot express the flow, report the exact
+additional file scope before implementation.
+
+Root reviews and joins the bounded packet, builds, runs the original native
+normal/scalar ownership flows and collects actual storage-module coverage.
+Current-source Linux normal/scalar and complete recovery qualify this criterion;
+the other KL-008 lease/maintainer/pool requirements and full StorageRecovery RF3,
+endurance and power-loss gates remain mandatory. SDK/MCP/frontend/dependency,
+format and rollout changes are N/A: this adds regression evidence only. Rollback
+removes only the new test. This criterion does not mark the broad AC-SQ-001..008
+group or the whole task passed.
+
 ## Current-format storage and restore contract
 
 The single supported native format, current restore authority, strict rejection

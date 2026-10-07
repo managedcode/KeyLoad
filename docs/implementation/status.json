@@ -40,20 +40,36 @@
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
     },
     "currentBuild": {
-      "passed": true,
-      "compileInputs": 4111,
+      "compileInputs": 4112,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "f1ff5bb762236dd24d1d3eebd498d0df790d8d0bb792d9e96b456ce9c3499e15",
-      "qualification": "native local full Release build; runtime acceptance remains open"
+      "logSha256": "fe030e4f12333033052093ddb025a37640d2ffebf058dc9b7f5d159f1ffa0bbb",
+      "passed": true,
+      "qualification": "native local full Release build; runtime and Linux task acceptance remain open"
     },
     "currentFormatter": {
-      "passed": true,
-      "compileInputs": 4111,
+      "compileInputs": 4112,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "latestVerifiedNativeLinux": {
+      "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
+      "runId": 37550611380,
+      "jobId": 112564950216,
+      "normalPassed": 2764,
+      "normalTotal": 2764,
+      "scalarPassed": 2764,
+      "scalarTotal": 2764,
+      "recoveryPassed": 235,
+      "recoveryTotal": 235,
+      "failed": 0,
+      "skipped": 0,
+      "sameJobSourceImageIdentityPassed": true,
+      "rf3": "pending_at_original_verify_artifact_capture",
+      "qualification": "original completed Linux verify job; current added codec/owner tests need their own source-bound original outcomes",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
     }
   },
   "TIME-PROVIDER-001": {
@@ -938,9 +954,10 @@
       },
       "latestOwnedSourceLinux": {
         "runIds": [
-          "37546085722"
+          "37550611380"
         ],
-        "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+        "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
+        "verifyJobId": 112564950216,
         "mappedCaseCount": 18,
         "normalPassed": 18,
         "scalarPassed": 18,
@@ -948,15 +965,29 @@
         "ownedSourceClosureFiles": 33,
         "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
         "currentOwnedSourceDrift": 1,
-        "priorManifestMismatch": "sole UnitTests.csproj entry reflects benchmark-case ownership move; current frozen refresh matches all33 exact876c paths",
-        "wholeRecoveryPassed": 235,
-        "wholeRecoveryTotal": 235,
-        "originalTestArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
-        "independentCompiledImageReceiptAvailable": false,
-        "qualification": "original_Linux_18_case_full_normal_scalar_recovery_pass; current19_case_source_and_same_job_compiled_image_task_acceptance_remain_open",
         "currentOwnedSourceChangedPaths": [
           "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
-        ]
+        ],
+        "wholeNormalPassed": 2764,
+        "wholeNormalTotal": 2764,
+        "wholeScalarPassed": 2764,
+        "wholeScalarTotal": 2764,
+        "wholeRecoveryPassed": 235,
+        "wholeRecoveryTotal": 235,
+        "originalTestArtifactId": 11453513011,
+        "originalTestArtifactSha256": "f5e4987a00e88757ee0a070ce8e4dbe9444367823ad7e719fb2df4337e879950",
+        "normalTrxSha256": "fdd8df079e08d9447e4a151b6ee7049a00a54c74bdf3b9023da9678f3f22e94d",
+        "scalarTrxSha256": "aa29ccea657a9184327a7b1e91cf2e79aa1d724a432e5d274d76ca5bba9787d2",
+        "recoveryTrxSha256": "2c77109dc98aa6330e3b298634d241658a8f4dd5ce65fcb7eb6eff6fcfd9fa61",
+        "independentCompiledImageReceiptAvailable": true,
+        "sameJobSourceAndImageVerifyPassed": true,
+        "productionSourceManifestSha256": "a6cca1a13764229e37eaea1e29497bd86de6ca871cab4244c5945ad7dd1cc8a6",
+        "unitImageManifestSha256": "d640fd5aa2be6bc5ac570cb04abb21e9f9fdd2de9d226851510990904c9182a3",
+        "recoveryImageManifestSha256": "8681a2d02e3d66429151f7f51102701ce481cd41e2975bad3069c831d36a3993",
+        "ownedSourceRowsBound": 33,
+        "ownedSourceRowsMismatched": 0,
+        "qualification": "original_Linux_all18_mapped_cases_full_normal_scalar_recovery_and_same_job_source_image_identity_pass; current19_case_source_requires_its_original_Linux_result",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
       },
       "previousOwnedSourceLinux": {
         "runIds": [
@@ -980,10 +1011,13 @@
         "adr": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "workflow": ".github/workflows/build-and-tests.yml",
         "implementation": "existing production/native-test source manifest prepare after Release build and verify after original full normal/scalar/recovery, retained by always uploader",
-        "deliveredRuntimeQualified": false,
+        "deliveredRuntimeQualified": true,
         "localPreparePassed": true,
         "localManifestSha256": "2f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09",
-        "localVerifyPassed": true
+        "localVerifyPassed": true,
+        "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
+        "runId": 37550611380,
+        "qualification": "original same-job native source/test-image receipt preparation and verification passed; this qualifies receipt retention, not current19-case task acceptance"
       },
       "currentNativeOperationEvidence": {
         "stage": "R121_actual_native19_case_flow_after922; final_R122_build_passed_with_unchanged33_owned_sources",
@@ -1009,6 +1043,28 @@
         "analysisSha256": "291276377369bd23154af7f7f7f516873496c5bf708cbb0971b5600973eed9e0",
         "linuxQualified": false,
         "fullProductCoverageQualified": false
+      },
+      "priorOwnedSourceLinuxAt876c": {
+        "runIds": [
+          "37546085722"
+        ],
+        "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+        "mappedCaseCount": 18,
+        "normalPassed": 18,
+        "scalarPassed": 18,
+        "mappedSkipped": 0,
+        "ownedSourceClosureFiles": 33,
+        "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
+        "currentOwnedSourceDrift": 1,
+        "priorManifestMismatch": "sole UnitTests.csproj entry reflects benchmark-case ownership move; current frozen refresh matches all33 exact876c paths",
+        "wholeRecoveryPassed": 235,
+        "wholeRecoveryTotal": 235,
+        "originalTestArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
+        "independentCompiledImageReceiptAvailable": false,
+        "qualification": "original_Linux_18_case_full_normal_scalar_recovery_pass; current19_case_source_and_same_job_compiled_image_task_acceptance_remain_open",
+        "currentOwnedSourceChangedPaths": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
+        ]
       }
     }
   },
@@ -1018,8 +1074,69 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
-      "docs/implementation/durability-audit.md"
-    ]
+      "docs/implementation/durability-audit.md",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StorageOwnerProcessTests.cs"
+    ],
+    "qualification": {
+      "sourceStage": "TASK-STORAGE-OWNER-PROCESS_real_parent_live_owner_two_denied_children_healthy_write_dispose_child_success_exact_reopen_joined",
+      "requirements": [
+        "REQ-STORAGE-008",
+        "REQ-CUT-003",
+        "REQ-KEYCODEC-004"
+      ],
+      "criteria": [
+        "AC-STORAGE-OWNER-001",
+        "AC-CUT-003",
+        "AC-KEYCODEC-004"
+      ],
+      "canonicalBuildPassed": true,
+      "canonicalFormatterPassed": true,
+      "runtimeQualified": false,
+      "currentBuild": {
+        "compileInputs": 4112,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "fe030e4f12333033052093ddb025a37640d2ffebf058dc9b7f5d159f1ffa0bbb",
+        "passed": true,
+        "qualification": "native local full Release build; runtime and Linux task acceptance remain open"
+      },
+      "currentFormatter": {
+        "compileInputs": 4112,
+        "inputDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "localNativeOperationEvidence": {
+        "ownerNormalPassed": 1,
+        "ownerNormalTotal": 1,
+        "ownerScalarPassed": 1,
+        "ownerScalarTotal": 1,
+        "skipped": 0,
+        "ownerNormalTrxSha256": "9355f4b4b5b84477b7028d486e14e262c00fb7754bf9a6c56a1057daf70b6a0f",
+        "ownerScalarTrxSha256": "056a6e1ede141877d3ebe1f0647701327ee7251f31ab1b59688dd6b21b0856c3",
+        "sourceInputs": 4113,
+        "unitAndCrashHostAssemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "selectedWholeStorageOperationsPassed": 32,
+        "selectedWholeStorageOperationsTotal": 32,
+        "operationCoverageTrxSha256": "636a5d1536668cc2a12cd3c6c3b4f116e76613ea58da8b4034665557e53eaf04",
+        "nativeCoverageSha256": "31d634be1ccfcab8a386a9c4a83e8b0796c4a8ec94d801b030d54061268e1850",
+        "coberturaSha256": "f84e6eceee577aaf8c531a40a74c07ff74f31f940bb5c580b603f15b8049ad32",
+        "collectorVersion": "18.11.2",
+        "settingsSha256": "f40d786e96dc4b6dbe9eb74a3f0880d150d0201d4d5408c22c39dad9401daa29",
+        "excludedHelperOnlyClass": "NativeReadCutCleanupTests",
+        "childSourceCoverage": "unmeasured; original local collector has zero ExistingStore/cleanup path hits despite successful real CrashHost operations; zero hits cannot be relabelled as untested behavior",
+        "branchCoverage": "unmeasured; original native report contains no branch-outcome rows",
+        "qualification": "actual selected local whole-operation development, not full product coverage or Linux acceptance"
+      },
+      "remaining": [
+        "Current-source Linux normal/scalar real distinct-process ownership and full recovery with native source/test-image identity",
+        "Strengthen existing joined read-cut shutdown case with exact bytes/position/full identity and a healthy write/reopen; no duplicate shutdown scenario",
+        "Bind actual native maintainer shutdown ownership and pooled-buffer operation criteria before whole KL-008 acceptance; full StorageRecovery RF3/endurance/power-loss remain separate mandatory gates"
+      ]
+    }
   },
   "KL-009": {
     "title": "Partition writer і command envelope",

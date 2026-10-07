@@ -36,6 +36,27 @@ helpers together after drain; retain the regression and native failure evidence.
 The decision remains Accepted until actual qualification; process kills do not
 qualify power-loss durability.
 
+## Distinct-process owner regression
+
+TASK-STORAGE-OWNER-PROCESS maps REQ-STORAGE-008 to the existing KL-008 requirement
+and measurable AC-STORAGE-OWNER-001 in StorageRecovery. Current same-process
+StoreLifetime contention and sequential CrashHost reopen tests do not establish
+simultaneous distinct-process exclusion. Root freezes the acceptance before code;
+unpack_atomicity Luna owns only the new StorageRecovery/Cases/
+StorageOwnerProcessTests.cs and reuses the existing real Release inspector.
+
+Ordered stages are: hold the actual parent store; launch and settle a denied
+child with exact safe I/O failure and unchanged canonical identity/journal/value/
+position; verify a healthy parent commit/read; reject and settle another child;
+dispose the parent; verify successful child inspection and exact ordinary reopen.
+Preserve original process, pipe, outer-owner and deadline bounds. Root reviews,
+joins, builds and executes native normal/scalar plus current-source Linux full
+recovery, retaining source, compiled identity and original native receipts. Native
+storage-module coverage is supporting evidence; all other lifetime and product
+gates stay open until actually qualified. No production, format, dependency,
+public API or deployment change is permitted by this test-only stage. Rollback
+removes only the added regression.
+
 ## Decision
 
 Preserve the public ZoneTreeStore facade and every format/caller contract. Compose
