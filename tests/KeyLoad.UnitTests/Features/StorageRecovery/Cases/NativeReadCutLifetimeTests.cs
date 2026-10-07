@@ -1,3 +1,5 @@
+using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class NativeReadCutLifetimeTests
@@ -81,7 +83,13 @@ internal sealed class NativeReadCutLifetimeTests
     public async Task AcCut003ShutdownCancelsAndJoinsTraversalBeforeReopen()
     {
         using var fixture = new NativeReadCutFixture();
-        fixture.Store.Commit((tx, _) => { tx.Put(NativeReadCutFixture.Key(RecordId), NativeReadCutFixture.Value(RecordValue)); return true; });
+        var originalKey = NativeReadCutFixture.Key(RecordId);
+        var expectedOriginalValue = NativeReadCutFixture.Value(RecordValue);
+        fixture.Store.Commit((tx, _) => { tx.Put(originalKey, expectedOriginalValue); return true; });
+        var expectedIdentity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var originalPosition = fixture.Store.Position;
+        var originalValue = fixture.Store.Read(view => view.ReadOwnedValue(originalKey))!.ToArray();
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, expectedOriginalValue);
         var lease = fixture.Capture(NativeReadCutFixture.Limits(4, 128));
         using var entered = new ManualResetEventSlim();
         var traversal = Task.Run(() => lease.VisitPrefix(NativeReadCutFixture.Key(string.Empty), (_, _) =>
@@ -103,7 +111,25 @@ internal sealed class NativeReadCutLifetimeTests
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => await traversal);
         await disposal;
         fixture.Reopen();
-        await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(NativeReadCutFixture.Key(RecordId)) is not null)).IsTrue();
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, originalPosition);
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
+
+        var followUpKey = NativeReadCutFixture.Key("two");
+        var followUpValue = NativeReadCutFixture.Value("healthy");
+        var followUpPosition = fixture.Store.Commit((tx, proposedPosition) =>
+        {
+            tx.Put(followUpKey, followUpValue);
+            return proposedPosition;
+        });
+        await Assert.That(followUpPosition).IsEqualTo(originalPosition + 1);
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, followUpPosition);
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, followUpKey, followUpValue);
+
+        fixture.Reopen();
+        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, followUpPosition);
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
+        await NativeReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, followUpKey, followUpValue);
         lease.Dispose();
     }
 

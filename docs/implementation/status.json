@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R122 full Release build passed with zero drift/warnings/errors; current codec19 normal/scalar passed locally; original876c Linux full unit/scalar/recovery passed and RF3 failed15/155; fresh current-source complete Linux gates remain open",
+    "verificationStage": "R130 full Release and R133 native formatter passed with 4,113 compile inputs and zero drift; strengthened read-cut lifetime class5/5 normal/scalar; original922 Linux full normal/scalar2764/2764 and recovery235/235 plus same-job native identity passed; RF3 terminal cancelled, original failure artifacts pending review; current complete Linux gates remain open",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve actual RF3 failures; local focused diagnostics did not deploy because the intended server image setting was absent",
@@ -40,16 +40,16 @@
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
     },
     "currentBuild": {
-      "compileInputs": 4112,
+      "compileInputs": 4113,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "fe030e4f12333033052093ddb025a37640d2ffebf058dc9b7f5d159f1ffa0bbb",
+      "logSha256": "caeb8fb61f61da1c018ad71606a7fcc59c73ee520a7904a3d184c343725b5cbf",
       "passed": true,
-      "qualification": "native local full Release build; runtime and Linux task acceptance remain open"
+      "qualification": "native local full Release build; Linux task acceptance remains open"
     },
     "currentFormatter": {
-      "compileInputs": 4112,
+      "compileInputs": 4113,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -67,7 +67,7 @@
       "failed": 0,
       "skipped": 0,
       "sameJobSourceImageIdentityPassed": true,
-      "rf3": "pending_at_original_verify_artifact_capture",
+      "rf3": "cancelled; original terminal artifacts pending review, no RF3 pass inferred",
       "qualification": "original completed Linux verify job; current added codec/owner tests need their own source-bound original outcomes",
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
     }
@@ -1075,10 +1075,12 @@
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "docs/implementation/durability-audit.md",
-      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StorageOwnerProcessTests.cs"
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StorageOwnerProcessTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Assertions/NativeReadCutStoreStateAssertions.cs"
     ],
     "qualification": {
-      "sourceStage": "TASK-STORAGE-OWNER-PROCESS_real_parent_live_owner_two_denied_children_healthy_write_dispose_child_success_exact_reopen_joined",
+      "sourceStage": "TASK-STORAGE-OWNER-PROCESS_and_TASK-CUT-SHUTDOWN-STATE_real_process_and_exact_joined_reopen_state_joined_local_native_normal_scalar_passed",
       "requirements": [
         "REQ-STORAGE-008",
         "REQ-CUT-003",
@@ -1093,16 +1095,16 @@
       "canonicalFormatterPassed": true,
       "runtimeQualified": false,
       "currentBuild": {
-        "compileInputs": 4112,
+        "compileInputs": 4113,
         "inputDrift": 0,
         "warnings": 0,
         "errors": 0,
-        "logSha256": "fe030e4f12333033052093ddb025a37640d2ffebf058dc9b7f5d159f1ffa0bbb",
+        "logSha256": "caeb8fb61f61da1c018ad71606a7fcc59c73ee520a7904a3d184c343725b5cbf",
         "passed": true,
-        "qualification": "native local full Release build; runtime and Linux task acceptance remain open"
+        "qualification": "native local full Release build; Linux task acceptance remains open"
       },
       "currentFormatter": {
-        "compileInputs": 4112,
+        "compileInputs": 4113,
         "inputDrift": 0,
         "nativeExitCode": 0,
         "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -1133,9 +1135,33 @@
       },
       "remaining": [
         "Current-source Linux normal/scalar real distinct-process ownership and full recovery with native source/test-image identity",
-        "Strengthen existing joined read-cut shutdown case with exact bytes/position/full identity and a healthy write/reopen; no duplicate shutdown scenario",
+        "Current-source Linux strengthened read-cut shutdown/reopen exact-state case with native source/test-image identity; local normal/scalar five-case class passes",
         "Bind actual native maintainer shutdown ownership and pooled-buffer operation criteria before whole KL-008 acceptance; full StorageRecovery RF3/endurance/power-loss remain separate mandatory gates"
-      ]
+      ],
+      "localReadCutShutdownStateEvidence": {
+        "task": "TASK-CUT-SHUTDOWN-STATE",
+        "criterion": "AC-CUT-003",
+        "normalPassed": 5,
+        "normalTotal": 5,
+        "scalarPassed": 5,
+        "scalarTotal": 5,
+        "failed": 0,
+        "skipped": 0,
+        "normalTrxSha256": "d5c5351a35183dce60b8fdadb019cece05f5cec97afe4a4982c93fa917b902ca",
+        "scalarTrxSha256": "171a448edf979a5ac373e318b044cc6452ded09702ec80d022356b0b50767058",
+        "normalLogSha256": "4d5eedf86cf0540252b1f3141212a93f1b639d04f75abff3887495ffa2d6d3e8",
+        "scalarLogSha256": "2a22d47b61bd8d72ac93d787bb69091e3ea7e0aa6ddd7c263a58f8de25ee5ec9",
+        "sourceInputs": 4114,
+        "unitAndCrashHostAssemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "ownedSourceHashes": {
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs": "079f7d0f671e2837cea8f803b22a4890293a97c0ba8f7ada1480b9412119b15d",
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Assertions/NativeReadCutStoreStateAssertions.cs": "9135c82ee423989739cd58932b3022f7b1d3559d2e56d68b9f1240c8fe36f547"
+        },
+        "observedFlow": "actual callback overlap and shutdown cancellation; original traversal/disposal joined; exact bytes/position/all identity fields after reopen; healthy second record write/read and second reopen preserves both records and identity",
+        "qualification": "actual local native normal/scalar five-case class; current-source Linux recovery and whole KL-008 criteria remain open"
+      }
     }
   },
   "KL-009": {

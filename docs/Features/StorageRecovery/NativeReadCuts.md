@@ -39,6 +39,15 @@ normal/scalar/recovery evidence. No format, dependency, public API or RF3 contra
 change; rollback removes only this stronger oracle. This does not qualify the
 helper-only aggregate-exception test as a product-operation contributor.
 
+The strengthened five-case lifetime class passes the original local native TUnit
+normal and scalar runs,5/5 in each with zero skipped/failed cases or source and
+UnitTests/CrashHost DLL/PDB drift. The shutdown case now proves the original
+committed bytes, position and all identity fields after joined reopen, then an
+independent healthy record write/read and exact second reopen. The full Release
+build and native formatter pass. Exact report/source hashes are retained under
+KL-008 in `docs/implementation/status.json`; current-source Linux identity and
+recovery qualification and the remaining KL-008 maintainer/pool criteria stay open.
+
 Capture is synchronous and native snapshot freeze/rotation and `Next` have no
 cancellation API. Elapsed checks detect and reject overruns after those calls;
 they do not interrupt a blocked native call or promise a hard wall-time bound.
