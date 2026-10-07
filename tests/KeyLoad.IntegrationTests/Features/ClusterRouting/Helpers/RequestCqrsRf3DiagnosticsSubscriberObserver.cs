@@ -11,12 +11,15 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     private IAsyncEnumerator<LogSubscriber>? enumerator;
     private Task<bool>? pendingMove;
     private Task<bool>? lastMove;
+    private Task<bool>? lastAdmissionMove;
     private Task? disposeTask;
     private Action<RequestCqrsLifecycleStage>? failureObserver;
+    private readonly RequestCqrsRf3SubscriberTransitionObservation transitionObservation = new();
+    private int moveOwner;
     private bool Initialized { get; set; }
 
     internal RequestCqrsSingleTaskLifecycleSnapshot ReadLifecycleSnapshot()
-        => new(pendingMove?.Status ?? lastMove?.Status, lifetimeToken.IsCancellationRequested);
+        => new(lastAdmissionMove?.Status, lifetimeToken.IsCancellationRequested);
 
     internal bool IsJoined => !Initialized || (enumerator is null && lifetime is null && pendingMove is null
         && disposeTask is { IsCompleted: true });
@@ -25,44 +28,79 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         Action<RequestCqrsLifecycleStage>? observer = null)
     {
         failureObserver = observer;
+        transitionObservation.SetCallerToken(cancellationToken);
         Initialized = true;
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         lifetimeToken = lifetime.Token;
         enumerator = logger.WatchAnySubscribersAsync(lifetimeToken).GetAsyncEnumerator(lifetimeToken);
         pendingMove = enumerator.MoveNextAsync().AsTask();
+        lastAdmissionMove = pendingMove;
     }
 
     internal async Task WaitForStateAsync(bool expected)
     {
-        var observed = new HashSet<string>(StringComparer.Ordinal);
-        while (observed.Count < RequestCqrsRf3Protocol.NodeCount)
+        if (System.Threading.Interlocked.CompareExchange(ref moveOwner, 1, 0) != 0)
+        { throw new InvalidOperationException("The native subscriber stream already has an active reader."); }
+        try
         {
-            var active = enumerator
-                ?? throw new InvalidOperationException("The Aspire subscriber observer is not initialized.");
-            var pending = pendingMove;
-            if (pending is null)
+            var observed = new HashSet<string>(StringComparer.Ordinal);
+            while (observed.Count < RequestCqrsRf3Protocol.NodeCount)
             {
-                pending = active.MoveNextAsync().AsTask();
-                pendingMove = pending;
-            }
-            bool moved;
-            try
-            { moved = await pending.ConfigureAwait(false); }
-            catch (Exception)
-            {
+                var active = enumerator
+                    ?? throw new InvalidOperationException("The Aspire subscriber observer is not initialized.");
+                var pending = pendingMove;
+                if (pending is null)
+                {
+                    pending = active.MoveNextAsync().AsTask();
+                    pendingMove = pending;
+                }
+                lastAdmissionMove = pending;
+                transitionObservation.ClaimAdmissionMove(pending);
+                bool moved;
+                try
+                { moved = await pending.ConfigureAwait(false); }
+                catch (Exception)
+                {
+                    lastMove = pending;
+                    pendingMove = null;
+                    throw;
+                }
                 lastMove = pending;
                 pendingMove = null;
-                throw;
+                if (!moved)
+                { throw new InvalidOperationException(RequestCqrsRf3SubscriberTransitionObservation.UnexpectedCompletionMessage); }
+                var subscriber = active.Current;
+                var isNode = transitionObservation.RecordAdmission(subscriber.Name,
+                    expected && subscriber.AnySubscribers);
+                if (isNode && subscriber.AnySubscribers == expected)
+                { observed.Add(subscriber.Name); }
             }
-            lastMove = pending;
-            pendingMove = null;
-            if (!moved)
-            { throw new InvalidOperationException("Aspire ended its resource subscriber observation unexpectedly."); }
-            var subscriber = active.Current;
-            if (IsNode(subscriber.Name) && subscriber.AnySubscribers == expected)
-            { observed.Add(subscriber.Name); }
         }
+        finally
+        { System.Threading.Volatile.Write(ref moveOwner, 0); }
     }
+
+    internal void BeginCompletionObservation() => transitionObservation.BeginCompletionObservation();
+
+    internal void DrainReadyTransitions(bool afterOriginalJoin)
+    {
+        var active = enumerator;
+        if (active is null)
+        { return; }
+        if (System.Threading.Interlocked.CompareExchange(ref moveOwner, 1, 0) != 0)
+        {
+            transitionObservation.MarkAmbiguous();
+            return;
+        }
+        try
+        {
+            transitionObservation.DrainAvailableEvents(active, ref pendingMove, ref lastMove, afterOriginalJoin);
+        }
+        finally
+        { System.Threading.Volatile.Write(ref moveOwner, 0); }
+    }
+
+    internal string FormatTransitionObservation() => transitionObservation.Format();
 
     public ValueTask DisposeAsync()
     {
@@ -94,8 +132,10 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         var active = lifetime;
         if (active is not null)
         {
+            transitionObservation.BeginOwnedCancellation(pendingMove);
             await RequestCqrsLifecycleFailureObserver.ObserveAsync(active.CancelAsync, failures,
-            failureObserver, RequestCqrsLifecycleStage.ObserverCancellation).ConfigureAwait(false);
+                failureObserver, RequestCqrsLifecycleStage.ObserverCancellation).ConfigureAwait(false);
+            transitionObservation.CompleteOwnedCancellation(active.IsCancellationRequested);
         }
     }
 
@@ -104,10 +144,15 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         var pending = pendingMove;
         if (pending is null)
         { return; }
-        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => pending, failures,
-            failureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
+        await ((Task)pending).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        if (!transitionObservation.IsExpectedDiagnosticCancellation(pending))
+        {
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => pending, failures,
+                failureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
+        }
         lastMove = pending;
         pendingMove = null;
+        transitionObservation.MoveJoined(pending);
     }
 
     private async Task CloseEnumeratorAsync(List<Exception> failures,
@@ -155,6 +200,4 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         }
     }
 
-    private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1
-        or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3;
 }

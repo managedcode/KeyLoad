@@ -64,7 +64,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         subscriberObserver.Initialize(loggerService, cancellationToken, lifecycle.RecordOwnerFailure);
         lifecycle.BindObserver(subscriberObserver);
         diagnostics = RequestCqrsRf3Diagnostics.Start(WaveId, resources, loggerService,
-            lifecycle.RecordOwnerFailure);
+            lifecycle.RecordOwnerFailure, new(subscriberObserver));
         streamOwner.BindDiagnostics(diagnostics);
         lifecycle.BindDiagnostics(diagnostics);
         artifactPath = RequestCqrsRf3DiagnosticsArtifactFiles.ExpectedPath(WaveId);

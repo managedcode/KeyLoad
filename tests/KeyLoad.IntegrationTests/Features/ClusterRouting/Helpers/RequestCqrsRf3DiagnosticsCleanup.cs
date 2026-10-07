@@ -18,19 +18,22 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     private readonly Guid waveId;
     private readonly Task[] subscriptions;
     private readonly Action<RequestCqrsLifecycleStage>? failureObserver;
+    private readonly RequestCqrsRf3SubscriberTransitionHooks? subscriberTransitions;
     private readonly RequestCqrsResourceCompletionEvidence completionEvidence = new();
     private Task? disposalTask;
     private bool fallbackRequested;
 
     internal RequestCqrsRf3DiagnosticsCleanup(Guid waveId, ResourceLoggerService logger,
         ContainerResource[] resources, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
-        Action<RequestCqrsLifecycleStage>? failureObserver = null)
+        Action<RequestCqrsLifecycleStage>? failureObserver = null,
+        RequestCqrsRf3SubscriberTransitionHooks? subscriberTransitions = null)
     {
         this.waveId = waveId;
         this.logger = logger;
         this.resources = resources;
         this.nodes = nodes;
         this.failureObserver = failureObserver;
+        this.subscriberTransitions = subscriberTransitions;
         subscriptions = resources.Select(resource => CaptureNodeAsync(logger, resource,
             nodes.Single(node => string.Equals(node.Name, resource.Name, StringComparison.Ordinal))))
             .ToArray();
@@ -78,11 +81,17 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         var drain = Task.WhenAll(subscriptions);
         try
         {
-            CompleteResourceStreams(failures);
+            RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.Begin(), failures, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDrain);
+            RequestCqrsRf3ResourceStreamCompletion.Complete(completionEvidence, logger, resources,
+                StatusFor, failures, failureObserver);
+            RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.Drain(false), failures, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDrain);
             RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.StartDrain(
                 cancellationToken.IsCancellationRequested, StatusFor(RequestCqrsRf3Protocol.Node1),
                 StatusFor(RequestCqrsRf3Protocol.Node2), StatusFor(RequestCqrsRf3Protocol.Node3)),
                 failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
+            var failuresBeforeDrain = failures.Count;
             await RequestCqrsLifecycleFailureObserver.ObserveAsync(async () =>
             {
                 await drain.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -90,10 +99,26 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
             }, failures, stage => completionEvidence.ObserveDrainFailure(stage, StatusFor,
                 failureObserver, cancellationToken),
                 RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
+            if (failures.Count > failuresBeforeDrain)
+            {
+                RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.Drain(false), failures, failureObserver,
+                    RequestCqrsLifecycleStage.CaptureDrain);
+                RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.WriteDiagnostic(subscriptions.Count(subscription =>
+                    subscription.Status == TaskStatus.RanToCompletion)), failures, failureObserver,
+                    RequestCqrsLifecycleStage.CaptureDrain);
+            }
         }
         finally
         {
             await JoinFallbackAsync(drain, failures).ConfigureAwait(false);
+            RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.Drain(true), failures, failureObserver,
+                fallbackRequested ? RequestCqrsLifecycleStage.CaptureFallbackJoin : RequestCqrsLifecycleStage.CaptureDrain);
+            if (fallbackRequested)
+            {
+                RequestCqrsRf3SubscriberTransitionHooks.Observe(() => subscriberTransitions?.WriteDiagnostic(subscriptions.Count(subscription =>
+                    subscription.Status == TaskStatus.RanToCompletion)), failures, failureObserver,
+                    RequestCqrsLifecycleStage.CaptureFallbackJoin);
+            }
             var lifetimeDisposal = DisposeLifetimeAsync();
             await ObserveCleanupAsync(() => lifetimeDisposal, failures,
                 RequestCqrsLifecycleStage.CaptureLifetimeDispose).ConfigureAwait(false);
@@ -135,23 +160,6 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
             failureObserver, RequestCqrsLifecycleStage.CaptureFallbackJoin);
     }
-
-    private void CompleteResourceStreams(List<Exception> failures)
-    {
-        foreach (var resource in resources)
-        {
-            completionEvidence.CompleteResourceStream(logger, resource, StatusFor, failures,
-                failureObserver, CompletionStage(resource.Name));
-        }
-    }
-
-    private static RequestCqrsLifecycleStage CompletionStage(string resourceName) => resourceName switch
-    {
-        RequestCqrsRf3Protocol.Node1 => RequestCqrsLifecycleStage.CaptureCompleteNode1,
-        RequestCqrsRf3Protocol.Node2 => RequestCqrsLifecycleStage.CaptureCompleteNode2,
-        RequestCqrsRf3Protocol.Node3 => RequestCqrsLifecycleStage.CaptureCompleteNode3,
-        _ => throw new ArgumentOutOfRangeException(nameof(resourceName))
-    };
 
     private async Task CaptureNodeAsync(ResourceLoggerService resourceLogger, ContainerResource resource,
         RequestCqrsRf3McpRejectionNodeCapture node)

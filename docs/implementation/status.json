@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R163 full native C# Release passed4,116 compile inputs with zero drift/warnings/errors; R165 full native formatter passed with zero drift. R153 real public partition-query SDK/MCP1/1 and R164 full discovery/query schema/Saga cohort6/6 passed on Aspire-owned Docker RF3 with4,117 source inputs and394 assembly paths, zero drift and no skips. Corrected R168/R169 native immutable local image prepare/verify/cleanup/repeated-absence lifecycle passed. These are local development receipts; complete current Linux RF3, functional product coverage and full task gates remain open.",
+    "verificationStage": "R187 full native C# Release passed4,119 compile inputs, zero source drift/warnings/errors; R188 all six unchanged native Aspire C1 logger controls passed6/6 with4,120 source and394 assembly paths, zero drift/no skips. R189/R190 native WAL/open/recovery whole flows passed21/21 in each normal/scalar mode with541 assembly paths, zero drift/no skips. R191 full native formatter passed4,119 inputs with zero drift; R186 original imports-order failure retained. R183 due wave rejected local receipt before AppHost creation; no RF3 pass inferred. Original6816 Linux verify passed2767 each mode plus235 recovery; RF3 canceled near60-minute job ceiling without TRX. Current Linux/RF3/product coverage/full task gates remain open.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
@@ -40,36 +40,46 @@
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
     },
     "currentBuild": {
-      "compileInputs": 4116,
+      "compileInputs": 4119,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "c09bf6e10ccd78c1e0a44b5e6eed3275e50cc468a03760554b9316a6a8606afd",
+      "logSha256": "544646e19b258ed5c265a820d78e7813c877d87e6375f261c5e731655be71453",
       "passed": true,
-      "qualification": "native local full C# Release build; Node cleanup one-line repair separately verified by actual native image lifecycle; complete current-source Linux/RF3 acceptance remains open"
+      "qualification": "Native local full C# Release build for C1/WAL checkpoint; complete delivered Linux/RF3 gates remain open"
     },
     "currentFormatter": {
-      "compileInputs": 4116,
+      "compileInputs": 4119,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "latestVerifiedNativeLinux": {
-      "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
-      "runId": 37554329420,
-      "jobId": 112576973966,
-      "normalPassed": 2765,
-      "normalTotal": 2765,
-      "scalarPassed": 2765,
-      "scalarTotal": 2765,
+      "sourceCommit": "6816ae919cac67c217c85096d04d474667e80f1f",
+      "runId": 37560457057,
+      "jobId": 112596312154,
+      "normalPassed": 2767,
+      "normalTotal": 2767,
+      "scalarPassed": 2767,
+      "scalarTotal": 2767,
       "recoveryPassed": 235,
       "recoveryTotal": 235,
+      "analyzerPassed": 388,
+      "nativeSourceOwnershipPassed": 10,
       "failed": 0,
       "skipped": 0,
       "sameJobSourceImageIdentityPassed": true,
-      "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
-      "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
+      "originalTestArtifactId": 11458227354,
+      "originalTestArtifactSha256": "aa41efe04a04e3bb4ba9009c85f17b642f8f8e694077d5f5c7fd3f7fe6343a85",
+      "normalTrxSha256": "4b90d557cb6107555c6037dd661ef3eee4d9ae82818f01e95139277be952356a",
+      "scalarTrxSha256": "f6c6654646ed785beb6ba8dfed323b0c0aa4c48ff7d7a25b54f90203d777fafb",
+      "recoveryTrxSha256": "999b9098b3df05bb94b815dfe0f4775cc85a10ae76e2d814e8f1be9a74d95fb4",
+      "rf3": "cancelled near original60-minute aggregate job budget; no original RF3 TRX or completed cohort",
+      "rf3JobId": 112596282805,
+      "rf3OriginalArtifactId": 11458353829,
+      "rf3OriginalArtifactSha256": "f216cbf0f1315516206b2c44dfc80e9f59dd00f402e33ad4f5041c9121376f5a",
+      "qualification": "Original completed Linux verify job and same-job source/test-image verification passed. StageIII source requires its own delivered Linux evidence; full RF3 and product coverage remain open.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37560457057"
     },
     "immutableLocalImageContextDevelopment": {
       "task": "TASK-TEST-LOCAL-CONTEXT-REALIZATION",
@@ -253,7 +263,105 @@
         "skipped": 0,
         "originalZipSha256": "97294b3d410d7be5a87bae0a3748a54fcea83b58362b1d8eb61a7f12886a5573"
       }
-    ]
+    ],
+    "previousVerifiedNativeLinux": {
+      "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+      "runId": 37554329420,
+      "jobId": 112576973966,
+      "normalPassed": 2765,
+      "normalTotal": 2765,
+      "scalarPassed": 2765,
+      "scalarTotal": 2765,
+      "recoveryPassed": 235,
+      "recoveryTotal": 235,
+      "failed": 0,
+      "skipped": 0,
+      "sameJobSourceImageIdentityPassed": true,
+      "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
+      "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
+    },
+    "nativeLoggerControlDevelopment": {
+      "tasks": [
+        "TASK-C1-LOGGER-MODEL-CONTROL",
+        "TASK-C1-DIAGNOSTIC-READ-CANCEL-001",
+        "TASK-C1-ADMISSION-MOVE-STATUS-002"
+      ],
+      "nativeExitCode": 0,
+      "passed": 6,
+      "total": 6,
+      "failed": 0,
+      "skipped": 0,
+      "sourceInputs": 4120,
+      "assemblyInputs": 394,
+      "sourceDrift": 0,
+      "assemblyDrift": 0,
+      "logSha256": "77164729bc2bde991fd4204b871a24faa957e1f4c73968c533dabed1e089764c",
+      "trxSha256": "135f2feaf7014bea7d246078d6c73d64dfb9f9c8ddb240955b486fbd64d6d950",
+      "cases": [
+        {
+          "name": "MalformedAspireLogLinesAreExcludedFromTheBoundedArtifact",
+          "outcome": "Passed"
+        },
+        {
+          "name": "EachAspireNodeRetainsOnlyThirtyTwoClosedRecords",
+          "outcome": "Passed"
+        },
+        {
+          "name": "IndependentNativeResourceConsumerDoesNotBlockOwnedCaptureJoin",
+          "outcome": "Passed"
+        },
+        {
+          "name": "SuccessEvidenceWaitsForOriginalSubscriptionsAndIsMemoized",
+          "outcome": "Passed"
+        },
+        {
+          "name": "ExactCallerCancellationAtAdmissionSettlesEveryOriginalCapture",
+          "outcome": "Passed"
+        },
+        {
+          "name": "NativeEarlyStreamCompletionFailsWithoutPublishingEvidence",
+          "outcome": "Passed"
+        }
+      ],
+      "originalFailedCohortsRetained": [
+        "R177 original unexpected ordinary startup/drain failure",
+        "R179 diagnostic-owned cancellation failed ObserverJoin",
+        "R182 five passed; diagnostic move overwrote canceled original admission status"
+      ],
+      "qualification": "All six unchanged actual native Aspire logger/model operation controls passed. Explicit model-control returns before RunAsync; no actual Docker/database RF3 or Linux delivery claim.",
+      "actualDockerRf3Qualified": false,
+      "linuxQualified": false
+    },
+    "rf3AggregateBudgetDevelopment": {
+      "task": "TASK-TEST-RF3-AGGREGATE-BUDGET",
+      "previousMinutes": 60,
+      "currentMinutes": 180,
+      "perCaseDeadlinesUnchanged": true,
+      "originalRunId": 37560457057,
+      "originalJobId": 112596282805,
+      "originalJobStartedAt": "2026-10-07T02:07:28Z",
+      "originalNativeRf3StartedAt": "2026-10-07T02:15:19Z",
+      "originalCanceledAt": "2026-10-07T03:07:42Z",
+      "originalRf3TrxAvailable": false,
+      "nextDeliveredRunQualified": false
+    },
+    "localCurrentWaveDevelopment": {
+      "task": "TASK-TEST-LOCAL-CURRENT-WAVE",
+      "sourceContractFrozen": true,
+      "implementationJoined": false,
+      "actualRf3Qualified": false,
+      "originalRejectedAttempt": {
+        "nativeExitCode": 2,
+        "passed": 0,
+        "total": 1,
+        "appHostCreated": false,
+        "initiatingFailure": "GitHub-only image receipt admission rejected explicit local-development provenance before topology composition",
+        "logSha256": "b345de8a5dec3d7ca9d1aed7d96fa40bb9c00dd46b8f08095a3a9dca6dffe6d5",
+        "trxSha256": "5ea4bafb910bed2c11c63f5de1ecef3286f6d16f058637656352b1fa7b89f904"
+      },
+      "qualification": "R183 is a pre-start rejection, not an executed RF3 due/leader/cold-restart flow; guarded source packet awaits integration and native verification"
+    }
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -819,8 +927,7 @@
       "successorSequenceRepair": "qualified_exactcf630751e_run37084177131_terminal_MaxValue_successor_rejects_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership",
       "sourceReviewGaps": [
         "decoded_memory_and_work_preallocation_contract_open",
-        "additional_complete_length_and_short_header_corruption_cases_open",
-        "additional_complete_length_and_short_header_corruption_cases_open"
+        "complete_payload_length_mismatch_normal_scalar_local_pass; current_delivered_Linux_gate_open; short_header_is_existing_torn_tail_contract"
       ],
       "decodedMemory": "native_remaining_input_checks_verified_source_only_recomputed_checksum_malformed_array_amplification_not_runtime_qualified_no_invented_count_cap_or_custom_wire_decoder",
       "firstRun": {
@@ -937,6 +1044,37 @@
         "governance": "passed",
         "sourceReview": "accepted",
         "deliveredSourceCI": "pending"
+      }
+    },
+    "nativeCompleteLengthPreflightDevelopment": {
+      "task": "TASK-WAL-LENGTH-MISMATCH",
+      "qualified": false,
+      "qualification": "Real native store/open plus guarded child whole flows pass locally; no decoder/memory/work-bound, power-loss, endurance or full task closure inferred",
+      "normal": {
+        "passed": 21,
+        "total": 21,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4120,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "55b92625648606c73bf147e21d828593fbfdad093b5f302c0ef095239825b5de",
+        "trxSha256": "07f7d50194f0111ec75741a5d9405ea2911b79b1b082e891fedea3d1823763a6"
+      },
+      "scalar": {
+        "passed": 21,
+        "total": 21,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4120,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "aed57d66a2f913cfb55368b698a68d087347761e8fb0087482c2bc3fb96945ca",
+        "trxSha256": "05f93fbc7a657be120db7eeceaf20a27e59a32b7b97e92d42098ee6494981a99"
       }
     }
   },

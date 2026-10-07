@@ -695,8 +695,10 @@ the original joins have completed. Caller cancellation must not become a
 successful capture or erase its primary failure.
 
 REQ-CRS-DIAG-005 / AC-CRS-DIAG-005 refines the native completion oracle:
-`WatchAnySubscribersAsync` is used only to observe the required pre-start
-admission. Its global `AnySubscribers` changes are never proof that this wave's
+`WatchAnySubscribersAsync` observes the required pre-start admission and may
+diagnose already-completed transitions at the fixed resource-completion,
+pre-fallback and post-original-join checkpoints. Its global `AnySubscribers`
+changes are never proof that this wave's
 three captures have completed, because another native consumer may remain
 subscribed. After completing the three captured resource streams, join the same
 memoized diagnostics disposal and every original watcher task/enumerator before
@@ -707,6 +709,70 @@ observes a later native log line, then completes and joins that consumer during
 scope cleanup. Repeated disposal, fail-closed publication, original task
 settlement, cleanup and fatal/error preservation remain asserted. No parser,
 artifact shape, cap, topology or timeout is changed.
+
+TASK-C1-BOUNDED-SUBSCRIBER-DIAGNOSIS refines REQ/AC-CRS-DIAG-005/006 without
+changing the completion oracle. Reuse the same native observer enumerator with
+one read owner; consume at most three successful, already-completed transitions
+per checkpoint, without waiting for another event or creating another consumer.
+Record only fixed node masks, bounded counts and explicit ambiguity in a fixed
+failure diagnostic. Aggregate subscriber state cannot identify this wave's
+watchers. Failed, canceled and ended moves remain with their original join
+owner, preserving failure order. The original three capture tasks and existing
+deadlines decide success; join them before observer disposal and publication.
+Root joins the reviewed feature-local observer, cleanup and scope helpers, then
+reruns the original native Aspire failure case before interpreting its evidence.
+This diagnostic stage does not establish a timeout cause or qualify RF3.
+
+TASK-C1-LOGGER-MODEL-CONTROL refines REQ/AC-CRS-DIAG-003/005/006 for the
+existing native logger-control scope. R177 records actual ordinary AppHost
+startup during that scope and original captures pending until fallback; the
+aggregate transitions remain ambiguous and do not establish logger-key drift.
+Only this scope selects `KeyLoadTests:LoggerModelControl=true`. Admit that exact
+true-only value without descendants, selected suite, comparison/benchmark,
+TwoRf3, request probe, protocol cohort or local-image preparer. Require its
+existing explicit ephemeral DataRoot and ports; permit ordinary inherited
+immutable image references/provenance from the full RF3 suite. Compose the same
+authoritative AddKeyLoad graph and Build, then return before RunAsync. The native
+testing wrapper owns disposal after all original logger/observer tasks join.
+Keep actual ResourceLoggerService/IResource APIs, assertions, failure priority
+and the 45-second deadline. Actual ClusterFixture and C1 Wave startup, readiness,
+SDK/MCP operations and RF3 qualification stay unchanged and mandatory. This
+control qualifies native logger/model lifetime only, never Docker or database
+RF3. Root joins the four guarded AppHost/options/scope-argument files and runs
+the unchanged positive, independent-consumer, cancellation and early-completion
+whole flows; rollback removes only this opt-in and branch.
+
+TASK-C1-DIAGNOSTIC-READ-CANCEL-001 refines that diagnostic lifetime after R179:
+the original three captures completed without fallback, but a drain-created
+pending move made observer-owned shutdown cancellation fail ObserverJoin.
+Tag only that exact optional move; transfer it out of diagnostic ownership if
+the original admission reader adopts it. Keep the same cancellation/join/dispose
+sequence. Its cancellation is normal cleanup only if it was pending immediately
+before owned cancellation, is canceled at join, and the caller stayed uncanceled
+through join. Retain terminal task state and every fault, preexisting/admission
+or caller cancellation, callback/disposal failure and original error ordering.
+Root joins the two guarded observer/transition helpers and runs all unchanged
+native logger whole flows; no task is abandoned and no deadline changes.
+
+TASK-C1-ADMISSION-MOVE-STATUS-002 refines that observation after R182 passed
+five of six original logger-control flows. Optional diagnostic moves overwrote
+the shared last-move reference after the actual admission move was canceled.
+Retain the exact latest original admission-reader task separately: initialize
+it from the native first move and update it only when that reader adopts or
+creates its next move. AdmissionMove reports this task's actual status, even
+after later diagnostics. This reference owns no new work. Root joins the
+guarded observer correction and reruns all six unchanged native cases; retain
+the original failed receipt, assertions, deadlines, joins and failure ordering.
+
+TASK-TEST-LOCAL-CURRENT-WAVE applies the linked TestInfrastructure REQ/AC-TEST-015
+local image contract to these current homogeneous RF3 waves. Reuse the same
+owned native verifier and actual three-container config-ID checks; reject mixed
+expected references and never synthesize GitHub digest/provenance. Root freezes
+ADR-074/082 before the guarded three-helper packet, builds and runs original
+due and catalog fault flows through real SDK/MCP clients. Keep unique request
+grains, signed controls, resource deadlines and joined cleanup unchanged.
+Local passes cannot close the separate exact-source Linux gates. Rollback
+removes only this explicit local-wave branch and retains default fail-closed CI.
 
 REQ-CRS-DIAG-006 / AC-CRS-DIAG-006 adds test-only first-failure lifecycle
 evidence before changing any cancellation behavior. Retain at most 2,048 UTF-8

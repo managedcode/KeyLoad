@@ -156,7 +156,8 @@ publication or the complete ADR.
 TASK-CRS-DIAG-JOIN-ORACLE implements REQ/AC-CRS-DIAG-005. Aspire 13.6
 `WatchAnySubscribersAsync` reports global subscriber changes and cannot certify
 that this wave's original resource watchers have settled. Keep it for admission
-before `AppHost.StartAsync`, then join the same memoized capture disposal and
+before `AppHost.StartAsync` and bounded nonblocking diagnostics of completed
+transitions at fixed completion/cleanup checkpoints, then join the same memoized capture disposal and
 original `Task.WhenAll` watcher set after the actual resource `Complete` calls;
 only afterward dispose/join the admission observer or publish evidence. Add a
 real `ResourceLoggerService` test consumer on a separate actual model resource
@@ -239,3 +240,59 @@ evidence; dependency_closeout owns the guarded diagnostics packet correction.
 TASK-CRS-DIAG-COMPLETION-OBSERVATION is accepted before implementation under REQ/AC-CRS-DIAG-003/005/006. The linked NativeCqrsRequestV2 contract freezes fixed per-node native Complete-start/return, original-task and drain-token observations at the existing calls/awaits, bounded to the unchanged 2,048-byte context. Preserve all original native work, ordering, failure/fatal priority and cleanup even when observation fails. Existing real Aspire whole-flow cases and fresh exact-source Linux RF3 artifacts provide verification; root owns integration and qualification. The exact existing and optional role paths, private agent scope and observation-only rollback are in the feature contract. No production/public/persisted contract or dependency changes; source reasoning does not prove the initiating failure.
 
 TASK-CRS-DIAG-CLEANUP-JOIN-ORDER, accepted before code under REQ/AC-CRS-DIAG-005, corrects only `RequestCqrsRf3DiagnosticsTestScope.DisposeAsync` to join original diagnostic captures before disposing its independent consumer. The linked feature freezes pinned Aspire close/join semantics, the retained AppHost lifetime, all bounded waits and original/fatal cleanup errors. Stages are freeze, root call-order correction, strict build/format, and existing real Aspire whole-flow/fresh Linux verification. No source-only timeout-cause or qualification claim is permitted; rollout/rollback changes only the same scope order.
+
+TASK-C1-BOUNDED-SUBSCRIBER-DIAGNOSIS implements the linked DIAG-005/006
+refinement in the existing ClusterRouting diagnostics observer, cleanup and
+test scope, with feature-local transition/stream-completion helpers. Freeze the
+same-enumerator single-reader contract first; join the guarded diagnostic code;
+run the original native Aspire case; interpret fixed masks/counts alongside the
+original capture-task states. No added consumer or wait, raw resource names,
+payloads, topology, timeout or publication rule is allowed. At most three
+successful completed events are consumed at each fixed checkpoint; unsuccessful
+or ended moves stay with the original join owner and remain ambiguous here.
+Root owns integration and gates. Rollback removes these optional diagnostics
+without changing any original native task, assertion or completion contract.
+
+TASK-C1-LOGGER-MODEL-CONTROL follows the linked DIAG-003/005/006 contract and
+R177 original native failure evidence. Ordered stages: freeze the exact internal
+selector/trust/ownership contract; root joins AppHostControlOptions, its native
+registration, KeyLoadAppHostApplication and the existing diagnostics argument
+helper; build; run the unchanged native logger-control whole flows; retain the
+separate real RF3 gates. The admitted scope composes the actual AddKeyLoad graph
+and builds it, returning before RunAsync; the testing wrapper retains disposal.
+Reject mixed modes without changing ordinary selection behavior or inherited
+immutable image provenance. No shadow graph, fake logger, private resolver,
+timeout change, original-task shortcut or evidence-schema change is allowed.
+Rollback removes only selector/branch/opt-in. Source and R177 prove unexpected
+ordinary startup in the control scope; they do not prove logger-key drift or
+the initiating cause of the full Linux RF3 cohort failures.
+
+TASK-C1-DIAGNOSTIC-READ-CANCEL-001 refines the optional subscriber observation
+under DIAG-005/006 after R179. Freeze the linked exact diagnostic-task predicate
+and admission-reader ownership transfer; root joins the two guarded observer
+helpers; build; run all unchanged native logger-control whole flows. A pending
+move created only by diagnostic drain is normal cleanup cancellation only when
+it was incomplete immediately before owned cancellation, is canceled at join,
+and the caller stayed uncanceled through join. An original admission reader
+adopting that move removes its diagnostic tag. Keep actual cancellation, join
+and disposal, terminal task state, all other failures and their ordering.
+Rollback removes only that diagnostic lifetime refinement. No task abandonment,
+deadline, original-task assertion, production or persisted contract changes.
+
+TASK-C1-ADMISSION-MOVE-STATUS-002, under DIAG-005/006, preserves the exact
+original admission task in lifecycle evidence after optional diagnostics read
+later moves. R182's five passes and one cancellation-status assertion failure
+remain original failed-cohort evidence. Freeze the linked task-reference
+contract, join only the subscriber observer, build and rerun all six unchanged
+native flows. This observation neither creates nor owns another task and does
+not change cancellation, joins, assertions, deadlines or the context schema.
+Rollback removes only that separate reference; all broader gates remain open.
+
+TASK-TEST-LOCAL-CURRENT-WAVE is accepted for existing current homogeneous C1
+waves under the linked TestInfrastructure contract and ADR-074. Root freezes
+the exact local identity/model/started-container joins, then reviews the guarded
+three-helper packet and runs actual due/catalog SDK/MCP flows. Preserve all
+original production assertions, signed controls, tasks, deadlines and cleanup.
+It grants no GitHub provenance or delivered RF3 qualification to a local image;
+default native CI digest/manifest verification remains mandatory. No public,
+persisted, authorization, topology or dependency contract changes.

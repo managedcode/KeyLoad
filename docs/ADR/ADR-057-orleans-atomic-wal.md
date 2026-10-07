@@ -56,6 +56,19 @@ complete-envelope/current-header proof gaps. They remain open and do not gain
 qualification from this sequence guard or a development build. The ADR remains Accepted until its full original
 unit/process/RF3 and current resource evidence exists.
 
+## Complete current-frame payload-length regression
+
+TASK-WAL-LENGTH-MISMATCH is test-only under REQ-STORAGE-017 / AC-WAL-003. The
+existing preflight operation test adds one-byte-short declared payload-length
+arguments to both direct ZoneTree open and the real CrashHost inspector. The
+frame remains physically complete and follows a real committed prefix; both
+paths must return the existing Corruption category, leave the entire provider
+file/tree inventory unchanged, and settle owner-lock cleanup. No production
+format, cap, error category, or torn-tail behavior changes. The already-covered
+short-header suffix remains an incomplete-tail case and is truncated only by
+ordinary recovery. The regression is not qualified until root joins actual
+normal/scalar and applicable recovery evidence.
+
 ## Native codec refinement from exact-source CI
 
 Run37077856823 at6ad4741a7 disproved the authored1024-byte size assertion and overflow-rejection protocol fixture. centrally pinned Orleans NullableCodec's generic codec resolution uses ReadOnlyMemoryCodec<byte> with per-byte tagged fields. Accept the framework's closed native IFieldCodec<ReadOnlyMemory<byte>> → ReadOnlyMemoryOfByteCodec registration, with no custom wire codec. Nullable nonnull values then use native length-prefixed raw bytes. The original size/4096-byte assertions remain unchanged and passed in that native qualification. The current generated Orleans codec uses the accepted closed native memory codec; no custom JSON or alternate-format decoder is supported. The active identity/WAL/checkpoint values and exact bytes remain those frozen in CurrentFormat.

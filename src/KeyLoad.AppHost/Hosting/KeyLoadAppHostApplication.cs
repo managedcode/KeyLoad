@@ -23,12 +23,15 @@ internal static class KeyLoadAppHostApplication
         });
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
         var tests = runtimeOptions.Control.Value.Tests;
+        var loggerModelControl = runtimeOptions.Control.Value.LoggerModelControl;
         if (requested && tests is null)
         {
             throw new InvalidOperationException(MessageText);
         }
         AddKeyLoad(builder);
         var app = builder.Build();
+        if (loggerModelControl)
+        { return EmptyResult; }
         if (tests is not null)
         {
             return await TestSuiteApplication.RunAsync(app, tests).ConfigureAwait(false);

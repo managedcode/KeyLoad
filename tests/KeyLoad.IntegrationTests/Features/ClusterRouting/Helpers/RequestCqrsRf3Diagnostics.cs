@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -29,15 +30,17 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
 
     private RequestCqrsRf3Diagnostics(Guid waveId, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
         ResourceLoggerService logger, ContainerResource[] resources,
-        Action<RequestCqrsLifecycleStage>? failureObserver)
+        Action<RequestCqrsLifecycleStage>? failureObserver,
+        RequestCqrsRf3SubscriberTransitionHooks? subscriberTransitions)
     {
         this.waveId = waveId;
         this.nodes = nodes;
-        cleanup = new(waveId, logger, resources, nodes, failureObserver);
+        cleanup = new(waveId, logger, resources, nodes, failureObserver, subscriberTransitions);
     }
 
     internal static RequestCqrsRf3Diagnostics Start(Guid waveId, IEnumerable<ContainerResource> resources,
-        ResourceLoggerService logger, Action<RequestCqrsLifecycleStage>? failureObserver = null)
+        ResourceLoggerService logger, Action<RequestCqrsLifecycleStage>? failureObserver = null,
+        RequestCqrsRf3SubscriberTransitionHooks? subscriberTransitions = null)
     {
         ArgumentNullException.ThrowIfNull(resources);
         ArgumentNullException.ThrowIfNull(logger);
@@ -55,7 +58,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
             || captures.Any(node => nodeResources.Count(resource => resource.Name == node.Name) != 1))
         { throw new InvalidOperationException(InvalidNodesMessage); }
 
-        return new(waveId, captures, logger, nodeResources, failureObserver);
+        return new(waveId, captures, logger, nodeResources, failureObserver, subscriberTransitions);
     }
 
     internal void SaveFailureEvidence(Exception failure)

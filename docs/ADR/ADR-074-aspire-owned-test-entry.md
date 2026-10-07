@@ -271,3 +271,31 @@ image/receipt/label/config-ID gates and refusal of any referencing container;
 no force/prune or unrelated resource changes. Keep original failed cleanup and
 owned diagnostic removal receipts distinct from the corrected canonical flow.
 This command repair adds no resource, deadline, dependency or product contract.
+
+TASK-TEST-RF3-AGGREGATE-BUDGET, under REQ/AC-TEST-010, increases only the
+docker-rf3 GitHub job's aggregate budget from60 to180 minutes. Original
+run37560457057 at6816ae91 ended near its60-minute ceiling after its native RF3
+step started, without producing an original RF3 TRX. Its separate verify job
+passed2767 normal,2767 scalar and235 recovery cases. This timing supports an
+aggregate-budget diagnosis; it does not identify an individual case failure.
+Ordered stages: root freezes this contract and the TestInfrastructure evidence;
+changes that single workflow budget; retains all native suites, coverage/source
+identity checks, per-case deadlines and artifacts; verifies the next original
+Linux run. No cancellation or missing report becomes success. Rollback restores
+only the aggregate budget; no product, format, topology or dependency changes.
+
+TASK-TEST-LOCAL-CURRENT-WAVE under REQ/AC-TEST-015 follows R183's pre-start
+GitHub-only receipt rejection. Freeze the linked current homogeneous local-wave
+contract; privately factor the existing LocalRf3ImageIdentity native identity
+read and join it in RequestCqrsRf3ImageProof; join its model proof before wave
+start and actual container proof after native readiness; build and run original
+due and catalog-mismatch SDK/MCP whole flows; retain owned image cleanup and
+fresh Linux qualification. Expected references, current input digest, labels,
+config ID and exclusive local/GitHub environments all remain mandatory. No
+registry digest is fabricated, default CI gate bypassed or deadline extended.
+Root owns integration and evidence. Rollback removes only local-wave admission;
+the native preparation/cleanup producer and default CI path retain their gates.
+The identity crossing start/readiness is the actual pre-start verifier return:
+VerifyModelAsync returns it to a WaveStartup local, then the same value supplies
+started-container checks. Early ReadAsync selects the validated reference only.
+Keep existing caller maps; no ambient state or extra identity carrier is needed.

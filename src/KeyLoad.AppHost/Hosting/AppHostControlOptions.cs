@@ -17,4 +17,5 @@ internal sealed class AppHostControlOptions
     internal bool ProtocolCohortConfigured { get; set; }
     internal bool ComparisonSelectorsPresent { get; set; }
     internal bool ScaleSelected { get; set; }
+    internal bool LoggerModelControl { get; set; }
 }

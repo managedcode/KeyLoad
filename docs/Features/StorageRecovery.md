@@ -448,6 +448,25 @@ post-cleanup receipt cancellation risk without altering production data.
 |REQ-STORAGE-018 current-version fence and restore|AC-WAL-004 current checkpoint/empty/refusal and InstallSnapshot/restore identity preservation|
 |REQ-STORAGE-019 authentic qualification|AC-WAL-005 full Release/formatter/governance and exact-SHA GitHub unit/process-recovery/RF3 SDK+MCP; speed and power-loss unclaimed|
 
+### TASK-WAL-LENGTH-MISMATCH complete-frame regression
+
+TASK-WAL-LENGTH-MISMATCH refines existing REQ-STORAGE-017 / AC-WAL-003 only.
+`NativeStoreOpenPreflightTests.R12Ac002CompleteCorruptionRejectsBeforeAnyProviderFileChanges`
+adds direct-open and real CrashHost-inspector arguments for an otherwise complete
+current WAL frame whose declared payload length is one byte shorter than its
+actual serialized payload. Both paths must return the existing exact
+`ErrorCode.Corruption`, preserve the complete provider file/tree hash inventory,
+and release the owner lock. The test begins with an actual committed ZoneTree
+record and a valid preceding frame; it does not add a frame-size limit or change
+reader behavior.
+
+The short-header case is already covered by
+`R12Ac002IncompleteCurrentTailIsOnlyTruncatedByOrdinaryRecovery`: it is an
+incomplete-tail recovery case, not a corruption oracle. Existing truncation and
+committed-prefix assertions remain unchanged. This proposal adds regression
+evidence only; fresh normal/scalar and required recovery/RF3 gates remain open
+until their actual reports are joined.
+
 ```mermaid
 flowchart LR
     Transaction[Owned ordered transaction] --> Codec[Orleans generated binary payload]

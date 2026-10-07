@@ -7,6 +7,7 @@ internal static class RequestCqrsRf3DiagnosticsArtifactFiles
 {
     private const string DataRootArgument = "--KeyLoad:DataRoot=";
     private const string EphemeralArgument = "--KeyLoad:Ephemeral=true";
+    private const string LoggerModelControlArgument = "--KeyLoadTests:LoggerModelControl=true";
     private const string DataRootPrefix = "keyload-c1-diagnostics-";
     private const string ExistingDataRootMessage = "The diagnostics data root already exists.";
     private const string ArtifactDirectory = "artifacts";
@@ -34,7 +35,7 @@ internal static class RequestCqrsRf3DiagnosticsArtifactFiles
     }
 
     internal static string[] CreateAppHostArguments(string dataRoot)
-        => [DataRootArgument + dataRoot, EphemeralArgument];
+        => [DataRootArgument + dataRoot, EphemeralArgument, LoggerModelControlArgument];
 
     internal static string ExpectedPath(Guid id)
         => Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, ArtifactDirectory,

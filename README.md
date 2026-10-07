@@ -342,7 +342,14 @@ source/test-image identity verification, without skips. Later native codec and
 captured-envelope criteria now close **KL-007**, with all19 mapped cases passing
 in both modes and all33 owned source files bound to the original compiled images.
 The newer cross-process ownership and read-cut regressions pass locally; their
-original Linux results remain pending. Six focused local Docker RF3 flows now
+task acceptance remains open. The [newer original Linux run at 6816ae91](https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154)
+passed normal and scalar **2,767/2,767**, recovery **235/235** and same-job native
+source/test-image identity checks. Its RF3 job was canceled near the original
+60-minute aggregate budget without producing a completed RF3 report. That job
+now has 180 minutes, with individual scenario deadlines and gates unchanged.
+All six unchanged native Aspire logger-control flows pass locally, including
+caller cancellation and original task settlement; these model/logger controls
+do not qualify Docker database execution. Six focused local Docker RF3 flows
 pass through the real SDK and official MCP clients, covering native schema
 discovery and autonomous saga timeout/replay. The owned image lifecycle also
 passes prepare, verify, cleanup and repeated cleanup. Full Linux RF3,

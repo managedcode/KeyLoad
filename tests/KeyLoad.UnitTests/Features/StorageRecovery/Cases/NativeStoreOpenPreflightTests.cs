@@ -8,6 +8,7 @@ internal sealed class NativeStoreOpenPreflightTests
 {
     private const int PayloadLengthOffset = 8;
     private const int ChecksumOffset = 20;
+    private const int LengthMismatchDecrement = 1;
     private const int IncompleteHeaderBytes = 7;
     private const int ChangedByte = 1;
     private const int CurrentIdentityVersion = 7;
@@ -85,6 +86,8 @@ internal sealed class NativeStoreOpenPreflightTests
     [Arguments(true, NativeStoreOpenPreflightDefect.UnsupportedTornPayload)]
     [Arguments(false, NativeStoreOpenPreflightDefect.Checkpoint)]
     [Arguments(true, NativeStoreOpenPreflightDefect.Checkpoint)]
+    [Arguments(false, NativeStoreOpenPreflightDefect.PayloadLengthMismatch)]
+    [Arguments(true, NativeStoreOpenPreflightDefect.PayloadLengthMismatch)]
     public async Task R12Ac002CompleteCorruptionRejectsBeforeAnyProviderFileChanges(bool guarded, NativeStoreOpenPreflightDefect defect)
     {
         using var files = new NativeStoreOpenPreflightFiles();
@@ -130,6 +133,11 @@ internal sealed class NativeStoreOpenPreflightTests
         if (defect == NativeStoreOpenPreflightDefect.Checksum)
         {
             frame[ChecksumOffset] ^= ChangedByte;
+        }
+        if (defect == NativeStoreOpenPreflightDefect.PayloadLengthMismatch)
+        {
+            var declaredLength = BinaryPrimitives.ReadInt32LittleEndian(frame.AsSpan(PayloadLengthOffset));
+            BinaryPrimitives.WriteInt32LittleEndian(frame.AsSpan(PayloadLengthOffset), declaredLength - LengthMismatchDecrement);
         }
         if (defect == NativeStoreOpenPreflightDefect.UnsupportedTornPayload)
         {
@@ -185,4 +193,4 @@ internal sealed class NativeStoreOpenPreflightTests
     }
 }
 
-internal enum NativeStoreOpenPreflightDefect { Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint }
+internal enum NativeStoreOpenPreflightDefect { Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint, PayloadLengthMismatch }

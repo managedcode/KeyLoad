@@ -53,34 +53,36 @@ internal static class DueFaultRf3Leadership
     private static async Task VerifySurvivorProgressAsync(DistributedApplication app, NodeEpochRf3Profile profile,
         DueFaultRf3Seed seed, DueFaultRf3LeaderCut cut, CancellationToken cancellationToken)
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
+        using var firstHttp = McpCallerHttp.Create(app, cut.Survivors[0]);
+        using var secondHttp = McpCallerHttp.Create(app, cut.Survivors[1]);
+        var firstSdk = new KeyLoadClient(firstHttp, profile.AdminKey, IntegrationClientOptions.Execution());
+        var secondSdk = new KeyLoadClient(secondHttp, profile.AdminKey, IntegrationClientOptions.Execution());
+        var observed = await WaitForReplacementLeaderAsync(firstSdk, secondSdk, cut, deadline.Token).ConfigureAwait(false);
         await using var first = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[0], cut.Survivors[0],
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
         await using var second = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[1], cut.Survivors[1],
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
-        var leader = await WaitForReplacementLeaderAsync(first, second, cut, cancellationToken).ConfigureAwait(false);
+        await AssertSnapshotMatchesAsync(first, cut.Survivors[0], observed.First, deadline.Token).ConfigureAwait(false);
+        await AssertSnapshotMatchesAsync(second, cut.Survivors[1], observed.Second, deadline.Token).ConfigureAwait(false);
         await AssertSurvivorDiscoveryAsync(app, profile, cut, cancellationToken).ConfigureAwait(false);
         await WaitUntilDueAsync(seed.DueAt, cancellationToken).ConfigureAwait(false);
         await WaitForDueEffectsAsync(first.Sdk, second.Sdk, seed, cancellationToken).ConfigureAwait(false);
-        await Assert.That(leader).IsNotEqualTo(VoterOrigin(cut.LeaderNode));
+        await Assert.That(observed.First.Leader).IsNotEqualTo(VoterOrigin(cut.LeaderNode));
     }
 
-    private static async Task<string> WaitForReplacementLeaderAsync(NodeEpochRf3Callers first,
-        NodeEpochRf3Callers second, DueFaultRf3LeaderCut cut, CancellationToken cancellationToken)
+    private static async Task<(NodeStatus First, NodeStatus Second)> WaitForReplacementLeaderAsync(
+        KeyLoadClient first, KeyLoadClient second, DueFaultRf3LeaderCut cut, CancellationToken cancellationToken)
     {
-        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         while (true)
         {
-            var a = await first.Sdk.StatusAsync(deadline.Token).ConfigureAwait(false);
-            var b = await second.Sdk.StatusAsync(deadline.Token).ConfigureAwait(false);
-            if (HasReplacementLeader(a, b, cut, out var leader))
-            {
-                await AssertSnapshotMatchesAsync(first, cut.Survivors[0], a.Value!, deadline.Token).ConfigureAwait(false);
-                await AssertSnapshotMatchesAsync(second, cut.Survivors[1], b.Value!, deadline.Token).ConfigureAwait(false);
-                return leader;
-            }
-            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), TimeProvider.System, deadline.Token)
-                .ConfigureAwait(false);
+            var a = await first.StatusAsync(cancellationToken).ConfigureAwait(false);
+            var b = await second.StatusAsync(cancellationToken).ConfigureAwait(false);
+            if (HasReplacementLeader(a, b, cut, out _))
+            { return (a.Value!, b.Value!); }
+            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), TimeProvider.System,
+                cancellationToken).ConfigureAwait(false);
         }
     }
 

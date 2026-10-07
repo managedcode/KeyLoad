@@ -29,6 +29,44 @@ failed and cancelled recovery. The Linux verify job receives120 minutes; no
 individual native suite deadline, required check, artifact or failure predicate
 is removed. A failed, timed out or cancelled suite remains failed/unqualified.
 
+TASK-TEST-RF3-AGGREGATE-BUDGET refines REQ/AC-TEST-010 for the separate RF3
+job. Run37560457057 at6816ae91 passed full native normal/scalar2767 each and
+recovery235 in its verify job. Its RF3 job started02:07:28Z, the native RF3 step
+started02:15:19Z and was canceled03:07:42Z near the configured60-minute job
+ceiling; no original RF3 TRX was produced. The same job must also execute the
+required instrumented unit/scalar/recovery/RF3 cohort and source/artifact checks.
+Allow180 minutes for that aggregate job, preserving every individual deadline,
+failure/cancellation predicate, required suite and artifact. This budget change
+does not make an unfinished or failed run qualified or alter workload bounds.
+
+TASK-TEST-LOCAL-CURRENT-WAVE extends REQ/AC-TEST-015 to current-image fault
+waves. R183 rejected the owned local receipt before creating an AppHost because
+RequestCqrsRf3ImageProof admitted only GitHub receipts. Reuse the existing
+local-development selector, canonical receipt/reference checks, exclusive
+GitHub/local environments and native bounded image verifier. One common local
+identity read validates actual immutable COPY inputs and daemon identity before
+wave composition; the existing pre-start local verifier checks all three model
+annotations. Every expected node reference must equal that exact owned image.
+ReadAsync selects only the validated reference; VerifyModelAsync returns the
+identity from its actual pre-start verifier to a local variable in WaveStartup.
+That exact returned identity supplies the post-readiness container checks. Each
+pre-start read revalidates the canonical receipt/reference against the expected
+map; no ambient cache, changed caller map or synthetic identity carrier applies.
+After native start/readiness establishes resource creation, verify each actual
+container config ID/reference under the unchanged wave deadline. Keep partial
+start, stopped-voter fault, original failure and joined cleanup semantics.
+The default GitHub manifest/digest path remains fail closed. Missing, mixed,
+stale or forged local inputs reject; local evidence is development-only.
+Root owns contract/integration/gates; Luna privately owns LocalRf3ImageIdentity,
+RequestCqrsRf3ImageProof and RequestCqrsRf3WaveStartup, with a feature-local
+local-image validation helper only if mandatory type limits require it.
+That helper is ClusterReplication/Helpers/LocalRf3ImageSelection.cs: it owns
+the existing closed selector/environment/reference/receipt validation only.
+LocalRf3ImageIdentity retains native verification and model/container proof.
+The existing due leader/rejoin/cold-restart and catalog mismatch whole flows
+provide real Aspire SDK/MCP regressions; no fixture/model assertion qualifies
+their database effects or substitutes for delivered-source Linux execution.
+
 AC-TEST-010 requires original per-suite MTP/TRX evidence from every required
 CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`;
 an omitted report setting, absent report, cancelled suite or failed native
@@ -36,6 +74,16 @@ runner cannot establish qualification. Run37303831451's missing full-suite
 TRX receipts are retained as an evidence gap, alongside its original artifacts.
 
 ## Unified Aspire test entry
+
+TASK-C1-LOGGER-MODEL-CONTROL maps the native logger-control fixture to the
+DIAG-003/005/006 contract in
+[NativeCqrsRequestV2](ClusterRouting/NativeCqrsRequestV2.md) and ADR-082. Only its
+explicit true-only selector composes the authoritative RF3 resource model and
+returns after Build before RunAsync. Native logger operations and original task
+joins remain real; startup/readiness/Docker/database RF3 are N/A for this control.
+The ordinary ClusterFixture and Wave paths remain mandatory RF3 evidence. The
+native testing wrapper owns final application disposal after reader settlement;
+inherited image/provenance settings are permitted, selected workload modes reject.
 
 [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md) specifies the owner-required
 single test entry and partial-start cleanup. Source and qualification are pending.
