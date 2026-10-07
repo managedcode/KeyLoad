@@ -9,7 +9,7 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(database.Apply(new(id, kind, principalId, database.EvaluationClock.GetUtcNow(), payloadJson)));
+        return Task.FromResult(database.ApplyEmbedded(new(id, kind, principalId, default, payloadJson), cancellationToken));
     }
 
     /// <inheritdoc />
@@ -17,8 +17,8 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
         ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(database.Apply(database.CreateNativeOperation(kind, id, principalId,
-            database.EvaluationClock.GetUtcNow(), payload)));
+        return Task.FromResult(database.ApplyEmbedded(database.CreateNativeOperation(kind, id, principalId,
+            default, payload), cancellationToken));
     }
 
     /// <inheritdoc />

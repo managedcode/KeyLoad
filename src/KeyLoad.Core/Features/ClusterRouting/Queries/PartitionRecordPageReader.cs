@@ -23,6 +23,19 @@ internal static class PartitionRecordPageReader
     internal static PartitionRecordPage Read(IKeyValueView view, PartitionRef partition,
         string family, int maxRecords, long maxRetainedBytes, long maxExaminedBytes,
         ReadOnlyMemory<byte> afterKey = default, CancellationToken cancellationToken = default)
+        => ReadCore(view, partition, family, maxRecords, maxRetainedBytes, maxExaminedBytes,
+            null, afterKey, cancellationToken);
+
+    internal static PartitionRecordPage Read(IKeyValueView view, PartitionRef partition,
+        string family, int maxRecords, long maxRetainedBytes, long maxExaminedBytes,
+        StorageReadObserver observer, ReadOnlyMemory<byte> afterKey = default,
+        CancellationToken cancellationToken = default)
+        => ReadCore(view, partition, family, maxRecords, maxRetainedBytes, maxExaminedBytes,
+            observer, afterKey, cancellationToken);
+
+    private static PartitionRecordPage ReadCore(IKeyValueView view, PartitionRef partition,
+        string family, int maxRecords, long maxRetainedBytes, long maxExaminedBytes,
+        StorageReadObserver? observer, ReadOnlyMemory<byte> afterKey, CancellationToken cancellationToken)
     {
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -42,6 +55,8 @@ internal static class PartitionRecordPageReader
             }
 
             examinedBytes = checked(examinedBytes + byteCount);
+            observer?.Invoke(byteCount);
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         bool RetainRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)

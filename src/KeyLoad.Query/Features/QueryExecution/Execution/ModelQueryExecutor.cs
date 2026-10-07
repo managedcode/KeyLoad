@@ -81,7 +81,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
             budget.Check();
             var projected = queries.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths);
             resultBytes += Encoding.UTF8.GetByteCount(projected.Json);
-            if (resultBytes > database.Limits.MaxBatchBytes)
+            if (resultBytes > budget.MaximumResultBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, QueryEngine.ResultLimitExceeded);
             }

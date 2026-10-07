@@ -25,6 +25,7 @@ internal static class PartitionQueryExecution
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(budget);
         var database = engine.PartitionQueryOwner;
+        QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.Check();
         using var admission = database.AdmitQuery(budget.Cancellation);
         budget.Check();
@@ -39,6 +40,7 @@ internal static class PartitionQueryExecution
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(budget);
         var database = engine.PartitionQueryOwner;
+        QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.Check();
         var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits, engine.Execution);
         return ExecuteNormalized(engine, principalId, prepared.Request, prepared.Partitions,
@@ -53,7 +55,8 @@ internal static class PartitionQueryExecution
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         budget.Check();
         var identity = database.Store.Identity;
-        var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, database.Limits, engine.Execution);
+        var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, database.Limits, engine.Execution,
+            maximumResultBytes: budget.MaximumResultBytes);
         _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
         var grants = ReserveGrants(budget, plan);
         var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);

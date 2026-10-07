@@ -16,19 +16,21 @@ internal static class PartitionQueryPlanFactory
     private const string GrantBudgetMessage = "The partition query grants exceed the configured budget.";
 
     internal static PartitionQueryPlanV1 Create(AstQueryRequest request, StoreIdentity owner,
-        ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution)
+        ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution, int? maximumResultBytes = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(limits);
         var sorted = ValidateAndOrderPartitions(partitions, execution.MaximumPartitions);
 
+        var maximumRetainedBytes = Math.Min(QueryResultBudgetPolicy.Resolve(limits, execution),
+            maximumResultBytes ?? limits.MaxBatchBytes);
         var limit = request.Query.Limit;
         var mergeReserve = PartitionQueryRetention.RootMergeReserve(sorted.Length,
             checked((long)limit * sorted.Length), limit);
         var leafFloor = checked(PartitionQueryRetention.LeafHeapReserve(limit)
             + PartitionQueryRetention.CandidateArrayBytes(limit));
-        var remainingRetained = limits.MaxBatchBytes - mergeReserve;
+        var remainingRetained = maximumRetainedBytes - mergeReserve;
         if (remainingRetained < checked(leafFloor * sorted.Length))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrantBudgetMessage);
@@ -45,7 +47,7 @@ internal static class PartitionQueryPlanFactory
                 retained[index], limit));
         }
         return new(Version, owner.NodeId, owner.Incarnation, owner.ReadGeneration, leaves.MoveToImmutable(),
-            limit, limits.MaxScanRecords, limits.MaxQueryReadBytes, limits.MaxBatchBytes);
+            limit, limits.MaxScanRecords, limits.MaxQueryReadBytes, maximumRetainedBytes);
     }
 
     private static PartitionRef[] ValidateAndOrderPartitions(ImmutableArray<PartitionRef> partitions, int maximumPartitions)

@@ -62,7 +62,8 @@ internal sealed class RelationalSqlRf3JoinCancellationTests(ClusterFixture fixtu
         };
         var configured = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(sdk,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.ResourcesConfigure,
-                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, right)), cancellationToken);
+                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, right),
+                Guid.NewGuid()), cancellationToken);
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RightId);
     }
 

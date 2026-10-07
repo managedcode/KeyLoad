@@ -43,7 +43,7 @@ internal static class GraphSearchExpansion
             var resource = GetResource(database, principal, view, entry.Reference, resources, budget);
             var document = ReadDocument(database, principal, view, entry.Reference, budget);
             var context = new GraphContextDocument(database.Project(principal, resource, document), entry.ShortestHops);
-            AddContext(context, database, results, ref retainedBytes, budget);
+            AddContext(context, results, ref retainedBytes, budget);
         }
         return results;
     }
@@ -79,11 +79,11 @@ internal static class GraphSearchExpansion
         return document;
     }
 
-    private static void AddContext(GraphContextDocument context, DatabaseEngine database,
+    private static void AddContext(GraphContextDocument context,
         List<GraphContextDocument> results, ref long retainedBytes, ReadExecutionBudget budget)
     {
         var bytes = budget.MeasureResult(context);
-        if (bytes > database.Limits.MaxBatchBytes - retainedBytes)
+        if (bytes > budget.MaximumResultBytes - retainedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ByteLimit);
         }

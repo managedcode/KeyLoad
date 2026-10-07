@@ -62,7 +62,11 @@ internal sealed class TestDatabase : IDisposable
         }
     }
     public OperationResult Submit<T>(OperationKind kind, T payload, string principal = RootPrincipalId, Guid? id = null, DateTimeOffset? time = null)
-        => Database.Apply(new(id ?? Guid.NewGuid(), kind, principal, time ?? Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+    {
+        var operation = new ReplicatedOperation(id ?? Guid.NewGuid(), kind, principal,
+            time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
+    }
 
     private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,

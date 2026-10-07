@@ -87,6 +87,7 @@ public sealed partial class QueryEngine
         CancellationToken cancellationToken)
     {
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();
@@ -178,7 +179,7 @@ public sealed partial class QueryEngine
             budget.Check();
             var projected = Project(principal, resource, row.Document, query.Projection, prepared.Paths);
             minimumResultBytes += Encoding.UTF8.GetByteCount(projected.Json);
-            if (minimumResultBytes > database.Limits.MaxBatchBytes)
+            if (minimumResultBytes > budget.MaximumResultBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, ResultLimitExceeded);
             }

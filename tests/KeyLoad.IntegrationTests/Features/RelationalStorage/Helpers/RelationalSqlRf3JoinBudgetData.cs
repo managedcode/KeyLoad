@@ -112,7 +112,7 @@ internal static class RelationalSqlRf3JoinBudgetData
     {
         var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
         var response = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(sdk,
-            SqlRf3Protocol.Call(partition, McpCallerTools.ResourcesConfigure, request), token);
+            SqlRf3Protocol.Call(partition, McpCallerTools.ResourcesConfigure, request, Guid.NewGuid()), token);
         await Assert.That(response.Name).IsEqualTo(resource.Name);
     }
 

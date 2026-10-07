@@ -21,6 +21,7 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.key ASC LIMIT 10";
     private const int QueryDialectVersion = 2;
     private const long InitialPolicyEpoch = 1;
+    private const long UpdatedPolicyEpoch = 2;
 
     [Test]
     public async Task RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead()
@@ -91,7 +92,8 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
     {
         var configured = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(admin,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.ResourcesConfigure,
-                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, right)), cancellationToken);
+                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, right),
+                Guid.NewGuid()), cancellationToken);
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RightId);
     }
 
@@ -100,14 +102,16 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             RelationalSqlRf3Tokens.Table, Capability.Query | Capability.DocumentsRead, cancellationToken);
+        await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
         var principal = identity.Principal with
         {
             Grants = [new(scenario.Partition.DatabaseId, RelationalSqlRf3Tokens.Table, Capability.Query | Capability.DocumentsRead),
                 new(scenario.Partition.DatabaseId, RightCollection, rightCapabilities)],
-            PolicyEpoch = InitialPolicyEpoch
+            PolicyEpoch = UpdatedPolicyEpoch
         };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), principal, cancellationToken));
-        await Assert.That(persisted.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
+        await Assert.That(persisted.PolicyEpoch).IsEqualTo(UpdatedPolicyEpoch);
+        await SqlRf3Protocol.EqualAsync(principal, persisted);
         return identity with { Principal = persisted };
     }
 

@@ -1,5 +1,18 @@
 # ClientApi
 
+TASK-MCP-Q2-SCHEMA-ORACLE implements REQ/AC-CLIENT-006 and AC-MCP-001 under
+the existing [ADR-118](../ADR/ADR-118-bounded-relational-inner-join.md) request
+contract. The original full normal/scalar runs at `24c0ac47` each failed
+`AcMcp001SqlPathSchemaHasVersionAndTypedQueryRequest`: the actual query schema
+contains six properties, while its pre-Q2 oracle expects five. Export the actual
+GraphPath operation schema and require the exact six-member query property set,
+the unchanged two required constructor fields, and the optional integer
+`queryDialectVersion` with default 1. Preserve every outer request, partition,
+result, hint and closed-object assertion. This is an oracle repair for the
+already accepted versioned request, not a new SQL capability. Run the complete
+ClientApi native normal/scalar suite and retain the original failure; actual
+SDK/official MCP RF3 operation parity remains a separate required gate.
+
 Owner direction2026-10-05 accepts [ToolDiscovery](ClientApi/ToolDiscovery.md)
 and [ADR-104](../ADR/ADR-104-mcp-gateway-tool-discovery.md): three initial
 ManagedCode.MCPGateway search/route/invoke tools replace the public default
@@ -389,3 +402,6 @@ This stage covers only
 the observable archive outcome portion of AC-BACKUP-001; streaming/memory,
 cluster-cut/reconciliation, cancellation/revocation parity and all remaining
 ClientApi/BackupRestore acceptance stay mandatory and open.
+
+
+TASK-MCP-SQL-SCHEMA-SIX-001 corrects the independent official SDK discovery oracle under AC-MCP-001 and ADR-118 Q1/Q2 schema additions. Original Linux run37612238705 attempt1 / SHA24c0ac47 actual AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints fails the closed SQL query five-field assertion. The canonical current SqlOperationRequest query schema has exactly partition, sql, parameters, allowFullScan, cursor and queryDialectVersion; only partition and sql are required, additionalProperties remains false, queryDialectVersion uses the existing integer schema contract and has exact default1. Freeze these six literal properties and default before correcting Integration ClientApi Assertions/McpGraphPathInputSchemaAssertions.cs and Contracts/McpDiscoveryProtocol.cs. Preserve every existing direct-path/entity/partition/nullability/result/effect/discovery assertion and real official MCP call. No schema relaxation or production contract change; original failure is retained. Root executes fresh original native discovery flow and unchanged qualification gates; this source-only correction makes no runtime claim.

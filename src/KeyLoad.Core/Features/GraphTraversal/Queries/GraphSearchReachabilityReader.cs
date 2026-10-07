@@ -124,7 +124,7 @@ internal sealed class GraphSearchReachabilityReader(
         }
         var entry = new GraphSearchReachability(reference, depth);
         var bytes = budget.MeasureResult(entry);
-        if (bytes > database.Limits.MaxBatchBytes - retainedBytes)
+        if (bytes > budget.MaximumResultBytes - retainedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, RetainedLimit);
         }

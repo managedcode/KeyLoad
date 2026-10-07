@@ -24,10 +24,14 @@ public sealed record QueryExecutionOptions
     private const int DefaultSqlBudgetCheckInterval = 256;
     private const int MaximumConformingSearchResults = 1_000;
     private const int MaximumConformingSearchTextBytes = 4_096;
+    private const int MinimumResultByteCount = 1;
     private const int MinimumWorkCount = 1;
     private const int MaximumConformingPartitions = 8;
     private const int MaximumCursorLifetimeDays = 365;
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
+
+    /// <summary>Gets an additional complete query/read result byte ceiling; null retains the native batch ceiling.</summary>
+    public int? MaximumResultBytes { get; init; }
 
     /// <summary>Gets the maximum age of a newly issued authorized query continuation.</summary>
     public TimeSpan CursorLifetime { get; init; } = TimeSpan.FromMinutes(DefaultCursorLifetimeMinutes);
@@ -58,7 +62,7 @@ public sealed record QueryExecutionOptions
 
     /// <summary>Checks that the configured duration remains positive and bounded.</summary>
     /// <returns>Whether the configured lifetime is valid.</returns>
-    public bool IsValid() => CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
+    public bool IsValid() => (MaximumResultBytes is null or >= MinimumResultByteCount) && CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
         && MaximumProjection >= MinimumWorkCount && MaximumOrdering >= MinimumWorkCount
         && MaximumParameters is >= MinimumWorkCount and <= DefaultMaximumParameters && MaximumInValues >= MinimumWorkCount
         && MaximumPartitions >= MinimumWorkCount && MaximumPartitions <= MaximumConformingPartitions

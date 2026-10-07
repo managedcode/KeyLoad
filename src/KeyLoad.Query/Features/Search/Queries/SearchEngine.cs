@@ -41,6 +41,7 @@ public sealed class SearchEngine
             throw new InvalidOperationException(UnsafeSynchronousSearch);
         }
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return SearchCore(principalId, request, budget);
@@ -55,6 +56,7 @@ public sealed class SearchEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await Task.Run(() => SearchCore(principalId, request, budget), cancellationToken).ConfigureAwait(false);
@@ -70,6 +72,15 @@ public sealed class SearchEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        return await GraphSearchAsync(principalId, request, budget, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal async Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
+        ReadExecutionBudget budget, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(budget);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await Task.Run(() => GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution),

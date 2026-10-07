@@ -22,6 +22,10 @@ internal static class PartitionQueryPlanValidation
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(limits);
         ValidateBounds(plan, limits, execution.MaximumPartitions);
+        if (plan.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PlanBudgetMessage);
+        }
 
         var partitions = new PartitionRef[plan.Leaves.Length];
         var firstRequest = NormalizeShape(plan.Leaves[FirstElementIndex], plan, partitions, EmptyElementCount);

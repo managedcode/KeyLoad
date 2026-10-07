@@ -14,6 +14,8 @@ internal static class McpGraphPathCatalogProtocol
     internal const string Parameters = "parameters";
     internal const string AllowFullScan = "allowFullScan";
     internal const string Cursor = "cursor";
+    internal const string QueryDialectVersion = "queryDialectVersion";
+    internal const int DefaultQueryDialectVersion = 1;
     internal const string Found = "found";
     internal const string Hops = "hops";
     internal const string Vertices = "vertices";

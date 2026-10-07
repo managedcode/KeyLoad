@@ -2,11 +2,11 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.CodeQuality;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.TestInfrastructure;
+using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
 
@@ -19,9 +19,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     private readonly long? commandBytes;
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
+    private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
     private ContainerRuntimeControl? containerRuntime;
     private NativeCoverageRf3FixtureOwner? coverage;
+    private LocalRf3ImageTestSession? localImageSession;
+    private bool localImageCleanupIncomplete;
     private readonly string coverageFixtureId = Guid.NewGuid().ToString("D");
     private byte[] peerSecret = [];
 
@@ -48,6 +51,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     internal ClusterFixture(DatabaseLimits databaseLimits)
         => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
 
+    /// <summary>Creates an RF3 fixture with explicit database and additional query result bounds.</summary>
+    internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
+        : this(databaseLimits)
+        => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
+
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
     public string Root { get; private set; } = Path.Combine(Path.GetTempPath(),
         ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
@@ -66,6 +74,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     {
         try
         {
+            using var preparation = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
+            localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(preparation.Token)
+                .ConfigureAwait(false);
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
             coverage = await NativeCoverageRf3FixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
                 .ConfigureAwait(false);
@@ -76,9 +87,13 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             {
                 Root = coverage.Root;
             }
+            if (localImageSession is not null)
+            {
+                arguments = [.. arguments, .. localImageSession.Selection.CreateWaveArguments()];
+            }
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
-            ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits);
+            ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);
@@ -96,34 +111,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         }
     }
 
-    private async Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
+    private Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
         string repository, CancellationToken token)
-    {
-        var localImageIdentity = coverage is null
-            ? await LocalRf3ImageIdentity.VerifyBeforeStartAsync(App, repository, token).ConfigureAwait(false)
-            : null;
-        if (coverage is null && localImageIdentity is null)
-        {
-            await ClusterFixtureImageIdentity.VerifyAsync(App, token).ConfigureAwait(false);
-        }
-        else if (coverage is not null)
-        {
-            await coverage.VerifyBeforeStartAsync(App, token).ConfigureAwait(false);
-        }
-        await App.StartAsync(token).ConfigureAwait(false);
-        var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-            .Select(ClusterFixtureProtocol.NodeName);
-        await AspireStartupReadiness.WaitForHealthyAsync(App, readinessNodes, token).ConfigureAwait(false);
-        if (localImageIdentity is not null)
-        {
-            await LocalRf3ImageIdentity.VerifyStartedContainersAsync(localImageIdentity, containerNames, token)
-                .ConfigureAwait(false);
-        }
-        if (coverage is not null)
-        {
-            await coverage.VerifyStartedAsync(containerNames, token).ConfigureAwait(false);
-        }
-    }
+        => ClusterFixtureApplicationStartup.StartAsync(App, repository, containerNames, coverage,
+            localImageSession?.Selection, token);
 
     internal void RegisterNativeCoverageCase<TCase>(string methodName) => coverage?.RegisterCase<TCase>(methodName);
 
@@ -177,7 +168,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         using var deadline = coverage?.CreateCleanupDeadline();
-        var token = deadline?.Token ?? CancellationToken.None;
+        using var localCleanup = localImageSession?.CreateApplicationCleanupCancellation();
+        var token = deadline?.Token ?? localCleanup?.Token ?? CancellationToken.None;
         var failures = new List<Exception>();
         await SaveDiagnosticsAsync(deadline, failures).ConfigureAwait(false);
         if (diagnostics is not null)
@@ -190,7 +182,16 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         App = null!;
         var (appStopped, stoppedNodes) = await ClusterFixtureApplicationShutdown.CollectAsync(
             ownedApp, deadline, coverage, containerRuntime is not null, failures, token).ConfigureAwait(false);
-        await DeleteOwnedRootAsync(deadline, failures).ConfigureAwait(false);
+        var ownedLocalImage = localImageSession is not null;
+        if (localImageSession is not null)
+        {
+            await ClusterFixtureLocalImageLifecycle.JoinAsync(localImageSession, Root, appStopped, ownedApp is null,
+                failures).ConfigureAwait(false);
+            localImageSession = null;
+        }
+        localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
+        if (!localImageCleanupIncomplete)
+        { await DeleteOwnedRootAsync(deadline, failures).ConfigureAwait(false); }
         if (coverage is not null && appStopped && failures.Count == 0 && stoppedNodes is not null)
         {
             await deadline!.CollectAsync(() => coverage.PublishReceiptAsync(stoppedNodes, token), failures)

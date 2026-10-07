@@ -62,9 +62,12 @@ internal static class TwoRf3ClusterResources
         const string SecondIncarnationParameterSuffix = "incarnation-b";
 
         ValidateMode(builder, profile);
+        var localImage = LocalDevelopmentContainerImage.Read(builder);
+        var image = localImage is null
+            ? RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration)
+            : null;
         var root = Path.GetFullPath(dataRoot);
         ClusterProfileStore.PrepareDirectory(root);
-        var image = RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
         var secondPhysical = Guid.NewGuid();
         var secondIncarnation = Guid.NewGuid();
         var secondPeerSecret = RandomSecret();
@@ -79,16 +82,17 @@ internal static class TwoRf3ClusterResources
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
-        return AddNodes(builder, profile, root, image, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
-            firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId);
+        return AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
+            firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
     }
 
     private static IResourceBuilder<ContainerResource>[] AddNodes(IDistributedApplicationBuilder builder,
-        LocalProfile profile, string root, RuntimeContainerImage image, Guid secondPhysical, Guid secondIncarnation,
+        LocalProfile profile, string root, Guid secondPhysical, Guid secondIncarnation,
         IResourceBuilder<ParameterResource> physicalB, IResourceBuilder<ParameterResource> incarnationB,
         IResourceBuilder<ParameterResource> signing, IResourceBuilder<ParameterResource> admin,
         IResourceBuilder<ParameterResource> firstPeer, IResourceBuilder<ParameterResource> secondPeer,
-        string? containerUser, string[] firstGroup, string[] secondGroup, string clusterId)
+        string? containerUser, string[] firstGroup, string[] secondGroup, string clusterId,
+        RuntimeContainerImage? image, LocalDevelopmentContainerImage? localImage)
     {
         const int IndexInitialValue = 0;
         const string ContainerNamePrefix = "keyload-";
@@ -106,7 +110,11 @@ internal static class TwoRf3ClusterResources
             var name = Nodes[index];
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
-            var resource = image.Add(builder, name)
+            var resourceBuilder = image is null
+                ? builder.AddContainer(name, LocalDevelopmentContainerImage.Repository,
+                    (localImage ?? throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid)).Tag)
+                : image.Add(builder, name);
+            var resource = resourceBuilder
                 .WithContainerName(ContainerNamePrefix + incarnation.ToString(ResourceIdentityFormat) + ContainerNameSeparator + name)
                 .WithContainerNetworkAlias(name)
                 .WithBindMount(directory, Data)
@@ -190,7 +198,6 @@ internal static class TwoRf3ClusterResources
         ClusterProfileStore.Validate(profile);
         if (!AppHostOptionsRegistration.Get(builder).Control.Value.Ephemeral
             || AppHostOptionsRegistration.Get(builder).Control.Value.BenchmarksEnabled
-            || LocalDevelopmentContainerImage.Read(builder) is not null
             || AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled
             || AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is not null)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }

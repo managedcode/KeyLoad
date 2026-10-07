@@ -9,9 +9,15 @@ internal static class SqlGraphSearchExecutor
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         var graphRequest = SqlGraphSearchParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters, execution.SqlBudgetCheckInterval);
         budget.Check();
-        return await search.GraphSearchAsync(principalId, graphRequest, cancellationToken).ConfigureAwait(false);
+        var result = await search.GraphSearchAsync(principalId, graphRequest, budget, cancellationToken).ConfigureAwait(false);
+        if (execution.MaximumResultBytes is not null)
+        {
+            budget.CheckResult(result);
+        }
+        return result;
     }
 }

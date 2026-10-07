@@ -8,6 +8,14 @@ const projects = new Map([
   ['unit-scalar', 'KeyLoad.UnitTests'], ['recovery', 'KeyLoad.RecoveryTests'],
   ['rf3', 'KeyLoad.IntegrationTests'], ['comparison', 'KeyLoad.ComparisonTests'], ['site', 'KeyLoad.SiteTests']
 ]);
+const localImageArgumentsEnvironment = 'KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS';
+const localImageFilters = new Set(['/*/*/TwoRf3MembershipProfileTests/*',
+  '/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*',
+  '/*/*/RelationalSqlRf3JoinRejectionTests/*']);
+const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
+const localImageInheritedIdentity = ['KEYLOAD_IMAGE_PROVENANCE', 'KEYLOAD_LOCAL_IMAGE_RECEIPT',
+  'KeyLoad__ContainerImages__Server', 'KEYLOAD_LOCAL_RF3_IMAGE_CHILD',
+  'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS', localImageArgumentsEnvironment];
 const mapped = new Map([
   ['Filter', '--treenode-filter'], ['ResultsDirectory', '--results-directory'],
   ['CoverageSettings', '--coverage-settings'], ['CoverageOutput', '--coverage-output'],
@@ -28,9 +36,27 @@ export function nativeSelection(input, inherited = process.env) {
   const suite = values.get('Suite');
   const project = projects.get(suite);
   if (!project) throw new Error('Unsupported native TUnit suite.');
+  const localImageEnabled = values.get('LocalRf3Image:Enabled');
+  const localImageSelected = values.has('LocalRf3Image:Enabled');
+  if (localImageSelected && (localImageEnabled !== 'true' || suite !== 'rf3'
+    || !localImageFilters.has(values.get('Filter'))
+    || [...values.keys()].some(key => !['Suite', 'Filter', 'LocalRf3Image:Enabled',
+      'ReportTrx', 'TimeoutMinutes', 'ResultsDirectory', 'Execution:MaximumParallelTests'].includes(key))
+    || localImageGithubIdentity.some(key => inherited[key] !== undefined && inherited[key] !== '')
+    || localImageInheritedIdentity.some(key => inherited[key] !== undefined && inherited[key] !== ''))) {
+    throw new Error('Invalid native local RF3 image selection.');
+  }
   const environment = { ...inherited };
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__ScaleProfile', 'KeyLoadTests__VectorProfile',
-    'KeyLoadTests__OpenLoopRate', 'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS']) delete environment[key];
+    'KeyLoadTests__OpenLoopRate', 'KeyLoadTests__LocalRf3Image__Enabled',
+    'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS',
+    localImageArgumentsEnvironment]) delete environment[key];
+  if (localImageSelected) {
+    environment[localImageArgumentsEnvironment] = JSON.stringify([
+      '--KeyLoadTests:Suite=' + suite, '--KeyLoadTests:Filter=' + values.get('Filter'),
+      '--KeyLoadTests:LocalRf3Image:Enabled=true'
+    ]);
+  }
   const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore', '--configuration', 'Release',
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', values.get('Execution:MaximumParallelTests') ?? '8',
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
@@ -53,6 +79,8 @@ export function nativeSelection(input, inherited = process.env) {
     } else if (['ScaleProfile', 'VectorProfile', 'OpenLoopRate'].includes(key)) {
       if (suite !== 'comparison') throw new Error('Benchmark selection requires ComparisonTests.');
       environment[key === 'OpenLoopRate' ? 'Benchmarks__OpenLoopRate' : `Benchmarks__${key}`] = value;
+    } else if (key === 'LocalRf3Image:Enabled') {
+      continue;
     } else if (key.startsWith('NativeCoverage:')) {
       if (suite !== 'rf3') throw new Error('Native RF3 preparation requires IntegrationTests.');
       preparation.push(`--KeyLoadTests:${key}=${value}`);

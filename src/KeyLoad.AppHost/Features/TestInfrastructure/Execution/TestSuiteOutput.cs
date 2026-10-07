@@ -47,6 +47,10 @@ internal static class TestSuiteOutput
     private static async Task CaptureResourcesAsync(DistributedApplication app, string resource,
         ResourceLoggerService logs, Dictionary<string, Task> captures, CancellationToken token)
     {
+        if (app.ResourceNotifications.TryGetCurrentState(resource, out var current))
+        {
+            CaptureResource(logs, current.ResourceId, captures, token);
+        }
         await foreach (var update in app.ResourceNotifications.WatchAsync(token).ConfigureAwait(false))
         {
             if (string.Equals(update.Resource.Name, resource, StringComparison.Ordinal))

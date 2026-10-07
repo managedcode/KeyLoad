@@ -117,3 +117,31 @@ Do not compute expectations through production normalization or weaken compariso
 ADR-035/039 remain sufficient for this test-only oracle correction; no product,
 schema, authority or transport contract changes. Lead owns integration/delivery
 and exact-SHA GitHub qualification; local tests remain prohibited.
+
+
+## TASK-EVENT-QUEUE-WHOLEFLOW-001 — bounded native operation regression proposal
+
+This source-only regression batch preserves the existing ADR-002/024/026/028
+contracts and REQ/AC-EVENT-004/005 plus REQ/AC-MSG-001/002/005. Its original
+architecture task subset is KL-083 (append OCC/content identity), KL-087 (lost
+claim/ACK reply recovery) and KL-091 (same-domain batch precondition rollback).
+It does not close those tasks or qualify the full EventStreams/Messaging feature.
+
+The owning unit cases are
+[EventAppendWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/EventStreams/Cases/EventAppendWholeFlowTests.cs)
+(two concurrent Exact append instances and four rejection instances),
+[QueueLostResponseWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLostResponseWholeFlowTests.cs)
+(one claim/ACK retry workflow with real ZoneTree reopen), and
+[QueueAdmissionCancellationWholeFlowTests](../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueAdmissionCancellationWholeFlowTests.cs)
+(two pre-admission cancellation instances). They use actual native storage,
+joined workers, literal complete results, persisted-state assertions, stable
+receipt replay and a healthy follow-up. Failed commands may retain authorized
+outcome/clock records; rejection tests assert complete affected domain-family
+state rather than falsely requiring no committed failure outcome. Pre-admission
+cancellation asserts the entire store and position remain unchanged and checks
+the original token. It does not claim cancellation after commit undoes effects.
+
+The exact proposed native inventory is nine. Current normal/scalar execution,
+seeded process-crash criteria and real RF3 SDK/MCP qualification remain required;
+source review is not execution evidence. Original historical passing cases and
+retained global failures remain separate from this proposal.

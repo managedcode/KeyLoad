@@ -1,3 +1,6 @@
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Server;
+
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 [NotInParallel]
@@ -8,13 +11,35 @@ internal sealed class TwoRf3MembershipProfileTests
     {
         using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
-        await using var wave = await TwoRf3MembershipWave.StartAsync(deadline.Token).ConfigureAwait(false);
-        await TwoRf3MembershipReadinessAssertions.VerifyAllNodesAsync(wave.Application, deadline.Token).ConfigureAwait(false);
-        await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, deadline.Token)
+        var failures = new List<Exception>();
+        LocalRf3ImageTestSession? localImage = null;
+        TwoRf3MembershipWave? wave = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            localImage = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token).ConfigureAwait(false);
+            var startedWave = await TwoRf3MembershipWave.StartAsync(localImage?.Selection, deadline.Token)
+                .ConfigureAwait(false);
+            wave = startedWave;
+            await VerifyMembershipAsync(startedWave, deadline.Token).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        var beforeWaveCleanup = failures.Count;
+        if (wave is { } ownedWave)
+        { await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
+        if (localImage is { } ownedImage)
+        { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false); }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task VerifyMembershipAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    {
+        await TwoRf3MembershipReadinessAssertions.VerifyAllNodesAsync(wave.Application, cancellationToken)
+            .ConfigureAwait(false);
+        await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, cancellationToken)
             .ConfigureAwait(false);
         await TwoRf3MembershipReadinessAssertions.VerifyPublicCallsClosedAsync(wave.Application,
-            TwoRf3MembershipProtocol.Node1, wave.Profile.AdminKey, deadline.Token).ConfigureAwait(false);
+            TwoRf3MembershipProtocol.Node1, wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
         await TwoRf3MembershipReadinessAssertions.VerifyPublicCallsClosedAsync(wave.Application,
-            TwoRf3MembershipProtocol.Node4, wave.Profile.AdminKey, deadline.Token).ConfigureAwait(false);
+            TwoRf3MembershipProtocol.Node4, wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
     }
 }

@@ -17,11 +17,11 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage VII: Q2/AST2 bounded same-partition Text-primary-key INNER JOIN, whole committed document/index scan, strict native MCP schema and exact functional contributor/selector joins are live. R290 full Release passes4,174 inputs with zero drift/warnings/errors; R291/R292 owning normal/scalar each606/606 and R293 real indexed/idempotency process recovery2/2 pass with zero source/assembly drift or skips. R294 full native formatter passes. Latest authentic Stage VI Linux4c48909 normal/scalar each2771/2771 and recovery236/236 pass; RF3 has7 failures among158 operations. Current-source full Linux/RF3, full SQL/protocol, sixteen-module functional coverage, endurance and original-task gates remain open.",
+    "verificationStage": "Stage VIII full local normal2876/2876 and scalar2876/2876 plus recovery236/236 pass on their original R327 compiled cohort; final R339 Release and R343 format pass after four using-order corrections and a test-only epoch2 authorization repair. Final current R344 Aspire-owned Docker RF3 eight public .NET/official MCP join/schema/auth/budget/cancellation/read-cut operations pass8/8, with unchanged4217source and896image inputs. Original failed and superseded native outcomes remain retained; complete delivered Linux/RF3, six-silo and sixteen-module functional coverage remain open.",
     "remaining": [
-      "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
-      "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
-      "Complete reviewed functional operation inventory and actual source-bound coverage; load/comparison/shape tests remain excluded"
+      "Complete exact-current-source Linux native unit/scalar/recovery and full RF3 public SDK/MCP qualification with original same-job compiled-image identity",
+      "Run actual six-silo one-membership regression after native silo/authority health route correction; qualify graph leader-loss canonical receipt reconciliation and remaining RF3 failure cohorts",
+      "Join and execute reviewed source-bound complete functional operation inventory and actual sixteen-module coverage; load/comparison and ordinary shape controls remain excluded"
     ],
     "latestOriginalLinux": {
       "sourceCommit": "4c48909fc244f8a1399ec45b11e2ef7f89145602",
@@ -114,20 +114,23 @@
       "qualification": "Authenticated original Stage VI Linux TUnit/TRX reports agree. Full build, formatter, analyzers, normal/scalar/recovery pass; RF3 has seven failed operations. Coverage collection, descriptor and merge skipped. Q2 additions are later source and receive no qualification from this run."
     },
     "currentBuild": {
-      "run": "R290",
-      "compileInputs": 4174,
+      "run": "R339",
+      "compileInputs": 4216,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "5063bd5c50ecb45faa0a47bd062ca07aa55aa4add33a6e06cd26b9f05f66952b",
+      "nativeExitCode": 0,
+      "elapsedSeconds": 139.324,
+      "logSha256": "3f197e4d8a9a6c8f61db455e71d209d2a76a491a3b35ebbf91392dac102655e5",
       "passed": true,
-      "qualification": "Full native local Release after the final Stage VII fixture correction; original delivered-source Linux and RF3 qualification remain open"
+      "qualification": "Full native local Release after four import-order corrections and persisted policy epoch2 fixture repair; delivered exact-source Linux/full RF3 qualification remains open."
     },
     "currentFormatter": {
-      "run": "R294",
-      "compileInputs": 4174,
+      "run": "R343",
+      "compileInputs": 4216,
       "inputDrift": 0,
       "nativeExitCode": 0,
+      "elapsedSeconds": 227.378,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -1133,6 +1136,1052 @@
       "fullRf3Qualified": false,
       "productCoveragePercent": null,
       "qualification": "Source-bound local development only. No power-loss, full product coverage, original acceptance closure or delivered Linux qualification inferred."
+    },
+    "stageVIIIOriginalDevelopment": {
+      "R308": {
+        "nativeExitCode": 7,
+        "elapsedSeconds": 1803.465,
+        "logSha256": "23cb2d7e2b3f2f9786101d8befda86e59bd61f5ee2277d6ded4a930f0b4f24f5",
+        "sourceInputs": 4189,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "reports": [
+          {
+            "sha256": "a5b3e0ff9ab99a443eb250388ebfa71c838f64cca88708945a2477a58b6a9211",
+            "counters": {
+              "total": "2828",
+              "executed": "2828",
+              "passed": "2819",
+              "failed": "9",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualifiesLaterJoinedSource": false
+      },
+      "R309": {
+        "nativeExitCode": 7,
+        "elapsedSeconds": 1807.552,
+        "logSha256": "2e1767a7717f9c9e78ca7caade119d0071895525c01ec8065bad9d0de2322dda",
+        "sourceInputs": 4189,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "reports": [
+          {
+            "sha256": "a86f85ae12bf089ef14f55d901ae7b0b8e136b55348d00aa335fb61f41527489",
+            "counters": {
+              "total": "2825",
+              "executed": "2825",
+              "passed": "2821",
+              "failed": "4",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualifiesLaterJoinedSource": false
+      },
+      "R310": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 302.356,
+        "logSha256": "a3aac823ba86c88a4ef3b14b4dfce60284fb8ee55d56ff909dc28848a585fcb7",
+        "sourceInputs": 4189,
+        "assemblyInputs": 427,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "reports": [
+          {
+            "sha256": "ae98c8625350de3b67bf6bad0d44f9ce7f4ed6f2ca981ced3ff1000a112f7b11",
+            "counters": {
+              "total": "236",
+              "executed": "236",
+              "passed": "236",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualifiesLaterJoinedSource": false
+      },
+      "R311": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 32.873,
+        "logSha256": "602a8df77078a1c9c8cc2b007fbbba90fe429d952d24139cf8b5aa9e273a1a17",
+        "sourceInputs": 4189,
+        "assemblyInputs": 896,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "reports": [
+          {
+            "sha256": "9d7da711ba0fd8a43b779e35f6cb777dd62a90f37866640d92066ec50576a679",
+            "counters": {
+              "total": "5",
+              "executed": "5",
+              "passed": "5",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualifiesLaterJoinedSource": false
+      },
+      "R312": {
+        "nativeExitCode": 2,
+        "elapsedSeconds": 18.85,
+        "logSha256": "a438b161c9c22d05a393fed79888f86941a425318b5ae3f1e4e2ede04f74623d",
+        "sourceInputs": 4189,
+        "assemblyInputs": 896,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "reports": [
+          {
+            "sha256": "1a5abafebb2842af1cb6eac6a52b409255f0374e94f8eeafd4c4adb129e9f94f",
+            "counters": {
+              "total": "8",
+              "executed": "8",
+              "passed": "0",
+              "failed": "8",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualifiesLaterJoinedSource": false
+      },
+      "previousCurrentBuild": {
+        "run": "R290",
+        "compileInputs": 4174,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "5063bd5c50ecb45faa0a47bd062ca07aa55aa4add33a6e06cd26b9f05f66952b",
+        "passed": true,
+        "qualification": "Full native local Release after the final Stage VII fixture correction; original delivered-source Linux and RF3 qualification remain open"
+      },
+      "previousCurrentFormatter": {
+        "run": "R294",
+        "compileInputs": 4174,
+        "inputDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "R328": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 34.964,
+        "logSha256": "43501de13ce78c3290558ad0a6448d873590c8e5c4800a38a3de74299406a8ff",
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "e9d184206337160cdc3cfb9af621e5c39279ae6982461db2ba46507674a35028",
+            "counters": {
+              "total": "50",
+              "executed": "50",
+              "passed": "50",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 50,
+            "cases": [
+              {
+                "name": "AcMcp001SqlPathSchemaHasVersionAndTypedQueryRequest",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmove002ScopedObservationChargesEachNativeRecordAndLookaheadExactlyOnce",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmove003ScopedObserverFailurePreservesOriginalExceptionStateAndHealthyPage",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMcp001DirectPathSchemaHasTheCompleteTypedRequestAndResult",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMcp001GraphPathCatalogContainsOneEntryPerToolWithReadHints",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022EntityEdgeEventQueueAtomicCommitRetryAndLateEdgeConflictLeaveExactModelState",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004ConcurrentExactAppendHasOneWholeProducerAndStableReplay(2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004ConcurrentExactAppendHasOneWholeProducerAndStableReplay(8)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022MissingEndpointRejectsTheWholeEntityEdgeBatchAndFollowingMutationSucceeds",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(3)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Receive)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Processing)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(False, 2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(True, 1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(False, 1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(True, 2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "LiveDeltaCumulativeCeilingRejectsBeforeRetentionAndOriginalPageBoundaryStillResumes",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001ClaimAndAckResponsesReplayExactlyAcrossRealStoreReopen",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidResultCeilingDeniesOwnerAdmissionBeforeNativeReadAndHealthyOwnerStillWorks(-1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(False, False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NullOrLargerResultCeilingStillRejectsAboveNativeBatchLimitAndHealthyReadWorks(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NullOrLargerResultCeilingStillRejectsAboveNativeBatchLimitAndHealthyReadWorks(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(True, True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(True, False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(False, True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidResultCeilingDeniesOwnerAdmissionBeforeNativeReadAndHealthyOwnerStillWorks(0)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MismatchedSqlAndSearchOwnerCapsRejectBeforeFinalGraphSerializationAndHealthyGraphPreservesFullState(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MismatchedSqlAndSearchOwnerCapsRejectBeforeFinalGraphSerializationAndHealthyGraphPreservesFullState(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Euclidean)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad·IntegrationTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Cosine)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(DotProduct)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad·UnitTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad·UnitTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad·Analyzers·Tests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad·RecoveryTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmove003CancellationAfterObservedNativeWorkReturnsNoPartialPage",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022SeededMutationsAndRetriesMatchIndependentAdjacencyStateBeforeAndAfterNativeReopen",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesPersistedCreatorRevocationBeforeTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesSagaCancellationBeforeTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesCompletionCommittedAfterScheduling",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesFutureCanonicalDeadlineBeforeTimeout",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R329": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 37.765,
+        "logSha256": "1f4ef78076aa364e6034b94c389fe1a6a71658090912eca548dfe396178887d4",
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "7665cce0db7d245d6e97ed627395daa2c0e028af8d0dfaa715a338a99ec7c472",
+            "counters": {
+              "total": "50",
+              "executed": "50",
+              "passed": "50",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 50,
+            "cases": [
+              {
+                "name": "AcPmove002ScopedObservationChargesEachNativeRecordAndLookaheadExactlyOnce",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmove003ScopedObserverFailurePreservesOriginalExceptionStateAndHealthyPage",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMcp001DirectPathSchemaHasTheCompleteTypedRequestAndResult",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMcp001SqlPathSchemaHasVersionAndTypedQueryRequest",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMcp001GraphPathCatalogContainsOneEntryPerToolWithReadHints",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match·)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004ConcurrentExactAppendHasOneWholeProducerAndStableReplay(2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcEvent004ConcurrentExactAppendHasOneWholeProducerAndStableReplay(8)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(3)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022MissingEndpointRejectsTheWholeEntityEdgeBatchAndFollowingMutationSucceeds",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022EntityEdgeEventQueueAtomicCommitRetryAndLateEdgeConflictLeaveExactModelState",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Processing)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001And002CancelledAdmissionHasNoPersistedEffectsAndSameIdIsHealthy(Receive)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(True, 2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(True, 1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(False, 1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(False, 2)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "LiveDeltaCumulativeCeilingRejectsBeforeRetentionAndOriginalPageBoundaryStillResumes",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcMsg001ClaimAndAckResponsesReplayExactlyAcrossRealStoreReopen",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidResultCeilingDeniesOwnerAdmissionBeforeNativeReadAndHealthyOwnerStillWorks(-1)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NullOrLargerResultCeilingStillRejectsAboveNativeBatchLimitAndHealthyReadWorks(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(False, False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NullOrLargerResultCeilingStillRejectsAboveNativeBatchLimitAndHealthyReadWorks(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(True, True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(True, False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExplicitResultCeilingRejectsCompleteScalarOrJoinPageAndHealthyProjectionPreservesSources(False, True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidResultCeilingDeniesOwnerAdmissionBeforeNativeReadAndHealthyOwnerStillWorks(0)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MismatchedSqlAndSearchOwnerCapsRejectBeforeFinalGraphSerializationAndHealthyGraphPreservesFullState(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MismatchedSqlAndSearchOwnerCapsRejectBeforeFinalGraphSerializationAndHealthyGraphPreservesFullState(False)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Euclidean)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(True)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad·UnitTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad·UnitTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad·IntegrationTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(DotProduct)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Cosine)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad·RecoveryTests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad·Analyzers·Tests)",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Kl022SeededMutationsAndRetriesMatchIndependentAdjacencyStateBeforeAndAfterNativeReopen",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmove003CancellationAfterObservedNativeWorkReturnsNoPartialPage",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesPersistedCreatorRevocationBeforeTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesSagaCancellationBeforeTimeout",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesCompletionCommittedAfterScheduling",
+                "outcome": "Passed"
+              },
+              {
+                "name": "NativeJobObservesFutureCanonicalDeadlineBeforeTimeout",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R330": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 239.643,
+        "logSha256": "90031ac67c5d2b23a9d91e71c4d3f8580384f6a96df811af6cc5efb1a4e39238",
+        "sourceInputs": 4217,
+        "assemblyInputs": 427,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "8693a6b784cee209d7a0353698e50b6ff49fea3e08eda958381cdc1c28aba3a6",
+            "counters": {
+              "total": "236",
+              "executed": "236",
+              "passed": "236",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 236
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R333": {
+        "nativeExitCode": 2,
+        "elapsedSeconds": 381.388,
+        "logSha256": "172cbd63c9d9f01b9526f17073eb75ce646d37276af5429fc7621d15c970a828",
+        "sourceInputs": 4217,
+        "assemblyInputs": 896,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "a5094160f10014c241ff61c8c494de2477805fb8c5576a857cd25f0f4ebfd647",
+            "counters": {
+              "total": "8",
+              "executed": "8",
+              "passed": "7",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 8,
+            "cases": [
+              {
+                "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
+                "outcome": "Passed"
+              },
+              {
+                "name": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+                "outcome": "Failed"
+              },
+              {
+                "name": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R334": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 460.114,
+        "logSha256": "f7e04230a9c23d165875eb99ff94a0c95638a3b7ad6fa95dee659eb4b8d198be",
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "7c21b8e1b0b3b1021350cb34b88f934057516eb1bfdad061d7195f3392765a56",
+            "counters": {
+              "total": "2876",
+              "executed": "2876",
+              "passed": "2876",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 2876
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R335": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 468.506,
+        "logSha256": "38d19f87900e7aca5f4afa461ee504834dcbf00f7fae803d6e2155e3f3433800",
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "8514fcc37462a8925533a6bf3292a9969a62913a33ab9fd5713c60376e328a5b",
+            "counters": {
+              "total": "2876",
+              "executed": "2876",
+              "passed": "2876",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 2876
+          }
+        ],
+        "currentPostFormattingCohort": false,
+        "linuxQualified": false
+      },
+      "R342": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 1.05,
+        "logSha256": "3a38f042a900aa3fee45933cfed85112456b24af0fd4b58a52f479fdb797ae4c",
+        "sourceInputs": 4217,
+        "assemblyInputs": 896,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [],
+        "currentPostFormattingCohort": true,
+        "linuxQualified": false
+      },
+      "R344": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 329.026,
+        "logSha256": "d0fad8b067bcc7ef15a3c84d42efe33b32468fdcd2ce7de5bf129051a84bba74",
+        "sourceInputs": 4217,
+        "assemblyInputs": 896,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "sha256": "2e5eab8af61c9433819da5e9da19b52c8f22d664253c2e045b37e5452f8b3577",
+            "counters": {
+              "total": "8",
+              "executed": "8",
+              "passed": "8",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "nativeCaseCount": 8,
+            "cases": [
+              {
+                "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
+                "outcome": "Passed"
+              },
+              {
+                "name": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "currentPostFormattingCohort": true,
+        "linuxQualified": false
+      },
+      "R340": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 61.385,
+        "logSha256": "b779e1d794f38de35a97a1e6a712061266111b033fdd1b8e0f02f7557a50de3b",
+        "inputCount": 4216,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "R343": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 227.378,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4216,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "R341": {
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "phases": [
+          {
+            "nativeExitCode": 0,
+            "elapsedSeconds": 0.169,
+            "stdoutBytes": 8428,
+            "stdoutSha256": "c2420d754b63d2b3594162ba496b72a3486dd037ae0f8d3e0d97e44899966f69",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "nativeExitCode": -15,
+            "elapsedSeconds": 231.769,
+            "stdoutBytes": 0,
+            "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "qualification": "Read-only native discovery help succeeded; original listing produced no records under sandbox and its exact owned child received SIGTERM after231.769s. Wrapper joined and recorded -15. No native census or operation pass."
+      },
+      "R345": {
+        "sourceInputs": 4217,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "nativeCaseCount": 2876,
+        "schemaVersion": 1,
+        "originalJsonSha256": "400ac7c0649a06277dedc6e96711b1540a780b84a10be63a03e2f3c6a8279818",
+        "nativeExitCode": 0,
+        "qualification": "Original genuine complete native JSON discovery of final R339 unit image; discovery is not operation PASS or measured functional coverage."
+      },
+      "R346": {
+        "observationSha256": "ac3ed832e41a471ef03da02db217402853401718bb13abc6810829dd0bf8d581",
+        "nativeImage": {
+          "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+          "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+          "dllSha256": "492846b7ee9fdd58d82ae90741d35b25f3c5f2a231df0c59449ace8845bd829f",
+          "pdbSha256": "35a910be98aef734c28fdca9b2f0044baf3b06ce8d56ed27188c98c5ea5bd371",
+          "moduleName": "KeyLoad.UnitTests.dll",
+          "compiledIdentityToolSha256": "baf2660772a551118067e33a0a7c62b8477722518561f27d5da2380be9a2d6bb",
+          "originalCompilationRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "inspectedSourceRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "mvid": "51e636aa-add9-4f59-ae31-a622831be55c",
+          "pdbGuid": "6f099a92-93ee-42e2-8b70-00701adb1b37",
+          "pdbStamp": 3661193885,
+          "compiledSourceBindingComplete": true,
+          "qualification": "static native identity inspection only; no test, coverage or build qualification",
+          "nativePdbDocumentCount": 1813,
+          "sourceFilesWithoutPdbDocumentsCount": 0
+        },
+        "declaredSourceCount": 1084,
+        "sourceDeclarationScope": "Every native declared source and central hash matches the independent original R345 snapshot and current bytes; declaration count is native observed, not an independently reconstructed MSBuild item census.",
+        "qualification": "Native DLL MVID, matching PDB identity and declared compile-source inspection only; no numeric coverage or Linux operation qualification."
+      }
+    },
+    "stageVIIOriginalRf3Completed": {
+      "sourceCommit": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+      "runId": 37612238705,
+      "attempt": 1,
+      "jobId": 112762012221,
+      "conclusion": "failure",
+      "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762012221",
+      "passed": 151,
+      "total": 165,
+      "failed": 14,
+      "skipped": 0,
+      "trxSha256": "6389edaac01edb094a709528ea594b0250ac7724143375c17c02be1aa76e61f4",
+      "logSha256": "7555954c842f73ed9a0c03e6d2c4860287b258702f8d824d170ef1e5f5faa465",
+      "archives": [
+        {
+          "id": 11480844296,
+          "name": "docker-rf3-image-evidence",
+          "sha256": "ecb614f779c928f988477e34ff2d1d192fc03734fd469976975e82608ede2e2a"
+        },
+        {
+          "id": 11480614414,
+          "name": "docker-rf3-qualification",
+          "sha256": "918cfadb1355460a2c33a7f24dd9cb166d71da74c74fff2e21f45bb4d706280d"
+        }
+      ],
+      "failedCaseNames": [
+        "AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints",
+        "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+        "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+        "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+        "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+        "AcGraph009CommittedPathMutationSurvivesLeaderLossAndRestoredNodeCatchup",
+        "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+        "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+        "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+        "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+        "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+        "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+        "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+        "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica"
+      ],
+      "coverageCollected": false,
+      "qualifiesLaterSource": false
     }
   },
   "TIME-PROVIDER-001": {
@@ -1966,12 +3015,535 @@
   },
   "KL-005": {
     "title": "Backup/restore spike",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
+    ],
+    "verification": {
+      "taskAcceptance": {
+        "completedAt": "2026-10-07",
+        "scope": "original KL-005 acceptance only",
+        "sourceCommit": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "runId": 37612238705,
+        "runAttempt": 1,
+        "verifyJobId": 112762072690,
+        "verifyJobConclusion": "failure",
+        "sameJobSourceAndImageVerifyPassed": true,
+        "originalTestArtifactId": 11478898817,
+        "originalTestArtifactSha256": "6b01ac114703371b98fe5c4788eec3a070ffb2e1c25c29aaf51ed9b6102e0e11",
+        "traceability": "docs/implementation/status.json (KL-005.verification.taskAcceptance)",
+        "completeSuiteQualified": false,
+        "laterSourceQualified": false,
+        "remainingFeatureGates": "Complete feature, current full-suite/RF3, endurance, performance and release gates are separate; process-kill is not power-loss proof.",
+        "originalAcceptance": "Clean restore recovers documents, indexes, dedup and apply position; corrupted/incomplete backup rejects.",
+        "originalCases": [
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "AcBackup002NonemptyDestinationRejectsBeforeArchiveIsOpened",
+            "instance": "AcBackup002NonemptyDestinationRejectsBeforeArchiveIsOpened",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "AcBackup001PackRejectsMissingCanonicalFileBeforePublishingArchive",
+            "instance": "AcBackup001PackRejectsMissingCanonicalFileBeforePublishingArchive",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupIndexedDocumentDedupCases",
+            "method": "AcBackupContent001CurrentIndexedDocumentsRestoreWithIncarnationFencedDedup",
+            "instance": "AcBackupContent001CurrentIndexedDocumentsRestoreWithIncarnationFencedDedup",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt",
+            "instance": "ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityLengthMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityLengthMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "UnsupportedManifestVersionFailsBeforeDestinationCreation",
+            "instance": "UnsupportedManifestVersionFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "NonemptyDestinationConflictsBeforeOversizedManifestIsRead",
+            "instance": "NonemptyDestinationConflictsBeforeOversizedManifestIsRead",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "ReparsePointCanonicalFileFailsBeforeDestinationCreation",
+            "instance": "ReparsePointCanonicalFileFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "CorruptWalVerificationPrecedesUnsupportedIdentityParsing",
+            "instance": "CorruptWalVerificationPrecedesUnsupportedIdentityParsing",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityInnerChecksumMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityInnerChecksumMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityOuterChecksumMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityOuterChecksumMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+            "method": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+            "instance": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+            "method": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+            "instance": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+            "instance": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+            "instance": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+            "instance": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+            "instance": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+            "instance": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+            "instance": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+            "instance": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+            "instance": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004CompleteJournalRequiresExactManifestCut",
+            "instance": "AcIs004CompleteJournalRequiresExactManifestCut(-1)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+            "instance": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+            "instance": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004CompleteJournalRequiresExactManifestCut",
+            "instance": "AcIs004CompleteJournalRequiresExactManifestCut(1)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+            "instance": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "AcBackup001PackRejectsMissingCanonicalFileBeforePublishingArchive",
+            "instance": "AcBackup001PackRejectsMissingCanonicalFileBeforePublishingArchive",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "AcBackup002NonemptyDestinationRejectsBeforeArchiveIsOpened",
+            "instance": "AcBackup002NonemptyDestinationRejectsBeforeArchiveIsOpened",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+            "method": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+            "instance": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
+            "method": "ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt",
+            "instance": "ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupIndexedDocumentDedupCases",
+            "method": "AcBackupContent001CurrentIndexedDocumentsRestoreWithIncarnationFencedDedup",
+            "instance": "AcBackupContent001CurrentIndexedDocumentsRestoreWithIncarnationFencedDedup",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityLengthMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityLengthMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "UnsupportedManifestVersionFailsBeforeDestinationCreation",
+            "instance": "UnsupportedManifestVersionFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "NonemptyDestinationConflictsBeforeOversizedManifestIsRead",
+            "instance": "NonemptyDestinationConflictsBeforeOversizedManifestIsRead",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "ReparsePointCanonicalFileFailsBeforeDestinationCreation",
+            "instance": "ReparsePointCanonicalFileFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "CorruptWalVerificationPrecedesUnsupportedIdentityParsing",
+            "instance": "CorruptWalVerificationPrecedesUnsupportedIdentityParsing",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityInnerChecksumMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityInnerChecksumMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
+            "method": "IdentityOuterChecksumMismatchFailsBeforeDestinationCreation",
+            "instance": "IdentityOuterChecksumMismatchFailsBeforeDestinationCreation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+            "method": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+            "instance": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+            "method": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+            "instance": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+            "instance": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+            "instance": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+            "instance": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+            "instance": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+            "instance": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+            "instance": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+            "instance": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+            "instance": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004CompleteJournalRequiresExactManifestCut",
+            "instance": "AcIs004CompleteJournalRequiresExactManifestCut(-1)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+            "instance": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+            "instance": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(False)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+            "instance": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(True)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004CompleteJournalRequiresExactManifestCut",
+            "instance": "AcIs004CompleteJournalRequiresExactManifestCut(1)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+            "method": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+            "instance": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+            "outcome": "Passed"
+          }
+        ],
+        "requirementsAndCriteria": {
+          "requirements": [
+            "REQ-BACKUP-001",
+            "REQ-BACKUP-002",
+            "REQ-BACKUP-003"
+          ],
+          "acceptance": [
+            {
+              "id": "AC-BACKUP-CONTENT-001",
+              "scope": "exact indexed document/revision/JSON restoration, persisted dedup bytes, old-incarnation fencing, new exact replay and real reopen"
+            },
+            {
+              "id": "AC-BACKUP-CONTENT-002",
+              "scope": "exact acknowledged source/manifest cut, target cut+1 authority commit, replica authority reset and paused dispatch"
+            },
+            {
+              "id": "AC-BACKUP-002",
+              "scope": "corrupt/incomplete backup rejection with preserved files and healthy restore; current offline subset"
+            }
+          ],
+          "task": "TASK-BACKUP-INDEXED-DOCUMENT-DEDUP",
+          "feature": "docs/Features/BackupRestore.md",
+          "adrs": [
+            "docs/ADR/ADR-030-retention-paused-restore.md"
+          ],
+          "testEvidence": {
+            "cases": "KL-005.verification.taskAcceptance.originalCases",
+            "sourceWitnesses": "sourceWitnesses",
+            "originalResults": "originalSuites",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+            "artifactId": 11478898817,
+            "cohortSource": "24c0ac47d4566f606ce8466aa0e5b3499c735eef"
+          }
+        },
+        "originalJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+        "originalArtifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/artifacts/11478898817",
+        "originalSourceWitnessCount": 267,
+        "originalSourceRevisionUrl": "https://github.com/managedcode/KeyLoad/tree/24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "restoreAuthority": "Original backup/source cut exactly matches manifest; restored position is cut plus one authority-reset commit. Old replica LastApplied/clock/membership reset and dispatch stays paused, per accepted current restore contract; old RF3 applied index is not claimed."
+      }
+    }
   },
   "KL-006": {
     "title": "Порівняльні бенчмарки та кластерна методологія",
@@ -2850,14 +4422,1195 @@
   },
   "KL-016": {
     "title": "Committed projection outbox",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Abstractions/Features/ChangeFeeds/Contracts/ChangeFeeds.cs",
       "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
       "docs/design/change-feeds.md",
       "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs"
-    ]
+      "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
+    ],
+    "verification": {
+      "taskAcceptance": {
+        "completedAt": "2026-10-07",
+        "scope": "original KL-016 acceptance only",
+        "sourceCommit": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "runId": 37612238705,
+        "runAttempt": 1,
+        "verifyJobId": 112762072690,
+        "verifyJobConclusion": "failure",
+        "sameJobSourceAndImageVerifyPassed": true,
+        "originalTestArtifactId": 11478898817,
+        "originalTestArtifactSha256": "6b01ac114703371b98fe5c4788eec3a070ffb2e1c25c29aaf51ed9b6102e0e11",
+        "traceability": "docs/implementation/status.json (KL-016.verification.taskAcceptance)",
+        "completeSuiteQualified": false,
+        "laterSourceQualified": false,
+        "remainingFeatureGates": "Complete feature, current full-suite/RF3, endurance, performance and release gates are separate; process-kill is not power-loss proof.",
+        "originalCrashHostCompiledIdentityObserved": false,
+        "originalCrashHostSourceBinding": "118 exact original source/project/common inputs match;57 independently match authenticated compile manifest; original DLL/PDB/MVID unobserved and current binary equivalence unclaimed",
+        "originalAcceptance": "Crash between commit and delivery loses no event; duplicate delivery is safe; checkpoint does not skip a failed event.",
+        "originalCases": [
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "RetentionPinsProtectUnprocessedAndRebuildHistory",
+            "instance": "RetentionPinsProtectUnprocessedAndRebuildHistory",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FailedProjectionEffectsDoNotAdvanceTheCheckpointAndDuplicateDeliveryIsSafe",
+            "instance": "FailedProjectionEffectsDoNotAdvanceTheCheckpointAndDuplicateDeliveryIsSafe",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FilteredProjectionPositionsAdvanceContiguouslyWithoutPublishingForeignResources",
+            "instance": "FilteredProjectionPositionsAdvanceContiguouslyWithoutPublishingForeignResources",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "AReleasedGenerationRejectsOldBatchesAndCachedCommandReceipts",
+            "instance": "AReleasedGenerationRejectsOldBatchesAndCachedCommandReceipts",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FailedBatchAndSameCommandRetryCannotPublishPartialOrDuplicateChanges",
+            "instance": "FailedBatchAndSameCommandRetryCannotPublishPartialOrDuplicateChanges",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition",
+            "instance": "FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "EveryCanonicalMutationAndItsCommitShareThePartitionOutbox",
+            "instance": "EveryCanonicalMutationAndItsCommitShareThePartitionOutbox",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "RetentionPinsProtectUnprocessedAndRebuildHistory",
+            "instance": "RetentionPinsProtectUnprocessedAndRebuildHistory",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FilteredProjectionPositionsAdvanceContiguouslyWithoutPublishingForeignResources",
+            "instance": "FilteredProjectionPositionsAdvanceContiguouslyWithoutPublishingForeignResources",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FailedProjectionEffectsDoNotAdvanceTheCheckpointAndDuplicateDeliveryIsSafe",
+            "instance": "FailedProjectionEffectsDoNotAdvanceTheCheckpointAndDuplicateDeliveryIsSafe",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "AReleasedGenerationRejectsOldBatchesAndCachedCommandReceipts",
+            "instance": "AReleasedGenerationRejectsOldBatchesAndCachedCommandReceipts",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition",
+            "instance": "FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "EveryCanonicalMutationAndItsCommitShareThePartitionOutbox",
+            "instance": "EveryCanonicalMutationAndItsCommitShareThePartitionOutbox",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+            "method": "FailedBatchAndSameCommandRetryCannotPublishPartialOrDuplicateChanges",
+            "instance": "FailedBatchAndSameCommandRetryCannotPublishPartialOrDuplicateChanges",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(HeaderWritten, 0)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(PayloadWritten, 0)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(MutationApplied, 0)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(MutationApplied, 3)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(MutationApplied, 6)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(ApplyCompleted, 0)",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "recovery",
+            "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+            "method": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+            "instance": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(JournalFlushed, 0)",
+            "outcome": "Passed"
+          }
+        ],
+        "requirementsAndCriteria": {
+          "requirements": [
+            "REQ-FEED-001",
+            "REQ-FEED-004",
+            "REQ-FEED-005"
+          ],
+          "acceptance": [
+            {
+              "id": "AC-FEED-001",
+              "scope": "atomic producer/effect/outbox/outcome, safe duplicate delivery and failed-effect checkpoint preservation"
+            },
+            {
+              "id": "AC-FEED-004",
+              "scope": "contiguous filtered checkpoint and active/rebuild retention pins"
+            },
+            {
+              "id": "AC-FEED-005",
+              "scope": "the seven declared genuine process-kill boundaries only; RF3 snapshot-install, leader loss and power loss remain outside this task evidence"
+            }
+          ],
+          "task": "KL-016",
+          "feature": "docs/Features/ChangeFeeds.md",
+          "adrs": [
+            "docs/ADR/ADR-025-event-revision-feed-positions.md",
+            "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md"
+          ],
+          "testEvidence": {
+            "cases": "KL-016.verification.taskAcceptance.originalCases",
+            "sourceWitnesses": "sourceWitnesses",
+            "originalResults": "originalSuites",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+            "artifactId": 11478898817,
+            "cohortSource": "24c0ac47d4566f606ce8466aa0e5b3499c735eef"
+          }
+        },
+        "originalJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+        "originalArtifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/artifacts/11478898817",
+        "originalSourceWitnessCount": 267,
+        "originalSourceRevisionUrl": "https://github.com/managedcode/KeyLoad/tree/24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "originalCrashHostExecutionBinding": {
+          "sourceRevision": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+          "runId": 37612238705,
+          "attempt": 1,
+          "jobId": 112762072690,
+          "historicalRecovery": "original actual236/236 passed; seven exact projection crash-cut instances passed",
+          "originalCrashHostCompileEvidence": {
+            "log": "authenticated original GitHub job log",
+            "line": 191,
+            "text": "2026-10-07T11:12:21.5017570Z KeyLoad.CrashHost -> /home/runner/work/KeyLoad/KeyLoad/tests/KeyLoad.CrashHost/bin/Release/net10.0/KeyLoad.CrashHost.dll",
+            "buildStepConclusion": "success",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
+          },
+          "originalCrashHostCompiledIdentity": "unobserved: original archives contain no CrashHost DLL/PDB or native compilation identity/receipt; do not claim its DLL/PDB/MVID matches current",
+          "archiveChildEntries": [
+            {
+              "archive": "code-quality.zip",
+              "entry": "KeyLoad.CrashHost/Release/net10.0/diagnostics.sarif"
+            }
+          ],
+          "sourceComparison": [
+            {
+              "path": "Directory.Build.props",
+              "currentSha256": "24b128306eedffc2002e3a9732b33a43bf041b75ce8b22e85b8f71e8f2c6596b",
+              "gitOriginalSha256": "24b128306eedffc2002e3a9732b33a43bf041b75ce8b22e85b8f71e8f2c6596b",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "24b128306eedffc2002e3a9732b33a43bf041b75ce8b22e85b8f71e8f2c6596b",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "Directory.Build.targets",
+              "currentSha256": "febf4f715173a01b9975b94bc71b0b0699545001e5ba9f029163524b1691fcf4",
+              "gitOriginalSha256": "febf4f715173a01b9975b94bc71b0b0699545001e5ba9f029163524b1691fcf4",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "febf4f715173a01b9975b94bc71b0b0699545001e5ba9f029163524b1691fcf4",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "Directory.Packages.props",
+              "currentSha256": "7b40bc477cca6eb1de2f1d733c636bc3d0f0253997ccc27d5f19757ce10d2b4e",
+              "gitOriginalSha256": "7b40bc477cca6eb1de2f1d733c636bc3d0f0253997ccc27d5f19757ce10d2b4e",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "7b40bc477cca6eb1de2f1d733c636bc3d0f0253997ccc27d5f19757ce10d2b4e",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "KeyLoad.slnx",
+              "currentSha256": "44c890b5f040b118c55b6b96835f9a98f90ce0283be096e2813f97fabed7c0a3",
+              "gitOriginalSha256": "44c890b5f040b118c55b6b96835f9a98f90ce0283be096e2813f97fabed7c0a3",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "44c890b5f040b118c55b6b96835f9a98f90ce0283be096e2813f97fabed7c0a3",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "global.json",
+              "currentSha256": "eaa896ea27d7225150b24f86b81bd875a76af1fe8d3006ac3aa9eaf058b5052e",
+              "gitOriginalSha256": "eaa896ea27d7225150b24f86b81bd875a76af1fe8d3006ac3aa9eaf058b5052e",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "eaa896ea27d7225150b24f86b81bd875a76af1fe8d3006ac3aa9eaf058b5052e",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/ChangeFeeds/Contracts/ChangeFeeds.cs",
+              "currentSha256": "56a7658da28571d944ed6404fa34906999c7cf45020fa08f5b20616cde7beca9",
+              "gitOriginalSha256": "56a7658da28571d944ed6404fa34906999c7cf45020fa08f5b20616cde7beca9",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "56a7658da28571d944ed6404fa34906999c7cf45020fa08f5b20616cde7beca9",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/JsonElementSurrogate.cs",
+              "currentSha256": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
+              "gitOriginalSha256": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "51e3744e51980047a9b6f97fda2bc81e694763d6abae576315a407c499633487",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/JsonElementSurrogateConverter.cs",
+              "currentSha256": "0cd13d37e95fe4e59d28022b318229526ec16846ded9973887bc17e82501751a",
+              "gitOriginalSha256": "0cd13d37e95fe4e59d28022b318229526ec16846ded9973887bc17e82501751a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "0cd13d37e95fe4e59d28022b318229526ec16846ded9973887bc17e82501751a",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeContractAliases.cs",
+              "currentSha256": "c511ebd1b504b5d2d3a751a2629c1ada4b73627290c58f3e256f6a5604e8d0aa",
+              "gitOriginalSha256": "c511ebd1b504b5d2d3a751a2629c1ada4b73627290c58f3e256f6a5604e8d0aa",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "c511ebd1b504b5d2d3a751a2629c1ada4b73627290c58f3e256f6a5604e8d0aa",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeContractValidation.cs",
+              "currentSha256": "021fe1175389b7d8495fecb0c2592fb810867b272b634454aec3674cf7520b6b",
+              "gitOriginalSha256": "021fe1175389b7d8495fecb0c2592fb810867b272b634454aec3674cf7520b6b",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "021fe1175389b7d8495fecb0c2592fb810867b272b634454aec3674cf7520b6b",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeCountingWriter.cs",
+              "currentSha256": "722d49a90740f2055a8bdd860740a0948e911bcb68c421adcf3013ee316ec699",
+              "gitOriginalSha256": "722d49a90740f2055a8bdd860740a0948e911bcb68c421adcf3013ee316ec699",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "722d49a90740f2055a8bdd860740a0948e911bcb68c421adcf3013ee316ec699",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomBufferWriter.cs",
+              "currentSha256": "4382f89da9950fa709755553e2fdaa3bf042effb1c7699772a8d7b6e8fd3ee68",
+              "gitOriginalSha256": "4382f89da9950fa709755553e2fdaa3bf042effb1c7699772a8d7b6e8fd3ee68",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "4382f89da9950fa709755553e2fdaa3bf042effb1c7699772a8d7b6e8fd3ee68",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomPreflight.cs",
+              "currentSha256": "8030fc09d620a3c1c5ebc9f082bb9be0b04fcf6e237b392e30f0d10df011da97",
+              "gitOriginalSha256": "8030fc09d620a3c1c5ebc9f082bb9be0b04fcf6e237b392e30f0d10df011da97",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "8030fc09d620a3c1c5ebc9f082bb9be0b04fcf6e237b392e30f0d10df011da97",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomProjection.cs",
+              "currentSha256": "69c8552e1cd09e52889c12685776c62fd6913a5bcfc577f8a0051b6b5a7ddc63",
+              "gitOriginalSha256": "69c8552e1cd09e52889c12685776c62fd6913a5bcfc577f8a0051b6b5a7ddc63",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "69c8552e1cd09e52889c12685776c62fd6913a5bcfc577f8a0051b6b5a7ddc63",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomShape.cs",
+              "currentSha256": "1cb0e8d8a2eb31065f03d4f4b470957d158ae394a526d5c0f6169f880c2a1d73",
+              "gitOriginalSha256": "1cb0e8d8a2eb31065f03d4f4b470957d158ae394a526d5c0f6169f880c2a1d73",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "1cb0e8d8a2eb31065f03d4f4b470957d158ae394a526d5c0f6169f880c2a1d73",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomStringSizes.cs",
+              "currentSha256": "f43bb4dbd44f0d889e307ba79b1f872555f49ae789f8d12b6c3cf53d93cdf967",
+              "gitOriginalSha256": "f43bb4dbd44f0d889e307ba79b1f872555f49ae789f8d12b6c3cf53d93cdf967",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "f43bb4dbd44f0d889e307ba79b1f872555f49ae789f8d12b6c3cf53d93cdf967",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeDomWriter.cs",
+              "currentSha256": "c49e853925c23542665b5078bfae624874913e215dc0b90c1b784f0920ab4cd6",
+              "gitOriginalSha256": "c49e853925c23542665b5078bfae624874913e215dc0b90c1b784f0920ab4cd6",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "c49e853925c23542665b5078bfae624874913e215dc0b90c1b784f0920ab4cd6",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeFieldHeaderReader.cs",
+              "currentSha256": "0e01aa80e9a741283426cbe91b498d5e50c3ef9767875d8e551f0b6fd529d36b",
+              "gitOriginalSha256": "0e01aa80e9a741283426cbe91b498d5e50c3ef9767875d8e551f0b6fd529d36b",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "0e01aa80e9a741283426cbe91b498d5e50c3ef9767875d8e551f0b6fd529d36b",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeGraphKeyComparer.cs",
+              "currentSha256": "6be6ffd481ad53f55d03911cba1fdaf44c1e8540c8f54a65d6fdd191dad5b605",
+              "gitOriginalSha256": "6be6ffd481ad53f55d03911cba1fdaf44c1e8540c8f54a65d6fdd191dad5b605",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "6be6ffd481ad53f55d03911cba1fdaf44c1e8540c8f54a65d6fdd191dad5b605",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeGraphValidationState.cs",
+              "currentSha256": "e4757f86c87c360cf6bd4c209eefe8750404555eaeea61239705834a7e9d8d2c",
+              "gitOriginalSha256": "e4757f86c87c360cf6bd4c209eefe8750404555eaeea61239705834a7e9d8d2c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "e4757f86c87c360cf6bd4c209eefe8750404555eaeea61239705834a7e9d8d2c",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativePayload.cs",
+              "currentSha256": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
+              "gitOriginalSha256": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "580e77a5cfed7c41d5964c2c15d43f36eebc689035dd1ad4773a65ea7d848d1e",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativePayloadInspectionCodec.cs",
+              "currentSha256": "56d86e50446a8743f6bd5a48b840eecfe82498ed0d11b08929abe45de47aa70e",
+              "gitOriginalSha256": "56d86e50446a8743f6bd5a48b840eecfe82498ed0d11b08929abe45de47aa70e",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "56d86e50446a8743f6bd5a48b840eecfe82498ed0d11b08929abe45de47aa70e",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativePayloadSyntax.cs",
+              "currentSha256": "ae262cfbe5ee1a6e96136cde55233373caa5c973d5f9984a0eb12f382cc17c43",
+              "gitOriginalSha256": "ae262cfbe5ee1a6e96136cde55233373caa5c973d5f9984a0eb12f382cc17c43",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "ae262cfbe5ee1a6e96136cde55233373caa5c973d5f9984a0eb12f382cc17c43",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeSerialization.cs",
+              "currentSha256": "6193738c187cb08fbdbf92268e57de1ca635d691ff54daef1016a6b7669f101e",
+              "gitOriginalSha256": "6193738c187cb08fbdbf92268e57de1ca635d691ff54daef1016a6b7669f101e",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "6193738c187cb08fbdbf92268e57de1ca635d691ff54daef1016a6b7669f101e",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeSerializationLimits.cs",
+              "currentSha256": "d57783e43ec33ae0c9dceb474dbccc6a7f90249d09c1256f4e9d1881487a81f0",
+              "gitOriginalSha256": "d57783e43ec33ae0c9dceb474dbccc6a7f90249d09c1256f4e9d1881487a81f0",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "d57783e43ec33ae0c9dceb474dbccc6a7f90249d09c1256f4e9d1881487a81f0",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeSerializerProviders.cs",
+              "currentSha256": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9",
+              "gitOriginalSha256": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "0a57dcd39a414aac17d4737961dd8504be766a808f3c768517ea52aeabfa2dc9",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeValidationProfile.cs",
+              "currentSha256": "76c48f3dea579203268ba6f2dfdb9e119d53d8b578d6c980d9b1f0f244614227",
+              "gitOriginalSha256": "76c48f3dea579203268ba6f2dfdb9e119d53d8b578d6c980d9b1f0f244614227",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "76c48f3dea579203268ba6f2dfdb9e119d53d8b578d6c980d9b1f0f244614227",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireFrame.cs",
+              "currentSha256": "7a984f3b336f35790545dee8e7ce04d1d8c8ce4add02d8dd99f1285fb457b3b1",
+              "gitOriginalSha256": "7a984f3b336f35790545dee8e7ce04d1d8c8ce4add02d8dd99f1285fb457b3b1",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "7a984f3b336f35790545dee8e7ce04d1d8c8ce4add02d8dd99f1285fb457b3b1",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireIdentities.cs",
+              "currentSha256": "43a5a7036826a52582d37736dfe0f0df766f76a3ef0820988e2bd4e17e0668fb",
+              "gitOriginalSha256": "43a5a7036826a52582d37736dfe0f0df766f76a3ef0820988e2bd4e17e0668fb",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "43a5a7036826a52582d37736dfe0f0df766f76a3ef0820988e2bd4e17e0668fb",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireMemberScopes.cs",
+              "currentSha256": "c6bff58fe713295b8d29dd499f2225fe8e6147468f396cb6cee65f718f82d9c6",
+              "gitOriginalSha256": "c6bff58fe713295b8d29dd499f2225fe8e6147468f396cb6cee65f718f82d9c6",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "c6bff58fe713295b8d29dd499f2225fe8e6147468f396cb6cee65f718f82d9c6",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireSchema.cs",
+              "currentSha256": "a97791a9c78543ea6db516c2eee469baa9cc74eb4ed33541fcb9d49bc30f1bae",
+              "gitOriginalSha256": "a97791a9c78543ea6db516c2eee469baa9cc74eb4ed33541fcb9d49bc30f1bae",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "a97791a9c78543ea6db516c2eee469baa9cc74eb4ed33541fcb9d49bc30f1bae",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireSupported.cs",
+              "currentSha256": "5a029ac7fe21a4834eca6259059bffc742abc8163e7a32dcf1e5a8dbbe855530",
+              "gitOriginalSha256": "5a029ac7fe21a4834eca6259059bffc742abc8163e7a32dcf1e5a8dbbe855530",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "5a029ac7fe21a4834eca6259059bffc742abc8163e7a32dcf1e5a8dbbe855530",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/Features/InternalSerialization/Serialization/NativeWireWalk.cs",
+              "currentSha256": "ab41c53752bf5002fce37899a8758ea8d9ad856c4fafd688e6df9e316844c950",
+              "gitOriginalSha256": "ab41c53752bf5002fce37899a8758ea8d9ad856c4fafd688e6df9e316844c950",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "ab41c53752bf5002fce37899a8758ea8d9ad856c4fafd688e6df9e316844c950",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj",
+              "currentSha256": "f15b170b6d41a883f4aa05fdc421750e236590c696d373049e829a148555ac74",
+              "gitOriginalSha256": "f15b170b6d41a883f4aa05fdc421750e236590c696d373049e829a148555ac74",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Commands/ProjectionCommandDispatch.cs",
+              "currentSha256": "36e1a109083d64bfef7d5aa0873c416296e4eb93a602b6f0111406f3ea28bd21",
+              "gitOriginalSha256": "36e1a109083d64bfef7d5aa0873c416296e4eb93a602b6f0111406f3ea28bd21",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "36e1a109083d64bfef7d5aa0873c416296e4eb93a602b6f0111406f3ea28bd21",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Configuration/ChangeFeedExecutionOptions.cs",
+              "currentSha256": "e39cf3efd4baf79aa7f51bb0165323b3206d2de7f0139f2531fa1bd0521319a8",
+              "gitOriginalSha256": "e39cf3efd4baf79aa7f51bb0165323b3206d2de7f0139f2531fa1bd0521319a8",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "e39cf3efd4baf79aa7f51bb0165323b3206d2de7f0139f2531fa1bd0521319a8",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Contracts/ChangeFeedClaims.cs",
+              "currentSha256": "c5e9cfbad47f03f97d4a6cb1f5eedcacd29a6f63031488776f7f2fa8cb026d2c",
+              "gitOriginalSha256": "c5e9cfbad47f03f97d4a6cb1f5eedcacd29a6f63031488776f7f2fa8cb026d2c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "c5e9cfbad47f03f97d4a6cb1f5eedcacd29a6f63031488776f7f2fa8cb026d2c",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ChangeFeeds.cs",
+              "currentSha256": "bd71c1a39ebe7db590e413d255c464a77451212741862a61b569a2b2bbbbc957",
+              "gitOriginalSha256": "bd71c1a39ebe7db590e413d255c464a77451212741862a61b569a2b2bbbbc957",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "bd71c1a39ebe7db590e413d255c464a77451212741862a61b569a2b2bbbbc957",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs",
+              "currentSha256": "d0e4d2451df21eda2e2cb91f80d44cdce5e6d081cfb183b7187074168b94849c",
+              "gitOriginalSha256": "d0e4d2451df21eda2e2cb91f80d44cdce5e6d081cfb183b7187074168b94849c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "d0e4d2451df21eda2e2cb91f80d44cdce5e6d081cfb183b7187074168b94849c",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/ChangeFeeds/Queries/StoredOutboxReader.cs",
+              "currentSha256": "fddbab32fb1b3a236fa65fc0f1a0bbe704ed01abee7cdf3d7821fd9a21e4e960",
+              "gitOriginalSha256": "fddbab32fb1b3a236fa65fc0f1a0bbe704ed01abee7cdf3d7821fd9a21e4e960",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "fddbab32fb1b3a236fa65fc0f1a0bbe704ed01abee7cdf3d7821fd9a21e4e960",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Configuration/NativeClaimsExecutionOptions.cs",
+              "currentSha256": "c700372d105d5b830c20c74fa427816cbb4bbe3b7c5ca12abecd4779673765dc",
+              "gitOriginalSha256": "c700372d105d5b830c20c74fa427816cbb4bbe3b7c5ca12abecd4779673765dc",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "c700372d105d5b830c20c74fa427816cbb4bbe3b7c5ca12abecd4779673765dc",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Contracts/CoreNativeContracts.cs",
+              "currentSha256": "2f1b5e567aa3965d8db88816447f3de69386131a1e0656ce34b6718c69be29b3",
+              "gitOriginalSha256": "2f1b5e567aa3965d8db88816447f3de69386131a1e0656ce34b6718c69be29b3",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "2f1b5e567aa3965d8db88816447f3de69386131a1e0656ce34b6718c69be29b3",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Contracts/NativeCommandAuthority.cs",
+              "currentSha256": "afe27baae50ca5918360770df91f6696dbdf353b588d9abb3ae48ba5dad74957",
+              "gitOriginalSha256": "afe27baae50ca5918360770df91f6696dbdf353b588d9abb3ae48ba5dad74957",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "afe27baae50ca5918360770df91f6696dbdf353b588d9abb3ae48ba5dad74957",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Execution/CoreTestVisibility.cs",
+              "currentSha256": "8b14acb0fcb89e4f519ffa6c3fc5692a239db9f4b85f47911e53b7bc85a9fff3",
+              "gitOriginalSha256": "8b14acb0fcb89e4f519ffa6c3fc5692a239db9f4b85f47911e53b7bc85a9fff3",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "8b14acb0fcb89e4f519ffa6c3fc5692a239db9f4b85f47911e53b7bc85a9fff3",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Execution/NativeOperationFactory.cs",
+              "currentSha256": "1c13b0692b307b1dfe28a316045b0b5a83087d94ffeb79bfec41a2952950ff27",
+              "gitOriginalSha256": "1c13b0692b307b1dfe28a316045b0b5a83087d94ffeb79bfec41a2952950ff27",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "1c13b0692b307b1dfe28a316045b0b5a83087d94ffeb79bfec41a2952950ff27",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Execution/NativeOperationSemantics.cs",
+              "currentSha256": "a8773a66a6c42a7ea41652f416b09d1d874431715f94c84122abd29a0c1c478f",
+              "gitOriginalSha256": "a8773a66a6c42a7ea41652f416b09d1d874431715f94c84122abd29a0c1c478f",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "a8773a66a6c42a7ea41652f416b09d1d874431715f94c84122abd29a0c1c478f",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Identity/CoreNativeClaims.cs",
+              "currentSha256": "59a422c3e98ce023174c573abe88ad30aa396a93c114610bcf821a558f2c13aa",
+              "gitOriginalSha256": "59a422c3e98ce023174c573abe88ad30aa396a93c114610bcf821a558f2c13aa",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "59a422c3e98ce023174c573abe88ad30aa396a93c114610bcf821a558f2c13aa",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Identity/NativeOperationAuthority.cs",
+              "currentSha256": "374b57184ac78e87b3b9b356ea52bfc434f1f244d5dbf0c1133c79e3335c7eb7",
+              "gitOriginalSha256": "374b57184ac78e87b3b9b356ea52bfc434f1f244d5dbf0c1133c79e3335c7eb7",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "374b57184ac78e87b3b9b356ea52bfc434f1f244d5dbf0c1133c79e3335c7eb7",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Serialization/CoreNativeAliases.cs",
+              "currentSha256": "65ffc8c83eced936239c0c7294b72d31f658ddbf507712721bce0777b3af7d0c",
+              "gitOriginalSha256": "65ffc8c83eced936239c0c7294b72d31f658ddbf507712721bce0777b3af7d0c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "65ffc8c83eced936239c0c7294b72d31f658ddbf507712721bce0777b3af7d0c",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Serialization/CoreNativeFieldIds.cs",
+              "currentSha256": "8e4a27892d050a56592be595ff48217a24393d97e5d66d4cf62ead6f3e6c347d",
+              "gitOriginalSha256": "8e4a27892d050a56592be595ff48217a24393d97e5d66d4cf62ead6f3e6c347d",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "8e4a27892d050a56592be595ff48217a24393d97e5d66d4cf62ead6f3e6c347d",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Serialization/NativeCommandPayload.cs",
+              "currentSha256": "d6d49bd60fd1fd05fa672a3cb761a362112137948afa8563cab5d8c299e5a89b",
+              "gitOriginalSha256": "d6d49bd60fd1fd05fa672a3cb761a362112137948afa8563cab5d8c299e5a89b",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "d6d49bd60fd1fd05fa672a3cb761a362112137948afa8563cab5d8c299e5a89b",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Serialization/NativeOperationFingerprint.cs",
+              "currentSha256": "4672abf79b265463076d19e9d109965aa349fc3b23a182c00daa4bfb8a238570",
+              "gitOriginalSha256": "4672abf79b265463076d19e9d109965aa349fc3b23a182c00daa4bfb8a238570",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "4672abf79b265463076d19e9d109965aa349fc3b23a182c00daa4bfb8a238570",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/Features/InternalSerialization/Validation/NativeOperationNormalization.cs",
+              "currentSha256": "0628afa934efb2a89a08b6b558f5eab3136b35b4fa33c40d818c3f12306ad741",
+              "gitOriginalSha256": "0628afa934efb2a89a08b6b558f5eab3136b35b4fa33c40d818c3f12306ad741",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "0628afa934efb2a89a08b6b558f5eab3136b35b4fa33c40d818c3f12306ad741",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Core/KeyLoad.Core.csproj",
+              "currentSha256": "f20c8e9e42e14675453926c9356f62968721dc8759a619aea23e0096c80e3385",
+              "gitOriginalSha256": "f20c8e9e42e14675453926c9356f62968721dc8759a619aea23e0096c80e3385",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Query/Features/ChangeFeeds/Contracts/LiveCursorClaims.cs",
+              "currentSha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84",
+              "gitOriginalSha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
+              "currentSha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89",
+              "gitOriginalSha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Query/Features/ChangeFeeds/Queries/LiveQueryExecutor.cs",
+              "currentSha256": "d37f776a13dfe6fe62d1a59d5dc28b77e8ce8dc8a3b67547bae739c1deeaf4ce",
+              "gitOriginalSha256": "d37f776a13dfe6fe62d1a59d5dc28b77e8ce8dc8a3b67547bae739c1deeaf4ce",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "d37f776a13dfe6fe62d1a59d5dc28b77e8ce8dc8a3b67547bae739c1deeaf4ce",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Query/KeyLoad.Query.csproj",
+              "currentSha256": "d837cba7cbbf4b6cd5666bf86642902c433d871bea84014194b1728ce497c993",
+              "gitOriginalSha256": "d837cba7cbbf4b6cd5666bf86642902c433d871bea84014194b1728ce497c993",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Replication/KeyLoad.Replication.csproj",
+              "currentSha256": "b416d4eb0b31ddf85e71009c0005ee18f882f6fc6b3b18a5fddc5a50d7a81795",
+              "gitOriginalSha256": "b416d4eb0b31ddf85e71009c0005ee18f882f6fc6b3b18a5fddc5a50d7a81795",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Security/KeyLoad.Security.csproj",
+              "currentSha256": "3986c60dc8772670bd1e5dcefe62fdfb727bb96ba5c8c922b893a206041243a1",
+              "gitOriginalSha256": "3986c60dc8772670bd1e5dcefe62fdfb727bb96ba5c8c922b893a206041243a1",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Server/Features/ChangeFeeds/Transport/ChangeFeedApi.cs",
+              "currentSha256": "781b4f9e082635b912b8358316b62bb6fcec739182f947cfbb0f1217fd195b31",
+              "gitOriginalSha256": "781b4f9e082635b912b8358316b62bb6fcec739182f947cfbb0f1217fd195b31",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "781b4f9e082635b912b8358316b62bb6fcec739182f947cfbb0f1217fd195b31",
+              "currentMatchesAuthenticatedManifest": true
+            },
+            {
+              "path": "src/KeyLoad.Server/KeyLoad.Server.csproj",
+              "currentSha256": "d99920801f7899c73d22fd5bab35bd227da3e9ae75c8b96ff465601ecb35c2a5",
+              "gitOriginalSha256": "d99920801f7899c73d22fd5bab35bd227da3e9ae75c8b96ff465601ecb35c2a5",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj",
+              "currentSha256": "5700846eeb4c53c02d8dcd4eb57574e78f17f612f3a1e582b9a4a4ca2681e3ed",
+              "gitOriginalSha256": "5700846eeb4c53c02d8dcd4eb57574e78f17f612f3a1e582b9a4a4ca2681e3ed",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj",
+              "currentSha256": "e3fe72676b752d848828c6628f41c7fd607b0127d102cf8a78105fcf513abcf2",
+              "gitOriginalSha256": "e3fe72676b752d848828c6628f41c7fd607b0127d102cf8a78105fcf513abcf2",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/AGENTS.md",
+              "currentSha256": "915ffc5af4428324e64a999ee8d84fb75fd54991de4bc8aa5d325e2f47a63af0",
+              "gitOriginalSha256": "915ffc5af4428324e64a999ee8d84fb75fd54991de4bc8aa5d325e2f47a63af0",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/Helpers/ReplicaCrashNode.cs",
+              "currentSha256": "02da0b2cd6a0955e2b1a4fcdcd2e5e1733cb7811717c26d15d4318167f61d1a7",
+              "gitOriginalSha256": "02da0b2cd6a0955e2b1a4fcdcd2e5e1733cb7811717c26d15d4318167f61d1a7",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/Helpers/ReplicaCrashScenario.cs",
+              "currentSha256": "43e9fedfb97ada6dc3f154e4e0fdca161e50456f1f522c4f6e631e215797c9a0",
+              "gitOriginalSha256": "43e9fedfb97ada6dc3f154e4e0fdca161e50456f1f522c4f6e631e215797c9a0",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/Helpers/ReplicaCrashTransfer.cs",
+              "currentSha256": "d23d98785dfd5cc0c007138c7e16c35a0f9526689ce24c10988e4a276e2ea9cb",
+              "gitOriginalSha256": "d23d98785dfd5cc0c007138c7e16c35a0f9526689ce24c10988e4a276e2ea9cb",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/Helpers/ReplicaFixturePaths.cs",
+              "currentSha256": "62899716465dbeaf8348c6b8803eeeb545be965a815fa91ea4337d7cb54bb6b6",
+              "gitOriginalSha256": "62899716465dbeaf8348c6b8803eeeb545be965a815fa91ea4337d7cb54bb6b6",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterReplication/Models/ReplicaCrashModel.cs",
+              "currentSha256": "08e527ee0f9c3d38e79569c730a17010ecdd0997a17cec4804ea5847a2e89d4a",
+              "gitOriginalSha256": "08e527ee0f9c3d38e79569c730a17010ecdd0997a17cec4804ea5847a2e89d4a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Contracts/C1OutcomeInspectionContracts.cs",
+              "currentSha256": "2470aeb7b2619799390a48454d70316287ed0cfa1129a4015749b2d9883e6d92",
+              "gitOriginalSha256": "2470aeb7b2619799390a48454d70316287ed0cfa1129a4015749b2d9883e6d92",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/C1OutcomeInspection.cs",
+              "currentSha256": "72091932a6ea97bbf93ced5b0a218837daaa0124e81c6ee22c596efe12976804",
+              "gitOriginalSha256": "72091932a6ea97bbf93ced5b0a218837daaa0124e81c6ee22c596efe12976804",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/C1OutcomeInspectionFailures.cs",
+              "currentSha256": "1742aa666ebd3411f1a82a0f2a1ce73a399d85e8f1600fb4280eb2169c0951f1",
+              "gitOriginalSha256": "1742aa666ebd3411f1a82a0f2a1ce73a399d85e8f1600fb4280eb2169c0951f1",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/C1OutcomeInspectionOperation.cs",
+              "currentSha256": "d8f6c597b12a682b7484003742ae3804e2de883ad72a4b5020d678b55ee53f4f",
+              "gitOriginalSha256": "d8f6c597b12a682b7484003742ae3804e2de883ad72a4b5020d678b55ee53f4f",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/C1OutcomeInspectionScopedOutcome.cs",
+              "currentSha256": "8754c04b498b1cca87c2e12e8454189eb4e69685b262b9b598e774a27d2ddfe9",
+              "gitOriginalSha256": "8754c04b498b1cca87c2e12e8454189eb4e69685b262b9b598e774a27d2ddfe9",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/RecoveryPhysicalShardBootstrap.cs",
+              "currentSha256": "e8f32fce014bfc103f6147252f389feee0d32e06ad87e6a04120d13d04905093",
+              "gitOriginalSha256": "e8f32fce014bfc103f6147252f389feee0d32e06ad87e6a04120d13d04905093",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcess.cs",
+              "currentSha256": "22393ee4d93ac55381037795502d6136f6ea80394dd6bbf93532319c10c7a349",
+              "gitOriginalSha256": "22393ee4d93ac55381037795502d6136f6ea80394dd6bbf93532319c10c7a349",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcessLifetime.cs",
+              "currentSha256": "112a6bf27c853fe410fffb1839e4d5a9ea13bf7eb2f64797b8657de3eab5e6ea",
+              "gitOriginalSha256": "112a6bf27c853fe410fffb1839e4d5a9ea13bf7eb2f64797b8657de3eab5e6ea",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcessStartInfo.cs",
+              "currentSha256": "bbbc69145dd7b4ca1890f10c2dd5e6140f37bb72e478b722809c22c2209cdda1",
+              "gitOriginalSha256": "bbbc69145dd7b4ca1890f10c2dd5e6140f37bb72e478b722809c22c2209cdda1",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcessSupport.cs",
+              "currentSha256": "082ef3d2afb6c37a8cba8efe32dab9f2daa7cbebbf1c75794fd67b08818a1da8",
+              "gitOriginalSha256": "082ef3d2afb6c37a8cba8efe32dab9f2daa7cbebbf1c75794fd67b08818a1da8",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Serialization/C1OutcomeInspectionJson.cs",
+              "currentSha256": "3c9f23796c997c9a57c91565388e713779f085c41425a3b7e35751b7835c5302",
+              "gitOriginalSha256": "3c9f23796c997c9a57c91565388e713779f085c41425a3b7e35751b7835c5302",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Serialization/C1OutcomeInspectionJsonContext.cs",
+              "currentSha256": "8ad3b0fc41d714ff2248b2b47b765831364d793cf166b31da68540b110c9108c",
+              "gitOriginalSha256": "8ad3b0fc41d714ff2248b2b47b765831364d793cf166b31da68540b110c9108c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Serialization/C1OutcomeInspectionRequestValidation.cs",
+              "currentSha256": "59e600e3f9d6935f2bd922c01c18ec962e5ed9e3aa26985a0a8f6eacb4ac8a14",
+              "gitOriginalSha256": "59e600e3f9d6935f2bd922c01c18ec962e5ed9e3aa26985a0a8f6eacb4ac8a14",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DatabaseComposition/Helpers/DatabaseCompositionCrashScenario.cs",
+              "currentSha256": "c2dd63210beb1132e79c7feda42bebdd8c12c1159b2096e351aec3a5c76c040c",
+              "gitOriginalSha256": "c2dd63210beb1132e79c7feda42bebdd8c12c1159b2096e351aec3a5c76c040c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Assertions/CommandIdempotencyCrashAssertions.cs",
+              "currentSha256": "4b6f3b763eb950658bd57b9901492121e5a63fdc9a048f7c732443641f34a43a",
+              "gitOriginalSha256": "4b6f3b763eb950658bd57b9901492121e5a63fdc9a048f7c732443641f34a43a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Contracts/CommandIdempotencyCrashContract.cs",
+              "currentSha256": "8e5aab5eeafc1d659d1a4945baba4bec8f526e2d05bb3f04ddc43419f0f64aa8",
+              "gitOriginalSha256": "8e5aab5eeafc1d659d1a4945baba4bec8f526e2d05bb3f04ddc43419f0f64aa8",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Contracts/ScalarIndexCrashContract.cs",
+              "currentSha256": "002e69b802cdbee961c2d0ea25cf1995401d2a395c84612a6202ac100c646255",
+              "gitOriginalSha256": "002e69b802cdbee961c2d0ea25cf1995401d2a395c84612a6202ac100c646255",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Contracts/ScalarIndexCrashSnapshot.cs",
+              "currentSha256": "1976537eb29040d69d5a248a68640cf1440d620f680728a23a552ba1fbd5c2ff",
+              "gitOriginalSha256": "1976537eb29040d69d5a248a68640cf1440d620f680728a23a552ba1fbd5c2ff",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Helpers/CommandIdempotencyCrashData.cs",
+              "currentSha256": "70ebf05686305ab3b6808c5d89e62734fb05de2ad94b55999bc2c9f5d6509283",
+              "gitOriginalSha256": "70ebf05686305ab3b6808c5d89e62734fb05de2ad94b55999bc2c9f5d6509283",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Helpers/CommandIdempotencyCrashScenario.cs",
+              "currentSha256": "7f348aa6802fa52abec121559f9d7bd5b48ebdbf9e8b5ff8c9b2e085a7f0f7b1",
+              "gitOriginalSha256": "7f348aa6802fa52abec121559f9d7bd5b48ebdbf9e8b5ff8c9b2e085a7f0f7b1",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Scenarios/ScalarIndexCrashOperations.cs",
+              "currentSha256": "3c34aae0097915000225936314d7524ffa8cae5697f94a01da0802f1d1203ee7",
+              "gitOriginalSha256": "3c34aae0097915000225936314d7524ffa8cae5697f94a01da0802f1d1203ee7",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Scenarios/ScalarIndexCrashScenario.cs",
+              "currentSha256": "d9cc9dc0a0ebda870299204d360126ae1a52abae207968d5af4fb8ed7209e1a7",
+              "gitOriginalSha256": "d9cc9dc0a0ebda870299204d360126ae1a52abae207968d5af4fb8ed7209e1a7",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/EventStreams/Helpers/AggregateReplayCrashScenario.cs",
+              "currentSha256": "7b79ce6b76081046dead967d07619a6dbddecda589f586cf665fe3f88e729525",
+              "gitOriginalSha256": "7b79ce6b76081046dead967d07619a6dbddecda589f586cf665fe3f88e729525",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Messaging/Helpers/RecurringScheduleCrashScenario.cs",
+              "currentSha256": "a3f322d28b48cbc8e791f4af16bbb7d32931c3dc78972af7f65930fccbcebea0",
+              "gitOriginalSha256": "a3f322d28b48cbc8e791f4af16bbb7d32931c3dc78972af7f65930fccbcebea0",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Messaging/Helpers/SagaTimeoutCrashScenario.cs",
+              "currentSha256": "0ed2747642e8d8e5a61ec748d1e3220299e362fd72421c0f1fb99b3ce9979a6a",
+              "gitOriginalSha256": "0ed2747642e8d8e5a61ec748d1e3220299e362fd72421c0f1fb99b3ce9979a6a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ResourceExecution/Configuration/CrashHostExecutionOptions.cs",
+              "currentSha256": "4b3137ab1be45e779329057a3126e436d9a8a2223b2850187cd8f4e1a63309f7",
+              "gitOriginalSha256": "4b3137ab1be45e779329057a3126e436d9a8a2223b2850187cd8f4e1a63309f7",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/ResourceExecution/Helpers/CrashExecutionOptions.cs",
+              "currentSha256": "8278eb73b2cb602714acca5b956dba4f683e5d90cf604bf8f8bb40e60185e17c",
+              "gitOriginalSha256": "8278eb73b2cb602714acca5b956dba4f683e5d90cf604bf8f8bb40e60185e17c",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Search/Contracts/NativeTextCrashReceipt.cs",
+              "currentSha256": "a42dce7fc5e06cac25b955b95b4eff6962e530164e0d340759d38f057ea5c3bc",
+              "gitOriginalSha256": "a42dce7fc5e06cac25b955b95b4eff6962e530164e0d340759d38f057ea5c3bc",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/EventProjectionCrashScenario.cs",
+              "currentSha256": "2dbd77debf491815cd92187b08d0ca000ea3b3ecc5a56a9f3ce172b481973fb9",
+              "gitOriginalSha256": "2dbd77debf491815cd92187b08d0ca000ea3b3ecc5a56a9f3ce172b481973fb9",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeTextCanonicalState.cs",
+              "currentSha256": "cba538828703b53345604ccffd50b997a7c0b17273f165144ebe9c6a1beb5e34",
+              "gitOriginalSha256": "cba538828703b53345604ccffd50b997a7c0b17273f165144ebe9c6a1beb5e34",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeTextCrashScenario.cs",
+              "currentSha256": "9725db429e451ee70a2891292663809ec21045eef83ec57b369e3ebf04c0a33a",
+              "gitOriginalSha256": "9725db429e451ee70a2891292663809ec21045eef83ec57b369e3ebf04c0a33a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Contracts/ExistingStoreInspectorContracts.cs",
+              "currentSha256": "7a3db2c53d59109b77fc3c8cf10bf08199ded17becb275260cbcd29199fd0e0a",
+              "gitOriginalSha256": "7a3db2c53d59109b77fc3c8cf10bf08199ded17becb275260cbcd29199fd0e0a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Contracts/ExistingStoreInspectorProtocol.cs",
+              "currentSha256": "e9a3190ad69d8687e27c9a944704a54af6e4054b1e346aba60ad1a88dcb462c3",
+              "gitOriginalSha256": "e9a3190ad69d8687e27c9a944704a54af6e4054b1e346aba60ad1a88dcb462c3",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Fixtures/CrashDatabase.cs",
+              "currentSha256": "654a41da31c8afeeb65049e4cb7445150a81ef6c2ec5bee5b85cf0812e6d7a12",
+              "gitOriginalSha256": "654a41da31c8afeeb65049e4cb7445150a81ef6c2ec5bee5b85cf0812e6d7a12",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Fixtures/CrashFixtureValues.cs",
+              "currentSha256": "a2b874e096d0b76213fc9197e46bee97963a4e0eb95520628191872d8c7fdffd",
+              "gitOriginalSha256": "a2b874e096d0b76213fc9197e46bee97963a4e0eb95520628191872d8c7fdffd",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CanonicalCrashScenario.cs",
+              "currentSha256": "811c2684f36da0c3495b63e107f9ab736953376b04a10fae3651d750abd62369",
+              "gitOriginalSha256": "811c2684f36da0c3495b63e107f9ab736953376b04a10fae3651d750abd62369",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CrashHostApplication.cs",
+              "currentSha256": "56dad81212fac0af35e1d374316ace2698782a74ed5d70e05499114bd813db34",
+              "gitOriginalSha256": "56dad81212fac0af35e1d374316ace2698782a74ed5d70e05499114bd813db34",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/CrashHostPause.cs",
+              "currentSha256": "fb9fc95c9e23bdb649cdf68502ee21cc5267aaa784b654345d490800f3e04249",
+              "gitOriginalSha256": "fb9fc95c9e23bdb649cdf68502ee21cc5267aaa784b654345d490800f3e04249",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/ExistingStoreInspector.cs",
+              "currentSha256": "9aeb6f175f88e50826b0c9b742c2e0b4aa42a837c33889ba2a12e5060088881a",
+              "gitOriginalSha256": "9aeb6f175f88e50826b0c9b742c2e0b4aa42a837c33889ba2a12e5060088881a",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/ExistingStoreInspectorFailures.cs",
+              "currentSha256": "759176e60bf3824b38e9193225dcbc7c63eca9a0e7050e18dce79337e5c53059",
+              "gitOriginalSha256": "759176e60bf3824b38e9193225dcbc7c63eca9a0e7050e18dce79337e5c53059",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/ExistingStoreInspectorInputs.cs",
+              "currentSha256": "bb9d709caea971950c0b0edc095d4808d3bfccf1017a8d479e7baa8b24e588e0",
+              "gitOriginalSha256": "bb9d709caea971950c0b0edc095d4808d3bfccf1017a8d479e7baa8b24e588e0",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/ExistingStoreInspectorOperation.cs",
+              "currentSha256": "f46d00f762201891089b29dab0a470635550791270d845f98098eb08da5315a8",
+              "gitOriginalSha256": "f46d00f762201891089b29dab0a470635550791270d845f98098eb08da5315a8",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/ProjectionCrashScenario.cs",
+              "currentSha256": "324c8e2cc25652b37a4ab95a6da6f9108db22dd81f425446ed1cc30a7972d5bd",
+              "gitOriginalSha256": "324c8e2cc25652b37a4ab95a6da6f9108db22dd81f425446ed1cc30a7972d5bd",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Helpers/SubscriptionCrashScenario.cs",
+              "currentSha256": "8d3459517f2fe7b4275656e2411da477442bc83789c0c09eebab541201684580",
+              "gitOriginalSha256": "8d3459517f2fe7b4275656e2411da477442bc83789c0c09eebab541201684580",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Features/TimeSeries/Helpers/SampleRetentionCrashScenario.cs",
+              "currentSha256": "bcadf69fe4f2bdad9826ccbfe11c0dfbc5c2d95ec185d8f6e3d1b3d573b27865",
+              "gitOriginalSha256": "bcadf69fe4f2bdad9826ccbfe11c0dfbc5c2d95ec185d8f6e3d1b3d573b27865",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj",
+              "currentSha256": "e45c7f9cbdee76df7be497d31337bb2be9cf3c3568f45de99eff4463d49533e2",
+              "gitOriginalSha256": "e45c7f9cbdee76df7be497d31337bb2be9cf3c3568f45de99eff4463d49533e2",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.CrashHost/Program.cs",
+              "currentSha256": "4937265861cf050ea8ea73253c75a682b63f6ad819c8497a88eaa97cd29e68ee",
+              "gitOriginalSha256": "4937265861cf050ea8ea73253c75a682b63f6ad819c8497a88eaa97cd29e68ee",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": null,
+              "currentMatchesAuthenticatedManifest": null
+            },
+            {
+              "path": "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+              "currentSha256": "8429144a4ef4c949de1c213c59b25c9db1300c3faa7049f0558a072ca04e59ed",
+              "gitOriginalSha256": "8429144a4ef4c949de1c213c59b25c9db1300c3faa7049f0558a072ca04e59ed",
+              "currentMatchesGitOriginal": true,
+              "authenticatedManifestSha256": "8429144a4ef4c949de1c213c59b25c9db1300c3faa7049f0558a072ca04e59ed",
+              "currentMatchesAuthenticatedManifest": true
+            }
+          ],
+          "allCurrentComparedSourcesMatchOriginalGit": true,
+          "matchedAuthenticatedManifestCount": 57,
+          "currentCompiledChildMatch": "not established; root current recovery/DLL capture is separate local proof",
+          "bindingReviewSha256": "1c608c07bcf0f7d0d4ffe82716ae0daf349b068d6650fd5f5415d671c8c84293"
+        }
+      }
+    }
   },
   "KL-017": {
     "title": "Consensus provider qualification",
@@ -3042,17 +5795,101 @@
   },
   "KL-024": {
     "title": "Time-series core",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/TimeSeries/Commands/DatabaseEngine.SampleAppend.cs",
       "src/KeyLoad.Core/Features/TimeSeries/Queries/DatabaseEngine.SampleReads.cs",
       "src/KeyLoad.Core/Features/TimeSeries/Queries/TimeSeriesReadOperations.cs",
-      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleOrderingTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleOrderingTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
+    ],
+    "verification": {
+      "taskAcceptance": {
+        "completedAt": "2026-10-07",
+        "scope": "original KL-024 acceptance only",
+        "sourceCommit": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "runId": 37612238705,
+        "runAttempt": 1,
+        "verifyJobId": 112762072690,
+        "verifyJobConclusion": "failure",
+        "sameJobSourceAndImageVerifyPassed": true,
+        "originalTestArtifactId": 11478898817,
+        "originalTestArtifactSha256": "6b01ac114703371b98fe5c4788eec3a070ffb2e1c25c29aaf51ed9b6102e0e11",
+        "traceability": "docs/implementation/status.json (KL-024.verification.taskAcceptance)",
+        "completeSuiteQualified": false,
+        "laterSourceQualified": false,
+        "remainingFeatureGates": "Complete feature, current full-suite/RF3, endurance, performance and release gates are separate; process-kill is not power-loss proof.",
+        "originalAcceptance": "Out-of-order and equal-timestamp samples read in defined order; retry does not change sample count.",
+        "originalCases": [
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleOrderingTests",
+            "method": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+            "instance": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "className": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "instance": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.TimeSeries.SampleOrderingTests",
+            "method": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+            "instance": "OutOfOrderSamplesStayOrderedAndSampleIdIsIdempotent",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "className": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "instance": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "outcome": "Passed"
+          }
+        ],
+        "requirementsAndCriteria": {
+          "requirements": [
+            "REQ-SERIES-003",
+            "REQ-SERIES-004",
+            "REQ-SERIES-005"
+          ],
+          "acceptance": [
+            {
+              "id": "AC-SERIES-004",
+              "scope": "out-of-order UTC/sequence ordering and repeated identical sample ID count preservation only; changed-content/nonfinite rejection is not claimed from these selected cases"
+            },
+            {
+              "id": "AC-SERIES-005",
+              "scope": "equal-UTC timestamps retain literal insertion-sequence order and inclusive min/max/offset reads only; authorization/budget/cancellation/RF3 are not claimed from these selected cases"
+            }
+          ],
+          "task": "KL-024",
+          "feature": "docs/Features/TimeSeries.md",
+          "adrs": [
+            "docs/ADR/ADR-005-canonical-keyspace-codec.md"
+          ],
+          "testEvidence": {
+            "cases": "KL-024.verification.taskAcceptance.originalCases",
+            "sourceWitnesses": "sourceWitnesses",
+            "originalResults": "originalSuites",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+            "artifactId": 11478898817,
+            "cohortSource": "24c0ac47d4566f606ce8466aa0e5b3499c735eef"
+          }
+        },
+        "originalJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+        "originalArtifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/artifacts/11478898817",
+        "originalSourceWitnessCount": 267,
+        "originalSourceRevisionUrl": "https://github.com/managedcode/KeyLoad/tree/24c0ac47d4566f606ce8466aa0e5b3499c735eef"
+      }
+    }
   },
   "KL-025": {
     "title": "Time-series range і aggregates",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/TimeSeries/Queries/DatabaseEngine.SampleReads.cs",
       "src/KeyLoad.Core/Features/TimeSeries/Queries/SampleRangeReader.cs",
@@ -3071,7 +5908,8 @@
       "Historical intermediate report removed from repository; no current qualification inferred",
       "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690"
     ],
     "boundedReads": {
       "requirements": "REQ-SERIES-008..012",
@@ -3137,6 +5975,296 @@
         "normalSameBucketInt32Ns": "9V74_52_77_to35_22_7763_58_25_to39_43",
         "scalarPair": "baseline_rep2_to_candidate_rep1_same_EPYC7763_other_CPU_cohorts_unpaired"
       }
+    },
+    "verification": {
+      "taskAcceptance": {
+        "scope": "original KL025 reference aggregates/range/latest/windows and scan-budget criterion",
+        "sourceCommit": "24c0ac47d4566f606ce8466aa0e5b3499c735eef",
+        "runId": 37612238705,
+        "runAttempt": 1,
+        "verifyJobId": 112762072690,
+        "verifyJobConclusion": "failure",
+        "sourceIdentityVerifyPassed": true,
+        "traceability": "docs/implementation/status.json (KL-025.verification.taskAcceptance)",
+        "completeSuiteQualified": false,
+        "laterSourceQualified": false,
+        "originalAcceptance": "Aggregates match reference for boundary/timezone/empty/late data; scanned-record budget obeyed.",
+        "originalCases": [
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+            "instance": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+            "instance": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+            "instance": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+            "instance": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+            "instance": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+            "instance": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+            "instance": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+            "instance": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+            "instance": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+            "instance": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+            "instance": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+            "instance": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+            "instance": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+            "instance": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+            "instance": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "instance": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+            "instance": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+            "instance": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+            "instance": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+            "instance": "AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+            "instance": "AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+            "instance": "AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+            "instance": "AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+            "instance": "AcSeries009AggregateMatchesIndependentRawFoldForLateDuplicatesOffsetsAndEdges",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+            "instance": "AcSeries009FiniteSumOverflowFailsWithoutChangingPositionOrHealthyFollowup",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateTests",
+            "method": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+            "instance": "AcSeries009NullEndIncludesMaximumAndEqualBoundsReturnEmptyAggregate",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+            "instance": "AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+            "instance": "AcSeries010WindowsAreDenseAnchoredClampedAndMatchRawReference",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+            "instance": "AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
+            "method": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+            "instance": "AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateBudgetTests",
+            "method": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+            "instance": "AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+            "instance": "AcSeries008LatestVisitsOneBaselineEntryWithLargeOlderHistoryAndSmallRawBudget",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+            "instance": "AcSeries008LatestUsesUtcTimestampAndGreatestSequenceAtInclusiveCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.SampleLatestTests",
+            "method": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+            "instance": "AcSeries008LatestIncludesDateMaximumAndReturnsNullWhenNoSampleIsAtCut",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "instance": "AcMp005InclusiveUtcBoundsHandleEqualTimestampsAndDateLimits",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+            "instance": "AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+            "instance": "AcMp005ProjectionUsesPersistedPolicyAndCancellationKeepsStoreUsable",
+            "outcome": "Passed"
+          },
+          {
+            "suite": "unit-scalar",
+            "class": "KeyLoad.UnitTests.Features.TimeSeries.TimeSeriesReadResourceTests",
+            "method": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+            "instance": "AcMp005NarrowRangeSkipsLargeLaterValuesBeforeCopyingOrDecoding",
+            "outcome": "Passed"
+          }
+        ],
+        "originalJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/job/112762072690",
+        "originalArtifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37612238705/artifacts/11478898817",
+        "originalTestArtifactId": 11478898817,
+        "originalTestArtifactSha256": "6b01ac114703371b98fe5c4788eec3a070ffb2e1c25c29aaf51ed9b6102e0e11",
+        "originalSourceWitnessCount": 106,
+        "originalQualificationBoundary": "historical original task acceptance; current full suite/RF3, performance/SIMD and complete TimeSeries feature remain separate"
+      },
+      "globalGates": "Complete current full-suite/RF3, feature/endurance/performance/release remain separate."
     }
   },
   "KL-026": {

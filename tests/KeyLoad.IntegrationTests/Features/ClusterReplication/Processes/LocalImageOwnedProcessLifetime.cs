@@ -69,20 +69,22 @@ internal static partial class LocalImageOwnedProcessLifetime
         }
     }
 
-    internal static async Task TerminateAndJoinAsync(Process process, Task exit, Task output, Task error,
+    internal static async Task TerminateAndJoinAsync(Process process, Task? exit, Task? output, Task? error,
         List<Exception> failures)
     {
+        var actualExit = exit ?? WaitForActualExitAsync(process, failures);
         TrySendTerminate(process, failures);
         if (!HasExited(process, failures))
         {
-            await Task.WhenAny(exit, Task.Delay(TerminationGrace, TimeProvider.System)).ConfigureAwait(false);
+            await Task.WhenAny(actualExit, Task.Delay(TerminationGrace, TimeProvider.System)).ConfigureAwait(false);
         }
         if (!HasExited(process, failures))
         {
             TryKill(process, failures);
         }
 
-        var joined = Task.WhenAll(exit, output, error);
+        var originalTasks = new Task?[] { actualExit, output, error }.OfType<Task>().ToArray();
+        var joined = Task.WhenAll(originalTasks);
         if (await Task.WhenAny(joined, Task.Delay(SettlementLimit, TimeProvider.System)).ConfigureAwait(false) != joined)
         {
             failures.Add(new TimeoutException("Local RF3 image process and original stream readers did not settle within the cleanup threshold."));
@@ -92,20 +94,20 @@ internal static partial class LocalImageOwnedProcessLifetime
             }
         }
 
-        await CollectFailureAsync(exit, failures).ConfigureAwait(false);
+        await CollectFailureAsync(actualExit, failures).ConfigureAwait(false);
         if (!HasExited(process, failures))
         {
             await WaitForActualExitAsync(process, failures).ConfigureAwait(false);
         }
 
-        if (!output.IsCompleted)
+        if (output is null || !output.IsCompleted)
         {
-            CloseOwnedStream(process.StandardOutput, failures);
+            CloseOwnedStream(process, standardOutput: true, failures);
         }
 
-        if (!error.IsCompleted)
+        if (error is null || !error.IsCompleted)
         {
-            CloseOwnedStream(process.StandardError, failures);
+            CloseOwnedStream(process, standardOutput: false, failures);
         }
 
         await CollectFailureAsync(output, failures).ConfigureAwait(false);
@@ -150,9 +152,10 @@ internal static partial class LocalImageOwnedProcessLifetime
         }
     }
 
-    private static void CloseOwnedStream(StreamReader reader, List<Exception> failures)
+    private static void CloseOwnedStream(Process process, bool standardOutput, List<Exception> failures)
     {
-        OwnedProcessFailureObserver.Observe(reader.Close, failures);
+        OwnedProcessFailureObserver.Observe(() =>
+            (standardOutput ? process.StandardOutput : process.StandardError).Close(), failures);
     }
 
     private static void TrySendTerminate(Process process, List<Exception> failures)
@@ -177,22 +180,17 @@ internal static partial class LocalImageOwnedProcessLifetime
         }, failures);
     }
 
-    private static async Task CollectFailureAsync(Task task, List<Exception> failures)
+    private static async Task CollectFailureAsync(Task? task, List<Exception> failures)
     {
-        await task.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        if (task.Exception is { } errors)
+        if (task is null)
+        { return; }
+        var captured = await OwnedProcessFailureObserver.CaptureAsync(task).ConfigureAwait(false);
+        IEnumerable<Exception> errors = captured is AggregateException aggregate
+            ? aggregate.InnerExceptions : captured is null ? [] : new[] { captured };
+        foreach (var error in errors)
         {
-            foreach (var error in errors.InnerExceptions)
-            {
-                if (!failures.Any(failure => ReferenceEquals(failure, error)))
-                { failures.Add(error); }
-            }
-        }
-        if (task.IsCanceled)
-        {
-            try
-            { await task.ConfigureAwait(false); }
-            catch (OperationCanceledException error) { failures.Add(error); }
+            if (!failures.Any(failure => ReferenceEquals(failure, error)))
+            { failures.Add(error); }
         }
     }
 

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-/// <summary>Proves the local-development image receipt and the actual three started Docker containers.</summary>
+/// <summary>Proves the local-development image receipt and the expected started Docker containers.</summary>
 internal static class LocalRf3ImageIdentity
 {
     private const string ProvenanceField = "provenance";
@@ -15,14 +15,18 @@ internal static class LocalRf3ImageIdentity
     private const string InputDigestField = "inputDigest";
     private const string ImageConfigIdField = "imageConfigId";
     private const string InvocationIdField = "invocationId";
+    private const string NodeResourcePrefix = "node";
     private const int MaximumOutputBytes = 16_384;
     private static readonly TimeSpan VerifyTimeout = TimeSpan.FromSeconds(30);
 
     internal sealed record Identity(string Reference, string Tag, string InvocationId, string ImageConfigId);
-    internal static async Task<Identity?> ReadVerifiedAsync(string root, CancellationToken cancellationToken)
+    internal static Task<Identity?> ReadVerifiedAsync(string root, CancellationToken cancellationToken)
+        => ReadVerifiedAsync(root, LocalRf3ImageSelection.Read(), cancellationToken);
+
+    internal static async Task<Identity?> ReadVerifiedAsync(string root, LocalRf3ImageSelection.Selection? selection,
+        CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
-        var selection = LocalRf3ImageSelection.Read();
         if (selection is null)
         {
             return null;
@@ -40,28 +44,44 @@ internal static class LocalRf3ImageIdentity
         var identity = await ReadVerifiedAsync(root, cancellationToken).ConfigureAwait(false);
         if (identity is not null)
         {
-            VerifyModel(app, identity.Tag);
+            VerifyModel(app, identity, ThreeNodeNames());
         }
         return identity;
     }
 
-    internal static async Task VerifyStartedContainersAsync(Identity identity,
+    internal static async Task<Identity> VerifyBeforeStartAsync(DistributedApplication app, string root,
+        LocalRf3ImageSelection.Selection selection, IReadOnlyCollection<string> expectedNames,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(selection);
+        var identity = await ReadVerifiedAsync(root, selection, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("The local RF3 image identity is invalid.");
+        VerifyModel(app, identity, expectedNames);
+        return identity;
+    }
+
+    internal static Task VerifyStartedContainersAsync(Identity identity,
         IReadOnlyDictionary<string, string> containerNames, CancellationToken cancellationToken)
+        => VerifyStartedContainersAsync(identity, containerNames, ThreeNodeNames(), cancellationToken);
+
+    internal static async Task VerifyStartedContainersAsync(Identity identity,
+        IReadOnlyDictionary<string, string> containerNames, IReadOnlyCollection<string> expectedNames,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(identity);
         ArgumentNullException.ThrowIfNull(containerNames);
-        if (containerNames.Count != ClusterFixtureProtocol.NodeCount)
+        var expected = ValidateExpectedNames(expectedNames);
+        if (containerNames.Count != expected.Length || expected.Any(name => !containerNames.ContainsKey(name))
+            || containerNames.Any(pair => !expected.Contains(pair.Key, StringComparer.Ordinal)
+                || string.IsNullOrWhiteSpace(pair.Value)))
         {
             throw new InvalidOperationException("The local RF3 container model is invalid.");
         }
-        foreach (var nodeNumber in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
+        foreach (var node in expected)
         {
-            var node = ClusterFixtureProtocol.NodeName(nodeNumber);
-            if (!containerNames.TryGetValue(node, out var name))
-            {
-                throw new InvalidOperationException("The local RF3 container model is invalid.");
-            }
-            var actual = await ContainerRuntimeDocker.InspectAsync(name, cancellationToken).ConfigureAwait(false);
+            var actual = await ContainerRuntimeDocker.InspectAsync(containerNames[node], cancellationToken)
+                .ConfigureAwait(false);
             if (!string.Equals(actual.ImageId, identity.ImageConfigId, StringComparison.Ordinal)
                 || !string.Equals(actual.ConfigImage, identity.Reference, StringComparison.Ordinal))
             {
@@ -70,24 +90,47 @@ internal static class LocalRf3ImageIdentity
         }
     }
 
-    private static void VerifyModel(DistributedApplication app, string tag)
+    private static void VerifyModel(DistributedApplication app, Identity identity,
+        IReadOnlyCollection<string> expectedNames)
     {
+        var expected = ValidateExpectedNames(expectedNames);
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         var nodes = model.Resources.OfType<ContainerResource>()
-            .Where(resource => ClusterFixtureProtocol.IsNodeName(resource.Name)).ToArray();
-        if (nodes.Length != ClusterFixtureProtocol.NodeCount)
+            .Where(resource => resource.Name.StartsWith(NodeResourcePrefix, StringComparison.Ordinal)).ToArray();
+        if (!nodes.Select(resource => resource.Name).Order(StringComparer.Ordinal)
+                .SequenceEqual(expected, StringComparer.Ordinal))
         {
             throw new InvalidOperationException("The local RF3 container model is invalid.");
         }
         foreach (var node in nodes)
         {
             var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
-            if (image.Image != LocalRf3ImageSelection.Repository || image.Tag != tag || image.SHA256 is not null)
+            if (image.Image != LocalRf3ImageSelection.Repository || image.Tag != identity.Tag || image.SHA256 is not null
+                || !node.TryGetContainerImageName(out var actual)
+                || !string.Equals(actual, identity.Reference, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException("The local RF3 container model is invalid.");
             }
         }
     }
+
+    private static string[] ValidateExpectedNames(IReadOnlyCollection<string> expectedNames)
+    {
+        ArgumentNullException.ThrowIfNull(expectedNames);
+        const int MaximumNodeCount = 6;
+        var expected = expectedNames.Order(StringComparer.Ordinal).ToArray();
+        if (expected.Length is 0 or > MaximumNodeCount
+            || expected.Any(string.IsNullOrWhiteSpace)
+            || expected.Distinct(StringComparer.Ordinal).Count() != expected.Length)
+        {
+            throw new InvalidOperationException("The local RF3 container model is invalid.");
+        }
+        return expected;
+    }
+
+    private static string[] ThreeNodeNames()
+        => Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+            .Select(ClusterFixtureProtocol.NodeName).ToArray();
 
     internal static async Task<string> RunVerifierAsync(string root, string script, string tag, string receipt,
         CancellationToken cancellationToken)

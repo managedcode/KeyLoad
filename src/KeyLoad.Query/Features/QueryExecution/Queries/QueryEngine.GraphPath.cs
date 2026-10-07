@@ -15,6 +15,7 @@ public sealed partial class QueryEngine
         TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         if (request is null)
         {

@@ -19,7 +19,7 @@ internal static class McpGraphPathInputSchemaAssertions
         McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To];
     private static readonly ImmutableArray<string> QueryProperties =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql, McpDiscoveryProtocol.Parameters,
-        McpDiscoveryProtocol.AllowFullScan, McpDiscoveryProtocol.Cursor];
+        McpDiscoveryProtocol.AllowFullScan, McpDiscoveryProtocol.Cursor, McpDiscoveryProtocol.QueryDialectVersion];
     private static readonly ImmutableArray<string> QueryRequired =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql];
     private static readonly ImmutableArray<string> EntityProperties =
@@ -71,6 +71,10 @@ internal static class McpGraphPathInputSchemaAssertions
             McpDiscoveryProtocol.Null, root)).IsTrue();
         await VerifyTypeAsync(queryProperties.GetProperty(McpDiscoveryProtocol.AllowFullScan), McpDiscoveryProtocol.Boolean, root);
         await VerifyNullableStringAsync(queryProperties.GetProperty(McpDiscoveryProtocol.Cursor), root);
+        var dialect = Resolve(root, queryProperties.GetProperty(McpDiscoveryProtocol.QueryDialectVersion));
+        await VerifyTypeAsync(dialect, McpDiscoveryProtocol.Integer, root);
+        await Assert.That(dialect.GetProperty(McpDiscoveryProtocol.Default).GetInt32())
+            .IsEqualTo(McpDiscoveryProtocol.DefaultQueryDialectVersion);
     }
 
     private static async Task VerifyEntityAsync(JsonElement schema, JsonElement root)

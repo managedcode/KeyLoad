@@ -652,3 +652,104 @@ joined exact-tag cleanup after all database resources/locks settle. Traceability
 is REQ/AC-TUNIT-ENTRY-005 to the actual six-silo membership case and native
 selection/model rejection whole flows. Implementation/runtime qualification is
 pending; a pre-existing external receipt is not end-to-end ownership evidence.
+
+## Owned preparation failure diagnostics
+
+TASK-TUNIT-LOCAL-PREPARATION-DIAGNOSTICS-008 refines REQ/AC-TEST-007/010/014/015
+and REQ/AC-TUNIT-ENTRY-006 after R312 failed eight selected cases during
+preparation startup. Before Build, the session registers a passive native host
+logger retaining only closed category/severity/event ID/exception kind; it
+never formats messages, exception text, properties, environments or endpoints.
+Observe actual prerequisite notifications before Start, retain at most128
+records, and emit an80-line/8192-byte failure receipt before teardown. Include
+caller-token and ApplicationStopping states and actual prerequisite state/exit.
+These identify cancellation provenance; an absent original cause remains
+unobserved. Prime the original TestSuiteOutput subscription from actual current
+resource state, then keep its existing native stream and joined cleanup. The
+producer retains its original bounded build-output sidecar under its existing
+contract; neither an absent stream nor a host-stop flag proves a Docker cause.
+Preserve primary, diagnostic and cleanup failures together. No deadline,
+selector, topology, native provider, success predicate or qualification gate
+changes. Sol owns private cohesive ClusterReplication diagnostics/session and
+AppHost TestInfrastructure output priming; root owns joins and native validation.
+
+Verification requires the original failed preparation receipt and resource logs,
+unchanged failure/cleanup settlement, followed by the same eight actual RF3
+SDK/MCP workflows on the current owned image with complete cleanup. Source
+lifetime/privacy review supplements environmental failure evidence; no fake
+provider or synthetic hook qualifies startup. A successful rerun cannot erase
+R312 or establish why it stopped. Runtime qualification remains pending.
+
+## Fixture-owned preparation composition owner
+
+TASK-TUNIT-LOCAL-PREPARATION-OWNER-009 implements REQ/AC-TEST-010/014/015 and
+REQ/AC-TUNIT-ENTRY-006. The fixture uses pinned Aspire13.6's existing public
+direct testing builder Create rather than the entrypoint-suspending CreateAsync.
+An AppHost-owned non-inlined composition bridge ensures native stack-based DCP
+metadata discovery selects KeyLoad.AppHost, then invokes unchanged AddKeyLoad.
+The session records the actual native builder immediately, extracts the original
+validated runner configuration, removes the recursive runner and verifies its
+one-prerequisite/no-container model before Build/start. No original standalone
+Program/TestSuiteApplication is resumed to wait on the removed tests-rf3 resource.
+The session is the sole prerequisite execution owner. Native direct builder
+disposal owns the built application after Stop and original output joining;
+do not separately dispose that same application first. Keep every original
+primary/cleanup failure, selector, policy, producer, receipt and tag gate.
+Standalone suite behavior and the authenticated default image path are unchanged.
+
+The pinned [native implementation](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting.Testing/DistributedApplicationTestingBuilder.cs)
+defines direct creation, stack DCP discovery, Build and builder disposal; the
+suspended factory instead resumes the original entrypoint. Root integrates and
+qualifies this private AppHost Hosting bridge/session join; rollback restores
+only this composition path, with no data/dependency/public API migration.
+Verification must retain the unchanged R312 failure and run the same eight
+actual standard RF3 SDK/MCP operations on its freshly owned image, proving
+original producer exit, exact model/container identity, three-node readiness and
+complete stop/reader/lock/tag cleanup. Six-silo membership and Linux gates remain
+separate. This repairs a concrete competing source owner; it does not assert
+R312's original stopping cause or claim an unexecuted green result.
+
+## Explicit public Q2 rejection RF3 selection
+
+TASK-REL-004-INNER-JOIN-PUBLIC-012-SELECTOR maps AC-REL-004-JOIN-001/003/005
+and AC-QUERY-007-JOIN-001 to REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006 under
+ADR-118/119. Native local-image selection additionally admits exactly:
+
+    /*/*/RelationalSqlRf3JoinRejectionTests/*
+
+This selects the existing12 Arguments of
+RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage. Preserve the
+byte-exact standard8 and six-silo1 selectors. Wildcard class names, method-only
+subsets, combined classes, unsupported/mixed/inherited image configuration and
+GitHub provenance reject; no default selector or tool catalog expands. Both the
+native selector and fixture's closed argument reader must admit this exact
+additional selector before preparation. The existing actual Node selection
+workflow tests positive original TUnit/filter/environment propagation and every
+existing rejection for all three selectors, plus four public12 near-miss filters
+with the exact safe local-selection error. This is infrastructure evidence only.
+
+Sol owns selector/argument admission and native selection regressions; SolNative
+owns the independent public12 helper commandId correction. Every SQL CALL
+configuration command carries its required outer canonical commandId for
+that operation under the existing stable command identity contract.
+Root joins the canonical independent R3 public12 packet and this selector and
+runs all12 complete rejection operations through real SDK query/SQL and official
+MCP query/SQL on the same existing owned RF3 fixture, preserving literal full
+row identity/JSON/revision, no disclosure and complete healthy follow-up. Keep
+original image/source verification, readiness, cancellation, process/reader
+joining, locks and exact-tag cleanup. No provider, public API, storage format,
+SQL language claim, default policy or qualification gate changes. Native
+normal/scalar selection proof, actual12 RF3 reports and original Linux delivery
+remain pending until executed; neither this selector nor source review closes
+full SQL or SQL-client protocol conformance. Rollback removes this additional
+selector and its assertions as one unit.
+
+
+## Native fixture default-time admission, TASK-TEST-EMBEDDED-CLOCK-ORDER-001
+
+TASK-TEST-EMBEDDED-CLOCK-ORDER-001: TestDatabase is the shared test owner of a genuine native ZoneTree DatabaseEngine. Submit without explicit time must use existing DatabaseEngine.ApplyEmbedded, which selects final business time inside the original ordered Store.Commit callback. Submission with explicit DateTimeOffset retains public Apply and its strict supplied-clock/replay/outcome semantics. Preserve the same stable operation ID, serialization, principal, errors and one real commit; no clamp, retry, mock coordinator, new gate or fenced-manager reset. This fixture composition refines TestInfrastructure actual-operation evidence (REQ/AC-TEST-010) and ADR-028 embedded clock ordering, not RF3 topology or clock qualification. NativeSagaTimeout shared PerTestSession fixture concurrently admits default CompleteSaga/CancelSaga/ConfigurePrincipal/revocation operations while native durable-job journal removal commits; pre-gate default clock sampling can therefore race the later committed instant. Existing five actual NativeSagaTimeoutFunctionalTests plus explicit stale-clock/ClockUncertain/replay tests, full normal/scalar and Linux gates remain required. Original R308 journal fences remain immutable evidence; no runtime success is claimed.
+
+
+## Saga deadline construction and admission
+
+TASK-TEST-SAGA-DEADLINE-ORDER-002 freezes CreateWaitingSaga intent: sampled now constructs dueAt, persisted CompareExchangeSaga.Deadline and identical DueWorkHint.DueAt. It is not an externally authoritative command evaluation instant. Sample deadline construction from the owning Database.EvaluationClock, preserve unchanged DueOffset/CompletionTimeout arithmetic and the exact canonical deadline/hint. Submit without explicit time selects final operation evaluation inside existing ApplyEmbedded commit admission. Never widen deadline, clamp time, retry or reset the native journal fence. Explicit-time canonical clock/replay regressions elsewhere remain unchanged. Existing five genuine NativeSagaTimeoutFunctionalTests deadline/effect/stale/revoked/completed/canceled and healthy control-job oracles remain required, along with original R317 outcomes before join.

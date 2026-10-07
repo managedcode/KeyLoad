@@ -18,6 +18,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
@@ -33,6 +34,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
@@ -73,10 +75,12 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, LiveQueryCursorBelongsToADifferentQueryDetail);
         }
+        var retained = queryEngine.Execution.MaximumResultBytes is null ? null : new LiveQueryResultByteAdmission(budget);
         var page = database.ReadChangeFeedView<LiveQueryChange>(view, principal,
             new(query.Partition, query.Query.Collection, claims.ChangeCursor, Limit: request.Limit,
                 MaxBytes: request.MaxBytes),
-            (schema, change) => MapChange(principal, schema, change, query, prepared, budget));
+            (schema, change) => MapChange(principal, schema, change, query, prepared, budget),
+            retained is null ? null : retained.Accept);
         var result = new LiveQueryPage(page.Changes,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor)), page.ThroughSequence,
             page.HasMore, page.CutPosition);

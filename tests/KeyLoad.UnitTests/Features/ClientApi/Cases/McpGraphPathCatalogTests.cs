@@ -82,11 +82,15 @@ internal sealed class McpGraphPathCatalogTests
         var properties = request.GetProperty(Properties);
         await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(Version), Integer);
         var query = Resolve(descriptor.InputSchema, properties.GetProperty(Query));
-        await VerifyObjectAsync(query, [Partition, McpGraphPathCatalogProtocol.Sql, McpGraphPathCatalogProtocol.Parameters, McpGraphPathCatalogProtocol.AllowFullScan, McpGraphPathCatalogProtocol.Cursor], [Partition, McpGraphPathCatalogProtocol.Sql]);
+        await VerifyObjectAsync(query, [Partition, McpGraphPathCatalogProtocol.Sql, McpGraphPathCatalogProtocol.Parameters, McpGraphPathCatalogProtocol.AllowFullScan, McpGraphPathCatalogProtocol.Cursor, McpGraphPathCatalogProtocol.QueryDialectVersion], [Partition, McpGraphPathCatalogProtocol.Sql]);
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(Partition), Object);
         await VerifyPartitionAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(Partition));
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.Sql), String);
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.AllowFullScan), Boolean);
+        var dialect = query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.QueryDialectVersion);
+        await VerifyTypeAsync(descriptor.InputSchema, dialect, Integer);
+        await Assert.That(dialect.GetProperty(McpSchemaInspector.Default).GetInt32())
+            .IsEqualTo(McpGraphPathCatalogProtocol.DefaultQueryDialectVersion);
         await VerifyPathResultAsync(descriptor.OutputSchema);
     }
 

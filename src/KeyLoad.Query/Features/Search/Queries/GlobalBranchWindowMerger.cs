@@ -20,7 +20,7 @@ internal static class GlobalBranchWindowMerger
         ImmutableArray<GlobalBranchWindow> windows, DatabaseLimits limits, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(budget);
-        var bytes = new GlobalBranchByteAdmission(limits.MaxBatchBytes, budget);
+        var bytes = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         var received = GlobalBranchValidation.ValidateRequest(request, windows, limits, budget, bytes);
         budget.Check();
         var candidateCount = PreflightWindows(windows, limits.MaxScanRecords, budget);

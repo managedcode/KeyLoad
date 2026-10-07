@@ -1,3 +1,5 @@
+using KeyLoad.Query;
+
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
 /// <summary>Proves existing database query budgets through real RF3 SDK and official MCP callers.</summary>
@@ -18,7 +20,8 @@ internal sealed class RelationalSqlRf3JoinBudgetTests
 
     [Test]
     public Task JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp()
-        => RunAsync(JoinBudgetKind.ResultBytes, new DatabaseLimits { MaxBatchBytes = ResultByteLimit });
+        => RelationalSqlRf3JoinBudgetFlow.ExecuteAsync(JoinBudgetKind.ResultBytes, new DatabaseLimits(),
+            new QueryExecutionOptions { MaximumResultBytes = ResultByteLimit });
 
     private static Task RunAsync(JoinBudgetKind kind, DatabaseLimits limits)
         => RelationalSqlRf3JoinBudgetFlow.ExecuteAsync(kind, limits);

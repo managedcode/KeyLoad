@@ -97,10 +97,11 @@ function Resolve-FcPath([string] $Root, [string] $Relative) {
     }
     $current = $Root
     foreach ($segment in $Relative.Split([char[]]@([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar))) {
-        $current = Join-Path $current $segment
-        if (Test-Path -LiteralPath $current) {
-            if ((Get-Item -LiteralPath $current -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw $script:FunctionalCoverage.ErrorPath }
-        }
+        $current = [IO.Path]::Combine($current, $segment)
+        try { $attributes = [IO.File]::GetAttributes($current) }
+        catch [IO.FileNotFoundException] { continue }
+        catch [IO.DirectoryNotFoundException] { continue }
+        if ($attributes -band [IO.FileAttributes]::ReparsePoint) { throw $script:FunctionalCoverage.ErrorPath }
     }
     $full
 }

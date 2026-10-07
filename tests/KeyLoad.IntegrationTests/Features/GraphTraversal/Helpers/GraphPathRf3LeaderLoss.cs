@@ -98,8 +98,8 @@ internal static class GraphPathRf3LeaderLoss
     {
         var command = new CommandRequest(Guid.NewGuid(), seed.Partition,
         [new UpsertEdge(GraphPathRf3Scenario.Graph, NewEdgeId, seed.Source, seed.Target, GraphPathRf3Scenario.Label)]);
-        var receipt = await McpCallerAssertions.SdkSuccessAsync(await clients.Administrators[survivor]
-            .CommitAsync(command, cancellationToken));
+        var receipt = await GraphPathRf3CommandReconciliation.CommitAsync(clients.Administrators[survivor],
+            command, cancellationToken);
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(seed.Partition.AtomicPartitionId);
@@ -107,6 +107,7 @@ internal static class GraphPathRf3LeaderLoss
         var request = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
         var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[survivor]
             .ShortestPathAsync(request, cancellationToken));
+        await GraphPathRf3CommandReconciliation.AssertShortcutAsync(result, command);
         await GraphPathRf3Assertions.AssertPathAsync(result, [seed.Source, seed.Target], [NewEdgeId],
             GraphPathRf3Scenario.Label, receipt.Token.Position);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, GraphPathRf3NodeClients.Nodes[survivor],
@@ -148,6 +149,7 @@ internal static class GraphPathRf3LeaderLoss
         {
             var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[nodeIndex]
                 .ShortestPathAsync(request, cancellationToken));
+            await GraphPathRf3CommandReconciliation.AssertShortcutAsync(result, seed, NewEdgeId);
             await GraphPathRf3Assertions.AssertPathAsync(result, [seed.Source, seed.Target], [NewEdgeId],
                 GraphPathRf3Scenario.Label, committedToken.Position);
         }
@@ -157,6 +159,7 @@ internal static class GraphPathRf3LeaderLoss
             GraphPathRf3Scenario.DirectTool, request, cancellationToken));
         await GraphPathRf3Assertions.AssertPathAsync(official.Value, [seed.Source, seed.Target], [NewEdgeId],
             GraphPathRf3Scenario.Label, committedToken.Position);
+        await GraphPathRf3CommandReconciliation.AssertShortcutAsync(official.Value, seed, NewEdgeId);
     }
 
     private static async Task RestoreNodeAsync(ClusterFixture fixture, string node,

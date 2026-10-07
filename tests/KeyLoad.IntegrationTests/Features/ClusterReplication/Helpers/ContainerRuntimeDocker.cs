@@ -1,11 +1,14 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.ExceptionServices;
+using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 /// <summary>Reads actual Docker runtime identity and polls the original kill/restart state transitions.</summary>
 internal static class ContainerRuntimeDocker
 {
+    private const int MaximumOutputCharacters = 16_384;
     internal static async Task<ContainerRuntimeInspection> WaitForExitedAsync(string containerName,
         string resourceName, CancellationToken cancellationToken)
     {
@@ -72,11 +75,47 @@ internal static class ContainerRuntimeDocker
         {
             startInfo.ArgumentList.Add(argument);
         }
-        using var process = Process.Start(startInfo) ?? throw new InvalidOperationException(ContainerRuntimeProtocol.DockerStartFailure);
-        var output = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var error = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-        return new(process.ExitCode, await output, await error);
+        var process = Process.Start(startInfo) ?? throw new InvalidOperationException(ContainerRuntimeProtocol.DockerStartFailure);
+        return await RunOwnedAsync(process, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task<ContainerRuntimeProcessResult> RunOwnedAsync(Process process, CancellationToken cancellationToken)
+    {
+        Task? exit = null;
+        Task<string>? output = null;
+        Task<string>? error = null;
+        var failures = new List<Exception>();
+        var original = RunProcessAsync();
+        try
+        {
+            var primary = await OwnedProcessFailureObserver.CaptureAsync(original).ConfigureAwait(false);
+            if (primary is not null)
+            {
+                failures.Add(primary);
+                var cleanup = LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures);
+                var cleanupFailure = await OwnedProcessFailureObserver.CaptureAsync(cleanup).ConfigureAwait(false);
+                if (cleanupFailure is not null)
+                { failures.Add(cleanupFailure); }
+            }
+        }
+        finally
+        {
+            OwnedProcessFailureObserver.Observe(process.Dispose, failures);
+        }
+        if (failures.Count == 1)
+        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        if (failures.Count > 1)
+        { throw new AggregateException("Docker CLI execution and owned process settlement failed.", failures); }
+        return await original.ConfigureAwait(false);
+
+        async Task<ContainerRuntimeProcessResult> RunProcessAsync()
+        {
+            exit = process.WaitForExitAsync(CancellationToken.None);
+            output = LocalImageOwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, MaximumOutputCharacters);
+            error = LocalImageOwnedProcessLifetime.ReadBoundedAsync(process.StandardError, MaximumOutputCharacters);
+            await LocalImageOwnedProcessLifetime.ObserveAsync(exit, output, error, cancellationToken).ConfigureAwait(false);
+            return new(process.ExitCode, await output.ConfigureAwait(false), await error.ConfigureAwait(false));
+        }
     }
 
     internal static void EnsureSuccessful(ContainerRuntimeProcessResult result, string operation, string target)

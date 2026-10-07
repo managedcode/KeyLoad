@@ -21,6 +21,7 @@ public sealed class ReadExecutionBudget
     private readonly TimeProvider clock;
     private readonly long started;
     private long bytes;
+    private int resultBytesLimit;
     private long reservedReadGrantBytes;
     private int examinedGrantRecords;
     private int reservedGrantRecords;
@@ -35,6 +36,7 @@ public sealed class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(options);
         limits = options.Value;
         limits.Validate();
+        resultBytesLimit = limits.MaxBatchBytes;
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
         started = clock.GetTimestamp();
@@ -44,6 +46,14 @@ public sealed class ReadExecutionBudget
     public long ReadBytes => bytes;
 
     internal CancellationToken Cancellation => cancellationToken;
+    internal int MaximumResultBytes => resultBytesLimit;
+
+    internal void ConstrainResultBytes(int maximumBytes)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
+        Check();
+        resultBytesLimit = Math.Min(resultBytesLimit, maximumBytes);
+    }
 
     /// <summary>Wraps an existing gated view so its reads share this operation budget.</summary>
     /// <param name="view">Existing view valid only inside its owning store action.</param>
@@ -214,7 +224,7 @@ public sealed class ReadExecutionBudget
     public long MeasureResult<T>(T result)
     {
         Check();
-        using var counter = new ResultByteCounterStream(limits.MaxBatchBytes, Check);
+        using var counter = new ResultByteCounterStream(resultBytesLimit, Check);
         JsonSerializer.Serialize(counter, result, JsonDefaults.Options);
         Check();
         return counter.Length;

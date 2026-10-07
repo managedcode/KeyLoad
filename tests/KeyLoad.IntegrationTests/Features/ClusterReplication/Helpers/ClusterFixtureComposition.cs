@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -51,11 +52,12 @@ internal static class ClusterFixtureComposition
     }
 
     internal static void ConfigureTestOverrides(IDistributedApplicationTestingBuilder builder, long? commandBytes,
-        HttpAdmissionLimits? httpAdmission, DatabaseLimits? databaseLimits)
+        HttpAdmissionLimits? httpAdmission, DatabaseLimits? databaseLimits, QueryExecutionOptions? queryExecution = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ConfigureCommandAdmission(builder, commandBytes);
         ConfigureHttpAdmission(builder, httpAdmission);
+        ClusterFixtureQueryResultLimits.Configure(builder, queryExecution);
         if (databaseLimits is not null)
         {
             ClusterFixtureDatabaseLimits.Configure(builder, databaseLimits);

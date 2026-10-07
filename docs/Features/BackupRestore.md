@@ -336,3 +336,14 @@ original delivered Linux evidence. Bounded archive pieces/peak-memory,
 cluster-cut and capability-state reconciliation remain separately required; these
 receipts do not close AC-BACKUP-001 in full or AC-BACKUP-004. No archive format,
 server endpoint, dependency, automatic retry or migration changes are introduced.
+
+
+Original KL-005 task acceptance is complete on the source-bound Linux Stage VII
+cohort documented in [the canonical task status](../implementation/status.json).
+The clean target recovers exact documents, index memberships and persisted dedup.
+The source and manifest positions equal the acknowledged backup cut; the target
+position equals that cut plus the single restore-authority commit. Old replica
+LastApplied, clock and membership reset and dispatch remains paused under
+AC-BACKUP-CONTENT-002. Corrupted/incomplete backups reject. The receipt retains
+all original full-suite failures;
+this task closure does not mark the complete feature or later source qualified.

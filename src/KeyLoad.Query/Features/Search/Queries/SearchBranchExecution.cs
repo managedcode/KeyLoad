@@ -59,7 +59,7 @@ internal static class SearchBranchExecution
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingSelectedDocument);
             var ranked = new RankedDocument(database.Project(principal, resource, document), selected[index].Score);
             var bytes = budget.MeasureResult(ranked);
-            if (bytes > database.Limits.MaxBatchBytes - projectedBytes)
+            if (bytes > budget.MaximumResultBytes - projectedBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, ResultExceeded);
             }

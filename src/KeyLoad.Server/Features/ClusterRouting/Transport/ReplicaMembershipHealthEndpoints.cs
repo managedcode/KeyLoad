@@ -1,10 +1,30 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class ReplicaMembershipHealthEndpoints
 {
+    private const string SiloHealthRoute = "/health/silo";
+    private const string AuthorityHealthRoute = "/health/membership-authority";
     private const string MapHealthMembershipReadyRoute = "/health/membership-ready";
 
-    internal static void Map(WebApplication app) => app.MapGet(MapHealthMembershipReadyRoute, MembershipAsync);
+    internal static void Map(WebApplication app)
+    {
+        app.MapGet(SiloHealthRoute, Silo);
+        app.MapGet(AuthorityHealthRoute, Authority);
+        app.MapGet(MapHealthMembershipReadyRoute, MembershipAsync);
+    }
+
+    private static IResult Silo(OrleansNode node)
+        => Status(node.SiloJoined && node.Grains is not null);
+
+    private static IResult Authority(OrleansNode node, ReplicaMembershipAuthorityOwner owner,
+        IOptions<NodeOptions> options)
+        => Status(options.Value.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
+            && node.SiloJoined && node.Grains is not null && owner.IsReady);
+
+    private static IResult Status(bool ready)
+        => Results.StatusCode(ready ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
 
     private static async Task<IResult> MembershipAsync(OrleansNode node, CancellationToken token)
     {

@@ -5,10 +5,10 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
 internal static class ProductionSourceManifestContributorAssertions
 {
     private const int RegistrySchemaVersion = 1;
-    private const int ExpectedUnitRows = 25;
-    private const int ExpectedScalarRows = 25;
+    private const int ExpectedUnitRows = 41;
+    private const int ExpectedScalarRows = 41;
     private const int ExpectedRecoveryRows = 1;
-    private const int ExpectedRf3Rows = 4;
+    private const int ExpectedRf3Rows = 11;
     private const int MaximumIdentityFieldCharacters = 512;
     private const int MaximumOperationCharacters = 4096;
     private const int MinimumFieldCount = 1;
@@ -33,7 +33,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private const string AcceptanceProperty = "acceptance";
     private const string ExecutedModulesProperty = "executedModules";
     private const string OperationProperty = "operationOutcomeAndState";
-    private const string QueryClassPrefix = "KeyLoad.UnitTests.Features.QueryExecution.";
+
     private static readonly string[] FieldNames =
     [
         AcceptanceProperty, ClassNameProperty, ExecutedModulesProperty, InstanceNameProperty, MethodNameProperty,
@@ -74,7 +74,7 @@ internal static class ProductionSourceManifestContributorAssertions
         await AssertRegistryRowsMatchAsync(actualRows, expectedRows);
         await AssertRowsAsync(actualRows);
         await AssertQueryExpansionAsync(actualRows, queryContract.RootElement);
-        await AssertAdditionalCandidatesAsync(actualRows);
+        await AssertAdditionalCandidatesAsync(actualRows, queryContract.RootElement);
     }
 
     private static async Task AssertRegistryShapeAsync(JsonElement registry)
@@ -134,11 +134,12 @@ internal static class ProductionSourceManifestContributorAssertions
     private static async Task AssertQueryExpansionAsync(JsonElement contributors, JsonElement queryContract)
     {
         var cases = queryContract.GetProperty(ContributorsProperty).GetProperty(ExactCasesProperty).EnumerateArray().ToArray();
+        var queryIdentities = ProductionSourceManifestQueryIdentities.Read(queryContract);
         foreach (var suite in new[] { UnitSuite, ScalarSuite })
         {
             var rows = contributors.EnumerateArray().Where(row =>
                 row.GetProperty(SuiteProperty).GetString() == suite &&
-                row.GetProperty(ClassNameProperty).GetString()!.StartsWith(QueryClassPrefix, StringComparison.Ordinal)).ToArray();
+                queryIdentities.Contains(ProductionSourceManifestQueryIdentities.Identity(row))).ToArray();
             await Assert.That(rows.Length).IsEqualTo(cases.Length);
             foreach (var sourceCase in cases)
             {
@@ -158,15 +159,16 @@ internal static class ProductionSourceManifestContributorAssertions
         }
     }
 
-    private static async Task AssertAdditionalCandidatesAsync(JsonElement contributors)
+    private static async Task AssertAdditionalCandidatesAsync(JsonElement contributors, JsonElement queryContract)
     {
+        var queryIdentities = ProductionSourceManifestQueryIdentities.Read(queryContract);
         var candidates = contributors.EnumerateArray().Where(row =>
-            !row.GetProperty(ClassNameProperty).GetString()!.StartsWith(QueryClassPrefix, StringComparison.Ordinal))
+            !queryIdentities.Contains(ProductionSourceManifestQueryIdentities.Identity(row)))
             .Select(row => string.Join('|', row.GetProperty(SuiteProperty).GetString(),
                 row.GetProperty(ClassNameProperty).GetString(), row.GetProperty(MethodNameProperty).GetString(),
                 row.GetProperty(InstanceNameProperty).GetString())).Order(StringComparer.Ordinal);
-        await Assert.That(candidates).IsEquivalentTo(CandidateIdentities.Order(StringComparer.Ordinal),
-            TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        var expected = CandidateIdentities.Concat(ProductionSourceManifestExpansionIdentities.Values).Order(StringComparer.Ordinal);
+        await Assert.That(candidates).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private static async Task AssertUniqueStringsAsync(JsonElement element, HashSet<string>? allowed)

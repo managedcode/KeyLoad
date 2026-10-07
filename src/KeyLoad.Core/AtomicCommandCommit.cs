@@ -27,6 +27,13 @@ public sealed partial class DatabaseEngine
     /// <param name="replicationIndex">Optional committed replica position.</param>
     /// <returns>The durable logical result, including a stored domain failure.</returns>
     public OperationResult Apply(ReplicatedOperation operation, long replicationIndex = AtomicCommandCommitFirstElementIndex)
+        => ApplyCore(operation, replicationIndex, selectEmbeddedClock: false, cancellationToken: default);
+
+    internal OperationResult ApplyEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => ApplyCore(operation, AtomicCommandCommitFirstElementIndex, selectEmbeddedClock: true, cancellationToken);
+
+    private OperationResult ApplyCore(ReplicatedOperation operation, long replicationIndex,
+        bool selectEmbeddedClock, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Id == Guid.Empty || Encoding.UTF8.GetByteCount(operation.PayloadJson) > Limits.MaxBatchBytes)
@@ -34,7 +41,12 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
         }
         operation = NormalizeOperation(operation);
-        return Store.Commit((transaction, position) => ApplyCommittedCommand(transaction, operation, position, replicationIndex));
+        return Store.Commit((transaction, position) =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var admitted = selectEmbeddedClock ? operation with { EvaluatedAt = EvaluationClock.GetUtcNow() } : operation;
+            return ApplyCommittedCommand(transaction, admitted, position, replicationIndex);
+        });
     }
 
     private OperationResult ApplyCommittedCommand(IAtomicTransaction transaction, ReplicatedOperation operation,

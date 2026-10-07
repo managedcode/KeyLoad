@@ -62,13 +62,18 @@ public sealed partial class DatabaseEngine
     /// <returns>Ordered immutable projected changes and continuation metadata.</returns>
     public AuthorizedDocumentChangePage<T> ReadChangeFeedView<T>(IKeyValueView view, PrincipalRecord principal,
         ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project) where T : class
+        => ReadChangeFeedView(view, principal, request, project, beforeRetain: null);
+
+    internal AuthorizedDocumentChangePage<T> ReadChangeFeedView<T>(IKeyValueView view, PrincipalRecord principal,
+        ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project,
+        Action<T>? beforeRetain) where T : class
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(project);
         var (resource, head, after) = PrepareChangeRead(view, principal, request);
-        return ProjectChangePage(view, principal, request, project, resource, head, after);
+        return ProjectChangePage(view, principal, request, project, resource, head, after, beforeRetain);
     }
 
     private (ResourceDefinition Resource, OutboxHead Head, long After) PrepareChangeRead(
@@ -112,7 +117,7 @@ public sealed partial class DatabaseEngine
 
     private AuthorizedDocumentChangePage<T> ProjectChangePage<T>(IKeyValueView view, PrincipalRecord principal,
         ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project,
-        ResourceDefinition resource, OutboxHead head, long after) where T : class
+        ResourceDefinition resource, OutboxHead head, long after, Action<T>? beforeRetain) where T : class
     {
         const int BytesInitialValue = 0;
         const string ProjectChangePageDetailText = "The first change exceeds the page byte budget.";
@@ -140,6 +145,7 @@ public sealed partial class DatabaseEngine
 
                 break;
             }
+            beforeRetain?.Invoke(change);
             changes.Add(change);
             bytes += size;
             through = entry.Sequence;

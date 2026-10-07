@@ -31,14 +31,14 @@ internal static class NativeSagaTimeoutTestData
     {
         var lane = new QueueLaneRef(fixture.Database.Partition, SagaQueue);
         var timeoutLane = new QueueLaneRef(fixture.Database.Partition, TimeoutQueue);
-        var now = TimeProvider.System.GetUtcNow();
+        var now = fixture.Database.Database.EvaluationClock.GetUtcNow();
         var dueAt = deadlineInFuture ? now.Add(fixture.TestProfile.CompletionTimeout) : now.Add(DueOffset);
         var sagaId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var timeout = new SagaTimeoutDefinition(timeoutLane, TimeoutPayload, TimeoutHeaders, TimeToLive: SagaTimeoutTtlValue);
         var create = new CommandRequest(commandId, fixture.Database.Partition,
             [new CompareExchangeSaga(lane, sagaId, InitialRevision, SagaPhase.Waiting, SagaState, dueAt, timeout)]);
-        _ = fixture.Database.Submit(OperationKind.Batch, create, creator, commandId, now).Get<CommitReceipt>();
+        _ = fixture.Database.Submit(OperationKind.Batch, create, creator, commandId).Get<CommitReceipt>();
         var hint = new DueWorkHint(DueWorkKind.Saga, lane, sagaId, creator, RevisionOne,
             DueCoordinatorFields.NoGeneration, DueCoordinatorFields.FirstOrdinal, dueAt);
         return new NativeSagaTimeoutCase(lane, timeoutLane, sagaId, dueAt, hint);

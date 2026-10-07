@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
@@ -19,9 +20,9 @@ internal static class RelationalSqlRf3JoinBudgetFlow
     private const long SeedRevision = 1;
     private const string MissingDocument = "The SDK did not return a seeded join source.";
 
-    internal static async Task ExecuteAsync(JoinBudgetKind kind, DatabaseLimits limits)
+    internal static async Task ExecuteAsync(JoinBudgetKind kind, DatabaseLimits limits, QueryExecutionOptions? queryExecution = null)
     {
-        var fixture = new ClusterFixture(limits);
+        var fixture = queryExecution is null ? new ClusterFixture(limits) : new ClusterFixture(limits, queryExecution);
         try
         {
             await fixture.InitializeAsync();

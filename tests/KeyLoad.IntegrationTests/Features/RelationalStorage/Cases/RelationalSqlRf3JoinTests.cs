@@ -37,7 +37,8 @@ internal sealed class RelationalSqlRf3JoinTests(ClusterFixture fixture)
         };
         var configured = await SqlRf3Protocol.SdkAsync<ResourceDefinition>(sdk,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.ResourcesConfigure,
-                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, rightDefinition)), deadline.Token);
+                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, rightDefinition),
+                Guid.NewGuid()), deadline.Token);
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RightId);
         var seedCommand = scenario.Command(
             new PutDocument(RelationalSqlRf3Tokens.Table, "order-z", "{\"key\":\"order-z\",\"title\":\"cust-2\",\"count\":2}"),

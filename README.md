@@ -332,34 +332,28 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **3 fully accepted, 101 in progress and 0 pending**.
-The accepted tasks are **KL-007** storage codecs, **KL-010** document CRUD/CAS and
-**KL-012** batch/idempotency, each bound to its original Linux tests and compiled
-source, including real process retries and task-specific SDK/MCP RF3 operations.
-Their acceptance does not qualify the remaining features or the complete cluster.
+The original 104-task plan has **7 accepted, 97 in progress and 0 pending**.
+Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
+document CRUD/CAS, **KL-012** batch/idempotency, **KL-016** committed projection
+outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
+ranges/aggregates. Each closure is bound to its original criteria and Linux
+operation evidence. Complete feature and cluster qualification remains open.
 
-The [latest completed Linux RF3 cohort](https://github.com/managedcode/KeyLoad/actions/runs/37590715245/job/112691267500)
-recorded **151/158**, with seven failed operations. Coverage collection and merge
-were skipped after that failure. The [same run's Linux verify job](https://github.com/managedcode/KeyLoad/actions/runs/37590715245/job/112691308536)
-passed normal and scalar **2,771/2,771** and recovery **236/236**, without skips.
-These results bind to Stage VI commit `4c48909`; they do not qualify later edits.
-Stage VII has joined bounded Q2/AST2 relational INNER JOIN, real concurrent
-committed document/index scanning, strict native MCP schema oracles and exact
-functional contributor selection. The final full Release build and formatter
-pass with zero warnings, errors or source drift. Owning normal/scalar operations
-each pass **606/606**, and real indexed/idempotency process recovery passes
-**2/2**, with unchanged source/DLL/PDB identities and no skips. These are local
-owning subsets. New public Q2 RF3 and complete current-source Linux qualification
-remain open; the Stage VI results above predate these additions.
-
-Three GPT-6.1 Sol workers prepare disjoint implementation and whole-operation
-verification batches while the integration owner runs stable compiled cohorts.
-The next reviewed source packets contain **52 JOIN rejection scenarios** and
-TUnit-owned fresh-image preparation/shutdown for standard RF3 and six silos;
-these packets have not been integrated or executed yet. Full SQL/client protocol,
-FK, KL-075 scaling, complete RF3, functional coverage, endurance and release gates
-remain open. The [implementation status](docs/implementation/status.json) retains
-original failures, source/report hashes and each qualification boundary.
+Current source includes bounded Q2/AST2 same-partition relational INNER JOIN,
+52 JOIN rejection scenarios, graph mutation/atomic-retry and traversal deadline
+flows, vector atomic rejection flows and 12 public SDK/official MCP rejection
+flows. C# fixtures own fresh-image Aspire preparation, RF3 readiness and joined
+cleanup. Three GPT-6.1 Sol workers prepare disjoint implementation and complete
+operation batches while the integration owner validates stable compiled cohorts.
+Local full native normal and scalar suites passed **2876/2876 each**, and process
+recovery passed **236/236** on their retained compiled cohort. Final Release build
+and formatter passed after import-order and test identity corrections; eight real
+Aspire-owned RF3 SQL JOIN/schema/auth/budget/cancellation/read-cut operations passed
+**8/8** through .NET and official MCP clients. Exact-source Linux and complete RF3
+qualification, six-silo membership, full SQL/client protocol, FK, KL-075 scaling,
+functional coverage, endurance and release gates remain open. The
+[status tracker](docs/implementation/status.json) retains the original failures,
+source/report hashes and each qualification boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation
 flows only. The current registry selects **94 contributors**: 41 normal, 41

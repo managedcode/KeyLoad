@@ -18,7 +18,7 @@ function Read-FcAssemblyMetadataStrings([object] $Reader) {
     $records = [Collections.Generic.List[object]]::new()
     $totalCharacters = 0L
     $sourceRecordCount = 0
-    foreach ($handle in $Reader.CustomAttributes) {
+    foreach ($handle in $Reader.GetAssemblyDefinition().GetCustomAttributes()) {
         $attribute = $Reader.GetCustomAttribute($handle)
         if ($attribute.Parent.Kind -ne [Reflection.Metadata.HandleKind]::AssemblyDefinition -or
             $attribute.Constructor.Kind -ne [Reflection.Metadata.HandleKind]::MemberReference) { continue }

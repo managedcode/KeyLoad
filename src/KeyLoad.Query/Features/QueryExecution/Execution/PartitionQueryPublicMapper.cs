@@ -22,7 +22,7 @@ internal static class PartitionQueryPublicMapper
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         var mappingBytes = MappingBytes(result.Rows.Length, result.Leaves.Length);
-        if (mappingBytes > limits.MaxBatchBytes - result.RetainedBytes)
+        if (mappingBytes > budget.MaximumResultBytes - result.RetainedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, MappingBudgetExceeded);
         }
