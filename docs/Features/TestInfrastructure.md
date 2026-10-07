@@ -75,6 +75,27 @@ TRX receipts are retained as an evidence gap, alongside its original artifacts.
 
 ## Unified Aspire test entry
 
+TASK-C1-LOGGER-PROVENANCE-NEGATIVE refines the existing DIAG-003/005/006
+model-selection regression after the original Stage IV Linux normal/scalar
+reports each passed2770/2771 and failed the same exact negative case. The local
+RF3 image reader rejects GitHub provenance before C1 logger selection. Freeze
+the negative matrix's exact expected rejection per row before changing source:
+the deliberately enabled local-image row explicitly supplies GitHub provenance
+to its unstarted builder configuration and expects the existing local-image
+configuration error on every host; other incompatible rows retain the exact C1
+selection error. Keep resource counts unchanged and the owned root absent,
+with original failure/cleanup joins. Never clear inherited runner provenance,
+mutate process environment, change a production validator, produce an image,
+start Docker or broaden the expected-error set. The independent real positive
+builder/build/disposal flow remains mandatory.
+
+Existing ADR-082/117 own this options/model-control boundary; product/data/API
+changes and new frontend are N/A. A Luna worker owns only the existing
+UnitTests TestInfrastructure selection case and rejection helper in a private
+guarded packet; root reviews, joins, runs native normal/scalar, commits/pushes
+and retains fresh exact-source Linux evidence. This is model-admission evidence,
+not database RF3 or a functional coverage contribution. Qualification pending.
+
 TASK-C1-LOGGER-MODEL-CONTROL maps the native logger-control fixture to the
 DIAG-003/005/006 contract in
 [NativeCqrsRequestV2](ClusterRouting/NativeCqrsRequestV2.md) and ADR-082. Only its
@@ -573,10 +594,22 @@ environmental error branches retain the explicit full-source audit supplement.
 
 | Вимога | Acceptance / flows | Test / evidence mapping |
 |---|---|---|
-| REQ-TEST-004: versions/licenses/native dependencies та platforms зафіксовані для delivered source | AC-TEST-004: centrally pinned package/image inventory і source provenance відповідають actual restore/container; required platform jobs pass, incompatible/missing/native/license requirement explicit fail; free comparison engines не потребують Enterprise | Owner-selected Linux-only GitHub qualification; macOS local runs remain development evidence. Current39-pin survey and26-project/222-package closure bind cached artifacts, licenses and provenance; clean delivered-source restore/native/platform qualification remains pending. |
+| REQ-TEST-004: versions/licenses/native dependencies та platforms зафіксовані для delivered source | AC-TEST-004: centrally pinned package/image inventory і source provenance відповідають actual restore/container; required platform jobs pass, incompatible/missing/native/license requirement explicit fail; free comparison engines не потребують Enterprise | Owner-selected Linux-only GitHub qualification; macOS local runs remain development evidence. The 2026-10-07 local inventory has50 central pins,27 project asset files and264 package/version pairs. The fresh R239 isolated restore selects all264 archives from NuGet.org; the VFS10.0.11 archive matches the exact official catalog SHA512/repository commit and the K4os1.3.8 source license is bound to its immutable release commit. There are0 unresolved package/license inventory rows. Restore and inventory alone do not qualify the native build or runtime. Original Linux receipts match central inputs but do not retain complete package-graph/archive identity. Clean delivered-source restore/native/platform qualification remains pending. |
 | REQ-TEST-005: release manifest рекламує тільки перевірені capability/guarantee gates | AC-TEST-005: all required build/analyze/format/TUnit/recovery/RF3 SDK/MCP та configured coverage/complexity pass на exact delivered SHA; failures/unsupported/unconfigured remain explicit unavailable; power-loss/endurance/fault gates окремі, stable release withheld до потрібних доказів | PLANNED consolidated exact SHA/run/job/artifact release evidence для KL-041/044/080/104; [CodeQuality](CodeQuality.md), [BenchmarkComparisons](BenchmarkComparisons.md), [ResourceExecution](ResourceExecution.md) owning checks |
 
 Negative/edge/error flows: skipped suite не passing; flaky case — failure; malformed/missing artifact, mismatched SHA/profile, unavailable engine/license/platform або test resource startup failure не замінює previous qualified history. Old CI не кваліфікує uncommitted code; test method name не є result. [ADR-031](../ADR/ADR-031-modular-all-in-one-resource-isolation.md) і [ADR-036 foundation](../ADR/ADR-036-orleans-foundation.md) фіксують topology/capability scope.
+
+TASK-TEST-PUBLISHED-PACKAGE-IDENTITY repairs the local qualification inputs before
+further native verification. Preserve the shared global cache and its original
+receipts; use a task-private package directory and the unchanged repository
+NuGet.Config/central pins for canonical restore. AC-TEST-PACKAGE-001 requires the
+actual restored VFS10.0.11 archive to match the authoritative exact-version NuGet
+catalog SHA512 and repository commit, with refreshed asset content hashes and no
+local feed/project reference. Rebuild and rerun affected native whole-operation
+regressions from those published inputs. A mismatch or missing package fails;
+earlier local receipts remain explicitly unqualified for published dependency
+identity. This changes development build inputs only; runtime contracts,
+licensing decisions and dependencies remain unchanged under ADR-107/117.
 
 Target maps: shared AppHost/CrashHost/fixtures/workflows — composition/infrastructure; business cases mirror owning canonical `Features/<SliceName>/`, TUnit/MTP — єдиний .NET framework/runner. Frontend N/A; real first-render website evidence належить BenchmarkComparisons. One integration owner owns central project/CI/resource graph; bounded test workers зберігають every assertion та join з real GitHub evidence. Нові doc files не запускають локальний продукт і не послаблюють жоден gate.
 # Build and Tests boundary, owner correction 2026-10-06
@@ -610,3 +643,12 @@ Compile links. `TestElapsedClock` keeps its one shared source because functional
 unit cases use it. ADR-074 fixes source ownership and root/Luna join roles; source
 byte/hash/reference review plus the existing canonical build/discovery gates
 verify this structural continuation without artificial structure-only tests.
+
+TASK-TEST-TUNIT-LOCAL-MEMBERSHIP implements the REQ/AC-TEST-015 prerequisite
+ownership gap under ADR-117. [ADR-119](../ADR/ADR-119-tunit-owned-local-membership-image.md)
+freezes the explicit native selector, per-case TUnit-owned preparation, typed
+selection without global environment mutation, six-name model/runtime proof and
+joined exact-tag cleanup after all database resources/locks settle. Traceability
+is REQ/AC-TUNIT-ENTRY-005 to the actual six-silo membership case and native
+selection/model rejection whole flows. Implementation/runtime qualification is
+pending; a pre-existing external receipt is not end-to-end ownership evidence.

@@ -1,5 +1,40 @@
 # BackupRestore
 
+TASK-BACKUP-INDEXED-DOCUMENT-DEDUP fills the original KL-005 content gap under
+REQ-BACKUP-001/002/003. AC-BACKUP-CONTENT-001 requires a current native backup
+seeded through actual DatabaseEngine document/index/command operations to restore
+into a fresh target, reopen exact canonical document/reference/revision state,
+return independently expected native indexed-query memberships and preserve the
+original stored dedup bytes. Replaying a pre-backup ID must return the existing
+TokenInvalidated outcome without overwrite or duplicate effects because its
+recorded incarnation differs from the new restored identity. A new post-restore
+command must then replay its exact current-incarnation persisted outcome once,
+with no additional effects or store-position change.
+Include insert/replace/delete and a rejected unique-conflict batch with no
+partial effects; verify the same content after a further close/reopen and a
+healthy new command. Raw key/value seeds or getters alone cannot prove it.
+
+AC-BACKUP-CONTENT-002 retains the original offline store cut: manifest position
+and verified source position are exactly the acknowledged backup cut; the target
+native store position includes the existing single restore-authority commit.
+Assert those exact values and unchanged source archive bytes. The existing
+new-incarnation restore intentionally clears replica LastApplied, clock and
+membership and keeps dispatch paused; that replica authority reset cannot be
+advertised as preserving a usable old RF3 applied index. Cluster-cut restoration,
+token/lease reconciliation and release qualification remain separate open gates.
+Use existing legitimate offline storage/physical-shard ownership APIs when
+opening DatabaseEngine/QueryEngine on the restored data; no fabricated catalog,
+authorization bypass, replica-authority replay or replacement query path is
+permitted. Report any genuine missing product path before changing its contract.
+
+ADR-046/048 and the current native restore contract own this test-only stage;
+there is no new format, migration, compatibility path, dependency or public API.
+Canonical ownership is UnitTests BackupRestore Cases/Fixtures/Assertions with
+cohesive actual roles; frontend and new transport are N/A to the offline gap.
+Root freezes/reviews/joins/runs native normal/scalar and source-bound Linux;
+a Luna worker prepares a private guarded packet. No task closure is claimed
+until every original criterion is directly supported by actual evidence.
+
 The native staged-restore caller remains in the BackupRestore slice under
 REQ-BACKUP-002 / AC-BACKUP-002. `BackupRestoreStagingJoinTests` directly invokes
 the native ZoneTree restore; despite its historical `AcSqlc011` method label, it

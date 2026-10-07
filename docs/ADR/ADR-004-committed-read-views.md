@@ -22,6 +22,15 @@ EventStreams `REQ-EVENT-001..003`/`AC-MP-005`, QueryExecution `REQ-QUERY-001..00
 4. Validate current cursor versions and invalidate stale bindings explicitly. Reject unsupported cursors with a stable error rather than translating them or guessing their cut.
 5. GitHub CI runs real-store TUnit, process recovery, and RF3 client reads across leader changes; root owns the common cut/token contract and joins feature-specific tests.
 
+TASK-CUT-DOCUMENT-INDEX-SCAN maps REQ-CUT-005 /
+AC-CUT-DOCUMENT-INDEX-SCAN-001 in
+[NativeReadCuts](../Features/StorageRecovery/NativeReadCuts.md). The bounded real
+document/index scan, concurrent atomic writer, joined failure cleanup, reopen and
+healthy follow-up are test-only completion of the existing gate contract. Root
+owns integration and exact-source qualification; the worker's exact private
+ownership and ordered implementation are frozen in that feature document.
+Snapshot/segment-movement performance and complete KL-004 acceptance stay open.
+
 Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-006](ADR-006-strict-derived-indexes.md), and [ADR-010](ADR-010-query-budgets-security.md). Stop on any ambiguity about visibility, cut translation, or cancellation lifetime; do not claim read-your-writes or global ordering beyond the verified contract.
 
 ```mermaid

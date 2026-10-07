@@ -16,10 +16,10 @@ internal static class TwoRf3ClusterResources
     private const string AdminKeyParameterName = "admin-key";
     private const string MembershipPeerParameterName = "membership-peer-a";
     private const string PeerParameterName = "peer-b";
-    private const string TrustedGroupIncarnationEnvironment = "TrustedGroup__Incarnation";
-    private const string TrustedGroupPeerSecretEnvironment = "TrustedGroup__PeerSecret";
-    private const string TrustedGroupVotersEnvironment = "TrustedGroup__VoterIds";
-    private const string TrustedGroupSiloEndpointsEnvironment = "TrustedGroup__SiloEndpoints";
+    private const string TrustedGroupIncarnationEnvironment = "TrustedGroupIncarnation";
+    private const string TrustedGroupPeerSecretEnvironment = "TrustedGroupPeerSecret";
+    private const string TrustedGroupVotersEnvironment = "TrustedGroupVoterIds";
+    private const string TrustedGroupSiloEndpointsEnvironment = "TrustedGroupSiloEndpoints";
     private const string AuthorityPhysicalShardEnvironment = "AuthorityPhysicalShardId";
     private const string AuthorityIncarnationEnvironment = "AuthorityIncarnation";
     private const string AuthorityPeerSecretEnvironment = "AuthorityPeerSecret";
@@ -154,7 +154,7 @@ internal static class TwoRf3ClusterResources
         const string AuthorityModeSetting = "Mode";
         const string AuthorityMode = "authority";
         const string ProxyMode = "proxy";
-        const string TrustedPhysicalShardSetting = "TrustedGroup__PhysicalShardId";
+        const string TrustedPhysicalShardSetting = "TrustedGroupPhysicalShardId";
         const string SiloPortSuffix = ":11111";
 
         resource.WithEnvironment(AuthorityPrefix + AuthorityModeSetting, groupA ? AuthorityMode : ProxyMode);

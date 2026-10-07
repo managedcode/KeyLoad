@@ -51,6 +51,9 @@ internal static class CrashHostApplication
             SagaTimeoutCrashScenario.Mode => SagaTimeoutCrashScenario.RunAsync(directory, store, boundary),
             CommandIdempotencyCrashContract.FirstMode => CommandIdempotencyCrashScenario.RunFirstAsync(directory, store),
             CommandIdempotencyCrashContract.ReplayMode => CommandIdempotencyCrashScenario.RunReplayAsync(directory, store),
+            ScalarIndexCrashContract.PrepareMode or ScalarIndexCrashContract.FaultMode
+                or ScalarIndexCrashContract.RecoverMode or ScalarIndexCrashContract.VerifyMode
+                => ScalarIndexCrashScenario.RunAsync(directory, store, boundary, mode),
             _ => RunCanonicalAsync(directory, store, boundary, mode)
         };
 

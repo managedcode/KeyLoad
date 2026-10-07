@@ -17,3 +17,11 @@ Automated traceability: AC-TUNIT-ENTRY-001 maps to `tests/KeyLoad.UnitTests/Feat
 REQ-TUNIT-ENTRY-004: the original Linux RF3 job must have a bounded aggregate scheduling budget for the complete same-image native product-coverage cohort. AC-TUNIT-ENTRY-004: the `docker-rf3` job in `.github/workflows/build-and-tests.yml` allows at most 180 minutes for its build, required RF3 suite, two full uninstrumented unit censuses, ten positive instrumented unit groups, instrumented recovery/RF3 runs, strict descriptor admission and product merge. Preserve every individual native test/session timeout, corpus, original exit code, no-skip rule, source/image identity and coverage threshold; a larger job budget does not qualify a failed or incomplete run.
 
 TASK-TUNIT-ENTRY-005 freezes this scheduling amendment before the workflow change. The unchanged local R111 full unit census took 19 minutes 28 seconds and failed one ANN deadline; its duration is planning evidence only. The required normal/scalar census and group union execute the functional cases twice in each mode, with build, RF3, recovery and admission in the same job. The former 60-minute aggregate budget cannot be treated as a demonstrated bound for that complete cohort. Root owns the workflow join; the coverage agent may prepare a private overlay against this contract. Verification is the original successful complete Linux cohort and its native receipts, with failures and timeouts retained. Frontend and public database contracts: N/A, CI scheduling only.
+
+REQ-TUNIT-ENTRY-005: an explicit local six-silo membership selection owns its fresh
+image prerequisite and final exact-tag cleanup inside the TUnit case.
+AC-TUNIT-ENTRY-005: [ADR-119](../../ADR/ADR-119-tunit-owned-local-membership-image.md)
+defines the exact selector, typed handoff, source/image admission, six actual
+container proof, SDK/MCP no-dispatch flow, failure joins and unchanged bounds.
+TASK-TUNIT-LOCAL-MEMBERSHIP-IMAGE freezes the ordered source/test stages there.
+The default GitHub route and Linux delivery gates remain mandatory.

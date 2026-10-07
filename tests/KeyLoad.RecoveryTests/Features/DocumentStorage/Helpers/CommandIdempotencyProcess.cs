@@ -9,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 internal static class CommandIdempotencyProcess
 {
-    private const int OutputLimitCharacters = 8_192;
+    internal const int OutputLimitCharacters = 8_192;
     private const int MutationIndex = 0;
 
     internal static async Task RunAsync(string root, CancellationToken callerToken)

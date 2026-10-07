@@ -932,6 +932,33 @@ worker supplies a guarded private target/reader/helper packet. Use real build
 metadata and accepted/rejected native image flows to verify this task. Static
 inspection of an older image may reproduce a defect but cannot qualify new source.
 
+TASK-CQ-COMPILE-PACKAGE-ROOT preserves AC-CQ-018/020 and the exact native TUnit
+generated-source exclusion while repairing package-root path composition.
+The R239 clean official restore supplied a NuGetPackageRoot without a trailing
+separator; string concatenation in the compile-identity target then failed to
+locate the real pinned TUnit props/source and correctly rejected an external
+compile item. Compose that directory with native Path.Combine/GetFullPath.
+AC-CQ-PACKAGE-ROOT-001 requires real native MSBuild compilation with the actual
+pinned TUnit props/generated source for roots with and without a trailing
+separator, identical owned-source/central/producer metadata and native DLL/PDB
+inspection; a counterfeit same-path item with different defining import
+metadata remains rejected before compilation. Do not broaden source admission,
+exclude arbitrary package files, alter receipt schema or disable the guard.
+Root owns the target join and native checks; a Luna worker may prepare guarded
+private target and cohesive compiler-flow tests. Existing ADR-033/117 and
+TASK-CQ-FUNCTIONAL-COMPILE-IDENTITY-001C remain the architecture contract.
+
+The actual `NativeCompilationIdentityPackageRootTests` whole operation compiles
+the pinned native TUnit props/source with both root forms, inspects exact six
+central/owned-source/producer rows and portable DLL/PDB binding, rejects a
+same-path source redefined by a different import, preserves the original output
+bytes, then performs a healthy forced compilation. The negative import removes
+the original compile item before replacing its defining metadata; no duplicate
+item or SDK clean operation substitutes for the required admission rejection.
+R256/R257 include this case in10/10 normal/scalar owning passes; full native
+Release and formatter pass with no input drift. This is local compiler-operation
+evidence; complete current-source Linux/coverage qualification stays open.
+
 TASK-CQ-QUERY-COHESION-091F is a bounded continuation of TASK-CQ-REPAIR-001,
 REQ-CQ-004/006/007 and AC-CQ-022/038. Review the current Query source before
 repairing remaining KLD0031 findings; concurrent capability, row-projection and

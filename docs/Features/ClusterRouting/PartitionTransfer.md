@@ -205,7 +205,7 @@ The HTTP authentication headers are single-valued and canonical: cluster ID, aut
 
 Group B signs calls using its existing group `KeyLoad__PeerSecret`. Group A's authority configuration holds the exact Group B fixed physical ID/incarnation/voter set and that group's peer credential to validate inbound calls. Group A signs replies with its own existing `PeerSecret`; Group B's authority client holds the expected Group A credential and physical ID/incarnation to validate replies. Credentials are separate from `AdminKey`/`SigningKey`; AppHost injects them as secret parameters, zeroes temporary decoded bytes, and never exposes them through status. Existing per-group peer discovery/replication authentication remains unchanged.
 
-Runtime settings are strict and all-or-nothing: `KeyLoad__MembershipAuthority__Mode` is `local` (default, existing single RF3), `authority` (Group A), or `proxy` (Group B); `KeyLoad__MembershipAuthority__AuthorityPhysicalShardId`, `...__AuthorityIncarnation`, `...__AuthorityEndpoints__0..2`, and `...__AuthorityPeerSecret` identify/authenticate the exact Group A authority for proxy nodes; `...__TrustedGroup__PhysicalShardId`, `...__TrustedGroup__Incarnation`, `...__TrustedGroup__VoterIds__0..2`, `...__TrustedGroup__SiloEndpoints__0..2` (canonical host:port resolved at startup), and `...__TrustedGroup__PeerSecret` identify/authenticate the exact Group B for authority nodes. `KeyLoad__ClusterId`, `KeyLoad__PhysicalShardId`, `KeyLoad__Incarnation`, `KeyLoad__Peers__0..2`, `KeyLoad__SiloAddress`, `KeyLoad__SiloPort`, and `KeyLoad__AllowPrivateNetworkHttp` keep their current meanings. `local` rejects authority-only keys; only the exact two-RF3 AppHost profile can assign `authority` to Group A and `proxy` to Group B. Partial vectors, duplicate/nonmember origins, wrong physical ID/incarnation/cluster, malformed secrets or non-private HTTP fail configuration before stores open. The normal three-node profile remains `local`; it has no authority settings or behavior change.
+Runtime settings are strict and all-or-nothing: `KeyLoad__MembershipAuthority__Mode` is `local` (default, existing single RF3), `authority` (Group A), or `proxy` (Group B); `KeyLoad__MembershipAuthority__AuthorityPhysicalShardId`, `...__AuthorityIncarnation`, `...__AuthorityEndpoints__0..2`, and `...__AuthorityPeerSecret` identify/authenticate the exact Group A authority for proxy nodes; `...__TrustedGroupPhysicalShardId`, `...__TrustedGroupIncarnation`, `...__TrustedGroupVoterIds__0..2`, `...__TrustedGroupSiloEndpoints__0..2` (canonical host:port resolved at startup), and `...__TrustedGroupPeerSecret` identify/authenticate the exact Group B for authority nodes. `KeyLoad__ClusterId`, `KeyLoad__PhysicalShardId`, `KeyLoad__Incarnation`, `KeyLoad__Peers__0..2`, `KeyLoad__SiloAddress`, `KeyLoad__SiloPort`, and `KeyLoad__AllowPrivateNetworkHttp` keep their current meanings. `local` rejects authority-only keys; only the exact two-RF3 AppHost profile can assign `authority` to Group A and `proxy` to Group B. Partial vectors, duplicate/nonmember origins, wrong physical ID/incarnation/cluster, malformed secrets or non-private HTTP fail configuration before stores open. The normal three-node profile remains `local`; it has no authority settings or behavior change.
 
 ### Bounds, errors and lifecycle
 
@@ -391,3 +391,34 @@ of that explicit call does not establish that resources never started. The owned
 application is disposed and joined before removing its private root.
 Retain the existing six-node real-image startup and client flow for Linux
 qualification. Rollback removes only this oracle correction and model regression.
+
+
+## TASK-MEMBERSHIP-FLAT-CONFIG (2026-10-07)
+
+This repairs the exact original Stage III startup failure under
+AC-MEMBERSHIP-001/002/006. AC-MEMBERSHIP-CONFIG-001 requires the two-RF3 AppHost
+to emit the existing native flat MembershipAuthoritySettings property names:
+TrustedGroupPhysicalShardId, TrustedGroupIncarnation, TrustedGroupVoterIds,
+TrustedGroupSiloEndpoints and TrustedGroupPeerSecret. Array indices use the
+native double-underscore separator. The previous nested TrustedGroup spelling
+is rejected; no dual-shape binding or compatibility fallback is allowed. Keep
+strict validation, secrets, fixed groups, identity and RF3 readiness unchanged.
+Original nodes1–3 validator and secondary missing-lock cleanup failures remain
+retained.
+
+Root owns the ADR-106 refinement and integration. A Luna worker prepares only
+AppHost ClusterRouting resource-key corrections and cohesive matching UnitTests
+regressions in a private guarded packet. Actual environment callbacks/binding
+must prove both group shapes without printing secret values. Existing genuine
+six-silo SDK/MCP membership/admission and joined cleanup remains the required
+runtime oracle. Do not loosen a validator, increase startup deadlines or skip
+lock checks to conceal this startup defect. Source and qualification pending;
+frontend, database schema and new dependency are N/A.
+
+TASK-MEMBERSHIP-TUNIT-LOCAL-IMAGE refines AC-MEMBERSHIP-001/002/006 under
+[ADR-119](../../ADR/ADR-119-tunit-owned-local-membership-image.md). Preserve the
+default strict GitHub image and current six-member/two-three-voter/SDK/MCP closed
+flow. The explicit local case owns one freshly prepared image, proves all six
+actual container config IDs/references and joins wave/18 locks/image cleanup.
+The current missing local prerequisite owner cannot be replaced by a bare tag
+or synthetic registry digest. Source and native runtime stages remain pending.

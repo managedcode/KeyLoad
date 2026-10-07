@@ -17,3 +17,10 @@ Current stage evidence: [NativeTUnitVerification](../Features/TestInfrastructure
 TASK-TUNIT-ENTRY-005 implements REQ/AC-TUNIT-ENTRY-004 from NativeTUnitEntry by changing only the bounded aggregate `docker-rf3` job timeout from 60 to 180 minutes in `.github/workflows/build-and-tests.yml`. The complete same-image coverage cohort requires two full uninstrumented unit censuses, ten positive instrumented groups, native recovery/RF3 and strict descriptor/product admission, alongside the required RF3 suite and build. The observed unchanged local full unit census lasted 19 minutes 28 seconds; that failed development run informs scheduling and provides no acceptance or coverage evidence.
 
 Stages are: freeze the linked requirement; join the workflow together with its source-bound native coverage producer and qualified unit inventory; parse the actual YAML/PowerShell; execute the original complete Linux job; retain all original exits, TRX, source/image hashes and coverage admission receipts. Root owns final integration and the agent's private workflow overlay. Every individual native deadline, bounded operation, coverage threshold, no-skip and fail-closed publication contract remains unchanged. Rollback removes the scheduling amendment and its overlay without admitting partial evidence. This amendment is Accepted, with complete Linux runtime qualification pending.
+
+[ADR-119](ADR-119-tunit-owned-local-membership-image.md) defines the Accepted
+REQ/AC-TUNIT-ENTRY-005 local membership prerequisite refinement. Native selection
+passes arguments only; the TUnit case removes the recursive runner, executes the
+existing Aspire image prerequisite, passes typed identity without environment
+mutation, and joins final exact-tag cleanup after the actual six-silo wave. Root
+freezes/joins; Luna prepares guarded source. Implementation and runtime pending.

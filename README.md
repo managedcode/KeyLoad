@@ -333,46 +333,36 @@ Discovery exposes static operation documentation. Each invocation checks current
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
 The original 104-task plan has **3 fully accepted, 101 in progress and 0 pending**.
-KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
-fanout, recovery and movement acceptance remains open. The joined stage has
-passed the local Release build with zero analyzer errors and warnings. The
-[original Linux run at 259a3fa5](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576973966)
-passed normal and scalar **2,765/2,765**, recovery **235/235** and same-job native
-source/test-image identity verification, without skips. Later native codec and
-captured-envelope criteria now close **KL-007**, with all19 mapped cases passing
-in both modes and all33 owned source files bound to the original compiled images.
-Original document **KL-010 CRUD/CAS** and **KL-012 batch/idempotency** acceptance
-is also closed: unchanged product/test source is bound to original Linux reports
-and compiled PDBs, including100 retries in each of two real processes. Their
-five SDK/MCP/restart RF3 cases pass in both retained Linux reports and a fresh
-local native Aspire/Docker run. This does not qualify the full RF3 cohort.
-The newer cross-process ownership and read-cut regressions pass locally; their
-task acceptance remains open. The [newer original Linux run at 6816ae91](https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154)
-passed normal and scalar **2,767/2,767**, recovery **235/235** and same-job native
-source/test-image identity checks. Its RF3 job was canceled near the original
-60-minute aggregate budget without producing a completed RF3 report. That job
-now has 180 minutes, with individual scenario deadlines and gates unchanged.
-The [later Linux run at 57532cd5](https://github.com/managedcode/KeyLoad/actions/runs/37569205558/job/112623818966)
-passed normal and scalar **2,769/2,769**, recovery **235/235**, and same-job
-source/test-image checks. Its complete RF3 report records **131/141 passed,
-10 failed**, with bootstrap admission exhaustion, a specific missing ACK grant
-and separate startup/cancellation failures retained. The next source's Linux
-normal/scalar reports each pass **2,770/2,771**; the sole failure is a test
-expecting logger-selection rejection after image-provenance rejection, and
-recovery passes **235/235**. That fixture correction remains pending.
-Local Stage V fixes pass **99/99** owning unit operations in
-each mode and the two real RF3 admission cases. SDK backup and dispatch also
-pass their actual RF3 flows, including native archive restore and queue delivery,
-replay/conflict/denial checks. Full current-source Linux/RF3 remains open.
-All six unchanged native Aspire logger-control flows pass locally, including
-caller cancellation and original task settlement; these model/logger controls
-do not qualify Docker database execution. Six focused local Docker RF3 flows
-pass through the real SDK and official MCP clients, covering native schema
-discovery and autonomous saga timeout/replay. The owned image lifecycle also
-passes prepare, verify, cleanup and repeated cleanup. Full Linux RF3,
-functional coverage, scale and release qualification remain open. The
-[implementation status](docs/implementation/status.json) records each
-source and report boundary.
+The accepted tasks are **KL-007** storage codecs, **KL-010** document CRUD/CAS and
+**KL-012** batch/idempotency, each bound to its original Linux tests and compiled
+source, including real process retries and task-specific SDK/MCP RF3 operations.
+Their acceptance does not qualify the remaining features or the complete cluster.
+
+The [latest completed Linux RF3 cohort](https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652868979)
+recorded **122/132**, with ten failed operations. Coverage collection and merge
+were skipped after that failure. The [same run's Linux verify job](https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652908001)
+passed normal and scalar **2,767/2,768** and recovery **235/235**, without skips.
+Its sole unit failure is an incorrect expected rejection in the C1 fixture; the
+correction passes locally and awaits fresh complete Linux verification.
+Local Stage V passed **99/99** owning unit
+operations in each mode and actual Aspire RF3 SDK/MCP admission, backup/restore
+and queue dispatch flows, in separately retained source/image cohorts.
+
+Stage VI has joined whole-operation query-factory, indexed-document backup/dedup,
+scalar-index process-recovery and six-resource membership configuration work.
+A fresh isolated restore now selects all **264** package/version archives from
+NuGet.org with zero unresolved package/license inventory rows. The corrected
+compile-identity target passes actual native builds with both package-root forms
+and rejects a counterfeit defining import. The complete Release build and native
+formatter pass; owning native normal/scalar flows each pass **10/10**, and real
+indexed/idempotency process recovery passes **2/2**, without source/assembly drift
+or skips. These are focused local results; a new complete Linux run is required.
+Bounded Q2 relational INNER JOIN and a
+TUnit-owned fresh-image six-silo flow have frozen contracts and private source
+stages; neither is runtime-qualified yet. KL-075 scaling, full SQL/client protocol,
+complete Linux RF3, functional coverage, endurance and release gates remain open.
+The [implementation status](docs/implementation/status.json) retains original
+failures, source hashes and each qualification boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation
 flows only. The current Query profile binds exactly 25 named cases and 103 source

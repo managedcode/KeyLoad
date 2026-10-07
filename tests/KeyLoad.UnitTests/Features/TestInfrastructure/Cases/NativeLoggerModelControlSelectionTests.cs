@@ -27,6 +27,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
     private const string ArgumentSeparator = "=";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string InvalidSelectionMessage = "The C1 logger model control selection is invalid.";
+    private const string InvalidLocalImageMessage = "Local RF3 image mode configuration is invalid.";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string FirstPublicPortSetting = "KeyLoad:FirstPublicPort";
@@ -61,6 +62,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
     private const string ProtocolEnabledSetting = "KeyLoadTests:ProtocolCohort:Enabled";
     private const string ProtocolVoterPrefix = "KeyLoadTests:ProtocolCohort:Voters:";
     private const string LocalImageEnabledSetting = "KeyLoadTests:LocalRf3Image:Enabled";
+    private const string GithubActionsSetting = "GITHUB_ACTIONS";
     private const string NodeOne = "node1";
     private const string NodeTwo = "node2";
     private const string NodeThree = "node3";
@@ -96,7 +98,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
         {
             var root = NewRoot();
             await NativeLoggerModelControlRejectionFlow.AssertRejectedAsync(root, selection.Name,
-                selection.Arguments, selection.IncludeImage, InvalidSelectionMessage, CreateBuilder).ConfigureAwait(false);
+                selection.Arguments, selection.IncludeImage, selection.ExpectedMessage, CreateBuilder).ConfigureAwait(false);
         }
     }
 
@@ -152,27 +154,28 @@ internal sealed class NativeLoggerModelControlSelectionTests
         await Assert.That(silo.IsProxied).IsFalse();
     }
 
-    private static (string Name, string[] Arguments, bool IncludeImage)[] RejectedSelections()
+    private static (string Name, string[] Arguments, bool IncludeImage, string ExpectedMessage)[] RejectedSelections()
     {
         var probeRoot = Path.Combine(Path.GetTempPath(), RootPrefix + RequestProbeSession);
         return
         [
-            (nameof(FalseValue), [Argument(LoggerModelControlSetting, FalseValue)], true),
-            (nameof(LoggerModelControlSetting), [Argument(LoggerModelControlSetting, string.Empty)], true),
-            (nameof(NestedControlSetting), [Argument(NestedControlSetting, TrueValue)], true),
-            (nameof(UnitSuite), [Argument(SuiteSetting, UnitSuite)], true),
-            (nameof(BenchmarkEnabledSetting), [Argument(BenchmarkEnabledSetting, TrueValue)], true),
-            (nameof(ComparisonTargetSetting), [Argument(ComparisonTargetSetting, ComparisonTargetValue)], true),
-            (nameof(TwoRf3Profile), [Argument(TwoRf3Setting, TwoRf3Profile)], true),
+            (nameof(FalseValue), [Argument(LoggerModelControlSetting, FalseValue)], true, InvalidSelectionMessage),
+            (nameof(LoggerModelControlSetting), [Argument(LoggerModelControlSetting, string.Empty)], true, InvalidSelectionMessage),
+            (nameof(NestedControlSetting), [Argument(NestedControlSetting, TrueValue)], true, InvalidSelectionMessage),
+            (nameof(UnitSuite), [Argument(SuiteSetting, UnitSuite)], true, InvalidSelectionMessage),
+            (nameof(BenchmarkEnabledSetting), [Argument(BenchmarkEnabledSetting, TrueValue)], true, InvalidSelectionMessage),
+            (nameof(ComparisonTargetSetting), [Argument(ComparisonTargetSetting, ComparisonTargetValue)], true, InvalidSelectionMessage),
+            (nameof(TwoRf3Profile), [Argument(TwoRf3Setting, TwoRf3Profile)], true, InvalidSelectionMessage),
             (nameof(RequestProbeEnabledSetting), [Argument(RequestProbeEnabledSetting, TrueValue),
-                Argument(RequestProbeRootSetting, probeRoot), Argument(RequestProbeSessionSetting, RequestProbeSession)], true),
+                Argument(RequestProbeRootSetting, probeRoot), Argument(RequestProbeSessionSetting, RequestProbeSession)], true, InvalidSelectionMessage),
             (nameof(ProtocolEnabledSetting), [Argument(ProtocolEnabledSetting, TrueValue),
                 Argument(ProtocolVoterPrefix + NodeOne, ImageReference), Argument(ProtocolVoterPrefix + NodeTwo, ImageReference),
-                Argument(ProtocolVoterPrefix + NodeThree, ImageReference)], true),
+                Argument(ProtocolVoterPrefix + NodeThree, ImageReference)], true, InvalidSelectionMessage),
             (nameof(LocalImageEnabledSetting), [Argument(SuiteSetting, Rf3Suite), Argument(FilterSetting, NativeFilter),
-                Argument(LocalImageEnabledSetting, TrueValue), Argument(ImageSetting, string.Empty)], false),
-            (nameof(EphemeralSetting), [Argument(EphemeralSetting, FalseValue)], true),
-            (nameof(DataRootSetting), [Argument(DataRootSetting, string.Empty)], true)
+                Argument(LocalImageEnabledSetting, TrueValue), Argument(ImageSetting, string.Empty),
+                Argument(GithubActionsSetting, TrueValue)], false, InvalidLocalImageMessage),
+            (nameof(EphemeralSetting), [Argument(EphemeralSetting, FalseValue)], true, InvalidSelectionMessage),
+            (nameof(DataRootSetting), [Argument(DataRootSetting, string.Empty)], true, InvalidSelectionMessage)
         ];
     }
 

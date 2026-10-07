@@ -256,3 +256,32 @@ Aspire testing resumes the normal AppHost entry point; absence of an explicit
 StartAsync call is not a guarantee that resources never start. Joined application
 disposal and owned-root cleanup remain mandatory. The real homogeneous image,
 six-silo startup, membership and public fail-closed cases still qualify runtime.
+
+
+## Accepted TASK-MEMBERSHIP-FLAT-CONFIG refinement (2026-10-07)
+
+Related AC-MEMBERSHIP-001/002/006 and AC-MEMBERSHIP-CONFIG-001 in
+ClusterRouting/PartitionTransfer. Original Linux run37569205558 source57532
+fails before health because its AppHost emits nested TrustedGroup keys while the
+unchanged native settings/binder/strict validator owns flat property names.
+Freeze the single supported flat names before source correction. No dual-format
+acceptance, migration, secret/trust change or old-format compatibility is added.
+
+Ordered stages: root freezes this contract; Luna privately changes only AppHost
+Features/ClusterRouting/Resources/TwoRf3ClusterResources.cs key constants and
+matching feature-local UnitTests whole model/binding regressions; root verifies
+source guards, joins, builds, executes native normal/scalar and the genuine
+six-silo Aspire Docker SDK/MCP scenario, then commits/pushes. Every original
+membership/readiness/admission/identity/cleanup gate remains mandatory. Preserve
+the three-node local profile and all authority/proxy server validation.
+
+Rollback restores only those current-stage key/test changes while retaining
+original failure artifacts. There is no persisted rollout; the corrected
+AppHost emits the existing settings shape. Source integration and exact-source
+Linux/runtime qualification remain open; do not mark this ADR Implemented.
+
+The Accepted [ADR-119](ADR-119-tunit-owned-local-membership-image.md) refinement
+assigns TASK-MEMBERSHIP-TUNIT-LOCAL-IMAGE and AC-MEMBERSHIP-001/002/006 local image
+ownership/proof to the TUnit case, existing Aspire prerequisite and exact-tag
+cleanup. It changes no membership or database ownership protocol; the strict
+GitHub route and original Linux gates remain mandatory and unqualified here.

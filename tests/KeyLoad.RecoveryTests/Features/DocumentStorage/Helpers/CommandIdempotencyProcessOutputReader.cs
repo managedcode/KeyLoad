@@ -7,17 +7,18 @@ internal sealed class CommandIdempotencyProcessOutputReader
 {
     private const int BufferCharacters = 512;
     private const string AcknowledgementFailure = "The original command process did not finish its pre-restart retries.";
+    private const string ChildSignalFailure = "The original document recovery child did not emit its required boundary signal.";
     private const string OutputLimitFailure = "The document command CrashHost output exceeded its fixed bound.";
     private readonly int maximumCharacters;
-    private readonly bool inspectAcknowledgement;
+    private readonly string? expectedSignal;
     private readonly TaskCompletionSource<Exception> pipeFailure;
     private readonly TaskCompletionSource<bool> acknowledgement = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    internal CommandIdempotencyProcessOutputReader(int maximumCharacters, bool inspectAcknowledgement,
+    internal CommandIdempotencyProcessOutputReader(int maximumCharacters, string? expectedSignal,
         TaskCompletionSource<Exception> pipeFailure)
     {
         this.maximumCharacters = maximumCharacters;
-        this.inspectAcknowledgement = inspectAcknowledgement;
+        this.expectedSignal = expectedSignal;
         this.pipeFailure = pipeFailure;
     }
 
@@ -45,7 +46,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
 
     internal void FailAcknowledgement(Exception failure)
     {
-        if (inspectAcknowledgement)
+        if (expectedSignal is not null)
         {
             acknowledgement.TrySetException(failure);
         }
@@ -54,7 +55,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
     private async Task DrainAsync(StreamReader reader)
     {
         var buffer = new char[BufferCharacters];
-        var line = inspectAcknowledgement ? new StringBuilder(CrashFixtureValues.Acknowledgement.Length) : null;
+        var line = expectedSignal is not null ? new StringBuilder(expectedSignal.Length) : null;
         var characters = 0;
         var acknowledgementSeen = false;
         var invalidAcknowledgement = false;
@@ -67,12 +68,12 @@ internal sealed class CommandIdempotencyProcessOutputReader
             {
                 exceeded = RecordOutputLimit(characters);
             }
-            if (inspectAcknowledgement && !acknowledgementSeen)
+            if (expectedSignal is not null && !acknowledgementSeen)
             {
                 ObserveAcknowledgement(buffer, read, line!, ref acknowledgementSeen, ref invalidAcknowledgement);
             }
         }
-        if (inspectAcknowledgement && !acknowledgementSeen)
+        if (expectedSignal is not null && !acknowledgementSeen)
         {
             RecordAcknowledgementFailure();
             invalidAcknowledgement = true;
@@ -109,7 +110,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
             {
                 ValidateAcknowledgement(line, ref acknowledgementSeen, ref invalidAcknowledgement);
             }
-            else if (line.Length <= CrashFixtureValues.Acknowledgement.Length)
+            else if (line.Length <= expectedSignal!.Length)
             {
                 line.Append(character);
             }
@@ -128,7 +129,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
             line.Length--;
         }
         acknowledgementSeen = true;
-        if (string.Equals(line.ToString(), CrashFixtureValues.Acknowledgement, StringComparison.Ordinal))
+        if (string.Equals(line.ToString(), expectedSignal, StringComparison.Ordinal))
         {
             acknowledgement.TrySetResult(true);
             return;
@@ -139,7 +140,10 @@ internal sealed class CommandIdempotencyProcessOutputReader
 
     private void RecordAcknowledgementFailure()
     {
-        var failure = new InvalidOperationException(AcknowledgementFailure);
+        var message = expectedSignal == CrashFixtureValues.Acknowledgement
+            ? AcknowledgementFailure
+            : ChildSignalFailure;
+        var failure = new InvalidOperationException(message);
         pipeFailure.TrySetResult(failure);
         FailAcknowledgement(failure);
     }

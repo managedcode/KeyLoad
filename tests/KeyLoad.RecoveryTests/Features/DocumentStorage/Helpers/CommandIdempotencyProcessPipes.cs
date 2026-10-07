@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using KeyLoad.CrashHost;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
@@ -7,7 +8,7 @@ internal sealed class CommandIdempotencyProcessPipes
     private readonly StreamReader output;
     private readonly StreamReader error;
     private readonly int maximumCharacters;
-    private readonly bool expectAcknowledgement;
+    private readonly string? expectedSignal;
     private readonly TaskCompletionSource<Exception> pipeFailure = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private CommandIdempotencyProcessOutputReader? outputReader;
     private Task? standardOutput;
@@ -18,12 +19,12 @@ internal sealed class CommandIdempotencyProcessPipes
     private Exception? joinStartupFailure;
 
     private CommandIdempotencyProcessPipes(StreamReader output, StreamReader error, int maximumCharacters,
-        bool expectAcknowledgement)
+        string? expectedSignal)
     {
         this.output = output;
         this.error = error;
         this.maximumCharacters = maximumCharacters;
-        this.expectAcknowledgement = expectAcknowledgement;
+        this.expectedSignal = expectedSignal;
     }
 
     internal Task<Exception> FailureTask => pipeFailure.Task;
@@ -33,7 +34,11 @@ internal sealed class CommandIdempotencyProcessPipes
 
     internal static CommandIdempotencyProcessPipes Create(Process process, int maximumCharacters,
         bool expectAcknowledgement)
-        => new(process.StandardOutput, process.StandardError, maximumCharacters, expectAcknowledgement);
+        => Create(process, maximumCharacters, expectAcknowledgement ? CrashFixtureValues.Acknowledgement : null);
+
+    internal static CommandIdempotencyProcessPipes Create(Process process, int maximumCharacters,
+        string? expectedSignal)
+        => new(process.StandardOutput, process.StandardError, maximumCharacters, expectedSignal);
 
     internal void StartReaders()
     {
@@ -97,7 +102,7 @@ internal sealed class CommandIdempotencyProcessPipes
         try
         {
             outputReader = new CommandIdempotencyProcessOutputReader(maximumCharacters,
-                expectAcknowledgement, pipeFailure);
+                expectedSignal, pipeFailure);
             standardOutput = outputReader.ReadAsync(output);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
@@ -117,7 +122,7 @@ internal sealed class CommandIdempotencyProcessPipes
         try
         {
             var errorReader = new CommandIdempotencyProcessOutputReader(maximumCharacters,
-                inspectAcknowledgement: false, pipeFailure);
+                expectedSignal: null, pipeFailure);
             standardError = errorReader.ReadAsync(error);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))

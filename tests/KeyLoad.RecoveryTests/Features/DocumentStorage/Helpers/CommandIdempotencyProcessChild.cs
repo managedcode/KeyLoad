@@ -1,12 +1,13 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
+using KeyLoad.CrashHost;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 internal sealed class CommandIdempotencyProcessChild
 {
     private readonly int outputLimitCharacters;
-    private readonly bool expectAcknowledgement;
+    private readonly string? expectedSignal;
     private Process? process;
     private Task? processExit;
     private CommandIdempotencyProcessPipes? pipes;
@@ -14,15 +15,18 @@ internal sealed class CommandIdempotencyProcessChild
     internal bool IsSettled { get; private set; }
     internal bool IsDisposed { get; private set; }
 
-    private CommandIdempotencyProcessChild(int outputLimitCharacters, bool expectAcknowledgement)
+    private CommandIdempotencyProcessChild(int outputLimitCharacters, string? expectedSignal)
     {
         this.outputLimitCharacters = outputLimitCharacters;
-        this.expectAcknowledgement = expectAcknowledgement;
+        this.expectedSignal = expectedSignal;
     }
 
     internal int ExitCode => RequireProcess().ExitCode;
     internal static CommandIdempotencyProcessChild Create(int outputLimitCharacters, bool expectAcknowledgement)
-        => new(outputLimitCharacters, expectAcknowledgement);
+        => Create(outputLimitCharacters, expectAcknowledgement ? CrashFixtureValues.Acknowledgement : null);
+
+    internal static CommandIdempotencyProcessChild Create(int outputLimitCharacters, string? expectedSignal)
+        => new(outputLimitCharacters, expectedSignal);
 
     internal void Start(ProcessStartInfo start)
     {
@@ -58,7 +62,7 @@ internal sealed class CommandIdempotencyProcessChild
         try
         {
             pipes = CommandIdempotencyProcessPipes.Create(startedProcess, outputLimitCharacters,
-                expectAcknowledgement);
+                expectedSignal);
             pipes.StartReaders();
             startupFailure = CommandIdempotencyProcessFailureHandling.PreserveStartupFailure(
                 startupFailure, pipes.StartupFailure);

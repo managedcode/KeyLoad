@@ -13,6 +13,44 @@ segments, but the current runtime shutdown does not track escaped iterators.
 Choose one finite provider-owned lease with copied callback bytes and explicit
 shutdown joining. Do not introduce another database or move storage ownership.
 
+## TASK-CUT-DOCUMENT-INDEX-SCAN (2026-10-07)
+
+REQ-CUT-005 and **AC-CUT-DOCUMENT-INDEX-SCAN-001** strengthen the original
+KL-004 concurrent-scan criterion. One real native ZoneTree/TestDatabase read
+callback must scan canonical document records and their declared scalar index
+under the existing committed read gate while an actual independent database
+writer attempts one atomic replacement/delete/insert batch. A bounded real
+callback barrier holds that scan; the writer reaches its operation boundary and
+remains pending until the gate is released. Every copied old document JSON,
+revision, tombstone/index membership and captured cut must match an independent
+literal reference model. After releasing the barrier, join the original scan and
+writer tasks, require the complete successful batch receipt, and scan the exact
+new document/index state and new cut. Close/reopen and a fresh valid command must
+preserve that state and prove continued native-store usability.
+
+The whole-operation case owns its finite barriers, cancellation, original tasks,
+copied callback bytes and store directory. Release barriers and join both original
+tasks on every failure path, retaining primary and cleanup failures. No sleeps as
+the sole overlap oracle, detached timeout tasks, fake provider, production hook,
+native write bypass, assertion weakening or unbounded materialization is allowed.
+No borrowed view/span or native iterator may escape its callback. Keep persisted
+authorization and the production document/index mutation path intact.
+
+Root owns this freeze, review, integration and native unit/scalar, recovery and
+exact-source Linux/RF3 evidence. Luna unpack_atomicity owns only one new
+`UnitTests/Features/StorageRecovery/Cases/DocumentIndexCommittedScanTests.cs`
+and necessary cohesive `Helpers/` and `Assertions/` in the same slice, prepared
+as a private guarded packet without live edits or build/test/Docker execution.
+Reuse actual fixture/store/serialization APIs and respect all code-size bounds.
+Implement the deterministic independent model and scan; add real writer overlap;
+then failure-safe joining, reopen and healthy follow-up. ADR-004 and ADR-097
+already define this unchanged committed-view/lifetime boundary; no new persisted
+format, public API, dependency or topology is introduced. Frontend/SDK/MCP
+additions are N/A for this provider concurrency gap. Rollback removes only the
+new test and helpers. Snapshot/segment-movement overhead at the required scales,
+full task-local RF3 and complete KL-004 acceptance remain separate open gates;
+this one concurrency flow must not be used to claim those measurements.
+
 | Requirement | Acceptance and mapped real-provider TUnit tests |
 |---|---|
 | REQ-CUT-001: capture one exact canonical cut | AC-CUT-001: capture only from this runtime's live `Read` callback while its read gate is held; lease captures Position and scalar format/key-codec/node/incarnation/durability/pause/read-generation fields from that cut, excluding signing material. Later committed insert/update/delete leaves the old snapshot exact while a fresh ordinary read sees all changes. `NativeReadCutConsistencyTests`. |

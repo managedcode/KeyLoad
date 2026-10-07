@@ -17,43 +17,45 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage V: R222 full native Release passed4,129 compile inputs with zero drift/warnings/errors; owning normal/scalar R216/R217 each99/99 passed. R219 actual Aspire Docker RF3 admission2/2, R221 SDK/MCP dispatch1/1 and R223 SDK/MCP backup1/1 pass in separately retained source/image cohorts. R214/R219/R221 original failed fixture observations retained and refined without changing production clock/dispatch/restore contracts. Native bootstrap now uses bounded authenticated control reservation; no capacity increase. Current full Linux/RF3, product coverage and all remaining original-task acceptance remain open. R224 original whitespace failure retained; R225 full native formatter passes after initializer layout-only normalization.",
+    "verificationStage": "Stage VI: R255 full native Release4,145 inputs passed with0 source drift/warnings/errors from fresh official R239 restore; R256/R257 owning normal/scalar10/10 each and R258 indexed/idempotency real process recovery2/2 pass with0 source/assembly drift or skips. R259 full native formatter passes after one layout-only correction. Whole-operation query factory, indexed-document restore/dedup, actual TUnit compile-root/import guard and strict six-resource membership configuration are integrated. Original failed R236/R246/R250/R254 observations retained. Stage V original Linux unit/scalar each2767/2768 and recovery235/235; RF3 completed122/132 with10 failures. Complete current-source Linux/RF3, sixteen-module functional coverage, endurance and remaining original-task acceptance stay open.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
       "Complete reviewed functional operation inventory and actual source-bound coverage; load/comparison/shape tests remain excluded"
     ],
     "latestOriginalLinux": {
-      "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
-      "runId": 37569205558,
-      "unitPassed": 2769,
-      "unitTotal": 2769,
-      "scalarPassed": 2769,
-      "scalarTotal": 2769,
+      "sourceCommit": "f38513b6f122f99202792a9c5ba5f2c349bfa860",
+      "runId": 37578573276,
+      "runAttempt": 1,
+      "unitPassed": 2767,
+      "unitTotal": 2768,
+      "scalarPassed": 2767,
+      "scalarTotal": 2768,
       "recoveryPassed": 235,
       "recoveryTotal": 235,
-      "rf3Passed": 131,
-      "rf3Total": 141,
+      "rf3Passed": 122,
+      "rf3Total": 132,
       "rf3Failed": 10,
-      "sameJobVerifyImageIdentityAvailable": true,
-      "qualification": "Original Stage III Linux verify and same-job source/image checks passed; newer source requires fresh qualification. Complete RF3 failed, product coverage remains open.",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37569205558"
+      "sameJobSourceImageIdentityAvailable": true,
+      "coverageCollected": false,
+      "qualification": "Original Stage V Linux normal/scalar each have one failed C1 negative fixture; recovery passes235. RF3 reports132 terminal unfiltered TUnit-discovered cases with10 failures; no independent source census is inferred. Coverage/descriptor/merge skipped after RF3 failure. Dirty Stage VI fixes require a fresh delivered-source Linux run.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37578573276"
     },
     "currentBuild": {
-      "compileInputs": 4129,
+      "compileInputs": 4145,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "e48e091f33034d0bb4269bbfdecc61127f6c50dcf56cb308c967e3ac07260c77",
+      "logSha256": "83c47088356160d55bfc7a0a6376ea5e6d7060e990b913a5f309532b826d6431",
       "passed": true,
-      "qualification": "R222 full native local Release for Stage V; delivered Linux/global RF3 remain open"
+      "qualification": "R255 full native local Release from fresh official R239 restored inputs for final Stage VI; complete delivered-source Linux/RF3 remain open"
     },
     "currentFormatter": {
-      "compileInputs": 4129,
+      "compileInputs": 4145,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "qualification": "R225 full native source-bound formatter verification; not functional or Linux proof"
+      "qualification": "R259 full native source-bound final Stage VI formatter; no source changed, not functional or Linux proof"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -462,14 +464,32 @@
       ],
       "imageInputDigest": "sha256:72193227bd92183b4190819ec38afeca7f85c1bd566a9d933cdcf65b0cb15336",
       "imageConfigId": "sha256:8904068d4766429d9a960b0842cfd7739232622220902f78cda63020807bf214",
-      "qualification": "Local actual native Aspire-owned Docker RF3 SDK/official MCP development only; separate original native source/image cohorts are retained, never combined into a synthetic suite pass. Full ClientApi/BackupRestore/ResourceExecution and current Linux gates remain open.",
+      "qualification": "Local actual native Aspire-owned Docker RF3 SDK/official MCP development only; separate original native source/image cohorts are retained, never combined into a synthetic suite pass. Full ClientApi/BackupRestore/ResourceExecution and current Linux gates remain open. The later R239 official isolated restore corrected development package inputs; these older local cohorts do not retroactively bind that package graph.",
       "linuxQualified": false,
-      "postFunctionalSourceChange": "Whitespace-only initializer layout in RuntimeJournalBootstrapAdmissionTests before R225; original owning source/assembly receipts retained. Fresh current-source Linux tests remain required."
+      "postFunctionalSourceChange": "Whitespace-only initializer layout in RuntimeJournalBootstrapAdmissionTests before R225; original owning source/assembly receipts retained. Fresh current-source Linux tests remain required.",
+      "build": {
+        "compileInputs": 4129,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "e48e091f33034d0bb4269bbfdecc61127f6c50dcf56cb308c967e3ac07260c77",
+        "passed": true,
+        "qualification": "R222 full native local Release for Stage V; delivered Linux/global RF3 remain open"
+      },
+      "formatter": {
+        "compileInputs": 4129,
+        "inputDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "R225 full native source-bound formatter verification; not functional or Linux proof"
+      }
     },
     "nextPreparedStages": [
-      "TASK-DSTORE-INDEX-PROCESS guarded source packet; integration/build/native process/Linux qualification pending",
-      "TASK-QUERY-FACTORY-WHOLE-OPERATION guarded packet; integration/current census pending",
-      "ADR-118 Q2 relational INNER JOIN accepted contract and private source; source integration/operation bounds/RF3/Linux qualification pending"
+      "ADR-118 Q2 bounded relational INNER JOIN reviewed immutable R4 source; guarded join/native bounds/RF3/Linux qualification pending",
+      "ADR-119 explicit TUnit-owned local six-silo image reviewed immutable R3 source; guarded join/native selectors/actual image-six-silo-cleanup lifecycle proof pending",
+      "TASK-CUT-DOCUMENT-INDEX-SCAN frozen with immutable R1 real concurrent document/index test source; review/join/native execution pending; snapshot/segment overhead remains open",
+      "Original host/container package graph capture contract proposal under review; no producer joined or original Linux archive graph qualification inferred",
+      "Current follower survivor OwnershipLost and canceled RF3 flows require source/phase-correlated actual Aspire reproduction; no speculative auth relaxation"
     ],
     "stageFourOriginalLinux": {
       "sourceCommit": "a11d4404607763726ce247d09a1653102031840c",
@@ -487,8 +507,156 @@
       "originalTestArtifactSha256": "6584794710b697847ac8bb419727c7356981545cd8a5516d0383e68b074f932b",
       "soleUnitFailure": "NativeLoggerModelControlSelectionTests.InvalidControlAndWorkloadSelectionsRejectBeforeResourcesOrFiles",
       "classification": "LocalRf3ImageRequest provenance rejection occurs before the expected logger-selection guard; original failing test/production source is bound to complete DLL/PDB identities. Fixture repair and fresh normal/scalar gates remain pending.",
-      "rf3": "still requires separate completed original results; no qualification inferred",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37573270684/job/112636479506"
+      "rf3": "Original completed native RF3 cohort151/156 passed,5 failed,0 skipped; initiating causes and unknown cancellation/ownership-loss phases retained; newer source requires fresh qualification.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37573270684/job/112636479506",
+      "rf3Passed": 151,
+      "rf3Total": 156,
+      "rf3Failed": 5,
+      "rf3Skipped": 0,
+      "rf3JobId": 112636449310,
+      "rf3OriginalArtifactId": 11463656958,
+      "rf3OriginalArtifactSha256": "a8c982a83e1e79364081847f64f26c186781c5e41bbac115c8fad7da835c6c60",
+      "rf3TrxSha256": "ee19124b23103472181b6c42bd45f8bb56c76b4ca3ea14d36f755bbaafb4d1b3"
+    },
+    "stageFiveOriginalLinux": {
+      "sourceCommit": "f38513b6f122f99202792a9c5ba5f2c349bfa860",
+      "runId": 37578573276,
+      "jobId": 112652908001,
+      "normalPassed": 2767,
+      "normalTotal": 2768,
+      "scalarPassed": 2767,
+      "scalarTotal": 2768,
+      "recoveryPassed": 235,
+      "recoveryTotal": 235,
+      "failedEachMode": 1,
+      "skipped": 0,
+      "originalTestArtifactId": 11464843240,
+      "originalTestArtifactSha256": "e7c11dca2bde1dc8b336d755bfeefc7b2cb28b9ac042652a7efd44db172cb7d0",
+      "normalTrxSha256": "763704b75f3a97abac60f04b8c50c92e23df266faee457af1592a427ed487a6e",
+      "scalarTrxSha256": "53311cefd0949729d580459eca66670d5c4188d231f6a63ca3d9d170450b6913",
+      "recoveryTrxSha256": "1d347e76e2d9cad17aa7dd8799bafbc008ae417346dace9cfb473cb90337aaf9",
+      "soleUnitFailure": "InvalidControlAndWorkloadSelectionsRejectBeforeResourcesOrFiles",
+      "rf3": {
+        "status": "completed",
+        "conclusion": "failure",
+        "jobId": 112652868979,
+        "passed": 122,
+        "total": 132,
+        "failed": 10,
+        "skipped": 0,
+        "aborted": 0,
+        "timedOut": 0,
+        "coverageCollected": false,
+        "originalArtifactId": 11466018992,
+        "originalArtifactSha256": "7f9501860ebcb95b9b527c310cb0de0dc23f79c880163f7f484ad07b35038aa2",
+        "trxSha256": "73dc147865187b728e4a7145709b7f4b4e9f8b541d3f9982f5fcd06669ae68c2",
+        "fullFailureDetailsSha256": "f3ab0fea9726cf3dc159b779a2c5ecffa93e7b10bf6832658f5d83c3bc263a4d",
+        "interpretationAddendumSha256": "33e7016188e7c36205872cac53c4e993f8343ea689fb96e5c486c1e80ffa7798",
+        "followerFailurePhase": "SDK GetAsync OwnershipLost after follower kill and before MCP Get/write/restart; exact ownership guard unknown",
+        "runtimeJournalSignal": "Bounded catalog-list capture reaches read barrier without exception header; no source-supported auth defect or failing-test causation established",
+        "qualification": "Original failed RF3 cohort only; absence of skips does not establish an independent expected source-test census. Task-specific passes do not convert the entire RF3 run into a pass.",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652868979"
+      },
+      "qualification": "Original completed native verify job; C1 negative fixture correction is joined in dirty Stage VI and requires fresh native/Linux results. Original image sidecars exist; resolved package graph was not retained.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37578573276/job/112652908001"
+    },
+    "stageThreeOriginalLinux": {
+      "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
+      "runId": 37569205558,
+      "unitPassed": 2769,
+      "unitTotal": 2769,
+      "scalarPassed": 2769,
+      "scalarTotal": 2769,
+      "recoveryPassed": 235,
+      "recoveryTotal": 235,
+      "rf3Passed": 131,
+      "rf3Total": 141,
+      "rf3Failed": 10,
+      "sameJobVerifyImageIdentityAvailable": true,
+      "qualification": "Original Stage III Linux verify and same-job source/image checks passed; newer source requires fresh qualification. Complete RF3 failed, product coverage remains open.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37569205558"
+    },
+    "stageSixDevelopment": {
+      "tasks": [
+        "TASK-DSTORE-INDEX-PROCESS",
+        "TASK-BACKUP-INDEXED-DOCUMENT-DEDUP",
+        "TASK-CQ-COMPILE-PACKAGE-ROOT",
+        "TASK-QUERY-FACTORY-WHOLE-OPERATION",
+        "C1 exact local/GitHub negative selection",
+        "ADR-106 strict flat six-resource membership configuration"
+      ],
+      "normal": {
+        "passed": 10,
+        "total": 10,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4146,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "4d8ea0118d22c9c8b52ec393556ae7814877cb04d2eac8d6d04bdd4262065cc2",
+        "trxSha256": "8d93b539822f76ddc0e7d0dd2f4eefc96ca6e4647221fdca76550b75e34175f1"
+      },
+      "scalar": {
+        "passed": 10,
+        "total": 10,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4146,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "688dd03a54306d57ef3cb8441d77b42db504c3108afad71e1e2d394b7db5d351",
+        "trxSha256": "d8e5eec62fc7dc409957c395f6dfb1a36cb1e962002c81ee7fb1e6712e9eadf7"
+      },
+      "recovery": {
+        "passed": 2,
+        "total": 2,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4146,
+        "assemblyInputs": 427,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "ad804224ed6f29bcd14e2cafa324d8062d9fb9330d9696aadaf3f858c010ffcd",
+        "trxSha256": "3c8e0a600f8adb90df9ac8c5d8093f2709542b5db1ee2be6e6c3e84722f31b5f"
+      },
+      "build": {
+        "compileInputs": 4145,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "83c47088356160d55bfc7a0a6376ea5e6d7060e990b913a5f309532b826d6431",
+        "passed": true,
+        "qualification": "R255 full native local Release from fresh official R239 restored inputs for final Stage VI; complete delivered-source Linux/RF3 remain open"
+      },
+      "formatter": {
+        "compileInputs": 4145,
+        "inputDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "R259 full native source-bound final Stage VI formatter; no source changed, not functional or Linux proof"
+      },
+      "nativeOwnings": [
+        "KeyLoadQueryFactoryTests",
+        "NativeLoggerModelControlSelectionTests",
+        "BackupIndexedDocumentDedupCases",
+        "TwoRf3MembershipEnvironmentTests",
+        "NativeCompilationIdentityPackageRootTests",
+        "StreamCommandIdentityTests",
+        "ScalarIndexProcessRecoveryTests",
+        "CommandIdempotencyProcessRecoveryTests"
+      ],
+      "publishedRestoreReceiptSha256": "ab0a2146413e4e043ec73cd187e91e8fac70398436082c79707b54035f1dc155",
+      "originalFailedObservationsRetained": [
+        "R236 new indexed recovery child failed before ack due to unquoted SQL collection; corrected quoted collection, R258 real four-process flow passed",
+        "R246 native owning5/7; R2506/7; backup comparator now reuses existing exact structural receipt/composition oracle; counterfeit negative replaces the original compile item and preserves outputs across expected guard rejection",
+        "R254 sole whitespace diagnostic; layout corrected and R259 native formatter passed"
+      ],
+      "qualification": "Focused native TUnit local development only with exact source/assembly snapshots and no skips/drift. Actual process kill does not establish power-loss durability. Six-resource native environment binding is not live six-silo membership/RF3 proof. No full product coverage, original task closure, or current-source Linux success inferred.",
+      "linuxQualified": false,
+      "fullRf3Qualified": false,
+      "productCoveragePercent": null
     }
   },
   "TIME-PROVIDER-001": {
@@ -1024,6 +1192,29 @@
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "developmentQualification": {
+      "task": "TASK-TEST-PUBLISHED-PACKAGE-IDENTITY",
+      "centralPins": 50,
+      "resolvedPackageVersions": 264,
+      "packageIds": 229,
+      "projects": 27,
+      "officialNuGetArchives": 264,
+      "unresolvedPackageLicenseInventoryRows": 0,
+      "restoreExitCode": 0,
+      "restoreLogSha256": "b0684f44ada431b3d18f7e17fdf9c91e78acaab442252bdc617f9c606511515f",
+      "restoreReceiptSha256": "ab0a2146413e4e043ec73cd187e91e8fac70398436082c79707b54035f1dc155",
+      "inventorySha256": "23604b15b6b4e3631eacf9784703f216f48fd0f6239ac5f9cc18fdf15b5944f9",
+      "centralPinsUnchanged": true,
+      "sharedGlobalPackageCacheModified": false,
+      "vfsOfficialRepositoryCommit": "81423cbe6a11d8b8b37efd1572141bc55ba36c6a",
+      "vfsOfficialArchiveSha256": "f811ec2ce4e7aa597ca2ecdf537d1a63e30c728f6427eec105c42cc4c9e638c9",
+      "k4osExactLicenseCommit": "f5a25b7d72e2e41550fe20662597169ff11c3b60",
+      "k4osLicenseSha256": "ef5a021fc2ae3658f4ad8d2526c87fb2cf394285f47abfb784cf73a27ffd9522",
+      "globalLinuxCleanRestoreNativeLicenseAndPlatformGates": "pending",
+      "nativeBuildFromPublishedInputs": "R255 full native Release passes4,145 inputs with0 drift/warnings/errors after owned native path composition repair; actual pinned TUnit native compiler/import regression passes in R256/R257",
+      "qualification": "Fresh official-feed local restore, independently hashed inventory, full local native build and focused complete native operations. Older original Linux reports do not bind archives/assets and cannot retroactively qualify this graph. Current Linux/container package-identity qualification remains open.",
+      "focusedNativeOperationVerification": "R256/R257 each10/10 and R258 real process recovery2/2 pass; complete fresh Linux/RF3/platform/container graph gates remain pending"
+    },
+    "previousDevelopmentQualification": {
       "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "centralPins": 39,
       "resolvedPackageVersions": 222,
@@ -1212,7 +1403,13 @@
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs"
-    ]
+    ],
+    "preparedConcurrentScan": {
+      "task": "TASK-CUT-DOCUMENT-INDEX-SCAN",
+      "contract": "docs/Features/StorageRecovery/NativeReadCuts.md",
+      "sourcePacketSha256": "6c763caa1533841258820040459481ac58fb31e5090c73e8f77d53bc2670878f",
+      "qualification": "Private source proposal only, no live join or native execution; snapshot/segment overhead and full original acceptance remain open."
+    }
   },
   "KL-005": {
     "title": "Backup/restore spike",
@@ -1888,7 +2085,14 @@
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs"
-    ]
+    ],
+    "indexedProcessDevelopment": {
+      "task": "TASK-DSTORE-INDEX-PROCESS",
+      "case": "ScalarIndexProcessRecoveryTests",
+      "processes": 4,
+      "recoveryTrxSha256": "3c8e0a600f8adb90df9ac8c5d8093f2709542b5db1ee2be6e6c3e84722f31b5f",
+      "qualification": "R258 actual acknowledged-cut and in-flight journal-flush process kill, independent document/index reference model, distinct reopen and healthy follow-up passed; original Linux/RF3/full strict-index acceptance remains open."
+    }
   },
   "KL-012": {
     "title": "Batch і persisted idempotency",

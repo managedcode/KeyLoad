@@ -15,9 +15,9 @@
     <PropertyGroup>
       <_KeyLoadCompileIdentityGeneratedFile>$(IntermediateOutputPath)KeyLoad.FunctionalCompilationIdentity.g.cs</_KeyLoadCompileIdentityGeneratedFile>
       <_KeyLoadCompileIdentityTUnitPackageVersion>@(_KeyLoadCompileIdentityTUnitVersion->'%(Version)')</_KeyLoadCompileIdentityTUnitPackageVersion>
-      <_KeyLoadCompileIdentityTUnitDirectory>$([System.IO.Path]::GetFullPath('$(NuGetPackageRoot)tunit.core/$(_KeyLoadCompileIdentityTUnitPackageVersion)/buildTransitive/$(TargetFramework)/'))</_KeyLoadCompileIdentityTUnitDirectory>
-      <_KeyLoadCompileIdentityTUnitProps>$(_KeyLoadCompileIdentityTUnitDirectory)TUnit.Core.props</_KeyLoadCompileIdentityTUnitProps>
-      <_KeyLoadCompileIdentityTUnitSource>$(_KeyLoadCompileIdentityTUnitDirectory)TUnit.Core.GeneratedNamespace.cs</_KeyLoadCompileIdentityTUnitSource>
+      <_KeyLoadCompileIdentityTUnitDirectory>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'tunit.core/$(_KeyLoadCompileIdentityTUnitPackageVersion)/buildTransitive/$(TargetFramework)/'))))</_KeyLoadCompileIdentityTUnitDirectory>
+      <_KeyLoadCompileIdentityTUnitProps>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(_KeyLoadCompileIdentityTUnitDirectory)', 'TUnit.Core.props'))))</_KeyLoadCompileIdentityTUnitProps>
+      <_KeyLoadCompileIdentityTUnitSource>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine('$(_KeyLoadCompileIdentityTUnitDirectory)', 'TUnit.Core.GeneratedNamespace.cs'))))</_KeyLoadCompileIdentityTUnitSource>
       <_KeyLoadCompileIdentityTUnitGenerated Condition="Exists('$(_KeyLoadCompileIdentityTUnitProps)') and Exists('$(_KeyLoadCompileIdentityTUnitSource)')">$([System.IO.File]::ReadAllText('$(_KeyLoadCompileIdentityTUnitSource)').StartsWith('// &lt;auto-generated/&gt;'))</_KeyLoadCompileIdentityTUnitGenerated>
     </PropertyGroup>
     <ItemGroup>

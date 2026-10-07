@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure.Helpers;
 internal static class NativeLoggerModelControlRejectionFlow
 {
     internal static async Task AssertRejectedAsync(string root, string name, string[] overrides,
-        bool includeImage, string invalidSelectionMessage,
+        bool includeImage, string expectedRejectionMessage,
         Func<string, bool, string[], IDistributedApplicationBuilder> createBuilder)
     {
         var failures = new List<Exception>();
@@ -23,7 +23,7 @@ internal static class NativeLoggerModelControlRejectionFlow
             if (builder is { } actualBuilder)
             {
                 await ServerFailureObserver.ObserveAsync(
-                    () => AssertAdmissionRejectedAsync(actualBuilder, name, invalidSelectionMessage), failures)
+                    () => AssertAdmissionRejectedAsync(actualBuilder, name, expectedRejectionMessage), failures)
                     .ConfigureAwait(false);
                 await ServerFailureObserver.ObserveAsync(
                     async () => { await Assert.That(actualBuilder.Resources.Count).IsEqualTo(resourceCount).Because(name); }, failures)
@@ -42,10 +42,10 @@ internal static class NativeLoggerModelControlRejectionFlow
     }
 
     private static async Task AssertAdmissionRejectedAsync(IDistributedApplicationBuilder builder, string name,
-        string invalidSelectionMessage)
+        string expectedRejectionMessage)
     {
         var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(builder));
-        await Assert.That(failure.Message).IsEqualTo(invalidSelectionMessage).Because(name);
+        await Assert.That(failure.Message).IsEqualTo(expectedRejectionMessage).Because(name);
     }
 
     private static void DeleteOwnedRootIfPresent(string root)

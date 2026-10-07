@@ -299,3 +299,11 @@ The identity crossing start/readiness is the actual pre-start verifier return:
 VerifyModelAsync returns it to a WaveStartup local, then the same value supplies
 started-container checks. Early ReadAsync selects the validated reference only.
 Keep existing caller maps; no ambient state or extra identity carrier is needed.
+
+The direct TUnit ownership in ADR-117 is refined by Accepted
+[ADR-119](ADR-119-tunit-owned-local-membership-image.md) for an explicit local
+six-silo membership image. Its TUnit case owns the existing Aspire prerequisite
+and exact-tag cleanup; no outer test runner executes. The typed selection does
+not mutate global environment or erase GitHub provenance. Preserve original
+producer bounds, all six actual container checks, 18 locks, SDK/MCP flow and Linux
+qualification gates. Implementation and native runtime proof are pending.
