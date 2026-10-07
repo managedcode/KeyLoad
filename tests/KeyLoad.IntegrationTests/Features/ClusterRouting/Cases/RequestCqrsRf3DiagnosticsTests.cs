@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Server;
+using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticAssertions;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -31,6 +32,13 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
     [Test]
     public Task NativeEarlyStreamCompletionFailsWithoutPublishingEvidence()
         => VerifyNativeEarlyCompletionAsync();
+
+    [Test]
+    public async Task NativeAdmissionCancellationRetainsFailureAndJoinedCleanupBeforeHealthyCapture()
+    {
+        await VerifyExactCallerCancellationAsync().ConfigureAwait(false);
+        await RunAsync(VerifySuccessEvidenceLifecycleAsync).ConfigureAwait(false);
+    }
 
     private static async Task RunAsync(Func<RequestCqrsRf3DiagnosticsTestScope, CancellationToken, Task> scenario)
     {
@@ -180,35 +188,6 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         await Assert.That(File.Exists(scope.OwnedArtifactPath)).IsFalse();
         var context = lifecycle.FormatBoundedContext();
         await Assert.That(context.Contains("first{s=CaptureJoin", StringComparison.Ordinal)).IsTrue();
-    }
-
-    private static async Task AssertThreeCapturesCompletedAsync(RequestCqrsLifecycleSnapshot snapshot)
-    {
-        await Assert.That(snapshot.CaptureNode1).IsEqualTo(TaskStatus.RanToCompletion);
-        await Assert.That(snapshot.CaptureNode2).IsEqualTo(TaskStatus.RanToCompletion);
-        await Assert.That(snapshot.CaptureNode3).IsEqualTo(TaskStatus.RanToCompletion);
-    }
-
-    private static async Task AssertCompletedCaptureObservationsAsync(RequestCqrsLifecycleSnapshot snapshot)
-    {
-        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode1).ConfigureAwait(false);
-        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode2).ConfigureAwait(false);
-        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode3).ConfigureAwait(false);
-        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node1).ConfigureAwait(false);
-        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node2).ConfigureAwait(false);
-        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node3).ConfigureAwait(false);
-        await Assert.That(snapshot.CleanupCompletion.Drain.Started).IsTrue();
-        await Assert.That(snapshot.CleanupCompletion.Drain.TokenCanceledAtStart).IsFalse();
-        await Assert.That(snapshot.CleanupCompletion.Drain.Returned).IsTrue();
-        await Assert.That(snapshot.CleanupCompletion.Drain.OriginalJoined).IsTrue();
-        await Assert.That(snapshot.CleanupCompletion.Drain.FallbackEntered).IsFalse();
-    }
-
-    private static async Task AssertReturnedCallAsync(RequestCqrsCompletionCallSnapshot call)
-    {
-        await Assert.That(call.State).IsEqualTo(RequestCqrsCompletionCallState.Returned);
-        await Assert.That(call.StatusAtStart.HasValue).IsTrue();
-        await Assert.That(call.StatusAtReturn.HasValue).IsTrue();
     }
 
     private static bool IsPending(TaskStatus? status) => status is TaskStatus.Created

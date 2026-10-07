@@ -20,6 +20,9 @@ internal static class RequestCqrsRf3SurvivorOracle
         }
     }
 
+    private const string PhaseDataKey = "KeyLoad.C1.Phase";
+    private const string NodeDataKey = "KeyLoad.C1.IngressNode";
+    private const string StoppedNodeDataKey = "KeyLoad.C1.StoppedNode";
     private const string FollowerFailurePhase = "AfterFollowerKillBeforeRestart";
     private const string FailurePhaseLabel = "RF3 phase=";
     private const string IngressNodeLabel = "; ingressNode=";
@@ -36,8 +39,17 @@ internal static class RequestCqrsRf3SurvivorOracle
         using var health = McpCallerHttp.Create(app, node);
         using var response = await health.GetAsync(RequestCqrsRf3Protocol.ReadyUri, cancellationToken).ConfigureAwait(false);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        await using var callers = await RequestCqrsRf3Callers.ConnectAsync(app, node, profile.AdminKey,
-            cancellationToken).ConfigureAwait(false);
+        RequestCqrsRf3Callers connected;
+        try
+        { connected = await RequestCqrsRf3Callers.ConnectAsync(app, node, profile.AdminKey, cancellationToken).ConfigureAwait(false); }
+        catch (Exception primary)
+        {
+            primary.Data[PhaseDataKey] = FollowerFailurePhase;
+            primary.Data[NodeDataKey] = node;
+            primary.Data[StoppedNodeDataKey] = stoppedNode;
+            throw;
+        }
+        await using var callers = connected;
         var status = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(status.RoutingReady).IsTrue();

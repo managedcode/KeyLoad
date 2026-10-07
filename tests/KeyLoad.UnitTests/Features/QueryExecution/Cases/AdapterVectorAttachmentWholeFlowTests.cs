@@ -24,7 +24,8 @@ internal sealed class AdapterVectorAttachmentWholeFlowTests
         await Assert.That(sqlFailure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(sqlFailure.Message).IsEqualTo("A valid vector space and matching finite vector parameter are required.");
         foreach (var input in new[] { AdapterVectorWholeFlow.Typed(database, invalid: true),
-            AdapterVectorWholeFlow.JsonRoundTrip(AdapterVectorWholeFlow.Typed(database, invalid: true)) })
+            AdapterVectorWholeFlow.JsonRoundTrip(AdapterVectorWholeFlow.Typed(database, invalid: true)),
+            AdapterVectorWholeFlow.CSharp(database, invalid: true) })
         {
             var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
                 rejectedResult = await search.GraphSearchAsync("root", input, token)))

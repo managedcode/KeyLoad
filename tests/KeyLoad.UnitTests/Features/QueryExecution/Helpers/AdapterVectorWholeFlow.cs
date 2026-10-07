@@ -1,10 +1,13 @@
 using System.Text.Json;
+using KeyLoad.Client;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class AdapterVectorWholeFlow
 {
+    private const string FirstValue = "first";
+    private const string SecondValue = "second";
     private const string VectorParameter = "vector";
     private const string ScopeGraph = "vector-scope";
     private const int RootDepth = 0;
@@ -22,21 +25,38 @@ internal static class AdapterVectorWholeFlow
     internal static SqlGraphSearchRequest SqlRequest(TestDatabase database, bool invalid = false)
         => new(1, new(database.Partition, Sql, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         { [VectorParameter] = JsonSerializer.SerializeToElement(invalid ? new[] { 1f } : new[] { 1f, 0f }) }, AllowFullScan: true));
+    internal static GraphSearchRequest CSharp(TestDatabase database, bool invalid = false)
+    {
+        var canonical = Typed(database, invalid);
+        return KeyLoadQuery.From<VectorAttachmentDocument>(database.Partition, Collection, UnitClientOptions.Translation())
+            .Take(canonical.Search.Limit).AttachVector(row => row.Embedding,
+                canonical.Search.Vector!.Value, Space(), canonical.Scope!);
+    }
     internal static GraphSearchRequest JsonRoundTrip(GraphSearchRequest request)
         => JsonDefaults.Deserialize<GraphSearchRequest>(JsonDefaults.Serialize(request));
     internal static void Seed(TestDatabase database)
     {
         database.Configure(Collection, ResourceKind.Collection);
         database.Configure(ScopeGraph, ResourceKind.Graph);
-        database.Commit(new PutDocument(Collection, "a", FirstJson), new PutDocument(Collection, "b", SecondJson),
+        var firstJson = JsonSerializer.Serialize(new VectorAttachmentDocument(FirstValue), JsonDefaults.Options);
+        var secondJson = JsonSerializer.Serialize(new VectorAttachmentDocument(SecondValue), JsonDefaults.Options);
+        if (!string.Equals(firstJson, FirstJson, StringComparison.Ordinal)
+            || !string.Equals(secondJson, SecondJson, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("The typed native seed must retain the complete literal document bytes.");
+        }
+        database.Commit(new PutDocument(Collection, "a", firstJson), new PutDocument(Collection, "b", secondJson),
             new PutVector(Collection, "a", "/embedding", [1, 0], Space(), 1), new PutVector(Collection, "b", "/embedding", [0, 1], Space(), 1));
     }
     internal static async Task HealthyAsync(TestDatabase database, QueryEngine sql, SearchEngine typed, CancellationToken token)
     {
         var direct = await typed.GraphSearchAsync("root", Typed(database), token);
         var json = await typed.GraphSearchAsync("root", JsonRoundTrip(Typed(database)), token);
+        var loweredRequest = CSharp(database);
+        await Assert.That(JsonDefaults.Serialize(loweredRequest).SequenceEqual(JsonDefaults.Serialize(Typed(database)))).IsTrue();
+        var lowered = await typed.GraphSearchAsync("root", loweredRequest, token);
         var attached = await sql.SearchSqlAsync("root", SqlRequest(database), token);
-        foreach (var result in new[] { direct, json, attached })
+        foreach (var result in new[] { direct, json, lowered, attached })
         {
             await Assert.That(JsonDefaults.Serialize(result).AsSpan().SequenceEqual(JsonDefaults.Serialize(direct))).IsTrue();
             await Assert.That(result.Expansion).IsNull();

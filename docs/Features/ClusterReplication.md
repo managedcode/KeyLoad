@@ -291,3 +291,37 @@ Lifetime: the physical host owns bridge, real materializer worker, storage callb
 Whole flow: actual Aspire current-image RF3, persisted non-admin principal and document+queue scope, original SDK atomic Batch, original signed BeforeSubmit marker, native follower JournalFlushed marker carrying real entry index/term, accepted authenticated Append settlement while held, and absent canonical-origin outbound evidence. Original leader SDK receipt must be successful under unchanged deadlines. Release the exact canonical arm and join its owner; verify independent literal complete document (reference/revision/JSON/redaction/empty fields) and queue inspection metadata/body/headers through SDK and official MCP. Assert exact receipt effects and native-byte same-ID SDK/MCP replay, changed-payload conflict with unchanged public state, then distinct healthy queue continuation. This proves the full scoped public projections, not a complete raw-store image or power-loss durability.
 
 Owned paths: Replication ClusterReplication real ApplyBatch/worker scope; Orleans ClusterReplication real GrainService incoming/outgoing transport; Server ClusterRouting existing private control codecs/lifecycle and observer composition; Server StorageRecovery physical host/native storage callback; AppHost ClusterRouting strict current owner reader; IntegrationTests ClusterRouting actual Aspire wave/probe/SDK/MCP helpers; UnitTests ClusterRouting bounded private codec-negative control. That unit codec case is supporting infrastructure, not a product coverage contributor. Root-only format/full build, genuine new census/source-image binding, focused native codec in normal/scalar, existing probe request/read/fault flows, new current-image RF3 operation and mandatory full normal/scalar/recovery/RF3 gates remain required. No numeric coverage or successful native execution is claimed. Rollback removes the same-current private diagnostics coherently; persisted database, replication/native binary/public JSON formats and authorities are unchanged.
+
+## TASK-KL020-ORIGINAL-ACCEPTANCE-CLOSEOUT-001
+
+The original KL-020 acceptance in architecture-v0.3.uk.md is independently
+qualified at source 4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0 by the original
+Linux [RF3 job 112948482972](https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948482972).
+`ClusterTests.ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites`
+passed through the actual fixture-owned Aspire three-voter topology. It commits
+an acknowledged QuorumProcessDurable document/event/queue/topic batch, kills the
+elected container, retries the frozen command ID and compares its original token
+and one document revision/one queue delivery, then observes processing and
+subscription/projection effects. It kills the second voter, rejects both a strong
+write and read, restores both voters, verifies the minority document remains
+absent and checks replicated revisions and checkpoints across all three nodes.
+This maps the three original task criteria to REQ/AC-REP-003.
+
+The immutable original required RF3 TRX digest is
+`8c9eb6c1b6fad38a0dd8532ea8f375465623939ef7784d9bb9ba9e24f938f75c`;
+the original native RF3 test-image observation digest is
+`086f26313d9d9311bcb544bf33290a90e51ebd49dd3d1f2d56d06a95a1d34c72`.
+Its exact test/helper declaration hashes match original native PDB documents;
+the operation bodies remain unchanged. Fixture and product sources have later
+changes: this is an original task/source qualification, not current whole-module
+equivalence. Required RF3 was 173/183 passed with ten retained failures; covered
+RF3 was 0/11 due to selection admission. Consensus fault/unacknowledged-entry,
+power-loss, endurance, performance, coverage and broader feature gates remain
+open under their owning criteria. No failed report is promoted to full-suite PASS.
+
+KL-021 remains open: the passed scenario performs ordinary quorum reads, not a
+read carrying the previous commit/session token. Current GetDocumentRequest has
+only EntityRef and the SDK GetAsync has no minimum CommitToken argument. Public
+token-bound failover read and wrong-incarnation rejection need a frozen ClientApi
+read-admission contract and actual SDK/MCP operation proof; internal token
+validation and receipt equality do not supply that missing public flow.

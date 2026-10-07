@@ -9,18 +9,18 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": false,
-    "canonicalFormatterPassed": false,
+    "canonicalBuildPassed": true,
+    "canonicalFormatterPassed": true,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Complete local Release/format and corrected decoder normal4/scalar4 passed before a final trailing EOF blank-line cleanup. Exact unit inventory/group discovery passed. Original full recovery256/256 and fullnormal/scalar2945/2946 failures retained. Checkpoint includes allcurrentcode; exact-current complete repaired/LinuxRF3/coverage gates remainopen.",
+    "verificationStage": "R481 full current Release, R482 full formatter, R484/R485 selected18/18 normal/scalar and R483/R486/R487 original native inventory plus twelve production discoveries passed without source/image drift. Original failures retained. Complete current Linux suites, public RF3 and numerical product coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
-      "Finish current complete normal/scalar and production coverage-selection discovery, retain original failures and successful repaired cohorts",
+      "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
       "Execute C1 same-command receipt reconciliation and scoped lifecycle diagnostics in genuine current-source RF3",
       "Complete same-job sixteen-module coverage collection/admission/merge; load/comparison excluded; original thresholds unchanged"
     ],
@@ -239,27 +239,27 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "run": "R460",
-      "compileInputs": 4375,
+      "run": "R481",
+      "nativeExitCode": 0,
+      "passed": true,
+      "buildCompletedSuccessfully": true,
+      "elapsedSeconds": 131.756,
+      "compileInputs": 4391,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "nativeExitCode": 0,
-      "elapsedSeconds": 115.638,
-      "logSha256": "f1a42ff22b63b697db2e445bc7b47fd2a98cb6408c973501e6476ea76253639a",
-      "passed": true,
-      "qualification": "Complete current local Release passed; full repaired suites/Linux/RF3/coverage remain open.",
-      "finalWhitespaceCleanupAfterBuild": true
+      "logSha256": "4cb532ece69bcdcde2f32847d6bd661cbc319581b9b93b2e40e7ad6c3ecaee4d",
+      "qualification": "Complete current local Release with unchanged source inputs. Full delivered Linux RF3 and numerical product coverage remain open."
     },
     "currentFormatter": {
-      "run": "R462",
+      "run": "R482",
       "nativeExitCode": 0,
-      "elapsedSeconds": 93.915,
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4375,
+      "passed": true,
+      "elapsedSeconds": 130.25,
+      "inputCount": 4391,
       "inputDrift": 0,
-      "qualification": "Complete current local formatter passed; no runtime/Linux qualification.",
-      "finalWhitespaceCleanupAfterFormatter": true
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "Complete current local native formatter verification; no runtime or Linux acceptance implied."
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -4110,6 +4110,217 @@
       "rf3CoveredTrxSha256": "a4675d4160e41481ba42abf77e69b6ba6ef222debf74d1337b0dd243745c791e",
       "rf3OriginalLogSha256": "a21849fc06dde20e56efae36b5b04724ce43248089a730c459508ce2613caa32",
       "rf3CoveredFailureDetails": "All eleven original BeforeTestSession failures rejected original-node coverage selection; no operation execution or numeric coverage admission."
+    },
+    "stageXIIOriginalDevelopment": {
+      "sourceParentCommit": "aa10337b159eaf3ea012f29b7c3f4645d7557aac",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "originalTasksRemain": {
+        "done": 11,
+        "inProgress": 93,
+        "pending": 0
+      },
+      "joinedWorkstreams": [
+        "Bounded native C# LINQ vector attachment through existing translator and canonical GraphSearchRequest",
+        "Eight actual SQL/AST index/fullscan observed-work cancellation/deadline whole flows",
+        "Actual selected-root cold RF3 bootstrap, discovered CLI/private profile and SDK full state/replay/conflict/healthy/shutdown",
+        "Existing lifecycle first/terminal stage and exact native token evidence for SDK fault and Due cold waves",
+        "Closed bounded native RPC failure-category capture for official MCP initialize after follower loss",
+        "Complete native paged graph state and operation-thread observed-work cancellation regression",
+        "Selected native bilingual FTS canonical delete receipt replay and reopen whole flow",
+        "Original exact-source RF3 acceptance evidence closes KL020 only"
+      ],
+      "verificationStage": "R481 full current Release, R482 full formatter, R484/R485 selected18/18 normal/scalar and R483/R486/R487 original native inventory plus twelve production discoveries passed without source/image drift. Original failures retained. Complete current Linux suites, public RF3 and numerical product coverage remain open.",
+      "originalFailedBuild": {
+        "run": "R467",
+        "nativeExitCode": 1,
+        "sourceInputs": 4387,
+        "sourceDrift": 0,
+        "errors": 14,
+        "logSha256": "7e446d5055bf5d7d4f6c4df6bfb8f2b20105e82e0a3501967b41222cf5b9f328"
+      },
+      "originalFailedBuildR469": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r469-stage-xii-native-build-20261007-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 91.309,
+        "log": "/private/tmp/keyload-current-r469-stage-xii-native-build-20261007.log",
+        "logSha256": "c870d9efcce010fdfa405337ca7739af24c52760d8808be8228438ab3f7aa3fd",
+        "inputCount": 4389,
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "sandboxInterruptedBuildR470": {
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": false,
+        "harnessExitCode": 1,
+        "sourceInputs": 4389,
+        "sourceDrift": 0,
+        "logSha256": "787e1b1ee659f69098a44c210fe4b832ffd827b57c5faa1fb35ffd63e5b1fcc0",
+        "reason": "Owned native build stopped after repeated MSBuild pipe SocketException13; incomplete native output is not successful build"
+      },
+      "currentBuild": {
+        "run": "R481",
+        "nativeExitCode": 0,
+        "passed": true,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 131.756,
+        "compileInputs": 4391,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "4cb532ece69bcdcde2f32847d6bd661cbc319581b9b93b2e40e7ad6c3ecaee4d",
+        "qualification": "Complete current local Release with unchanged source inputs. Full delivered Linux RF3 and numerical product coverage remain open."
+      },
+      "originalFailedBuildR475": {
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 87.826,
+        "inputCount": 4391,
+        "logSha256": "9f19365ad00a2a310ef6e6a34001da7ed64e9591234704406224a0ba960b6189",
+        "sourceDrift": 0,
+        "diagnostic": "IDE0005 unused using in native bilingual regression; removed beforeR476"
+      },
+      "focusedNormal": {
+        "run": "R484",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 6.394,
+        "sourceInputs": 4392,
+        "sourceDrift": 0,
+        "assemblyInputs": 553,
+        "assemblyDrift": 0,
+        "passed": 18,
+        "total": 18,
+        "logSha256": "a10755d80f7824b2b4d0cc31232d3ad474e197000b7cd08c096cf249251fdd0b",
+        "trxSha256": "43199dd5001b09a9506c7d9c3db37642746ce94f701e376878990cf38d936a83",
+        "qualification": "Current selected actual SQL/AST observed-work, native LINQ vectors, graph cancellation with complete paged native state and bilingual native FTS replay/reopen whole flows. Complete current suites, Linux RF3 and numerical coverage remain required."
+      },
+      "focusedScalar": {
+        "run": "R485",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 7.197,
+        "sourceInputs": 4392,
+        "sourceDrift": 0,
+        "assemblyInputs": 553,
+        "assemblyDrift": 0,
+        "passed": 18,
+        "total": 18,
+        "logSha256": "a7272a02c64e11a05326db19a3907c88ed9ba887d2fae3ed8dfe9d449a666da1",
+        "trxSha256": "c6b029d2578548848179748d51442eb77cbba15408d19c5af472bb483102b316",
+        "qualification": "Current selected actual SQL/AST observed-work, native LINQ vectors, graph cancellation with complete paged native state and bilingual native FTS replay/reopen whole flows. Complete current suites, Linux RF3 and numerical coverage remain required."
+      },
+      "previousBuildR471": {
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 89.543,
+        "inputCount": 4389,
+        "logSha256": "b606f677d6f0a144455bfc7945d9e6fbb9bc49bf5498880b242dd0c089a2c50f",
+        "run": "R471",
+        "sourceDrift": 0
+      },
+      "currentFormatter": {
+        "run": "R482",
+        "nativeExitCode": 0,
+        "passed": true,
+        "elapsedSeconds": 130.25,
+        "inputCount": 4391,
+        "inputDrift": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "Complete current local native formatter verification; no runtime or Linux acceptance implied."
+      },
+      "priorFocusedNormal": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 3.407,
+        "sourceInputs": 4390,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "passed": 15,
+        "total": 15,
+        "logSha256": "b3f0e8d6d5427465c44bde21f091be805fca69d6b88eca020bdac2208a5e3d7d",
+        "trxSha256": "9c21513b4ef236fcf96a54826a56d358b832868e8328055895b88bfdaaf32483",
+        "qualification": "Selected actual fifteen newQueryBudget/vectorAttachment wholeflows only, before later bilingual/graph regression join; completecurrent normal/scalar/RF3 and coverage remain pending"
+      },
+      "priorFocusedScalar": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 4.64,
+        "sourceInputs": 4390,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "passed": 15,
+        "total": 15,
+        "logSha256": "5f0459458a470812b72ce60f78ca26abe55d0ab07e0ce3afd8a88eacd63e59f1",
+        "trxSha256": "da6beb8c18e96e5692498412e0a04a57e7ea909d6379520812e292f487fb2d32",
+        "qualification": "Selected actual fifteen newQueryBudget/vectorAttachment wholeflows only, before later bilingual/graph regression join; completecurrent normal/scalar/RF3 and coverage remain pending"
+      },
+      "nativeInventory": {
+        "run": "R483/R486/R487",
+        "reviewedOriginalNativeIdentities": 2961,
+        "functionalContributors": 2566,
+        "requiredOrdinaryCases": 395,
+        "functionalGroupCounts": [
+          496,
+          522,
+          448,
+          528,
+          572
+        ],
+        "strictOriginalCensusValidationPassed": true,
+        "actualProductionDiscoveriesPassed": 12,
+        "sourceImageScriptDrift": 0,
+        "inventorySha256": "dc03c4b3895b0a96c1105275650fe2bd3fdd4aafa3a9dac25233c509b587f536",
+        "originalNativeCensusSha256": "2f37cd6181f73430f8980e113a8fd84e52390bac20187e24343510d60a82c5de",
+        "nativeCompiledImageObservationSha256": "0e66e9f2debdc42132235fafc8e31b5c057b186e62f005ce810586779a19f6ad",
+        "productionDiscoveryLogSha256": "ba95de0aa1946bc4b61809674ddd4c9ed2b565f2929096e2b32e5d937143b57a",
+        "qualification": "Actual native discovery and exact compiled-source/PDB identity only; discovery does not execute operations or measure coverage."
+      },
+      "originalFailedFormatterR480": {
+        "nativeExitCode": 2,
+        "elapsedSeconds": 89.354,
+        "inputCount": 4391,
+        "inputDrift": 0,
+        "logSha256": "cb2d94704b1943a65adbf88be3354ddc4bdfa24d51a2b8a170f4821f3f54268a",
+        "diagnostic": "Four native import-order diagnostics; exact using headers repaired before R481/R482."
+      },
+      "sourceIntegratedPathsAtInitialJoin": 31,
+      "checkpointChangedPaths": 48
+    },
+    "stageXIOriginalLinux": {
+      "sourceCommit": "aa10337b159eaf3ea012f29b7c3f4645d7557aac",
+      "runId": 37686560768,
+      "runAttempt": 1,
+      "runStatus": "in_progress",
+      "qualification": "Authenticated original aa103 Linux verify failedone normal case; complete scalar/recovery/sourceownership passed. Original RF3 stillpending; currentStageXII source is distinct and productcoverage unmeasured.",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37686560768",
+      "verifyJobId": 113015831034,
+      "verifyConclusion": "failure",
+      "normalPassed": 2945,
+      "normalTotal": 2946,
+      "normalFailed": 1,
+      "normalTrxSha256": "79411c313bcec48221d4e1b5ca8b98cab8b1deb02ac24836d08b17ae6ec61eb3",
+      "normalFailure": "InProgressAdjacencyScanCancelsOnChargedBytesAndSettlesBeforeHealthyRead returned before asynchronous observer cancellation; exact original failure retained",
+      "scalarPassed": 2946,
+      "scalarTotal": 2946,
+      "scalarTrxSha256": "671c650e180856ee7c31b488af065547f1f3e7cdef18fee0092fe51522520f01",
+      "recoveryPassed": 256,
+      "recoveryTotal": 256,
+      "recoveryTrxSha256": "d71be1957098e470157b6c732e51a60a9c444a4848fd64bf6dfe6f2940670baa",
+      "sourceManifestSha256": "99ad3f1f0bc7f68e9c6b946ed42c9ddc8c09ca5c40999707cefbe780afeab567",
+      "compiledProductCount": 16,
+      "originalVerifyLogSha256": "5ae9e22c393adb3f69bec8cc58b910bac986639fdf8a9355f16759c4be73a06b",
+      "originalVerifyArtifacts": [
+        {
+          "name": "test-results-ubuntu-latest",
+          "id": 11511969422,
+          "archiveSha256": "a45c94fa8f1688ec9fa04e7fdda84b5bd507d4f29a8a2b2109a43e236f595146",
+          "apiDigestVerified": true
+        },
+        {
+          "name": "code-quality-ubuntu-latest",
+          "id": 11513000322,
+          "archiveSha256": "458423d2bf38056bbbcabcaa8c7a30545beae7f3370c23fb5b2bfd2db945a612",
+          "apiDigestVerified": true
+        }
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -7655,13 +7866,24 @@
   },
   "KL-020": {
     "title": "Три-вузловий replicated apply",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
       "src/KeyLoad.Replication/Features/ClusterReplication/Commands/ReplicaCanonicalApply.cs",
       "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs"
-    ]
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948482972",
+      "docs/Features/ClusterReplication.md#task-kl020-original-acceptance-closeout-001"
+    ],
+    "qualification": {
+      "sourceRevision": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "runtimeQualified": true,
+      "scope": "original KL-020 acceptance only; current changed fixture/product, broader consensus faults, RF3 failures, coverage, power-loss and endurance remain independently open",
+      "requiredRf3": "173 passed / 183 executed; ten original failures retained",
+      "coveredRf3": "0 passed / 11 executed; original selection failures retained",
+      "originalSourceBindingSha256": "a7bcbab4be473fab2e07e2b205b2bc929e52573964cefe97dd100ce7e4d70c7d",
+      "rootVerifiedOriginalGitWitnesses": 497
+    }
   },
   "KL-021": {
     "title": "Strong read і session tokens",

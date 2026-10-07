@@ -65,6 +65,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
     public string AdminKey { get; private set; } = "";
 
+    internal ClusterFixtureColdStartObservation? ColdStartObservation { get; private set; }
+
     /// <summary>Gets the opaque physical-shard identity from the actual private shared V2 profile.</summary>
     public Guid PhysicalShardId { get; private set; }
 
@@ -91,6 +93,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             {
                 arguments = [.. arguments, .. localImageSession.Selection.CreateWaveArguments()];
             }
+            ObserveColdStart();
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
@@ -110,6 +113,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             throw;
         }
     }
+
+    private void ObserveColdStart() => ColdStartObservation = new(Root, Directory.Exists(Root), File.Exists(Root));
 
     private Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
         string repository, CancellationToken token)
@@ -250,10 +255,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             : deadline.CollectAsync(operation, failures);
     private void ReadPrivateProfile()
     {
-        var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(Root);
-        AdminKey = profile.AdminKey;
-        peerSecret = Convert.FromBase64String(profile.PeerSecret);
-        PhysicalShardId = profile.PhysicalShardId;
+        (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
     }
 
     private Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>

@@ -398,3 +398,10 @@ The observed archive portion does not close bounded streaming/peak memory,
 cluster-cut/reconciliation or AC-BACKUP-004; member denial does not qualify
 revocation/cancellation parity. This decision remains Accepted until all its
 required implementation and qualification exist.
+
+
+### KL014 cold bootstrap SDK qualification ownership
+
+TASK-KL014-COLD-BOOTSTRAP-SDK-001 under REQ/AC-CLIENT-004/005 and REQ/AC-TEST-010 adds fixture-only operation proof, with no product API/format/topology change. Implement docs first, then ClientApi integration Cases/Helpers/Assertions/Processes; root joins, builds/format verifies, and executes actual new fresh Aspire RF3 case plus existing Unknown recovery. Rollback removes only this authored regression. Existing ClusterFixture owns startup/readiness/private profile/node resources/joined shutdown; CLI borrows discovered endpoint/private profile and owns only its original process/readers through existing AppHost process settlement policy. Source absent-root admission is distinct from clean Linux qualification. No alternate coordinator, image whitelist, trusted roles, receipt authority or migrations.
+
+R3 fixture-only refinement captures a fixed typed actual pre-builder selected-root existence observation in ClusterFixture and ClusterReplication/Models; it does not expose a generic callback or new product diagnostics. The case asserts that actual pre-start observation plus full native startup/SDK/CLI/cleanup flows. Covered selection remains the original closed eleven, with existing strict ledger admission.

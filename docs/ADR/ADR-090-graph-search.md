@@ -85,3 +85,41 @@ Before scoped kill, freeze exactly one immutable addition CommandRequest (delta 
 Submit frozen addition once. Definitive OwnershipLost and every other non-Unknown error fail; only actual UnknownWriteOutcome permits one bounded same-byte/same-ID receipt reconciliation, no loop/new GUID/client retry policy. Verify exact two mutation receipts, nonempty partition/incarnation/position and QuorumProcessDurable. Explicit later SDK/official-MCP administrative replay uses identical original command and requires byte-identical complete receipt. Genuine graph-search readers/MCP preserve full literal four document references/revisions/JSON/redaction/weighted ranks, and a bounded native canonical Traverse from original second seed returns exact four vertices/three full literal edge records. After original stopped node restart, all three nodes replay original receipt and return those complete graph literals without duplicate edge revision or derived document effect.
 
 Ownership IntegrationTests/Search existing fixture/kill/restart/discovered clients and original error-preserving cleanup. No product/dependency/public contract/timeouts/whitelists/LocalImage catalog changes. Ordered docs→private tests→root guarded join/build/focused native original case/full180cohort; preserve original TRX/error and source/image receipts. Actual Linux rerun remains required; source repair is not qualification. Rollback removes only this readiness/oracle amendment and test helpers.
+
+
+## Adapter implementation contract — TASK-KL051-VECTOR-LINQ-ATTACHMENT-001
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001 and REQ-QUERY-007 under ADR-090:
+`KeyLoadQuery<T>.Take(limit).AttachVector(field, vector, space, scope)` translates
+only the existing non-evaluating member path and constructs the same canonical
+GraphSearchRequest v1 consumed by GraphSearchAsync. The vector is an immutable
+attachment bounded by existing MaximumConstantArrayItems; scope is explicit
+bounded native GraphScope. No new planner, result materialization, wire model,
+trusted caller role or query dispatcher. Scalar Where/order/project/Explain
+state is rejected UnsupportedCapability rather than silently omitted. Take is
+preserved as the canonical search limit. Server validation remains responsible
+for finite values, dimension/profile, current persisted policy, scoped read cut,
+shared budget and cancellation. Named SQL, builder request, typed/JSON requests
+must return complete independent literal ranks and errors; SQL's existing
+parser detail remains distinct from native typed validation detail. Real
+ZoneTree wrong dimension/unsupported/overattachment/denied-principal operations
+must preserve complete store and position then produce the complete healthy
+literal result. Root must execute native normal/scalar and official RF3 public
+paths before original KL051 closure; authored source is not qualification.
+
+Ordered join: freeze owning spec/ADR; Client QueryExecution builder/helper; native UnitTests wholeflows; root guarded integration/build/format/discovery/full suites/Linux RF3. Dependencies unchanged; rollback removes adapter API and tests without modifying stored data.
+
+## TASK-KL051-VECTOR-SCALAR-STATE-002
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001, REQ-QUERY-007 and ADR-090: supplement
+the existing Order whole flow with three actual builder Where, custom projection
+and Explain states. Construct each supported scalar state successfully before
+AttachVector; require exact UnsupportedCapability and no lowered request, unchanged
+native read diagnostics, complete canonical storage bytes and position. Then execute
+the valid C# attachment through the real ZoneTree SearchEngine and retain the existing
+independent full literal two-document ranks, revision, JSON, redaction, empty expansion
+and equivalent SQL/typed/JSON results. Preserve the same complete storage and cut after
+healthy continuation. No planner/public scope change. Authored cases require native
+normal/scalar execution and existing public RF3 gates; source is not qualification.
+
+R467 typed seed repair: VectorAttachmentDocument is instantiated as each actual committed document. Default absent vector attachment is omitted by WhenWritingDefault; member remains supported by the existing field translator. Independent literal full JSON equality is checked before native commit. Native vector records, document bytes/revisions, SQL/typed/JSON rank oracles remain unchanged. No dummy/public type/suppression.

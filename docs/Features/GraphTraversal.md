@@ -162,3 +162,21 @@ Original compilation binding: 515 original source witnesses across the UnitTests
 - KeyLoad.Security: DLL `774601b8b595bc4d5af03605b6eba285317a17ca8a3c854018e073ade2345e7c`, PDB `69e068448d9ead25f1d348c0074cb4c9b6ff2a32d285deed0dbc68e4cc3e3cf0`, MVID `b946ab33-0c63-415f-ab22-f824fdcfacd6`.
 - KeyLoad.Storage.IO: DLL `4ca43435e641d544a41888711cd212cb93c8246790faa9e84e8dd758358eb1ab`, PDB `bcbb7ad25fb89781857ff072b53781e5998940e70fe24685fa5fa37bfb0e9049`, MVID `1076ce61-07f3-4379-82a0-470c8d88200b`.
 - KeyLoad.Storage.ZoneTree: DLL `ab6b103e385b6f9ba7d932eac82a871576a437a988a36473dc6754aa94e4ab63`, PDB `740cc621422be6c9a5906ce2de660e765e3daa140cb7cd3dfac811b09e3e0564`, MVID `bf86999f-6550-488e-926c-f28636b89d28`.
+
+## TASK-GRAPH-SHORTEST-PATH-OBSERVED-CANCELLATION-002
+
+REQ-GRAPH-003/004, AC-GRAPH-003/004 retain original cancellation semantics. Original
+aa103 Linux normal failure returned a complete path before the independent polling
+observer requested cancellation; scalar passed. Replace exclusive polling/thread
+helpers with an owning operation TimeProvider which synchronously cancels the original
+token only after both charged bytes exceed the actual empty-adjacency probe and native
+same-store RangeExaminedBytes increases. Native storage/read-cut and budget are real.
+Require exact original-token cancellation, no partial result, full storage bytes/cut
+unchanged, then the identical busy-source request returns the complete literal no-path
+result and identical store/cut. No corpus/budget/timeout increase or permitted-success
+branch. No worker/controller remains to settle; synchronous native operation stack
+settles before healthy continuation and all unexpected/fatal failures propagate.
+Authored source requires original native normal/scalar and Linux reruns; preserve
+original failure receipt.
+
+R2 full-image correction: unchanged4096edge corpus exceeds one4096record page. A feature-owned native Scan helper uses unchanged4096record pages, at most16pages under one Store.Read cut, strictly increasing original native keys as exclusive afterKey, no empty continuation and final HasMorefalse required. Every page is synchronous/joined before image returns. Full bytes are compared without dropping records; no query quota/deadline/corpus change.

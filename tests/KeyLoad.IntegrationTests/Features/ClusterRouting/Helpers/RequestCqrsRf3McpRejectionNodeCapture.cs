@@ -14,6 +14,7 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
 
     private readonly System.Threading.Lock gate = new();
     private readonly List<RequestCqrsRf3McpRejectionRecord> records = [];
+    private readonly List<RequestCqrsRpcFailureRecord> rpcFailures = [];
     private TaskCompletionSource<bool> changed = NewChangeSignal();
     private bool completed;
 
@@ -21,6 +22,11 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
 
     internal void TryCapture(string line, Guid waveId)
     {
+        if (RequestCqrsRpcFailureParser.TryParse(line, waveId, Name, out var rpc))
+        {
+            lock (gate)
+            { if (rpcFailures.Count < MaximumRecords) { rpcFailures.Add(rpc); } }
+        }
         if (!TryParse(line, Name, waveId, out var record))
         { return; }
         lock (gate)
@@ -71,6 +77,12 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     {
         lock (gate)
         { return [.. records]; }
+    }
+
+    internal RequestCqrsRpcFailureRecord[] RpcSnapshot()
+    {
+        lock (gate)
+        { return [.. rpcFailures]; }
     }
 
     private static TaskCompletionSource<bool> NewChangeSignal()

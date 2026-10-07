@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using ManagedCode.Communication.CQRS;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
@@ -9,7 +9,6 @@ internal sealed class GraphShortestPathCancellationTests
     private const string ProbeId = "base-source";
     private const string ScanId = "busy-source";
     private const string MissingTargetId = "no-target";
-    private const string NoReadMessage = "A canceled path read accepted storage bytes before cancellation.";
     private const int CandidateCount = 4_096;
     private const int CommitBatchSize = 128;
 
@@ -55,56 +54,39 @@ internal sealed class GraphShortestPathCancellationTests
         var probeBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         _ = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, probeRequest, probeBudget);
         var sourcePosition = database.Store.Position;
+        var image = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        using var started = new ManualResetEventSlim(false);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
-        var observer = new GraphShortestPathCancellationObserver(budget, cancellation, started, probeBudget.ReadBytes);
-        Exception? primary = null;
-        OperationCanceledException? canceled = null;
-        List<Exception> settlement;
+        var clock = new GraphShortestPathObservedWorkClock();
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            clock, cancellation.Token);
+        clock.Arm(() => budget.ReadBytes > probeBudget.ReadBytes
+            && database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes,
+            cancellation.Cancel);
+        GraphShortestPathResult? partial = null;
+        OperationCanceledException canceled;
         try
         {
-            observer.StartAndWait();
-            CapturePath(database, request, cancellation, budget, ref canceled, ref primary);
+            canceled = Assert.ThrowsExactly<OperationCanceledException>(() => partial = database.Database.ShortestPath(
+                GraphShortestPathTestSupport.RootPrincipal, request, budget));
         }
         finally
         {
-            settlement = observer.JoinAfterPath();
+            clock.Disarm();
         }
-
-        GraphShortestPathCancellationFailures.ThrowIfAny(primary, settlement);
-        await Assert.That(canceled).IsNotNull();
-        await Assert.That(canceled!.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(observer.CancellationRequested).IsTrue();
-        await Assert.That(observer.ObservedReadBytes).IsGreaterThan(probeBudget.ReadBytes);
+        await Assert.That(canceled.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(clock.Triggered).IsTrue();
+        await Assert.That(partial).IsNull();
+        await Assert.That(budget.ReadBytes).IsGreaterThan(probeBudget.ReadBytes);
+        await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(database.Store.Position).IsEqualTo(sourcePosition);
-        var healthy = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, probeRequest,
+        await Assert.That(GraphShortestPathFullStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        var healthy = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request,
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(healthy.Found).IsFalse();
+        var expected = new GraphShortestPathResult(1, false, null, [], [], sourcePosition);
+        await Assert.That(JsonDefaults.Serialize(healthy).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(sourcePosition);
-    }
-
-    private static void CapturePath(TestDatabase database, GraphShortestPathRequest request,
-        CancellationTokenSource cancellation, ReadExecutionBudget budget,
-        ref OperationCanceledException? canceled, ref Exception? primary)
-    {
-        try
-        {
-            _ = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, budget);
-            primary = new InvalidOperationException(NoReadMessage);
-        }
-        catch (OperationCanceledException failure) when (cancellation.IsCancellationRequested)
-        {
-            canceled = failure;
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
-        {
-            primary = failure;
-        }
-        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is not null)
-        {
-            primary = failure;
-        }
+        await Assert.That(GraphShortestPathFullStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }
 
     private static void PersistCandidates(TestDatabase database,

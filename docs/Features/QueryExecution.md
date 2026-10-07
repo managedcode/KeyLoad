@@ -338,7 +338,7 @@ REQ-KL051-PLAN-001 / AC-KL051-PLAN-001 refine existing REQ-QUERY-004/005/006 and
 
 REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001 map REQ-QUERY-007 and existing graph-search profile to actual SQL named vector-array attachment, typed C# GraphSearchRequest and its public JSON roundtrip. Persist two real cosine vectors/raw documents, execute SQL SearchSqlAsync and native GraphSearchAsync for both typed/public JSON inputs, compare complete results with independent literal document/entity/revision/JSON/rank score/empty expansion. Wrong dimension must reject exact Validation before native access, preserve full store/cut, then valid actual operation completes. SQL parser safe detail and typed-search validator safe detail are distinct existing contract messages and remain exact; code parity does not fabricate message equivalence.
 
-Source-proven boundary: KeyLoadQuery<T> currently explicitly supports scalar Q1 expression lowering only; there is no C# LINQ vector attachment/parameter-marker API. SQL vector attachments use Q1.Search.v1/SqlGraphSearchRequest, not scalar SELECT. These tests do not introduce a builder/parallel planner or claim three-input LINQ vector plan equivalence. Original KL051 remains open for complete vector-builder lowering and equivalent public profile errors; actual supported subset may be qualified only after original native execution. No unsupported expression is silently evaluated client-side.
+Source-proven boundary: KeyLoadQuery<T> currently explicitly supports scalar Q1 expression lowering only; at that original source stage there was no C# LINQ vector attachment/parameter-marker API; TASK-KL051-VECTOR-LINQ-ATTACHMENT-001 below now owns its bounded implementation. SQL vector attachments use Q1.Search.v1/SqlGraphSearchRequest, not scalar SELECT. These tests do not introduce a builder/parallel planner or claim three-input LINQ vector plan equivalence. Original KL051 remains open for complete vector-builder lowering and equivalent public profile errors; actual supported subset may be qualified only after original native execution. No unsupported expression is silently evaluated client-side.
 
 Ownership UnitTests QueryExecution Cases/Helpers, existing ZoneTree/TestDatabase/QueryEngine/SearchEngine and actual public KeyLoadQuery APIs. Docs then tests; root guarded join/format/build/current native discovery normal/scalar/recovery/RF3/Linux gates; preserve originals and no source-only PASS. Rollback only tests/appendix, no production/dependency/protocol change.
 
@@ -361,3 +361,62 @@ rejection, full state/cut preservation and healthy complete result remain
 mandatory. This repairs test input only; no SQL support/public contract change
 or runtime PASS is inferred. Original R441 receipt remains immutable and fresh
 native execution is required.
+
+## Observed native scalar/index query work budget evidence
+
+TASK-QUERY-OBSERVED-WORK-001 supplements REQ-QUERY-001/003 and AC-MP-003 under
+ADR-035/054. QueryObservedWorkBudgetTests executes eight real QueryEngine SQL/AST
+index/full-scan cancellation/deadline flows over isolated canonical ZoneTree.
+The owning operation TimeProvider triggers only after the same store native
+RangeExaminedBytes increases. Original cancellation token or elapsed two seconds
+against the original one-second cap must reject the entire page; deadline code
+and safe detail remain exact. Full persisted bytes, receipts and position stay
+unchanged; a fresh same-request budget returns both literal rows, revision,
+redaction defaults, cursor, access path and cut. No storage substitution or
+production hook is introduced. This is authored test scope, pending native
+normal/scalar discovery and execution and exact-source Linux evidence, not
+original KL014 acceptance or expanded SQL qualification.
+
+```mermaid
+flowchart LR
+    Q[SQL or AST query] --> N[Native index or full-scan work]
+    N --> B[Original cancellation or elapsed deadline]
+    B --> R[Exact whole-operation rejection]
+    R --> S[Unchanged canonical state]
+    S --> H[Fresh budget complete literal healthy page]
+```
+
+## TASK-KL051-VECTOR-LINQ-ATTACHMENT-001
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001 and REQ-QUERY-007 under ADR-090:
+`KeyLoadQuery<T>.Take(limit).AttachVector(field, vector, space, scope)` translates
+only the existing non-evaluating member path and constructs the same canonical
+GraphSearchRequest v1 consumed by GraphSearchAsync. The vector is an immutable
+attachment bounded by existing MaximumConstantArrayItems; scope is explicit
+bounded native GraphScope. No new planner, result materialization, wire model,
+trusted caller role or query dispatcher. Scalar Where/order/project/Explain
+state is rejected UnsupportedCapability rather than silently omitted. Take is
+preserved as the canonical search limit. Server validation remains responsible
+for finite values, dimension/profile, current persisted policy, scoped read cut,
+shared budget and cancellation. Named SQL, builder request, typed/JSON requests
+must return complete independent literal ranks and errors; SQL's existing
+parser detail remains distinct from native typed validation detail. Real
+ZoneTree wrong dimension/unsupported/overattachment/denied-principal operations
+must preserve complete store and position then produce the complete healthy
+literal result. Root must execute native normal/scalar and official RF3 public
+paths before original KL051 closure; authored source is not qualification.
+
+## TASK-KL051-VECTOR-SCALAR-STATE-002
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001, REQ-QUERY-007 and ADR-090: supplement
+the existing Order whole flow with three actual builder Where, custom projection
+and Explain states. Construct each supported scalar state successfully before
+AttachVector; require exact UnsupportedCapability and no lowered request, unchanged
+native read diagnostics, complete canonical storage bytes and position. Then execute
+the valid C# attachment through the real ZoneTree SearchEngine and retain the existing
+independent full literal two-document ranks, revision, JSON, redaction, empty expansion
+and equivalent SQL/typed/JSON results. Preserve the same complete storage and cut after
+healthy continuation. No planner/public scope change. Authored cases require native
+normal/scalar execution and existing public RF3 gates; source is not qualification.
+
+R467 typed seed repair: VectorAttachmentDocument is instantiated as each actual committed document. Default absent vector attachment is omitted by WhenWritingDefault; member remains supported by the existing field translator. Independent literal full JSON equality is checked before native commit. Native vector records, document bytes/revisions, SQL/typed/JSON rank oracles remain unchanged. No dummy/public type/suppression.

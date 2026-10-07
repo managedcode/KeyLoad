@@ -12,6 +12,8 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private const string ArtifactDirectory = "qualification";
     private const string ArtifactRootDirectory = "artifacts";
     private const string ArtifactNamePrefix = "request-cqrs-rf3-mcp-rejections-";
+    private const string RpcArtifactNamePrefix = "request-cqrs-rf3-rpc-failures-";
+    private const string RpcArtifactDataKey = "KeyLoad.RequestCqrsRf3.RpcFailureArtifact";
     private const string ArtifactSuffix = ".json";
     private const string ArtifactDataKey = "KeyLoad.RequestCqrsRf3.McpRejectionArtifact";
     private const string InvalidWaveIdMessage = "The C1 diagnostics wave identifier must be nonempty.";
@@ -27,6 +29,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private readonly System.Threading.Lock disposalGate = new();
     private Task? disposalTask;
     private string? artifactPath;
+    private string? rpcArtifactPath;
 
     private RequestCqrsRf3Diagnostics(Guid waveId, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
         ResourceLoggerService logger, ContainerResource[] resources,
@@ -66,6 +69,8 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(failure);
         var path = SaveEvidence();
         failure.Data[ArtifactDataKey] = path;
+        lock (disposalGate)
+        { failure.Data[RpcArtifactDataKey] = rpcArtifactPath ??= WriteRpcArtifact(); }
     }
 
     internal string SaveEvidence()
@@ -119,6 +124,22 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         var directory = Path.Combine(root, ArtifactRootDirectory, ArtifactDirectory);
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, ArtifactNamePrefix + waveId.ToString("N") + ArtifactSuffix);
+        using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        stream.Write(bytes);
+        stream.Flush(flushToDisk: true);
+        return path;
+    }
+
+    private string WriteRpcArtifact()
+    {
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new RequestCqrsRpcFailureArtifact(ArtifactVersion,
+            waveId, nodes.SelectMany(node => node.RpcSnapshot()).ToArray()));
+        if (bytes.Length > MaximumArtifactBytes)
+        { throw new InvalidOperationException(OversizedArtifactMessage); }
+        var directory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
+            ArtifactRootDirectory, ArtifactDirectory);
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, RpcArtifactNamePrefix + waveId.ToString("N") + ArtifactSuffix);
         using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         stream.Write(bytes);
         stream.Flush(flushToDisk: true);

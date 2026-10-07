@@ -66,7 +66,30 @@ internal enum RequestCqrsLifecycleStage
     ScatCorrectedWave,
     ScatSeed,
     ScatMismatchAssertions,
-    ScatCorrectedAssertions
+    ScatCorrectedAssertions,
+    FaultProfile,
+    FaultImages,
+    FaultDiscovery,
+    FaultAdministrator,
+    FaultProvisioning,
+    FaultCaller,
+    FaultReceiptCapture,
+    FaultMarkerWait,
+    FaultDocumentRead,
+    FaultCallerCancel,
+    FaultProducerSettlement,
+    FaultOriginalOutcome,
+    FaultArmRetire,
+    FaultReceiptRetry,
+    DueOriginalWave,
+    DueColdWave,
+    DueSeed,
+    DueLeaderLoss,
+    DueLeaderRejoin,
+    DueStatus,
+    DueDiscovery,
+    DueOutcomes,
+    DueConsume
 }
 
 internal enum RequestCqrsNodeReadinessOutcome

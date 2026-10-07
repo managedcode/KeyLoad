@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -6,7 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal static class DueRf3WaveLifecycle
 {
     internal static async Task<T> RunAsync<T>(string dataRoot, IReadOnlyDictionary<string, string> images,
-        Func<RequestCqrsRf3Wave, Task<T>> action, CancellationToken cancellationToken)
+        Func<RequestCqrsRf3Wave, Task<T>> action, CancellationToken cancellationToken,
+        RequestCqrsLifecycleEvidence? lifecycle = null)
     {
         var failures = new List<Exception>();
         RequestCqrsRf3Wave? wave = null;
@@ -15,13 +17,16 @@ internal static class DueRf3WaveLifecycle
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                wave = await RequestCqrsRf3Wave.StartAsync(dataRoot, images, false, true, cancellationToken)
+                wave = await RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, false, true, null,
+                    Guid.NewGuid(), cancellationToken, lifecycleEvidence: lifecycle)
                     .ConfigureAwait(false);
+                lifecycle?.SetWaveToken(cancellationToken);
                 result = await action(wave).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
         {
+            lifecycle?.RecordFirstFailureIfAny(failures);
             if (wave is not null)
             { await CompleteWaveAsync(wave, failures).ConfigureAwait(false); }
         }

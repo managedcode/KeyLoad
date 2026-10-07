@@ -98,6 +98,16 @@ public sealed class KeyLoadQuery<T>
     /// <summary>Requests the supported query plan description.</summary>
     /// <returns>A new builder whose request includes an explain flag.</returns>
     public KeyLoadQuery<T> Explain() => With(query with { Explain = true });
+    /// <summary>Attaches a bounded immutable vector and explicit graph scope to the canonical search request.</summary>
+    /// <param name="field">Persisted vector member path; its getter is never invoked.</param>
+    /// <param name="vector">Immutable named-vector equivalent, bounded by translation options.</param>
+    /// <param name="space">Canonical vector profile validated by the server.</param>
+    /// <param name="scope">Explicit same-partition graph scope validated by the server.</param>
+    /// <returns>The existing typed graph-search request for the original SDK transport.</returns>
+    public GraphSearchRequest AttachVector(Expression<Func<T, ImmutableArray<float>>> field,
+        ImmutableArray<float> vector, VectorSpace space, GraphScope scope)
+        => QueryVectorAttachment.Lower(partition, query, context, field, vector, space, scope);
+
     /// <summary>Creates the immutable canonical AST request for this builder.</summary>
     /// <param name="allowFullScan">Whether the caller permits a query without a selective predicate.</param>
     /// <param name="cursor">Optional continuation cursor for the query page.</param>

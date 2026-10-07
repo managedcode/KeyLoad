@@ -26,4 +26,9 @@ internal static class ClusterFixturePhysicalShardIdentity
         var value = identity.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
         node.WithEnvironment(context => context.EnvironmentVariables[ClusterFixtureProtocol.PhysicalShardIdSetting] = value);
     }
+    internal static (string AdminKey, byte[] PeerSecret, Guid PhysicalShardId) ReadIdentity(string root)
+    {
+        var profile = ReadProfile(root);
+        return (profile.AdminKey, Convert.FromBase64String(profile.PeerSecret), profile.PhysicalShardId);
+    }
 }
