@@ -79,6 +79,7 @@ exact-source gate. A listed class is evidence for only the stated scope.
 |---|---|---|
 | `DocumentCrudRevisionTests`, `DocumentPutValidationAtomicityTests` | REQ-DSTORE-001 / AC-DSTORE-001 | CRUD/CAS/revision, malformed-input rollback, and healthy follow-up. |
 | `DocumentScalarIndexMutationTests` | REQ-DSTORE-002 / AC-DSTORE-002 | Old/new index transitions and uniqueness rollback. |
+| `ScalarIndexProcessRecoveryTests` and the owning CrashHost DocumentStorage scenario | REQ-DSTORE-002 / AC-DSTORE-INDEX-PROCESS-001 | TASK-DSTORE-INDEX-PROCESS freezes the real process/reference-model flow below; source and qualification pending. |
 | `DocumentRowTenantMutationAuthorizationTests` | REQ-DSTORE-003 / AC-DSTORE-003 and REQ-AUTH-005 / AC-AUTH-005 | Put/Patch/Delete cannot forge row owner or tenant; this does not cover all row-scoped read/query adapters. |
 | `DocumentFieldMutationAuthorizationTests`, `DocumentReplacementFieldAuthorizationTests`, `DocumentDeleteIndexAuthorizationTests` | REQ-DSTORE-003 / AC-DSTORE-003 and REQ-AUTH-006 / AC-AUTH-006 | Persisted field-write/index-use grants are independently enforced on the tested paths, not across the full query-adapter or field-lineage matrix. Whole-row delete requires applicable index-use, not field-write. |
 | `DocumentMutationImageTests`, `DocumentMutationImageFailureTests`, `DocumentMutationImageReadTests` | REQ-DSTORE-005 / AC-DSTORE-005 | Real same-ID image/outbox bytes, before-image read-counts, and failure rollback. These cases do not establish REQ-DSTORE-004 cross-resource event/enqueue atomicity or performance qualification. |
@@ -315,3 +316,36 @@ ADR-002/060 already govern these operations. This closes the original two task
 scopes only. Complete DocumentStorage, full Linux RF3, endurance, power loss and
 full product functional coverage are still open; process kill is not power-loss
 proof. Other feature criteria remain individually tracked.
+
+## TASK-DSTORE-INDEX-PROCESS (2026-10-07)
+
+REQ-DSTORE-002 additionally maps to **AC-DSTORE-INDEX-PROCESS-001**: an independent
+parent reference model must agree with canonical documents and declared scalar
+index membership after a real child process performs insert, replace, patch,
+delete and a rejected unique-conflict batch, then is killed and reopened in a
+distinct process. The conflict must leave documents, index entries and all other
+batch effects unchanged. Equal unique values in different atomic partitions
+remain admissible. Verify every expected member and excluded old/deleted value,
+exact document JSON/revision and declared unique ownership; a fresh valid
+mutation and subsequent reopen must prove recovery remains usable.
+
+Reuse the existing CrashHost process protocol, native ZoneTree storage, safe
+readiness/fault markers and ordered kill/exit/stdout/stderr settlement. Cover an
+acknowledged cut and an existing in-flight atomic fault boundary; the allowed
+complete outcomes come from the immutable operation schedule and observed
+receipt/cut, never from treating the query engine as its own reference oracle.
+Retain bounded deadlines, current persisted authorization, no partial transaction
+and primary/cleanup failures. Do not add a second storage implementation or
+consumer workaround. Process kill does not establish power-loss durability.
+
+Ownership is RecoveryTests/Features/DocumentStorage/Cases/
+`ScalarIndexProcessRecoveryTests.cs`, its feature-local Helpers/Assertions as
+needed, and CrashHost/Features/DocumentStorage/Scenarios with the existing
+dispatch registration. Frontend/SDK/MCP additions are N/A to this child-process
+recovery gap; actual RF3 index qualification remains a separate required gate.
+ADR-002 and ADR-011 already own atomic scalar indexing and process recovery;
+there is no new format, dependency, trust or topology boundary. Root freezes
+requirements before a Luna worker prepares private guarded source, reviews and
+joins it, builds, executes focused native TUnit/recovery and obtains exact-source
+Linux source/PDB evidence before acceptance. Broader index varieties and full
+DocumentStorage qualification remain open.

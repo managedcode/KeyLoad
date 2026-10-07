@@ -100,12 +100,21 @@ Actors: an operator with a current persisted administrator principal, an unautho
 | 004 | AdminCatalogTests / real store; AdminDashboardRf3Tests; browser | pagination positive/zero/over-limit/cross-tenant scopes, real document/blob flow and hostile text; CI unit + RF3 |
 | 005 | AdminQueueTests / real store; AdminDashboardRf3Tests | empty and populated lanes, metadata pagination, state/counter/read-position unchanged; CI unit + RF3 |
 | 006 | AdminDashboardBrowserTests / real RF3 + actual headless browser | navigation, credential disconnect, empty/error/loading, document viewing, viewport overflow, keyboard; CI RF3 browser; manual visual inspection adds design evidence only |
-| 007 | MCP catalog unit assertions + AdminDashboardRf3Tests | tool inventory/shapes/hints, real SDK/MCP agreement and auth failure; all canonical CI gates |
+| 007 | AdminDashboardRf3Tests with real SDK/official MCP operations | discovered operation metadata, real catalog/nonconsuming-queue agreement and persisted auth failure; all canonical CI gates |
 | 008 | AdminHttpMetricsTests, AdminHttpMetricsMiddlewareTests / unit; AdminDashboardRf3Tests / RF3 | bound, order, exact fields, template-not-path, exclusions, real SDK failure appears; CI unit + RF3 |
 | 009 | AdminDashboardRf3Tests / RF3 SDK and official MCP | three distinct voters, local voter and leader are members, SDK and MCP agree; CI RF3 |
 | 010 | AdminDashboardBrowserTests / real Chrome; SiteBrandParityTests / pages | navigation across all nine views, overflow, reduced motion, brand parity; screenshots reviewed |
 
-Manual exception: subjective visual polish is inspected via desktop/mobile screenshots; it does not replace functional browser or numeric coverage qualification. Migration is additive, with no persisted schema changes or dependencies. Rollback removes this slice's routes/assets/client methods/read enum additions in a coordinated release; existing wire enum numbers remain stable. ADR-051 defines the implementation contract. Unknown SMID mapping and separate Orleans Streams qualification remain visible independent workstreams.
+Manual exception: subjective visual polish is inspected via desktop/mobile screenshots; it does not replace functional browser or numeric coverage qualification. Current dashboard reads use the existing persisted model and dependencies. Rollback removes this slice's routes/assets/client methods/read enum additions in a coordinated release; existing wire enum numbers remain stable. ADR-051 defines the implementation contract. Unknown SMID mapping and separate Orleans Streams qualification remain visible independent workstreams.
+
+TASK-OWNER-REJECTED-TRIVIAL-PRUNE removes the catalog-array-only case and the
+two invalid-retention constructor cases. They perform no dashboard, request or
+metric lifecycle operation and cannot contribute functional product coverage.
+Preserve AdminHttpMetricsTests' real observation/ordering/bounds flows and the
+actual SDK/official-MCP RF3 catalog and nonconsuming queue operation case,
+`AcAd007RealSdkAndOfficialMcpAgreeOnCatalogAndNonconsumingQueue`. Root owns the
+guarded deletion and full build/normal/scalar owning regressions, followed by a
+fresh native coverage census. ADR: N/A, no product or architecture changes.
 
 
 ## Traceability and delivery evidence

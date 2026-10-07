@@ -18,7 +18,7 @@ internal sealed class CommandInboxLanes(int maximumControlBurst)
     public void Enqueue(AdmittedCommand command)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var lane = CommandAdmissionGovernor.IsControl(command.Operation.Kind) ? controls : commands;
+        var lane = command.Control ? controls : commands;
         lane.Enqueue(command);
     }
 

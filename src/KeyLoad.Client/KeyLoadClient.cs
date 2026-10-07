@@ -23,8 +23,9 @@ public sealed partial class KeyLoadClient
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 
-    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
-        => transport.Send<T>(path, request, write, id, cancellationToken);
+    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
+        HttpMethod? method = null)
+        => transport.Send<T>(path, request, write, id, cancellationToken, method);
     /// <summary>Submits one atomic command using its stable idempotency identifier.</summary>
     /// <param name="command">Typed command and caller-owned stable command identifier.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>

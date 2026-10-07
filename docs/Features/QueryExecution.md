@@ -1,5 +1,28 @@
 # QueryExecution
 
+TASK-QUERY-FACTORY-WHOLE-OPERATION replaces the two shape-only
+`KeyLoadQueryFactoryTests` cases under REQ/AC-ROC-005 and the existing bounded
+query execution requirements. AC-QUERY-FACTORY-001 requires the public
+`KeyLoadQuery.From<T>` builder, including predicate/projection/order/limit, to
+execute against the actual TestDatabase/ZoneTree QueryEngine and return the
+independently expected rows, canonical references, revisions and scoped read
+cut. AC-QUERY-FACTORY-002 retains null partition/collection/expression rejection,
+then requires an unchanged native store position and a successful query against
+the same seeded database. Initial AST/getter assertions alone cannot qualify
+these cases or contribute functional coverage. Use the current builder and
+executor APIs, persisted operation state and existing bounded test options;
+no duplicated translator, fake store or new product behavior is permitted.
+
+ADR-041 owns the existing factory contract and ADR-033/117 own functional
+test/coverage qualification; no new public or persisted contract is introduced.
+Canonical ownership is UnitTests `Features/ClientApi/Cases/KeyLoadQueryFactoryTests.cs`
+and cohesive same-slice helpers if required. Backend/client contracts remain
+unchanged; frontend, new transport and RF3 fixture changes are N/A to this
+unit-operation gap. Root freezes, reviews, joins and runs native owning
+normal/scalar tests; a Luna worker prepares a private guarded source packet.
+Source integration and exact-source Linux qualification remain pending. All
+broader query/ClientApi gates stay mandatory.
+
 ## Event and queue SQL sources in the 104-task completion
 
 [ADR-072](../ADR/ADR-072-authorized-sql-model-views.md) freezes the following
@@ -117,9 +140,8 @@ format change. UI: N/A, typed caller operations are the entry point.
 The preserving quality join is specified by AC-CQ-011/012 in
 [quality-gates acceptance](CodeQuality.md) and ADR-033.
 QueryEngine keeps the public SQL/AST/live facade; its private live owner is
-`Features/ChangeFeeds/LiveQueryExecutor.cs`. First-authored
-`Features/QueryExecution/QueryConstructionTests.cs` asserts the explicit invalid
-null-database constructor boundary; real existing query suites cover valid input.
+`Features/ChangeFeeds/LiveQueryExecutor.cs`. Actual query suites cover the owning
+operation results, authorization, cancellation and budget boundaries.
 The numeric-enabled Query build is clean; exact-SHA test qualification is pending.
 
 AC-CQ-014 accepts the preserving migration of the three legacy adapter/live/security
@@ -129,8 +151,8 @@ deterministic200-document/50-query and100-mutation/12-identity flow assertions.
 REQ-QUERY-003..006 map to this additional test-source acceptance and TASK-MP-010UQ;
 the detailed matrix, exact worker ownership and required GitHub proof are in
 the [CodeQuality](CodeQuality.md) acceptance and execution contract.
-Existing QueryConstruction/SqlParserContract/QueryResource cases retain their
-constructor, error-precedence, cancellation and budget boundary assertions.
+Existing SqlParserContract/QueryResource cases retain their error-precedence,
+cancellation and budget boundary assertions where paired with whole operations.
 ADR-033/032 suffice: only test ownership/input selection changes, no production
 or public/data contract. Canonical paths/evidence are updated after the source join.
 
@@ -188,7 +210,14 @@ These candidate references do not certify an AC or a native run. The R111 input 
 | Query adapter/resource/cursor tests | REQ-QUERY-001..006 and REQ-QUERY-008; the per-case map selects AC-MP-003/012 or AC-QUERY-004..006 only where the method asserts them | Real data, budget, cursor, cancellation, or store-preservation flows are candidates; parser/constructor guards alone are not. |
 | SQL comment/parser/budget tests | REQ/AC-SQLC-002..004, REQ-AISQL-003 / AC-AISQL-007, and REQ-QUERY-004 / AC-QUERY-004 where applicable | Parser shape and byte-boundary checks are traceable but not sufficient contributor flows by themselves; query execution/result assertions are required. |
 
-`QueryConstructionTests.AcCq012NullDatabaseIsRejectedAtConstruction` remains unmapped: it is a constructor guard with no database operation and no exact owning AC. Existing comments on `NativeQueryCursorTests` (`AC-IS-001`) and parser cases (`AC-ROC-006`) do not match their current owning criteria and should not be copied into the crosswalk.
+Existing comments on `NativeQueryCursorTests` (`AC-IS-001`) and parser cases (`AC-ROC-006`) do not match their current owning criteria and should not be copied into the crosswalk.
+
+TASK-OWNER-REJECTED-TRIVIAL-PRUNE removes the standalone null-constructor case
+under the owner's whole-flow test rule. It never executes a query or establishes
+an owning acceptance criterion. Preserve all actual query operation cases and
+production guards. Root owns the source deletion, full build and normal/scalar
+operation regressions; regenerate the native coverage census after removal.
+ADR: N/A, no product behavior, public/data contract or architecture changes.
 
 
 TASK-REL-004-INNER-JOIN-001..006 extends REQ-QUERY-007 only with the exact bounded

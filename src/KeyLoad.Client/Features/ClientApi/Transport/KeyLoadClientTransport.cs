@@ -26,9 +26,14 @@ internal sealed class KeyLoadClientTransport
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution;
 
-    internal async Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
+    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
+        HttpMethod? method = null)
+        => SendCore<T>(path, request, write, id, method ?? (request is null ? HttpMethod.Get : HttpMethod.Post), cancellationToken);
+
+    private async Task<Result<T>> SendCore<T>(string path, object? request, bool write, Guid? id,
+        HttpMethod method, CancellationToken cancellationToken)
     {
-        using var message = new HttpRequestMessage(request is null ? HttpMethod.Get : HttpMethod.Post, path);
+        using var message = new HttpRequestMessage(method, path);
         message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
         if (id is { } command)
         {

@@ -13,12 +13,15 @@ public sealed class AdmittedCommand : IDisposable
     /// <summary>Gets the admitted immutable operation.</summary>
     public ReplicatedOperation Operation { get; }
 
+    internal bool Control { get; }
+
     /// <summary>Gets the task completed when the consumer records the operation outcome.</summary>
     public Task<OperationResult> Completion => completion.Task;
 
     internal AdmittedCommand(ReplicatedOperation operation, CommandAdmissionLease lease)
     {
         Operation = operation;
+        Control = lease.Control;
         this.lease = lease;
     }
 

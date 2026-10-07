@@ -60,7 +60,7 @@ public sealed class AdmittedCommandInbox : IAsyncDisposable
             throw Errors.Fail(ErrorCode.PermissionDenied, PrincipalMismatchDetail);
         }
 
-        var lease = governor.Reserve(operation.Kind, principal, payloadBytes, operation.PayloadJson.Length, cancellationToken);
+        var lease = governor.Reserve(operation, principal, payloadBytes, cancellationToken);
         try
         {
             lock (gate)

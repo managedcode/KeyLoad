@@ -33,7 +33,8 @@ internal static class ReplicaNativeOperationAdmission
                 ?? throw Errors.Fail(ErrorCode.Corruption, InvalidOperation);
             NativeSerialization.Validate(value.Value.Span, type);
         }
-        var control = CommandAdmissionGovernor.IsControl(operation.Kind);
+        var control = RuntimeJournalBootstrapAdmission.IsControl(operation, value,
+            inspected.Utf8Length(operation.PayloadJson), maximumControlPayloadBytes);
         if (control && (inspected.Utf8Length(operation.PayloadJson) > maximumControlPayloadBytes
             || value.Value.Length > maximumControlPayloadBytes))
         {

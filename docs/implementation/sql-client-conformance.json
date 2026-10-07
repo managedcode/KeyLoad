@@ -35,9 +35,9 @@
     {
       "id": "SQLC-JOIN",
       "name": "joins, subqueries, correlated queries, CTEs including recursive/data modifying",
-      "syntax": "pending",
-      "execution": "pending",
-      "evidence": "AC-SQLC-006 pending"
+      "syntax": "ADR-118 accepted closed Q2 INNER equijoin contract; guarded source implementation/native qualification pending; all other join/subquery/CTE forms pending",
+      "execution": "One authorized bounded same-partition canonical ZoneTree read-cut target; no execution qualification claimed before actual native gates",
+      "evidence": "AC-REL-004-JOIN-001..006 and AC-QUERY-007-JOIN-001/002 frozen in ADR-118/RelationalStorage/QueryExecution; complete AC-SQLC-006 remains open"
     },
     {
       "id": "SQLC-GROUP",
@@ -84,7 +84,7 @@
     {
       "id": "SQLC-ROUTINE",
       "name": "functions, procedures, DO, CALL",
-      "syntax": "canonical CALL envelope only",
+      "syntax": "canonical CALL envelope in default query dialect1 only; nondefault version explicitly unsupported",
       "execution": "sole canonical operation catalog only",
       "evidence": "full routine execution pending"
     },
@@ -124,13 +124,6 @@
       "evidence": "declarative typed execution AC-SQLC-006 pending"
     }
   ],
-  "searchCandidate": {
-    "repository": "https://github.com/ZoneTree/ZoneTree.FullTextSearch",
-    "decision": "evaluate",
-    "sourceReview": "completed pinned 6d7710a4845608a5ab266342c3e93808f53a8695; docs/implementation/zonetree-fulltextsearch-review.md",
-    "integration": "pending",
-    "performanceQualification": "pending"
-  },
   "qualification": {
     "testsLocation": "GitHub Actions only",
     "newLexicalCasesExecuted": "Existing comment cases are included in the genuine qualified baseline; full PostgreSQL lexical conformance is not established.",
@@ -160,5 +153,41 @@
   },
   "commandInventory": "docs/implementation/sql-client-commands-postgresql18.json",
   "officialCommandCount": 183,
-  "commandInventoryStatus": "all official names mapped for planning; semantic contracts and real execution fixtures pending; family mappings are research inference"
+  "commandInventoryStatus": "all official names mapped for planning; semantic contracts and real execution fixtures pending; family mappings are research inference",
+  "currentLanguageContract": {
+    "decision": "ADR-118",
+    "defaultAstVersion": 1,
+    "defaultQueryDialectVersion": 1,
+    "sourceTargetAstVersions": [
+      1,
+      2
+    ],
+    "sourceTargetQueryDialectVersions": [
+      1,
+      2
+    ],
+    "q2Profile": "Q2.InnerJoin.v1",
+    "q2Scope": "Explicit projection, one same-partition INNER equijoin from a Text column to the second typed collection's nonnullable Text primary key; left primary-key ordinal ascending order, explicit full-scan opt-in and bounded LIMIT",
+    "sourceStage": "accepted contract before guarded implementation join; native execution qualification pending",
+    "q2Unsupported": [
+      "WHERE/cursor",
+      "self or multiple joins",
+      "outer/cross joins",
+      "non-primary-key right key",
+      "non-Text key",
+      "star projection",
+      "EXPLAIN INNER JOIN",
+      "GROUP/aggregate/subquery/CTE",
+      "CALL with nondefault query dialect"
+    ],
+    "fullSqlComplete": false,
+    "nativeClientProtocolQualified": false
+  },
+  "textIndexFoundation": {
+    "repository": "https://github.com/ZoneTree/ZoneTree.FullTextSearch",
+    "decision": "selected by owner on2026-10-03",
+    "ownership": "native node-local full-text index over canonical ZoneTree records; not an SQL parser or replacement canonical database",
+    "integration": "existing native selected provider; its scoped tests and qualification remain in Search/FullTextNative",
+    "performanceQualification": "open; SQL conformance does not qualify comparative search performance"
+  }
 }

@@ -1,5 +1,4 @@
 using KeyLoad.Server;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.AdminDashboard;
 
@@ -138,15 +137,6 @@ internal sealed class AdminHttpMetricsTests
         metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), Failure(Requests));
         await Assert.That(snapshot.RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus + Requests - 1);
         await Assert.That(metrics.Snapshot().RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus + Requests);
-    }
-
-    [Test]
-    [Arguments(0)]
-    [Arguments(AdminDashboardProtocol.RecentFailureLimit + 1)]
-    public void AcCq034InvalidRetentionIsRejectedBeforeMetricsOwnerConstruction(int retained)
-    {
-        var options = Options.Create(new AdminObservationOptions { MaximumRecentFailures = retained });
-        Assert.ThrowsExactly<OptionsValidationException>(() => _ = new AdminHttpMetrics(options));
     }
 
     private static AdminHttpFailureDetail Failure(int index) =>

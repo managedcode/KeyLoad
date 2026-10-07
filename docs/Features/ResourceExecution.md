@@ -619,3 +619,23 @@ Run normal/scalar focused operations, full Release/formatter/governance and
 actual SDK/official MCP RF3, then retain exact-source Linux evidence. All gates
 remain required; no increased cap, retry, alternate dispatcher or fixture-only
 authorization bypass repairs this product defect.
+
+The unit saturation cohort must retain valid signed evaluation times when the
+reserved bootstrap is dequeued before an already-admitted data command. R214
+passed98/99 owning cases; the new flow admitted/applied bootstrap successfully,
+then its earlier-timestamp data command correctly failed the existing
+ClockUncertain guard. Create the data operation first, sign its bootstrap
+control peer at that same captured evaluation instant, and create the later
+malformed/oversized candidates in their eventual apply order. Preserve the
+production committed-clock check, all authority and capacity assertions, exact
+state/error expectations and healthy following operations. This is fixture
+ordering under the existing contract, not a product clock exception.
+
+Local Stage V evidence now passes the actual owning operation cohort99/99 in
+normal R216 and scalar R217, without skips or source/assembly drift. R219 actual
+Aspire-owned Docker RF3 admission cases2/2 pass the unchanged data/control
+assertions through real SDK/MCP callers after native bootstrap admission.
+R222 full Release remains clean with zero warnings/errors. The original
+Stage III Linux RF3 node1 admission-exhaustion failure is retained separately;
+these local results do not qualify full Linux, mixed-load performance or every
+ResourceExecution acceptance gate. Those remain open.

@@ -35,6 +35,9 @@ internal static class ClientApiRoutes
     internal const string ResourcesConfigure = "/v1/admin/resources";
     internal const string PrincipalsConfigure = "/v1/admin/principals";
     internal const string ApiKeysConfigure = "/v1/admin/api-keys";
+    internal const string AdminBackup = "/v1/admin/backup";
+    internal const string AdminDispatch = "/v1/admin/dispatch";
+    internal const string DispatchPausedQuery = "?paused=";
     internal const string Status = "/v1/status";
     internal const string AdmissionStatus = "/v1/admin/admission";
 }

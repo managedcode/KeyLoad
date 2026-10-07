@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
@@ -97,6 +98,21 @@ public sealed class CommandAdmissionGovernor
     /// <returns>An owned reservation that releases capacity when disposed.</returns>
     public CommandAdmissionLease Reserve(OperationKind kind, PrincipalRecord principal, int payloadBytes,
         int payloadCharacters, CancellationToken cancellationToken = default)
+        => Reserve(IsControl(kind), principal, payloadBytes, payloadCharacters, cancellationToken);
+
+    internal CommandAdmissionLease Reserve(ReplicatedOperation operation, PrincipalRecord principal, int payloadBytes,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+        var control = operation.Kind == OperationKind.RuntimeJournal
+            ? RuntimeJournalBootstrapAdmission.IsControl(operation,
+                Encoding.UTF8.GetByteCount(operation.PayloadJson), maxControlPayloadBytes)
+            : IsControl(operation.Kind);
+        return Reserve(control, principal, payloadBytes, operation.PayloadJson.Length, cancellationToken);
+    }
+
+    private CommandAdmissionLease Reserve(bool control, PrincipalRecord principal, int payloadBytes,
+        int payloadCharacters, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(principal);
@@ -106,7 +122,6 @@ public sealed class CommandAdmissionGovernor
         ArgumentOutOfRangeException.ThrowIfNegative(payloadCharacters);
 
         var bytes = CalculateRetainedBytes(payloadBytes, payloadCharacters);
-        var control = IsControl(kind);
         if (control && payloadBytes > maxControlPayloadBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ControlPayloadLimitDetail);

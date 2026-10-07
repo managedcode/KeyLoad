@@ -354,11 +354,38 @@ cleanup scope, persists a DocumentsRead-only member and requires its pause to
 fail with PermissionDenied. Immediately commit a healthy administrator write
 without any intervening dispatch mutation, proving denial had no effect. Then
 exercise same-ID/same-boolean replay through both clients, changed-payload
-Conflict, paused-write rejection with unchanged JSON/revision, and cross-client
-resume/pause followed by healthy commits/public reads. Bounded observed cleanup
+Conflict, paused queue-receive rejection with unchanged message state/counters,
+and cross-client resume/pause followed by exact delivery/ack and healthy document
+commits/public reads. Global dispatch pause controls delivery; ordinary document
+writes and enqueue remain admitted under their existing contracts. The R219
+original RF3 attempt exposed the incorrect document-write pause oracle; refine
+this test before changing its source, preserving the production pause contract.
+Backup voter identities are canonical internal origins, not host directory
+names. Resolve the matching Aspire container resource and its actual `/data`
+bind mount within the fixture-owned root; require exact membership, origin and
+mount identity before comparing archive bytes. The R219 original physical-path
+failure remains retained. Bounded observed cleanup
 restores dispatch. Root reviews guards, builds/formats, executes the real SDK and
 official-MCP fixture, retains original evidence, and commits/pushes the stage.
-Source integration and runtime qualification are pending. This stage covers only
+The original R221 attempt reached exact restored document/reference/revision
+verification, then exposed an invalid record-equality oracle: `StoreIdentity`
+contains independently decoded `ReadOnlyMemory<byte>` signing-key storage.
+Before refining the test, freeze value equality through the unchanged native
+generated serialization, compared as a boolean without exposing either payload.
+Capture the source `backup.json` SHA-256 before restore and require the same
+digest after restore; the complete native verifier must again validate every
+manifest file and the original position. This retains the unchanged-archive
+requirement without changing identity equality, serialization or restore behavior.
+`BackupRestore/Helpers/AdminBackupArchiveIntegrity` owns the bounded manifest
+digest; the existing verifier owns the full native identity/file checks.
+Hash the fixture-owned manifest through a streaming file reader, with cancellation
+and joined disposal; never emit identity payloads, signing keys or archive data.
+Source integration and the local owning RF3 flows now pass: R221 dispatch1/1
+and R223 backup1/1 use the same source-verified native server image, real SDK and
+official MCP clients and joined fixture cleanup. R222 full Release has zero
+warnings/errors and zero source drift. Original R219/R221 failed observations
+remain retained; exact-source Linux and broader runtime qualification are open.
+This stage covers only
 the observable archive outcome portion of AC-BACKUP-001; streaming/memory,
 cluster-cut/reconciliation, cancellation/revocation parity and all remaining
 ClientApi/BackupRestore acceptance stay mandatory and open.

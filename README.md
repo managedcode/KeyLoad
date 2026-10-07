@@ -352,6 +352,18 @@ passed normal and scalar **2,767/2,767**, recovery **235/235** and same-job nati
 source/test-image identity checks. Its RF3 job was canceled near the original
 60-minute aggregate budget without producing a completed RF3 report. That job
 now has 180 minutes, with individual scenario deadlines and gates unchanged.
+The [later Linux run at 57532cd5](https://github.com/managedcode/KeyLoad/actions/runs/37569205558/job/112623818966)
+passed normal and scalar **2,769/2,769**, recovery **235/235**, and same-job
+source/test-image checks. Its complete RF3 report records **131/141 passed,
+10 failed**, with bootstrap admission exhaustion, a specific missing ACK grant
+and separate startup/cancellation failures retained. The next source's Linux
+normal/scalar reports each pass **2,770/2,771**; the sole failure is a test
+expecting logger-selection rejection after image-provenance rejection, and
+recovery passes **235/235**. That fixture correction remains pending.
+Local Stage V fixes pass **99/99** owning unit operations in
+each mode and the two real RF3 admission cases. SDK backup and dispatch also
+pass their actual RF3 flows, including native archive restore and queue delivery,
+replay/conflict/denial checks. Full current-source Linux/RF3 remains open.
 All six unchanged native Aspire logger-control flows pass locally, including
 caller cancellation and original task settlement; these model/logger controls
 do not qualify Docker database execution. Six focused local Docker RF3 flows
