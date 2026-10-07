@@ -41,5 +41,9 @@ internal sealed class TwoRf3MembershipProfileTests
             TwoRf3MembershipProtocol.Node1, wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
         await TwoRf3MembershipReadinessAssertions.VerifyPublicCallsClosedAsync(wave.Application,
             TwoRf3MembershipProtocol.Node4, wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        await TwoRf3MembershipReadinessAssertions.VerifyAllNodesAsync(wave.Application, cancellationToken)
+            .ConfigureAwait(false);
+        await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

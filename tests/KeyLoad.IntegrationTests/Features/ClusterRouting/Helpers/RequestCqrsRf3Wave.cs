@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
@@ -15,20 +16,23 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     private readonly RequestCqrsRf3Diagnostics diagnostics;
     private readonly RequestCqrsLifecycleEvidence? lifecycleEvidence;
     private DistributedApplication? application;
+    private IDistributedApplicationTestingBuilder? testingBuilder;
     private Action<RequestCqrsLifecycleStage>? FailureObserver => lifecycleEvidence is null
         ? null : lifecycleEvidence.RecordOwnerFailure;
 
     private RequestCqrsRf3Wave(string dataRoot, ref DistributedApplication? application,
-        ContainerRuntimeControl runtime, ref RequestCqrsRf3Diagnostics? diagnostics,
+        ContainerRuntimeControl runtime, ref RequestCqrsRf3Diagnostics? diagnostics, ref IDistributedApplicationTestingBuilder? testingBuilder,
         RequestCqrsLifecycleEvidence? lifecycleEvidence)
     {
-        if (application is null || diagnostics is null)
+        if (application is null || diagnostics is null || testingBuilder is null)
         {
             throw new InvalidOperationException("The C1 wave transfer requires its owned Aspire resources.");
         }
         this.dataRoot = dataRoot;
         this.application = application;
         this.runtime = runtime;
+        this.testingBuilder = testingBuilder;
+        testingBuilder = null;
         this.diagnostics = diagnostics;
         this.lifecycleEvidence = lifecycleEvidence;
         application = null;
@@ -59,8 +63,8 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
         ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,
-        RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
-        => new(dataRoot, ref application, runtime, ref diagnostics, lifecycleEvidence);
+        ref IDistributedApplicationTestingBuilder? testingBuilder, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
+        => new(dataRoot, ref application, runtime, ref diagnostics, ref testingBuilder, lifecycleEvidence);
 
     internal Task KillAsync(string node, CancellationToken cancellationToken)
         => runtime.KillAsync(node, RequestCqrsRf3Protocol.FollowerLossScenario, cancellationToken);
@@ -97,6 +101,8 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         { return; }
         var failures = new List<Exception>();
         await CompleteAsync(owned, diagnostics, failures, lifecycleEvidence).ConfigureAwait(false);
+        if (await RequestCqrsRf3BuilderCleanup.DisposeAsync(testingBuilder, failures, FailureObserver).ConfigureAwait(false))
+        { testingBuilder = null; }
         if (failures.Count == 0)
         {
             RequestCqrsLifecycleFailureObserver.Observe(() => AssertNodeLocksReleased(dataRoot), failures,

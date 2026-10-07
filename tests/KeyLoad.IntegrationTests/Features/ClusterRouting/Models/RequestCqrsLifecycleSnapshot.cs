@@ -50,7 +50,8 @@ internal enum RequestCqrsLifecycleStage
     AuthorityWaveAppDispose,
     AuthorityWaveLockCheck,
     AuthorityWaveDiagnosticsArtifact,
-    AuthorityRootDelete
+    AuthorityRootDelete,
+    AuthorityWaveBuilderDispose
 }
 
 internal enum RequestCqrsNodeReadinessOutcome

@@ -20,6 +20,9 @@ internal static class NativeCoverageMergeProcess
     internal const string OutputFailure = "The native coverage tooling child output exceeded its bound.";
     internal const string StartFailure = "The native coverage tooling child process did not start.";
     private const string ToolingInputDescriptorName = "tooling-inputs.v1.json";
+    internal const string ProductAdmissionDescriptorEnvironment = "KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH";
+    internal const string ProductAdmissionRequiredEnvironment = "KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED";
+    internal const string ProductDescriptorName = "functional-coverage.native-product-descriptor.v1.json";
 
     internal sealed record ToolingOptions(NativeCoverageToolPackage Tool, NativeCoverageExecutionOptions Coverage,
         TestExecutionOptions Tests, string RepositoryRoot, NativeCoverageSettingsSnapshot Settings);
@@ -95,6 +98,37 @@ internal static class NativeCoverageMergeProcess
         var result = ConvertResult(processResult);
         await AssertSuccessfulChildAsync(result).ConfigureAwait(false);
         return JsonDocument.Parse(result.StandardOutput);
+    }
+
+    internal static async Task<ChildResult> RunProductAdmissionAsync(ToolingOptions options,
+        string evidenceRoot, string descriptorPath, CancellationToken cancellationToken)
+    {
+        var start = NativeCoverageMergeChildProcess.CreateStartInfo(PowerShellCommand,
+            options.Tests.CleanupOutputCharacters, options.Coverage);
+        start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-File");
+        start.ArgumentList.Add(Path.Combine(options.RepositoryRoot, MergeScript));
+        AddArgument(start, "Mode", "ProductAdmission");
+        AddArgument(start, "Repository", options.RepositoryRoot);
+        AddArgument(start, "EvidenceRoot", evidenceRoot);
+        AddArgument(start, "DescriptorPath", descriptorPath);
+        AddArgument(start, "ToolPackageRoot", options.Tool.PackageRoot);
+        AddArgument(start, "ToolVersion", options.Tool.Version);
+        AddArgument(start, "NativeOptionsJson", NativeCoverageProductEvidenceOptions.Read(evidenceRoot, options.Coverage));
+        AddArgument(start, "MaximumDescriptorBytes", options.Coverage.MaximumDescriptorBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumFiles", options.Coverage.MaximumFiles.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "TimeoutSeconds", ((int)options.Coverage.ApplicationCleanupTimeout.TotalSeconds).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "ReadBufferBytes", options.Coverage.ReadBufferBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumTotalBytes", options.Coverage.MaximumTotalBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumFileBytes", options.Coverage.MaximumFileBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumPathCharacters", options.Coverage.MaximumPathCharacters.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumManifestBytes", options.Coverage.MaximumManifestBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumReportBytes", options.Coverage.MaximumReportBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "SettlementTimeoutSeconds", ((int)options.Coverage.SettlementTimeout.TotalSeconds).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        AddArgument(start, "MaximumOutputCharacters", options.Tests.CleanupOutputCharacters.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        var result = await NativeCoverageMergeChildProcess.RunAsync(start, options.Coverage.ApplicationCleanupTimeout,
+            options.Tests.ProcessSettlementTimeout, options.Tests.CleanupOutputCharacters, cancellationToken).ConfigureAwait(false);
+        return ConvertResult(result);
     }
 
     internal static string HashFile(string path, NativeCoverageExecutionOptions options)

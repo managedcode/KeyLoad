@@ -3,8 +3,7 @@ param(
     [Parameter(Mandatory = $true)][string] $Repository,
     [Parameter(Mandatory = $true)][string] $SourceManifestPath,
     [Parameter(Mandatory = $true)][string] $ResultsRoot,
-    [Parameter(Mandatory = $true)][int] $UnitExitCode,
-    [Parameter(Mandatory = $true)][int] $ScalarExitCode,
+    [Parameter(Mandatory = $true)][string] $UnitRunStatusPath,
     [Parameter(Mandatory = $true)][int] $RecoveryExitCode,
     [Parameter(Mandatory = $true)][int] $Rf3ExitCode
 )
@@ -20,6 +19,8 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.process.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.test-images.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.contributors.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.unit-inventory.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.unit-selectors.ps1')
 
 $script:FcNativeProductDescriptor = [ordered]@{
     Invalid = 'The original functional coverage cohort is incomplete or mismatched.'
@@ -40,8 +41,11 @@ $script:FcNativeProductDescriptor = [ordered]@{
     ShaPattern = '\A[0-9a-f]{64}\z'
     RevisionPattern = '\A[0-9a-f]{40}\z'
     GuidPattern = '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z'
-    Rf3Filter = '/*/*/(PartitionQueryPublicRf3Tests)|(McpDocumentCrudParityTests)/*'
-    SuiteNames = @('unit','unit-scalar','recovery','rf3')
+    Rf3Filter = '/*/*/(PartitionQueryPublicRf3Tests|McpDocumentCrudParityTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*'
+    UnitCensusReportPattern = '*.tunit-report.json'
+    UnitCensusTrxPattern = '*.trx'
+    UnitCensusCoverageName = 'coverage.coverage'
+    UnitRunStatusName = 'functional-coverage.unit-run-status.v1.json'
     ReportPattern = '*.tunit-report.json'
     TrxPattern = '*.trx'
     CoverageName = 'coverage.coverage'
@@ -53,10 +57,10 @@ $script:FcNativeProductDescriptor = [ordered]@{
     TimeSpanFormat = 'c'
     InvalidTool = 'The pinned native coverage tool could not be resolved from the built AppHost.'
 }
-
 function Assert-DescriptorInputs {
     if (-not [IO.Path]::IsPathFullyQualified($Repository) -or
         -not [IO.Path]::IsPathFullyQualified($SourceManifestPath) -or
+        -not [IO.Path]::IsPathFullyQualified($UnitRunStatusPath) -or
         -not [IO.Path]::IsPathFullyQualified($ResultsRoot)) { throw $script:FcNativeProductDescriptor.Invalid }
     $script:FcNativeMergeInput.MaximumJsonDepth = $script:FcNativeProductDescriptor.JsonDepth
     $script:FcNativeMergeInput.ReadBufferBytes = $script:FcNativeProductDescriptor.InitialReadBufferBytes
@@ -68,24 +72,29 @@ function Assert-DescriptorInputs {
     $script:FcNativeProductDescriptor.RepositoryRoot = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($Repository))
     $script:FcNativeProductDescriptor.ResultsRoot = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($ResultsRoot))
     $script:FcNativeProductDescriptor.SourceManifestPath = [IO.Path]::GetFullPath($SourceManifestPath)
+    $script:FcNativeProductDescriptor.UnitRunStatusPath = [IO.Path]::GetFullPath($UnitRunStatusPath)
     Assert-FcNativeNoReparsePath $script:FcNativeProductDescriptor.RepositoryRoot
     Assert-FcNativeNoReparsePath $script:FcNativeProductDescriptor.ResultsRoot
     $relativeResults = [IO.Path]::GetRelativePath($script:FcNativeProductDescriptor.RepositoryRoot,
         $script:FcNativeProductDescriptor.ResultsRoot)
     $relativeSource = [IO.Path]::GetRelativePath($script:FcNativeProductDescriptor.ResultsRoot,
         $script:FcNativeProductDescriptor.SourceManifestPath)
+    $relativeRunStatus = [IO.Path]::GetRelativePath($script:FcNativeProductDescriptor.ResultsRoot,
+        [IO.Path]::GetFullPath($UnitRunStatusPath))
     if (-not [IO.Directory]::Exists($script:FcNativeProductDescriptor.ResultsRoot) -or
         [IO.Path]::IsPathRooted($relativeResults) -or $relativeResults -eq '..' -or
         $relativeResults.StartsWith('..' + [IO.Path]::DirectorySeparatorChar, [StringComparison]::Ordinal) -or
         [IO.Path]::IsPathRooted($relativeSource) -or $relativeSource -eq '..' -or
-        $relativeSource.StartsWith('..' + [IO.Path]::DirectorySeparatorChar, [StringComparison]::Ordinal)) {
+        $relativeSource.StartsWith('..' + [IO.Path]::DirectorySeparatorChar, [StringComparison]::Ordinal) -or
+        [IO.Path]::IsPathRooted($relativeRunStatus) -or
+        $relativeRunStatus.Replace([IO.Path]::DirectorySeparatorChar, '/') -cne $script:FcNativeProductDescriptor.UnitRunStatusName) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
     $Repository = $script:FcNativeProductDescriptor.RepositoryRoot
     $ResultsRoot = $script:FcNativeProductDescriptor.ResultsRoot
     $SourceManifestPath = $script:FcNativeProductDescriptor.SourceManifestPath
+    $UnitRunStatusPath = $script:FcNativeProductDescriptor.UnitRunStatusPath
 }
-
 function Get-PolicyBounds([string] $RunManifestPath) {
     $file = Read-BoundedJson $RunManifestPath $script:FcNativeProductDescriptor.MaximumRunManifestBytes
     $run = $file.value
@@ -218,20 +227,63 @@ function Get-AppHostToolMetadata([string] $Root, [object] $Bounds) {
 }
 
 function Get-SuiteRun([string] $Suite, [int] $ExitCode, [object] $Source, [object] $ImageBySuite,
-    [object] $Bounds, [string] $ResultsRoot, [string] $Rf3RunId) {
+    [object] $Bounds, [string] $ResultsRoot, [string] $Rf3RunId, [string] $Filter = '', [object] $Status = $null) {
     if ($ExitCode -ne $script:FcNativeProductDescriptor.ExitSuccess) {
         throw "The native $Suite coverage child did not complete successfully; raw outputs are retained."
     }
-    $directory = if ($Suite -ceq 'rf3') { $ResultsRoot } else { Join-Path $ResultsRoot $Suite }
+    $directoryName = if ($null -ne $Status) { [string] $Status.resultsDirectory } else { $Suite }
+    $directory = if ($Suite -ceq 'rf3') { $ResultsRoot } else { Join-Path $ResultsRoot $directoryName }
     $report = Get-UniqueReport $directory $script:FcNativeProductDescriptor.ReportPattern
     $trx = Get-UniqueReport $directory $script:FcNativeProductDescriptor.TrxPattern
     $coverage = Join-Path $directory $script:FcNativeProductDescriptor.CoverageName
     $runId = if ($Suite -ceq 'rf3') { $Rf3RunId } else { [Guid]::NewGuid().ToString('D').ToLowerInvariant() }
-    [ordered]@{ suite = $Suite; runId = $runId; sourceRevision = $Source.value.sourceRevision
-        sourceManifestSha256 = $Source.file.sha256; testImageManifestSha256 = $ImageBySuite[$Suite].sha256
+    $baseSuite = Get-FcNativeBaseSuite $Suite
+    $run = [ordered]@{ suite = $Suite; runId = $runId; sourceRevision = $Source.value.sourceRevision
+        sourceManifestSha256 = $Source.file.sha256; testImageManifestSha256 = $ImageBySuite[$baseSuite].sha256
         nativeExitCode = $ExitCode; functionalReport = New-EvidenceReference $report $Bounds.maximumReportBytes
         trx = New-EvidenceReference $trx $Bounds.maximumReportBytes
         coverage = New-EvidenceReference $coverage $Bounds.maximumReportBytes }
+    if ($null -ne $Status) {
+        $run.statusId = [string] $Status.id
+        $run.filter = $Filter
+        $run.coverageEnabled = $true
+        $run.resultsDirectory = $directoryName
+    }
+    $run
+}
+
+function Get-UnitCensusRun([string] $StatusId, [object] $Status, [object] $Source,
+    [object] $ImageBySuite, [object] $Bounds, [string] $ResultsRoot) {
+    $suite = [string] $Status.suite
+    if ($Status.id -cne $StatusId -or $Status.exitCode -ne $script:FcNativeProductDescriptor.ExitSuccess -or
+        $Status.coverageEnabled -ne $false -or $Status.suite -cne $suite -or $Status.filter -cne '' -or
+        $Status.resultsDirectory -cne $StatusId) {
+        throw "The full uninstrumented $suite census did not complete successfully."
+    }
+    $directoryName = [string] $Status.resultsDirectory
+    $directory = Join-Path $ResultsRoot $directoryName
+    $report = Get-UniqueReport $directory $script:FcNativeProductDescriptor.UnitCensusReportPattern
+    $trx = Get-UniqueReport $directory $script:FcNativeProductDescriptor.UnitCensusTrxPattern
+    if ([IO.File]::Exists((Join-Path $directory $script:FcNativeProductDescriptor.UnitCensusCoverageName))) {
+        throw $script:FcNativeProductDescriptor.Invalid
+    }
+    [ordered]@{ statusId = $StatusId; suite = $suite; runId = $StatusId; filter = ''
+        coverageEnabled = $false; resultsDirectory = $directoryName
+        sourceRevision = $Source.value.sourceRevision; sourceManifestSha256 = $Source.file.sha256
+        testImageManifestSha256 = $ImageBySuite[$suite].sha256; nativeExitCode = $Status.exitCode
+        functionalReport = New-EvidenceReference $report $Bounds.maximumReportBytes
+        trx = New-EvidenceReference $trx $Bounds.maximumReportBytes }
+}
+
+function Get-UnitGroupSuites {
+    $suites = [Collections.Generic.List[string]]::new()
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+        for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
+            $suites.Add($prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
+                [Globalization.CultureInfo]::InvariantCulture))
+        }
+    }
+    $suites.ToArray()
 }
 
 function Get-Rf3Fixture([string] $ResultsRoot, [object] $Run, [object] $Source, [object] $Bounds) {
@@ -267,6 +319,34 @@ function Write-CreateOnly([string] $Path, [byte[]] $Bytes) {
     finally { $stream.Dispose() }
 }
 
+function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bounds, [object] $Policy, [object] $Source,
+    [object] $ImageBySuite, [string] $StatusPath, [object] $StatusRead, [object] $StatusRuns,
+    [int] $RecoveryExitCode, [int] $Rf3ExitCode) {
+    $groupSuites = [string[]] @(Get-UnitGroupSuites)
+    $census = [ordered]@{
+        normal = Get-UnitCensusRun 'unit-census' $statusRuns['unit-census'] $source $imageBySuite $bounds $results
+        scalar = Get-UnitCensusRun 'unit-scalar-census' $statusRuns['unit-scalar-census'] $source $imageBySuite $bounds $results
+    }
+    $codes = @{ recovery = $RecoveryExitCode; rf3 = $Rf3ExitCode }
+    $runs = [Collections.Generic.List[object]]::new()
+    foreach ($suite in $groupSuites + @('recovery','rf3')) {
+        $statusRow = if ($statusRuns.ContainsKey($suite)) { $statusRuns[$suite] } else { $null }
+        $exitCode = if ($null -ne $statusRow) { [int] $statusRow.exitCode } else { $codes[$suite] }
+        $runId = if ($suite -ceq 'rf3') { [string]$policy.run.runId } else { $null }
+        $filter = if ($null -ne $statusRow) { [string] $statusRow.filter } else { '' }
+        $runs.Add((Get-SuiteRun $suite $exitCode $source $imageBySuite $bounds $results $runId $filter $statusRow))
+    }
+    $rf3Run = @($runs.ToArray() | Where-Object suite -CEQ 'rf3')[0]
+    $fixture = Get-Rf3Fixture $results $rf3Run $source $bounds
+    $tool = Get-AppHostToolMetadata $root $bounds
+    $statusReference = New-EvidenceReference $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
+    if ($statusReference.length -ne $statusRead.length -or $statusReference.sha256 -cne $statusRead.sha256) {
+        throw $script:FcNativeProductDescriptor.Invalid
+    }
+    [ordered]@{ census = $census; runs = @($runs.ToArray()); fixture = $fixture; tool = $tool
+        statusReference = $statusReference }
+}
+
 function Invoke-DescriptorProducer {
     Assert-DescriptorInputs
     $root = $script:FcNativeProductDescriptor.RepositoryRoot
@@ -274,6 +354,8 @@ function Invoke-DescriptorProducer {
     $runPath = Join-Path $results $script:FcNativeProductDescriptor.RunName
     $policy = Get-PolicyBounds $runPath
     $bounds = $policy.bounds
+    $statusPath = $script:FcNativeProductDescriptor.UnitRunStatusPath
+    $statusRead = Read-BoundedJson $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
     $sourceRef = New-EvidenceReference $SourceManifestPath $bounds.maximumManifestBytes
     $source = Read-FcNativeJsonReference $results $sourceRef $bounds.maximumManifestBytes $bounds.maximumPathCharacters
     Assert-FcNativeSourceManifest $root $source.value
@@ -287,22 +369,21 @@ function Invoke-DescriptorProducer {
     Assert-CompleteContributorModules @($rows.ToArray()) $source.value
     $imageBySuite = Read-FcNativeTestImageManifests $results $root $source.value $bounds
     if ($imageBySuite.Count -ne 4) { throw $script:FcNativeProductDescriptor.Invalid }
+    $inventory = Read-FcNativeUnitInventory $root $source.value $bounds $imageBySuite $contributors
+    $statusRuns = Assert-FcNativeUnitRunStatus $statusRead.value $inventory.value $policy.run.sourceRevision `
+        $policy.run.sourceManifestSha256
     if ($policy.run.sourceRevision -cne $source.value.sourceRevision -or
         $policy.run.sourceManifestSha256 -cne $source.file.sha256 -or
         $policy.run.testImageManifestSha256 -cne $imageBySuite['rf3'].sha256) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
-    $codes = @{ unit = $UnitExitCode; 'unit-scalar' = $ScalarExitCode; recovery = $RecoveryExitCode; rf3 = $Rf3ExitCode }
-    $runs = [Collections.Generic.List[object]]::new()
-    foreach ($suite in $script:FcNativeProductDescriptor.SuiteNames) {
-        $runId = if ($suite -ceq 'rf3') { [string]$policy.run.runId } else { $null }
-        $runs.Add((Get-SuiteRun $suite $codes[$suite] $source $imageBySuite $bounds $results $runId))
-    }
-    $fixture = Get-Rf3Fixture $results $runs[3] $source $bounds
-    $tool = Get-AppHostToolMetadata $root $bounds
-    $descriptor = [ordered]@{ schemaVersion = 1; invocationId = [Guid]::NewGuid().ToString('D').ToLowerInvariant()
-        evidenceRoot = $results; sourceManifest = $sourceRef; tool = $tool; bounds = $bounds; suiteRuns = @($runs.ToArray())
-        rf3Fixtures = @($fixture); outputDirectory = $script:FcNativeProductDescriptor.OutputDirectory }
+    $runEvidence = New-ProductRunEvidence $root $results $bounds $policy $source $imageBySuite `
+        $statusPath $statusRead $statusRuns $RecoveryExitCode $Rf3ExitCode
+    $descriptor = [ordered]@{ schemaVersion = 3; invocationId = [Guid]::NewGuid().ToString('D').ToLowerInvariant()
+        evidenceRoot = $results; sourceManifest = $sourceRef; unitRunStatus = $runEvidence.statusReference
+        tool = $runEvidence.tool; bounds = $bounds; unitCensus = $runEvidence.census
+        suiteRuns = $runEvidence.runs; rf3Fixtures = @($runEvidence.fixture)
+        outputDirectory = $script:FcNativeProductDescriptor.OutputDirectory }
     $descriptorPath = Join-Path $results 'functional-coverage.native-product-descriptor.v1.json'
     $nativeOptionsPath = Join-Path $results 'functional-coverage.native-options.v1.json'
     $descriptorBytes = [Text.UTF8Encoding]::new($false).GetBytes((ConvertTo-Json -InputObject $descriptor -Depth 32) + "`n")

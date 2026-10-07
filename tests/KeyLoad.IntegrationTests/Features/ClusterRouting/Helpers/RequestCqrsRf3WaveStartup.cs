@@ -20,6 +20,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     private const string IncompletePhysicalShardOverride = "The physical shard override requires both a node and identity.";
     private readonly string[] args = RequestCqrsRf3WaveArguments.Create(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
     private DistributedApplication? application;
+    private IDistributedApplicationTestingBuilder? testingBuilder;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsSubscriberObserver? subscriberObserver;
     private RequestCqrsRf3Wave? wave;
@@ -32,10 +33,9 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         RequestCqrsProbeFixture? controls = null, string? physicalShardOverrideNode = null,
         Guid? physicalShardOverrideId = null, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
     {
-        await using var startup = new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
+        return await RequestCqrsRf3StartupExecution.RunAsync(() => new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
             requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
-            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, cancellationToken);
-        return await startup.RunAsync().ConfigureAwait(false);
+            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, cancellationToken)).ConfigureAwait(false);
     }
 
     private void ApplyPhysicalShardOverride(IDistributedApplicationTestingBuilder builder)
@@ -47,7 +47,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         ClusterFixturePhysicalShardIdentity.OverrideNode(builder, physicalShardOverrideNode, identity);
     }
 
-    private async Task<RequestCqrsRf3Wave> RunAsync()
+    internal async Task<RequestCqrsRf3Wave> RunAsync()
     {
         using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
@@ -63,7 +63,6 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (failures.Count == 0)
         { failures.Add(new InvalidOperationException(MissingWaveMessage)); }
         lifecycleEvidence?.RecordFirstFailure();
-        await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(MissingWaveMessage);
     }
@@ -73,6 +72,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
+        testingBuilder = builder;
         ApplyPhysicalShardOverride(builder);
         builder.Services.AddLogging(logging =>
         {
@@ -104,7 +104,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             .ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
-        wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics,
+        wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics, ref testingBuilder,
             lifecycleEvidence);
     }
 
@@ -152,6 +152,8 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             }
             diagnostics = null;
         }
+        if (await RequestCqrsRf3BuilderCleanup.DisposeAsync(testingBuilder, failures, FailureObserver).ConfigureAwait(false))
+        { testingBuilder = null; }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

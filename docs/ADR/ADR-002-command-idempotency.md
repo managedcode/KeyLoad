@@ -122,3 +122,13 @@ full-partition replay and owned restart also pass. This task-local result does
 not mark the complete DocumentStorage/Messaging/EventStreams feature contracts,
 full Linux RF3, coverage, endurance, external effects or power-loss durability
 qualified. This ADR remains Accepted while its broader feature gates are open.
+
+
+## TASK-EVENT-APPEND-SEEDED-CRASH-001 implementation contract
+
+Accepted private scope; implementation/qualification pending. Canonical requirements and exact AC-EVENT-CRASH-001/002 are frozen in [EventStreams](../Features/EventStreams.md#task-event-append-seeded-crash-001), covering original KL083/KL091 plus REQ-MSG-005/AC-MSG-005 and REQ/AC-STORAGE-006/007. This is an additive current-format test mode, not a product seam or new storage contract.
+
+1. Freeze the seeded same-domain doc+Exact1 append+queue command and seven original pre/post-commit/apply cuts before implementation.
+2. CrashHost/EventStreams/Contracts and Helpers implement scenario/data; root joins its one existing CrashHostApplication dispatch arm. RecoveryTests/EventStreams/Cases, Processes and Assertions implement genuine native child kill/join/reopen and literal complete-prefix/receipt/replay/healthy flow. Reuse actual CanonicalCrashBoundary and bounded CommandIdempotencyProcessChild original readers/exit; no output-hook replacement or after-ACK substitute.
+3. Root verifies source guards, unchanged original modes/serialization/options, complete original child and store-lock joins, numeric400/200/64/depth3 limits, then formats/builds and executes the exact seven new cases and full native recovery. Retain exact CrashHost DLL/PDB/source/runtime identities, native arguments/marker/cut/index/exit/readers and original reports. New output does not qualify an unexecuted gate.
+4. Mandatory Linux exact-SHA full normal/scalar/recovery/RF3/coverage gates remain unchanged. No migration, dependency, trust, public protocol or deadline changes. Rollback removes the additive mode/cases and linked task contracts only. Root owns private-packet join and final gates; no parallel shared writer.

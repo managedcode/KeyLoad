@@ -7,6 +7,10 @@ internal static class NativeCoverageMergeEvidenceInventory
     internal sealed record FileEntry(string SourcePath, string RelativePath, long Length, DateTime LastWriteTimeUtc);
 
     internal static IReadOnlyList<FileEntry> Read(string sourceRoot, NativeCoverageExecutionOptions options)
+        => Read(sourceRoot, options, out _);
+
+    internal static IReadOnlyList<FileEntry> Read(string sourceRoot, NativeCoverageExecutionOptions options,
+        out int entryCount)
     {
         var root = Path.GetFullPath(sourceRoot);
         var rootInfo = new DirectoryInfo(root);
@@ -24,6 +28,7 @@ internal static class NativeCoverageMergeEvidenceInventory
             var directory = pending.Pop();
             ReadDirectory(directory, root, options, pending, files, ref entries, ref totalBytes);
         }
+        entryCount = entries;
         return files;
     }
 

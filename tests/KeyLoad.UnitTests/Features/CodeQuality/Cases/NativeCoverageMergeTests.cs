@@ -12,7 +12,12 @@ internal sealed class NativeCoverageMergeTests
         var context = TestContext.Current!;
         var root = await CliBackupRestoreFixture.RunAsync(fixture =>
             NativeCoverageMergeEvidenceRetention.RunBeforeFixtureCleanupAsync(
-                () => NativeCoverageMergeScenario.RunAsync(fixture, options, cancellationToken),
+                async () =>
+                {
+                    await NativeCoverageMergeScenario.RunAsync(fixture, options, cancellationToken);
+                    await NativeCoverageProductEvidenceRejection.RunIfRequiredAsync(options,
+                        TestContext.ResultsDirectory, cancellationToken);
+                },
                 Path.Combine(fixture.Root, NativeCoverageMergeScenario.CoverageDirectoryName),
                 TestContext.ResultsDirectory, context.Output, options.Coverage), cancellationToken);
         await Assert.That(Directory.Exists(root)).IsFalse();

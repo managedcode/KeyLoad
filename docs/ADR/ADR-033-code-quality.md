@@ -228,3 +228,61 @@ Ownership: CodeQuality, ADR-033, TASK-CQ-PRODUCTION-IDENTITY-003; AC-CQ-039..042
 ## Native confined path traversal, TASK-CQ-NATIVE-CONFINED-PATH-001
 
 TASK-CQ-NATIVE-CONFINED-PATH-001 preserves Resolve-FcPath lexical rooted/parent/escape rejection and every per-segment reparse denial. Replace PowerShell provider Join-Path/Test-Path/Get-Item with native Path.Combine/File.GetAttributes for the same original segments. Only FileNotFoundException and DirectoryNotFoundException retain the original missing-path behavior; all other native IO failures propagate, never admit an unchecked path. Symlink/dangling/reparse points retain the exact frozen ErrorPath message. No filesystem cache, omitted segment, skipped source/PDB/image scan, new authority or timeout change. Final regular-file/compiled-file and caller-specific existence checks remain unchanged. Original path normalization, source checksum/pre-post identity binding, all complete manifest passes and cleanup remain mandatory. Linux filesystem behavior requires original runner proof; private macOS native diagnostics are development evidence only. Ownership is CodeQuality shared path confinement under ADR033/TASK-CQ-PRODUCTION-IDENTITY-003 and AC-CQ-039..042 plus existing complete native manifest tamper/restoration and process-settlement flows. Root must qualify real normal/scalar source-manifest operations with original bounds before closure.
+
+
+## Inventory3 complete-census producer/admission join, 2026-10-07
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 implements REQ-CQ-009 and
+AC-CQ-018/020/021 through the exact inventory3/descriptor3 contract frozen in
+CodeQuality. Functional cases and required ordinary-only controls remain
+disjoint; full census proves their union while five groups prove only functional
+projection. Native negative method-prefix selectors preserve mixed classes,
+actual parametrized report/TRX identities and4096character pergroup bounds.
+Canonical deterministic /_/ source-map prefix remains exact, with current
+compiled source/hash/range witnesses; no source suffix heuristic is introduced.
+
+Ordered stages: private contract freeze; guarded existing producer/admission
+repair and feature-local unit-inventory/unit-selectors helpers; actual current
+normal/scalar original census reconciliation and whole-operation classification;
+one root-owned inventory/readers/producer/workflow join; native build/format;
+complete Linux ordinary/census/groups/recovery/coveredRF3; existing genuine
+ProductAdmission admit/copiedTRX denial/original immutability/healthy re-admit
+and joined cleanup receipt. Only runtime original success qualifies.
+
+Owned source files are functional-coverage.native-product-descriptor.ps1,
+functional-coverage.native-merge{,.admission,.contributors,.unit-inventory,
+.unit-selectors,.functional-report,.test-images,.trx}.ps1, existing
+NativeCoverageMergeTests/Process/EvidenceInventory and feature-local
+NativeCoverageProductEvidenceFiles/Rejection helpers. Root owns workflow,
+canonical reviewed inventory, contract integration and gates; the assigned
+Sol worker prepares private guarded source, another Sol independently reviews.
+Source manifest remains3 with14 production+2 infrastructure modules; statuses
+and phase receipt remain1 and bounds/thresholds unchanged. Dependencies and
+public formats/APIs remain unchanged. Replace old descriptor/inventory readers
+as one coherent join without runtime fallback. Rollback removes that complete
+join; absent coveredRF3, failed/changed/missing census or unresolved
+classification rejects without creating passing evidence.
+
+
+### R4 genuine native census and confined selectors (authored, pending native group proof)
+
+REQ-CQ-039..045 and ADR-033 retain the schema3 contributor/descriptor contracts, exactly five disjoint nonempty functional groups, every required ordinary control, all sixteen production module gates and unchanged80/70/90/no-decrease thresholds. The genuine R332 full discovery contains2876 complete parameterized native identities; source review reconciles2788 existing identities and88 new whole-operation cases. The reviewed partition is2534 functional and342 ordinary-only controls. These are inventory counts, not measured coverage or Linux qualification. Original failed and superseded native reports remain retained.
+
+The canonical selector uses the shortest ordinal CLR class-leaf identifier prefix plus terminal `*` whose matches within the complete observed universe are confined to the assigned group. Deduplicate and remove redundant longer prefixes, sort ordinally, retain existing exact method-prefix exclusions, reject collisions, unassigned/ordinary-only classes, unsafe exclusions and selectors over4096 characters. Do not infer TUnit wildcard behavior from this construction. Before collecting coverage, root must run genuine native `--list-tests json` for each exact selector on the same compiled image and compare its complete parameterized identity set to that group's inventory. Any missing/extra/control identity rejects admission; full discovery must equal the complete functional-plus-ordinary census.
+
+`functional-coverage.native-census.ps1` performs bounded read-only equality validation against digest-bound original native JSON and the reviewed inventory. The preflight requires a digest-bound genuine native image observation, validates current DLL/PDB and every declared source hash (at most8192 records), and invokes existing schema3 inventory/source/group validation. Native exit/status, before/after source/image equality, matching PDB/MVID/declared compiled-source receipt and original native JSON remain mandatory independent evidence. The R332/R337 receipts bind the historical pre-formatter image only; subsequent formatter or R4 source changes require fresh native identities and discovery. Full ordinary normal/scalar, all five normal/scalar coverage groups, recovery, covered RF3 and original descriptor/TRX admission remain separate mandatory gates. No measured coverage, RF3 success or task closure follows from authored source or discovery alone.
+
+
+R5 independently confirmed correction: the R3/R4 native merge whole-operation case changes its source bytes and method span. Bind its authored proposed sourceSHA36c399c42a659957ac7e9308a38bb747551fe79f55828d0fc0f9270788b0aef5, preserve original observed native range7..19 as pending historical metadata, and block source/census qualification until actual post-join full discovery and matching current compiled image observation exist. The optional full-census-only private range rebind changes only lineNumber/endLineNumber from genuine native records after complete reviewed universe/class/method/display/sourceSHA equality and existing schema3 validation. It writes one new exclusive inventory.current-native.v3.json outside checkout; root reviews and guards the range-only canonical join. No source-derived guessed range, UID or native success is published. Original R345/R346 are pre-R5 image/discovery receipts only; a subsequent R5 build and original native source/image/census proof are mandatory.
+
+
+### R5 same-job workflow producer integration (source proposal, runtime pending)
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 / REQ-CQ-039..045 / AC-CQ-039..045: Build and Tests retains all ordinary required verify/RF3 gates. The RF3 coverage job additionally owns one source/image preparation, native full plus five selected discoveries in both normal/scalar modes, full uninstrumented normal/scalar execution, ten disjoint instrumented groups, existing recovery contributor and covered RF3. Each original child exit is retained; twelve closed unit status rows represent two censuses and ten coverage groups, while recovery/RF3 remain separate explicit exit inputs and twelve covered inputs. Failed execution rejects descriptor admission without altering original reports.
+
+Workflow-local CodeQuality producer helpers use the existing genuine native DLL/PDB/assembly compile-receipt snapshot and strict schema3 census validator; snapshots before/after each discovery must match. Discovery original stdout/stderr and joined native process receipt remain artifacts. No inferred wildcard selection, authored positive report, timeout increase, cache or omitted source scan is permitted. Each native discovery keeps the ordinary 30-minute ceiling and joined 30-second settlement; ordinary unit/recovery and RF3 execution retain existing runner budgets. Root must first join genuinely observed post-R5 native ranges; CI never rebinds or mutates inventory automatically.
+
+After same-job source/image verification, descriptor producer consumes the bounded twelve-row status file. NativeCoverageMergeTests runs separately with both required ProductAdmission environment inputs; validate its original one-case TRX and bounded phase receipt against the descriptor digest, two healthy admissions and one controlled TRX denial. Product merge then enforces unchanged sixteen-module80/70/critical90/no-decrease gates. Every original artifact survives failures; source authoring alone establishes no qualification. Owned paths: .github/workflows/build-and-tests.yml and scripts/Features/CodeQuality/functional-coverage.workflow-{discovery,collect}.ps1; root owns joins and native execution. Rollback removes this complete workflow integration, never restores the obsolete four-cohort producer contract.
+
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 argument-construction correction: source review found that PowerShell comma-array precedence combined the intended Suite and ResultsDirectory expressions into one string. Freeze the existing exact two native selection arguments before correcting only expression parentheses in functional-coverage.workflow-collect.ps1. Retain every status row, original child exit, suite/filter/coverage/result-path/budget and all discovery/source/image/descriptor/admission gates. Verify actual two-element argument values with bounded literal-only PowerShell evaluation, then genuine native execution after root releases frozen images. This is a tooling source correction, not a successful native test receipt.

@@ -339,31 +339,15 @@ outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates. Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
 
-Current source includes bounded Q2/AST2 same-partition relational INNER JOIN,
-52 JOIN rejection scenarios, graph mutation/atomic-retry and traversal deadline
-flows, vector atomic rejection flows and 12 public SDK/official MCP rejection
-flows. C# fixtures own fresh-image Aspire preparation, RF3 readiness and joined
-cleanup. Three GPT-6.1 Sol workers prepare disjoint implementation and complete
-operation batches while the integration owner validates stable compiled cohorts.
-Local full native normal and scalar suites passed **2876/2876 each**, and process
-recovery passed **236/236** on their retained compiled cohort. Final Release build
-and formatter passed after import-order and test identity corrections; eight real
-Aspire-owned RF3 SQL JOIN/schema/auth/budget/cancellation/read-cut operations passed
-**8/8** through .NET and official MCP clients. Exact-source Linux and complete RF3
-qualification, six-silo membership, full SQL/client protocol, FK, KL-075 scaling,
-functional coverage, endurance and release gates remain open. The
-[status tracker](docs/implementation/status.json) retains the original failures,
-source/report hashes and each qualification boundary.
+Current source includes bounded same-partition relational INNER JOIN and shared
+SDK, MCP and SQL operations across the database models. Complete RF3 fault
+qualification, full SQL and its native client protocol, foreign keys, scaling and
+endurance remain in progress. The [status tracker](docs/implementation/status.json)
+records the actual source, test results and remaining acceptance gates.
 
-Functional coverage excludes load/comparison runs and admits complete operation
-flows only. The current registry selects **94 contributors**: 41 normal, 41
-scalar, one recovery and eleven RF3 cases. Selection is not measured coverage.
-The first historical Query profile bound 25 cases and 103 source files. Scoped
-local KeyCodec coverage records **202/203 executable lines** across three files,
-with all 19 native cases passing normal and scalar; branch coverage is unmeasured.
-The complete sixteen-module/RF3-server product cohort remains **unmeasured**.
-See the [coverage contract](docs/Features/CodeQuality.md) for source/contributor
-binding, native report preservation and the required product-admission flow.
+Complete product functional coverage remains **unmeasured**. The
+[coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,
+excludes load and comparison runs, and requires matching source and build reports.
 
 | Ready to try (in source, covered by tests) | Still in progress |
 |---|---|

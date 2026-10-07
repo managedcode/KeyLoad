@@ -1,6 +1,16 @@
 $script:FcNativeContributors = [ordered]@{
     Suites = @('unit','unit-scalar','recovery','rf3')
     Invalid = 'The canonical native contributor inventory is invalid or incomplete.'
+    UnitInventoryName = 'functional-coverage.unit-test-inventory.json'
+    UnitGroupCount = 5
+    UnitGroupPrefix = 'unit-functional-'
+    ScalarUnitGroupPrefix = 'unit-scalar-functional-'
+    UnitGroupIdFormat = 'D2'
+    UnitRunStatusMaximumBytes = 65536
+    UnitFilterPrefix = '/*/*/('
+    UnitFilterSuffix = ')/*'
+    MaximumUnitFilterCharacters = 4096
+    HistoricalInventoryFailure = 'The functional unit inventory has not been reconciled to current native test reports.'
 }
 
 function Read-FcNativeContributors([object] $SourceManifest, [object] $Bounds, [string[]] $ModuleRoster) {
@@ -64,5 +74,58 @@ function Assert-FcNativeUniqueLabels([object[]] $Values, [string] $Pattern) {
         if ($value -isnot [string] -or $value -cnotmatch $Pattern -or -not $seen.Add($value)) {
             throw $script:FcNativeContributors.Invalid
         }
+    }
+}
+
+function Assert-FcNativeUnitRunStatus([object] $Status, [object] $Inventory, [string] $SourceRevision,
+    [string] $SourceManifestSha256) {
+    Assert-FcNativeContributorExactKeys $Status @('schemaVersion','sourceRevision','sourceManifestSha256','runs')
+    if (($Status.schemaVersion -isnot [int] -and $Status.schemaVersion -isnot [long]) -or $Status.schemaVersion -ne 1 -or
+        $Status.sourceRevision -isnot [string] -or $Status.sourceRevision -cne $SourceRevision -or
+        $Status.sourceManifestSha256 -isnot [string] -or $Status.sourceManifestSha256 -cne $SourceManifestSha256 -or
+        $Status.runs -isnot [array] -or
+        $Status.runs.Count -ne 2 * $script:FcNativeContributors.UnitGroupCount + 2) {
+        throw $script:FcNativeContributors.Invalid
+    }
+    $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    $expected.Add('unit-census', [ordered]@{ suite = 'unit'; filter = ''; coverageEnabled = $false })
+    $expected.Add('unit-scalar-census', [ordered]@{ suite = 'unit-scalar'; filter = ''; coverageEnabled = $false })
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+        for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
+            $id = $prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
+                [Globalization.CultureInfo]::InvariantCulture)
+            $suiteName = if ($prefix -ceq $script:FcNativeContributors.UnitGroupPrefix) { 'unit' } else { 'unit-scalar' }
+            $expected.Add($id, [ordered]@{ suite = $suiteName
+                filter = [string] $Inventory.coverageGroups[$index - 1].selector; coverageEnabled = $true })
+        }
+    }
+    $observed = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    foreach ($run in $Status.runs) {
+        Assert-FcNativeContributorExactKeys $run @('id','suite','filter','coverageEnabled','exitCode','resultsDirectory')
+        if ($run.id -isnot [string] -or -not $expected.ContainsKey($run.id) -or $observed.ContainsKey($run.id) -or
+            $run.suite -isnot [string] -or $run.suite -cne $expected[$run.id].suite -or
+            $run.filter -isnot [string] -or $run.filter -cne $expected[$run.id].filter -or
+            $run.coverageEnabled -isnot [bool] -or $run.coverageEnabled -ne $expected[$run.id].coverageEnabled -or
+            ($run.exitCode -isnot [int] -and $run.exitCode -isnot [long]) -or $run.exitCode -ne 0 -or
+            $run.resultsDirectory -isnot [string] -or $run.resultsDirectory -cne $run.id) {
+            throw $script:FcNativeContributors.Invalid
+        }
+        $observed.Add([string] $run.id, $run)
+    }
+    if ($observed.Count -ne $expected.Count) { throw $script:FcNativeContributors.Invalid }
+    $observed
+}
+
+function Assert-FcNativeUnitContributorSubset([object] $Inventory, [object] $Contributors) {
+    $cases = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    foreach ($case in $Inventory.functionalCases) {
+        $cases.Add((Get-FcNativeTrxKey $case.className $case.methodName $case.instanceName), $case)
+    }
+    foreach ($entry in $Contributors['unit']) {
+        $identity = Get-FcNativeTrxKey $entry.className $entry.methodName $entry.instanceName
+        if (-not $cases.ContainsKey($identity)) { throw $script:FcNativeContributors.Invalid }
+        $case = $cases[$identity]
+        foreach ($label in $entry.requirements) { if ($label -cnotin $case.requirements) { throw $script:FcNativeContributors.Invalid } }
+        foreach ($label in $entry.acceptance) { if ($label -cnotin $case.acceptance) { throw $script:FcNativeContributors.Invalid } }
     }
 }

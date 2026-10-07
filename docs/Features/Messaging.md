@@ -226,3 +226,6 @@ The exact proposed native inventory is nine. Current normal/scalar execution,
 seeded process-crash criteria and real RF3 SDK/MCP qualification remain required;
 source review is not execution evidence. Original historical passing cases and
 retained global failures remain separate from this proposal.
+
+
+TASK-EVENT-APPEND-SEEDED-CRASH-001 preserves REQ-MSG-005/AC-MSG-005 and original KL091 through the exact seven native during-append process cuts and original child/readers/store-lock ownership frozen in [EventStreams](EventStreams.md#task-event-append-seeded-crash-001) and ADR002. The new complete recovered doc/event/head/dedup/queue/outbox/receipt and same-ID/healthy-follow-up assertions use real ZoneTree and current serialization. No runtime qualification, timeout change, multi-lane or power-loss claim follows from source. Existing required Linux/RF3/coverage gates remain unchanged.

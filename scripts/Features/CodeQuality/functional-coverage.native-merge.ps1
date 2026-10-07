@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][ValidateSet('Product','ToolingProof')][string] $Mode,
+    [Parameter(Mandatory = $true)][ValidateSet('Product','ProductAdmission','ToolingProof')][string] $Mode,
     [Parameter(Mandatory = $true)][string] $Repository,
     [Parameter(Mandatory = $true)][string] $EvidenceRoot,
     [string] $DescriptorPath,
@@ -30,6 +30,8 @@ param(
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.inputs.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.test-images.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.contributors.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.unit-inventory.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.unit-selectors.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.trx.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.functional-report.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.native-merge.files.ps1')
@@ -49,7 +51,7 @@ try {
         Invoke-FcNativeToolingProof | ConvertTo-Json -Compress -Depth 8 | Write-Output
         exit 0
     }
-    if ($Mode -cne 'Product') { throw 'Tooling-proof mode is supplied by the TUnit operation helper only.' }
+    if ($Mode -cnotin @('Product','ProductAdmission')) { throw 'Tooling-proof mode is supplied by the TUnit operation helper only.' }
     if (-not [IO.Path]::IsPathFullyQualified($Repository) -or -not [IO.Path]::IsPathFullyQualified($EvidenceRoot) -or
         -not [IO.Path]::IsPathFullyQualified($DescriptorPath) -or [string]::IsNullOrWhiteSpace($NativeOptionsJson)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
     $Repository = [IO.Path]::GetFullPath($Repository)
@@ -59,7 +61,13 @@ try {
     Assert-FcNativeNoReparsePath $EvidenceRoot
     Assert-FcNativeNoReparsePath $ToolPackageRoot
     $expectedBounds = ConvertFrom-Json -InputObject $NativeOptionsJson -AsHashtable -Depth 4
-    $plan = Read-FcNativeProductPlan $EvidenceRoot $DescriptorPath $expectedBounds
+    $plan = Read-FcNativeProductPlan $EvidenceRoot $Repository $DescriptorPath $expectedBounds
+    if ($Mode -ceq 'ProductAdmission') {
+        [ordered]@{ admitted = $true; invocationId = $plan.descriptor.invocationId
+            sourceRevision = $plan.manifest.sourceRevision; inputCount = $plan.inputs.Count
+            suiteRunCount = $plan.descriptor.suiteRuns.Count } | ConvertTo-Json -Compress -Depth 4 | Write-Output
+        exit 0
+    }
     Invoke-FcNativeMergePlan $plan | ConvertTo-Json -Compress -Depth 8 | Write-Output
 }
 catch [System.Exception] {

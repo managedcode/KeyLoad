@@ -17,121 +17,245 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage VIII full local normal2876/2876 and scalar2876/2876 plus recovery236/236 pass on their original R327 compiled cohort; final R339 Release and R343 format pass after four using-order corrections and a test-only epoch2 authorization repair. Final current R344 Aspire-owned Docker RF3 eight public .NET/official MCP join/schema/auth/budget/cancellation/read-cut operations pass8/8, with unchanged4217source and896image inputs. Original failed and superseded native outcomes remain retained; complete delivered Linux/RF3, six-silo and sixteen-module functional coverage remain open.",
+    "verificationStage": "StageIX local Release/format and final recovery243/243 pass; actual production normal/scalar full discovery and all five functional selections pass. Prior517f4b original Linux normal/scalar2876each,recovery236,analyzers388,sourceownership10 pass; RF3176/180 preserves four failures. Product coverage remains unmeasured; complete current-source Linux and fullRF3 gates remain required.",
     "remaining": [
-      "Complete exact-current-source Linux native unit/scalar/recovery and full RF3 public SDK/MCP qualification with original same-job compiled-image identity",
-      "Run actual six-silo one-membership regression after native silo/authority health route correction; qualify graph leader-loss canonical receipt reconciliation and remaining RF3 failure cohorts",
-      "Join and execute reviewed source-bound complete functional operation inventory and actual sixteen-module coverage; load/comparison and ordinary shape controls remain excluded"
+      "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
+      "Diagnose SCAT mismatch and C1 guard cancellations; execute narrow C1 unknown receipt recovery and later membership/startup owner fixes",
+      "Validate whole-operation coverage selection against native discovery in both modes, then complete same-job sixteen-module collection/admission/merge; load/comparison excluded"
     ],
     "latestOriginalLinux": {
-      "sourceCommit": "4c48909fc244f8a1399ec45b11e2ef7f89145602",
-      "runId": 37590715245,
+      "sourceCommit": "517f4b731a9a9894b78cfc3fe05bade018ab7389",
+      "runId": 37643564885,
       "runAttempt": 1,
       "conclusion": "failure",
-      "verifyJobId": 112691308536,
-      "rf3JobId": 112691267500,
-      "unitPassed": 2771,
-      "unitTotal": 2771,
-      "scalarPassed": 2771,
-      "scalarTotal": 2771,
+      "verifyJobId": 112868549362,
+      "rf3JobId": 112868390191,
+      "analyzerJobId": 112868390483,
+      "unitPassed": 2876,
+      "unitTotal": 2876,
+      "scalarPassed": 2876,
+      "scalarTotal": 2876,
       "recoveryPassed": 236,
       "recoveryTotal": 236,
-      "rf3Passed": 151,
-      "rf3Total": 158,
-      "rf3Failed": 7,
-      "failedOutsideRf3": 0,
+      "analyzerPassed": 388,
+      "analyzerTotal": 388,
+      "nativeSourceOwnershipPassed": 10,
+      "nativeSourceOwnershipTotal": 10,
+      "rf3Passed": 176,
+      "rf3Total": 180,
+      "rf3Failed": 4,
       "skipped": 0,
-      "originalReportHashes": {
-        "normal": {
-          "tunitSha256": "ea5d8d9947c2dfc9e2c139e9807efac63608ac6f386943774ec4eccbc83ba231",
-          "trxSha256": "44df0b41780cb1276fd7369b12b381c5c604b201cfcdb716592cd4d0d8fa4c13"
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37643564885",
+      "archives": [
+        {
+          "artifactId": 11495254306,
+          "archive": "docker-rf3-qualification-original.zip",
+          "sha256": "15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7",
+          "expectedDigest": "sha256:15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7"
         },
-        "scalar": {
-          "tunitSha256": "a44a6bc9d2b1958bd7fa9d86ded0e393669ed9ee88b05af9d61382b50d63b071",
-          "trxSha256": "c0f71b1fdbfd9b96bfd55bd84163a9df34abb7d454a1f302c5a608e63175fc8f"
+        {
+          "artifactId": 11495041607,
+          "archive": "test-results-original.zip",
+          "sha256": "3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3",
+          "expectedDigest": "sha256:3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3"
         },
-        "recovery": {
-          "tunitSha256": "70707359d0518feb286be418974d0a75eb22c4978de8a0f27513d2d93b72565b",
-          "trxSha256": "686757d3f4d41e406004a4e1283c117a4faec7254fb025df4712fff8bbcb5e7c"
+        {
+          "artifactId": 11495998008,
+          "archive": "docker-rf3-image-evidence-original.zip",
+          "sha256": "ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366",
+          "expectedDigest": "sha256:ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366"
         },
-        "rf3": {
-          "tunitSha256": "b118da21d2b2b7feebffa49fb7176c707fb7a6811881b5245d9f5c7387ed98e7",
-          "trxSha256": "42766f1e836f864edeae5f0870733b90bcaa6696450d320891e4492a38a08cf5"
+        {
+          "artifactId": 11495524017,
+          "archive": "code-quality-docker-rf3-original.zip",
+          "sha256": "04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088",
+          "expectedDigest": "sha256:04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088"
         }
-      },
+      ],
+      "originalReportHashes": [
+        {
+          "path": "test-results/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+          "sha256": "382be68b51bdcc1722acfa898ae88f206a17cb039d3bcfae7405efd7e76bdfe2",
+          "counters": {
+            "total": "388",
+            "executed": "388",
+            "passed": "388",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "be2c6da081f048bb5eba49a6f1e47f98aee31a4b5ef29c1298c0401343503fcc",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+          "sha256": "735dc408dd6776ae0c6cb7f4af3572315464b150e6c79d04a144acdd1c6c671e",
+          "counters": {
+            "total": "236",
+            "executed": "236",
+            "passed": "236",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "eb078880e71fdb2a82d7fcb72841fde369d2136ee10b6330285b1ee8a51e3225",
+          "counters": {
+            "total": "10",
+            "executed": "10",
+            "passed": "10",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "7627476679a1721aba56974f721f793017639ad7c484eaac1587a7e07ae9bcf3",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "docker-rf3-qualification/TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
+          "sha256": "24f8a60279e76098b7a1c99d66973dc656b8c08b30e0813de1e577acb895d1bf",
+          "counters": {
+            "total": "180",
+            "executed": "180",
+            "passed": "176",
+            "failed": "4",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        }
+      ],
       "rf3Failures": [
         {
-          "methodName": "AcSeries013Through016PartialPurgeReplaysHidesAndSurvivesFollowerRestart",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3RecoveryTests.cs",
-          "exceptionType": "System.OperationCanceledException",
-          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
-        },
-        {
-          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/TwoRf3MembershipProfileTests.cs",
-          "exceptionType": "System.AggregateException",
-          "message": "One or more errors occurred. (A task was canceled.) (Offline filesystem operation failed.)"
-        },
-        {
-          "methodName": "AcDue003NoQuorumDefersRecurringOccurrenceUntilTwoVotersReturn",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/DueNoQuorumRf3Tests.cs",
-          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
-          "message": "A task was canceled."
-        },
-        {
-          "methodName": "AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/TimeSeriesRf3ReplicaRestartTests.cs",
-          "exceptionType": "System.OperationCanceledException",
-          "message": "Resource 'node1' failed to become healthy before the operation was cancelled.\n- Current State: Starting\n- Creation Time: 10/07/2026 08:57:55\n- Current Health: (null)\n- Health Reports:\n  - node1_http_/health/ready_200_check: Unknown"
-        },
-        {
-          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs",
-          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
-          "message": "A task was canceled."
-        },
-        {
           "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PhysicalShardCatalogRf3MismatchTests.cs",
-          "exceptionType": "System.Threading.Tasks.TaskCanceledException",
-          "message": "A task was canceled."
+          "error": "TaskCanceledException: A task was canceled.",
+          "duration": "00:02:13.4700508"
         },
         {
           "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
-          "sourceRelativePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3FollowerRestartTests.cs",
-          "exceptionType": "System.Net.Http.HttpRequestException",
-          "message": "Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The Orleans request could not complete.\",\"errorCode\":\"OwnershipLost\"}"
+          "error": "AssertionException: Expected to be true, because The canonical SDK outcome reported UnknownWriteOutcome.\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue().Because(\"The canonical SDK outcome reported UnknownWriteOutcome.\")",
+          "duration": "00:00:46.3686495"
+        },
+        {
+          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+          "error": "TaskCanceledException: A task was canceled.",
+          "duration": "00:12:13.4522501"
+        },
+        {
+          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+          "error": "HttpRequestException: Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The physical shard catalog is not ready for public admission.\",\"errorCode\":\"OwnershipLost\"}",
+          "duration": "00:00:56.1362873"
         }
       ],
-      "sameJobVerifySourceImageIdentityStepPassed": true,
-      "crossJobBinaryIdentityInferred": false,
-      "sourceImageBoundary": "Verify and RF3 jobs retain separate compiled identities; KeyLoad.Orleans DLL/MVID/PDB and one generated LoggerMessage document differ. The shared source SHA does not establish a shared binary cohort.",
+      "originalJobLogHashes": {
+        "verify-job-completed-original.log": "fbcd17231027cf347fb2e80cda417ddbe8dd467108541ad9b02bf62ceb7ac329",
+        "rf3-job-completed-original.log": "2e29ab4a80a5a51b35a3d5eaaced7d678b89d5f289eb294f2c086f1c27dd2321"
+      },
       "coverageCollected": false,
       "productCoveragePercent": null,
-      "expectedIndependentSourceCensusAvailable": false,
-      "receiptSha256": "8fe48a1f71a7fe003df475630ce3323f78971281cca542e8744456cfc2520f60",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37590715245",
-      "qualification": "Authenticated original Stage VI Linux TUnit/TRX reports agree. Full build, formatter, analyzers, normal/scalar/recovery pass; RF3 has seven failed operations. Coverage collection, descriptor and merge skipped. Q2 additions are later source and receive no qualification from this run."
+      "qualifiesLaterSource": false,
+      "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "run": "R339",
-      "compileInputs": 4216,
+      "run": "R363",
+      "compileInputs": 4231,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
       "nativeExitCode": 0,
-      "elapsedSeconds": 139.324,
-      "logSha256": "3f197e4d8a9a6c8f61db455e71d209d2a76a491a3b35ebbf91392dac102655e5",
+      "elapsedSeconds": 251.14,
+      "logSha256": "3afbfaa301f25bcfe76c72c8de61099511e4317ee2cefa195cd31a12202da8f0",
       "passed": true,
-      "qualification": "Full native local Release after four import-order corrections and persisted policy epoch2 fixture repair; delivered exact-source Linux/full RF3 qualification remains open."
+      "qualification": "Complete final native local Release with strict analyzers after StageIX ownership/whitespace fixes; delivered-source fullLinux/RF3/product coverage remain required."
     },
     "currentFormatter": {
-      "run": "R343",
-      "compileInputs": 4216,
-      "inputDrift": 0,
+      "run": "R364",
       "nativeExitCode": 0,
-      "elapsedSeconds": 227.378,
+      "elapsedSeconds": 220.864,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputCount": 4231,
+      "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
     "latestVerifiedNativeLinux": {
@@ -2182,6 +2306,538 @@
       ],
       "coverageCollected": false,
       "qualifiesLaterSource": false
+    },
+    "stageVIIIOriginalLinux": {
+      "sourceCommit": "517f4b731a9a9894b78cfc3fe05bade018ab7389",
+      "runId": 37643564885,
+      "runAttempt": 1,
+      "conclusion": "failure",
+      "verifyJobId": 112868549362,
+      "rf3JobId": 112868390191,
+      "analyzerJobId": 112868390483,
+      "unitPassed": 2876,
+      "unitTotal": 2876,
+      "scalarPassed": 2876,
+      "scalarTotal": 2876,
+      "recoveryPassed": 236,
+      "recoveryTotal": 236,
+      "analyzerPassed": 388,
+      "analyzerTotal": 388,
+      "nativeSourceOwnershipPassed": 10,
+      "nativeSourceOwnershipTotal": 10,
+      "rf3Passed": 176,
+      "rf3Total": 180,
+      "rf3Failed": 4,
+      "skipped": 0,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37643564885",
+      "archives": [
+        {
+          "artifactId": 11495254306,
+          "archive": "docker-rf3-qualification-original.zip",
+          "sha256": "15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7",
+          "expectedDigest": "sha256:15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7"
+        },
+        {
+          "artifactId": 11495041607,
+          "archive": "test-results-original.zip",
+          "sha256": "3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3",
+          "expectedDigest": "sha256:3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3"
+        },
+        {
+          "artifactId": 11495998008,
+          "archive": "docker-rf3-image-evidence-original.zip",
+          "sha256": "ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366",
+          "expectedDigest": "sha256:ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366"
+        },
+        {
+          "artifactId": 11495524017,
+          "archive": "code-quality-docker-rf3-original.zip",
+          "sha256": "04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088",
+          "expectedDigest": "sha256:04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088"
+        }
+      ],
+      "originalReportHashes": [
+        {
+          "path": "test-results/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+          "sha256": "382be68b51bdcc1722acfa898ae88f206a17cb039d3bcfae7405efd7e76bdfe2",
+          "counters": {
+            "total": "388",
+            "executed": "388",
+            "passed": "388",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "be2c6da081f048bb5eba49a6f1e47f98aee31a4b5ef29c1298c0401343503fcc",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+          "sha256": "735dc408dd6776ae0c6cb7f4af3572315464b150e6c79d04a144acdd1c6c671e",
+          "counters": {
+            "total": "236",
+            "executed": "236",
+            "passed": "236",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "eb078880e71fdb2a82d7fcb72841fde369d2136ee10b6330285b1ee8a51e3225",
+          "counters": {
+            "total": "10",
+            "executed": "10",
+            "passed": "10",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "test-results/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "7627476679a1721aba56974f721f793017639ad7c484eaac1587a7e07ae9bcf3",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "docker-rf3-qualification/TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
+          "sha256": "24f8a60279e76098b7a1c99d66973dc656b8c08b30e0813de1e577acb895d1bf",
+          "counters": {
+            "total": "180",
+            "executed": "180",
+            "passed": "176",
+            "failed": "4",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        }
+      ],
+      "rf3Failures": [
+        {
+          "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+          "error": "TaskCanceledException: A task was canceled.",
+          "duration": "00:02:13.4700508"
+        },
+        {
+          "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+          "error": "AssertionException: Expected to be true, because The canonical SDK outcome reported UnknownWriteOutcome.\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue().Because(\"The canonical SDK outcome reported UnknownWriteOutcome.\")",
+          "duration": "00:00:46.3686495"
+        },
+        {
+          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+          "error": "TaskCanceledException: A task was canceled.",
+          "duration": "00:12:13.4522501"
+        },
+        {
+          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
+          "error": "HttpRequestException: Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The physical shard catalog is not ready for public admission.\",\"errorCode\":\"OwnershipLost\"}",
+          "duration": "00:00:56.1362873"
+        }
+      ],
+      "originalJobLogHashes": {
+        "verify-job-completed-original.log": "fbcd17231027cf347fb2e80cda417ddbe8dd467108541ad9b02bf62ceb7ac329",
+        "rf3-job-completed-original.log": "2e29ab4a80a5a51b35a3d5eaaced7d678b89d5f289eb294f2c086f1c27dd2321"
+      },
+      "coverageCollected": false,
+      "productCoveragePercent": null,
+      "qualifiesLaterSource": false,
+      "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
+    },
+    "stageIXOriginalDevelopment": {
+      "sourceParentCommit": "517f4b731a9a9894b78cfc3fe05bade018ab7389",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "canonicalBuildRun": "R363",
+      "canonicalFormatRun": "R364",
+      "originalNativeDevelopment": {
+        "R357": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 20.774,
+          "logSha256": "ca9af77eebd34cbc97db40d07f2c84f84d94c48793147434aa3b413be952ce9c",
+          "sourceInputs": 4232,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "008545579373e1ceec3191ba316c5512513dfed7f35be462463d5603063bb00d",
+              "counters": {
+                "total": "7",
+                "executed": "7",
+                "passed": "7",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "finalWhitespaceCohort": false,
+          "linuxQualified": false
+        },
+        "R358": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 143.62,
+          "logSha256": "879d21b714307f9ba54940271859ff0ba5a046fd6b6907c77d17931880d2731d",
+          "sourceInputs": 4232,
+          "assemblyInputs": 912,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "9c1577df7506e25c7931f43878c5ebf00830fb4a21ffdd87bcd690c28b0ab94d",
+              "counters": {
+                "total": "1",
+                "executed": "1",
+                "passed": "1",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "finalWhitespaceCohort": false,
+          "linuxQualified": false
+        },
+        "R359": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 85.442,
+          "logSha256": "73338187dcf21c0c7f1c5a835aae5ce415760af93663a884626ce3b3bb7b990d",
+          "sourceInputs": 4232,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "4c36b5544e93361011081799c3f0fc80b8d198600bf5c34f53470c9523d2783f",
+              "counters": {
+                "total": "1",
+                "executed": "1",
+                "passed": "1",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "finalWhitespaceCohort": false,
+          "linuxQualified": false
+        },
+        "R368": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 259.667,
+          "logSha256": "bc4070b52599baad4412c6f7dc99e9ac273a70eb84b0b4c27aff529764093034",
+          "sourceInputs": 4232,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "12aead8231b7fa972499abe8cfcf3bf87ac0b797e76d43a28d9170f4440063c7",
+              "counters": {
+                "total": "243",
+                "executed": "243",
+                "passed": "243",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "finalWhitespaceCohort": true,
+          "linuxQualified": false
+        }
+      },
+      "nativeDiscovery": {
+        "run": "R365",
+        "nativeCaseCount": 2876,
+        "originalJsonSha256": "30e571d5a995e21b9608115ae6c2c661a8a1d277a66ae392e982fe0c713708d1",
+        "sourceInputs": 4232,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "Actual unfiltered native discovery only; no operation PASS or numeric coverage implied."
+      },
+      "nativeImageObservation": {
+        "run": "R366",
+        "observationSha256": "44d7440be8605017be52ddc4b79deb24e47a768d7ac82f3c10990df5934d5540",
+        "nativeImage": {
+          "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+          "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+          "dllSha256": "dc83bc927bbed7e31b23bfb99c61a90a2091138bdf29bdb7d443e74a84ecd056",
+          "pdbSha256": "02f71d3b1ae632472b6a5989ede3a6387e58ec90788ca4866198583db31377fa",
+          "moduleName": "KeyLoad.UnitTests.dll",
+          "compiledIdentityToolSha256": "baf2660772a551118067e33a0a7c62b8477722518561f27d5da2380be9a2d6bb",
+          "originalCompilationRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "inspectedSourceRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "mvid": "a37d15a4-8979-43da-8101-9f42d02571b0",
+          "pdbGuid": "2f2d2ee7-3680-40d3-a830-d52a52d74ed7",
+          "pdbStamp": 3068432482,
+          "compiledSourceBindingComplete": true,
+          "qualification": "static native identity inspection only; no test, coverage or build qualification"
+        },
+        "declaredSourceCount": 1088,
+        "qualification": "Native DLL MVID, matching PDB identity and declared compile-source inspection only; no numeric coverage or Linux operation qualification.",
+        "sourceDeclarationScope": "Every native declared source and central hash matches the independent original R365 snapshot and current bytes; declaration count is native observed, not an independently reconstructed MSBuild item census.",
+        "nativeDeclaredSourceCount": 1088
+      },
+      "originalCensusFailures": [
+        {
+          "entry": "standalone buffer initialization",
+          "nativeExitCode": 1,
+          "originalLogSha256": "9112a6e8e3234704f34d858abef31ae37afbc62629312a2eba985147befbaf3b",
+          "correction": "Same frozen65536 shared reader buffer initialized; strict bounds preserved"
+        },
+        {
+          "entry": "R367 contributor traceability validation",
+          "nativeExitCode": 1,
+          "originalLogSha256": "65bdb746f2d57efd9d150e7b266b5d28db713587d77329e883386c3815aaeb8d",
+          "correction": "Individual owning REQ/AC mapping and parser-only ordinary-control classification in progress; strict validation preserved"
+        }
+      ],
+      "qualification": "Final native local Release/format and243/243 real process-recovery passed; exact complete production normal/scalar native discovery and five coverage selections passed with every original owner joined and no source/image/script drift. ToolingProof1/1 and focused RF3 cohorts are separate earlier development evidence. Sixteen-module numeric coverage and delivered-source Linux/fullRF3/endurance gates remain required.",
+      "originalWorkflowDiscoveryFailure": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 6.447,
+        "logSha256": "ce6fce9b53f68f5be182b95d452a60f4e1b22969de7ea16f9859a987c3201456",
+        "sourceImageScriptDrift": [],
+        "cause": "Actual exit awaiter emitted VoidTaskResult into the success pipeline before the owner dictionary; corrected by discarding only that observed value."
+      },
+      "strictNativeCensusValidation": {
+        "nativeExitCode": 0,
+        "originalLogSha256": "875a07f0826699f4c86f8157bb297e4f5b8835078f345f78a5c67be782ca4cef",
+        "actualNativeUniverse": 2876,
+        "functionalOperationCases": 2484,
+        "requiredNonContributorCases": 392,
+        "nativeRangeOnlyCorrection": "NativeCoverageMergeTests actual method line7..24; no other identity/source/classification changes during range reconciliation."
+      },
+      "workflowNativeDiscovery": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 101.698,
+        "logSha256": "4222ec8795b0d8012f942f6a27378b5232b60b06cd444758afc3508fd5842737",
+        "guardedInputs": 4681,
+        "sourceImageScriptDrift": [],
+        "qualification": "Actual full plus five filtered native discoveries in both modes only; no executed operation pass, numeric coverage or Linux qualification.",
+        "selections": [
+          {
+            "selection": "unit-discovery",
+            "actualNativeCases": 2876,
+            "originalJsonSha256": "30e571d5a995e21b9608115ae6c2c661a8a1d277a66ae392e982fe0c713708d1",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-discovery-unit-functional-01",
+            "actualNativeCases": 490,
+            "originalJsonSha256": "2a31c641fce2dd86a3e4d8ca802dfaabf42b3db8a8a1f8e86d4da9ecbf0ba1a8",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-discovery-unit-functional-02",
+            "actualNativeCases": 522,
+            "originalJsonSha256": "8a948027b583e61d3e2b7c8deeadcceb7ab2987231c1fa5babf088f4b9682801",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-discovery-unit-functional-03",
+            "actualNativeCases": 416,
+            "originalJsonSha256": "6dd3ba24f85c505a10bce25252933d504c1de1b88cb74edfa45e43e29bbe220d",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-discovery-unit-functional-04",
+            "actualNativeCases": 509,
+            "originalJsonSha256": "677db5dc936dd25f1f580dbfc5f03f6a4e1f8ac8ef6559634a12a642b4ebb32a",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-discovery-unit-functional-05",
+            "actualNativeCases": 547,
+            "originalJsonSha256": "f371062588464853f4069e768d8be1e39c8abe1d7188694e41ae4671d486f846",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery",
+            "actualNativeCases": 2876,
+            "originalJsonSha256": "30e571d5a995e21b9608115ae6c2c661a8a1d277a66ae392e982fe0c713708d1",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery-unit-functional-01",
+            "actualNativeCases": 490,
+            "originalJsonSha256": "2a31c641fce2dd86a3e4d8ca802dfaabf42b3db8a8a1f8e86d4da9ecbf0ba1a8",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery-unit-functional-02",
+            "actualNativeCases": 522,
+            "originalJsonSha256": "8a948027b583e61d3e2b7c8deeadcceb7ab2987231c1fa5babf088f4b9682801",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery-unit-functional-03",
+            "actualNativeCases": 416,
+            "originalJsonSha256": "6dd3ba24f85c505a10bce25252933d504c1de1b88cb74edfa45e43e29bbe220d",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery-unit-functional-04",
+            "actualNativeCases": 509,
+            "originalJsonSha256": "677db5dc936dd25f1f580dbfc5f03f6a4e1f8ac8ef6559634a12a642b4ebb32a",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          },
+          {
+            "selection": "unit-scalar-discovery-unit-functional-05",
+            "actualNativeCases": 547,
+            "originalJsonSha256": "f371062588464853f4069e768d8be1e39c8abe1d7188694e41ae4671d486f846",
+            "exitCode": 0,
+            "exitAndReadersJoined": true,
+            "disposed": true
+          }
+        ]
+      }
     }
   },
   "TIME-PROVIDER-001": {

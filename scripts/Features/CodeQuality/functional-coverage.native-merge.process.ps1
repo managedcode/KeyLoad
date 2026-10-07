@@ -115,7 +115,7 @@ function Observe-FcProcessTask([Diagnostics.Process] $Process, [Collections.IDic
     [Threading.Tasks.Task] $Completed, [Text.StringBuilder] $Output, [Text.StringBuilder] $ErrorOutput,
     [long] $MaximumCharacters, [Collections.Generic.List[Exception]] $Failures) {
     if (-not $State.exitJoined -and [object]::ReferenceEquals($Completed,$State.exitTask)) {
-        try { $State.exitTask.GetAwaiter().GetResult(); $State.exitCode = $Process.ExitCode; $State.exitCodeObserved = $true }
+        try { [void] $State.exitTask.GetAwaiter().GetResult(); $State.exitCode = $Process.ExitCode; $State.exitCodeObserved = $true }
         catch [System.Exception] {
             Add-FcProcessFailure $_.Exception $Failures
             try { $State.exitCode = $Process.ExitCode; $State.exitCodeObserved = $true }

@@ -245,6 +245,7 @@ jobs:
       - name: Build the complete native coverage cohort
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release
       - name: Prepare original source and test-image receipts
+        id: coverage-source
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
@@ -255,49 +256,39 @@ jobs:
           "KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST=$evidence/functional-coverage.production-source-manifest.json" | Add-Content $env:GITHUB_ENV
       - name: Test three-node database with .NET and MCP clients
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
-      - name: Collect four native functional coverage cohorts
-        id: functional-coverage
+      - name: Reconcile original native full and five-group discovery in both modes
+        id: native-census
+        if: ${{ !cancelled() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
         run: |
-          $common = @(
-            'scripts/Features/TestInfrastructure/run-tests.mjs',
-            '--KeyLoadTests:ReportTrx=true',
-            '--KeyLoadTests:CoverageSettings=scripts/Features/CodeQuality/functional-coverage.production.settings.xml',
-            '--KeyLoadTests:CoverageFormat=coverage')
-          & node @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/(PartitionQueryAuthorizationTests|PartitionQueryCancellationTests|PartitionQueryContractTests|PartitionQueryGrantTests|PartitionQueryMcpContractTests|PartitionQueryMergeTests|PartitionQueryPublicAuthorizationTests|PartitionQueryPublicBudgetTests|PartitionQueryPublicContractTests|PartitionQueryPublicMergeTests|SqlInnerJoinBudgetTests|SqlInnerJoinCancellationTests|SqlInnerJoinDeclaredProjectionTests|SqlInnerJoinExecutionTests|SqlInnerJoinLifecycleTests|SqlInnerJoinOrdinalOrderTests|SqlInnerJoinRowAuthorizationTests|DocumentIndexCommittedScanTests)/*' `
-            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit' `
-            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit/coverage.coverage'
-          $unitExitCode = $LASTEXITCODE
-          "unit_exit_code=$unitExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & node @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/(PartitionQueryAuthorizationTests|PartitionQueryCancellationTests|PartitionQueryContractTests|PartitionQueryGrantTests|PartitionQueryMcpContractTests|PartitionQueryMergeTests|PartitionQueryPublicAuthorizationTests|PartitionQueryPublicBudgetTests|PartitionQueryPublicContractTests|PartitionQueryPublicMergeTests|SqlInnerJoinBudgetTests|SqlInnerJoinCancellationTests|SqlInnerJoinDeclaredProjectionTests|SqlInnerJoinExecutionTests|SqlInnerJoinLifecycleTests|SqlInnerJoinOrdinalOrderTests|SqlInnerJoinRowAuthorizationTests|DocumentIndexCommittedScanTests)/*' `
-            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit-scalar' `
-            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit-scalar/coverage.coverage'
-          $scalarExitCode = $LASTEXITCODE
-          "scalar_exit_code=$scalarExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & node @common '--KeyLoadTests:Suite=recovery' `
-            '--KeyLoadTests:Filter=/*/*/CommandIdempotencyProcessRecoveryTests/*' `
-            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/recovery' `
-            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/recovery/coverage.coverage'
-          $recoveryExitCode = $LASTEXITCODE
-          "recovery_exit_code=$recoveryExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & node @common '--KeyLoadTests:Suite=rf3' `
-            '--KeyLoadTests:Filter=/*/*/(PartitionQueryPublicRf3Tests|McpDocumentCrudParityTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*' `
-            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3' `
-            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/coverage.coverage' `
-            '--KeyLoadTests:NativeCoverage:ServerMode=rf3-original-node-v1' `
-            "--KeyLoadTests:NativeCoverage:SourceManifest=$env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST"
-          $rf3ExitCode = $LASTEXITCODE
-          "rf3_exit_code=$rf3ExitCode" | Add-Content $env:GITHUB_OUTPUT
-          if ($unitExitCode -ne 0 -or $scalarExitCode -ne 0 -or $recoveryExitCode -ne 0 -or $rf3ExitCode -ne 0) {
-            exit 1
-          }
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.workflow-discovery.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Execute full censuses and twelve original covered suite inputs
+        id: functional-coverage
+        if: ${{ !cancelled() && steps.native-census.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.workflow-collect.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3') `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify original coverage source and test-image receipts after all children settle
+        id: coverage-source-after
+        if: ${{ !cancelled() && steps.coverage-source.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode verify -Root $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Assemble product descriptor from original reports
         id: product-descriptor
         if: ${{ success() }}
         shell: pwsh
         env:
-          UNIT_EXIT_CODE: ${{ steps.functional-coverage.outputs.unit_exit_code }}
-          SCALAR_EXIT_CODE: ${{ steps.functional-coverage.outputs.scalar_exit_code }}
           RECOVERY_EXIT_CODE: ${{ steps.functional-coverage.outputs.recovery_exit_code }}
           RF3_EXIT_CODE: ${{ steps.functional-coverage.outputs.rf3_exit_code }}
         run: |
@@ -305,9 +296,50 @@ jobs:
             -Repository $env:GITHUB_WORKSPACE `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST `
             -ResultsRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3') `
-            -UnitExitCode ([int]$env:UNIT_EXIT_CODE) -ScalarExitCode ([int]$env:SCALAR_EXIT_CODE) `
+            -UnitRunStatusPath (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3/functional-coverage.unit-run-status.v1.json') `
             -RecoveryExitCode ([int]$env:RECOVERY_EXIT_CODE) -Rf3ExitCode ([int]$env:RF3_EXIT_CODE)
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exercise original product admission and copied TRX denial with healthy re-admission
+        id: product-admission
+        if: ${{ success() }}
+        env:
+          KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED: 'true'
+          KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH: ${{ github.workspace }}/TestResults/functional-coverage/rf3/functional-coverage.native-product-descriptor.v1.json
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeCoverageMergeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/native-product-admission --KeyLoadTests:ReportTrx=true
+      - name: Verify original product-admission test and closed phase receipt
+        if: ${{ !cancelled() && steps.product-admission.outcome != 'skipped' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-StrictMode -Version Latest
+          $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/native-product-admission'
+          $reports = @(Get-ChildItem -LiteralPath $directory -Filter '*.trx' -File -Recurse)
+          $receipts = @(Get-ChildItem -LiteralPath $directory -Filter 'native-product-admission-phase.v1.json' -File -Recurse)
+          if ($reports.Count -ne 1 -or $receipts.Count -ne 1 -or $receipts[0].Length -le 0 -or $receipts[0].Length -gt 65536) {
+            throw 'Exactly one original TRX and bounded product-admission receipt are required.'
+          }
+          [xml] $trx = Get-Content -LiteralPath $reports[0].FullName -Raw
+          $counts = $trx.TestRun.ResultSummary.Counters
+          if ([int] $counts.total -ne 1 -or [int] $counts.executed -ne 1 -or [int] $counts.passed -ne 1 -or [int] $counts.failed -ne 0) {
+            throw 'The real product-admission whole operation must execute and pass.'
+          }
+          . ./scripts/Features/CodeQuality/functional-coverage.native-merge.inputs.ps1
+          $bytes = [IO.File]::ReadAllBytes($receipts[0].FullName)
+          $document = [Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($bytes))
+          try { Assert-FcNativeJsonUnique $document.RootElement }
+          finally { $document.Dispose() }
+          $phase = ConvertFrom-Json ([Text.Encoding]::UTF8.GetString($bytes)) -AsHashtable
+          Assert-FcNativeExactKeys $phase @('schemaVersion','phase','descriptorSha256','healthyAdmissions','rejectedAdmissions','rejectedOutcome')
+          $descriptor = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3/functional-coverage.native-product-descriptor.v1.json'
+          foreach ($name in @('schemaVersion','healthyAdmissions','rejectedAdmissions')) {
+            if ($phase[$name] -isnot [int] -and $phase[$name] -isnot [long]) { throw 'Invalid product phase integer.' }
+          }
+          if ($phase.schemaVersion -ne 1 -or $phase.phase -cne 'product-admission' -or
+              $phase.descriptorSha256 -cne (Get-FileHash $descriptor -Algorithm SHA256).Hash.ToLowerInvariant() -or
+              $phase.healthyAdmissions -ne 2 -or $phase.rejectedAdmissions -ne 1 -or
+              $phase.rejectedOutcome -cne 'An original native test outcome report does not match the exact contributor inventory.') {
+            throw 'The product-admission phase does not bind the original descriptor and complete flow.'
+          }
       - name: Validate and merge native product coverage
         if: ${{ success() }}
         shell: pwsh

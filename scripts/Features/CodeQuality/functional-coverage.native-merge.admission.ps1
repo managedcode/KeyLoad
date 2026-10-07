@@ -35,7 +35,7 @@ function Assert-FcNativeTool([object] $Tool, [string] $ExpectedRoot, [string] $E
     }
 }
 
-function Read-FcNativeProductPlan([string] $Root, [string] $Descriptor, [object] $ExpectedBounds) {
+function Read-FcNativeProductPlan([string] $Root, [string] $Repository, [string] $Descriptor, [object] $ExpectedBounds) {
     $value = Read-FcNativeDescriptor $Root $Descriptor $ExpectedBounds
     $manifest = Read-FcNativeJsonReference $Root $value.sourceManifest $value.bounds.maximumManifestBytes $value.bounds.maximumPathCharacters
     Assert-FcNativeSourceManifest $Repository $manifest.value
@@ -43,14 +43,75 @@ function Read-FcNativeProductPlan([string] $Root, [string] $Descriptor, [object]
     $images = Read-FcNativeTestImageManifests $Root $Repository $manifest.value $value.bounds
     $contributors = Read-FcNativeContributors $manifest.value $value.bounds ([string[]] $script:FcNativeMergeInput.ModuleRoster)
     Assert-FcNativeProductModuleCompleteness $contributors $manifest.value
-    $suiteRuns = Read-FcNativeSuiteRuns $Root $value $manifest $images $contributors
+    $inventory = Read-FcNativeUnitInventory $Repository $manifest.value $value.bounds $images $contributors
+    $statusReferencePath = [string] $value.unitRunStatus.path
+    if ($statusReferencePath -cne 'functional-coverage.unit-run-status.v1.json') {
+        throw $script:FcNativeMergeInput.InvalidDescriptor
+    }
+    $statusFile = Read-FcNativeJsonReference $Root $value.unitRunStatus $script:FcNativeContributors.UnitRunStatusMaximumBytes $value.bounds.maximumPathCharacters
+    $statusRuns = Assert-FcNativeUnitRunStatus $statusFile.value $inventory.value `
+        $manifest.value.sourceRevision $manifest.file.sha256
+    $census = Read-FcNativeUnitCensus $Root $Repository $value $manifest $images $inventory.value $statusRuns
+    $suiteRuns = Read-FcNativeSuiteRuns $Root $Repository $value $manifest $images $contributors `
+        $inventory.value $census $statusRuns
     $fixtures = Read-FcNativeRf3Fixtures $Root $value $manifest $suiteRuns
     $allInputs = [Collections.Generic.List[object]]::new()
     foreach ($input in $suiteRuns.inputs) { $allInputs.Add($input) }
     foreach ($input in $fixtures.inputs) { $allInputs.Add($input) }
     if ($allInputs.Count -gt $value.bounds.maximumFiles) { throw $script:FcNativeMergeInput.InvalidDescriptor }
     [ordered]@{ descriptor = $value; manifest = $manifest.value; manifestFile = $manifest.file; images = $images
+        unitInventory = $inventory.value; unitCensus = $census
         inputs = $allInputs.ToArray(); evidenceRoot = $Root }
+}
+
+function Read-FcNativeUnitCensus([string] $Root, [string] $Repository, [object] $Value,
+    [object] $Manifest, [object] $Images, [object] $Inventory, [object] $StatusRuns) {
+    Assert-FcNativeContributorExactKeys $Value.unitCensus @('normal','scalar')
+    $normal = Read-FcNativeUnitCensusRun $Root $Repository $Value $Manifest $Images $Inventory `
+        $StatusRuns 'unit' 'unit-census' $Value.unitCensus.normal
+    $scalar = Read-FcNativeUnitCensusRun $Root $Repository $Value $Manifest $Images $Inventory `
+        $StatusRuns 'unit-scalar' 'unit-scalar-census' $Value.unitCensus.scalar
+    if ($normal.runId -ceq $scalar.runId -or $normal.identities.Count -ne $scalar.identities.Count -or
+        ($normal.censusIdentities -join "`n") -cne ($scalar.censusIdentities -join "`n")) {
+        throw $script:FcNativeMergeInput.InvalidDescriptor
+    }
+    [ordered]@{ normal = $normal; scalar = $scalar }
+}
+
+function Read-FcNativeUnitCensusRun([string] $Root, [string] $Repository, [object] $Value,
+    [object] $Manifest, [object] $Images, [object] $Inventory, [object] $StatusRuns,
+    [string] $Suite, [string] $StatusId, [object] $Run) {
+    Assert-FcNativeContributorExactKeys $Run @('statusId','suite','runId','filter','resultsDirectory',
+        'sourceRevision','sourceManifestSha256','testImageManifestSha256','nativeExitCode','coverageEnabled',
+        'functionalReport','trx')
+    $status = $StatusRuns[$StatusId]
+    if ($Run.statusId -cne $StatusId -or $Run.resultsDirectory -cne $status.resultsDirectory -or
+        $Run.filter -cne $status.filter -or $Run.suite -cne $Suite -or $Run.runId -cne $StatusId -or
+        $Run.sourceRevision -cne $Manifest.value.sourceRevision -or $Run.sourceManifestSha256 -cne $Manifest.file.sha256 -or
+        $Run.testImageManifestSha256 -cne $Images[$Suite].sha256 -or
+        ($Run.nativeExitCode -isnot [int] -and $Run.nativeExitCode -isnot [long]) -or $Run.nativeExitCode -ne 0 -or
+        $Run.coverageEnabled -isnot [bool] -or $Run.coverageEnabled -or
+        $status.suite -cne $Suite -or $status.coverageEnabled -ne $false -or $status.exitCode -ne 0 -or
+        $status.filter -cne '' -or $status.resultsDirectory -cne $StatusId) {
+        throw $script:FcNativeMergeInput.InvalidDescriptor
+    }
+    Assert-FcNativeRunEvidenceDirectory $Run $status
+    $expected = @($Inventory.functionalCases) + @($Inventory.requiredNonContributorCases)
+    $functional = Read-FcNativeJsonReference $Root $Run.functionalReport $Value.bounds.maximumReportBytes $Value.bounds.maximumPathCharacters
+    if ($functional.value.Contains('commitSha') -and $functional.value.commitSha -cne $Manifest.value.sourceRevision) {
+        throw $script:FcNativeMergeInput.InvalidEvidence
+    }
+    $identities = @(Read-FcNativeFunctionalCases $functional.value $expected $Suite $Repository -MatchSourceLocations)
+    $trxFile = Read-FcNativeEvidenceFile $Root $Run.trx $Value.bounds.maximumReportBytes $Value.bounds.maximumPathCharacters
+    $trx = Read-FcNativeTrx $trxFile.path $Suite $expected
+    $trxIdentities = @($trx.cases | ForEach-Object { [string] $_.caseIdentity } | Sort-Object)
+    if ($identities.Count -ne $trxIdentities.Count -or ($identities -join "`n") -cne ($trxIdentities -join "`n")) {
+        throw $script:FcNativeMergeInput.InvalidEvidence
+    }
+    $functionalIdentities = @($Inventory.functionalCases | ForEach-Object {
+        Get-FcNativeTrxKey $_.className $_.methodName $_.instanceName
+    } | Sort-Object)
+    [ordered]@{ runId = $Run.runId; identities = $functionalIdentities; censusIdentities = $identities }
 }
 
 function Assert-FcNativeProductModuleCompleteness([object] $Contributors, [object] $Manifest) {
@@ -77,8 +138,9 @@ function Read-FcNativeDescriptor([string] $Root, [string] $Descriptor, [object] 
     try { Assert-FcNativeJsonUnique $json.RootElement }
     finally { $json.Dispose() }
     $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($jsonFile.bytes)) -AsHashtable -Depth 32
-    Assert-FcNativeExactKeys $value @('schemaVersion','invocationId','evidenceRoot','sourceManifest','tool','bounds','suiteRuns','rf3Fixtures','outputDirectory')
-    if ($value.schemaVersion -ne 1 -or $value.invocationId -cnotmatch '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z' -or
+    Assert-FcNativeExactKeys $value @('schemaVersion','invocationId','evidenceRoot','sourceManifest','unitRunStatus','tool','bounds',
+        'unitCensus','suiteRuns','rf3Fixtures','outputDirectory')
+    if (($value.schemaVersion -isnot [int] -and $value.schemaVersion -isnot [long]) -or $value.schemaVersion -ne 3 -or $value.invocationId -cnotmatch '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z' -or
         [IO.Path]::GetFullPath([string] $value.evidenceRoot) -cne [IO.Path]::GetFullPath($Root)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
     Assert-FcNativeBounds $value.bounds $ExpectedBounds
     Assert-FcNativeTool $value.tool $ToolPackageRoot $ToolVersion $value.bounds
@@ -87,44 +149,91 @@ function Read-FcNativeDescriptor([string] $Root, [string] $Descriptor, [object] 
     $value
 }
 
-function Read-FcNativeSuiteRuns([string] $Root, [object] $Value, [object] $Manifest,
-    [object] $Images, [object] $Contributors) {
-    if ($Value.suiteRuns -isnot [array] -or $Value.suiteRuns.Count -ne 4 -or $Value.rf3Fixtures -isnot [array]) {
+function Read-FcNativeSuiteRuns([string] $Root, [string] $Repository, [object] $Value, [object] $Manifest,
+    [object] $Images, [object] $Contributors, [object] $Inventory, [object] $Census, [object] $StatusRuns) {
+    $expectedSuites = [Collections.Generic.List[string]]::new()
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+        for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
+            $expectedSuites.Add($prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
+                [Globalization.CultureInfo]::InvariantCulture))
+        }
+    }
+    $expectedSuites.Add('recovery'); $expectedSuites.Add('rf3')
+    if ($Value.suiteRuns -isnot [array] -or $Value.suiteRuns.Count -ne $expectedSuites.Count -or $Value.rf3Fixtures -isnot [array]) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
     $seenSuites = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $runIds = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $caseIdentities = [Collections.Generic.Dictionary[string, string[]]]::new([StringComparer]::Ordinal)
+    $suiteIdentities = [Collections.Generic.Dictionary[string, string[]]]::new([StringComparer]::Ordinal)
     $coveragePaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $inputs = [Collections.Generic.List[object]]::new()
     foreach ($run in @($Value.suiteRuns | Sort-Object suite)) {
-        $cases = Read-FcNativeSuiteRun $Root $Value $Manifest $Images $Contributors $run $seenSuites $runIds $coveragePaths
+        $cases = Read-FcNativeSuiteRun $Root $Repository $Value $Manifest $Images $Contributors $Inventory $Census `
+            $StatusRuns $run $seenSuites $runIds $coveragePaths
         $caseIdentities.Add([string] $run.runId, $cases.identities)
+        $suiteIdentities.Add([string] $run.suite, $cases.identities)
         $inputs.Add($cases.input)
     }
-    if (-not $seenSuites.SetEquals([string[]] $script:FcNativeContributors.Suites)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
+    if (-not $seenSuites.SetEquals([string[]] $expectedSuites.ToArray())) { throw $script:FcNativeMergeInput.InvalidDescriptor }
+    Assert-FcNativeUnitGroupCensusUnion $suiteIdentities $Census
     [ordered]@{ inputs = $inputs.ToArray(); cases = $caseIdentities; runIds = $runIds }
 }
 
-function Read-FcNativeSuiteRun([string] $Root, [object] $Value, [object] $Manifest,
-    [object] $Images, [object] $Contributors, [object] $Run, [Collections.Generic.HashSet[string]] $SeenSuites,
+function Assert-FcNativeUnitGroupCensusUnion([Collections.Generic.Dictionary[string, string[]]] $SuiteIdentities,
+    [object] $Census) {
+    foreach ($mode in @('normal','scalar')) {
+        $prefix = if ($mode -ceq 'normal') { $script:FcNativeContributors.UnitGroupPrefix } else {
+            $script:FcNativeContributors.ScalarUnitGroupPrefix
+        }
+        $union = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
+            $suite = $prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
+                [Globalization.CultureInfo]::InvariantCulture)
+            foreach ($identity in $SuiteIdentities[$suite]) {
+                if (-not $union.Add($identity)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
+            }
+        }
+        $census = [Collections.Generic.HashSet[string]]::new([string[]] $Census[$mode].identities,
+            [StringComparer]::Ordinal)
+        if (-not $union.SetEquals($census)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
+    }
+}
+
+function Read-FcNativeSuiteRun([string] $Root, [string] $Repository, [object] $Value, [object] $Manifest,
+    [object] $Images, [object] $Contributors, [object] $Inventory, [object] $Census, [object] $StatusRuns,
+    [object] $Run, [Collections.Generic.HashSet[string]] $SeenSuites,
     [Collections.Generic.HashSet[string]] $RunIds, [Collections.Generic.HashSet[string]] $CoveragePaths) {
-    Assert-FcNativeExactKeys $Run @('suite','runId','sourceRevision','sourceManifestSha256',
-        'testImageManifestSha256','nativeExitCode','functionalReport','trx','coverage')
-    if ($Run.suite -cnotin $script:FcNativeContributors.Suites -or -not $SeenSuites.Add([string] $Run.suite) -or
+    $isUnitGroup = [string] $Run.suite -match '\A(unit|unit-scalar)-functional-[0-9]{2}\z'
+    $expectedKeys = if ($isUnitGroup) { @('suite','runId','statusId','filter','coverageEnabled','resultsDirectory',
+        'sourceRevision','sourceManifestSha256','testImageManifestSha256','nativeExitCode','functionalReport','trx','coverage') } else {
+        @('suite','runId','sourceRevision','sourceManifestSha256','testImageManifestSha256','nativeExitCode',
+            'functionalReport','trx','coverage')
+    }
+    Assert-FcNativeExactKeys $Run $expectedKeys
+    $expectedSuite = Get-FcNativeBaseSuite ([string] $Run.suite)
+    $status = if ($isUnitGroup) { $StatusRuns[[string] $Run.suite] } else { $null }
+    if ([string]::IsNullOrWhiteSpace($expectedSuite) -or -not $SeenSuites.Add([string] $Run.suite) -or
         $Run.runId -cnotmatch '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z' -or
         -not $RunIds.Add([string] $Run.runId) -or $Run.sourceRevision -cne $Manifest.value.sourceRevision -or
         $Run.sourceManifestSha256 -cne $Manifest.file.sha256 -or
-        $Run.testImageManifestSha256 -cne $Images[[string] $Run.suite].sha256 -or
+        $Run.testImageManifestSha256 -cne $Images[$expectedSuite].sha256 -or
+        ($isUnitGroup -and ($null -eq $status -or $Run.statusId -cne $Run.suite -or
+            $Run.filter -cne $status.filter -or
+            $Run.coverageEnabled -isnot [bool] -or -not $Run.coverageEnabled -or
+            $Run.resultsDirectory -cne $status.resultsDirectory -or $status.suite -cne $expectedSuite -or
+            $status.coverageEnabled -ne $true -or $status.exitCode -ne 0)) -or
         ($Run.nativeExitCode -isnot [int] -and $Run.nativeExitCode -isnot [long]) -or $Run.nativeExitCode -ne 0) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
-    $expected = @($Contributors[[string] $Run.suite])
+    if ($isUnitGroup) { Assert-FcNativeRunEvidenceDirectory $Run $status }
+    $expected = Get-FcNativeExpectedSuiteCases ([string] $Run.suite) $Contributors $Inventory
     $functional = Read-FcNativeJsonReference $Root $Run.functionalReport $Value.bounds.maximumReportBytes $Value.bounds.maximumPathCharacters
     if ($functional.value.Contains('commitSha') -and $functional.value.commitSha -cne $Manifest.value.sourceRevision) {
         throw $script:FcNativeMergeInput.InvalidEvidence
     }
-    $reportCases = @(Read-FcNativeFunctionalCases $functional.value $expected ([string] $Run.suite))
+    $reportCases = @(Read-FcNativeFunctionalCases $functional.value $expected ([string] $Run.suite) $Repository `
+        -MatchSourceLocations:($expectedSuite -cin @('unit','unit-scalar')))
     $trx = Read-FcNativeSuiteTrx $Root $Run $expected $Value.bounds
     if ($reportCases.Count -ne $trx.identities.Count -or ($reportCases -join "`n") -cne ($trx.identities -join "`n")) {
         throw $script:FcNativeMergeInput.InvalidEvidence
@@ -134,6 +243,19 @@ function Read-FcNativeSuiteRun([string] $Root, [object] $Value, [object] $Manife
     [ordered]@{ identities = $reportCases; input = [ordered]@{ kind = 'suite'; suite = $Run.suite;
         runId = $Run.runId; nativeExitCode = $Run.nativeExitCode; path = $coverage.path;
         length = $coverage.length; sha256 = $coverage.sha256 } }
+}
+
+function Assert-FcNativeRunEvidenceDirectory([object] $Run, [object] $Status) {
+    $prefix = ([string] $Status.resultsDirectory) + '/'
+    $references = [Collections.Generic.List[object]]::new()
+    $references.Add($Run.functionalReport)
+    $references.Add($Run.trx)
+    if ($Run.Contains('coverage')) { $references.Add($Run.coverage) }
+    foreach ($reference in $references) {
+        if ($reference.path -isnot [string] -or -not ([string] $reference.path).StartsWith($prefix, [StringComparison]::Ordinal)) {
+            throw $script:FcNativeMergeInput.InvalidDescriptor
+        }
+    }
 }
 
 function Read-FcNativeSuiteTrx([string] $Root, [object] $Run, [object[]] $Expected, [object] $Bounds) {

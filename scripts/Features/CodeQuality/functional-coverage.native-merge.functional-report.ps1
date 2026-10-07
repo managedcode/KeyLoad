@@ -20,13 +20,16 @@ $script:FcNativeFunctionalReport = [ordered]@{
         'filePath','lineNumber','endLineNumber','traceId','spanId')
 }
 
-function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCases, [string] $Suite) {
-    Assert-FcNativeFunctionalReport $Report $Suite
+function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCases, [string] $Suite,
+    [string] $Repository, [switch] $MatchSourceLocations) {
+    $baseSuite = Get-FcNativeBaseSuite $Suite
+    Assert-FcNativeFunctionalReport $Report $baseSuite
     $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     foreach ($case in $ExpectedCases) {
         $key = Get-FcNativeTrxKey ([string] $case.className) ([string] $case.methodName) ([string] $case.instanceName)
         $expected.Add($key, $case)
     }
+    $reportExpected = New-FcNativeReportIdentityMap $ExpectedCases $MatchSourceLocations
     $observed = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $identities = [Collections.Generic.List[string]]::new()
     foreach ($group in $Report.groups) {
@@ -34,7 +37,7 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
         $displayClass = [string] $group.namespace + '|' + [string] $group.className
         $qualifiedClass = [string] $group.namespace + '.' + [string] $group.className
         $rf3HasConstructorData = $false
-        if ($Suite -ceq 'rf3') {
+        if ($baseSuite -ceq 'rf3') {
             if ($script:FcNativeFunctionalReport.Rf3ClassAliases.Contains($displayClass)) {
                 $qualifiedClass = [string] $script:FcNativeFunctionalReport.Rf3ClassAliases[$displayClass]
                 $rf3HasConstructorData = $true
@@ -44,10 +47,12 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
             }
             else { throw $script:FcNativeFunctionalReport.Invalid }
         }
+        $groupQualifiedClass = $qualifiedClass
         foreach ($test in $group.tests) {
+            $qualifiedClass = $groupQualifiedClass
             Assert-FcNativeFunctionalTest $test
             if ($test.className -cne $group.className) { throw $script:FcNativeFunctionalReport.Invalid }
-            if ($Suite -ceq 'rf3') {
+            if ($baseSuite -ceq 'rf3') {
                 if ($rf3HasConstructorData) {
                     $nativeId = $qualifiedClass + '(' + $script:FcNativeFunctionalReport.Rf3Fixture + ').1.1.' +
                         $test.methodName + '.1.1.0'
@@ -57,9 +62,17 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
                 }
                 if ($test.id -cne $nativeId) { throw $script:FcNativeFunctionalReport.Invalid }
             }
+            if ($MatchSourceLocations) {
+                $displayKey = Get-FcNativeTrxKey $qualifiedClass ([string] $test.methodName) ([string] $test.displayName)
+                if (-not $reportExpected.ContainsKey($displayKey)) { throw $script:FcNativeFunctionalReport.Invalid }
+                $qualifiedClass = [string] $reportExpected[$displayKey].className
+            }
             $key = Get-FcNativeTrxKey $qualifiedClass ([string] $test.methodName) ([string] $test.displayName)
             if (-not $expected.ContainsKey($key) -or -not $observed.Add($key)) {
                 throw $script:FcNativeFunctionalReport.Invalid
+            }
+            if ($MatchSourceLocations) {
+                Assert-FcNativeFunctionalSourceLocation $test $expected[$key] $Repository
             }
             $identities.Add($key)
         }
@@ -70,10 +83,29 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
     @($identities | Sort-Object)
 }
 
+function Assert-FcNativeFunctionalSourceLocation([object] $Test, [object] $Expected, [string] $Repository) {
+    if ([string]::IsNullOrWhiteSpace($Repository) -or -not [IO.Path]::IsPathFullyQualified([string] $Test.filePath)) {
+        throw $script:FcNativeFunctionalReport.Invalid
+    }
+    $repositoryRoot = [IO.Path]::GetFullPath($Repository)
+    $fullPath = [IO.Path]::GetFullPath([string] $Test.filePath)
+    $relativePath = [IO.Path]::GetRelativePath($repositoryRoot, $fullPath).Replace([IO.Path]::DirectorySeparatorChar, '/')
+    $mapped = [string] $script:FcCompiledIdentity.DeterministicPathMapPrefix + [string] $Expected.sourcePath
+    if ($Test.filePath -ceq $mapped) { $relativePath = [string] $Expected.sourcePath }
+    if ([IO.Path]::IsPathRooted($relativePath) -or $relativePath -eq '..' -or
+        $relativePath.StartsWith('../', [StringComparison]::Ordinal) -or
+        $relativePath -cne $Expected.sourcePath -or $Test.lineNumber -ne $Expected.lineNumber -or
+        $Test.endLineNumber -ne $Expected.endLineNumber -or
+        ($Test.Contains('sourceRelativePath') -and $Test.sourceRelativePath -cne $Expected.sourcePath)) {
+        throw $script:FcNativeFunctionalReport.Invalid
+    }
+}
+
 function Assert-FcNativeFunctionalReport([object] $Report, [string] $Suite) {
+    $baseSuite = Get-FcNativeBaseSuite $Suite
     if ($Report -isnot [Collections.IDictionary] -or $Report.schemaVersion -ne 1 -or
-        -not $script:FcNativeFunctionalReport.Assemblies.Contains($Suite) -or
-        $Report.assemblyName -cne $script:FcNativeFunctionalReport.Assemblies[$Suite] -or
+        -not $script:FcNativeFunctionalReport.Assemblies.Contains($baseSuite) -or
+        $Report.assemblyName -cne $script:FcNativeFunctionalReport.Assemblies[$baseSuite] -or
         [string]::IsNullOrWhiteSpace($Report.machineName) -or [string]::IsNullOrWhiteSpace($Report.timestamp) -or
         [string]::IsNullOrWhiteSpace($Report.tunitVersion) -or [string]::IsNullOrWhiteSpace($Report.operatingSystem) -or
         [string]::IsNullOrWhiteSpace($Report.runtimeVersion) -or $Report.groups -isnot [array] -or
@@ -154,4 +186,15 @@ function Assert-FcNativeFunctionalSummary([object] $Summary) {
         $Summary.timedOut -ne 0 -or $Summary.flaky -ne 0 -or $Summary.passed -ne $Summary.total) {
         throw $script:FcNativeFunctionalReport.Invalid
     }
+}
+
+function New-FcNativeReportIdentityMap([object[]] $ExpectedCases, [bool] $MatchSourceLocations) {
+    $reportExpected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    if ($MatchSourceLocations) {
+        foreach ($case in $ExpectedCases) {
+            $displayKey = Get-FcNativeTrxKey $case.nativeReportClassName $case.methodName $case.instanceName
+            $reportExpected.Add($displayKey, $case)
+        }
+    }
+    $reportExpected
 }
