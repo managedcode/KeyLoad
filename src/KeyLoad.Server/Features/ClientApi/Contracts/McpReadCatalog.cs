@@ -9,6 +9,8 @@ internal static class McpReadCatalog
 {
     internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
     [
+        McpOperationFactory.Read<ReadFollowerDocumentRequestV1, FollowerDocumentReadResultV1>(
+            McpToolNames.DocumentsReadFollower, McpToolRoutes.DocumentsReadFollower, GrainReadKind.FollowerDocument),
         McpOperationFactory.Read<GetDocumentRequest, DocumentResult>(McpToolNames.DocumentsGet, McpToolRoutes.DocumentsGet, GrainReadKind.Document, true),
         McpOperationFactory.Read<ReadStreamRequest, StreamPage>(McpToolNames.StreamsRead, McpToolRoutes.StreamsRead, GrainReadKind.Stream),
         McpOperationFactory.Read<ReadAggregateReplayRequest, AggregateReplayPage>(McpToolNames.StreamsReplay,

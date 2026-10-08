@@ -84,6 +84,9 @@ internal static class McpCanonicalTestData
     internal static ImmutableArray<McpDecodeCase> Reads() =>
     [
         Read(McpCatalogExpectations.DocumentsGet, new GetDocumentRequest(Reference)),
+        Read(McpCatalogExpectations.DocumentsReadFollower, new ReadFollowerDocumentRequestV1(ContractVersion, Reference,
+            "http://node2:8080", WaitMinimumPosition, new CommitToken(StableId, Partition.AtomicPartitionId,
+                WaitMinimumPosition, WaitPlacementEpoch))),
         Read(McpCatalogExpectations.StreamsRead, new ReadStreamRequest(new StreamRef(Partition, Resource, Entity))),
         Read(McpCatalogExpectations.StreamsReplay,
             new ReadAggregateReplayRequest(new StreamRef(Partition, Resource, Entity), "worker.v1")),

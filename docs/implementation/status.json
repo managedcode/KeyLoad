@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R760/R761/R762 original native source-bound failures retained; R762 exposes15actual compiler/analyzer diagnostics assigned root2/security9/movement4. Current native repair in progress with limits/operation oracles unchanged. Authentic Linux and product functional coverage remain unqualified.",
+    "verificationStage": "R814 complete native Release build and full readonly formatter passed with zero source drift. Current native census binds3114cases; all60task expectations bind actual native metadata. Related88whole-operation cases passed with actual20concurrent TRX intervals; same88at50also passed but this exploratory trial used more CPU/RAM and took longer, so default20 remains. Six isolated task/profile Linux lanes joined; committed-source runtime/coverage qualification remains pending.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -25,58 +25,50 @@
       "Complete same-job sixteen-module coverage collection/admission/merge; load/comparison excluded; original thresholds unchanged"
     ],
     "latestOriginalLinux": {
-      "sourceCommit": "517f4b731a9a9894b78cfc3fe05bade018ab7389",
-      "runId": 37643564885,
+      "sourceCommit": "fdc3128fe3844b04fa13811c8f528d9d81c84845",
+      "runId": 37835972588,
       "runAttempt": 1,
       "conclusion": "failure",
-      "verifyJobId": 112868549362,
-      "rf3JobId": 112868390191,
-      "analyzerJobId": 112868390483,
-      "unitPassed": 2876,
-      "unitTotal": 2876,
-      "scalarPassed": 2876,
-      "scalarTotal": 2876,
-      "recoveryPassed": 236,
-      "recoveryTotal": 236,
+      "unitPassed": 3078,
+      "unitTotal": 3093,
+      "unitFailed": 15,
+      "scalarPassed": 3078,
+      "scalarTotal": 3093,
+      "scalarFailed": 15,
+      "recoveryPassed": 275,
+      "recoveryTotal": 275,
       "analyzerPassed": 388,
       "analyzerTotal": 388,
       "nativeSourceOwnershipPassed": 10,
       "nativeSourceOwnershipTotal": 10,
-      "rf3Passed": 176,
-      "rf3Total": 180,
-      "rf3Failed": 4,
-      "skipped": 0,
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37643564885",
+      "rf3Passed": 118,
+      "rf3Executed": 130,
+      "rf3Failed": 12,
+      "rf3CompleteSuite": false,
+      "coveredRf3Passed": 7,
+      "coveredRf3Executed": 11,
+      "coveredRf3Failed": 4,
+      "coveredRf3CompleteSuite": false,
+      "coveragePercent": null,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37835972588",
       "archives": [
         {
-          "artifactId": 11495254306,
-          "archive": "docker-rf3-qualification-original.zip",
-          "sha256": "15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7",
-          "expectedDigest": "sha256:15683736cad4bd6350dd3ff0f2a38908e3c9a5f5486296c1b650ca13d7428ad7"
+          "artifactId": 11578220594,
+          "name": "test-results-ubuntu-latest",
+          "sha256": "8f1ac4b16bf00284fba0fd27decb68238485034991a8a26604bbc767c9214845",
+          "apiDigest": "sha256:8f1ac4b16bf00284fba0fd27decb68238485034991a8a26604bbc767c9214845"
         },
         {
-          "artifactId": 11495041607,
-          "archive": "test-results-original.zip",
-          "sha256": "3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3",
-          "expectedDigest": "sha256:3c4a197a443a1be40ca9f54927f25763ca2b78149a4b5fb6764c47bd2f021bd3"
-        },
-        {
-          "artifactId": 11495998008,
-          "archive": "docker-rf3-image-evidence-original.zip",
-          "sha256": "ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366",
-          "expectedDigest": "sha256:ae3c14e0251cbea89cea8597bf5c2e8690c97e575c50e19d9283c2a7bb958366"
-        },
-        {
-          "artifactId": 11495524017,
-          "archive": "code-quality-docker-rf3-original.zip",
-          "sha256": "04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088",
-          "expectedDigest": "sha256:04eddd9e92f5b36c81591cf48e6dc27f0c305486964a9fc715372b2404c71088"
+          "artifactId": 11581991014,
+          "name": "docker-rf3-qualification",
+          "sha256": "dc198bec10f8eee00b520d20e1469dfaf6e7158f108f30465be67395c7665668",
+          "apiDigest": "sha256:dc198bec10f8eee00b520d20e1469dfaf6e7158f108f30465be67395c7665668"
         }
       ],
       "originalReportHashes": [
         {
-          "path": "test-results/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
-          "sha256": "382be68b51bdcc1722acfa898ae88f206a17cb039d3bcfae7405efd7e76bdfe2",
+          "path": "TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+          "sha256": "7572e6f58e7fbe70cdcf290b6214b9b7f012c3dbf1a34e12d4bde37c8560c7e7",
           "counters": {
             "total": "388",
             "executed": "388",
@@ -97,52 +89,8 @@
           }
         },
         {
-          "path": "test-results/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
-          "sha256": "be2c6da081f048bb5eba49a6f1e47f98aee31a4b5ef29c1298c0401343503fcc",
-          "counters": {
-            "total": "2876",
-            "executed": "2876",
-            "passed": "2876",
-            "failed": "0",
-            "error": "0",
-            "timeout": "0",
-            "aborted": "0",
-            "inconclusive": "0",
-            "passedButRunAborted": "0",
-            "notRunnable": "0",
-            "notExecuted": "0",
-            "disconnected": "0",
-            "warning": "0",
-            "completed": "0",
-            "inProgress": "0",
-            "pending": "0"
-          }
-        },
-        {
-          "path": "test-results/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
-          "sha256": "735dc408dd6776ae0c6cb7f4af3572315464b150e6c79d04a144acdd1c6c671e",
-          "counters": {
-            "total": "236",
-            "executed": "236",
-            "passed": "236",
-            "failed": "0",
-            "error": "0",
-            "timeout": "0",
-            "aborted": "0",
-            "inconclusive": "0",
-            "passedButRunAborted": "0",
-            "notRunnable": "0",
-            "notExecuted": "0",
-            "disconnected": "0",
-            "warning": "0",
-            "completed": "0",
-            "inProgress": "0",
-            "pending": "0"
-          }
-        },
-        {
-          "path": "test-results/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
-          "sha256": "eb078880e71fdb2a82d7fcb72841fde369d2136ee10b6330285b1ee8a51e3225",
+          "path": "TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "6f6da7948864b8babe53ac7376ec1a2962d910e1600c1b36de2753a20fc7ad00",
           "counters": {
             "total": "10",
             "executed": "10",
@@ -163,12 +111,12 @@
           }
         },
         {
-          "path": "test-results/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
-          "sha256": "7627476679a1721aba56974f721f793017639ad7c484eaac1587a7e07ae9bcf3",
+          "path": "TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+          "sha256": "3ff63ebbaa7daa7b4d2a5779c2b62bb5b81a9740aa114a58a562717c64fb58c4",
           "counters": {
-            "total": "2876",
-            "executed": "2876",
-            "passed": "2876",
+            "total": "275",
+            "executed": "275",
+            "passed": "275",
             "failed": "0",
             "error": "0",
             "timeout": "0",
@@ -185,12 +133,78 @@
           }
         },
         {
-          "path": "docker-rf3-qualification/TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
-          "sha256": "24f8a60279e76098b7a1c99d66973dc656b8c08b30e0813de1e577acb895d1bf",
+          "path": "TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "ef0d06134726429ca2885d8f7fc53bf0735367b73228b573de4e2abfb1622f56",
           "counters": {
-            "total": "180",
-            "executed": "180",
-            "passed": "176",
+            "total": "3093",
+            "executed": "3093",
+            "passed": "3078",
+            "failed": "15",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "1c63cfc69810f193d71d547c8c42e2e480ebe106d704d5827fc0b09584648856",
+          "counters": {
+            "total": "3093",
+            "executed": "3093",
+            "passed": "3078",
+            "failed": "15",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
+          "sha256": "247a9c9ad61d0de22eb3a80ba0455d905b3ae3f5eda79f31656db0fb294a0c26",
+          "counters": {
+            "total": "130",
+            "executed": "130",
+            "passed": "118",
+            "failed": "12",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "path": "TestResults/functional-coverage/rf3/KeyLoad.IntegrationTests_net10.0_x64.trx",
+          "sha256": "a88b27f8636d9af020fc32ac21ac5f63f6e0e7079c20c53cb36e964a1b917d98",
+          "counters": {
+            "total": "11",
+            "executed": "11",
+            "passed": "7",
             "failed": "4",
             "error": "0",
             "timeout": "0",
@@ -207,45 +221,24 @@
           }
         }
       ],
-      "rf3Failures": [
-        {
-          "methodName": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
-          "error": "TaskCanceledException: A task was canceled.",
-          "duration": "00:02:13.4700508"
-        },
-        {
-          "methodName": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
-          "error": "AssertionException: Expected to be true, because The canonical SDK outcome reported UnknownWriteOutcome.\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue().Because(\"The canonical SDK outcome reported UnknownWriteOutcome.\")",
-          "duration": "00:00:46.3686495"
-        },
-        {
-          "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
-          "error": "TaskCanceledException: A task was canceled.",
-          "duration": "00:12:13.4522501"
-        },
-        {
-          "methodName": "AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed",
-          "error": "HttpRequestException: Response status code does not indicate success: 503 (Service Unavailable). Response body: {\"type\":\"urn:keyload:error:OwnershipLost\",\"title\":\"OwnershipLost\",\"status\":503,\"detail\":\"The physical shard catalog is not ready for public admission.\",\"errorCode\":\"OwnershipLost\"}",
-          "duration": "00:00:56.1362873"
-        }
-      ],
-      "originalJobLogHashes": {
-        "verify-job-completed-original.log": "fbcd17231027cf347fb2e80cda417ddbe8dd467108541ad9b02bf62ceb7ac329",
-        "rf3-job-completed-original.log": "2e29ab4a80a5a51b35a3d5eaaced7d678b89d5f289eb294f2c086f1c27dd2321"
-      },
-      "coverageCollected": false,
-      "productCoveragePercent": null,
-      "qualifiesLaterSource": false,
-      "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
+      "diagnosticUploadFailure": "Early original-report check exited127 because rg was absent, although original TRX exists. Portable native find source repair prepared; no inferred native timeout cause.",
+      "qualification": "Authenticated original failed/partial Linux source cohort. New R812 source repairs and follower implementation require fresh committed-source original Linux qualification."
     },
     "currentBuild": {
       "state": "PASS: complete native Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r803-three-module-rf3-flow-full-build-20261008-diagnostics.json",
-      "qualification": "Local development. Whole current-source Linux runtime qualification remains open."
+      "evidence": "/private/tmp/keyload-current-r814-tunit20-task-acceptance-natural-expiry-full-build-20261009-diagnostics.json",
+      "elapsedSeconds": 128.886,
+      "logSha256": "ff39b2c652fc58aea7a6d4fd1d82dd7caba276b62d79a7297f4a859f5e384ca4",
+      "inputCount": 5325,
+      "qualification": "Source-bound local development; current-source Linux runtime qualification remains open."
     },
     "currentFormatter": {
       "state": "PASS: complete native readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r804-three-module-rf3-flow-full-native-format-20261008-receipt.json"
+      "evidence": "/private/tmp/keyload-current-r814-tunit20-natural-expiry-full-native-format-20261009-receipt.json",
+      "elapsedSeconds": 97.558,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputCount": 5325,
+      "qualification": "Native source-bound local formatter; no runtime or Linux qualification."
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -35850,28 +35843,28 @@
           "owner": "sol61_security_finish",
           "task": "KL-015",
           "scope": "Security and telemetry acceptance, including actual exported HTTP/log privacy and native negative→healthy client flows; exclusive ServiceDefaults privacy join.",
-          "state": "Whole KL015; complete nullable foreign Result denial joined; genuine C1/auth/cancellation qualification and sole original3458 RF3 archive harvest continue. Current Linux telemetry12+12 is supporting evidence only.",
+          "state": "Whole KL015: actual source admission/capture-before-start and event/queue authority flows joined;7+7 native Build/logger controls passed. Private exact original discovery/TRX admission implementation active; genuine current C1/RF3 acceptance pending.",
           "previousOwner": "sol_public_bridge_finish"
         },
         {
           "owner": "sol61_session_finish",
           "task": "KL-021",
           "scope": "Strong read/session tokens; malformed/negative native authority whole state/healthy regression and genuine isolated former-leader qualification.",
-          "state": "Whole KL014/KL011/KL021; complete interrupted replay/session adapter oracles joined; actual server-authenticated owner-bounded follower snapshot implementation and full flows continue privately. Broader stale-read requirements remain open.",
+          "state": "Whole KL011/KL014/KL021: complete explicit follower point-document source and28RF3 whole cases joined;110normal+110scalar supporting cases passed. Private native task acceptance adapter/contract implementation active; fresh original committed Linux task/follower proof pending.",
           "previousOwner": "sol_read_lock_regression"
         },
         {
           "owner": "sol61_movement_finish",
           "task": "KL-036",
           "scope": "Controlled movement full acceptance; missing actual Install/Retire/Abort process/full-model gates and public move orchestration gaps.",
-          "state": "Whole KL036 native parent first-issue/reconciliation, exact grant promotion, cold interrupted Abort and original bounded producer metrics continue privately; unsealed/unexecuted. Exact e478 unit failures await original reports.",
+          "state": "Whole KL036: retired-original outcome/first-family expiry foundation joined; Linux runtime pending after20Darwin pre-effect failures. Public native first-issuance parent remains private/unsealed; natural actual issued-grant expiry follow-on separately unqualified.",
           "previousOwner": "sol_terminal_abort_join"
         },
         {
           "owner": "root",
           "task": "TEST-PIPELINE-001",
           "scope": "Coherent native build/format, full original native census/classification, independent test lanes, current functional-only coverage, Linux original evidence, complete wave Git delivery.",
-          "state": "Three-module RF3 wholeflow stage joined and actual full build/format passed; whole source-stage Git delivery and exact original Linux failure diagnosis owned."
+          "state": "R812 coherent native build/format/3113 census/234 supporting passes verified; root joins six independent Linux task acceptance cells, portable originalTRX gate, honest canonical status, whole-wave commit/push and original GitHub delivery."
         }
       ],
       "liveMutationOwner": "root only during integration; no source/image mutation during native verification",
@@ -36211,7 +36204,127 @@
       ]
     },
     "stageXXVIDeliveredCommit": "e47803ef6e1e7ab89105f337772cb94b625951f6",
-    "stageXXVIDeliveredRemoteVerified": true
+    "stageXXVIDeliveredRemoteVerified": true,
+    "stageXXVIIIOriginalDevelopment": {
+      "state": "Complete coherent source wave built/formatted; additive parallel task GitHub lanes being integrated. Linux acceptance pending.",
+      "sourceRepairs": [
+        "closed literal unique-index MCP conflict detail and whole healthy continuation",
+        "exact native namespace ID/name admission of the same actual attached Docker entry",
+        "covered fixture retains admitted actual container names before Stop and never resolves stopped services",
+        "native C1 subscribers admitted before real resource start; original capture/identity and cancellation joins retained",
+        "actual canonical retired placement resolves original outcomes; first-family pre-issuance expiry uses owning clock without renewal",
+        "official MCP empty native maintenance status body retained through explicit no-body caller",
+        "complete queue/event cross-tenant field denial/grant/revoke/state-preservation SDK/MCP flows",
+        "server-authenticated bounded explicit follower point-document V1 through existing SDK/official MCP/Q1 request grain"
+      ],
+      "buildReceipt": "/private/tmp/keyload-current-r812-complete-follower-movement-authorization-wave-full-build-20261008-diagnostics.json",
+      "formatterReceipt": "/private/tmp/keyload-current-r812-complete-wave-full-native-format-20261008-receipt.json",
+      "originalParallelNativeReceipt": "/private/tmp/keyload-root-r812-original-parallel-native-lanes-verification-20261008.json",
+      "originalFilteredNativePasses": 234,
+      "nativeDiscoveryReceipt": "/private/tmp/keyload-root-r812-twelve-original-native-discovery-verification-20261009.json",
+      "fullNativeUnitCases": 3113,
+      "functionalContributors": 2705,
+      "requiredOrdinaryNonContributors": 408,
+      "inventoryReceipt": "/private/tmp/keyload-root-r812-current-functional-inventory-source-join-r2-20261009.json",
+      "inventorySha256": "5584895910165aea2a66bd15495a20a9de377f0c599a360f41c7f8e882232b4f",
+      "normalScalarGroupCases": [
+        547,
+        530,
+        528,
+        528,
+        572
+      ],
+      "preEffectDarwinMovementFailures": {
+        "failed": 20,
+        "reason": "Actual controlled loopback listen SocketException Cannot assign requested address before database operation; no Linux success inferred.",
+        "receipt": "/private/tmp/keyload-current-r812-movement-retired-receipt-whole-families-normal-20261008-receipt.json"
+      },
+      "coveragePercent": null,
+      "runtimeQualified": false,
+      "remaining": "Fresh committed-source Linux full required gates, exact mapped task acceptance, covered RF3 shutdown and C1 callback flows, all28 new follower RF3 cases; issued-grant natural expiry and whole KL036 public parent remain open."
+    },
+    "parallelTaskAcceptance20261009": {
+      "requirement": "REQ/AC-TUNIT-ENTRY-010",
+      "workflow": ".github/workflows/build-and-tests.yml",
+      "job": "task-acceptance",
+      "tasks": [
+        "KL-011",
+        "KL-014",
+        "KL-015"
+      ],
+      "profiles": [
+        "normal",
+        "scalar"
+      ],
+      "isolatedLinuxCells": 6,
+      "state": "Complete guarded workflow/native adapter/verifier/contract/source-roster integration ready for main delivery; fresh original Linux outcomes pending.",
+      "independentOfFullSuiteCompletion": true,
+      "defaultFullGatesPreserved": true,
+      "scalarBoundary": "Native caller/in-process Unit only; current Docker servers do not propagate the scalar setting.",
+      "coverageContribution": false,
+      "qualified": false,
+      "nativeMaximumParallelTests": 20,
+      "caseCountsPerProfile": {
+        "KL-011": 16,
+        "KL-014": 12,
+        "KL-015": 32
+      },
+      "declaredCaseCountPerProfile": 60,
+      "exactCurrentNativeMetadataBound": true,
+      "metadataEvidence": "/private/tmp/keyload-r814-task-source-contract-metadata-complete-receipt-20261009.json",
+      "metadataEvidenceSha256": "1e923da6992db5f8f428111fc4e5eefc2059e8bc1e22546f46e57d85613c7dad",
+      "manualTaskChoices": [
+        "all",
+        "KL-011",
+        "KL-014",
+        "KL-015"
+      ]
+    },
+    "nativeParallelism20261009": {
+      "requirement": "REQ/AC-TUNIT-ENTRY-011",
+      "defaultNativeSlots": 20,
+      "originalRelatedOperationCases": 88,
+      "allPassedAt20": true,
+      "allPassedAt50": true,
+      "sourceAndAssemblyDrift": false,
+      "actualOriginalTrxOverlapAt20": 20,
+      "actualOriginalTrxOverlapAt50": 25,
+      "durationAt20Seconds": 5.512,
+      "durationAt50Seconds": 6.492,
+      "original20TrxSha256": "1d0a7fce94ca3b43e2e02f288d67be481ad428417680568dee62a5792022d52e",
+      "original50TrxSha256": "544d3878df31c070c7f0eb2762c2c196254c98e0a603d08ac7647fe4c312a5a8",
+      "trialReceipt": "/private/tmp/keyload-root-r814-native20-v50-original-related-operation-trials-20261009.json",
+      "decision": "Retain20 after this single exploratory50trial;50did not reduce duration and used more actual CPU/RAM. No universal performance or Linux/RF3 inference.",
+      "qualification": "Local related whole-operation development; not full-suite, benchmark, coverage or Linux acceptance."
+    },
+    "stageXXIXOriginalDevelopment": {
+      "state": "Natural issued-grant expiry foundation and complete task-parallel CI tooling joined; native20 scheduling demonstrated. Ready for stable main delivery; current Linux qualification pending.",
+      "buildReceipt": "/private/tmp/keyload-current-r814-tunit20-task-acceptance-natural-expiry-full-build-20261009-diagnostics.json",
+      "formatterReceipt": "/private/tmp/keyload-current-r814-tunit20-natural-expiry-full-native-format-20261009-receipt.json",
+      "sourceToolingInventoryJoin": "/private/tmp/keyload-root-r814-complete-task-acceptance-tooling-inventory-source-join-20261009.json",
+      "nativeCensus": "/private/tmp/keyload-current-r814-unfiltered-native-unit-census-20261009-list-tests.stdout.txt",
+      "nativeCensusSha256": "220145346acacbfc491cceb0fecdb5f40942ebd92bdfcdba91bedf3638759894",
+      "fullNativeUnitCases": 3114,
+      "functionalContributors": 2706,
+      "requiredOrdinaryNonContributors": 408,
+      "inventorySha256": "7ccf83f77b578d55d133dd307976057960ab7de08e18dc55d7b0347b8d913b3d",
+      "normalScalarGroupCaseInventory": [
+        548,
+        530,
+        528,
+        528,
+        572
+      ],
+      "groupQualification": "Current full native census and exact preserved inventory; current full/group Linux execution remains pending.",
+      "processOwnerRepair": "Actual overflow/native-deadline failure settles with retained initiating errors/native failed exits, then same helper healthy Unicode continuation; terminate tree before closing pending readers under unchanged bounds.",
+      "naturalIssuedGrantExpiry": "One genuine original issued-retire-grant expiry denial preserves both owners, unchanged pending outcome and all canonical state; newly issued ACK/families/cold-owner continuation authored and compiled, actual Linux operation pending.",
+      "relatedOperationsAt20": 88,
+      "relatedOperationsAt50": 88,
+      "originalNoSocketSandboxFailure": "/private/tmp/keyload-current-r815-focused-whole-operations-tunit20-20261009-receipt.json",
+      "runtimeQualified": false,
+      "coveragePercent": null,
+      "remaining": "Fresh committed-source required Linux gates and all task/profile cells, real covered RF3 shutdown/C1callback flows,28new follower RF3 cases, natural-issued expiry execution and complete KL036 public parent."
+    }
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -38251,6 +38364,12 @@
       "qualification": "Current local sparse4normal+4scalarPASS; original source/PDB-bound22casesPASS; new actual compositeRF3 and all current Linux task gates pending.",
       "rf3SourceJoin": "/private/tmp/keyload-kl011-composite-rf3-5-root-source-join-20261008.json",
       "sparseSourceJoin": "/private/tmp/keyload-kl011-sparse3-root-source-join-20261008.json"
+    },
+    "parallelLinuxAcceptance": {
+      "requirement": "REQ/AC-TUNIT-ENTRY-010",
+      "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
+      "qualified": false,
+      "nativeMaximumParallelTests": 20
     }
   },
   "KL-012": {
@@ -38471,6 +38590,12 @@
       "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
       "runtimeQualified": false,
       "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
+    },
+    "parallelLinuxAcceptance": {
+      "requirement": "REQ/AC-TUNIT-ENTRY-010",
+      "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
+      "qualified": false,
+      "nativeMaximumParallelTests": 20
     }
   },
   "KL-015": {
@@ -38488,6 +38613,12 @@
       "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
       "runtimeQualified": false,
       "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
+    },
+    "parallelLinuxAcceptance": {
+      "requirement": "REQ/AC-TUNIT-ENTRY-010",
+      "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
+      "qualified": false,
+      "nativeMaximumParallelTests": 20
     }
   },
   "KL-016": {
@@ -39813,6 +39944,12 @@
       "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
       "runtimeQualified": false,
       "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
+    },
+    "currentFollowerDocumentDevelopment": {
+      "state": "Complete explicit bounded follower point-document V1 implementation plus17functional+2schema support and28whole RF3 cases authored/joined;19normal+19scalar native supporting cases passed.",
+      "qualification": "Fresh current-source Linux28RF3 outcomes, broader stale-read models/SQL and performance/resource gates remain pending.",
+      "feature": "docs/Features/DocumentStorage.md",
+      "runtimeQualified": false
     }
   },
   "KL-022": {
@@ -40910,6 +41047,13 @@
         "receiptSha256": "23fff034f18b888810ac71a0047ecfe7891bd0aa069741ff587186ebc68027dc"
       },
       "runtimeQualified": false
+    },
+    "currentNaturalIssuedGrantExpiryDevelopment": {
+      "requirement": "REQ/AC-MOVE-NATURAL-ISSUED-EXPIRY-001",
+      "state": "Genuine immutable issued-grant natural expiry/unchanged-two-owner/freshACK/fullfamilies/cold-owner case compiled and present in exact3114native census.",
+      "runtimeQualified": false,
+      "nativeCase": "ActualIssuedRetireGrantExpiresWithoutMutationThenFreshAckAndFamiliesCompleteBothColdOwners",
+      "remaining": "Actual current-source Linux operation plus complete public parent/API/fault/resource gates."
     }
   },
   "KL-037": {

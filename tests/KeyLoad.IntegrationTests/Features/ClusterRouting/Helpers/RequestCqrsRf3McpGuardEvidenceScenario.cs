@@ -20,7 +20,9 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
             completedWave = wave;
             await ExecuteInWaveAsync(wave, profile, lifecycle, cancellationToken).ConfigureAwait(false);
         }, new(lifecycle), cancellationToken).ConfigureAwait(false);
-        return (completedWave ?? throw new InvalidOperationException(MissingWaveMessage)).SaveDiagnosticsEvidence();
+        var joined = completedWave ?? throw new InvalidOperationException(MissingWaveMessage);
+        await Assert.That(joined.NativeAdmissionOwnersJoined).IsTrue();
+        return joined.SaveDiagnosticsEvidence();
     }
 
     internal static string CreatePrivateRoot()
@@ -36,6 +38,7 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
     private static async Task ExecuteInWaveAsync(RequestCqrsRf3Wave wave, NodeEpochRf3Profile profile,
         RequestCqrsLifecycleEvidence lifecycle, CancellationToken cancellationToken)
     {
+        await Assert.That(wave.NativeAdmittedNodeCount).IsEqualTo(RequestCqrsRf3Protocol.NodeCount);
         var app = wave.App;
         lifecycle.SetStage(RequestCqrsLifecycleStage.GuardSeed);
         var workload = await RequestCqrsRf3Workload.SeedAsync(app, profile, cancellationToken).ConfigureAwait(false);

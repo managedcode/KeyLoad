@@ -24,6 +24,8 @@ internal sealed class NativeTUnitSelectionTests
     private const string RevisionEnvironment = "GITHUB_SHA";
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
+    private const string ParallelismArgument = "--maximum-parallel-tests";
+    private const string ExpectedDefaultParallelism = "20";
 
     [Test]
     [Arguments("unit", "KeyLoad.UnitTests")]
@@ -40,6 +42,7 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(args[0]).IsEqualTo("test");
         await Assert.That(args[2]).IsEqualTo("tests/" + project);
         await Assert.That(args[Array.IndexOf(args, "--output") + 1]).IsEqualTo("Detailed");
+        await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
         await Assert.That(args[Array.IndexOf(args, "--treenode-filter") + 1]).IsEqualTo("/*/*/ActualCase/*");
         await Assert.That(args).Contains("--report-trx");
         await Assert.That(args).Contains("--coverage");
@@ -66,6 +69,8 @@ internal sealed class NativeTUnitSelectionTests
         var localTUnitArguments = local.GetProperty(ArgumentsProperty).EnumerateArray()
             .Select(value => value.GetString()).ToArray();
         var filterIndex = Array.IndexOf(localTUnitArguments, "--treenode-filter");
+        await Assert.That(localTUnitArguments[Array.IndexOf(localTUnitArguments, ParallelismArgument) + 1])
+            .IsEqualTo(ExpectedDefaultParallelism);
         await Assert.That(filterIndex >= 0).IsTrue();
         await Assert.That(localTUnitArguments[filterIndex + 1]).IsEqualTo(expectedFilter);
         var localArgs = arguments.RootElement.EnumerateArray().Select(value => value.GetString()!).ToArray();

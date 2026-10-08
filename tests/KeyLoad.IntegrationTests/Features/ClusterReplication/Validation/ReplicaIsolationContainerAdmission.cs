@@ -23,7 +23,7 @@ internal static class ReplicaIsolationContainerAdmission
         { return ReplicaIsolationAdmissionMismatch.SharedPidNamespace; }
         if (networks.Length != SingleNetwork)
         { return ReplicaIsolationAdmissionMismatch.NetworkCount; }
-        if (value.GetProperty(NetworkMode).GetString() != networks[FirstIndex].Name)
+        if (!IsAttachedNetwork(value.GetProperty(NetworkMode).GetString(), networks[FirstIndex]))
         { return ReplicaIsolationAdmissionMismatch.NetworkMode; }
         if (capabilities.Length != SingleCapability)
         { return ReplicaIsolationAdmissionMismatch.CapabilityCount; }
@@ -40,6 +40,18 @@ internal static class ReplicaIsolationContainerAdmission
         if (Guid.ParseExact(Text(value, ReplicaIsolationNativeKeys.Incarnation), IncarnationFormat) != plan.Incarnation)
         { return ReplicaIsolationAdmissionMismatch.Incarnation; }
         return ReplicaIsolationAdmissionMismatch.None;
+    }
+
+    private static bool IsAttachedNetwork(string? mode, JsonProperty network)
+    {
+        if (string.IsNullOrEmpty(mode) || string.IsNullOrEmpty(network.Name)
+            || !network.Value.TryGetProperty(NetworkId, out var identity)
+            || identity.ValueKind != JsonValueKind.String)
+        { return false; }
+        var id = identity.GetString();
+        return !string.IsNullOrEmpty(id)
+            && (string.Equals(mode, network.Name, StringComparison.Ordinal)
+                || string.Equals(mode, id, StringComparison.Ordinal));
     }
 
     private static string Text(JsonElement value, string key) => value.GetProperty(key).GetString()

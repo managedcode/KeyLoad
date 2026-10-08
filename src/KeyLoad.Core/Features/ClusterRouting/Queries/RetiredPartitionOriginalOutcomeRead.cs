@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
         if (control?.Phase != PartitionMovePhase.Retired)
         { return null; }
         var directory = RequireMoveDirectory(view);
-        var placement = ReadPlacementWitness(view, command.Partition);
+        var placement = ResolveRegisteredPlacement(view, command.Partition, directory.ControlOwner);
         RequireRetiredOriginalPlacement(fence, control, placement, directory.ControlOwner, configuredPhysicalOwner);
         if (command.OwnershipEpoch != fence.SourcePlacement.PlacementEpoch)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }

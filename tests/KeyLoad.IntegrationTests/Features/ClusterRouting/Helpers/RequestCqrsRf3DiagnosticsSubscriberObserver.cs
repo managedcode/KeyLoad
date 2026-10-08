@@ -6,6 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
 internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDisposable
 {
+    private const int SingleResourceCount = 1;
     private CancellationTokenSource? lifetime;
     private CancellationToken lifetimeToken;
     private IAsyncEnumerator<LogSubscriber>? enumerator;
@@ -37,14 +38,20 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         lastAdmissionMove = pendingMove;
     }
 
-    internal async Task WaitForStateAsync(bool expected)
+    internal Task WaitForStateAsync(bool expected) => WaitForAdmissionAsync(expected, null, null);
+
+    internal Task WaitForResourceAsync(string actualResourceId, string canonicalNode)
+        => WaitForAdmissionAsync(true, actualResourceId, canonicalNode);
+
+    private async Task WaitForAdmissionAsync(bool expected, string? actualResourceId, string? canonicalNode)
     {
         if (System.Threading.Interlocked.CompareExchange(ref moveOwner, 1, 0) != 0)
         { throw new InvalidOperationException("The native subscriber stream already has an active reader."); }
         try
         {
             var observed = new HashSet<string>(StringComparer.Ordinal);
-            while (observed.Count < RequestCqrsRf3Protocol.NodeCount)
+            var required = actualResourceId is null ? RequestCqrsRf3Protocol.NodeCount : SingleResourceCount;
+            while (observed.Count < required)
             {
                 var active = enumerator
                     ?? throw new InvalidOperationException("The Aspire subscriber observer is not initialized.");
@@ -70,14 +77,23 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
                 if (!moved)
                 { throw new InvalidOperationException(RequestCqrsRf3SubscriberTransitionObservation.UnexpectedCompletionMessage); }
                 var subscriber = active.Current;
-                var isNode = transitionObservation.RecordAdmission(subscriber.Name,
-                    expected && subscriber.AnySubscribers);
+                var isNode = ObserveAdmission(subscriber, expected, actualResourceId, canonicalNode);
                 if (isNode && subscriber.AnySubscribers == expected)
-                { observed.Add(subscriber.Name); }
+                { observed.Add(canonicalNode ?? subscriber.Name); }
             }
         }
         finally
         { System.Threading.Volatile.Write(ref moveOwner, 0); }
+    }
+
+    private bool ObserveAdmission(LogSubscriber subscriber, bool expected, string? actualResourceId,
+        string? canonicalNode)
+    {
+        if (actualResourceId is null)
+        { return transitionObservation.RecordAdmission(subscriber.Name, expected && subscriber.AnySubscribers); }
+        if (!string.Equals(subscriber.Name, actualResourceId, StringComparison.Ordinal) || !subscriber.AnySubscribers)
+        { return false; }
+        return transitionObservation.RecordAdmission(canonicalNode!, true);
     }
 
     internal void BeginCompletionObservation() => transitionObservation.BeginCompletionObservation();

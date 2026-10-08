@@ -4,6 +4,7 @@ namespace KeyLoad.Server;
 internal static class McpToolDescriptions
 {
     internal const string StableRetry = " Retry a command only with the same stable ID and canonical payload; timeout or disconnect does not prove rollback.";
+    private const string DocumentsReadFollower = "Read an explicitly selected follower committed document snapshot with a declared position-lag bound. Data and fresh authorization cuts are returned separately; current persisted credential, grants, field policy and row visibility are revalidated after a quorum barrier. A minimum cannot silently fall back to a newer or strong read.";
     private const string DocumentsGet = "Read one authorized document revision; result is null when absent. Optional minimumToken requires the acknowledged position in the same physical incarnation and placement after a fresh quorum barrier. Invalid tokens fail; redaction follows current persisted grants.";
     private const string StreamsRead = "Read a bounded event stream page after a revision; continue using the returned revision and hasMore indicator.";
     private const string StreamsReplay = "Read one exact-versioned aggregate snapshot and its complete bounded event tail under one committed cut. Requires persisted worker capabilities and every raw payload/header grant; incompatible versions or unavailable history fail. Replay invokes no subscription or external effect.";
@@ -65,6 +66,7 @@ internal static class McpToolDescriptions
     internal static string For(string name) => name switch
     {
         McpToolNames.DocumentsGet => DocumentsGet,
+        McpToolNames.DocumentsReadFollower => DocumentsReadFollower,
         McpToolNames.StreamsRead => StreamsRead,
         McpToolNames.StreamsReplay => StreamsReplay,
         McpToolNames.EventsRead => EventsRead,

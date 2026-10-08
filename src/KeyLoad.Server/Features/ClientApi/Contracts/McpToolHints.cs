@@ -10,6 +10,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
 {
     internal static McpToolHints ForRead(GrainReadKind kind) => kind switch
     {
+        GrainReadKind.FollowerDocument => new(true, true, false),
         GrainReadKind.Document => new(true, true, false),
         GrainReadKind.Stream => new(true, true, false),
         GrainReadKind.AggregateReplay => new(true, true, false),

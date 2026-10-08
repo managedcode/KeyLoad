@@ -114,5 +114,7 @@ public enum GrainReadKind
     /// <summary>Read the immutable original outcome of one privately authenticated movement phase.</summary>
     PartitionMovementOutcome,
     /// <summary>Read one authenticated A-authority document on its protected physical destination.</summary>
-    ControlledDocument
+    ControlledDocument,
+    /// <summary>Read one explicitly bounded follower snapshot under fresh persisted authority.</summary>
+    FollowerDocument
 }

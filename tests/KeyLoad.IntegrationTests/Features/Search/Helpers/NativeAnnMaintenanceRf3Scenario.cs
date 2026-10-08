@@ -38,7 +38,8 @@ internal sealed record NativeAnnMaintenanceRf3Scenario(PartitionRef Partition)
     internal async Task<AnnMaintenanceRequest> RequestAsync(KeyLoadClient sdk, McpOfficialClient mcp, CancellationToken token)
     {
         var status = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
-        var official = (await McpCallerAssertions.SuccessAsync<NodeStatus>(await mcp.CallAsync(McpCallerTools.AdminStatus, (object?)null, token))).Value;
+        var official = (await McpCallerAssertions.SuccessAsync<NodeStatus>(
+            await mcp.CallWithoutBodyAsync(McpCallerTools.AdminStatus, token))).Value;
         await Assert.That(official.NodeId).IsEqualTo(status.NodeId);
         await Assert.That(official.Incarnation).IsEqualTo(status.Incarnation);
         if (!Guid.TryParse(status.NodeId, out var owner) || owner == Guid.Empty)

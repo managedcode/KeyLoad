@@ -355,6 +355,17 @@ local seed/replay/cold-reopen flow; public transfer and fresh full Linux RF3,
 model, recovery and performance qualification remain open. Original source
 identities and results belong in the [qualification records](docs/implementation/status.json).
 
+Current source also includes an explicit bounded follower document read through
+the .NET SDK and MCP, with a selected replica, lag limit and fresh authorization.
+Its [document contract](docs/Features/DocumentStorage.md) keeps the captured data
+cut distinct from the current authorization cut. Complete current-source RF3
+qualification remains open.
+
+Native TUnit now defaults to 20 parallel tests. GitHub also runs separate
+normal/scalar-caller acceptance lanes for strict indexes, the server/SDK and
+security/telemetry. Focused task runs retain their complete declared operation
+scope; full build, unit, recovery, RF3 and coverage gates remain mandatory.
+
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,
 excludes load and comparison runs, and requires matching source and build reports.

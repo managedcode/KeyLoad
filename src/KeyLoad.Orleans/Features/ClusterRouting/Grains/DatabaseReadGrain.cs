@@ -93,6 +93,16 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request,
         NativeCapabilityWorkLifetime work)
     {
+        if (request.Envelope.ReadKind == GrainReadKind.FollowerDocument)
+        {
+            var execution = new FollowerDocumentReadExecution(localDatabase, coordinator,
+                services.GetRequiredService<KeyLoad.Replication.ReplicaConsensus>(),
+                services.GetRequiredService<PhysicalShardRecord>(), codec);
+            var follower = await execution.ExecuteAsync(request, ((IGrainBase)this).GrainContext, work)
+                .ConfigureAwait(true);
+            work.Stage = GrainFailureStage.ReplyEncoding;
+            return GrainReplyFactory.Value(value: follower, cancellationToken: work.Token, options: codec.ExecutionOptions);
+        }
         work.Stage = GrainFailureStage.QuorumRead;
         var barrier = request.Envelope.ReadKind == GrainReadKind.Authenticate
             ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;

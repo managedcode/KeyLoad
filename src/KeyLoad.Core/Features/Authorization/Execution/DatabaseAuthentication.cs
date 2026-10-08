@@ -56,36 +56,8 @@ public sealed partial class DatabaseEngine
     /// <returns>The verified persisted principal identifier.</returns>
     public string Authenticate(string secret, DateTimeOffset now)
     {
-        const char KeyIdentitySeparator = '.';
-        const int MinimumEncodedKeyCharacters = 20;
-        const int MaximumEncodedKeyCharacters = 256;
-        const int FirstKeyCharacterIndex = 0;
-        const string AuthenticateDetailText = "An API key is required.";
-        const int CredentialVerifierBytes = 32;
-        const string InvalidCredentialVerifierDetail = "A credential verifier is invalid.";
-
-        ArgumentNullException.ThrowIfNull(secret);
-        var separator = secret.IndexOf(KeyIdentitySeparator, StringComparison.Ordinal);
-        if (secret.Length is < MinimumEncodedKeyCharacters or > MaximumEncodedKeyCharacters || separator <= FirstKeyCharacterIndex)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, AuthenticateDetailText);
-        }
-
-        return Store.Read(view =>
-        {
-            var key = view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(secret[..separator]));
-            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(secret));
-            byte[] verifier;
-            try
-            { verifier = key is null ? new byte[CredentialVerifierBytes] : Convert.FromHexString(key.Verifier); }
-            catch (FormatException) { throw Errors.Fail(ErrorCode.Corruption, InvalidCredentialVerifierDetail); }
-            if (key is null || !CryptographicOperations.FixedTimeEquals(hash, verifier) || key.Revoked || key.ExpiresAt <= now)
-            {
-                throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
-            }
-
-            return Principal(view, key.PrincipalId, now).Id;
-        });
+        var witness = IssueCredentialWitness(secret);
+        return Store.Read(view => RevalidateCredential(view, witness, null, now).Id);
     }
     /// <summary>Creates a credential record containing only the secret's SHA-256 verifier.</summary>
     /// <param name="id">Credential identifier.</param>

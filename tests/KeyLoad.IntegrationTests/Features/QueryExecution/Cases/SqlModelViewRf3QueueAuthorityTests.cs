@@ -23,6 +23,8 @@ internal sealed class SqlModelViewRf3QueueAuthorityTests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
 
+        await SqlModelViewRf3ForeignTenantFlow.RunAsync(administrator, reader, mcp, identity.Secret, deadline.Token);
+
         var request = scenario.QueueSql();
         var redacted = await McpCallerAssertions.SdkSuccessAsync(await reader.QueryAsync(request, deadline.Token));
         var redactedMcp = await McpCallerAssertions.SuccessAsync<QueryPage>(await mcp.CallAsync(
@@ -37,16 +39,17 @@ internal sealed class SqlModelViewRf3QueueAuthorityTests(ClusterFixture fixture)
                 + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.QueueCanary}' LIMIT {SqlModelViewRf3Scenario.RowLimit}"
         };
         var denied = await reader.QueryAsync(deniedUse, deadline.Token);
-        await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
+        await SqlModelViewRf3DenialAssertions.SdkAsync(denied, identity.Secret);
         var deniedMcp = await mcp.CallAsync(McpCallerTools.QueryExecute, deniedUse, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(deniedMcp, ErrorCode.PermissionDenied, dispatched: true);
-        await McpCallerAssertions.DoesNotDiscloseAsync(deniedMcp, identity.Secret,
-            SqlModelViewRf3Scenario.QueueCanary);
+        await SqlModelViewRf3DenialAssertions.McpAsync(deniedMcp, identity.Secret);
 
         identity = await SqlModelViewRf3AuthorizationAssertions.GrantSensitiveReadAsync(
             administrator, identity, deadline.Token);
         var visible = await McpCallerAssertions.SdkSuccessAsync(await reader.QueryAsync(
             SqlModelViewRf3AuthorizationAssertions.QueuePrivateProjection(scenario), deadline.Token));
+        var visibleMcp = await McpCallerAssertions.SuccessAsync<QueryPage>(await mcp.CallAsync(
+            McpCallerTools.QueryExecute, SqlModelViewRf3AuthorizationAssertions.QueuePrivateProjection(scenario), deadline.Token));
+        await SqlRf3Protocol.EqualAsync(visible.Rows, visibleMcp.Value.Rows);
         await Assert.That(visible.Rows.Length).IsEqualTo(1);
         using var visibleJson = JsonDocument.Parse(visible.Rows[0].Json);
         await Assert.That(visibleJson.RootElement.GetProperty(SqlModelViewRf3JsonKeys.Secret).GetString())

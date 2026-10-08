@@ -64,15 +64,6 @@ internal static class ClusterFixtureComposition
         }
     }
 
-    internal static Dictionary<string, string> GetContainerNames(DistributedApplicationModel model)
-    {
-        ArgumentNullException.ThrowIfNull(model);
-        return model.Resources.OfType<ContainerResource>()
-            .Where(resource => ClusterFixtureProtocol.IsNodeName(resource.Name))
-            .ToDictionary(resource => resource.Name,
-                resource => resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name, StringComparer.Ordinal);
-    }
-
     internal static Dictionary<string, string> GetContainerNames(IDistributedApplicationTestingBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

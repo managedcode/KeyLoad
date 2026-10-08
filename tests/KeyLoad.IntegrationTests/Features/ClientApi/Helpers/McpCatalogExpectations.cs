@@ -31,6 +31,8 @@ internal static class McpCatalogExpectations
         new(AnnMaintainName, false, false, true, McpExpectedBody.Object, false, [.. AnnRequiredFields]),
         new(TextMaintainName, false, false, true, McpExpectedBody.Object, false, [.. TextRequiredFields]),
         Read(McpCallerTools.DocumentsGet, [McpDiscoveryProtocol.Reference]),
+        Read(McpCallerTools.DocumentsReadFollower, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Reference,
+            "replicaId", "maximumLagPositions"]),
         Read(McpCallerTools.StreamsRead, [McpDiscoveryProtocol.Stream]),
         Read(McpCallerTools.StreamsReplay, [McpDiscoveryProtocol.Stream, McpDiscoveryProtocol.ReducerVersion]),
         Read(McpCallerTools.EventsRead, [McpDiscoveryProtocol.Source]),

@@ -13,8 +13,23 @@ internal static class ControlledPartitionMovementTerminalTrial
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
         ControlledPartitionMovementLoopbackCorpus corpus)
+        => await ExecuteCoreAsync(source, target, listeners, corpus, naturalExpiry: false);
+
+    internal static Task ExecuteNaturalExpiryAsync(ControlledPartitionMovementNode source,
+        ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
+        ControlledPartitionMovementLoopbackCorpus corpus)
+        => ExecuteCoreAsync(source, target, listeners, corpus, naturalExpiry: true);
+
+    private static async Task ExecuteCoreAsync(ControlledPartitionMovementNode source,
+        ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackListeners listeners,
+        ControlledPartitionMovementLoopbackCorpus corpus, bool naturalExpiry)
     {
-        var token = TestContext.Current!.Execution.CancellationToken;
+        var options = UnitExecutionOptions.NativeMovementProcess().Value;
+        var wholeExpiresAt = source.Database.EvaluationClock.GetUtcNow() + options.OperationTimeout;
+        using var deadline = new CancellationTokenSource(options.OperationTimeout, source.Database.EvaluationClock);
+        using var original = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        var token = original.Token;
         var initialPosition = source.Store.Position;
         var seeded = await ControlledPartitionMovementPrepareSeed.ExecuteAsync(source, target, corpus, token);
         var controlSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(PeerKeyBytes));
@@ -28,7 +43,7 @@ internal static class ControlledPartitionMovementTerminalTrial
                 await ControlledPartitionMovementTerminalOperation.ExecuteAsync(source, target, corpus,
                     sourceRuntime, targetRuntime, sourceAdmission, targetAdmission,
                     ControlledPartitionMovementPrepareRequest.CallerAddress(listeners), seeded.Receipt,
-                    seeded.Authority, seeded.RecordedAt, initialPosition, token)));
+                    seeded.Authority, seeded.RecordedAt, initialPosition, wholeExpiresAt, naturalExpiry ? options.IssuedGrantExpiryWindow : TimeSpan.Zero, token)));
     }
 
     private static async Task WithSourceAdmissionAsync(ControlledPartitionMovementNode source,

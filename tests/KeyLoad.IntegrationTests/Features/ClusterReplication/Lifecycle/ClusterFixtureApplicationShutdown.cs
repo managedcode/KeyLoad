@@ -1,8 +1,6 @@
 using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -58,9 +56,7 @@ internal static class ClusterFixtureApplicationShutdown
             IReadOnlyDictionary<string, ContainerRuntimeInspection>? nodes = null;
             if (coverage is not null && hasRuntime)
             {
-                var names = ClusterFixtureComposition.GetContainerNames(
-                    owned.Services.GetRequiredService<DistributedApplicationModel>());
-                nodes = await coverage.VerifyStoppedAsync(names, deadline!, token).ConfigureAwait(false);
+                nodes = await coverage.VerifyStoppedAsync(deadline!, token).ConfigureAwait(false);
             }
             return (true, nodes);
         }

@@ -3,6 +3,7 @@ namespace KeyLoad.Server;
 /// <summary>Stable version-one tool identities frozen by ADR-039.</summary>
 internal static class McpToolNames
 {
+    internal const string DocumentsReadFollower = "keyload_documents_read_follower";
     internal const string DocumentsGet = "keyload_documents_get";
     internal const string StreamsRead = "keyload_streams_read";
     internal const string StreamsReplay = AggregateReplayProtocol.Tool;

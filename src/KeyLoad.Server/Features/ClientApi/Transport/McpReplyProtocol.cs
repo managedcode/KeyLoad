@@ -16,6 +16,7 @@ internal static class McpReplyProtocol
     private const string SelectedTextMismatch = "The native text projection does not match the authorized source cut.";
     private const string ConfiguredVectorMismatch = "The declared vector profile does not match the configured field.";
     private const string OwnedScopeDenied = "The principal cannot perform this operation in this scope.";
+    private const string UniqueIndexConflict = "A partition-scoped unique index value is already present.";
     private const string CommandContentConflict = "The command ID was already used with different content.";
     private const string GenericFailure = "The database operation could not be completed.";
     private const string UnknownOutcome = "The write outcome is unknown. Retry with the same command identity and payload.";
@@ -35,9 +36,20 @@ internal static class McpReplyProtocol
         (ErrorCode.TokenInvalidated, DocumentInvalidPosition) => DocumentInvalidPosition,
         (ErrorCode.TokenInvalidated, DocumentFuturePosition) => DocumentFuturePosition,
         (ErrorCode.HistoryUnavailable, SelectedTextMismatch) => SelectedTextMismatch,
+        (ErrorCode.HistoryUnavailable, KeyLoad.Core.DatabaseEngine.FollowerReadLagExceeded)
+            => KeyLoad.Core.DatabaseEngine.FollowerReadLagExceeded,
+        (ErrorCode.HistoryUnavailable, KeyLoad.Core.DatabaseEngine.FollowerReadMinimumUnavailable)
+            => KeyLoad.Core.DatabaseEngine.FollowerReadMinimumUnavailable,
+        (ErrorCode.OwnershipLost, KeyLoad.Core.DatabaseEngine.FollowerReadOwnerChanged)
+            => KeyLoad.Core.DatabaseEngine.FollowerReadOwnerChanged,
+        (ErrorCode.OwnershipLost, KeyLoad.Core.DatabaseEngine.FollowerReadReplicaUnavailable)
+            => KeyLoad.Core.DatabaseEngine.FollowerReadReplicaUnavailable,
+        (ErrorCode.Validation, KeyLoad.Core.DatabaseEngine.FollowerReadInvalid)
+            => KeyLoad.Core.DatabaseEngine.FollowerReadInvalid,
         (ErrorCode.Validation, ConfiguredVectorMismatch) => ConfiguredVectorMismatch,
         (ErrorCode.PermissionDenied, OwnedScopeDenied) => OwnedScopeDenied,
         (ErrorCode.Conflict, CommandContentConflict) => CommandContentConflict,
+        (ErrorCode.Conflict, UniqueIndexConflict) => UniqueIndexConflict,
         _ => CodeDetail(code)
     };
 

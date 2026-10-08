@@ -42,8 +42,9 @@ function Add-FcProcessChunk([string] $Text, [Text.StringBuilder] $Buffer, [long]
     [void] $Buffer.Append($Text)
 }
 
-function New-FcProcessReader([IO.StreamReader] $Reader, [char[]] $Buffer) {
-    [ordered]@{ reader = $Reader; buffer = $Buffer; task = $Reader.ReadAsync($Buffer, 0, $Buffer.Length) }
+function New-FcProcessReader([IO.StreamReader] $Reader, [char[]] $Buffer, [IO.TextWriter] $ForwardWriter = $null) {
+    [ordered]@{ reader = $Reader; buffer = $Buffer; forwardWriter = $ForwardWriter
+        task = $Reader.ReadAsync($Buffer, 0, $Buffer.Length) }
 }
 
 function Start-FcNextProcessRead([Collections.IDictionary] $State) {
@@ -55,7 +56,13 @@ function Consume-FcProcessRead([Collections.IDictionary] $State, [Text.StringBui
     $count = $State.task.GetAwaiter().GetResult()
     if ($count -eq 0) { return $false }
     if (-not $Counter.Overflow) {
-        Add-FcProcessChunk ([string]::new([char[]] $State.buffer, 0, $count)) $Output $MaximumCharacters $Failures $Counter
+        $chunk = [string]::new([char[]] $State.buffer, 0, $count)
+        $beforeLength = $Output.Length
+        Add-FcProcessChunk $chunk $Output $MaximumCharacters $Failures $Counter
+        $admittedLength = $Output.Length - $beforeLength
+        if ($null -ne $State.forwardWriter -and $admittedLength -gt 0) {
+            $State.forwardWriter.Write($chunk.Substring(0, $admittedLength))
+        }
     }
     if ($Counter.Overflow) { return $false }
     Start-FcNextProcessRead $State
@@ -90,8 +97,8 @@ function Start-FcProcessSettlement([Diagnostics.Process] $Process, [Collections.
     if ($State.settling) { return }
     $State.settling = $true
     $State.deadline = [Threading.Tasks.Task]::Delay([TimeSpan]::FromSeconds($SettlementTimeoutSeconds))
-    Close-FcProcessReaders $State $Failures
     Stop-FcProcessTree $Process $Failures
+    Close-FcProcessReaders $State $Failures
 }
 
 function Stop-FcNativeMergeOwner([Collections.IDictionary] $State) {
@@ -142,16 +149,19 @@ function Observe-FcProcessTask([Diagnostics.Process] $Process, [Collections.IDic
 }
 
 function StartAndDrain-FcCoverageProcess([Diagnostics.Process] $Process, [int] $TimeoutSeconds,
-    [int] $SettlementTimeoutSeconds, [int] $MaximumOutputCharacters, [Collections.Generic.List[Exception]] $Failures) {
+    [int] $SettlementTimeoutSeconds, [int] $MaximumOutputCharacters, [Collections.Generic.List[Exception]] $Failures,
+    [bool] $ForwardToConsole = $false) {
     $started = $false
     try { $started = $Process.Start() }
     catch [System.Exception] { Add-FcProcessFailure $_.Exception $Failures }
     if (-not $started) { return [ordered]@{ started = $false; exitCode = $script:FcNativeMergeProcess.NotStartedExitCode; stdout = ''; stderr = ''; exitJoined = $true; outputJoined = $true; errorJoined = $true; disposed = $false } }
     $output = [Text.StringBuilder]::new(); $errorOutput = [Text.StringBuilder]::new()
     $stdoutReader = $Process.StandardOutput; $stderrReader = $Process.StandardError
+    $stdoutForward = if ($ForwardToConsole) { [Console]::Out } else { $null }
+    $stderrForward = if ($ForwardToConsole) { [Console]::Error } else { $null }
     $state = [ordered]@{ exitTask = $Process.WaitForExitAsync(); stdoutReader = $stdoutReader; stderrReader = $stderrReader
-        stdout = (New-FcProcessReader $stdoutReader ([char[]]::new($script:FcNativeMergeInput.ReadBufferBytes)))
-        stderr = (New-FcProcessReader $stderrReader ([char[]]::new($script:FcNativeMergeInput.ReadBufferBytes)))
+        stdout = (New-FcProcessReader $stdoutReader ([char[]]::new($script:FcNativeMergeInput.ReadBufferBytes)) $stdoutForward)
+        stderr = (New-FcProcessReader $stderrReader ([char[]]::new($script:FcNativeMergeInput.ReadBufferBytes)) $stderrForward)
         exitJoined = $false; outputJoined = $false; errorJoined = $false; exitCode = $script:FcNativeMergeProcess.NotStartedExitCode
         exitCodeObserved = $false; exitFailureRecorded = $false; settlementFailureRecorded = $false; settling = $false; readersClosed = $false
         deadline = [Threading.Tasks.Task]::Delay([TimeSpan]::FromSeconds($TimeoutSeconds))
@@ -187,14 +197,14 @@ function StartAndDrain-FcCoverageProcess([Diagnostics.Process] $Process, [int] $
 }
 
 function Invoke-FcCoverageProcess([string] $Executable, [string[]] $Arguments, [int] $TimeoutSeconds,
-    [int] $MaximumOutputCharacters) {
+    [int] $MaximumOutputCharacters, [bool] $ForwardToConsole = $false) {
     if ($TimeoutSeconds -le 0 -or $MaximumOutputCharacters -le 0 -or $script:FcNativeMergeInput.SettlementTimeoutSeconds -le 0) {
         throw $script:FcNativeMergeProcess.ExitMessage
     }
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = New-FcCoverageProcessStartInfo $Executable $Arguments
     $failures = [Collections.Generic.List[Exception]]::new()
-    $state = StartAndDrain-FcCoverageProcess $process $TimeoutSeconds $script:FcNativeMergeInput.SettlementTimeoutSeconds $MaximumOutputCharacters $failures
+    $state = StartAndDrain-FcCoverageProcess $process $TimeoutSeconds $script:FcNativeMergeInput.SettlementTimeoutSeconds $MaximumOutputCharacters $failures $ForwardToConsole
     $disposed = $false
     try { $process.Dispose(); $disposed = $true }
     catch [System.Exception] { $failures.Add($_.Exception) }

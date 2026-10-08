@@ -24,6 +24,16 @@ internal static class ControlledPartitionMovementRetiredSourceAssertions
         var before = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;
+        var placement = source.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
+            new(Version, ControlledPartitionMovementCorpus.Partition));
+        await Assert.That(placement.IsFallback).IsFalse();
+        await Assert.That(placement.PhysicalShardId).IsEqualTo(target.PhysicalOwner.PhysicalShardId);
+        await Assert.That(placement.Incarnation).IsEqualTo(target.PhysicalOwner.Incarnation);
+        await Assert.That(placement.VoterIds.SequenceEqual(target.PhysicalOwner.VoterIds, StringComparer.Ordinal)).IsTrue();
+        var original = NativeSerialization.Deserialize<CommitReceipt>(originalReceipt);
+        await Assert.That(original.Token.Incarnation).IsEqualTo(source.PhysicalOwner.Incarnation);
+        await Assert.That(original.Token.OwnershipEpoch).IsEqualTo(source.PhysicalOwner.PlacementEpoch);
+        await Assert.That(placement.PlacementEpoch > original.Token.OwnershipEpoch).IsTrue();
         var replay = source.Journal.Submit(ControlledPartitionMovementCorpus.SeedOperation(source.Database,
             originalRecordedAt), cancellationToken);
         await ControlledPartitionMovementReceiptAssertions.ReplayAsync(replay, originalReceipt);

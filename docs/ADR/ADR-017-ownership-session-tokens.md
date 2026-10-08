@@ -152,6 +152,8 @@ Frozen bounded native authority observation (owner approved2026-10-08): under th
 
 Service-user invariant clarification: the fault Dockerfile inherits and restores the base APP_UID USER. The selected resources preserve the already existing ClusterResourceSettings --user uid:gid override exactly, captured through pinned public ContainerRuntimeArgsCallbackAnnotation before adding NET_ADMIN. They do not change default host/container identity or start service as root. Native tool/read commands alone use --user0 inside each verified owned namespace.
 
+TASK-KL021-NATIVE-NETWORK-IDENTITY-003 refines the existing REQ-MTOKEN-ISOLATION-003 / AC-MTOKEN-ISOLATION-003/005 native inspection contract without changing topology or namespace ownership. Docker's original NetworkMode must exactly equal either the nonempty name or nonempty native ID of its sole actual attached network; the same entry supplies both identities. An unrelated mode, absent/malformed ID or multiple networks fails closed, with no alias/prefix lookup or raw identity export. The original schema2 Linux3458/run37821315110/attempt1 admission receipt proves modeMatchesAttachedId=true and modeMatchesAttachedName=false. Root freezes this predicate correction in TestInfrastructure, changes only IntegrationTests Features/ClusterReplication/Validation/ReplicaIsolationContainerAdmission, builds/reviews it and executes the existing full former-leader SDK/official-MCP minimum-token/isolation/restoration flow through the Linux-owned fault image. All original privilege, service-user, PID, source/image/incarnation and actual majority-ACK/cleanup gates remain unchanged. Rollout is the next native source/image cohort; rollback removes the predicate refinement without any database migration. Accepted; genuine current-source runtime qualification is pending.
+
 Persisted NodeStatus.NodeId is a physical GUID independent of Aspire node1/node2/node3 resource names. The real flow captures each original authenticated endpoint identity and requires it unchanged after restoration; public SDK/official MCP status comparisons bind that actual GUID rather than an invented resource-name identity.
 
 
@@ -255,3 +257,46 @@ IntegrationTests ClusterReplication Lifecycle/ReplicaIsolationOwner.cs owns part
 Related REQ/AC-SESSIONREAD-001..004. The existing IntegrationTests ClusterReplication DocumentSessionReadRf3Authorization owns a complete grant revoke→valid-minimum rejection→administrator unchanged document→grant restore→healthy continuation through direct SDK, official MCP and Q1 CALL. Denied SDK typed reads carry no value; denied SQL SDK reads carry no JSON value; actual official errors retain dispatched request identity, safe envelope and private-data omission. Full administrator document equals the independent literal reference/revision/JSON/unredacted/empty-redactions model.
 
 Stages: canonical ClusterReplication contract and this amendment; private guarded assertion-only delta; root source join and native build; unchanged fixture-owned failover case and delivered-source Linux RF3 original evidence. Dependencies, routing, authorization, token validation, storage format, admission and lifecycle unchanged. Root owns shared integration/compiler/Git, author owns complete adapter oracle. No data migration; rollback this coherent assertion-only delta. Original failures remain preserved and acceptance remains open until required runtime reports.
+
+
+## TASK-KL021-FOLLOWER-SNAPSHOT-001 implementation contract
+
+Decision and related REQ/AC-FOLLOWERREAD-001..005 are canonical in
+[DocumentStorage](../Features/DocumentStorage.md#task-kl021-follower-snapshot-001-explicit-bounded-follower-document-reads).
+The architecture's required follower mode is a separate explicit version1 point
+read, preserving the initial strong/minimum stage boundary. Signed server-only
+DatabaseCredentialWitness, FollowerDocumentReadCapability and local snapshot use
+stable generated Orleans aliases/Ids. Existing owning DatabaseEngine credential
+issuer/verifier serves both Authenticate and final same-cut key/principal/policy/
+current+captured row validation. Public callers cannot create proof or trusted roles.
+
+Ordered integration: frozen contract and broader unsupported inventory; guarded
+Abstractions DTO/alias + Core Authorization/DocumentStorage + Orleans
+ClusterRouting capture/barrier/final-admission + Server canonical routes/catalog/
+safe-output + shared SDK transport; authored native Unit17 ZoneTree functional and
+Schema2 supporting cases;28 actual independently owned Aspire RF3 SDK/official
+MCP/Q1 held/refusal/cancel/no-quorum/restoration cases; root full solution/native
+census/source/PE/PDB checks and exact-current committed Linux qualification.
+Root alone owns shared source joins/compiler/formatter/Git; author retains whole
+acceptance ownership. Existing dependencies, unique request grain, node-local
+store/apply ownership, admission/deadline/cancel/drain, readiness and cleanup are
+unchanged. No data/storage/legacy migration, private transport, history allocation
+or stronger durability promise is introduced. Homogeneous current first-release
+sources/images include the new explicit operation. Rollback removes the new
+capability and its catalog/SDK/tests coherently, retaining original strong routes.
+New source/tests remain unexecuted and ADR completion cannot be inferred. Broader
+KL021 model stale modes and remote forwarding stay open until their contracts
+and actual acceptance are complete.
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Gateway
+  participant RequestGrain
+  participant LocalOwner
+  Gateway->>RequestGrain: Signed server-created native witness
+  RequestGrain->>LocalOwner: Capture one bounded committed document cut
+  RequestGrain->>LocalOwner: Fresh quorum and apply barrier
+  RequestGrain->>LocalOwner: Revalidate key principal policy and both rows
+  LocalOwner-->>Client: Explicit data cut and current authority cut or safe refusal
+```

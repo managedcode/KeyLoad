@@ -4,6 +4,12 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      task:
+        description: 'Acceptance task; all runs complete qualification and all task lanes'
+        type: choice
+        default: all
+        options: [all, KL-011, KL-014, KL-015]
 permissions:
   contents: read
 concurrency:
@@ -21,6 +27,7 @@ jobs:
         run: node scripts/Features/RepositoryGovernance/verify.mjs
   analyzer-rules:
     name: Test code analyzers
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -95,6 +102,7 @@ jobs:
           if-no-files-found: error
   verify:
     name: Build and test KeyLoad
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
     needs: repository-checks
     strategy:
       fail-fast: false
@@ -210,8 +218,84 @@ jobs:
           name: code-quality-${{ matrix.os }}
           path: artifacts/code-quality/**
           if-no-files-found: error
+  task-acceptance:
+    name: Qualify ${{ matrix.task }} (${{ matrix.profile }} caller)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJSON(inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || '["KL-011","KL-014","KL-015"]') }}
+        profile: [normal, scalar]
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Check Docker
+        run: docker version
+      - name: Build this task's KeyLoad server image
+        id: images
+        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs --server-only
+      - name: Configure this task's Docker image
+        shell: bash
+        env:
+          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
+        run: |
+          test -n "$KEYLOAD_SERVER_IMAGE"
+          printf 'KeyLoad__ContainerImages__Server=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+      - name: Restore .NET packages
+        run: dotnet restore KeyLoad.slnx
+      - name: Build the complete current solution
+        id: build
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Prepare original task source and test-image receipts
+        id: source-identity
+        shell: pwsh
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode prepare -Root $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Discover and execute this task's complete acceptance flows
+        id: acceptance
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.source-identity.outcome == 'success' }}
+        shell: pwsh
+        env:
+          KEYLOAD_ACCEPTANCE_TASK: ${{ matrix.task }}
+          KEYLOAD_ACCEPTANCE_PROFILE: ${{ matrix.profile }}
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/task-acceptance.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
+            -Task $env:KEYLOAD_ACCEPTANCE_TASK -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify unchanged task source and test images
+        if: ${{ !cancelled() && steps.source-identity.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode verify -Root $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Clean up this task's Docker registry
+        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
+        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
+      - name: Save this task's original acceptance results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: task-acceptance-${{ matrix.task }}-${{ matrix.profile }}
+          path: |
+            TestResults/task-acceptance/**
+            artifacts/code-quality/**
+            ${{ runner.temp }}/keyload-images/**
+          if-no-files-found: error
   docker-rf3:
     name: Test three-node database
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -260,7 +344,12 @@ jobs:
       - name: Check original three-node reports for diagnostic upload
         id: rf3-original-reports
         if: ${{ !cancelled() && (steps.rf3-required.outcome == 'success' || steps.rf3-required.outcome == 'failure') }}
-        run: rg --files --no-ignore TestResults/rf3-required -g '*.trx'
+        shell: bash
+        run: |
+          test -d TestResults/rf3-required
+          original_trx=$(find TestResults/rf3-required -type f -name '*.trx' -size +0c -print -quit)
+          test -n "$original_trx"
+          printf '%s\n' "$original_trx"
       - name: Save original three-node diagnostics before covered suites
         if: ${{ !cancelled() && steps.rf3-original-reports.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -14,6 +14,7 @@ internal sealed class NativeCoverageRf3FixtureOwner
     private readonly HashSet<NativeCoverageRf3CaseIdentity> executedCases = [];
     private readonly Lock caseGate = new();
     private IReadOnlyDictionary<string, ContainerRuntimeInspection>? startedNodes;
+    private IReadOnlyDictionary<string, string>? startedNames;
 
     private NativeCoverageRf3FixtureOwner(NativeCoverageRf3FixtureContext context,
         ClusterFixtureSourceImage sourceImage, IOptions<NativeCoverageExecutionOptions> options)
@@ -54,8 +55,13 @@ internal sealed class NativeCoverageRf3FixtureOwner
         => NativeCoverageRf3ImageIdentity.VerifyBeforeStartAsync(app, context, token);
 
     internal async Task VerifyStartedAsync(IReadOnlyDictionary<string, string> names, CancellationToken token)
-        => startedNodes = await NativeCoverageRf3ImageIdentity.VerifyStartedAsync(names, context, token)
+    {
+        var retainedNames = new Dictionary<string, string>(names, StringComparer.Ordinal);
+        var verified = await NativeCoverageRf3ImageIdentity.VerifyStartedAsync(retainedNames, context, token)
             .ConfigureAwait(false);
+        startedNames = retainedNames;
+        startedNodes = verified;
+    }
 
     internal void RegisterCase<TCase>(string methodName)
     {
@@ -75,12 +81,14 @@ internal sealed class NativeCoverageRf3FixtureOwner
     internal NativeCoverageCleanupDeadline CreateCleanupDeadline() => new(options.Value.ApplicationCleanupTimeout);
 
     internal async Task<IReadOnlyDictionary<string, ContainerRuntimeInspection>?> VerifyStoppedAsync(
-        IReadOnlyDictionary<string, string> names, NativeCoverageCleanupDeadline deadline, CancellationToken token)
+        NativeCoverageCleanupDeadline deadline, CancellationToken token)
     {
         if (startedNodes is null)
         {
             return null;
         }
+        var names = startedNames
+            ?? throw new InvalidOperationException(NativeCoverageRf3FixtureProtocol.InvalidContext);
         return await deadline.WaitAsync(() => NativeCoverageRf3ImageIdentity.VerifyStoppedAsync(
             names, startedNodes, context, token)).ConfigureAwait(false);
     }

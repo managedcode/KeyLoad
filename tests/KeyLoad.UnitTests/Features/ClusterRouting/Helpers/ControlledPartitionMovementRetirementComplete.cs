@@ -15,12 +15,13 @@ internal static class ControlledPartitionMovementRetirementComplete
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         ControlledPartitionMovementLoopbackCorpus corpus, PartitionMovePhaseResult finalized,
         PartitionMovePhaseResult terminal, Guid originalGrantId, ReadOnlyMemory<byte> originalCleanupBody,
-        string callerAddress, DateTimeOffset expiry, CancellationToken cancellationToken)
+        string callerAddress, DateTimeOffset wholeExpiresAt, CancellationToken cancellationToken)
     {
         var control = finalized.Control ?? throw new InvalidOperationException("Actual Published control is absent.");
         var body = NativeSerialization.Serialize(new PartitionMoveCompletionBody(
             PhysicalShardCatalogFixture.RootPrincipalId, control, terminal.Journal, null,
             originalGrantId, null, originalCleanupBody, ReadOnlyMemory<byte>.Empty));
+        var expiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, runtime, wholeExpiresAt, cancellationToken);
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,
             corpus.Control.Owner, control.SourcePlacement, corpus.Destination.Owner,
             finalized.Journal.ControlIntentDigest, PartitionMovePeerStage.ControlCompleteRetirement,

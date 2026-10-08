@@ -732,3 +732,57 @@ Ownership: IntegrationTests ClusterRouting Assertions existing receipt oracle pl
 
 
 KL014 interrupted replay owner-oracle follow-on: the healthy complete receipt is independently constructed from the caller-issued fresh command ID, real administrator placement witness (incarnation, exact atomic partition, current ownership epoch), literal putDocument mutation and QuorumProcessDurable. Its observed position must strictly exceed both original receipt and precommand same-owner Applied, and not exceed postcommand same-owner Applied; no exact position reservation is claimed. SDK/official MCP minimum-token reads with that actual healthy token must each equal the complete literal healthy document. Existing complete receipt parity, post-conflict original replay and post-healthy original replay/no-revert assertions remain unchanged. The existing administrator is passed only for authenticated native placement/status observations; the database effects retain the original persisted nonadministrator.
+
+
+### KL011 unique-conflict MCP parity
+
+REQ-MCP-003 / AC-MCP-005 and DocumentStorage REQ-DSTORE-002 / AC-DSTORE-002:
+The native SDK and official MCP duplicate-unique write failure retain the same
+fixed safe detail `A partition-scoped unique index value is already present.`.
+Only the exact Conflict/code/literal pair is admitted by the public MCP writer;
+null, arbitrary, suffixed private text and a different code keep the prior fixed
+safe response. No key, index, document, credential or caller value is reflected.
+Existing whole RF3 `CompositeUniqueRf3Tests.Kl011CompositeUniqueDeltasRollbackScopeAndPersistedGrantRestorationMatchBothClients`
+retains every independent literal row/index/cut, rollback, cross-partition and
+restored-grant assertion. `McpReplyOwnerTests.UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation`
+adds supporting non-contributor transport controls for the complete native error
+wrapper, inclusive byte bound, rejection/privacy and healthy complete reply.
+ADR-039 and ADR-017 supply the existing public safe-error and strict-index
+contracts; no new transport or database architecture is introduced.
+Authenticated Linux 3458/run37821315110/attempt1 failed the old exact MCP detail
+assertion while SDK detail succeeded. This repair is unexecuted until native
+normal/scalar and current-source complete RF3 qualification run.
+
+### TASK-MCP-BODYLESS-RF3-CALLER-001
+
+REQ-MCP-003 / AC-MCP-003/005 and Search's complete native ANN/text maintenance,
+read-cancellation and healthy continuation flows retain the existing bodyless
+administrative status schema. The actual official SDK client must submit an
+empty argument dictionary for `keyload_admin_status`; `{request:null}` has an
+extra argument and the unchanged native decoder correctly rejects it. The test
+client gets an explicit bodyless invocation, used by the ANN and text scenario
+owners before native owner/placement selection. Typed request calls retain their
+original exact framing and null rejection; no generic null normalization or
+server-side compatibility path is added. ADR-039 supplies the existing strict
+public schema and official-SDK contract. Original Linux3458 RF3 failures at both
+scenario status calls remain retained; root owns this paired caller correction
+and current-source full maintenance/cancellation flows remain required evidence.
+
+
+## Explicit follower document public contract
+
+REQ/AC-FOLLOWERREAD-001..005 in [DocumentStorage](DocumentStorage.md#task-kl021-follower-snapshot-001-explicit-bounded-follower-document-reads)
+and ADR-017 add only `/v1/documents/read-follower` /
+`keyload_documents_read_follower` / typed SDK ReadFollowerDocumentAsync.
+The existing strict typed canonical decoder/gateway and Q1 CALL compile to the
+same admitted unique read grain. Default strong GET and nullable absent Document
+contracts stay unchanged. Follower result root is required; only its Document
+may be null under current policy. Version/replica/position lag are explicit and
+required, minimum optional. Public schema excludes the server-only native witness.
+Canonical operation inventory75/body-read corpus31 and real SDK-independent RF3
+tool/schema expectations include the new exact operation; initial gateway tools
+remain3. New FollowerDocumentSchemaTests are supporting noncontributors; real
+ZoneTree/full RF3 flows own functional acceptance. Fixed safe literal mapping
+includes only owned follower input/lag/minimum/owner/role failures; arbitrary
+text remains excluded. All new native and current-source Linux gates are pending;
+Q1 SELECT/AST and broader model stale modes are explicitly unsupported.

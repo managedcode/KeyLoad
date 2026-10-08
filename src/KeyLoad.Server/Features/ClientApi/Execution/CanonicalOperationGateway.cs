@@ -24,6 +24,8 @@ internal static class CanonicalOperationGateway
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
+        if (readKind == GrainReadKind.FollowerDocument)
+        { payload = FollowerReadCredentialCapability.Wrap(context, payload); }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
         var signed = readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)

@@ -203,3 +203,16 @@ function Assert-FcExpectedCases([object] $Contract) {
     }
     if ($seen.Count -ne $t.ContributorCaseCount -or -not $admittedClasses.SetEquals($classes)) { throw $t.ErrorContract }
 }
+
+# Closed immutable admission shared by the source producers and original-manifest validator.
+function Test-FcTaskAcceptanceScriptName([string] $Name) {
+    switch -CaseSensitive ($Name) {
+        'task-acceptance.ps1' { return $true }
+        'task-acceptance.verify.ps1' { return $true }
+        'task-acceptance.contract.json' { return $true }
+    }
+    if ($Name.StartsWith('task-acceptance', [StringComparison]::Ordinal)) {
+        throw $script:FunctionalCoverage.ErrorInventory
+    }
+    return $false
+}

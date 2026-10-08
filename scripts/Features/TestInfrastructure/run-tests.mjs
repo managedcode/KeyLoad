@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const defaultMaximumParallelTests = 20;
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['unit-scalar', 'KeyLoad.UnitTests'], ['recovery', 'KeyLoad.RecoveryTests'],
@@ -58,9 +59,9 @@ export function nativeSelection(input, inherited = process.env) {
     ]);
   }
   const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore', '--configuration', 'Release',
-    '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', values.get('Execution:MaximumParallelTests') ?? '8',
+    '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', values.get('Execution:MaximumParallelTests') ?? String(defaultMaximumParallelTests),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
-  const parallel = Number(values.get('Execution:MaximumParallelTests') ?? '8');
+  const parallel = Number(values.get('Execution:MaximumParallelTests') ?? defaultMaximumParallelTests);
   if (!Number.isInteger(parallel) || parallel < 1 || parallel > 64) throw new Error('Invalid native parallelism.');
   if (suite === 'unit-scalar') environment.DOTNET_EnableHWIntrinsic = '0';
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['rf3', 'comparison'].includes(suite) ? 60 : 30)}m`);

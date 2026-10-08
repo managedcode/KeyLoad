@@ -1,0 +1,601 @@
+{
+  "schemaVersion": 1,
+  "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+  "tasks": [
+    {
+      "taskId": "KL-011",
+      "selections": [
+        {
+          "selectionId": "unit",
+          "suite": "unit",
+          "filter": "/*/*/(DocumentScalarIndexMutationTests)|(CompositeSparseUniqueTests)|(DocumentIndexCommittedScanTests)|(KeyCodecTests)|(QueryResourceIndexBudgetTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.DocumentIndexCommittedScanTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.DocumentIndexCommittedScanTests",
+              "methodName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+              "instanceName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/DocumentIndexCommittedScanTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentScalarIndexMutationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentScalarIndexMutationTests",
+              "methodName": "AcDstore002ReplacePatchDeleteAndConflictPreserveScalarIndexImages",
+              "instanceName": "AcDstore002ReplacePatchDeleteAndConflictPreserveScalarIndexImages",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentScalarIndexMutationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "methodName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas",
+              "instanceName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(False, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "methodName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas",
+              "instanceName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(False, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "methodName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas",
+              "instanceName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(True, False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.CompositeSparseUniqueTests",
+              "methodName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas",
+              "instanceName": "Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(True, True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "methodName": "GoldenKeysRemainStable",
+              "instanceName": "GoldenKeysRemainStable",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "methodName": "TenThousandSeededDecimalKeysRoundTripAndSortNumerically",
+              "instanceName": "TenThousandSeededDecimalKeysRoundTripAndSortNumerically",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "methodName": "StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide",
+              "instanceName": "StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
+              "methodName": "Int64AndFiniteDoublesPreserveOrder",
+              "instanceName": "Int64AndFiniteDoublesPreserveOrder",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.QueryResourceIndexBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.QueryExecution.QueryResourceIndexBudgetTests",
+              "methodName": "AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget",
+              "instanceName": "AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryResourceIndexBudgetTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-conflict",
+          "suite": "unit",
+          "filter": "/*/*/TransactionTests/UniqueConflictRollsBackDocumentIndexEventAndEnqueue",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests",
+              "methodName": "UniqueConflictRollsBackDocumentIndexEventAndEnqueue",
+              "instanceName": "UniqueConflictRollsBackDocumentIndexEventAndEnqueue",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-mcp-control",
+          "suite": "unit",
+          "filter": "/*/*/McpReplyOwnerTests/UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.McpReplyOwnerTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpReplyOwnerTests",
+              "methodName": "UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation",
+              "instanceName": "UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpReplyOwnerTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "process",
+          "suite": "recovery",
+          "filter": "/*/*/(ScalarIndexProcessRecoveryTests)|(CompositeIndexProcessRecoveryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.Features.DocumentStorage.ScalarIndexProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.DocumentStorage.ScalarIndexProcessRecoveryTests",
+              "methodName": "AcDstoreIndexProcess001ReferenceModelSurvivesAcknowledgedAndInflightRestart",
+              "instanceName": "AcDstoreIndexProcess001ReferenceModelSurvivesAcknowledgedAndInflightRestart",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/DocumentStorage/Cases/ScalarIndexProcessRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.DocumentStorage.CompositeIndexProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.DocumentStorage.CompositeIndexProcessRecoveryTests",
+              "methodName": "AcDstoreIndexProcess001ReferenceModelSurvivesAcknowledgedAndInflightRestart",
+              "instanceName": "AcDstoreIndexProcess001ReferenceModelSurvivesAcknowledgedAndInflightRestart",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/DocumentStorage/Cases/CompositeIndexProcessRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3",
+          "suite": "rf3",
+          "filter": "/*/*/CompositeUniqueRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.CompositeUniqueRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.CompositeUniqueRf3Tests(ClusterFixture)",
+              "methodName": "Kl011CompositeUniqueDeltasRollbackScopeAndPersistedGrantRestorationMatchBothClients",
+              "instanceName": "Kl011CompositeUniqueDeltasRollbackScopeAndPersistedGrantRestorationMatchBothClients",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/CompositeUniqueRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-014",
+      "selections": [
+        {
+          "selectionId": "unit",
+          "suite": "unit",
+          "filter": "/*/*/(KeyLoadClientTransportTests)|(KeyLoadClientNullReadTests)|(KeyLoadClientNullWriteTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "methodName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads",
+              "instanceName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads(null)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "methodName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads",
+              "instanceName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads({)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+              "methodName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation",
+              "instanceName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation(null)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+              "methodName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation",
+              "instanceName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation({)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "methodName": "StatusReadsLargeChunkedTypedResponseOverRealKestrel",
+              "instanceName": "StatusReadsLargeChunkedTypedResponseOverRealKestrel",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "methodName": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+              "instanceName": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientTransportTests",
+              "methodName": "ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized",
+              "instanceName": "ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3",
+          "suite": "rf3",
+          "filter": "/*/*/(ColdBootstrapSdkTests)|(RequestCqrsPhaseFaultTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClientApi.ColdBootstrapSdkTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClientApi.ColdBootstrapSdkTests",
+              "methodName": "Kl014FreshOwnedRf3BootstrapCliAndPersistedSdkRetainExactCommandIdentity",
+              "instanceName": "Kl014FreshOwnedRf3BootstrapCliAndPersistedSdkRetainExactCommandIdentity",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClientApi/Cases/ColdBootstrapSdkTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "methodName": "SdkBeforeSubmitCancellationHasNoEffectUntilStableRetry",
+              "instanceName": "SdkBeforeSubmitCancellationHasNoEffectUntilStableRetry",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsPhaseFaultTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "methodName": "OfficialMcpBeforeSubmitCancellationHasNoEffectUntilStableRetry",
+              "instanceName": "OfficialMcpBeforeSubmitCancellationHasNoEffectUntilStableRetry",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsPhaseFaultTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "methodName": "SdkSubmitReturnedCancellationReusesCommittedReceipt",
+              "instanceName": "SdkSubmitReturnedCancellationReusesCommittedReceipt",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsPhaseFaultTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultTests",
+              "methodName": "OfficialMcpSubmitReturnedCancellationReusesCommittedReceipt",
+              "instanceName": "OfficialMcpSubmitReturnedCancellationReusesCommittedReceipt",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsPhaseFaultTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-015",
+      "selections": [
+        {
+          "selectionId": "native-telemetry",
+          "suite": "unit",
+          "filter": "/*/*/(AuthorizationTelemetryWholeFlowTests)|(AuthorizationTelemetryClientWholeFlowTests)|(OrleansRuntimeTelemetryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "methodName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog",
+              "instanceName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(ClientExtraLink)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "methodName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog",
+              "instanceName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(ClientTraceStateLink)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "methodName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog",
+              "instanceName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(ClientTaggedLink)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "methodName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog",
+              "instanceName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(ClientEvent)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(ExcessParentLinks)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(InheritedParentBaggage)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(ExcessTags)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(Link)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(Event)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002RealHttpAndLogExportsKeepSafeMetadataAfterDenialThenHealthyCatalog",
+              "instanceName": "AcAuthKl015002RealHttpAndLogExportsKeepSafeMetadataAfterDenialThenHealthyCatalog",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryWholeFlowTests",
+              "methodName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup",
+              "instanceName": "AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(ExcessBaggage)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.OrleansRuntimeTelemetryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.OrleansRuntimeTelemetryTests(RequestCqrsClusterFixture)",
+              "methodName": "AcOrl012RealSignedOperationsExportBoundedPrivateNativeTelemetry",
+              "instanceName": "AcOrl012RealSignedOperationsExportBoundedPrivateNativeTelemetry",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/OrleansRuntimeTelemetryTests.cs"
+            }
+          ]
+        },
+        {
+          "selectionId": "c1-build-logger-controls",
+          "suite": "rf3",
+          "filter": "/*/*/(RequestCqrsRf3DiagnosticsTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "MalformedAspireLogLinesAreExcludedFromTheBoundedArtifact",
+              "instanceName": "MalformedAspireLogLinesAreExcludedFromTheBoundedArtifact",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "EachAspireNodeRetainsOnlyThirtyTwoClosedRecords",
+              "instanceName": "EachAspireNodeRetainsOnlyThirtyTwoClosedRecords",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "IndependentNativeResourceConsumerDoesNotBlockOwnedCaptureJoin",
+              "instanceName": "IndependentNativeResourceConsumerDoesNotBlockOwnedCaptureJoin",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "SuccessEvidenceWaitsForOriginalSubscriptionsAndIsMemoized",
+              "instanceName": "SuccessEvidenceWaitsForOriginalSubscriptionsAndIsMemoized",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "ExactCallerCancellationAtAdmissionSettlesEveryOriginalCapture",
+              "instanceName": "ExactCallerCancellationAtAdmissionSettlesEveryOriginalCapture",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "NativeEarlyStreamCompletionFailsWithoutPublishingEvidence",
+              "instanceName": "NativeEarlyStreamCompletionFailsWithoutPublishingEvidence",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3DiagnosticsTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "NativeAdmissionCancellationRetainsFailureAndJoinedCleanupBeforeHealthyCapture",
+              "instanceName": "NativeAdmissionCancellationRetainsFailureAndJoinedCleanupBeforeHealthyCapture",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3DiagnosticsTests.cs"
+            }
+          ]
+        },
+        {
+          "selectionId": "bounded-log-controls",
+          "suite": "rf3",
+          "filter": "/*/*/BoundedDiagnosticLogTests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcDiag003EveryNodeRetainsItsFailureBeforeOversizedNoise",
+              "instanceName": "AcDiag003EveryNodeRetainsItsFailureBeforeOversizedNoise",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/BoundedDiagnosticLogTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcDiag003UnicodeClippingPreservesScalarsAndNodeShares",
+              "instanceName": "AcDiag003UnicodeClippingPreservesScalarsAndNodeShares",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/BoundedDiagnosticLogTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.BoundedDiagnosticLogTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcDiag003ExistingSingleArtifactBoundsRemainExact",
+              "instanceName": "AcDiag003ExistingSingleArtifactBoundsRemainExact",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/BoundedDiagnosticLogTests.cs"
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-authority-core",
+          "suite": "rf3",
+          "filter": "/*/*/(AdmissionClusterTests)|(CrossTenantRf3WholeFlowTests)|(RequestCqrsAuthorityFaultTests)|(RequestCqrsRf3McpGuardEvidenceTests)|(SqlModelViewRf3EventAuthorityTests)|(SqlModelViewRf3QueueAuthorityTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Authorization.CrossTenantRf3WholeFlowTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Authorization.CrossTenantRf3WholeFlowTests(ClusterFixture)",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+              "instanceName": "Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Authorization/Cases/CrossTenantRf3WholeFlowTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.AdmissionClusterTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.AdmissionClusterTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds",
+              "instanceName": "OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.AdmissionClusterTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.AdmissionClusterTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable",
+              "instanceName": "FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ResourceExecution/Cases/AdmissionClusterTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsAuthorityFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsAuthorityFaultTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
+              "instanceName": "SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsAuthorityFaultTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsAuthorityFaultTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsAuthorityFaultTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
+              "instanceName": "OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsAuthorityFaultTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+              "instanceName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlModelViewRf3QueueAuthorityTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlModelViewRf3QueueAuthorityTests(ClusterFixture)",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "PersistedQueueGrantsRedactCanariesDenyFieldUseAndHonorRevocation",
+              "instanceName": "PersistedQueueGrantsRedactCanariesDenyFieldUseAndHonorRevocation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/SqlModelViewRf3QueueAuthorityTests.cs"
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlModelViewRf3EventAuthorityTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.QueryExecution.SqlModelViewRf3EventAuthorityTests(ClusterFixture)",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "PersistedEventGrantsRedactCanariesDenyFieldUseAndHonorRevocation",
+              "instanceName": "PersistedEventGrantsRedactCanariesDenyFieldUseAndHonorRevocation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/SqlModelViewRf3EventAuthorityTests.cs"
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-query-bounds",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionQueryPublicValidationTests/AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicValidationTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicValidationTests(ClusterFixture)",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups",
+              "instanceName": "AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/PartitionQueryPublicValidationTests.cs"
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-search-bounds",
+          "suite": "rf3",
+          "filter": "/*/*/FilteredSearchRf3Tests/AcFilter003OversizedAllowlistAndCancellationFailWithoutPartialResults",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.FilteredSearchRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.FilteredSearchRf3Tests(ClusterFixture)",
+              "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
+              "methodName": "AcFilter003OversizedAllowlistAndCancellationFailWithoutPartialResults",
+              "instanceName": "AcFilter003OversizedAllowlistAndCancellationFailWithoutPartialResults",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/FilteredSearchRf3Tests.cs"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "maximumParallelTests": 20
+}

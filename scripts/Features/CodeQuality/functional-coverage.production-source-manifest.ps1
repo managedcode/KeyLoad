@@ -226,7 +226,7 @@ function Get-PsmScriptInventory([string] $Root) {
         $item = Get-Item -LiteralPath $path -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
             $item -isnot [IO.FileInfo]) { throw $script:Psm.InvalidInventory }
-        $include = $item.Name -ceq '.dockerignore'
+        $include = (Test-FcTaskAcceptanceScriptName $item.Name) -or $item.Name -ceq '.dockerignore'
         if ($item.Name.StartsWith('functional-coverage', [StringComparison]::Ordinal)) {
             $include = $false
             foreach ($extension in $script:Psm.ScriptExtensions) {

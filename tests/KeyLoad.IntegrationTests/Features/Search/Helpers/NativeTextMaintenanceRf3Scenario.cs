@@ -39,7 +39,7 @@ internal sealed record NativeTextMaintenanceRf3Scenario(PartitionRef Partition)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
         var official = (await McpCallerAssertions.SuccessAsync<NodeStatus>(
-            await mcp.CallAsync<object?>(McpCallerTools.AdminStatus, null, token))).Value;
+            await mcp.CallWithoutBodyAsync(McpCallerTools.AdminStatus, token))).Value;
         await Assert.That(official.NodeId).IsEqualTo(actual.NodeId);
         await Assert.That(official.Incarnation).IsEqualTo(actual.Incarnation);
         if (!Guid.TryParse(actual.NodeId, out var node) || node == Guid.Empty)

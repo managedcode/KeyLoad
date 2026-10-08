@@ -15,6 +15,7 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     private readonly string dataRoot;
     private readonly ContainerRuntimeControl runtime;
     private readonly RequestCqrsRf3Diagnostics diagnostics;
+    private readonly RequestCqrsRf3NativeStartupAdmission nativeAdmission;
     private readonly RequestCqrsLifecycleEvidence? lifecycleEvidence;
     private DistributedApplication? application;
     private IDistributedApplicationTestingBuilder? testingBuilder;
@@ -23,9 +24,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     private RequestCqrsRf3Wave(string dataRoot, ref DistributedApplication? application,
         ContainerRuntimeControl runtime, ref RequestCqrsRf3Diagnostics? diagnostics, ref IDistributedApplicationTestingBuilder? testingBuilder,
-        RequestCqrsLifecycleEvidence? lifecycleEvidence)
+        ref RequestCqrsRf3NativeStartupAdmission? nativeAdmission, RequestCqrsLifecycleEvidence? lifecycleEvidence)
     {
-        if (application is null || diagnostics is null || testingBuilder is null)
+        if (application is null || diagnostics is null || testingBuilder is null || nativeAdmission is null)
         {
             throw new InvalidOperationException("The C1 wave transfer requires its owned Aspire resources.");
         }
@@ -35,10 +36,15 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         this.testingBuilder = testingBuilder;
         testingBuilder = null;
         this.diagnostics = diagnostics;
+        this.nativeAdmission = nativeAdmission;
+        nativeAdmission = null;
         this.lifecycleEvidence = lifecycleEvidence;
         application = null;
         diagnostics = null;
     }
+
+    internal int NativeAdmittedNodeCount => nativeAdmission.AdmittedNodeCount;
+    internal bool NativeAdmissionOwnersJoined => nativeAdmission.IsJoined;
 
     internal DistributedApplication App => application ?? throw new ObjectDisposedException(nameof(RequestCqrsRf3Wave));
 
@@ -65,8 +71,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
         ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,
-        ref IDistributedApplicationTestingBuilder? testingBuilder, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
-        => new(dataRoot, ref application, runtime, ref diagnostics, ref testingBuilder, lifecycleEvidence);
+        ref IDistributedApplicationTestingBuilder? testingBuilder,
+        ref RequestCqrsRf3NativeStartupAdmission? nativeAdmission, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
+        => new(dataRoot, ref application, runtime, ref diagnostics, ref testingBuilder, ref nativeAdmission, lifecycleEvidence);
 
     internal Task KillAsync(string node, CancellationToken cancellationToken)
         => runtime.KillAsync(node, RequestCqrsRf3Protocol.FollowerLossScenario, cancellationToken);
@@ -102,6 +109,8 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         if (owned is null)
         { return; }
         var failures = new List<Exception>();
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => nativeAdmission.DisposeAsync().AsTask(), failures,
+            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
         await CompleteAsync(owned, diagnostics, failures, lifecycleEvidence).ConfigureAwait(false);
         if (await RequestCqrsRf3BuilderCleanup.DisposeAsync(testingBuilder, failures, FailureObserver).ConfigureAwait(false))
         { testingBuilder = null; }

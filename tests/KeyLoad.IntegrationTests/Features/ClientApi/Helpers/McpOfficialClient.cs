@@ -109,6 +109,14 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     internal Task<CallToolResult> CallAsync<T>(string toolName, T request, CancellationToken cancellationToken)
         => Client.InvokeKeyLoadToolAsync(toolName, Arguments(request), cancellationToken).AsTask();
 
+    /// <summary>Invokes a bodyless native operation with its exact empty argument contract.</summary>
+    /// <param name="toolName">The frozen public bodyless operation name.</param>
+    /// <param name="cancellationToken">The bounded external caller token.</param>
+    /// <returns>The official SDK's actual tool result.</returns>
+    internal Task<CallToolResult> CallWithoutBodyAsync(string toolName, CancellationToken cancellationToken)
+        => Client.InvokeKeyLoadToolAsync(toolName, new Dictionary<string, object?>(StringComparer.Ordinal),
+            cancellationToken).AsTask();
+
     /// <summary>Builds only public tool arguments from the exact canonical serializer.</summary>
     /// <typeparam name="T">The actual canonical request type.</typeparam>
     /// <param name="request">The public request, without trusted caller roles.</param>

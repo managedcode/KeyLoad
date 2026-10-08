@@ -3,6 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Independent public-name oracle frozen by ADR-039 rather than copied from runtime catalog objects.</summary>
 internal static class McpCallerTools
 {
+    internal const string DocumentsReadFollower = "keyload_documents_read_follower";
     internal const string DocumentsGet = "keyload_documents_get";
     internal const string StreamsRead = "keyload_streams_read";
     internal const string StreamsReplay = "keyload_streams_replay";

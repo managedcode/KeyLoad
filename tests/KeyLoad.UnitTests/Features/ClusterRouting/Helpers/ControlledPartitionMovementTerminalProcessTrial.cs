@@ -13,6 +13,7 @@ internal static class ControlledPartitionMovementTerminalProcessTrial
         => ControlledPartitionMovementTerminalOwners.ExecuteAsync(async (source, target, listeners, corpus) =>
         {
             var options = UnitExecutionOptions.NativeMovementProcess().Value;
+            var wholeExpiresAt = source.Database.EvaluationClock.GetUtcNow() + options.OperationTimeout;
             using var deadline = new CancellationTokenSource(options.OperationTimeout, source.Database.EvaluationClock);
             using var original = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
@@ -38,7 +39,7 @@ internal static class ControlledPartitionMovementTerminalProcessTrial
             await ControlledPartitionMovementTerminalOperation.ExecuteAsync(source, target, corpus,
                 sourceRuntime, targetRuntime, null!, null!,
                 ControlledPartitionMovementPrepareRequest.CallerAddress(listeners), seeded.Receipt,
-                seeded.Authority, seeded.RecordedAt, initialPosition, token);
+                seeded.Authority, seeded.RecordedAt, initialPosition, wholeExpiresAt, TimeSpan.Zero, token);
             await Assert.That(process.Exercised).IsTrue();
             await ControlledDocumentNativeCommandOperation.ExecuteAsync(source, target, listeners, corpus,
                 sourceRuntime, targetRuntime, null!, null!, token);

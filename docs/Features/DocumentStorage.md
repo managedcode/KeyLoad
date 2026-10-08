@@ -521,3 +521,82 @@ Canonical slice is DocumentStorage, not a new Indexing layer. IntegrationTests o
 REQ-DSTORE-002 / AC-DSTORE-002 additionally maps to **AC-DSTORE-COMPOSITE-SPARSE-001**: the existing declared IncludeNull/IncludeMissing flags independently control native composite index and partition-unique membership. A real ZoneTree store with persisted nonadministrator document grants must admit distinct explicit-null and missing-field tuples, reject duplicate live owners only for included tuples, and omit excluded tuples without inventing SQL null/missing index seeks. Every duplicate attempt checks original literal document visibility and complete document/index/unique/epoch/outbox domain bytes; failed outcomes may persist their own existing outcome/clock metadata but cannot stage a domain effect. Explicit replacement removes prior included sparse keys and writes new numeric composite keys atomically. Delete and reuse by another ID prove old unique ownership is gone, followed by literal native index/unique images and healthy authorized reads. Four explicit flag combinations are native functional tests, not mocks or a new storage implementation.
 
 Ownership: UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs and Assertions/CompositeSparseUniqueAssertions.cs. Existing TestDatabase owns actual files and native ZoneTree; DocumentCrudFixture uses existing persisted principal/command APIs. ADR-002/011 and current IndexDefinition fields already define this contract; no format, public API, alias, authorization or parser change is proposed. Existing RF3 SDK/official composite flow and original scalar/composite process ranges remain mandatory. Strict build, actual focused unit normal/scalar and current original Linux suites are required; this private packet claims no execution.
+
+
+## TASK-KL021-FOLLOWER-SNAPSHOT-001: explicit bounded follower document reads
+
+The architecture KL-021 Work and section Fencing require a declared follower stale mode. TASK-KL021-DOCUMENT-SESSION-READ-001's sentence “No ... stale-mode API ... is added” is its initial homogeneous strong/minimum stage boundary, not a permanent prohibition. Preserve that completed-stage contract and all strong-read paths unchanged. This separate version1 capability is explicit and does not infer offline read authority.
+
+| Requirement | Acceptance and native operation evidence |
+| --- | --- |
+| REQ-FOLLOWERREAD-001: expose an explicit follower committed-snapshot operation, never silently downgrade strong GET. | AC-FOLLOWERREAD-001: ReadFollowerDocumentRequestV1(Version1, Reference, ReplicaId, MaximumLagPositions, optional MinimumToken) through native SDK, official MCP and Q1 CALL returns FollowerDocumentReadResultV1 with explicit mode, full nullable DocumentResult, actual captured DataToken, fresh AuthorizationToken, replica ID, captured/current term and measured position lag. Existing GetDocumentRequest/DocumentResult and strong routes remain byte-contract unchanged. Wrong version, missing/unknown/wrong-case fields, negative lag and nonfollower/wrong actual replica fail without value; healthy follower continuation succeeds. |
+| REQ-FOLLOWERREAD-002: raw document snapshot is bounded node-local committed data, never stale policy authority. | AC-FOLLOWERREAD-002: the unique request/read grain verifies/adopts normal signed identity and admission, observes native follower role/term, captures one actual local document/ownership/applied/generation cut, then completes the existing fresh quorum/apply barrier. Final Store.Read revalidates the original real credential witness and freshly reloads persisted principal, collection policy and current row access; authorize both captured and current row access and project captured JSON using current field policy. A current missing/deleted/invisible row cannot expose an older row. Revoked credentials/grants or newly protected fields prevent disclosure; restored persisted grants produce complete literal healthy results. Same node/owner incarnation/epoch/generation and native follower observations must remain valid; no remote owner substitution, stale policy cache or caller roles. |
+| REQ-FOLLOWERREAD-003: publish exact bounded cuts and token behavior. | AC-FOLLOWERREAD-003: DataToken comes from capture's actual positive canonical applied cut and placement witness; AuthorizationToken comes from final fresh authorized cut. Their exact atomic partition/incarnation/epoch agree; lag equals AuthorizationToken.Position minus DataToken.Position, nonnegative and <= caller's explicit nonnegative MaximumLagPositions. Lag counts physical replicated positions, including control entries, not seconds or document versions. A valid MinimumToken is checked by existing native validator against fresh authority and must also be met by DataToken; otherwise exact HistoryUnavailable/no value, never speculative wait/fallback. Invalid minimum retains existing TokenInvalidated reasons with authorization precedence. |
+| REQ-FOLLOWERREAD-004: preserve role/authority, cancellation, bounded ownership and native lifecycle. | AC-FOLLOWERREAD-004: actual native follower role/term/replica observations bracket capture; fresh final observation must still be follower on the selected replica. No quorum fails existing OwnershipLost before public value, even though document data is stale. Wrong owner, migration, restart/restore generation, corrupt applied metadata, cancellation while captured/barrier/final projection and lag exceedance reject without effects/partial data; snapshot is one request-owned bounded record, released on terminal/cancellation, no grain-owned storage handle or history cache. Actual Aspire RF3 proves stale literal cut under a native held read phase, fresh authorization denial/redaction/restoration, SDK/official MCP/Q1 interoperability and full receipt/strong-read healthy continuation. |
+
+Canonical ownership: DocumentStorage Abstractions Contracts/ReadFollowerDocumentRequestV1.cs and FollowerDocumentReadResultV1.cs, feature-local Serialization/FollowerDocumentAliases.cs; Core DocumentStorage Models/FollowerDocumentReadCapability.cs plus Execution/FollowerDocumentRead.cs and Validation/FollowerDocumentReadValidation.cs; Client DocumentStorage Transport/FollowerDocumentClient.cs. Orleans ClusterRouting feature-local Queries/FollowerDocumentReadExecution.cs and existing DatabaseReadGrain/GrainReadKind generated native catalog integration; Server ClientApi existing canonical HTTP/MCP catalog and safe fixed problem writer. Node-local PartitionHost/ZoneTree apply ownership and native ReplicaConsensus role/barrier remain unchanged. UnitTests DocumentStorage real ZoneTree operation matrix, native Orleans read operation controls and IntegrationTests DocumentStorage FollowerDocumentRf3Tests whole follower RF3 cases own evidence. Frontend N/A because the product caller surface is SDK/MCP/Q1.
+
+Compatibility: new separately named version1 operation `/v1/documents/read-follower` / `keyload_documents_read_follower`, new stable native aliases/Ids and append-only read-kind selection; existing DTOs/aliases/Ids/operations unchanged. All native SDK, official tools and Q1 use the one canonical typed decoder and normal dispatcher/request grain, no parallel transport. Homogeneous current first-release recompile, no persistent format migration or legacy fallback. Unsupported remote physical owner is explicit refusal until an owning forwarding contract is qualified.
+
+Stale data capture precedes the OPERATION barrier, not the mandatory endpoint authentication. The final authorization barrier is intentionally retained, including follower WaitForApply. Thus this mode provides an explicitly older selected data cut, not a quorum-free availability or latency improvement. Native role observations do not mint authority. Current policy/canonical row checks may make a captured record absent or more redacted; result metadata never pretends it was latest. Caller-selected lag does not allocate history; only one existing MaxDocumentBytes-bounded record and existing verified-read admission/deadline are retained. No new timer, retries, polling budget or unbounded buffering.
+
+Ordered stages: private source/native ownership and exact schema review; this REQ/AC and ADR017 contract frozen before implementation; coherent DTO/core/Orleans/catalog/SDK and native operation tests; root guarded source join and normal/scalar/source+PE/PDB discovery/full build; actual native Unit/recovery/RF3 originals; exact-source Linux complete gates before task closure. Root exclusively owns shared source/compiler/formatter/Git joins; private author owns full implementation and actual acceptance proof on explicit image grant. Original strong/minimum/refusal diagnostics and all historical/current original failures remain immutable. No code-present, local test, running-job, latency/performance, power-loss or production qualification claim.
+
+
+REQ-FOLLOWERREAD-005 / AC-FOLLOWERREAD-005 freezes the server-created native
+credential witness. The existing authenticated canonical gateway alone wraps the
+strict public DTO with DatabaseCredentialWitness(credential ID, 32-byte SHA256)
+from the original real bearer using the owning DatabaseEngine issuer. The same
+native verifier is shared by original Authenticate and final follower completion;
+there is no duplicated consumer verifier, role/credential input, public witness
+schema, raw-secret retention, diagnostic digest or parallel transport. Final
+same-view validation checks current actual key existence, verifier using native
+fixed-time comparison, revocation/expiry, unchanged principal binding, active
+principal and fresh policy/row authority. Private witness/capability/snapshot
+have stable generated Orleans aliases/Ids; the signed native payload binds the
+witness to the server-authenticated unique operation. Key deletion is a real
+node-local authority-corruption test because no public delete-key API is added;
+public RF3 credential revoke/restore exercises the same current verifier.
+
+| Criterion | Exact authored operation and required result |
+| --- | --- |
+| AC-FOLLOWERREAD-001 | FollowerDocumentSchemaTests.CanonicalSdkMcpAndSqlPayloadShareFullTypedRequestAndHideServerOnlyProof and ActualGeneratedClosedSchemasRequireExplicitFollowerAndLagAndDescribeSeparateCuts are required ordinary schema/native transport controls, not functional contributors. The independently frozen canonical MCP corpus becomes75 operations/31 body reads and real RF3 discovery matches the additional exact tool; the initial public gateway catalog remains3. FollowerDocumentAuthorityTests.UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues covers version/lag/blank replica failures. Every RF3 healthy continuation rejects a requested actual leader ID on the selected follower with no fallback, then returns a complete literal value. |
+| AC-FOLLOWERREAD-002/005 | FollowerDocumentReadTests.CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues covers revoke/delete/replace/retarget/expiry; CapturedPrivateDocumentUsesRenewedGrantAndChangedFieldPolicyBeforeHealthyResume covers current grant and changed field policy; CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow covers current tombstone and row visibility with restored full document. Full canonical image and Store.Position are retained for failed reads. FollowerDocumentAuthorityTests.CorruptNativeVerifierThenRevokedPrincipalCannotReleaseCapturedDocumentBeforeRestoration and NativeWitnessRoundTripPreservesServerProofButAlteredProofFailsWithoutStorageEffects cover current verifier/principal and exact private native proof. |
+| AC-FOLLOWERREAD-003 | FollowerDocumentReadTests.CapturedCommittedDocumentRetainsExplicitOldCutAndMinimumBeforeFullFreshContinuation proves an older full literal document, exact independent fixture data/authority tokens and lag, renewed minimum refusal, zero-lag refusal and fresh full result. InvalidMinimumOwnerGenerationAndCancellationLeaveCompleteNativeStateThenHealthyRead preserves existing invalid-minimum reason and actual node generation/owner/cancel no-effect. InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues covers missing/negative actual native applied metadata. |
+| AC-FOLLOWERREAD-001..005 | FollowerDocumentRf3Tests owns28 independently provisioned real Aspire RF3 cases: HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(4); HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(8 credential/grant); HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(4); HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(8); CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(4). Each mode is direct SDK, official MCP, Q1 SDK or Q1 official MCP. Existing server-only AuthorizationReload hold is reached after actual local capture and before the operation barrier. Real SDK changes persisted state, actual native markers identify unique request/voter/silo and prove producer disposal/settlement; original caller is joined. Full literal old/redacted document or exact no-value safe refusal precedes full fresh follower and strong acknowledged-minimum continuation through all four callers. No-quorum kills only other owned voters, restores real Aspire nodes, verifies health and fresh signed discovery, then uses a new explicit actual follower request; it never makes the old captured value available offline. Existing wave/client/store/lock/root cleanup and deadlines are reused unchanged. |
+
+Full RF3 receipt expectation independently fixes original command GUID, actual
+placement incarnation/atomic partition/epoch, complete literal mutation and
+QuorumProcessDurable. Its observed native position is greater than the same-owner
+pre-write quorum cut and no larger than the post-write cut; no `+1` reservation is
+predicted. Follower full-response expectation fixes version/mode/replica/terms,
+physical token scopes, revision/JSON/redaction/policy epoch and lag equation,
+while original data/authority positions are bounded by actual same-owner native
+quorum Status observations. Current source StatusAsync includes the operation
+barrier before NodeAdministration reads native materialized state. A follower's
+bare consensus diagnostic is never a strong bound. Cancellation retains the
+actual native SDK Cancelled classification or official cancellation exception,
+no value, producer settlement and literal healthy continuation.
+
+```mermaid
+flowchart LR
+  P[Authenticated strict public DTO] --> W[Server creates signed native witness]
+  W --> G[Unique admitted request grain]
+  G --> S[Bounded local committed follower snapshot]
+  S --> B[Fresh native quorum and apply barrier]
+  B --> A[Same-view key principal policy current row and captured row]
+  A --> R[Explicit old data cut and fresh authorization cut]
+```
+
+Qualification state: all new implementation and cases are privately authored,
+uncompiled and unexecuted. Root alone joins guarded source/build/formatter/Git;
+actual native normal/scalar/full suites and current committed Linux RF3 original
+reports are required. Broader architecture KL021 remains OPEN: this initial
+operation supports DocumentStorage point reads only. Existing strong routes and
+all other native read kinds do not acquire a stale option; SQL SELECT/AST,
+multimodel query/stream/search/blob/event/queue/graph/time-series stale modes,
+and remote physical-owner forwarding remain unsupported pending their complete
+owning contract and qualification. Administration/authentication/placement and
+policy reads retain fresh authority; no stale credential/policy mode is planned.
+The exact private supported/unsupported read inventory is preserved alongside
+the packet and must not be replaced by a whole-task done claim.

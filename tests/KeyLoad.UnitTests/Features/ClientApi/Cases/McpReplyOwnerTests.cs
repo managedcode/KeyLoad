@@ -143,5 +143,47 @@ internal sealed class McpReplyOwnerTests
             .GetProperty(McpOutputTestData.ResultField), healthyExpected.RootElement)).IsTrue();
         await Assert.That(healthy.ToolResult().IsError).IsFalse();
     }
+    /// <summary>AC-DSTORE-002 / AC-MCP-005: the complete bounded public wrapper retains only the owned unique conflict.</summary>
+    [Test]
+    public async Task UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation()
+    {
+        const string mismatch = "A partition-scoped unique index value is already present.";
+        const string generic = "The database operation could not be completed.";
+        const int ProblemFieldCount = 5;
+        using var accepted = McpReplyOwner.Failure(ErrorCode.Conflict,
+            McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, mismatch);
+        var actual = accepted.ToolResult().StructuredContent!.Value;
+        var problem = actual.GetProperty(McpOutputTestData.ErrorField);
+        using var expected = JsonDocument.Parse(JsonDefaults.Serialize(Errors.Problem(ErrorCode.Conflict, mismatch)));
+        await Assert.That(JsonElement.DeepEquals(problem, expected.RootElement)).IsTrue();
+        await Assert.That(problem.EnumerateObject().Count()).IsEqualTo(ProblemFieldCount);
+        await Assert.That(actual.TryGetProperty(McpOutputTestData.ResultField, out _)).IsFalse();
+        await Assert.That(actual.GetProperty(McpOutputTestData.RequestIdField).GetGuid()).IsEqualTo(McpOutputTestData.ExecutionId);
+        using var exact = McpReplyOwner.Failure(ErrorCode.Conflict,
+            McpOutputTestData.ExecutionId, accepted.Bytes.Length, mismatch);
+        await Assert.That(exact.Bytes.Span.SequenceEqual(accepted.Bytes.Span)).IsTrue();
+        foreach (var pair in new (ErrorCode Code, string? Detail)[]
+        {
+            (ErrorCode.Conflict, null),
+            (ErrorCode.Conflict, McpOutputTestData.Marker),
+            (ErrorCode.Conflict, mismatch + McpOutputTestData.Marker),
+            (ErrorCode.Validation, mismatch)
+        })
+        {
+            using var rejected = McpReplyOwner.Failure(pair.Code, McpOutputTestData.ExecutionId,
+                McpOutputTestData.MaximumBytes, pair.Detail);
+            using var safe = JsonDocument.Parse(JsonDefaults.Serialize(Errors.Problem(pair.Code, generic)));
+            await Assert.That(JsonElement.DeepEquals(rejected.ToolResult().StructuredContent!.Value
+                .GetProperty(McpOutputTestData.ErrorField), safe.RootElement)).IsTrue();
+            await Assert.That(Encoding.UTF8.GetString(rejected.Bytes.Span)).DoesNotContain(McpOutputTestData.Marker);
+        }
+        var canonical = Encoding.UTF8.GetBytes(McpOutputTestData.CanonicalJson);
+        using var healthy = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId,
+            McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
+        using var healthyExpected = JsonDocument.Parse(canonical);
+        await Assert.That(JsonElement.DeepEquals(healthy.ToolResult().StructuredContent!.Value
+            .GetProperty(McpOutputTestData.ResultField), healthyExpected.RootElement)).IsTrue();
+        await Assert.That(healthy.ToolResult().IsError).IsFalse();
+    }
 
 }

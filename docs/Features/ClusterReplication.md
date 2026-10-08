@@ -487,3 +487,21 @@ IntegrationTests ClusterReplication Lifecycle/ReplicaIsolationOwner.cs owns part
 REQ/AC-SESSIONREAD-001..004: extend the existing DocumentSessionReadRf3Authorization revoke→deny→restore operation, retaining its real persisted nonadministrator and valid acknowledged minimum. Direct SDK denial must be unsuccessful with no value and PermissionDenied/403. The same valid minimum through Q1 CALL must fail through both real SDK and official MCP, with no SDK JSON value and the actual dispatched safe PermissionDenied envelope. Credential and literal document content stay absent from official errors. An authorized administrator's full literal DocumentResult at the same minimum remains unchanged during denial. Renewed persisted grants then restore the existing full SDK/MCP/Q1 healthy reads.
 
 Ownership: IntegrationTests ClusterReplication Assertions/DocumentSessionReadRf3Authorization only. ADR-017 owns current token and same-cut authorization, with no schema/product/storage/topology/lifecycle changes. Keep every existing assertion and original bound, failover, namespace, primary failure and joined cleanup. Ordered docs/private guarded review→root join/build→existing Kl021AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads through native RF3→authentic current Linux originals; source alone is not acceptance.
+
+
+## KL021 initial explicit follower snapshot capability
+
+REQ/AC-FOLLOWERREAD-001..005 are canonically frozen in
+[DocumentStorage](DocumentStorage.md#task-kl021-follower-snapshot-001-explicit-bounded-follower-document-reads)
+and implemented under ADR-017 through the unique authenticated request grain,
+actual local follower capture and final fresh quorum/apply barrier. Server-created
+native credential witness is revalidated against current actual key/principal,
+policy and current/captured row in the same final cut. Captured data is disposable
+request-owned memory, never policy or durable authority. Data/authorization cuts,
+term/owner/generation, explicit physical-position lag and minimum refusals are
+separate and bounded; original strong/session/refusal paths remain unchanged.
+Actual authored28 FollowerDocumentRf3Tests cases cover held SDK/official MCP/Q1,
+credential/grant/field-policy changes, lag/cancel/no-quorum and full restoration;
+all runtime gates remain pending. This point-document stage does not close the
+broader KL021 model/read-mode inventory. No offline authorization, silent
+fallback, remote owner substitution, latency or production claim is made.

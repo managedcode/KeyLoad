@@ -3,6 +3,7 @@ namespace KeyLoad.Server;
 /// <summary>Existing canonical admission paths for every supported tool.</summary>
 internal static class McpToolRoutes
 {
+    internal const string DocumentsReadFollower = "/v1/documents/read-follower";
     internal const string DocumentsGet = "/v1/documents/get";
     internal const string StreamsRead = "/v1/streams/read";
     internal const string StreamsReplay = AggregateReplayProtocol.Route;

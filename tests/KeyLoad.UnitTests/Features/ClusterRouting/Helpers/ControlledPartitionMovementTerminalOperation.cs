@@ -16,7 +16,7 @@ internal static class ControlledPartitionMovementTerminalOperation
         ServerRuntimeOptions sourceRuntime, ServerRuntimeOptions targetRuntime,
         PartitionMovementPeerAdmission sourceAdmission, PartitionMovementPeerAdmission targetAdmission,
         string callerAddress, byte[] originalReceipt, ControlledPartitionMovementOutcomeAuthority originalAuthority,
-        DateTimeOffset originalRecordedAt, long initialPosition, CancellationToken cancellationToken)
+        DateTimeOffset originalRecordedAt, long initialPosition, DateTimeOffset wholeExpiresAt, TimeSpan issuedExpiryWindow, CancellationToken cancellationToken)
     {
         var installed = await ControlledPartitionMovementInstallationScenario.ExecuteAsync(source, target,
             corpus, sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, callerAddress,
@@ -28,11 +28,11 @@ internal static class ControlledPartitionMovementTerminalOperation
             installed.Handle.Descriptor.Resources, callerAddress, installed.Handle.ExpiresAt, cancellationToken);
         var targetImage = ControlledPartitionMovementRawImage.Bytes(target.Store);
         var targetPosition = target.Store.Position;
-        var retired = await ControlledPartitionMovementRetireFlow.ExecuteAsync(source, sourceRuntime,
-            sourceAdmission, corpus, finalized, callerAddress, installed.Handle.ExpiresAt, cancellationToken);
+        var retired = await ControlledPartitionMovementRetireFlow.ExecuteAsync(source, target, sourceRuntime,
+            sourceAdmission, corpus, finalized, callerAddress, wholeExpiresAt, issuedExpiryWindow, cancellationToken);
         await ControlledPartitionMovementRetirementComplete.ExecuteAsync(source, sourceRuntime, sourceAdmission,
             corpus, finalized, retired.Terminal, retired.GrantId, retired.OriginalBody,
-            callerAddress, installed.Handle.ExpiresAt, cancellationToken);
+            callerAddress, wholeExpiresAt, cancellationToken);
         var sourceIndex = checked(FixedControlEntries + ControlEntriesPerPage * installed.Handle.PageCount);
         var targetIndex = checked(FixedTargetEntries + TargetEntriesPerPage * installed.Handle.PageCount);
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(sourceIndex);
