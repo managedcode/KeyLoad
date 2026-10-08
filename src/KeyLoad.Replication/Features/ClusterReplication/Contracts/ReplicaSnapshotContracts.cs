@@ -70,6 +70,10 @@ public interface IReplicaSnapshotStore
 {
     /// <summary>Gets the published verified checkpoint, or null before checkpointing.</summary>
     ReplicaSnapshot? Current { get; }
+    /// <summary>Reverifies the published recovery image before reclaiming one actual replica-prefix batch.</summary>
+    /// <param name="cancellationToken">Original node-owner cancellation.</param>
+    /// <returns>The actual number of reclaimed entry keys.</returns>
+    int ReclaimCheckpointPrefix(CancellationToken cancellationToken);
     /// <summary>Recovers complete installations and validates the published canonical cut.</summary>
     void Recover();
     /// <summary>Recovers any complete verified installation, then abandons only an incomplete fenced upload.</summary>

@@ -2,8 +2,10 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using KeyLoad.Security;
+using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost;
@@ -22,32 +24,41 @@ internal sealed class ReplicaCrashNode : IDisposable
     private const string Wildcard = "*";
     private const string Obsolete = "replica-crash-obsolete";
     private const int CredentialBytes = 32;
-    private readonly ZoneTreeStore replicaStore;
     private readonly IOptions<ReplicaConfiguration> configurationOptions;
 
-    private ReplicaCrashNode(string directory, string voter, Guid incarnation, Action<ReplicaCrashBoundary>? observer)
+    private ReplicaCrashNode(string directory, string voter, Guid incarnation, Action<ReplicaCrashBoundary>? observer,
+        Action<CommitStage, long, int>? replicaObserver = null, ReadOnlyMemory<byte>? canonicalSigningKey = null)
     {
         configurationOptions = CrashExecutionOptions.Configuration(voter, [VoterA, VoterB, VoterC], directory, incarnation);
-        Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = canonicalSigningKey }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
-            replicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+            ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation, FaultObserver = replicaObserver }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             try
             {
                 Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
-                Log = new(replicaStore, configurationOptions, observer, canonicalDatabase: Database);
+                Log = new(ReplicaStore, configurationOptions, observer, canonicalDatabase: Database);
                 Bootstrap();
                 Snapshots = new(Canonical, Log, configurationOptions, CrashExecutionOptions.Replica(), observer);
             }
-            catch (Exception)
+            catch (Exception primary)
             {
-                replicaStore.Dispose();
+                var failures = new List<Exception> { primary };
+                if (Log is { } log)
+                { ServerFailureObserver.Observe(log.Dispose, failures); }
+                try
+                { ReplicaStore.Dispose(); }
+                catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
+                catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+                ServerFailureObserver.ThrowIfAny(failures);
                 throw;
             }
         }
-        catch (Exception)
+        catch (Exception primary)
         {
-            Canonical.Dispose();
+            var failures = new List<Exception> { primary };
+            ServerFailureObserver.Observe(Canonical.Dispose, failures);
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
@@ -56,6 +67,8 @@ internal sealed class ReplicaCrashNode : IDisposable
     public ReplicaConfiguration Configuration => configurationOptions.Value;
     /// <summary>The node-owned canonical storage engine.</summary>
     public ZoneTreeStore Canonical { get; }
+    /// <summary>The independently owned native replica store, borrowed for GC operation assertions.</summary>
+    public ZoneTreeStore ReplicaStore { get; }
     /// <summary>The real caller-visible database engine.</summary>
     public DatabaseEngine Database { get; }
     /// <summary>The independently persisted durable replica log.</summary>
@@ -69,8 +82,11 @@ internal sealed class ReplicaCrashNode : IDisposable
     /// <param name="root">The owning trial's physical root.</param>
     /// <param name="incarnation">The persisted cluster incarnation.</param>
     /// <param name="observer">The synchronous observer that pauses only at the armed durable boundary.</param>
-    public static ReplicaCrashNode OpenTarget(string root, Guid incarnation, Action<ReplicaCrashBoundary>? observer = null)
-        => new(Path.Combine(root, TargetDirectory), VoterA, incarnation, observer);
+    /// <param name="replicaObserver">Existing native replica-store publication observer for real process cuts.</param>
+    /// <param name="canonicalSigningKey">Optional actual cluster key configured for a fresh receiving member and its reopen.</param>
+    public static ReplicaCrashNode OpenTarget(string root, Guid incarnation, Action<ReplicaCrashBoundary>? observer = null,
+        Action<CommitStage, long, int>? replicaObserver = null, ReadOnlyMemory<byte>? canonicalSigningKey = null)
+        => new(Path.Combine(root, TargetDirectory), VoterA, incarnation, observer, replicaObserver, canonicalSigningKey);
 
     /// <summary>Opens a distinct real source node for verified snapshot transfer.</summary>
     /// <param name="root">The owning trial's physical root.</param>
@@ -139,8 +155,13 @@ internal sealed class ReplicaCrashNode : IDisposable
     /// <summary>Disposes independently owned physical stores after all materializers have stopped.</summary>
     public void Dispose()
     {
-        Log.Dispose();
-        replicaStore.Dispose();
-        Canonical.Dispose();
+        var failures = new List<Exception>();
+        ServerFailureObserver.Observe(Log.Dispose, failures);
+        try
+        { ReplicaStore.Dispose(); }
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+        ServerFailureObserver.Observe(Canonical.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -41,6 +41,9 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<PhysicalOwnerExecutionOptions>()
+            .Bind(configuration.GetSection(PhysicalOwnerExecutionOptions.SectionName), binding => binding.ErrorOnUnknownConfiguration = true)
+            .Validate(options => options.IsValid(), PhysicalOwnerExecutionOptions.ValidationMessage).ValidateOnStart();
     }
 
     private static void RegisterStorageExecution(IServiceCollection services, IConfiguration configuration)

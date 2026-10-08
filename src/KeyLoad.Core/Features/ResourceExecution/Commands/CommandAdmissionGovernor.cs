@@ -87,7 +87,8 @@ public sealed class CommandAdmissionGovernor
     /// <param name="kind">The operation kind to classify.</param>
     public static bool IsControl(OperationKind kind)
         => kind is OperationKind.Delivery or OperationKind.SubscriptionDelivery or OperationKind.Membership or OperationKind.SetDispatch
-            or OperationKind.AbortBlobUpload or OperationKind.ReclaimBlob or OperationKind.BootstrapPhysicalShardCatalog;
+            or OperationKind.AbortBlobUpload or OperationKind.ReclaimBlob or OperationKind.BootstrapPhysicalShardCatalog
+            or OperationKind.RegisterPhysicalOwner;
 
     /// <summary>Atomically reserves command count, retained bytes, tenant, and principal capacity.</summary>
     /// <param name="kind">The kind of operation being admitted.</param>

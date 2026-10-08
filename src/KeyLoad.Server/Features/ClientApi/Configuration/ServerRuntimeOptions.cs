@@ -28,6 +28,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<RequestProbeExecutionOptions> RequestProbeExecution,
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
+    IOptions<PhysicalOwnerExecutionOptions> PhysicalOwners,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<ServerExecutionOptions> ServerExecution,
@@ -54,6 +55,7 @@ internal sealed record ServerRuntimeOptions(
         _ = RequestProbeExecution.Value;
         _ = Membership.Value;
         _ = GrainRouting.Value;
+        _ = PhysicalOwners.Value;
         _ = AdminObservation.Value;
         _ = NativeText.Value;
         _ = ServerExecution.Value;
@@ -81,6 +83,7 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(RequestProbeExecution);
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
+        services.AddSingleton(PhysicalOwners);
         services.AddSingleton(AdminObservation);
         services.AddSingleton(NativeText);
         services.AddSingleton(ServerExecution);

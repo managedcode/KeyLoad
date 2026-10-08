@@ -16,11 +16,12 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool applicationDisposed;
     private bool nodeLocksReleased;
     private bool cleanupFailed;
+    private readonly bool registerPhysicalOwners;
     private readonly LocalRf3ImageSelection.Selection? localImageSelection;
     private LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection)
-        => localImageSelection = selection;
+    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false)
+    { localImageSelection = selection; registerPhysicalOwners = register; }
 
     internal NodeEpochRf3Profile Profile
     {
@@ -36,7 +37,14 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal static async Task<TwoRf3MembershipWave> StartAsync(LocalRf3ImageSelection.Selection? selection,
         CancellationToken cancellationToken)
     {
-        var wave = new TwoRf3MembershipWave(selection);
+        return await StartOwnedAsync(new TwoRf3MembershipWave(selection), cancellationToken).ConfigureAwait(false);
+    }
+
+    internal static Task<TwoRf3MembershipWave> StartRegistrationAsync(CancellationToken cancellationToken)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true), cancellationToken);
+
+    private static async Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => wave.StartCoreAsync(cancellationToken), failures)
             .ConfigureAwait(false);
@@ -116,6 +124,18 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
+    internal async Task<string> StopForDirectoryReadAsync()
+    {
+        var failures = new List<Exception>();
+        await DisposeApplicationAsync(failures).ConfigureAwait(false);
+        if (CanCheckLocks)
+        { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
+        ServerFailureObserver.ThrowIfAny(failures);
+        if (!nodeLocksReleased)
+        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        return dataRoot ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.InvalidRoot);
+    }
+
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {
         var owned = application;
@@ -138,7 +158,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         => dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
 
-    private static string[] CreateArguments(string root, LocalRf3ImageSelection.Selection? selection)
+    private string[] CreateArguments(string root, LocalRf3ImageSelection.Selection? selection)
     {
         var args = new List<string>
         {
@@ -146,6 +166,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             TwoRf3MembershipProtocol.EphemeralArgument,
             TwoRf3MembershipProtocol.ProfileArgument
         };
+        if (registerPhysicalOwners)
+        { args.Add("--KeyLoadTests:ClusterRouting:RegisterPhysicalOwners=true"); }
         if (selection is not null)
         {
             args.AddRange(selection.CreateWaveArguments());

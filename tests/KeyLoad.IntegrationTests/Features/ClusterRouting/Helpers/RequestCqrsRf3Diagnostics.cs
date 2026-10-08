@@ -79,7 +79,13 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         {
             if (disposalTask is not { IsCompleted: true } || !cleanup.IsJoined)
             { throw new InvalidOperationException(IncompleteSubscriptionMessage); }
-            return artifactPath ??= WriteArtifact();
+            if (artifactPath is null)
+            {
+                artifactPath = WriteArtifact();
+                RequestCqrsNativeCaptureArtifact.Write(artifactPath, waveId,
+                    nodes.Select(node => node.NativeSnapshot()).ToArray());
+            }
+            return artifactPath;
         }
     }
 

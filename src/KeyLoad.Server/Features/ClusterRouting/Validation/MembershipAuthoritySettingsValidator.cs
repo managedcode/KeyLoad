@@ -19,7 +19,7 @@ internal static class MembershipAuthoritySettingsValidator
         ArgumentNullException.ThrowIfNull(node);
         if (settings.Mode == MembershipAuthoritySettingsProtocol.Local)
         {
-            if (HasAuthorityFields(settings) || HasTrustedFields(settings))
+            if (settings.RegisterPhysicalOwners || HasAuthorityFields(settings) || HasTrustedFields(settings))
             { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
             return;
         }
@@ -39,9 +39,9 @@ internal static class MembershipAuthoritySettingsValidator
         {
             MembershipAuthoritySettingsProtocol.Local => new[] { nameof(MembershipAuthoritySettings.Mode) },
             MembershipAuthoritySettingsProtocol.Authority => new[]
-            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId), nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId), nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
             MembershipAuthoritySettingsProtocol.Proxy => new[]
-            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
             _ => []
         };
         if (children.Any(child => !allowed.Contains(child.Key, StringComparer.Ordinal))

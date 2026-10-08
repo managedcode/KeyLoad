@@ -2,6 +2,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed record MembershipAuthoritySettings
 {
+    public bool RegisterPhysicalOwners { get; init; }
     public string Mode { get; init; } = MembershipAuthoritySettingsProtocol.Local;
     public Guid AuthorityPhysicalShardId { get; init; }
     public Guid AuthorityIncarnation { get; init; }

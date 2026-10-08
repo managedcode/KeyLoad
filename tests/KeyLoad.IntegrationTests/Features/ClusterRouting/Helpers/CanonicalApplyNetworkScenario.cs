@@ -37,6 +37,7 @@ internal sealed class CanonicalApplyNetworkScenario
     private Guid commandId;
     private bool rootOwned;
     private bool waveStartupAttempted;
+    private CanonicalApplyNetworkPhase phase;
 
     internal static async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -45,12 +46,15 @@ internal sealed class CanonicalApplyNetworkScenario
         var scenario = new CanonicalApplyNetworkScenario();
         await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteAsync(parent.Token), scenario.failures)
             .ConfigureAwait(false);
+        var originalEvidence = scenario.CaptureEvidence();
         await CanonicalApplyNetworkCleanup.JoinAsync(scenario.controls, scenario.discovery, scenario.armId, scenario.failures);
         await RequestCqrsPhaseFaultCleanup.RunAsync(scenario.root, scenario.rootOwned, scenario.controls,
             scenario.wave, scenario.waveStartupAttempted, scenario.caller, scenario.administrator, scenario.discovery,
             scenario.callerCancellation, scenario.scenarioDeadline, scenario.sdkCall, null,
             scenario.submissionArmId, scenario.failures)
             .ConfigureAwait(false);
+        ServerFailureObserver.Observe(() => CanonicalApplyNetworkEvidence.Save(originalEvidence,
+            scenario.sdkCall?.Status, scenario.failures), scenario.failures);
         ServerFailureObserver.ThrowIfAny(scenario.failures);
     }
 
@@ -64,31 +68,41 @@ internal sealed class CanonicalApplyNetworkScenario
         await PrepareAndStartAsync(scenarioDeadline.Token).ConfigureAwait(false);
         await VerifyHeldNetworkProgressAsync(scenarioDeadline.Token).ConfigureAwait(false);
         await VerifyReleasedOperationAsync(scenarioDeadline.Token).ConfigureAwait(false);
+        phase = CanonicalApplyNetworkPhase.Completed;
     }
 
     private async Task PrepareAndStartAsync(CancellationToken cancellationToken)
     {
         dataRoot = Path.Combine(root, DataDirectoryName);
+        phase = CanonicalApplyNetworkPhase.PriorProfile;
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, cancellationToken).ConfigureAwait(false)).Profile;
+        phase = CanonicalApplyNetworkPhase.ImageProof;
         var images = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken).ConfigureAwait(false);
         controls = RequestCqrsProbeFixture.Create(dataRoot, Guid.NewGuid());
         waveStartupAttempted = true;
+        phase = CanonicalApplyNetworkPhase.NativeWaveStartup;
         wave = await RequestCqrsRf3Wave.StartProbedAsync(dataRoot,
             RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), controls, cancellationToken)
             .ConfigureAwait(false);
         var activeWave = wave ?? throw new InvalidOperationException(MissingWave);
+        phase = CanonicalApplyNetworkPhase.SignedDiscovery;
         discovery = await ReadDiscoveryAsync(activeWave.App, profile, cancellationToken).ConfigureAwait(false);
+        phase = CanonicalApplyNetworkPhase.AdminConnection;
         var adminOwner = await RequestCqrsRf3Callers.ConnectAsync(activeWave.App,
             RequestCqrsRf3Protocol.Node1, profile.AdminKey, cancellationToken).ConfigureAwait(false);
         administrator = adminOwner;
+        phase = CanonicalApplyNetworkPhase.PersistedIdentity;
         var persistedIdentity = await RequestCqrsPhaseFaultProvisioning.CreatePersistedIdentityAsync(adminOwner.Sdk,
             cancellationToken)
             .ConfigureAwait(false);
         preparedIdentity = persistedIdentity;
+        phase = CanonicalApplyNetworkPhase.LeaderStatus;
         var status = await McpCallerAssertions.SdkSuccessAsync(await adminOwner.Sdk.StatusAsync(cancellationToken));
         await Assert.That(status.Leader).IsNotNull();
         targetVoter = discovery.First(item => item.VoterId != status.Leader).VoterId;
+        phase = CanonicalApplyNetworkPhase.SeedState;
         await CanonicalApplyNetworkData.PrepareAsync(adminOwner, persistedIdentity, cancellationToken);
+        phase = CanonicalApplyNetworkPhase.CallerConnection;
         var callerOwner = await RequestCqrsPhaseFaultProvisioning.ConnectAsync(activeWave.App, persistedIdentity,
             cancellationToken).ConfigureAwait(false);
         caller = callerOwner;
@@ -99,6 +113,7 @@ internal sealed class CanonicalApplyNetworkScenario
             RequestCqrsProbePhase.BeforeSubmit, RequestCqrsProbeAction.Hold);
         var originalCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         callerCancellation = originalCancellation;
+        phase = CanonicalApplyNetworkPhase.OriginalSdkAdmission;
         StartOriginalCall(callerOwner, activeCommand, originalCancellation.Token);
     }
 
@@ -106,6 +121,7 @@ internal sealed class CanonicalApplyNetworkScenario
     {
         var active = controls ?? throw new InvalidOperationException(MissingWave);
         var signed = discovery ?? throw new InvalidOperationException(MissingWave);
+        phase = CanonicalApplyNetworkPhase.BeforeSubmitObserved;
         var submitting = await active.WaitForMarkerAsync(submissionArmId, RequestCqrsProbePhase.BeforeSubmit,
             RequestCqrsProbeOutcome.Observed, signed, token);
         await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(submitting, submissionArmId, commandId,
@@ -114,8 +130,10 @@ internal sealed class CanonicalApplyNetworkScenario
         armId = active.WriteArm(identity.PrincipalId, commandId, null, RequestCqrsProbePhase.CanonicalJournalFlushed,
             RequestCqrsProbeAction.Hold, identity.Partition, submitting.RequestId, targetVoter, submissionArmId);
         active.WriteRelease(submissionArmId, submitting.RequestId);
+        phase = CanonicalApplyNetworkPhase.BeforeSubmitReleased;
         await active.WaitForMarkerAsync(submissionArmId, RequestCqrsProbePhase.BeforeSubmit,
             RequestCqrsProbeOutcome.Released, signed, token);
+        phase = CanonicalApplyNetworkPhase.CanonicalFlushObserved;
         var marker = await active.WaitForMarkerAsync(armId, RequestCqrsProbePhase.CanonicalJournalFlushed,
             RequestCqrsProbeOutcome.Observed, signed, token);
         observed = marker;
@@ -125,8 +143,11 @@ internal sealed class CanonicalApplyNetworkScenario
         await Assert.That(marker.Voter).IsEqualTo(targetVoter);
         await Assert.That(marker.EntryIndex is > BeforeFirstEntryPosition).IsTrue();
         await Assert.That(marker.EntryTerm is > UnelectedEntryTerm).IsTrue();
+        phase = CanonicalApplyNetworkPhase.OriginalSdkReceipt;
         originalReceipt = await McpCallerAssertions.SdkSuccessAsync(await (sdkCall ?? throw new InvalidOperationException(MissingTask)).WaitAsync(token));
+        phase = CanonicalApplyNetworkPhase.OriginalProducerSettled;
         await RequestCqrsPhaseFaultAssertions.VerifySettledAsync(active, submissionArmId, submitting.RequestId, commandId, signed, token);
+        phase = CanonicalApplyNetworkPhase.IndependentAppendObserved;
         var progress = await active.WaitForMarkerAsync(armId, RequestCqrsProbePhase.CanonicalIndependentAppendCompleted,
             RequestCqrsProbeOutcome.Observed, signed, token);
         await Assert.That(progress.RequestId).IsEqualTo(marker.RequestId);
@@ -143,16 +164,24 @@ internal sealed class CanonicalApplyNetworkScenario
         var signed = discovery ?? throw new InvalidOperationException(MissingWave);
         var marker = observed ?? throw new InvalidOperationException(MissingTask);
         var original = originalReceipt ?? throw new InvalidOperationException(MissingTask);
+        phase = CanonicalApplyNetworkPhase.CanonicalReleased;
         await active.WaitForMarkerAsync(armId, RequestCqrsProbePhase.CanonicalJournalFlushed, RequestCqrsProbeOutcome.Released, signed, token);
+        phase = CanonicalApplyNetworkPhase.CanonicalOwnerDisposed;
         var closed = await active.WaitForMarkerAsync(armId, RequestCqrsProbePhase.CanonicalOwnerDisposed, RequestCqrsProbeOutcome.Observed, signed, token);
         await Assert.That(closed.EntryIndex).IsEqualTo(marker.EntryIndex);
         await Assert.That(closed.EntryTerm).IsEqualTo(marker.EntryTerm);
         CanonicalApplyNetworkMarkers.RequireNoOutbound(active, armId);
+        phase = CanonicalApplyNetworkPhase.ArmRetirement;
         await active.RetireArmAsync(armId, token);
         await active.RetireArmAsync(submissionArmId, token);
+        phase = CanonicalApplyNetworkPhase.HealthyReplay;
         await CanonicalApplyNetworkAssertions.VerifyAsync(caller ?? throw new InvalidOperationException(MissingWave),
             command ?? throw new InvalidOperationException(MissingTask), original, token);
     }
+    private CanonicalApplyNetworkSnapshot CaptureEvidence()
+        => CanonicalApplyNetworkEvidence.Capture(phase, sdkCall, callerCancellation?.IsCancellationRequested ?? false,
+            scenarioDeadline?.IsCancellationRequested ?? false, observed is not null, originalReceipt is not null);
+
     private void StartOriginalCall(RequestCqrsRf3Callers callers, CommandRequest command, CancellationToken token)
         => sdkCall = RequestCqrsFaultCallers.CommitSdkAsync(callers.Sdk, command, token);
 

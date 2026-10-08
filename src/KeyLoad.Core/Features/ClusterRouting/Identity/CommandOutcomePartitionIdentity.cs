@@ -41,7 +41,7 @@ internal static class CommandOutcomePartitionIdentity
                 => ResolveBlob(kind, payload),
             OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
                 or OperationKind.SetDispatch or OperationKind.Membership or OperationKind.BootstrapPhysicalShardCatalog
-                or OperationKind.BindAtomicPartitionPlacement => CommandOutcomePartitionScope.Global,
+                or OperationKind.BindAtomicPartitionPlacement or OperationKind.RegisterPhysicalOwner => CommandOutcomePartitionScope.Global,
             _ => CommandOutcomePartitionScope.Unknown
         };
 

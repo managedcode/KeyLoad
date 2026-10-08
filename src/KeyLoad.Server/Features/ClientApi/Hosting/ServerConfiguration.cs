@@ -43,6 +43,7 @@ internal static class ServerConfiguration
         ReplicaDiscoveryEndpoints.Map(app);
         ReplicaMembershipHealthEndpoints.Map(app);
         ReplicaMembershipAuthorityEndpoints.Map(app);
+        PhysicalOwnerRegistrationServices.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
@@ -101,6 +102,7 @@ internal static class ServerConfiguration
         services.AddSingleton<PartitionHost>();
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
+        PhysicalOwnerRegistrationServices.Add(services);
         services.AddSingleton<OrleansNode>();
         services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
         services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(

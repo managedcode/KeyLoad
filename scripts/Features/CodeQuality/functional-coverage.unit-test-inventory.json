@@ -13652,6 +13652,42 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests",
+      "methodName": "AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration",
+      "instanceName": "AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration",
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-OWNER-REGISTER-001"
+      ],
+      "acceptance": [
+        "AC-OWNER-REGISTER-001"
+      ],
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PhysicalOwnerDirectoryWholeFlowTests.cs",
+      "sourceSha256": "eff29d11b7f01b7848eeac975272dbc5dc0820c1f3bc791e1b9f83d001ebf6df",
+      "lineNumber": 45,
+      "endLineNumber": 76
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests",
+      "methodName": "AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory",
+      "instanceName": "AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory",
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-OWNER-REGISTER-001"
+      ],
+      "acceptance": [
+        "AC-OWNER-REGISTER-001"
+      ],
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PhysicalOwnerDirectoryWholeFlowTests.cs",
+      "sourceSha256": "eff29d11b7f01b7848eeac975272dbc5dc0820c1f3bc791e1b9f83d001ebf6df",
+      "lineNumber": 9,
+      "endLineNumber": 43
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalShardCatalogAuthorizationTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalShardCatalogAuthorizationTests",
       "methodName": "AcScat001BootstrapAndReadRequirePersistedClusterAdministrator",
@@ -59540,7 +59576,7 @@
     },
     {
       "groupId": "unit-functional-02",
-      "selector": "/*/*/(AdminQ*)|(Admis*)|(AggregateReplayWorkerP*)|(Ana*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AtomicPartitionPlacementC*)|(AtomicPartitionRosterF*)|(Ba*)|(BlobO*)|(BlobRo*)|(Bu*)|(C1OutcomeInspectionP*)|(CacheControlWireP*)|(CacheControlWireS*)|(CacheReadPermitT*)|(Ch*)|(CliBackupRestoreI*)|(CoreM*)|(DatabaseCompositionB*)|(DatabaseCompositionV*)|(DocumentC*)|(DocumentP*)|(DocumentSe*)|(DueWa*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventProjectionR*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(Grai*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphShortestPathB*)|(GraphTraversalR*)|(GraphTraversalT*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpA*)|(McpGatewayG*)|(McpMemoryB*)|(McpTransportG*)|(McpV*)|(Mes*)|(NativeB*)|(NativeCh*)|(NativeCqrsL*)|(NativeI*)|(NativeOperationO*)|(NativePublicE*)|(NativeReadCutB*)|(NativeReadCutCo*)|(NativeSagaTimeoutJ*)|(NativeTextF*)|(NativeTextProjectionD*)|(NativeTextProjectionRes*)|(NativeTextProjectionS*)|(NativeWireC*)|(OrleansWalS*)|(PartitionH*)|(PartitionO*)|(PartitionQueryPublicA*)|(PhysicalShardCatalogB*)|(QueryAdapterV*)|(QueueB*)|(ReadExecutionBudgetGrantP*)|(ReadExecutionBudgetGrantR*)|(RelationalA*)|(ReplicaE*)|(ReplicaInspectionResolutionA*)|(ReplicaNativeP*)|(ReplicaReplayL*)|(RequestCqrsB*)|(RequestCqrsCohortS*)|(RequestCqrsPu*)|(RuntimeJournalG*)|(SampleAggregateI*)|(SampleRetentionM*)|(SearchS*)|(SqlClientC*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlModelViewA*)|(SqlOperationR*)|(TransactionA*)|(TransactionR*)|(ZoneTreeCoordinatedPointCacheL*)|(ZoneTreeCoordinatedPointCacheP*)|(ZoneTreeCoordinatedPointCacheR*)|(ZoneTreePointCacheA*)|(ZoneTreePointCacheOwnerC*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!InvalidDeadlineIsRejectedBeforeMaterializerRecovery*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!NativeAliasesAndFieldIdsRemainExact*)&(!ReplayConfigurationRejectsNonpositiveAndUnboundedMemoryBudgets*)",
+      "selector": "/*/*/(AdminQ*)|(Admis*)|(AggregateReplayWorkerP*)|(Ana*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AtomicPartitionPlacementC*)|(AtomicPartitionRosterF*)|(Ba*)|(BlobO*)|(BlobRo*)|(Bu*)|(C1OutcomeInspectionP*)|(CacheControlWireP*)|(CacheControlWireS*)|(CacheReadPermitT*)|(Ch*)|(CliBackupRestoreI*)|(CoreM*)|(DatabaseCompositionB*)|(DatabaseCompositionV*)|(DocumentC*)|(DocumentP*)|(DocumentSe*)|(DueWa*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventProjectionR*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(Grai*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphShortestPathB*)|(GraphTraversalR*)|(GraphTraversalT*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpA*)|(McpGatewayG*)|(McpMemoryB*)|(McpTransportG*)|(McpV*)|(Mes*)|(NativeB*)|(NativeCh*)|(NativeCqrsL*)|(NativeI*)|(NativeOperationO*)|(NativePublicE*)|(NativeReadCutB*)|(NativeReadCutCo*)|(NativeSagaTimeoutJ*)|(NativeTextF*)|(NativeTextProjectionD*)|(NativeTextProjectionRes*)|(NativeTextProjectionS*)|(NativeWireC*)|(OrleansWalS*)|(PartitionH*)|(PartitionO*)|(PartitionQueryPublicA*)|(PhysicalO*)|(PhysicalShardCatalogB*)|(QueryAdapterV*)|(QueueB*)|(ReadExecutionBudgetGrantP*)|(ReadExecutionBudgetGrantR*)|(RelationalA*)|(ReplicaE*)|(ReplicaInspectionResolutionA*)|(ReplicaNativeP*)|(ReplicaReplayL*)|(RequestCqrsB*)|(RequestCqrsCohortS*)|(RequestCqrsPu*)|(RuntimeJournalG*)|(SampleAggregateI*)|(SampleRetentionM*)|(SearchS*)|(SqlClientC*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlModelViewA*)|(SqlOperationR*)|(TransactionA*)|(TransactionR*)|(ZoneTreeCoordinatedPointCacheL*)|(ZoneTreeCoordinatedPointCacheP*)|(ZoneTreeCoordinatedPointCacheR*)|(ZoneTreePointCacheA*)|(ZoneTreePointCacheOwnerC*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!InvalidDeadlineIsRejectedBeforeMaterializerRecovery*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!NativeAliasesAndFieldIdsRemainExact*)&(!ReplayConfigurationRejectsNonpositiveAndUnboundedMemoryBudgets*)",
       "classNames": [
         "KeyLoad.UnitTests.CheckpointTests",
         "KeyLoad.UnitTests.DueWaitControlledClockTests",
@@ -59572,6 +59608,7 @@
         "KeyLoad.UnitTests.Features.ClusterRouting.GrainReplyCancellationTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.NativeCqrsLifetimeTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.PartitionOwnershipEpochTests",
+        "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalShardCatalogBootstrapTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.RuntimeJournalGraphCallerTests",
@@ -59846,6 +59883,8 @@
         "KeyLoad.UnitTests.Features.ClusterRouting.PartitionOwnershipEpochTests|CurrentBatchEpochIssuesTokenFromPersistedPlacementWitness|CurrentBatchEpochIssuesTokenFromPersistedPlacementWitness",
         "KeyLoad.UnitTests.Features.ClusterRouting.PartitionOwnershipEpochTests|MissingCatalogFailsClosedBeforePartitionCommit|MissingCatalogFailsClosedBeforePartitionCommit",
         "KeyLoad.UnitTests.Features.ClusterRouting.PartitionOwnershipEpochTests|StaleAndFutureBatchEpochsPersistOwnershipFailureWithoutDomainMutation|StaleAndFutureBatchEpochsPersistOwnershipFailureWithoutDomainMutation",
+        "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests|AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration|AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration",
+        "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalOwnerDirectoryWholeFlowTests|AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory|AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory",
         "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalShardCatalogBootstrapTests|AcScat001AllowsExactDifferentCommandRetryAndSameIdentityReplay|AcScat001AllowsExactDifferentCommandRetryAndSameIdentityReplay",
         "KeyLoad.UnitTests.Features.ClusterRouting.PhysicalShardCatalogBootstrapTests|AcScat001CommitsOneCanonicalNativeRecordAndReopensExactly|AcScat001CommitsOneCanonicalNativeRecordAndReopensExactly",
         "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests|AcCrs003RealNativeProducerSettlesOnCancellation|AcCrs003RealNativeProducerSettlesOnCancellation",

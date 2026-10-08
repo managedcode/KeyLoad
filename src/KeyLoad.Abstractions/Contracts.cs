@@ -364,7 +364,9 @@ public enum OperationKind
     /// <summary>Changes private native runtime journal infrastructure through RF3.</summary>
     RuntimeJournal,
     /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
-    ReceiveAcrossLanes
+    ReceiveAcrossLanes,
+    /// <summary>Commits server-confirmed physical owner registration at the stable control authority.</summary>
+    RegisterPhysicalOwner
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

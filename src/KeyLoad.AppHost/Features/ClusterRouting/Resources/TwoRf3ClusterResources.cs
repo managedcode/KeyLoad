@@ -62,6 +62,7 @@ internal static class TwoRf3ClusterResources
         const string SecondIncarnationParameterSuffix = "incarnation-b";
 
         ValidateMode(builder, profile);
+        var registerOwners = TwoRf3Profile.ReadRegistration(builder.Configuration);
         var localImage = LocalDevelopmentContainerImage.Read(builder);
         var image = localImage is null
             ? RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration)
@@ -82,8 +83,14 @@ internal static class TwoRf3ClusterResources
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
-        return AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
+        var resources = AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
+        if (registerOwners)
+        {
+            foreach (var resource in resources)
+            { resource.WithEnvironment(TwoRf3ProfileProtocol.RegistrationEnvironment, TwoRf3ProfileProtocol.Enabled); }
+        }
+        return resources;
     }
 
     private static IResourceBuilder<ContainerResource>[] AddNodes(IDistributedApplicationBuilder builder,

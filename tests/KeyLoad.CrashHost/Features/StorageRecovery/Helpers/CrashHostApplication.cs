@@ -25,7 +25,7 @@ internal static class CrashHostApplication
         {
             return;
         }
-        if (await ReplicaCrashScenario.TryRunAsync(args))
+        if (await ReplicaPrefixGcCrashScenario.TryRunAsync(args) || await ReplicaCrashScenario.TryRunAsync(args))
         {
             return;
         }

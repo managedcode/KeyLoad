@@ -8,7 +8,6 @@ namespace KeyLoad.Replication;
 public sealed class ReplicaMaterializer : IAsyncDisposable
 {
     private const int ExclusiveApplyPermit = 1;
-    private const int FirstLogPosition = 1;
     private const int BeforeFirstLogPosition = 0;
 
     private readonly int applyBatchSize;
@@ -187,12 +186,8 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         try
         {
             Check();
-            var cut = Database.LastApplied;
-            if (cut < FirstLogPosition || cut <= (Snapshots.Current?.Index ?? BeforeFirstLogPosition))
-            {
-                return Snapshots.Current;
-            }
-            return await Task.Run(() => Snapshots.Create(cut, Log.TermAt(cut)), cancellationToken).ConfigureAwait(false);
+            return await Task.Run(() => ReplicaCheckpointReclamation.CaptureAndReclaim(Database,
+                Log, Snapshots, cancellationToken), cancellationToken).ConfigureAwait(false);
         }
         finally { applyGate.Release(); }
     }

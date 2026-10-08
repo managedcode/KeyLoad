@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Retains bounded closed rejection records for one actual RF3 node.</summary>
 internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
 {
-    private const string MessagePrefix = "MCP transport rejected at ";
+    internal const string MessagePrefix = "MCP transport rejected at ";
     private const string Separator = " for ";
     private const string MissingRecordMessage = "The expected closed MCP rejection was not published before the resource stream completed.";
     private const string RecordLimitMessage = "The bounded node diagnostics reached its record limit before the expected rejection.";
@@ -17,6 +17,7 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     private readonly List<RequestCqrsRpcFailureRecord> rpcFailures = [];
     private TaskCompletionSource<bool> changed = NewChangeSignal();
     private bool completed;
+    private readonly RequestCqrsNativeCaptureEvidence nativeEvidence = new();
 
     internal string Name { get; } = name;
 
@@ -27,10 +28,12 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
             lock (gate)
             { if (rpcFailures.Count < MaximumRecords) { rpcFailures.Add(rpc); } }
         }
-        if (!TryParse(line, Name, waveId, out var record))
-        { return; }
+        var parsed = TryParse(line, Name, waveId, out var record);
         lock (gate)
         {
+            nativeEvidence.Observe(line, parsed);
+            if (!parsed)
+            { return; }
             if (records.Count >= MaximumRecords)
             { return; }
             records.Add(record);
@@ -83,6 +86,12 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     {
         lock (gate)
         { return [.. rpcFailures]; }
+    }
+
+    internal RequestCqrsNativeCaptureSnapshot NativeSnapshot()
+    {
+        lock (gate)
+        { return nativeEvidence.Snapshot(Name); }
     }
 
     private static TaskCompletionSource<bool> NewChangeSignal()

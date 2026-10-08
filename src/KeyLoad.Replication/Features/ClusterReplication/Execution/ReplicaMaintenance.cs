@@ -64,7 +64,8 @@ internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection ele
             return;
         }
         var cut = state.Materializer.Database.LastApplied;
-        if (cut - (state.Materializer.Snapshots.Current?.Index ?? BeforeFirstLogPosition) >= state.Configuration.SnapshotThreshold)
+        if (cut - (state.Materializer.Snapshots.Current?.Index ?? BeforeFirstLogPosition) >= state.Configuration.SnapshotThreshold
+            || state.Materializer.Log.HasCheckpointPrefix)
         {
             checkpoint = state.Materializer.CreateCheckpointAsync(cancellationToken);
         }

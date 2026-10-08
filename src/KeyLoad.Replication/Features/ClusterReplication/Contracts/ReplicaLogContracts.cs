@@ -48,4 +48,11 @@ public interface IDurableReplicaLog : IDisposable
     /// <summary>Acquires the protocol gate before publishing a verified checkpoint and retaining its matching tail; callers must not already hold that gate.</summary>
     /// <param name="snapshot">Verified canonical image and its exact committed cut.</param>
     void PublishSnapshot(ReplicaSnapshot snapshot);
+    /// <summary>Gets whether actual stored keys remain at or below the published checkpoint.</summary>
+    bool HasCheckpointPrefix { get; }
+    /// <summary>Deletes one bounded eligible prefix and rewrites the replica journal under protocol ownership.</summary>
+    /// <param name="verifiedSnapshot">Exact current complete image verified by its snapshot owner.</param>
+    /// <param name="cancellationToken">Original owner cancellation checked before durable deletion.</param>
+    /// <returns>The actual number of deleted entry keys.</returns>
+    int ReclaimCheckpointPrefix(ReplicaSnapshot verifiedSnapshot, CancellationToken cancellationToken);
 }

@@ -7,6 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsRf3McpGuardEvidenceAssertions
 {
     private const int ArtifactVersion = 1;
+    private const int ExpectedRejections = 1;
+    private const int NoRejections = 0;
     private const int MaximumArtifactBytes = 16 * 1_024;
     private const string ExpectedNode = RequestCqrsRf3Protocol.Node1;
 
@@ -22,10 +24,35 @@ internal static class RequestCqrsRf3McpGuardEvidenceAssertions
         if (artifact.Rejections is not { Length: 1 } records)
         { throw new InvalidDataException("The MCP guard artifact does not contain exactly one closed rejection."); }
         await VerifyRecordAsync(records[0], artifact.WaveId).ConfigureAwait(false);
+        await VerifyNativeCaptureAsync(path, artifact.WaveId, cancellationToken).ConfigureAwait(false);
         var text = Encoding.UTF8.GetString(bytes);
         await Assert.That(text.Contains(persistedKey, StringComparison.Ordinal)).IsFalse();
         await Assert.That(text.Contains(RequestCqrsRf3McpGuardEvidenceCall.MalformedPayload,
             StringComparison.Ordinal)).IsFalse();
+    }
+
+    private static async Task VerifyNativeCaptureAsync(string path, Guid waveId, CancellationToken cancellationToken)
+    {
+        var bytes = await ReadBoundedAsync(RequestCqrsNativeCaptureArtifact.PathFor(path), cancellationToken).ConfigureAwait(false);
+        var evidence = JsonSerializer.Deserialize<RequestCqrsNativeCaptureArtifactRecord>(bytes)
+            ?? throw new InvalidDataException("The native capture evidence is empty.");
+        await Assert.That(evidence.Version).IsEqualTo(ArtifactVersion);
+        await Assert.That(evidence.WaveId).IsEqualTo(waveId);
+        await Assert.That(evidence.Nodes.Length).IsEqualTo(RequestCqrsRf3Protocol.NodeCount);
+        await Assert.That(evidence.Nodes.Select(node => node.Node).ToHashSet(StringComparer.Ordinal).SetEquals(
+            new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3 })).IsTrue();
+        foreach (var node in evidence.Nodes)
+        {
+            var expected = node.Node == ExpectedNode ? ExpectedRejections : NoRejections;
+            await Assert.That(node.Accepted).IsEqualTo(expected);
+            await Assert.That(node.Saturated).IsFalse();
+            await Assert.That(node.Lines >= node.Candidates && node.Candidates >= node.Accepted).IsTrue();
+            if (node.Node == ExpectedNode)
+            {
+                await Assert.That(node.FirstLineObservedAt).IsNotNull();
+                await Assert.That(node.LastLineObservedAt).IsNotNull();
+            }
+        }
     }
 
     private static async Task VerifyClosedFieldsAsync(JsonElement artifact)

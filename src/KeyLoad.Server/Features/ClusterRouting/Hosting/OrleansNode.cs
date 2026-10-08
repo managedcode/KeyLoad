@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Sockets;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -14,9 +12,10 @@ namespace KeyLoad.Server;
 /// <param name="membershipAuthority">Borrowed discovery authority, drained before the native silo stops.</param>
 /// <param name="runtimeOptions">Shared validated options snapshots borrowed by the native silo.</param>
 /// <param name="clock">Borrowed runtime clock for the silo and its shutdown deadlines.</param>
+/// <param name="physicalOwnerWork">Borrowed configured proof work owner, joined before native silo shutdown.</param>
 internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
-    ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null) : IAsyncDisposable
+    ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null) : IAsyncDisposable
 {
     private NodeOptions Options => nodeOptions.Value;
     private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
@@ -29,6 +28,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private Task? shutdown;
     private Task? startup;
     private PhysicalShardCatalogStartup? physicalShardCatalog;
+    private PhysicalOwnerRegistrationRuntime? ownerRegistration;
     private int siloJoined;
 
     /// <summary>Factory published only after native silo startup completes.</summary>
@@ -44,6 +44,8 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
 
     internal bool DatabaseReady => Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
         && CatalogReady && Volatile.Read(ref host)?.Services.GetRequiredService<RuntimeJournalAdmission>().IsReady == true;
+
+    internal PhysicalOwnerRegistrationObservation? OwnerRegistration => Volatile.Read(ref ownerRegistration)?.Observe();
 
     internal bool SiloJoined => Volatile.Read(ref siloJoined) == OrleansNodeProtocol.JoinedSilo;
 
@@ -95,7 +97,9 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private async Task StartCoreAsync(Task registered, CancellationToken cancellationToken)
     {
         await registered.ConfigureAwait(false);
-        var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
+        if (Options.MembershipAuthority.RegisterPhysicalOwners && physicalOwnerWork is null)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        var address = await OrleansNodeAddressResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
             address, runtimeOptions, runtimeClock, cancellationToken);
         Volatile.Write(ref host, built);
@@ -114,17 +118,11 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
                 runtimeOptions, cancellationToken).ConfigureAwait(false);
         }
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
-        { membershipAuthority.Publish(built.Services.GetRequiredService<IMembershipTable>()); }
-    }
-
-    private async Task<IPAddress> ResolveAddressAsync(CancellationToken cancellationToken)
-    {
-        var addresses = IPAddress.TryParse(Options.SiloAddress, out var literal) ? [literal]
-            : await Dns.GetHostAddressesAsync(Options.SiloAddress, cancellationToken).ConfigureAwait(false);
-        var allowLoopback = Options.Peers.All(peer => new Uri(peer).IsLoopback);
-        return addresses.FirstOrDefault(address => address.AddressFamily == AddressFamily.InterNetwork
-            && !address.Equals(IPAddress.Any) && (allowLoopback || !IPAddress.IsLoopback(address)))
-            ?? throw new InvalidOperationException(OrleansNodeProtocol.InvalidSiloAddress);
+        {
+            membershipAuthority.Publish(built.Services.GetRequiredService<IMembershipTable>());
+            PhysicalOwnerRegistrationRuntime.Attach(ref ownerRegistration, this, partition, runtimeOptions,
+                built.Services, runtimeClock);
+        }
     }
 
     /// <summary>Executes one signed operation through the corresponding GUID request actor.</summary>
@@ -180,6 +178,8 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
+        await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(Volatile.Read(ref ownerRegistration),
+            physicalOwnerWork, failures).ConfigureAwait(false);
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
         {
             await membershipAuthority.StopAdmissionJoinAndClearProviderAsync(failures).ConfigureAwait(false);

@@ -307,3 +307,65 @@ DatabaseIdentityMiddleware routes every /mcp request through McpHttpPipeline, wh
 The owning ClusterRouting readiness assertion must use real McpOfficialClient.ConnectAsync and require the exact native HttpRequestException503, a bounded original native response-body message, precisely five problem fields type/title/status/detail/errorCode with the literal catalog-not-ready values, and no bearer credential disclosure. Any other503, generic server fault, wrong body/extra field, successful connection, timeout, cancellation or cleanup error fails. Unexpected successful native owners are disposed; existing connection failure cleanup preserves primary and cleanup errors. No alternate transport, fake provider/handler, retry, timing change, production seam or successful-session branch is admitted.
 
 The original SDK QueryCapabilities/Commit calls remain and now compare every typed safe problem field. This earliest source-bound pre-grain rejection implies no user data/catalog/outcome effect; this test does not claim a complete persisted-store snapshot from Initialize. Following both group denials, repeat genuine all-six silo/membership/data/authority health and independent signed native fingerprint checks to prove system-control operations remain healthy while data stays closed. All existing image/profile/two-three-voter/membership/privacy/cleanup and Stage1B boundaries remain. Root owns guarded join, full build and actual native six-silo operation proof plus mandatory Linux/recovery/standardRF3 gates. No runtime PASS, movement acceptance or production qualification follows from authored source.
+
+## TASK-OWNER-DIRECTORY-1B-001: configured two-owner startup registration
+
+This private implementation stage is a prerequisite for KL036/KL037, not remote
+query fanout or partition movement. REQ-OWNER-REGISTER-001 maps to
+AC-OWNER-REGISTER-001: the real node-local canonical directory operation must
+prove fresh persisted administrator authorization, exact literal native record
+bytes, CAS, immutable-command replay, logged denial replay, complete unchanged
+post-failure state and native reopen followed by a healthy operation.
+REQ-OWNER-REGISTER-002 maps to AC-OWNER-REGISTER-002: only the explicitly enabled
+configured two-RF3 topology may verify all three destination endpoint proofs and
+submit the same canonical registration body through unique request grains.
+REQ-OWNER-REGISTER-003 maps to AC-OWNER-REGISTER-003: malformed/overbound or
+unconfigured owner evidence must fail closed; the destination public SDK/MCP
+data admission remains closed and all accepted native work is joined on stop.
+
+Directory version1 is additive to SCAT/PMAP V1 and bounded to exactly the two
+configured owners, each with three exact native endpoint voter identities. The
+maximum eight PartitionQuery leaves remains a separate bound. Native binary
+records contain stable owner tuples and configured endpoints only; no credential,
+principal claims, transient silo address, probe nonce, MAC or observation timing.
+Canonical registration identity binds the exact bounded tuple/CAS native body
+under its frozen domain. Each issuer independently verifies current destination
+proof before signing identical durable command bytes. Registration is not a
+persisted index/checkpoint, user grant, remote routing authority or global cut.
+
+Startup subscribes to native advisory silo events before an initial actual
+membership ReadAll check, coalesces notifications in one bounded owned signal,
+and verifies fresh six-silo membership before any registration. Endpoint identity
+is the receiving node's actual PartitionHost/native signed discovery identity;
+PreferLocalPlacement or a NodeStatus NodeId does not prove endpoint placement.
+The receiving owner uses its own configured credential through a separately
+authorized native RequestGrain and revalidates current local persisted authority
+after the local quorum barrier. Default RF3 behavior is unchanged. Cancellation
+and original failures settle native children, readers, subscriptions and worker
+before membership provider/silo/storage disposal; no retry-to-green or widened
+execution deadline. Implementation and native qualification remain pending.
+
+Authored native Core operation mappings (execution pending):
+- AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory
+  covers actual canonical register, same-ID replay, changed-content conflict, full
+  native directory/source bytes and native reopen/healthy continuation.
+- AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration
+  covers persisted nonadministrator denial, retained failure replay/post-failure
+  full image/cut equality and legitimate canonical registration/read continuation.
+
+These two methods do not qualify endpoint probes or actual two-owner startup.
+AC-OWNER-REGISTER-002/003 require the actual controller and Aspire six-silo flows,
+currently incomplete. No native IDs, census count or runtime PASS is inferred.
+
+### TASK-OWNER-DIRECTORY-1B-001 current configured topology implementation gate
+The opt-in is exactly `KeyLoadTests:ClusterRouting:RegisterPhysicalOwners=true` under validated ephemeral `two-rf3`; absent/false preserves the default membership-only topology. An explicit registration setting without that profile or a nonliteral value rejects. Each A issuer independently verifies all three configured native B endpoint proofs and emits the same deterministic tuple/CAS-zero command body; nonce, signature, clock and observed silo addresses never enter the durable body. A native advisory subscription precedes the initial actual membership check, with one coalesced signal and one original execution lifetime. Public GroupA/GroupB admission remains closed.
+`PhysicalOwnerRegistrationRf3Tests.AcOwnerRegister001To003RegistersConfiguredOwnersThenJoinsAllNodesAndReopensLiteralDirectory` exercises actual configured startup, completed native registration observation, fresh SDK/official MCP closed admission, full all-three-A literal directory bytes, B absence, joined shutdown/file-lock release and same-store full-image/position reopen. Two `PhysicalOwnerDirectoryWholeFlowTests` exercise real ZoneTree canonical apply, exact native replay, changed-body conflict, logged permission failure, CAS failure and healthy directory reads. These authored gates map REQ/AC-OWNER-REGISTER-001..003; native execution is pending. They do not complete KL036 owner assignment/movement or KL037 public remote fanout.
+
+
+### Native compiler integration: owner admission and joined disposal
+
+The physical-owner probe owner receives centrally bound and validated `PhysicalOwnerExecutionOptions` from `KeyLoad:PhysicalOwnerExecution`. MaximumAdmissions defaults to8 and may only be reduced to1..8; the frozen16KiB body limit and original request lifetime remain unchanged. A single boolean DropWrite membership wake is advisory/coalesced, never a queued operation or authority proof. Options are validated before physical ownership and shared with the borrowed native silo container. Every original native client, address pin, replay cache, cancellation source and work lease has direct observed disposal after its original worker/requests join. Partial construction and native admission failure retain the original error plus cleanup errors; an operation releases only its own frame/permit and never disposes the borrowed parent owner. This implements the already frozen owner lifetime and bound, without suppression, provider substitution, timing changes or new acceptance claims.
+
+The exact probe operation returns its permit before disposing the final native work lease. Registry drain therefore dominates permit return before semaphore disposal; both original failures are retained. No operation disposes the borrowed parent owner.
+
+The configured probe-client owner holds both native HttpClient and SocketsHttpHandler. HTTP borrows its handler (disposeHandler=false); parent disposal directly observes both after requests join. Failed creation joins acquired handler/pins and retains every original failure.

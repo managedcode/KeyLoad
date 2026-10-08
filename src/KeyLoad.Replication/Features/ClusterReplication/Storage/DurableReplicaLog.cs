@@ -174,24 +174,38 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
             lock (gate)
             {
                 Check();
-                ReplicaPersistence.ValidateSnapshot(snapshot, configuration);
-                if (snapshot.Index < (state.Snapshot?.Index ?? BeforeFirstLogPosition))
-                {
-                    throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
-                }
-                var retain = snapshot.Index <= state.LastIndex && Term(snapshot.Index) == snapshot.Term;
-                if (!retain && snapshot.Index <= state.CommittedIndex)
-                {
-                    throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot);
-                }
-                Save(state with
-                {
-                    Snapshot = snapshot,
-                    LastIndex = retain ? state.LastIndex : snapshot.Index,
-                    CommittedIndex = Math.Max(state.CommittedIndex, snapshot.Index),
-                    Term = Math.Max(state.Term, snapshot.Term),
-                    VotedFor = snapshot.Term > state.Term ? null : state.VotedFor
-                });
+                Save(ReplicaCheckpointPublication.Next(snapshot, state, configuration, Term));
+            }
+        }
+        finally { ProtocolGate.Release(); }
+    }
+
+    /// <inheritdoc />
+    public bool HasCheckpointPrefix
+    {
+        get
+        {
+            lock (gate)
+            {
+                Check();
+                return state.Snapshot is { } published && ReplicaPrefixReclaimer.HasPrefix(store, published, configuration);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public int ReclaimCheckpointPrefix(ReplicaSnapshot verifiedSnapshot, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(verifiedSnapshot);
+        ProtocolGate.Wait(cancellationToken);
+        try
+        {
+            lock (gate)
+            {
+                Check();
+                if (state.Snapshot != verifiedSnapshot || verifiedSnapshot.Index > state.CommittedIndex)
+                { throw Errors.Fail(ErrorCode.Conflict, ReplicaProtocol.InvalidSnapshot); }
+                return ReplicaPrefixReclaimer.Reclaim(store, verifiedSnapshot, configuration, CanonicalDatabase, cancellationToken);
             }
         }
         finally { ProtocolGate.Release(); }

@@ -41,6 +41,16 @@ public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
     }
     /// <inheritdoc />
     public ReplicaSnapshot? Current => log.State.Snapshot;
+    /// <inheritdoc />
+    public int ReclaimCheckpointPrefix(CancellationToken cancellationToken)
+    {
+        lock (gate)
+        {
+            ValidateScope();
+            return ReplicaVerifiedPrefixReclamation.Reclaim(canonical, log, configuration, files, cancellationToken);
+        }
+    }
+
     private ReplicaIncomingTransfer Incoming => incoming;
 
     /// <inheritdoc />
