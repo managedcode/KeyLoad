@@ -36,16 +36,19 @@ internal sealed record RequestCqrsFaultReceiptOracle(
         await Assert.That(sdk.Json).IsEqualTo(expectedBeforeJson);
         await Assert.That(mcp.Value.Json).IsEqualTo(expectedBeforeJson);
         await Assert.That(mcp.Value.Revision).IsEqualTo(sdk.Revision);
+        await RequestCqrsFaultReplayContinuation.DocumentAsync(callers, reference, sdk.Revision,
+            expectedBeforeJson, cancellationToken).ConfigureAwait(false);
         return new(partition, collection, documentId, expectedBeforeJson, sdk.Revision, expectedAfterJson);
     }
 
     /// <summary>Retries the identical stable command, compares both full receipts and proves exactly one effect.</summary>
     /// <param name="callers">The genuine SDK and official MCP clients.</param>
+    /// <param name="administrator">The existing administrator used only for fresh native placement and cut observations.</param>
     /// <param name="command">The exact original command, retaining its stable command ID and body.</param>
     /// <param name="cancellationToken">The bounded caller token.</param>
     /// <returns>The canonical receipt observed on retry.</returns>
     internal async Task<RequestCqrsFaultRetryResult> RetryAndVerifyAsync(RequestCqrsRf3Callers callers,
-        CommandRequest command, CancellationToken cancellationToken)
+        RequestCqrsRf3Callers administrator, CommandRequest command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(callers);
         if (command.CommandId == Guid.Empty)
@@ -62,6 +65,8 @@ internal sealed record RequestCqrsFaultReceiptOracle(
         await AssertReceiptAsync(sdkReceipt, mcpReceipt.Value, command.CommandId, Collection, DocumentId,
             checked(BeforeRevision + 1)).ConfigureAwait(false);
         await VerifyFinalDocumentAsync(callers, sdkReceipt, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsFaultReplayContinuation.VerifyAsync(callers, administrator.Sdk, new EntityRef(Partition, Collection, DocumentId), command, sdkReceipt,
+            BeforeJson, checked(BeforeRevision + 1), ExpectedJson, cancellationToken).ConfigureAwait(false);
         return new(sdkReceipt, mcpReceipt.Value, mcpReceipt.RequestId);
     }
 
@@ -81,6 +86,8 @@ internal sealed record RequestCqrsFaultReceiptOracle(
         await Assert.That(sdk?.Json).IsEqualTo(ExpectedJson);
         await Assert.That(mcp.Value?.Json).IsEqualTo(ExpectedJson);
         await Assert.That(sdk?.Json).IsNotEqualTo(BeforeJson);
+        await RequestCqrsFaultReplayContinuation.DocumentAsync(callers, reference, expectedRevision,
+            ExpectedJson, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task AssertReceiptAsync(CommitReceipt actual, CommitReceipt expected, Guid commandId,

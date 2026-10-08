@@ -26,6 +26,10 @@ container proof, SDK/MCP no-dispatch flow, failure joins and unchanged bounds.
 TASK-TUNIT-LOCAL-MEMBERSHIP-IMAGE freezes the ordered source/test stages there.
 The default GitHub route and Linux delivery gates remain mandatory.
 
+REQ-TUNIT-ENTRY-008: original required RF3 failure diagnostics become available before the longer covered cohort completes. AC-TUNIT-ENTRY-008: after the original `rf3-required` native step finishes with success or failure, the same job uploads its unchanged original reports and already prepared source/image receipts as `docker-rf3-original-diagnostics`; a native report-presence check includes ignored test artifacts, and missing reports fail that check before upload. This artifact is diagnostic evidence only. Complete qualification still requires the existing terminal `docker-rf3-qualification` artifact, final source/image verification, every required suite and strict coverage admission. No copied or edited report, synthetic outcome, skipped suite, changed deadline or new permission is admitted.
+
+TASK-TUNIT-EARLY-RF3-DIAGNOSTICS-008 maps this requirement to the existing native RF3 invocation and pinned artifact action in `.github/workflows/build-and-tests.yml`, under ADR-117. Root freezes the contract, adds the native step identity and diagnostic upload, reviews the workflow, then authenticates the original Linux run/attempt/source/job/artifact digest. The earlier ordinary RF3 failure is otherwise unavailable from the artifact API while the full covered cohort is still executing. Frontend and public contracts are N/A; this only shortens the failure feedback path. Rollback removes the additional diagnostic upload; all final qualification gates remain mandatory.
+
 REQ-TUNIT-ENTRY-006: the explicit standard RF3 Q2/schema batch also owns fresh
 image preparation and cleanup through its native C# fixture. AC-TUNIT-ENTRY-006:
 the exact second selector, typed handoff, three actual container identities,

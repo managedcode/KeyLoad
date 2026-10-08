@@ -151,7 +151,8 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
         var activeCaller = caller ?? throw new InvalidOperationException(MissingTask);
         var activeCommand = command ?? throw new InvalidOperationException(MissingTask);
         lifecycle.SetStage(RequestCqrsLifecycleStage.FaultReceiptRetry);
-        var retry = await activeOracle.RetryAndVerifyAsync(activeCaller, activeCommand, cancellationToken)
+        var retry = await activeOracle.RetryAndVerifyAsync(activeCaller, administrator ?? throw new InvalidOperationException(MissingWave),
+            activeCommand, cancellationToken)
             .ConfigureAwait(false);
         await Assert.That(retry.SdkReceipt.CommandId).IsEqualTo(commandId);
         await Assert.That(retry.McpReceipt.CommandId).IsEqualTo(commandId);

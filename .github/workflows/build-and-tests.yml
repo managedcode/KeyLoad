@@ -255,7 +255,21 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST=$evidence/functional-coverage.production-source-manifest.json" | Add-Content $env:GITHUB_ENV
       - name: Test three-node database with .NET and MCP clients
+        id: rf3-required
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
+      - name: Check original three-node reports for diagnostic upload
+        id: rf3-original-reports
+        if: ${{ !cancelled() && (steps.rf3-required.outcome == 'success' || steps.rf3-required.outcome == 'failure') }}
+        run: rg --files --no-ignore TestResults/rf3-required -g '*.trx'
+      - name: Save original three-node diagnostics before covered suites
+        if: ${{ !cancelled() && steps.rf3-original-reports.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docker-rf3-original-diagnostics
+          path: |
+            TestResults/rf3-required/**
+            TestResults/functional-coverage/rf3/**
+          if-no-files-found: error
       - name: Reconcile original native full and five-group discovery in both modes
         id: native-census
         if: ${{ !cancelled() && steps.coverage-source.outcome == 'success' }}

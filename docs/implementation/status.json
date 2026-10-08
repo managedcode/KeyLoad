@@ -239,13 +239,13 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "state": "PASS: complete native current movement foundation Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r798-movement-foundation-full-build-20261008-diagnostics.json",
-      "qualification": "Local development; exact current-source Linux runtime qualification remains open."
+      "state": "PASS: complete native Release solution,0warnings/errors,0source drift.",
+      "evidence": "/private/tmp/keyload-current-r803-three-module-rf3-flow-full-build-20261008-diagnostics.json",
+      "qualification": "Local development. Whole current-source Linux runtime qualification remains open."
     },
     "currentFormatter": {
       "state": "PASS: complete native readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r799-movement-foundation-full-native-format-20261008-receipt.json"
+      "evidence": "/private/tmp/keyload-current-r804-three-module-rf3-flow-full-native-format-20261008-receipt.json"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -35850,28 +35850,28 @@
           "owner": "sol61_security_finish",
           "task": "KL-015",
           "scope": "Security and telemetry acceptance, including actual exported HTTP/log privacy and native negative→healthy client flows; exclusive ServiceDefaults privacy join.",
-          "state": "Owns wholeKL015 C1/auth/cancellation and sole originalRF3 artifact harvest; prepared full foreign SDK Result denial oracle; native Linux telemetry12+12 passed separately.",
+          "state": "Whole KL015; complete nullable foreign Result denial joined; genuine C1/auth/cancellation qualification and sole original3458 RF3 archive harvest continue. Current Linux telemetry12+12 is supporting evidence only.",
           "previousOwner": "sol_public_bridge_finish"
         },
         {
           "owner": "sol61_session_finish",
           "task": "KL-021",
           "scope": "Strong read/session tokens; malformed/negative native authority whole state/healthy regression and genuine isolated former-leader qualification.",
-          "state": "Owns wholeKL014/KL011/KL021; prepared full interrupted-write same-ID Conflict/original receipt/fresh healthy flow packet; current-source RF3 bootstrap/replay/composite/session gates remain required.",
+          "state": "Whole KL014/KL011/KL021; complete interrupted replay/session adapter oracles joined; actual server-authenticated owner-bounded follower snapshot implementation and full flows continue privately. Broader stale-read requirements remain open.",
           "previousOwner": "sol_read_lock_regression"
         },
         {
           "owner": "sol61_movement_finish",
           "task": "KL-036",
           "scope": "Controlled movement full acceptance; missing actual Install/Retire/Abort process/full-model gates and public move orchestration gaps.",
-          "state": "WholeKL036 parent continues with first-issued phases/native reconciliation, original read metrics/downward budget/deadline and supported retained-mutation matrix; unsealed/unexecuted, no whole-task closure.",
+          "state": "Whole KL036 native parent first-issue/reconciliation, exact grant promotion, cold interrupted Abort and original bounded producer metrics continue privately; unsealed/unexecuted. Exact e478 unit failures await original reports.",
           "previousOwner": "sol_terminal_abort_join"
         },
         {
           "owner": "root",
           "task": "TEST-PIPELINE-001",
           "scope": "Coherent native build/format, full original native census/classification, independent test lanes, current functional-only coverage, Linux original evidence, complete wave Git delivery.",
-          "state": "Foundation16-path stage joined, full native build/format and10+10 actual outcome regressions passed; native3093 census and12discovery passed; full stage commit/push and genuine RF3 namespace root causes owned."
+          "state": "Three-module RF3 wholeflow stage joined and actual full build/format passed; whole source-stage Git delivery and exact original Linux failure diagnosis owned."
         }
       ],
       "liveMutationOwner": "root only during integration; no source/image mutation during native verification",
@@ -36122,7 +36122,96 @@
         "Complete KL036 public parent orchestration and extended/composition retained-read admission with every original policy, full-operation oracle and original bounded metrics/deadline.",
         "Complete functional-only collector, endurance and resource/performance qualification."
       ]
-    }
+    },
+    "stageXXVIICompleteRf3ClientFlowDevelopment": {
+      "sourceParentCommit": "e47803ef6e1e7ab89105f337772cb94b625951f6",
+      "tasks": [
+        "KL-014",
+        "KL-015",
+        "KL-021"
+      ],
+      "sourceStage": "Complete existing RF3 SDK/official MCP interrupted-write/replay/conflict/healthy continuation, foreign full Result denial privacy and persisted-session Q1 denial/restoration oracles. Same fixtures, actual persisted callers, original deadlines and genuine Aspire lifecycle retained.",
+      "guardedJoins": [
+        {
+          "receipt": "/private/tmp/keyload-kl014-interrupted-replay5-root-source-join-20261008.json",
+          "receiptSha256": "7108ce356c500c3b5113df767125a98044d535cb938e39f5f6862893066c048e"
+        },
+        {
+          "receipt": "/private/tmp/keyload-kl015-complete-denial2-root-source-join-20261008.json",
+          "receiptSha256": "9e7e7ba7d3ef8d3716aeadf66f93425cec807895ac759b39cc4f8da1be62709c"
+        },
+        {
+          "receipt": "/private/tmp/keyload-kl021-session-denial3-root-source-join-20261008.json",
+          "receiptSha256": "0bd2f08194813833137cef007ccf1d1c24eec8d83150ce549397969da945efa2"
+        }
+      ],
+      "finalSourceReview": {
+        "receipt": "/private/tmp/keyload-r803-three-module-flow-final-source-review-20261008.json",
+        "receiptSha256": "6c2446a16c7c10b68eab9fb44faae0d9ead9444a264db115194137e028c1488f"
+      },
+      "originalBuildR801": {
+        "receipt": "/private/tmp/keyload-current-r801-three-module-rf3-flow-full-build-20261008-diagnostics.json",
+        "receiptSha256": "65f49d6a9708b47ea77e72e79b3ab1500e99fe3ea8831449028044e8835016d5"
+      },
+      "finalBuild": {
+        "receipt": "/private/tmp/keyload-current-r803-three-module-rf3-flow-full-build-20261008-diagnostics.json",
+        "receiptSha256": "392708d76790d1da8e4ea74dc8dcfb4b824527ae85a19ce67e5215891de295b8"
+      },
+      "finalFormatter": {
+        "receipt": "/private/tmp/keyload-current-r804-three-module-rf3-flow-full-native-format-20261008-receipt.json",
+        "receiptSha256": "6a32f656966e89df834376af66486f988739c34d6f5c8cb23df521b3c7a4fd5f"
+      },
+      "currentNativeDiscovery": {
+        "receipt": "/private/tmp/keyload-current-r803-full-native-census-20261008-receipt.json",
+        "receiptSha256": "512ef4589fe54cf070694b083088fcad883d1f9220a43f6238d204105edb89f5",
+        "nativeCases": 3093,
+        "functionalCases": 2688,
+        "requiredOrdinaryCases": 405,
+        "originalFullCensusSha256": "ce1dc59b004c3be51dc85501cbfdd24de7e0f209ecba682c24ef53d92582ce40",
+        "same3093CaseIdentitiesAndSourceMappings": true,
+        "inventorySha256": "21eb67d024f41a334123991597e401d081f43a9fe496212daee515fb4fbb4dd9",
+        "nativeImage": {
+          "receipt": "/private/tmp/keyload-r803-current-native-image-observation-20261008.json",
+          "receiptSha256": "5c4f1528b79e8191d154d81b14234558d1dfe57a05a57a912f703031053764d3"
+        },
+        "originalAndCurrentImageReview": {
+          "receipt": "/private/tmp/keyload-r803-native-unit-image-review-20261008.json",
+          "receiptSha256": "05daa585134e87ed73268d55d7917b9bb66354827616f840a844d2d5b25812f8"
+        },
+        "all12DiscoveryEvidenceRoot": "artifacts/local/keyload-r803-final-native-functional-discovery-20261008",
+        "qualification": "Native full and canonical group discovery only. No new operation execution or product coverage inferred."
+      },
+      "earlyOriginalRf3Diagnostics": {
+        "requirements": [
+          "REQ-TUNIT-ENTRY-008",
+          "AC-TUNIT-ENTRY-008"
+        ],
+        "artifactName": "docker-rf3-original-diagnostics",
+        "qualification": "Native YAML/source review passed. Actual next-source GitHub upload and API/archive digest authentication pending. Final RF3 suite/source/image/coverage gates unchanged."
+      },
+      "latestFoundationSourceLinux": {
+        "sourceCommit": "e47803ef6e1e7ab89105f337772cb94b625951f6",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37831435664",
+        "originalRunApi": {
+          "receipt": "/private/tmp/keyload-e47803ef-original-ci-run-list-20261008.json",
+          "receiptSha256": "395e5556b1defb7fc624f3e9365a16ebbb689abe86e2f2e0d338229cca507079"
+        },
+        "originalJobApi": {
+          "receipt": "/private/tmp/keyload-e47803ef-ci-jobs-original-snapshot1-20261008.json",
+          "receiptSha256": "ce6d5069d6055b5812d5d9c21d15d7bef9c53693545ab612637b3d62d15db2a8"
+        },
+        "observedState": "Normal unit step failed; scalar and actual RF3 still running. Exact original failing cases not yet available in terminal archive. No assumption that earlier19 movement roots are fully cleared."
+      },
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Execute complete existing native current-source RF3 whole flows and inspect authenticated original reports.",
+        "Finish actual public movement parent, fresh-authorized follower snapshot mode and all broader original KL014/KL015/KL021 criteria.",
+        "Diagnose exact delivered-source unit/RF3 failures from originals, complete functional-only collector, endurance and resource/performance gates."
+      ]
+    },
+    "stageXXVIDeliveredCommit": "e47803ef6e1e7ab89105f337772cb94b625951f6",
+    "stageXXVIDeliveredRemoteVerified": true
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -38377,6 +38466,11 @@
         "receiptSha256": "0a9d121a114f4b813716a2d57e3d155a66182592f7db8bd3cdb969dd61c0dbde"
       },
       "runtimeQualified": false
+    },
+    "currentCompleteRf3FlowDevelopment": {
+      "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
+      "runtimeQualified": false,
+      "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
     }
   },
   "KL-015": {
@@ -38389,6 +38483,11 @@
     "currentTelemetryDevelopment": {
       "qualification": "Actual local12normal+12scalarPASS; exact current Linux C1/authorization gates remain open.",
       "evidence": "/private/tmp/keyload-r785-kl015-native-telemetry-evidence-ledger-20261008.json"
+    },
+    "currentCompleteRf3FlowDevelopment": {
+      "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
+      "runtimeQualified": false,
+      "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
     }
   },
   "KL-016": {
@@ -39709,7 +39808,12 @@
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs"
-    ]
+    ],
+    "currentCompleteRf3FlowDevelopment": {
+      "stage": "TEST-PIPELINE-001.stageXXVIICompleteRf3ClientFlowDevelopment",
+      "runtimeQualified": false,
+      "qualification": "Complete independently expected negative/replay/healthy flow source compiled. Exact-source native Linux RF3 reports and broader whole-task criteria remain mandatory."
+    }
   },
   "KL-022": {
     "title": "Graph storage",

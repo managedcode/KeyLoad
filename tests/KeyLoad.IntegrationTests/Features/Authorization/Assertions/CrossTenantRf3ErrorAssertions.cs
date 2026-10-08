@@ -9,12 +9,13 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class CrossTenantRf3ErrorAssertions
 {
     private const string Detail = "The principal cannot perform this operation in this scope.";
-    internal static async Task SdkAsync<T>(Result<T> result, string secret)
+    internal static async Task SdkAsync<T>(Result<T> result, string secret) where T : class?
     {
         await Assert.That(result.IsFailed).IsTrue();
+        await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await Assert.That(result.Problem.Detail).IsEqualTo(Detail);
-        await PrivateAsync(JsonSerializer.Serialize(result.Problem, JsonDefaults.Options), secret);
+        await PrivateAsync(JsonSerializer.Serialize(result, JsonDefaults.Options), secret);
     }
     internal static async Task McpAsync(CallToolResult result, string secret)
     {
