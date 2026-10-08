@@ -9,7 +9,7 @@ on:
         description: 'Acceptance task; all runs complete qualification and all task lanes'
         type: choice
         default: all
-        options: [all, KL-011, KL-014, KL-015]
+        options: [all, KL-011, KL-014, KL-015, KL-021]
 permissions:
   contents: read
 concurrency:
@@ -225,7 +225,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: ${{ fromJSON(inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || '["KL-011","KL-014","KL-015"]') }}
+        task: ${{ fromJSON(inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || '["KL-011","KL-014","KL-015","KL-021"]') }}
         profile: [normal, scalar]
     steps:
       - name: Download source code

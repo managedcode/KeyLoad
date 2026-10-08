@@ -11,6 +11,8 @@ internal static class ColdBootstrapSdkFlow
     internal const long FirstRevision = 1;
     internal const long HealthyRevision = 2;
     private const long AbsentRevision = 0;
+    private const int PlacementVersion = 1;
+    private const long InitialPosition = 0;
     private const int OneMutation = 1;
     private const int MutationIndex = 0;
     private const string Tenant = "bootstrap-tenant";
@@ -41,6 +43,11 @@ internal static class ColdBootstrapSdkFlow
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await ColdBootstrapSdkAssertions.ReceiptAsync(receipt, command).ConfigureAwait(false);
         var reference = new EntityRef(partition, Collection, Document);
+        var placement = await McpCallerAssertions.SdkSuccessAsync(await admin.ReadAtomicPartitionPlacementAsync(
+            new(PlacementVersion, partition), joined.Token));
+        await ColdBootstrapSdkAssertions.NativeReceiptAsync(receipt, command, placement, FirstRevision, InitialPosition);
+        await ColdBootstrapSdkAssertions.DocumentAtMinimumAsync(sdk, reference, receipt.Token, FirstRevision,
+            OriginalJson, joined.Token);
         await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, FirstRevision, OriginalJson, joined.Token);
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
@@ -53,9 +60,26 @@ internal static class ColdBootstrapSdkFlow
         await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, FirstRevision, OriginalJson, joined.Token);
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await Assert.That(NativeSerialization.Serialize(after).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
-        var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(changed with { CommandId = Guid.NewGuid() }, joined.Token));
+        await HealthyContinuationAsync(sdk, reference, command, changed, receipt, placement, joined.Token);
+    }
+
+    private static async Task HealthyContinuationAsync(KeyLoadClient sdk, EntityRef reference,
+        CommandRequest original, CommandRequest changed, CommitReceipt originalReceipt,
+        AtomicPartitionPlacementResolution placement, CancellationToken token)
+    {
+        var healthyCommand = changed with { CommandId = Guid.NewGuid() };
+        await Assert.That(healthyCommand.CommandId).IsNotEqualTo(original.CommandId);
+        var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(healthyCommand, token));
         await Assert.That(healthy.Mutations.Length).IsEqualTo(OneMutation);
         await Assert.That(healthy.Mutations[MutationIndex].Revision).IsEqualTo(HealthyRevision);
-        await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, HealthyRevision, HealthyJson, joined.Token);
+        await ColdBootstrapSdkAssertions.NativeReceiptAsync(healthy, healthyCommand, placement, HealthyRevision,
+            originalReceipt.Token.Position);
+        await ColdBootstrapSdkAssertions.DocumentAtMinimumAsync(sdk, reference, healthy.Token, HealthyRevision,
+            HealthyJson, token);
+        await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, HealthyRevision, HealthyJson, token);
+        var originalReplay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(original, token));
+        await Assert.That(NativeSerialization.Serialize(originalReplay)
+            .SequenceEqual(NativeSerialization.Serialize(originalReceipt))).IsTrue();
+        await ColdBootstrapSdkAssertions.DocumentAsync(sdk, reference, HealthyRevision, HealthyJson, token);
     }
 }

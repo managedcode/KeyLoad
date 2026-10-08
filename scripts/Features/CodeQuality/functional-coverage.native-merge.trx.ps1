@@ -5,7 +5,7 @@ function Read-FcNativeTrx([string] $Path, [string] $Suite, [object[]] $ExpectedC
     $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     foreach ($case in $ExpectedCases) { $expected.Add((Get-FcNativeTrxKey $case.className $case.methodName $case.instanceName), $case) }
     $definitions = Read-FcNativeTrxDefinitions $doc $expected
-    $results = Read-FcNativeTrxResults $doc $definitions $expected
+    $results = @(Read-FcNativeTrxResults $doc $definitions $expected)
     Assert-FcNativeTrxCounters $doc $definitions.Count $results.Count
     [ordered]@{ suite = $Suite; testCount = $results.Count; cases = @($results | Sort-Object identity) }
 }
@@ -21,10 +21,10 @@ function Read-FcNativeTrxDefinitions([Xml.XmlDocument] $Document, [Collections.G
         $id = $node.GetAttribute('id'); $method = $node.SelectSingleNode('./*[local-name()="TestMethod"]')
         if ([string]::IsNullOrWhiteSpace($id) -or $null -eq $method -or $definitions.ContainsKey($id)) { throw $script:FcNativeTrx.Invalid }
         $className = $method.GetAttribute('className'); $methodName = $method.GetAttribute('name')
-        $prefix = "$className|$methodName|"
-        $matches = @($Expected.Keys | Where-Object { $_.StartsWith($prefix, [StringComparison]::Ordinal) })
-        if ($matches.Count -eq 0 -or $node.GetAttribute('name') -cne $methodName) { throw $script:FcNativeTrx.Invalid }
-        $definitions.Add($id, [ordered]@{ className = $className; methodName = $methodName })
+        $instanceName = $node.GetAttribute('name')
+        $key = Get-FcNativeTrxKey $className $methodName $instanceName
+        if (-not $Expected.ContainsKey($key)) { throw $script:FcNativeTrx.Invalid }
+        $definitions.Add($id, [ordered]@{ className = $className; methodName = $methodName; instanceName = $instanceName })
     }
     if ($definitions.Count -eq 0) { throw $script:FcNativeTrx.Invalid }
     $definitions
@@ -42,7 +42,7 @@ function Read-FcNativeTrxResults([Xml.XmlDocument] $Document,
         }
         $definition = $Definitions[$id]
         $key = Get-FcNativeTrxKey $definition.className $definition.methodName $testName
-        if (-not $Expected.ContainsKey($key) -or -not $cases.Add($key)) { throw $script:FcNativeTrx.Invalid }
+        if ($testName -cne $definition.instanceName -or -not $Expected.ContainsKey($key) -or -not $cases.Add($key)) { throw $script:FcNativeTrx.Invalid }
         $results.Add([ordered]@{ identity = "$id|$($definition.className)|$($definition.methodName)|$testName"
             caseIdentity = $key
             testId = $id; className = $definition.className; methodName = $definition.methodName; instanceName = $testName })

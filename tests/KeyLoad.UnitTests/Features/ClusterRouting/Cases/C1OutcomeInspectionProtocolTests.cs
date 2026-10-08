@@ -43,12 +43,15 @@ internal sealed class C1OutcomeInspectionProtocolTests
             await AssertRawRejectedAsync(fixture, malformedUtf8);
             await AssertRawRejectedAsync(fixture, oversized);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
+            await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true);
         }).ConfigureAwait(false);
     }
 
     private static async Task AssertRawRejectedAsync(C1OutcomeInspectionFixture fixture, byte[] input)
     {
         var result = await C1OutcomeInspectionAssertions.RunRawAsync(fixture, input);
-        await C1OutcomeInspectionAssertions.AssertRejectedAsync(result);
+        var phase = input.Length > C1OutcomeInspectionProtocol.MaximumRequestBytes
+            ? C1OutcomeInspectionFailurePhase.ReadInput : C1OutcomeInspectionFailurePhase.ValidateRequest;
+        await C1OutcomeInspectionAssertions.AssertRejectedAsync(result, phase);
     }
 }

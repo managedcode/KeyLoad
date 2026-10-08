@@ -21,6 +21,7 @@ internal static class ControlledDocumentPublishedReadFlow
         ControlledPartitionMovementNode target)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
+        await ControlledDocumentRetiredBridgeDenials.ExecuteAsync(source, target, token);
         var sourceBytes = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var targetBytes = ControlledPartitionMovementRawImage.Bytes(target.Store);
         var sourcePosition = source.Store.Position;

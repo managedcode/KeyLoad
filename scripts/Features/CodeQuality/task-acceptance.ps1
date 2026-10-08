@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-011','KL-014','KL-015')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-011','KL-014','KL-015','KL-021')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
 )
 Set-StrictMode -Version Latest
@@ -189,7 +189,8 @@ $inherited = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic')
 $location = Get-Location
 try {
     Set-Location -LiteralPath $Repository
-    [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', $(if ($Profile -ceq 'scalar') { '0' } else { $null }))
+    if ($Profile -ceq 'scalar') { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', '0') }
+    else { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', [NullString]::Value) }
     foreach ($selection in $taskContract[0].selections) {
         $manifest.selections += Invoke-TaskSelection $selection $taskRoot
     }
@@ -207,6 +208,7 @@ try {
     }
 }
 finally {
-    [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', $inherited)
+    if ($null -eq $inherited) { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', [NullString]::Value) }
+    else { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', $inherited) }
     Set-Location -LiteralPath $location.Path
 }

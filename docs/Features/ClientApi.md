@@ -786,3 +786,10 @@ ZoneTree/full RF3 flows own functional acceptance. Fixed safe literal mapping
 includes only owned follower input/lag/minimum/owner/role failures; arbitrary
 text remains excluded. All new native and current-source Linux gates are pending;
 Q1 SELECT/AST and broader model stale modes are explicitly unsupported.
+
+
+### TASK-KL014-COLD-BOOTSTRAP-NATIVE-ORACLE-002
+
+REQ/AC-CLIENT-004/005 and ADR039/117 retain the original real cold-root, built CLI, persisted nonadministrator, exact command replay/conflict and owned-root removal flow. Both original and healthy complete CommitReceipt values must independently equal the literal command ID/partition/mutation/durability model with incarnation and placement epoch obtained from the actual administrator-authorized native placement operation after the original commit. The observed positive original position is validated by an actual SDK MinimumToken read; the healthy position must strictly exceed it and is likewise validated by the real MinimumToken document read. Position is observed, never reserved as previous+1 or borrowed from a potentially stale Status snapshot. Full literal documents, both native-byte original receipt replay comparisons and every existing negative assertion remain intact. After the healthy replacement, another original-ID replay retains the full original receipt and the later document remains unchanged.
+
+Ownership: existing IntegrationTests ClientApi ColdBootstrapSdkAssertions and ColdBootstrapSdkFlow; no product, route, schema, topology, deadline or fixture-lifetime change. Existing ADR039 owns public client outcomes and ADR117 native fixture execution, so an additional ADR is N/A. The same current native ColdBootstrapSdkTests case qualifies this delta only after a fresh root build and authenticated Linux normal/scalar task RF3 originals; earlier images remain historical evidence. Broader SQL/model requirements and unrelated task gates are unchanged.

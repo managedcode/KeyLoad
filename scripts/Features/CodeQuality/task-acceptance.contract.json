@@ -595,6 +595,1191 @@
           ]
         }
       ]
+    },
+    {
+      "taskId": "KL-021",
+      "selections": [
+        {
+          "selectionId": "unit-document-cuts",
+          "suite": "unit",
+          "filter": "/*/*/(DocumentSessionReadTests)|(FollowerDocumentReadTests)|(FollowerDocumentAuthorityTests)|(FollowerDocumentSchemaTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021CancelledMinimumReadReturnsNoResultAndFreshNativeReadSucceeds",
+              "instanceName": "Kl021CancelledMinimumReadReturnsNoResultAndFreshNativeReadSucceeds",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues",
+              "instanceName": "Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues",
+              "instanceName": "Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021MinimumTokenRejectsInvalidAuthorityWithoutEffectsAndHealthyReadContinues",
+              "instanceName": "Kl021MinimumTokenRejectsInvalidAuthorityWithoutEffectsAndHealthyReadContinues",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021MinimumTokenUsesFreshPersistedAuthorizationAndHealthyGrantRestoration",
+              "instanceName": "Kl021MinimumTokenUsesFreshPersistedAuthorizationAndHealthyGrantRestoration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionReadTests",
+              "methodName": "Kl021MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues",
+              "instanceName": "Kl021MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentSessionReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues",
+              "instanceName": "InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues(missing)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues",
+              "instanceName": "InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues(negative)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "CorruptNativeVerifierThenRevokedPrincipalCannotReleaseCapturedDocumentBeforeRestoration",
+              "instanceName": "CorruptNativeVerifierThenRevokedPrincipalCannotReleaseCapturedDocumentBeforeRestoration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "NativeWitnessRoundTripPreservesServerProofButAlteredProofFailsWithoutStorageEffects",
+              "instanceName": "NativeWitnessRoundTripPreservesServerProofButAlteredProofFailsWithoutStorageEffects",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues",
+              "instanceName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues(version)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues",
+              "instanceName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues(lag)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentAuthorityTests",
+              "methodName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues",
+              "instanceName": "UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues(replica)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedCommittedDocumentRetainsExplicitOldCutAndMinimumBeforeFullFreshContinuation",
+              "instanceName": "CapturedCommittedDocumentRetainsExplicitOldCutAndMinimumBeforeFullFreshContinuation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues",
+              "instanceName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues(revoked)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues",
+              "instanceName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues(deleted)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues",
+              "instanceName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues(replaced)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues",
+              "instanceName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues(retargeted)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues",
+              "instanceName": "CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues(expired)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CapturedPrivateDocumentUsesRenewedGrantAndChangedFieldPolicyBeforeHealthyResume",
+              "instanceName": "CapturedPrivateDocumentUsesRenewedGrantAndChangedFieldPolicyBeforeHealthyResume",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow",
+              "instanceName": "CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow",
+              "instanceName": "CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentReadTests",
+              "methodName": "InvalidMinimumOwnerGenerationAndCancellationLeaveCompleteNativeStateThenHealthyRead",
+              "instanceName": "InvalidMinimumOwnerGenerationAndCancellationLeaveCompleteNativeStateThenHealthyRead",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentReadTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentSchemaTests",
+              "methodName": "CanonicalSdkMcpAndSqlPayloadShareFullTypedRequestAndHideServerOnlyProof",
+              "instanceName": "CanonicalSdkMcpAndSqlPayloadShareFullTypedRequestAndHideServerOnlyProof",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentSchemaTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.DocumentStorage.FollowerDocumentSchemaTests",
+              "methodName": "ActualGeneratedClosedSchemasRequireExplicitFollowerAndLagAndDescribeSeparateCuts",
+              "instanceName": "ActualGeneratedClosedSchemasRequireExplicitFollowerAndLagAndDescribeSeparateCuts",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/FollowerDocumentSchemaTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-signed-read-authority",
+          "suite": "unit",
+          "filter": "/*/*/(ReplicaReadProbeSecurityTests)|(ReplicaReadProbeHeaderTests)|(ReplicaControlBarrierSecurityTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "FullControlPoolRejectsControlReadsButAdmitsApplicationRead",
+              "instanceName": "FullControlPoolRejectsControlReadsButAdmitsApplicationRead",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "MalformedControlPayloadCannotConsumeReserve",
+              "instanceName": "MalformedControlPayloadCannotConsumeReserve(\"\" \"\")",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "MalformedControlPayloadCannotConsumeReserve",
+              "instanceName": "MalformedControlPayloadCannotConsumeReserve(null)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "MalformedControlPayloadCannotConsumeReserve",
+              "instanceName": "MalformedControlPayloadCannotConsumeReserve({})",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "NonemptyControlPayloadFailsValidation",
+              "instanceName": "NonemptyControlPayloadFailsValidation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "MaximumPreviousIndexFailsBeforeReplayAdmission",
+              "instanceName": "MaximumPreviousIndexFailsBeforeReplayAdmission",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "NativeReadProbeValidTwinRetainsAllFieldsAndIndependentControlCapacity",
+              "instanceName": "NativeReadProbeValidTwinRetainsAllFieldsAndIndependentControlCapacity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "OversizedProbeCannotClaimAnyPool",
+              "instanceName": "OversizedProbeCannotClaimAnyPool",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(ConflictingPreviousTerm)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(MissingCommittedIndex)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(MissingPreviousIndex)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(MissingPreviousTerm)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(MissingTerm)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(NegativeCommittedIndex)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(NegativePreviousIndex)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeHeaderTests",
+              "methodName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity",
+              "instanceName": "StrictHeaderDenialDoesNotConsumeReadOrControlCapacity(ZeroTerm)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeHeaderTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "ApplicationReadMethodsCannotConsumeNativeControlReserve",
+              "instanceName": "ApplicationReadMethodsCannotConsumeNativeControlReserve(ReadBarrier)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaRpc"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "ApplicationReadMethodsCannotConsumeNativeControlReserve",
+              "instanceName": "ApplicationReadMethodsCannotConsumeNativeControlReserve(ReadProbe)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaRpc"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "MalformedSignedProbePreservesCapacity",
+              "instanceName": "MalformedSignedProbePreservesCapacity(DuplicateEntries)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "MalformedSignedProbePreservesCapacity",
+              "instanceName": "MalformedSignedProbePreservesCapacity(MissingEntries)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "MalformedSignedProbePreservesCapacity",
+              "instanceName": "MalformedSignedProbePreservesCapacity(NullEntries)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "MalformedSignedProbePreservesCapacity",
+              "instanceName": "MalformedSignedProbePreservesCapacity(TrailingObject)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "MalformedSignedProbePreservesCapacity",
+              "instanceName": "MalformedSignedProbePreservesCapacity(UnknownEntries)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.NativeReadProbeFault"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "NonceCannotMoveBetweenReadProbeAndControlMethods",
+              "instanceName": "NonceCannotMoveBetweenReadProbeAndControlMethods",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed",
+              "instanceName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed(Batch)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Nullable`1<KeyLoad.OperationKind>"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed",
+              "instanceName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed(Membership)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Nullable`1<KeyLoad.OperationKind>"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed",
+              "instanceName": "NonemptyProbeFailsBeforeEitherPoolIsConsumed(null)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Nullable`1<KeyLoad.OperationKind>"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaReadProbeSecurityTests",
+              "methodName": "ProbeRetainsExactMethodMacAndDeclaredLeaderBinding",
+              "instanceName": "ProbeRetainsExactMethodMacAndDeclaredLeaderBinding",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaReadProbeSecurityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaControlBarrierSecurityTests",
+              "methodName": "AppendedMethodsPreserveExistingWireOrdinals",
+              "instanceName": "AppendedMethodsPreserveExistingWireOrdinals",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaControlBarrierSecurityTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-read-deadline",
+          "suite": "unit",
+          "filter": "/*/*/ReplicaExecutionOptionsTests/ConfiguredReadDeadlineCancelsWaitingTransportWithoutCallerCancellation",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.ReplicaExecutionOptionsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaExecutionOptionsTests",
+              "methodName": "ConfiguredReadDeadlineCancelsWaitingTransportWithoutCallerCancellation",
+              "instanceName": "ConfiguredReadDeadlineCancelsWaitingTransportWithoutCallerCancellation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaExecutionOptionsTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-closed-read-admission",
+          "suite": "unit",
+          "filter": "/*/*/ReplicaConsensusLifecycleTests/RepeatedStopAndDisposeFenceAllNewEndpointActivity",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.ReplicaConsensusLifecycleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaConsensusLifecycleTests",
+              "methodName": "RepeatedStopAndDisposeFenceAllNewEndpointActivity",
+              "instanceName": "RepeatedStopAndDisposeFenceAllNewEndpointActivity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaConsensusLifecycleTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-compatible-majority",
+          "suite": "unit",
+          "filter": "/*/*/RequestCqrsCohortUnavailableTests/StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterReplication.RequestCqrsCohortUnavailableTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterReplication.RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntimeFixture)",
+              "methodName": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
+              "instanceName": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/RequestCqrsCohortUnavailableTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "stored-read-rounds",
+          "suite": "recovery",
+          "filter": "/*/*/(ReadRoundProtocolTests)|(ReadRoundGuardTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "methodName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes",
+              "instanceName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes(1)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundProtocolTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "methodName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes",
+              "instanceName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes(2)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundProtocolTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "methodName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes",
+              "instanceName": "ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes(3)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundProtocolTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundProtocolTests",
+              "methodName": "RemoteControlRoundDoesNotSpendApplicationProbeTraffic",
+              "instanceName": "RemoteControlRoundDoesNotSpendApplicationProbeTraffic",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundProtocolTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(nonempty)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(null-entries)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-entries)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-leader)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-term)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-previous-index)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-previous-term)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(missing-committed-index)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(duplicate)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(unknown)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(case-mutated-alias)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(invalid-term)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(invalid-previous)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority",
+              "instanceName": "InvalidProbeCannotReachReceiverOrMutateStoredAuthority(trailing)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidControlReadCannotReachLeader",
+              "instanceName": "InvalidControlReadCannotReachLeader(nonempty-string)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidControlReadCannotReachLeader",
+              "instanceName": "InvalidControlReadCannotReachLeader(null-root)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidControlReadCannotReachLeader",
+              "instanceName": "InvalidControlReadCannotReachLeader(object-root)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "InvalidControlReadCannotReachLeader",
+              "instanceName": "InvalidControlReadCannotReachLeader(trailing-string)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "NonemptyRealOperationCannotUseProbe",
+              "instanceName": "NonemptyRealOperationCannotUseProbe(1)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "NonemptyRealOperationCannotUseProbe",
+              "instanceName": "NonemptyRealOperationCannotUseProbe(2)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "CancelledReadDoesNotWaitForTransportOrChangeStoredState",
+              "instanceName": "CancelledReadDoesNotWaitForTransportOrChangeStoredState(False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReadRoundGuardTests",
+              "methodName": "CancelledReadDoesNotWaitForTransportOrChangeStoredState",
+              "instanceName": "CancelledReadDoesNotWaitForTransportOrChangeStoredState(True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundGuardTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-strong-session",
+          "suite": "rf3",
+          "filter": "/*/*/(DocumentSessionReadRf3Tests)|(DocumentSessionIsolationRf3Tests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionReadRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionReadRf3Tests(ClusterFixture)",
+              "methodName": "Kl021AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads",
+              "instanceName": "Kl021AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/DocumentSessionReadRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionIsolationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionIsolationRf3Tests",
+              "methodName": "Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm",
+              "instanceName": "Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/DocumentSessionIsolationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-follower-held-cut",
+          "suite": "rf3",
+          "filter": "/*/*/FollowerDocumentRf3Tests/HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport",
+              "instanceName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(Sdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport",
+              "instanceName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(OfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport",
+              "instanceName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(SqlSdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport",
+              "instanceName": "HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(SqlOfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-follower-current-authority",
+          "suite": "rf3",
+          "filter": "/*/*/FollowerDocumentRf3Tests/HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(Sdk, Credential)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(OfficialMcp, Credential)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(SqlSdk, Credential)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(SqlOfficialMcp, Credential)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(Sdk, Grant)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(OfficialMcp, Grant)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(SqlSdk, Grant)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes",
+              "instanceName": "HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(SqlOfficialMcp, Grant)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-follower-current-field-policy",
+          "suite": "rf3",
+          "filter": "/*/*/FollowerDocumentRf3Tests/HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes",
+              "instanceName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(Sdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes",
+              "instanceName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(OfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes",
+              "instanceName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(SqlSdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes",
+              "instanceName": "HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(SqlOfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-follower-lag-cancellation",
+          "suite": "rf3",
+          "filter": "/*/*/FollowerDocumentRf3Tests/HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(Sdk, Lag)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(OfficialMcp, Lag)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(SqlSdk, Lag)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(SqlOfficialMcp, Lag)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(Sdk, Cancellation)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(OfficialMcp, Cancellation)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(SqlSdk, Cancellation)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume",
+              "instanceName": "HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(SqlOfficialMcp, Cancellation)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller",
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentChange"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-follower-lost-quorum",
+          "suite": "rf3",
+          "filter": "/*/*/FollowerDocumentRf3Tests/CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume",
+              "instanceName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(Sdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume",
+              "instanceName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(OfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume",
+              "instanceName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(SqlSdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentRf3Tests",
+              "methodName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume",
+              "instanceName": "CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(SqlOfficialMcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "maximumParallelTests": 20

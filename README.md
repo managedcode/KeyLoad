@@ -363,7 +363,8 @@ qualification remains open.
 
 Native TUnit now defaults to 20 parallel tests. GitHub also runs separate
 normal/scalar-caller acceptance lanes for strict indexes, the server/SDK and
-security/telemetry. Focused task runs retain their complete declared operation
+security/telemetry, plus strong/session and follower document reads. These four
+tasks run in eight isolated Linux jobs. Focused task runs retain their complete declared operation
 scope; full build, unit, recovery, RF3 and coverage gates remain mandatory.
 
 Complete product functional coverage remains **unmeasured**. The

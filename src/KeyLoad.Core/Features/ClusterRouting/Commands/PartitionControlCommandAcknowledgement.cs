@@ -59,7 +59,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         var control = PartitionMoveControlStorage.ReadHistory(view, identity.Partition!, record.Delegation.MoveId,
             Limits.MaxBatchBytes) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
-        _ = RequireRetiredCommandControl(view, principal, control);
+        _ = RequireRetiredCommandControl(view, principal, control, out _);
         return record;
     }
 }

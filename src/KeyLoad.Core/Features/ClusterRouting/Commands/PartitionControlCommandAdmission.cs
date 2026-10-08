@@ -12,7 +12,7 @@ public sealed partial class DatabaseEngine
     private PartitionControlCommandRecord AdmitControlledDocumentCommand(IAtomicTransaction transaction,
         PrincipalRecord operatorPrincipal, PartitionControlAdmitBody body, long position, DateTimeOffset now)
     {
-        var control = RequireRetiredCommandControl(transaction, operatorPrincipal, body.Control);
+        var control = RequireRetiredCommandControl(transaction, operatorPrincipal, body.Control, out var destination);
         var original = VerifyOperationAuthority(body.OriginalOperation);
         var command = RequireControlledDocumentBatch(original, control.Partition);
         var principal = Principal(transaction, original.PrincipalId, now);
@@ -33,7 +33,6 @@ public sealed partial class DatabaseEngine
         var selected = CommandOutcomeKeyResolver.Select(transaction, original.PrincipalId, original.Id, scope);
         if (selected.Outcome is not null)
         { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
-        var destination = ReadPlacementWitness(transaction, command.Partition);
         var owner = RequireMoveDirectory(transaction).ControlOwner;
         var delegation = new PartitionControlDelegation(PartitionMoveProtocol.Version, identity, fingerprint,
             body.EffectId, control.MoveId, destination, principal, body.ExpiresAt, position,
@@ -59,18 +58,22 @@ public sealed partial class DatabaseEngine
     }
 
     private PartitionMoveControlRecord RequireRetiredCommandControl(IKeyValueView view,
-        PrincipalRecord operatorPrincipal, PartitionMoveControlRecord expected)
+        PrincipalRecord operatorPrincipal, PartitionMoveControlRecord expected, out AtomicPartitionPlacementResolution placement)
     {
+        if (!operatorPrincipal.ClusterAdministrator)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         var control = PartitionMoveControlStorage.ReadHistory(view, expected.Partition, expected.MoveId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
-        if (!operatorPrincipal.ClusterAdministrator || control.PrincipalId != operatorPrincipal.Id
+        if (control.PrincipalId != operatorPrincipal.Id
             || control.Phase != PartitionMovePhase.Retired || control.PublishedPlacement is null
             || JsonData.Fingerprint(control) != JsonData.Fingerprint(expected))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-        var placement = ReadPlacementWitness(view, control.Partition);
+        var directory = RequireMoveDirectory(view);
+        placement = ResolveRegisteredPlacement(view, control.Partition, directory.ControlOwner);
         if (placement.PhysicalShardId != control.DestinationOwner.PhysicalShardId
             || placement.Incarnation != control.DestinationOwner.Incarnation
-            || placement.PlacementEpoch != control.PublishedPlacement.PlacementEpoch)
+            || placement.PlacementEpoch != control.PublishedPlacement.PlacementEpoch
+            || placement.Revision != control.PublishedPlacement.Revision)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         return control;
     }

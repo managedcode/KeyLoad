@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -52,7 +53,7 @@ internal sealed class C1OutcomeInspectionScopeTests
                 C1OutcomeInspectionAssertions.AdminId, fixture.CommandId);
             var locatorBefore = fixture.Store.Read(view => view.ReadOwnedValue(locatorKey));
             var rejected = await C1OutcomeInspectionAssertions.RunAsync(fixture);
-            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected);
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected, C1OutcomeInspectionFailurePhase.ReadOutcome);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
             await C1OutcomeInspectionHealthyFollowUp.AssertUnrelatedCurrentOperationAsync(
                 fixture, outcomeBefore, locatorBefore);
@@ -81,7 +82,7 @@ internal sealed class C1OutcomeInspectionScopeTests
                 C1OutcomeInspectionAssertions.AdminId, fixture.CommandId);
             var locatorBefore = fixture.Store.Read(view => view.ReadOwnedValue(locatorKey));
             var rejected = await C1OutcomeInspectionAssertions.RunAsync(fixture);
-            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected);
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected, C1OutcomeInspectionFailurePhase.ReadOutcome);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
             await C1OutcomeInspectionHealthyFollowUp.AssertUnrelatedCurrentOperationAsync(
                 fixture, outcomeBefore, locatorBefore);
@@ -119,7 +120,7 @@ internal sealed class C1OutcomeInspectionScopeTests
             var outcomeBefore = fixture.Store.Read(view => view.ReadOwnedValue(outcomeKey));
             var locatorBefore = fixture.Store.Read(view => view.ReadOwnedValue(locatorKey));
             var rejected = await C1OutcomeInspectionAssertions.RunAsync(fixture);
-            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected);
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(rejected, C1OutcomeInspectionFailurePhase.ReadOutcome);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
             await C1OutcomeInspectionHealthyFollowUp.AssertUnrelatedCurrentOperationAsync(
                 fixture, outcomeBefore, locatorBefore);

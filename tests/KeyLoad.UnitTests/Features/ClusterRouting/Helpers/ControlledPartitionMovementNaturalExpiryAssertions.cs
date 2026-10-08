@@ -17,9 +17,7 @@ internal static class ControlledPartitionMovementNaturalExpiryAssertions
         await Assert.That(issued.ExpiresAt).IsEqualTo(original.Envelope.ExpiresAt);
         await Assert.That(NativeSerialization.Serialize(issued)
             .SequenceEqual(NativeSerialization.Serialize(original.Envelope.Grant))).IsTrue();
-        var remaining = issued.ExpiresAt - source.Database.EvaluationClock.GetUtcNow();
-        if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, source.Database.EvaluationClock, cancellationToken).ConfigureAwait(false); }
+        await WaitForOriginalExpiryAsync(source.Database.EvaluationClock, issued.ExpiresAt, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         await Assert.That(source.Database.EvaluationClock.GetUtcNow() >= issued.ExpiresAt).IsTrue();
         await RequireOriginalGrantAsync(source, issued);
@@ -34,6 +32,20 @@ internal static class ControlledPartitionMovementNaturalExpiryAssertions
         await RequireOriginalGrantAsync(source, issued);
         await sourceBefore.AssertUnchangedAsync(source);
         await targetBefore.AssertUnchangedAsync(target);
+    }
+
+    private static async Task WaitForOriginalExpiryAsync(TimeProvider clock, DateTimeOffset originalExpiry,
+        CancellationToken cancellationToken)
+    {
+        while (clock.GetUtcNow() < originalExpiry)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = originalExpiry - clock.GetUtcNow();
+            if (remaining <= TimeSpan.Zero)
+            { break; }
+            var delay = TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds));
+            await Task.Delay(delay, clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static async Task RequireOriginalGrantAsync(ControlledPartitionMovementNode source, PartitionMovePhaseGrant issued)

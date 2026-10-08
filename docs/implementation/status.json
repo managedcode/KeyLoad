@@ -226,18 +226,18 @@
     },
     "currentBuild": {
       "state": "PASS: complete native Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r814-tunit20-task-acceptance-natural-expiry-full-build-20261009-diagnostics.json",
-      "elapsedSeconds": 128.886,
-      "logSha256": "ff39b2c652fc58aea7a6d4fd1d82dd7caba276b62d79a7297f4a859f5e384ca4",
-      "inputCount": 5325,
+      "evidence": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-build-20261009-diagnostics.json",
+      "elapsedSeconds": 106.501,
+      "logSha256": "96c9b8e4b94ed21633cba67858c16aab44e7d6cd53da6a5b56e964ac86bcfd92",
+      "inputCount": 5328,
       "qualification": "Source-bound local development; current-source Linux runtime qualification remains open."
     },
     "currentFormatter": {
       "state": "PASS: complete native readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r814-tunit20-natural-expiry-full-native-format-20261009-receipt.json",
-      "elapsedSeconds": 97.558,
+      "evidence": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-native-format-20261009-receipt.json",
+      "elapsedSeconds": 92.578,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 5325,
+      "inputCount": 5328,
       "qualification": "Native source-bound local formatter; no runtime or Linux qualification."
     },
     "latestVerifiedNativeLinux": {
@@ -36250,14 +36250,15 @@
       "tasks": [
         "KL-011",
         "KL-014",
-        "KL-015"
+        "KL-015",
+        "KL-021"
       ],
       "profiles": [
         "normal",
         "scalar"
       ],
-      "isolatedLinuxCells": 6,
-      "state": "Complete guarded workflow/native adapter/verifier/contract/source-roster integration ready for main delivery; fresh original Linux outcomes pending.",
+      "isolatedLinuxCells": 8,
+      "state": "Complete current-source four-task/eight-cell native acceptance implementation joined; strict fresh committed-source Linux outcomes pending.",
       "independentOfFullSuiteCompletion": true,
       "defaultFullGatesPreserved": true,
       "scalarBoundary": "Native caller/in-process Unit only; current Docker servers do not propagate the scalar setting.",
@@ -36267,17 +36268,19 @@
       "caseCountsPerProfile": {
         "KL-011": 16,
         "KL-014": 12,
-        "KL-015": 32
+        "KL-015": 32,
+        "KL-021": 113
       },
-      "declaredCaseCountPerProfile": 60,
+      "declaredCaseCountPerProfile": 173,
       "exactCurrentNativeMetadataBound": true,
-      "metadataEvidence": "/private/tmp/keyload-r814-task-source-contract-metadata-complete-receipt-20261009.json",
-      "metadataEvidenceSha256": "1e923da6992db5f8f428111fc4e5eefc2059e8bc1e22546f46e57d85613c7dad",
+      "metadataEvidence": "/private/tmp/keyload-kl021-task-lane-private-r2-native-bound-20261009/native-case-binding.json",
+      "metadataEvidenceSha256": "615d8893fbe72dae10157cca73703021bd3bc17ee6fe03ceaabe3810afccdfaf",
       "manualTaskChoices": [
         "all",
         "KL-011",
         "KL-014",
-        "KL-015"
+        "KL-015",
+        "KL-021"
       ]
     },
     "nativeParallelism20261009": {
@@ -36324,6 +36327,219 @@
       "runtimeQualified": false,
       "coveragePercent": null,
       "remaining": "Fresh committed-source required Linux gates and all task/profile cells, real covered RF3 shutdown/C1callback flows,28new follower RF3 cases, natural-issued expiry execution and complete KL036 public parent."
+    },
+    "stageXXXOriginalDevelopment": {
+      "state": "Original admission, bootstrap receipt oracle, bounded C1 failures, retired-owner bridge and complete KL021 parallel acceptance joined. Full build/format and supporting native flows passed; fresh Linux task/full RF3 qualification pending.",
+      "recordedAtUtc": "2026-10-08T23:45:27.988939+00:00",
+      "buildReceipt": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-build-20261009-diagnostics.json",
+      "formatterReceipt": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-native-format-20261009-receipt.json",
+      "sourceJoins": [
+        "/private/tmp/keyload-root-stage-xxx-original-admission-bootstrap-source-join-20261009.json",
+        "/private/tmp/keyload-root-stage-xxx-c1-offline-failure-source-join-20261009.json",
+        "/private/tmp/keyload-root-stage-xxx-r7-retired-controlled-bridge-source-join-20261009.json",
+        "/private/tmp/keyload-root-stage-xxx-kl021-inventory-source-join-20261009.json"
+      ],
+      "rootReviewRepairs": "Keep source placement distinct from fixed control owner; update fifth protected grant-observation callsite; extract domain literals and remove actual unnecessary import. No ordinary retired-source execution or analyzer suppression.",
+      "nativeUnfilteredDiscovery": {
+        "unit": {
+          "suite": "unit",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-57xdto4d/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 1.692,
+          "temporaryRoot": "/private/tmp/kl-list-57xdto4d",
+          "sourceInputs": 5329,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r823-unfiltered-native-unit-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 3028725,
+          "stdoutSha256": "7f3977b96129c6402a5a5abf12958db592bd3d023f58264dc2a982f407b3ddde",
+          "stderr": "/private/tmp/keyload-current-r823-unfiltered-native-unit-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 3114
+        },
+        "recovery": {
+          "suite": "recovery",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-zcwcszcg/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 0.883,
+          "temporaryRoot": "/private/tmp/kl-list-zcwcszcg",
+          "sourceInputs": 5329,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r823-unfiltered-native-recovery-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 277795,
+          "stdoutSha256": "2913be5b6ebddc3cf7c557636c6698115c4fe2e57a1d5bec871b11c839c2b53b",
+          "stderr": "/private/tmp/keyload-current-r823-unfiltered-native-recovery-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 275
+        },
+        "rf3": {
+          "suite": "rf3",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/bin/Release/net10.0/KeyLoad.IntegrationTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-p3ng88_p/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 1.036,
+          "temporaryRoot": "/private/tmp/kl-list-p3ng88_p",
+          "sourceInputs": 5329,
+          "assemblyInputs": 912,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r823-unfiltered-native-rf3-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 262892,
+          "stdoutSha256": "54df7ffbff6697dfc94f1462707552ad48e0885b7048575b9fe5a43e3464d0a5",
+          "stderr": "/private/tmp/keyload-current-r823-unfiltered-native-rf3-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 247
+        }
+      },
+      "nativeTestImages": "/private/tmp/keyload-current-r823-task-native-images-20261009",
+      "functionalContributors": 2706,
+      "requiredOrdinaryNonContributors": 408,
+      "inventorySha256": "c107dcd46f60af630665522b747f084ddfe2511238695a5e642f92dce1963a8e",
+      "normalScalarGroupCaseInventory": [
+        548,
+        530,
+        528,
+        528,
+        572
+      ],
+      "metadataRebind": "Exactly six existing functional C1 source hashes/ranges and four existing ordinary Blob catalog source hashes; all3114identities/classifications/requirements/groups preserved.",
+      "sourceManifestEvidenceRoot": "/private/tmp/keyload-current-r823-stage-xxx-source-provenance-20261009",
+      "originalAdmissionRegressions": "/private/tmp/keyload-root-r819-original-admission-native-regressions-20261009/receipt.json",
+      "nativeC1ExistingModule": {
+        "normal": 18,
+        "scalar": 18,
+        "failed": 0,
+        "nativeExitCodes": [
+          0,
+          0
+        ],
+        "sourceOrImageDrift": false,
+        "ledger": "/private/tmp/keyload-kl015-r823-native-c1-18-normal-scalar-original-ledger-20261009.json",
+        "ledgerSha256": "8141974b5c173d65eab850c41bb033795093c08f61604adbb517421834059b89",
+        "qualification": "Local native whole-flow controls; not held RF3 cause or whole KL015 qualification."
+      },
+      "nativeCatalogAndSourceManifest": {
+        "passed": 6,
+        "failed": 0,
+        "receipt": "/private/tmp/keyload-current-r823-catalog-native-source-related-normal-20261009-receipt.json",
+        "qualification": "Current C# image and source-roster oracle; later enum/inventory-only join has separate original source-manifest verification."
+      },
+      "nativeMovementLocal": {
+        "normalFailed": 20,
+        "scalarFailed": 20,
+        "passed": 0,
+        "nativeExitCodes": [
+          2,
+          2
+        ],
+        "sourceOrImageDrift": false,
+        "actualFailure": "SocketException: Can't assign requested address at ControlledPartitionMovementLoopbackListeners.CreateListener:100 before model operation execution on Darwin.",
+        "normalReceipt": "/private/tmp/keyload-current-r823-movement-native-normal-20261009-receipt.json",
+        "scalarReceipt": "/private/tmp/keyload-current-r823-movement-native-scalar-20261009-receipt.json",
+        "qualification": "Original setup failures retained; exact-source Linux movement execution mandatory."
+      },
+      "originalFe8Linux": {
+        "source": "fe8e813c50ca93d4ed53e9e4eb32ceda03cc403d",
+        "run": 37855042382,
+        "attempt": 1,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37855042382",
+        "artifactId": 11584188901,
+        "archiveSha256": "19e0af23f6cec9361097981eabc7eed87a309c1838ad9971623793e6e56e29eb",
+        "originalAdmission": "/private/tmp/keyload-fe8-full-unit-original-run37855042382-r1-20261009/archive-admission.json",
+        "normalUnitPassed": 3098,
+        "normalUnitTotal": 3114,
+        "scalarUnitPassed": 3097,
+        "scalarUnitTotal": 3114,
+        "recoveryPassed": 275,
+        "recoveryTotal": 275,
+        "analyzersPassed": 388,
+        "analyzersTotal": 388,
+        "nativeSourceOwnershipPassed": 9,
+        "nativeSourceOwnershipTotal": 10,
+        "taskCellConclusions": "All six original cells failed strict final admission; KL011/014 actual selected operations passed, KL015 scalar retained two genuine held-authority offline inspection failures. Old failed jobs remain failed.",
+        "qualification": "Original authenticated previous-source results; not current-source qualification."
+      },
+      "retainedFailedNativeDiscovery": "/private/tmp/keyload-current-r821-unfiltered-native-unit-census-20261009-failed-attempt-receipt.json",
+      "retainedFailedBuild": {
+        "r820": "/private/tmp/keyload-current-r820-original-admission-bootstrap-c1-full-build-20261009-diagnostics.json",
+        "r822": "/private/tmp/keyload-current-r822-admission-c1-retired-bridge-full-build-20261009-diagnostics.json"
+      },
+      "runtimeQualified": false,
+      "coveragePercent": null,
+      "remaining": "Fresh Linux four-task normal/scalar-caller artifacts with exact native outcomes, original final admission and owned cleanup; complete mandatory unit/scalar/recovery/RF3/coverage gates; actual held-authority scalar cause; whole KL036 public parent and subsequent registered-source move. Full SQL/models/performance/endurance gates remain separate and open.",
+      "sourceManifestVerification": {
+        "prepareNativeExitCode": 0,
+        "verifyNativeExitCode": 0,
+        "manifest": "/private/tmp/keyload-current-r823-stage-xxx-source-provenance-20261009/functional-coverage.production-source-manifest.json",
+        "manifestSha256": "97f619a3c6ec63cd92e8938782be4a4f076bf7d00702109b78f11485821a410b",
+        "qualification": "Actual original source/compiled-image/script-manifest prepare then verify after all code/tooling/inventory joins; not runtime or coverage evidence."
+      },
+      "finalNativePowerShellAst": {
+        "files": 41,
+        "parseErrors": 0,
+        "originalStdout": "/private/tmp/keyload-root-stage-xxx-final-static-quality-20261009/native-powershell-ast.stdout.json",
+        "stdoutSha256": "ba47f615fd707bd32d4a6076d177c84062ca64defe31ca86a2dd38be28df99f5"
+      },
+      "workflowReview": {
+        "actualYamlParsed": true,
+        "everyFullMandatoryJobUnchanged": true,
+        "taskStepsBoundsCleanupAndEnvironmentUnchanged": true,
+        "taskProfileCells": 8,
+        "nativeMaximumParallelTests": 20
+      }
     }
   },
   "TIME-PROVIDER-001": {
@@ -38369,7 +38585,8 @@
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
       "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
       "qualified": false,
-      "nativeMaximumParallelTests": 20
+      "nativeMaximumParallelTests": 20,
+      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
     }
   },
   "KL-012": {
@@ -38595,7 +38812,8 @@
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
       "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
       "qualified": false,
-      "nativeMaximumParallelTests": 20
+      "nativeMaximumParallelTests": 20,
+      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
     }
   },
   "KL-015": {
@@ -38618,7 +38836,8 @@
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
       "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
       "qualified": false,
-      "nativeMaximumParallelTests": 20
+      "nativeMaximumParallelTests": 20,
+      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
     }
   },
   "KL-016": {
@@ -39950,6 +40169,16 @@
       "qualification": "Fresh current-source Linux28RF3 outcomes, broader stale-read models/SQL and performance/resource gates remain pending.",
       "feature": "docs/Features/DocumentStorage.md",
       "runtimeQualified": false
+    },
+    "parallelLinuxAcceptance": {
+      "state": "Complete current-source113-case/12-selector acceptance lane implemented and exact native metadata bound; fresh Linux normal/scalar-caller original outcomes pending.",
+      "workflow": ".github/workflows/build-and-tests.yml",
+      "caseCountPerProfile": 113,
+      "unitCases": 57,
+      "recoveryProjectStoredProtocolCases": 26,
+      "rf3Cases": 30,
+      "runtimeQualified": false,
+      "remaining": "Strict current-source normal/scalar original outcomes/source-image/owned cleanup; broader Q1 SELECT/AST and other-model stale reads remain unqualified."
     }
   },
   "KL-022": {
@@ -41054,6 +41283,27 @@
       "runtimeQualified": false,
       "nativeCase": "ActualIssuedRetireGrantExpiresWithoutMutationThenFreshAckAndFamiliesCompleteBothColdOwners",
       "remaining": "Actual current-source Linux operation plus complete public parent/API/fault/resource gates."
+    },
+    "currentRetiredBridgeDevelopment": {
+      "state": "Registered published-owner protected command/read bridge and first-issued owner-clock expiry oracle compiled; actual Linux model operation qualification pending.",
+      "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
+      "requirement": "REQ/AC-MOVE-RETIRED-BRIDGE-001..003",
+      "localNativeSetupFailure": {
+        "normalFailed": 20,
+        "scalarFailed": 20,
+        "passed": 0,
+        "nativeExitCodes": [
+          2,
+          2
+        ],
+        "sourceOrImageDrift": false,
+        "actualFailure": "SocketException: Can't assign requested address at ControlledPartitionMovementLoopbackListeners.CreateListener:100 before model operation execution on Darwin.",
+        "normalReceipt": "/private/tmp/keyload-current-r823-movement-native-normal-20261009-receipt.json",
+        "scalarReceipt": "/private/tmp/keyload-current-r823-movement-native-scalar-20261009-receipt.json",
+        "qualification": "Original setup failures retained; exact-source Linux movement execution mandatory."
+      },
+      "runtimeQualified": false,
+      "wholePublicParentComplete": false
     }
   },
   "KL-037": {

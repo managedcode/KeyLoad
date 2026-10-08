@@ -23,6 +23,27 @@ internal static class ColdBootstrapSdkAssertions
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
     }
 
+    internal static async Task NativeReceiptAsync(CommitReceipt actual, CommandRequest command,
+        AtomicPartitionPlacementResolution placement, long revision, long previousPosition)
+    {
+        await Assert.That(placement.Partition).IsEqualTo(command.Partition);
+        await Assert.That(actual.Token.Position).IsGreaterThan(previousPosition);
+        var expected = new CommitReceipt(command.CommandId,
+            new(placement.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position,
+                placement.PlacementEpoch),
+            [new(PutKind, ColdBootstrapSdkFlow.Collection, ColdBootstrapSdkFlow.Document, revision)],
+            DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+    }
+
+    internal static async Task DocumentAtMinimumAsync(KeyLoadClient sdk, EntityRef reference,
+        CommitToken minimum, long revision, string json, CancellationToken token)
+    {
+        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, minimum, token));
+        var expected = new DocumentResult(reference, revision, json, false, []);
+        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+    }
+
     internal static async Task DocumentAsync(KeyLoadClient sdk, EntityRef reference, long revision,
         string json, CancellationToken token)
     {

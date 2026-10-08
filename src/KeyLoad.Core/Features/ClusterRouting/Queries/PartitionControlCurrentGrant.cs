@@ -33,7 +33,7 @@ public sealed partial class DatabaseEngine
         var principal = RequireMoveDispatchPrincipal(view, body.OperatorPrincipalId, EvaluationClock.GetUtcNow());
         var control = PartitionMoveControlStorage.ReadHistory(view, original.Partition, original.MoveId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
-        _ = RequireRetiredCommandControl(view, principal, control);
+        _ = RequireRetiredCommandControl(view, principal, control, out _);
         var grant = PartitionMoveGrantStorage.Read(view, original.Partition, body.GrantId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         RequireMoveOutcomeDirectory(original, grant, directory);

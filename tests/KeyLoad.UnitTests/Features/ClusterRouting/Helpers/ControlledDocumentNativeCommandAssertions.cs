@@ -33,7 +33,9 @@ internal static class ControlledDocumentNativeCommandAssertions
         await Assert.That(original.Kind).IsEqualTo(OperationKind.Batch);
         var expectedRequest = new CommandRequest(OriginalId, Partition,
             [new PutDocument(Collection, DocumentId, UpdatedJson, InitialRevision, ExplicitReplacement: true)]);
-        await Assert.That(original.NativePayload.Span.SequenceEqual(NativeSerialization.Serialize(expectedRequest))).IsTrue();
+        var expectedOriginal = source.Database.CreateNativeOperation(OperationKind.Batch, OriginalId, Principal,
+            original.EvaluatedAt, NativeSerialization.Serialize(expectedRequest));
+        await Assert.That(original.NativePayload.Span.SequenceEqual(expectedOriginal.NativePayload.Span)).IsTrue();
         var published = context.Control.PublishedPlacement
             ?? throw new InvalidOperationException(PartitionMoveProtocol.MissingAuthority);
         var expectedToken = new CommitToken(target.Store.Identity.Incarnation,

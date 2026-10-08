@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-011','KL-014','KL-015')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-011','KL-014','KL-015','KL-021')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile,
     [Parameter(Mandatory)][string] $ContractPath,
     [Parameter(Mandatory)][string] $ExecutionManifestPath
@@ -36,8 +36,9 @@ function Read-AcOriginal([string] $Path, [bool] $AllowEmpty = $false, [bool] $Ex
     $info = Get-Item -LiteralPath $full -Force
     if ($info -isnot [IO.FileInfo] -or $info.Length -gt 33554432 -or
         (-not $AllowEmpty -and $info.Length -eq 0)) { throw $invalid }
-    $bytes = if ($info.Length -eq 0) { [byte[]]@() } else {
-        (Read-FcNativeBoundedFile $full 33554432 65536 $invalid).bytes
+    [byte[]] $bytes = [byte[]]::new(0)
+    if ($info.Length -gt 0) {
+        $bytes = (Read-FcNativeBoundedFile $full 33554432 65536 $invalid).bytes
     }
     $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$bytes)).ToLowerInvariant()
     if ($originals.ContainsKey($full)) {
@@ -185,7 +186,7 @@ foreach ($selection in $declared[0].selections) {
     if ($row.originalTrxPaths.Count -ne 1 -or $actualTrx.Count -ne 1 -or
         $actualTrx[0] -cne $row.originalTrxPaths[0]) { throw $invalid }
     [void](Read-AcOriginal $actualTrx[0])
-    $trxCases = @($selection.cases | ForEach-Object { @{ className = $_.nativeReportClassName; methodName = $_.methodName; instanceName = $_.instanceName } })
+    $trxCases = @($selection.cases | ForEach-Object { @{ className = $_.className; methodName = $_.methodName; instanceName = $_.instanceName } })
     $outcome = Read-FcNativeTrx $actualTrx[0] $selection.suite $trxCases
     $xml = Read-FcXml $actualTrx[0] 'TestRun'
     $summary = $xml.SelectSingleNode('//*[local-name()="ResultSummary"]')

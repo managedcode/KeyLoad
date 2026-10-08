@@ -37,13 +37,13 @@ public sealed partial class DatabaseEngine
         var control = PartitionMoveControlStorage.ReadHistory(view, command.Partition, publication.MoveId,
             Limits.MaxBatchBytes) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var controlPrincipal = Principal(view, control.PrincipalId, EvaluationClock.GetUtcNow());
-        _ = RequireRetiredCommandControl(view, controlPrincipal, control);
+        _ = RequireRetiredCommandControl(view, controlPrincipal, control, out var placement);
         var identity = new PartitionControlCommandIdentity(scope.Kind, scope.Partition, original.PrincipalId, original.Id);
         var record = PartitionControlCommandStorage.Read(view, identity, Limits.MaxBatchBytes);
         if (record is not null && record.Fingerprint != CommandFingerprint(original))
         { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
         var previous = CommandOutcomeKeyResolver.Select(view, original.PrincipalId, original.Id, scope).Outcome;
         var outcome = previous is null ? null : ResolveControlledDocumentOutcomeView(view, original, command);
-        return new(control, ReadPlacementWitness(view, command.Partition), controlPrincipal.Id, identity, record, outcome);
+        return new(control, placement, controlPrincipal.Id, identity, record, outcome);
     }
 }

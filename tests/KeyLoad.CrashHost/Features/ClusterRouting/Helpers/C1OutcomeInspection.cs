@@ -16,23 +16,34 @@ internal static class C1OutcomeInspection
         {
             return false;
         }
+        var evidence = new C1OutcomeInspectionFailureEvidence();
         Console.SetOut(TextWriter.Null);
         Console.SetError(TextWriter.Null);
         try
         {
+            evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
             if (args.Length != TryRunAsyncEmptyArgsLength)
             { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
+            evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var requestBytes = await ReadRequestBytesAsync().ConfigureAwait(false);
+            evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
             var request = C1OutcomeInspectionJson.ReadRequest(requestBytes);
-            var receipt = C1OutcomeInspectionOperation.Run(request);
+            var receipt = C1OutcomeInspectionOperation.Run(request, evidence);
+            evidence.SetPhase(C1OutcomeInspectionFailurePhase.WriteReceipt);
             var receiptBytes = C1OutcomeInspectionJson.SerializeReceipt(receipt);
-            await WriteReceiptBytesAsync(receiptBytes).ConfigureAwait(false);
+            await WriteBytesAsync(receiptBytes, standardError: false).ConfigureAwait(false);
             Environment.ExitCode = ExitCodeEmptyCount;
         }
         catch (Exception failure) when (!C1OutcomeInspectionFailures.ContainsFatal(failure))
         {
+            evidence.Capture(failure);
+            var failures = new List<Exception> { failure };
+            await ServerFailureObserver.ObserveAsync(() => WriteBytesAsync(evidence.Bytes(), standardError: true),
+                failures).ConfigureAwait(false);
+            if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
+            { ServerFailureObserver.ThrowIfAny(failures); }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
-            GC.KeepAlive(failure);
+            GC.KeepAlive(failures);
         }
         return true;
     }
@@ -83,13 +94,13 @@ internal static class C1OutcomeInspection
         return retained.AsSpan(StartEmptyCount, length).ToArray();
     }
 
-    private static async Task WriteReceiptBytesAsync(byte[] receiptBytes)
+    private static async Task WriteBytesAsync(byte[] receiptBytes, bool standardError)
     {
         var failures = new List<Exception>();
         Stream? output = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            output = Console.OpenStandardOutput();
+            output = standardError ? Console.OpenStandardError() : Console.OpenStandardOutput();
             await output.WriteAsync(receiptBytes.AsMemory()).ConfigureAwait(false);
             await output.FlushAsync().ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

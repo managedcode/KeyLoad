@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -19,10 +19,11 @@ internal static class RetiredPartitionOutcomeAuthorizationTrial
             source.Database.EvaluationClock.GetUtcNow()));
         await ConfigureAsync(source, root with { Id = RepairPrincipalId }, root.Id, token);
         await ConfigureAsync(source, root with { Id = WrongPrincipalId, Grants = [], ClusterAdministrator = false }, root.Id, token);
-        var placement = source.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, ControlledPartitionMovementCorpus.Partition));
+        var originalPayload = NativeSerialization.Deserialize<NativeCommandPayload>(original.NativePayload.Span);
+        var originalCommand = NativeSerialization.Deserialize<CommandRequest>(originalPayload.Value.Span);
         var changedSubject = source.Database.CreateNativeOperation(OperationKind.Batch, original.Id, WrongPrincipalId,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(
-                ControlledPartitionMovementCorpus.Seed() with { OwnershipEpoch = placement.PlacementEpoch }));
+                ControlledPartitionMovementCorpus.Seed() with { OwnershipEpoch = originalCommand.OwnershipEpoch }));
         await RetiredPartitionOutcomeAuthorizationOracles.DeniedAsync(source, target, changedSubject,
             ErrorCode.PermissionDenied, authority, token);
         await ControlledPartitionMovementReceiptAssertions.ReplayAsync(source.Journal.Submit(original, token), originalReceipt);

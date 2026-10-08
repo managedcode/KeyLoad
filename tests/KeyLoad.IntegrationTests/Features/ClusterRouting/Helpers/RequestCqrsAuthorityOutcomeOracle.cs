@@ -84,15 +84,20 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
     private static async Task AssertJoinedAsync(C1OutcomeInspectionProcessResult result)
     {
         await Assert.That(result.ProcessId).IsGreaterThan(0);
-        await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.StandardOutputExceeded).IsFalse();
         await Assert.That(result.StandardErrorExceeded).IsFalse();
-        await Assert.That(result.StandardError).IsEmpty();
         await Assert.That(result.ProcessReaped).IsTrue();
         await Assert.That(result.InputWriterSettled).IsTrue();
         await Assert.That(result.StandardOutputReaderSettled).IsTrue();
         await Assert.That(result.StandardErrorReaderSettled).IsTrue();
         await Assert.That(result.ProcessHandleClosed).IsTrue();
         await Assert.That(result.OuterOwnerReleased).IsTrue();
+        if (result.ExitCode != 0)
+        {
+            var failure = C1OutcomeInspectionFailureEvidence.Read(result.StandardError);
+            throw new InvalidOperationException(C1OutcomeInspectionFailureEvidence.Describe(failure));
+        }
+        await Assert.That(result.ExitCode).IsEqualTo(0);
+        await Assert.That(result.StandardError).IsEmpty();
     }
 }
