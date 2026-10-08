@@ -33,6 +33,7 @@ public sealed partial class DatabaseEngine
         var owner = row is null ? control
             : ResolveRegisteredPlacementOwner(view, control, row.PhysicalShardId, ErrorCode.Corruption);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);
+        owner = ResolveMovementPlacementOwner(view, partition, owner, row);
         return ResolvePlacement(partition, owner, directory, row);
     }
 }

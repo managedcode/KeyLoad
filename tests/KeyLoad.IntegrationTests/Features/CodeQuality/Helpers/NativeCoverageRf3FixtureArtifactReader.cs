@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.CodeQuality;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.CodeQuality;
@@ -39,10 +40,15 @@ internal static class NativeCoverageRf3FixtureArtifactReader
         var toolPackage = NativeCoverageToolPackage.Read();
         var context = NativeCoverageRf3FixtureContextArtifactReader.Read(contextBytes, contextHash, sourceHash,
             bounds, toolPackage);
+        var templatePath = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
+            NativeCoverageRf3TemplateIdentity.SourceRelativePath);
+        var templateBytes = await NativeCoverageRf3BoundedFileReader.ReadAsync(templatePath,
+            bounds.MaximumManifestBytes, options, token).ConfigureAwait(false);
+        var templateHash = NativeCoverageRf3TemplateIdentity.ReadAndRequire(contextBytes, templateBytes);
         var baseReceipt = NativeCoverageRf3FixtureArtifactValidation.ReadBaseReceipt(baseReceiptBytes, sourceRevision,
             context.BaseImageReference);
         NativeCoverageRf3FixtureArtifactValidation.ValidatePreparation(materializer,
-            context, baseReceipt, baseReceiptBytes, contextHash, evidence, materializerPath);
+            context, baseReceipt, baseReceiptBytes, contextHash, templateHash, evidence, materializerPath);
         var invocationId = NativeCoverageRf3FixtureInvocationValidation.Validate(invocationBytes,
             materializer.Directory, runId,
             imageReference, sourceHash, sourceManifestPath, baseReceiptPath, baseReceiptBytes, context, bounds,

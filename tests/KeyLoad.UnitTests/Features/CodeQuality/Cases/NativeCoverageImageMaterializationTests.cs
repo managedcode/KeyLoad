@@ -106,6 +106,8 @@ internal sealed class NativeCoverageImageMaterializationTests
         await Assert.That(result.OriginalExitJoined && result.StandardOutputJoined
             && result.StandardErrorJoined && result.ProcessDisposed).IsTrue();
         NativeCoverageImageContextOracle.Verify(fixture, invocation, result);
+        await NativeCoverageImagePreparationFlow.VerifyTamperAndHealthyAsync(fixture, invocation, result)
+            .ConfigureAwait(false);
     }
 
     private static Task<NativeCoverageImageNodeResult> RunAsync(NativeCoverageImageFixture fixture,

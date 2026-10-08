@@ -26,6 +26,7 @@ internal static class CommandOutcomePartitionIdentity
     private static CommandOutcomePartitionScope ResolveKind(OperationKind kind, ReadOnlyMemory<byte> payload)
         => kind switch
         {
+            OperationKind.PartitionMovementPhase => ForPayload<PartitionMovePhaseCommand>(payload, static request => request.Partition),
             OperationKind.Batch => ForPayload<CommandRequest>(payload, static request => request.Partition),
             OperationKind.Receive => ForPayload<ReceiveRequest>(payload, static request => request.Lane?.Partition),
             OperationKind.Delivery => ForPayload<DeliveryCommand>(payload, static request => request.Lane?.Partition),

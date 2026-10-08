@@ -1,3 +1,4 @@
+using System.Net;
 using KeyLoad.Query;
 using ModelContextProtocol.Protocol;
 
@@ -55,6 +56,30 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
     public async Task AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds()
     {
         using var deadline = McpCallerDeadline.Create();
+        await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
+            fixture.AdminKey, deadline.Token);
+        var first = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
+            McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
+        var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
+            McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
+        await Assert.That(first.Value.AstVersion).IsEqualTo(McpCallerProtocol.AstVersion);
+        await Assert.That(first.Value.ReadOnly).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(first.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(second.Value))).IsTrue();
+        await Assert.That(first.RequestId).IsNotEqualTo(second.RequestId);
+    }
+
+    /// <summary>An actual unsupported official handshake fails before two healthy current-protocol executions.</summary>
+    [Test]
+    public async Task AcMcp003UnsupportedOfficialProtocolRejectsThenCurrentCallerExecutes()
+    {
+        using var deadline = McpCallerDeadline.Create();
+        var rejected = await Assert.ThrowsAsync<HttpRequestException>(() => McpOfficialClient.ConnectAsync(
+            fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+            McpCallerProtocol.UnsupportedProtocolVersion, deadline.Token));
+        await Assert.That(rejected).IsNotNull();
+        if (rejected is null)
+        { throw new InvalidOperationException(McpCallerProtocol.MissingClient); }
+        await Assert.That(rejected.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
         var first = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(

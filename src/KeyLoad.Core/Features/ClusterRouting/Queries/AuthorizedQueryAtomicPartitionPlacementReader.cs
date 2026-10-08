@@ -38,6 +38,7 @@ public sealed partial class DatabaseEngine
         var owner = row is null ? catalog.DefaultShard
             : ResolveRegisteredPlacementOwner(view, catalog.DefaultShard, row.PhysicalShardId,
                 ErrorCode.Corruption, grant);
+        owner = ResolveMovementPlacementOwner(view, partition, owner, row, grant);
         var placement = ResolvePlacement(partition, owner, directory, row);
         return (catalog.DefaultShard, placement);
     }

@@ -117,6 +117,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
+        RequireNoUnpublishedPartitionMoveTarget(view, partition);
         RequireLocalResourceOwner(view, partition);
         var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
             ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);

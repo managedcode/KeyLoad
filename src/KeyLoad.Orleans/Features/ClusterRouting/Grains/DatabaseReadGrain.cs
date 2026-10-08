@@ -132,6 +132,13 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
 
         var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        if (kind == GrainReadKind.PartitionMovementCapture)
+        {
+            return await PartitionMovementCaptureExecution.ExecuteAsync(
+                services.GetRequiredService<INativePartitionMovementCapture>(), principal,
+                GrainNativePayload.Read<PartitionMovementCaptureCapability>(request.Payload),
+                cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.TextMaintenance)
         {
             GrainRequestAuthority.RequireAdministrator(principal);

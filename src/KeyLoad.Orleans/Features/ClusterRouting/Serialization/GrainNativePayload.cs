@@ -4,6 +4,17 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainNativePayload
 {
+    internal static ReadOnlyMemory<byte> Copy(ReadOnlyMemory<byte> payload, int maximumBytes)
+    {
+        if (payload.Length > maximumBytes)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
+        }
+
+        Validate(payload.Span);
+        return payload.ToArray();
+    }
+
     internal static void Validate(ReadOnlySpan<byte> payload)
     {
         try

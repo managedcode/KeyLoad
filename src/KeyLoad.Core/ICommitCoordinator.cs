@@ -10,6 +10,11 @@ public interface ICommitCoordinator
     /// <returns>The persisted typed command result or an explicit acceptance failure.</returns>
     Task<OperationResult> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
         ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default);
+    /// <summary>Submits an already Core-issued operation after verifying its native authority.</summary>
+    /// <param name="operation">Exact issued operation; this path cannot mint authority from public input.</param>
+    /// <param name="cancellationToken">Original caller cancellation for admission and settlement.</param>
+    /// <returns>The original ordered coordinator result or explicit acceptance uncertainty.</returns>
+    Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken);
     /// <summary>Establishes the coordinator's committed read cut.</summary>
     /// <returns>A task completing when the read barrier is established.</returns>
     Task ReadBarrierAsync(CancellationToken cancellationToken = default);

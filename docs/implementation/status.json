@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current completed source59e85625 has local full solution build/formatter and unfiltered original native unit3039/3039 passing with zero source/image drift. Exact-source Linux full normal/scalar/recovery and genuine Aspire RF3, numeric coverage, complete task acceptance and endurance/performance remain open. Original local raw artifacts are subject to explicit owner cleanup; compact observed SHA/counters and original remote provenance are retained.",
+    "verificationStage": "Current controlled-movement source full Release R727 and full formatterR728 pass with zero warnings/errors and no source drift. Original unfiltered native unitR725 is3036/3044: five exact read-cost regressions under repair and three macOS configured-loopback bind failures, no skipped cases. Recorded R720seed/routing46/46 and R710site5/5 are local development cohorts; exact-current final runtime/Linux RF3, Pages, task acceptance and numeric product coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,13 +240,13 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 199.745,
-      "log": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008.log",
-      "logSha256": "9d52c58e5b72243fbe05a8bf24f17123eacf2b623a8684e4c33f7d29e6f79733",
-      "inputCount": 4863,
+      "elapsedSeconds": 178.05,
+      "log": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008.log",
+      "logSha256": "c275402e564d219db0a3d6ffdd6838cf3e1108c6f03c8cd0a4f48a151090b9cb",
+      "inputCount": 5056,
       "inputDrift": [],
       "uniqueErrors": [],
       "qualification": "local development; source drift invalidates exact-current-source qualification"
@@ -262,10 +262,10 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 167.609,
-      "log": "/private/tmp/keyload-current-r684-stage-xx-pmap-corruption-full-format-20261008.log",
+      "elapsedSeconds": 101.51,
+      "log": "/private/tmp/keyload-movement-current-r728-final-imports-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4863,
+      "inputCount": 5056,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -29678,6 +29678,1017 @@
       "runtimeQualified": false,
       "productCoveragePercent": null,
       "remaining": "Exact new-source original Linux Website/browser/coverage/freshness/Pages outcome; full RF3 and product coverage remain required."
+    },
+    "stageXXIIIControlledMovementDevelopment": {
+      "sourceParentCommit": "32bbe2364dcc6df4b60933897a79abde57b617ae",
+      "tasks": [
+        "TASK-KL036-CONTROLLED-MOVE-002",
+        "TASK-MOVE-VERIFIED-TRANSPORT-001",
+        "TASK-KL036-NATIVE-PHASE-COMPILE-001",
+        "TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043",
+        "TASK-WEB-NAVIGATION-002"
+      ],
+      "requirements": [
+        "REQ-MOVE-002..007",
+        "REQ-MOVE-NATIVE-001",
+        "REQ-CLIENT-006"
+      ],
+      "acceptance": [
+        "AC-MOVE-002..007",
+        "AC-MOVE-NATIVE-001..004",
+        "AC-CLIENT-006",
+        "AC-BC-WEB-003"
+      ],
+      "sourceStage": "Eighteen private logged movement phases, configured receiver Capture/Page/Release and joined node-local source lifetime; ordinary moved target reads and public movement sender remain Unsupported/fenced. Actual seed/canonical queue JSON/replay/conflict/cold-reopen and MCP owned command-conflict error flow are covered locally. Public A-authority document bridge and terminal/process/six-silo execution are pending integration/qualification.",
+      "actualNativeFullBuildR727": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 178.05,
+        "log": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008.log",
+        "logSha256": "c275402e564d219db0a3d6ffdd6838cf3e1108c6f03c8cd0a4f48a151090b9cb",
+        "inputCount": 5056,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "actualNativeNormalUnitR725": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008-results",
+          "--KeyLoadTests:ReportTrx=true"
+        ],
+        "nativeExitCode": 2,
+        "elapsedSeconds": 465.392,
+        "log": "/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008.log",
+        "logSha256": "75e5deb6c266eabde7c538d484b93e2e08b189ae8fff7855d877bd4bbf1b9878",
+        "sourceInputs": 5057,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "2f3ad23fb946aee3d9741d3fbce6fa0117ede4144708a4fce1b03114bfcedcd8",
+            "counters": {
+              "total": "3044",
+              "executed": "3044",
+              "passed": "3036",
+              "failed": "8",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptSha256": "8ff02ece370fddc1e33a93455c8a5014be3842438d9a8dd90f693f21b419b052",
+        "originalFailures": [
+          {
+            "name": "AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead",
+            "originalMessage": "AssertionException: Expected to be 10\nbut found 14\n\nat Assert.That(small.Points).IsEqualTo(SingleMutationBorrowedPoints)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AcDstore005ReplacementPatchAndDeleteReadOnePriorImage",
+            "originalMessage": "AssertionException: Expected to be 10\nbut found 14\n\nat Assert.That(small.Points).IsEqualTo(SingleMutationBorrowedPoints)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+            "originalMessage": "KeyLoadException: The read execution byte budget is exceeded.",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "ScanLookaheadFailureNeverReturnsPartialSeed",
+            "originalMessage": "AssertionException: Expected to be 2020\nbut found 2096\n\nat Assert.That(budget.ReadBytes).IsEqualTo(expectedBytes)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "MetadataVectorAndDocumentReadsAreChargedExactlyOnce",
+            "originalMessage": "AssertionException: Expected to be 3518\nbut found 3594\n\nat Assert.That(seed.ReadBytes).IsEqualTo(expectedBytes)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          },
+          {
+            "name": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          },
+          {
+            "name": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          }
+        ]
+      },
+      "actualNativeSeedAndRoutingR720": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(ControlledPartitionMovementSeedTests)|(McpCommandConflictDiagnosticWholeFlowTests)|(McpOwnedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)|(NativeOperationSemanticsTests)|(GrainRequestCodecTests)|(PhysicalOwnerDirectoryWholeFlowTests)|(AtomicPartitionPlacement*Tests)/*"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 7.887,
+        "log": "/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008.log",
+        "logSha256": "0efd5add177933737af8a01ac747212df8f96f896fa98cc5bae5e666fd680f67",
+        "sourceInputs": 5057,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "4490a3f078b20753c65fc3c51b1b9a424cb6ee32ab14d6f765ae0278ce3d3ebb",
+            "counters": {
+              "total": "46",
+              "executed": "46",
+              "passed": "46",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptSha256": "251f883997fe37087ba6e9ef8f0d04b300f4c5354698298501a9b311a67edb83"
+      },
+      "originalBudgetRegression": {
+        "observedDocumentPointReads": 14,
+        "unchangedExpectedDocumentPointReads": 10,
+        "annExtraReadBytes": 76,
+        "sourceReadExactBudgetExceeded": true,
+        "repairStatus": "in_progress; no test thresholds or resource limits increased"
+      },
+      "inventoryR721": {
+        "originalInventorySha256": "b40f54594e4c7119e14d0d5afb6b9994a918d992c029a5c11312ab2628421ecb",
+        "currentInventorySha256": "054d7e96050f58ec2c3288a585feb4ba03304d71b715488b0d3edb70553d5818",
+        "nativeCensusSha256": "2e982517d39ff0bc77e355be105b668621449979290c28abb837c55681204904",
+        "nativeImageObservationSha256": "854b7f04fa9cae22648bc50affd5e76e7dc5ea83ceeee90e63e8598089c669e2",
+        "sourceClassificationSha256": "8f8a8ed589b5b2500f9b7341c2d845740c75ea00fa1389d3ea0e2891f811a524",
+        "nativeMvid": "cac87ab1-1d02-42e3-b930-f5fd4e6e5dc3",
+        "nativeDllSha256": "3b3505bd7668103a36948f3c3f2353fe17bd14c50817948098ed394b8512b847",
+        "nativePdbSha256": "78a6db2dc212c54086b8c7924d49d74172252a05a0926d20502440393bdd5f9c",
+        "original3039IdentitiesDispositionsAndOwnersPreserved": true,
+        "newFunctionalCases": [
+          {
+            "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
+            "methodName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
+            "instanceName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementSeedTests.cs",
+            "sourceSha256": "54322321ac8f25b69700acac6cb52bf965c155e8c61e54971e4f57a9f0b84c0c",
+            "lineNumber": 11,
+            "endLineNumber": 68,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-MOVE-NATIVE-001"
+            ],
+            "acceptance": [
+              "AC-MOVE-NATIVE-001"
+            ],
+            "actualNativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests.1.1.ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly.1.1.0"
+          },
+          {
+            "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+            "methodName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+            "instanceName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementPrepareTests.cs",
+            "sourceSha256": "08ee5b09dcc5bcdc3136c5ad2fcd4cab29f6dd26ab688c3ee9c01bb672a1fb0a",
+            "lineNumber": 15,
+            "endLineNumber": 57,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-MOVE-NATIVE-001"
+            ],
+            "acceptance": [
+              "AC-MOVE-NATIVE-002"
+            ],
+            "actualNativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests.1.1.ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen.1.1.0"
+          },
+          {
+            "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+            "methodName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+            "instanceName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementGrantTests.cs",
+            "sourceSha256": "2bd29fbdb3c11696c7f63c1d16a104bbffcf07d02e35fb1eb94c34e64e0d2ec7",
+            "lineNumber": 15,
+            "endLineNumber": 59,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-MOVE-NATIVE-001"
+            ],
+            "acceptance": [
+              "AC-MOVE-NATIVE-003"
+            ],
+            "actualNativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests.1.1.ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen.1.1.0"
+          },
+          {
+            "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+            "methodName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+            "instanceName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementCaptureTests.cs",
+            "sourceSha256": "203d0eda3abf1801050f8e17d47a4e989a476cdf4d19400fe6088bf863bb2e95",
+            "lineNumber": 14,
+            "endLineNumber": 62,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-MOVE-NATIVE-001"
+            ],
+            "acceptance": [
+              "AC-MOVE-NATIVE-004"
+            ],
+            "actualNativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests.1.1.AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl.1.1.0"
+          },
+          {
+            "className": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
+            "methodName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
+            "instanceName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpCommandConflictDiagnosticWholeFlowTests.cs",
+            "sourceSha256": "db7f0250b6ffbb4d765b5a26d97fb16e974fa26a2733f887c016c84b97ba2cf3",
+            "lineNumber": 20,
+            "endLineNumber": 58,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-CLIENT-006"
+            ],
+            "acceptance": [
+              "AC-CLIENT-006",
+              "AC-MCP-003",
+              "AC-MCP-007"
+            ],
+            "actualNativeUid": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests.1.1.NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand.1.1.0"
+          }
+        ],
+        "changedSourceOrNativeLocations": [
+          "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests|ActualAttributedQueryDictionaryOrderingDoesNotDefineCanonicalNativeSemanticHash|ActualAttributedQueryDictionaryOrderingDoesNotDefineCanonicalNativeSemanticHash",
+          "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests|CopiedNativeEnvelopeComparesBySemanticContentAndRejectsChangedBodyUnderSameRawIdentity|CopiedNativeEnvelopeComparesBySemanticContentAndRejectsChangedBodyUnderSameRawIdentity",
+          "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests|IndependentlyAuthenticatedDifferentTypedBodyIsNotAReplayOfTheSameFrozenIdentity|IndependentlyAuthenticatedDifferentTypedBodyIsNotAReplayOfTheSameFrozenIdentity",
+          "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests|OrleansParentCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState|OrleansParentCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState",
+          "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests|ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly|ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
+          "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests|ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen|ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+          "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests|ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen|ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+          "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests|AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl|AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+          "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests|NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand|NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
+          "KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageMaterializationTests|RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure|RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure",
+          "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests|NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes|NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes"
+        ],
+        "functionalCount": 2648,
+        "ordinaryCount": 396,
+        "nativeCount": 3044,
+        "groups": [
+          {
+            "groupId": "unit-functional-01",
+            "count": 526,
+            "selectorLength": 2197
+          },
+          {
+            "groupId": "unit-functional-02",
+            "count": 528,
+            "selectorLength": 2005
+          },
+          {
+            "groupId": "unit-functional-03",
+            "count": 494,
+            "selectorLength": 2168
+          },
+          {
+            "groupId": "unit-functional-04",
+            "count": 528,
+            "selectorLength": 2399
+          },
+          {
+            "groupId": "unit-functional-05",
+            "count": 572,
+            "selectorLength": 2107
+          }
+        ],
+        "qualification": "actual unfiltered native census and source/image binding only; selected group proof and runtime/Linux/coverage gates pending"
+      },
+      "nativeDiscoveryR722": {
+        "observedCases": 3044,
+        "functionalCases": 2648,
+        "requiredOrdinaryCases": 396,
+        "groupCases": [
+          526,
+          528,
+          494,
+          528,
+          572
+        ],
+        "fullAndFiveSelectedModes": [
+          "normal",
+          "scalar"
+        ],
+        "passedPhases": 12,
+        "readOnlyDiscovery": true,
+        "evidenceRoot": "artifacts/local/stage-xxiii-native-discovery-20261008",
+        "qualification": "Original R719 image; later helper-only imports require a fresh native source/image observation before exact-current-source qualification. Discovery executes no scalar operations and measures no product coverage."
+      },
+      "originalLinux59Terminal": {
+        "sourceCommit": "59e856254a4243ebc74780f95dec1623a9fe2dae",
+        "runId": 37744013727,
+        "runAttempt": 1,
+        "artifacts": [
+          {
+            "artifactId": 11540260540,
+            "name": "docker-rf3-qualification",
+            "apiDigest": "sha256:acca30f942dac04f34109991fdfb6668403f949d3b0c5f9d6fb6d9b1dd43c600",
+            "archiveSha256": "acca30f942dac04f34109991fdfb6668403f949d3b0c5f9d6fb6d9b1dd43c600",
+            "archiveBytes": 60251964,
+            "elapsedSeconds": 8.971,
+            "originalReports": [
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/KeyLoad.IntegrationTests_net10.0_x64.trx",
+                "sha256": "2ab57a5d51f9854a101d138493cf9be4e671f87bb676137535624748548acab6",
+                "counters": {
+                  "total": "11",
+                  "executed": "11",
+                  "passed": "0",
+                  "failed": "11",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": [
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  },
+                  {
+                    "name": null,
+                    "message": "InvalidOperationException: The original RF3 coverage fixture context is invalid."
+                  }
+                ]
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+                "sha256": "8ebefa9bb318083d05e77111321d4dcc2bb7f3344c754aef89579f45fe013950",
+                "counters": {
+                  "total": "1",
+                  "executed": "1",
+                  "passed": "1",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-census/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "de2bf80e4eb2d69418e21fd0966da54fb3299f47bfdbbbff77d48708f32766c6",
+                "counters": {
+                  "total": "3039",
+                  "executed": "3039",
+                  "passed": "3039",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-01/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "aa69ab18a4fe749353e81d31d2b20e4e31b9970d27437bce4d4a30d5dcefb8eb",
+                "counters": {
+                  "total": "522",
+                  "executed": "522",
+                  "passed": "522",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-02/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "37a6911f813e76be09537a96ab7d322a12f98ac75297a952220f907496028932",
+                "counters": {
+                  "total": "528",
+                  "executed": "528",
+                  "passed": "528",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-03/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "aafd19b63ebd400f7f92ac9fc8e982f02d1e4106f885c7f8811cd58b0ff101ef",
+                "counters": {
+                  "total": "493",
+                  "executed": "493",
+                  "passed": "493",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-04/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "d6044fe1a460f6a02804cf51a556b377570dc1b4286c0439afd75dad3e27a647",
+                "counters": {
+                  "total": "528",
+                  "executed": "528",
+                  "passed": "528",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-05/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "aef73449f28a9b55706ceec40db33eda2c15f0d61b74636d5c6accb635e39ff4",
+                "counters": {
+                  "total": "572",
+                  "executed": "572",
+                  "passed": "572",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-census/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "7a1b26af38b6078201eef50f961729dc58a643a7472ed6b9e86cef1fffbbf19b",
+                "counters": {
+                  "total": "3039",
+                  "executed": "3039",
+                  "passed": "3039",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-01/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "246dae0911d1481af29ea72efd4cb86820e7199516c7448cda8b6d0ccd66e22b",
+                "counters": {
+                  "total": "522",
+                  "executed": "522",
+                  "passed": "522",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-02/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "d9f1b083386f6c3d61f26435df112948ff12942b8aa70c9b2ab3e30bd158ce97",
+                "counters": {
+                  "total": "528",
+                  "executed": "528",
+                  "passed": "528",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-03/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "fb8dc21ba551cb64857c98be0a11c39d31220ae4efa49424085812fa7542566c",
+                "counters": {
+                  "total": "493",
+                  "executed": "493",
+                  "passed": "493",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-04/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "73d795fe53548cce0918c9aa3ca378fa1ef5258e4fc43d2e61e7df89883edfb9",
+                "counters": {
+                  "total": "528",
+                  "executed": "528",
+                  "passed": "528",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-05/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "e1914562cf9bfbe4191bd2e5651803ec6194f727ad95b840afc8efc73410ae74",
+                "counters": {
+                  "total": "572",
+                  "executed": "572",
+                  "passed": "572",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37744013727-original-rf3-terminal-r1-20261008/reports/docker-rf3-qualification/TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
+                "sha256": "af8d95dbb1e5abc69ebfead2f60f3f9f471a01063422b0dd75122caa722a052e",
+                "counters": {
+                  "total": "85",
+                  "executed": "85",
+                  "passed": "77",
+                  "failed": "8",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": [
+                  {
+                    "name": null,
+                    "message": "AssertionException: Expected to be equal to \"The command ID was already used with different content.\"\nbut received \"The database operation could not be completed.\"\n\nat Assert.That(conflict.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)\n            .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(\"The command ID was already used with different content.\")"
+                  },
+                  {
+                    "name": null,
+                    "message": "AggregateException: Cluster fixture startup and cleanup failed. (The inspected namespace is not the exact admitted non-root fault cohort.) (The actual fault topology did not settle; its root and images remain owned.)\n ---> System.InvalidOperationException: The inspected namespace is not the exact admitted non-root fault cohort.\n ---> System.InvalidOperationException: The actual fault topology did not settle; its root and images remain owned."
+                  },
+                  {
+                    "name": null,
+                    "message": "TaskCanceledException: A task was canceled."
+                  },
+                  {
+                    "name": null,
+                    "message": "TaskCanceledException: A task was canceled."
+                  },
+                  {
+                    "name": null,
+                    "message": "AggregateException: C1_LIFECYCLE v=1 phase=ScatOriginalWave first{s=WaveStartup;c1=WaitingForActivation;c2=WaitingForActivation;c3=WaitingForActivation;a=Canceled;i=NotAdmitted;caller=0;parent=0;wave=1;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=NotObserved;r2=NotObserved;r3=NotObserved;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=n:-:-/n:-:-/n:-:-;dw=0:-:-/-/-:-:-/-/-:-:0:-:-:-/-/-:-} terminal{s=WaveStartup;c1=RanToCompletion;c2=RanToCompletion;c3=RanToCompletion;a=Canceled;i=NotAdmitted;caller=0;parent=0;wave=1;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=NotObserved;r2=NotObserved;r3=NotObserved;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=r:wa:wa/r:wa:wa/r:wa:wa;dw=1:0:wa/wa/wa:-:-/-/-:1:0:-:1:ok/ok/ok:0} (A task was canceled.)\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled."
+                  },
+                  {
+                    "name": null,
+                    "message": "HttpRequestException: Response status code does not indicate success: 400 (Bad Request). Response body: {\"type\":\"urn:keyload:error:Validation\",\"title\":\"Validation\",\"status\":400,\"detail\":\"The MCP transport headers or metadata are invalid.\",\"errorCode\":\"Validation\"}"
+                  },
+                  {
+                    "name": null,
+                    "message": "AggregateException: C1_LIFECYCLE v=1 phase=GuardScenario first{s=GuardWarningWait;c1=WaitingForActivation;c2=WaitingForActivation;c3=WaitingForActivation;a=RanToCompletion;i=NotAdmitted;caller=0;parent=1;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=n:-:-/n:-:-/n:-:-;dw=0:-:-/-/-:-:-/-/-:-:0:-:-:-/-/-:-} terminal{s=GuardWarningWait;c1=RanToCompletion;c2=RanToCompletion;c3=RanToCompletion;a=RanToCompletion;i=NotAdmitted;caller=0;parent=1;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=r:ok:ok/r:ok:ok/r:ok:ok;dw=1:0:ok/ok/ok:-:-/-/-:1:0:-:1:ok/ok/ok:0} (A task was canceled.)\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled."
+                  },
+                  {
+                    "name": null,
+                    "message": "AggregateException: One or more errors occurred. (A task was canceled.) (Offline filesystem operation failed.)\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.IO.IOException: Offline filesystem operation failed.\n ---> System.ComponentModel.Win32Exception: Resource temporarily unavailable"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "artifactId": 11539997841,
+            "name": "code-quality-docker-rf3",
+            "apiDigest": "sha256:9932c1c5a0433b562dc3eab73b230fc6cf8cf5ebae65aaf95c14aca1be0997a9",
+            "archiveSha256": "9932c1c5a0433b562dc3eab73b230fc6cf8cf5ebae65aaf95c14aca1be0997a9",
+            "archiveBytes": 2132525,
+            "elapsedSeconds": 2.23,
+            "originalReports": []
+          }
+        ],
+        "qualification": "Authenticated original Linux artifacts; original failures and manifests retained; no rerun or rewritten report.",
+        "receiptSha256": "61b74aff581c777fd97561a32b1ad4c6efa950c4ef10dc988869edd9d484a148"
+      },
+      "websiteNativePointer": {
+        "task": "TASK-WEB-NAVIGATION-002",
+        "change": "Use real CDP pointer input at the visible hit-tested menu link; retain exact clamped CSS scroll/menu/scene assertions and diagnostic focus/scroll geometry. No forced scroll/focus, renderer change, expanded deadline or reduced coverage threshold.",
+        "originalLinux32Failure": {
+          "sourceCommit": "32bbe2364dcc6df4b60933897a79abde57b617ae",
+          "runId": 37758156397,
+          "runAttempt": 1,
+          "artifacts": [
+            {
+              "artifactId": 11541238525,
+              "name": "site-qualification-32bbe2364dcc6df4b60933897a79abde57b617ae-1",
+              "apiDigest": "sha256:8d879fce7d606b8084316ed255f4e2d4e6ff4b4824e43fe88ff82a229975f49a",
+              "archiveSha256": "8d879fce7d606b8084316ed255f4e2d4e6ff4b4824e43fe88ff82a229975f49a",
+              "archiveBytes": 2700025,
+              "elapsedSeconds": 2.715,
+              "originalReports": [
+                {
+                  "path": "/private/tmp/keyload-site-ci-37758156397-original-failure-r1-20261008/reports/site-qualification-32bbe2364dcc6df4b60933897a79abde57b617ae-1/artifacts/site-evidence/analyzer-tests/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+                  "sha256": "4701b7f5917688c08046017343ff778b225066a21d5bdb36b7e48cc668eb4172",
+                  "counters": {
+                    "total": "388",
+                    "executed": "388",
+                    "passed": "388",
+                    "failed": "0",
+                    "error": "0",
+                    "timeout": "0",
+                    "aborted": "0",
+                    "inconclusive": "0",
+                    "passedButRunAborted": "0",
+                    "notRunnable": "0",
+                    "notExecuted": "0",
+                    "disconnected": "0",
+                    "warning": "0",
+                    "completed": "0",
+                    "inProgress": "0",
+                    "pending": "0"
+                  },
+                  "failures": []
+                },
+                {
+                  "path": "/private/tmp/keyload-site-ci-37758156397-original-failure-r1-20261008/reports/site-qualification-32bbe2364dcc6df4b60933897a79abde57b617ae-1/artifacts/site-evidence/selection-tests/KeyLoad.ComparisonTests_net10.0_x64.trx",
+                  "sha256": "d34d23f3518453cdeaf4ae971648589b22be787f68e9bcf069a6731890c30c39",
+                  "counters": {
+                    "total": "7",
+                    "executed": "7",
+                    "passed": "7",
+                    "failed": "0",
+                    "error": "0",
+                    "timeout": "0",
+                    "aborted": "0",
+                    "inconclusive": "0",
+                    "passedButRunAborted": "0",
+                    "notRunnable": "0",
+                    "notExecuted": "0",
+                    "disconnected": "0",
+                    "warning": "0",
+                    "completed": "0",
+                    "inProgress": "0",
+                    "pending": "0"
+                  },
+                  "failures": []
+                },
+                {
+                  "path": "/private/tmp/keyload-site-ci-37758156397-original-failure-r1-20261008/reports/site-qualification-32bbe2364dcc6df4b60933897a79abde57b617ae-1/artifacts/site-evidence/site-tests/KeyLoad.SiteTests_net10.0_x64.trx",
+                  "sha256": "e3d32d830d22d0ab6ab5f2aa6529d93e6c9b31942ca210cb154390d5d312e5f5",
+                  "counters": {
+                    "total": "6",
+                    "executed": "6",
+                    "passed": "4",
+                    "failed": "2",
+                    "error": "0",
+                    "timeout": "0",
+                    "aborted": "0",
+                    "inconclusive": "0",
+                    "passedButRunAborted": "0",
+                    "notRunnable": "0",
+                    "notExecuted": "0",
+                    "disconnected": "0",
+                    "warning": "0",
+                    "completed": "0",
+                    "inProgress": "0",
+                    "pending": "0"
+                  },
+                  "failures": [
+                    {
+                      "name": null,
+                      "message": "AssertionException: Expected to be true, because {\"hash\":\"#product\",\"scrollY\":11734,\"top\":-11664,\"padding\":\"96px\",\"margin\":\"0px\",\"viewport\":844}\nbut found False\n\nat Assert.That(navigated).IsTrue().Because(\"{\"hash\":\"#product\",\"scrollY\":11734,\"top\":-11664,\"padding\":\"96px\",\"margin\":\"0px\",\"viewport\":844}\")"
+                    },
+                    {
+                      "name": null,
+                      "message": "Errors occurred while disposing static properties (AfterTestSession hook failed: The deterministic site coverage report did not satisfy ADR-040 thresholds.)\n ---> TUnit.Core.Exceptions.AfterTestSessionException: AfterTestSession hook failed: The deterministic site coverage report did not satisfy ADR-040 thresholds."
+                    }
+                  ]
+                },
+                {
+                  "path": "/private/tmp/keyload-site-ci-37758156397-original-failure-r1-20261008/reports/site-qualification-32bbe2364dcc6df4b60933897a79abde57b617ae-1/artifacts/site-evidence/startup-tests/KeyLoad.ComparisonTests_net10.0_x64.trx",
+                  "sha256": "6a7e57effdef5758a95fc817dcaca789012b066218f267d84bea562ae2d920de",
+                  "counters": {
+                    "total": "6",
+                    "executed": "6",
+                    "passed": "6",
+                    "failed": "0",
+                    "error": "0",
+                    "timeout": "0",
+                    "aborted": "0",
+                    "inconclusive": "0",
+                    "passedButRunAborted": "0",
+                    "notRunnable": "0",
+                    "notExecuted": "0",
+                    "disconnected": "0",
+                    "warning": "0",
+                    "completed": "0",
+                    "inProgress": "0",
+                    "pending": "0"
+                  },
+                  "failures": []
+                }
+              ]
+            }
+          ],
+          "qualification": "Authenticated original Linux artifacts; original failures and manifests retained; no rerun or rewritten report.",
+          "receiptSha256": "7f7fbbfe1f2b1bc39204326e799924772c8768f9696df56e2ae5535c1c844153"
+        },
+        "originalLocalR710": {
+          "commandArgs": [
+            "node",
+            "scripts/Features/TestInfrastructure/run-tests.mjs",
+            "--KeyLoadTests:Suite=site",
+            "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-site-current-r710-native-pointer-20261008-results",
+            "--KeyLoadTests:ReportTrx=true",
+            "--KeyLoadTests:Filter=/*/*/SiteContent*/*"
+          ],
+          "nativeExitCode": 0,
+          "elapsedSeconds": 8.145,
+          "log": "/private/tmp/keyload-site-current-r710-native-pointer-20261008.log",
+          "logSha256": "e1f8a7fc5173b7d62cc5c57c0b47ef5595ef9a19a140da3ab0b8f216b24e916a",
+          "sourceInputs": 5054,
+          "assemblyInputs": 119,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-site-current-r710-native-pointer-20261008-results/KeyLoad.SiteTests_net10.0_arm64.trx",
+              "sha256": "32092a631c0218330acbf4d4cd653dca5aa256c15dc674dc84e5477951493714",
+              "counters": {
+                "total": "5",
+                "executed": "5",
+                "passed": "5",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "receiptSha256": "1c3f69550a255a565a25f30d46ae6cb04e7d4b94a266fc8aca31053707d0661d"
+        },
+        "javascriptCoverage": {
+          "originalReportSha256": "4919efbc2f2ac89698b5fa6f25c528983fb7c1f4437f61a847079f7611e9e642",
+          "linesPercent": 93,
+          "branchesPercent": 84,
+          "coveredLines": 946,
+          "executableLines": 1008,
+          "coveredBlockOutcomes": 126,
+          "blockOutcomes": 150,
+          "scope": "Site JavaScript only; not KeyLoad .NET product coverage."
+        },
+        "initiatingFocusOrScrollEventObserved": false,
+        "deliveredCurrentSourceLinuxPagesPassed": false
+      },
+      "ownedArtifactCleanup": {
+        "removedOwnedRoots": 2388,
+        "approximateRemovedBytes": 4702560256,
+        "receiptSha256": "f8754f1bfe4382454db4359dc16feb491c50e249556fd90ece0985ad2db103de",
+        "errors": [],
+        "otherChatsAndActivePacketsPreserved": true
+      },
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Repair five exact read-cost regressions without weakening configured movement fences or existing byte/point budgets",
+        "Fresh final build/formatter, normal whole-flow unit and real process recovery results",
+        "Exact-current-source Linux normal/scalar/recovery and required Aspire Docker RF3 through real SDK/official MCP clients",
+        "Covered RF3 template preparation and all11 operations; original59 failed0/11 before execution; sixteen-module admitted merged functional coverage remains unmeasured",
+        "Terminal movement/install/publication/abort/retirement, genuine process cuts and public document bridge/native six-silo acceptance",
+        "Current-source Linux Website browser/V8/freshness and Pages proof; successful all15 producer final dispatch and backend-only push omission still open"
+      ],
+      "actualNativeFullFormatterR728": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 101.51,
+        "log": "/private/tmp/keyload-movement-current-r728-final-imports-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 5056,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      }
     }
   },
   "TIME-PROVIDER-001": {
@@ -34143,7 +35154,7 @@
     ],
     "decision": "docs/ADR/ADR-016-atomic-physical-placement.md",
     "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
-    "sourceStage": "bounded_native_partition_family_pages_with_owned_exclusive_continuation",
+    "sourceStage": "private_logged_eighteen_phase_control_and_configured_capture_page_release_foundation_public_sender_and_target_reads_fenced",
     "qualification": {
       "runtimeQualified": false,
       "localDevelopment": {
@@ -34174,6 +35185,169 @@
       "allAcceptanceClosed": false,
       "productCoveragePercent": null,
       "remaining": "Required actual native build/format/normal/scalar/process/publicRF3/source-image/Linux/fault/resource gates remain open; no local source proof promoted."
+    },
+    "stageXXIIISourceDevelopment": {
+      "requirements": [
+        "REQ-MOVE-002..007",
+        "REQ-MOVE-NATIVE-001",
+        "REQ-CLIENT-006"
+      ],
+      "acceptance": [
+        "AC-MOVE-002..007",
+        "AC-MOVE-NATIVE-001..004"
+      ],
+      "sourceStage": "Eighteen private logged movement phases, configured receiver Capture/Page/Release and joined node-local source lifetime; ordinary moved target reads and public movement sender remain Unsupported/fenced. Actual seed/canonical queue JSON/replay/conflict/cold-reopen and MCP owned command-conflict error flow are covered locally. Public A-authority document bridge and terminal/process/six-silo execution are pending integration/qualification.",
+      "nativeSeedAndRoutingR720": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(ControlledPartitionMovementSeedTests)|(McpCommandConflictDiagnosticWholeFlowTests)|(McpOwnedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)|(NativeOperationSemanticsTests)|(GrainRequestCodecTests)|(PhysicalOwnerDirectoryWholeFlowTests)|(AtomicPartitionPlacement*Tests)/*"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 7.887,
+        "log": "/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008.log",
+        "logSha256": "0efd5add177933737af8a01ac747212df8f96f896fa98cc5bae5e666fd680f67",
+        "sourceInputs": 5057,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-movement-current-r720-native-seed-and-routing-regressions-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "4490a3f078b20753c65fc3c51b1b9a424cb6ee32ab14d6f765ae0278ce3d3ebb",
+            "counters": {
+              "total": "46",
+              "executed": "46",
+              "passed": "46",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptSha256": "251f883997fe37087ba6e9ef8f0d04b300f4c5354698298501a9b311a67edb83"
+      },
+      "originalNormalUnitR725": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008-results",
+          "--KeyLoadTests:ReportTrx=true"
+        ],
+        "nativeExitCode": 2,
+        "elapsedSeconds": 465.392,
+        "log": "/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008.log",
+        "logSha256": "75e5deb6c266eabde7c538d484b93e2e08b189ae8fff7855d877bd4bbf1b9878",
+        "sourceInputs": 5057,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-movement-current-r725-full-normal-native-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "2f3ad23fb946aee3d9741d3fbce6fa0117ede4144708a4fce1b03114bfcedcd8",
+            "counters": {
+              "total": "3044",
+              "executed": "3044",
+              "passed": "3036",
+              "failed": "8",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptSha256": "8ff02ece370fddc1e33a93455c8a5014be3842438d9a8dd90f693f21b419b052",
+        "originalFailures": [
+          {
+            "name": "AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead",
+            "originalMessage": "AssertionException: Expected to be 10\nbut found 14\n\nat Assert.That(small.Points).IsEqualTo(SingleMutationBorrowedPoints)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AcDstore005ReplacementPatchAndDeleteReadOnePriorImage",
+            "originalMessage": "AssertionException: Expected to be 10\nbut found 14\n\nat Assert.That(small.Points).IsEqualTo(SingleMutationBorrowedPoints)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails",
+            "originalMessage": "KeyLoadException: The read execution byte budget is exceeded.",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "ScanLookaheadFailureNeverReturnsPartialSeed",
+            "originalMessage": "AssertionException: Expected to be 2020\nbut found 2096\n\nat Assert.That(budget.ReadBytes).IsEqualTo(expectedBytes)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "MetadataVectorAndDocumentReadsAreChargedExactlyOnce",
+            "originalMessage": "AssertionException: Expected to be 3518\nbut found 3594\n\nat Assert.That(seed.ReadBytes).IsEqualTo(expectedBytes)",
+            "classification": "exact_native_point_or_byte_budget_regression"
+          },
+          {
+            "name": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          },
+          {
+            "name": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          },
+          {
+            "name": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+            "originalMessage": "SocketException: Can't assign requested address",
+            "classification": "macOS_loopback_address_bind"
+          }
+        ]
+      },
+      "buildR727": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 178.05,
+        "log": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008.log",
+        "logSha256": "c275402e564d219db0a3d6ffdd6838cf3e1108c6f03c8cd0a4f48a151090b9cb",
+        "inputCount": 5056,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "runtimeQualified": false,
+      "publicSenderUnsupportedBeforeEffects": true,
+      "ordinaryTargetReadAlwaysFenced": true,
+      "remaining": [
+        "Repair five exact read-cost regressions without weakening configured movement fences or existing byte/point budgets",
+        "Fresh final build/formatter, normal whole-flow unit and real process recovery results",
+        "Exact-current-source Linux normal/scalar/recovery and required Aspire Docker RF3 through real SDK/official MCP clients",
+        "Terminal movement/install/publication/abort/retirement, genuine process cuts and public document bridge/native six-silo acceptance"
+      ]
     }
   },
   "KL-037": {

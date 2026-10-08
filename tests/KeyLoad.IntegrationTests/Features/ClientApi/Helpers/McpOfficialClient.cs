@@ -41,15 +41,26 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <param name="key">The persisted credential used at the public boundary.</param>
     /// <param name="cancellationToken">The bounded caller lifetime.</param>
     /// <returns>The actual native SDK, transport and HTTP resource owner.</returns>
-    internal static async Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
+    internal static Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
         string? key, CancellationToken cancellationToken)
+        => ConnectAsync(app, node, key, McpCallerProtocol.ProtocolVersion, cancellationToken);
+
+    /// <summary>Submits an explicit official protocol revision without changing native transport validation.</summary>
+    /// <param name="app">The actual running Aspire application.</param>
+    /// <param name="node">The discovered resource endpoint.</param>
+    /// <param name="key">The actual persisted credential.</param>
+    /// <param name="protocolVersion">The exact revision offered by the official SDK.</param>
+    /// <param name="cancellationToken">The original bounded caller lifetime.</param>
+    /// <returns>The connected native owner after successful official admission.</returns>
+    internal static async Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
+        string? key, string protocolVersion, CancellationToken cancellationToken)
     {
         var connection = McpCallerHttp.Create(app, node);
         var transport = CreateTransport(connection, key);
         var owner = new McpOfficialClient(connection, transport);
         try
         {
-            await owner.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            await owner.InitializeAsync(protocolVersion, cancellationToken).ConfigureAwait(false);
             return owner;
         }
         catch (Exception primary)
@@ -83,9 +94,9 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         }
     }
 
-    private async Task InitializeAsync(CancellationToken cancellationToken)
+    private async Task InitializeAsync(string protocolVersion, CancellationToken cancellationToken)
     {
-        client = await McpClient.CreateAsync(transport, new McpClientOptions(),
+        client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 

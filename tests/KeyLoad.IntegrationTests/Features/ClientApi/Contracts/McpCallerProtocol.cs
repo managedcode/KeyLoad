@@ -25,6 +25,7 @@ internal static class McpCallerProtocol
     internal const string HttpEndpoint = "http";
     internal const string Endpoint = "/mcp";
     internal const string ProtocolVersion = "2026-07-28";
+    internal const string UnsupportedProtocolVersion = "2025-11-25";
     internal const string AuthorizationHeader = "Authorization";
     internal const string BearerPrefix = "Bearer ";
     internal const string BearerScheme = "Bearer";

@@ -349,10 +349,11 @@ qualification, full SQL and its native client protocol, foreign keys, scaling an
 endurance remain in progress. The [status tracker](docs/implementation/status.json)
 records the actual source, test results and remaining acceptance gates.
 
-The latest Linux verification passed the complete unit suites in normal and
-scalar modes and the process-recovery suite. RF3 fault, complete model and
-performance qualification remain open. Original source identities, results and
-remaining gates belong in the [qualification records](docs/implementation/status.json).
+The recorded Linux baseline passed the complete normal/scalar unit and
+process-recovery suites. Current controlled-partition transfer work has a complete
+local seed/replay/cold-reopen flow; public transfer and fresh full Linux RF3,
+model, recovery and performance qualification remain open. Original source
+identities and results belong in the [qualification records](docs/implementation/status.json).
 
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,

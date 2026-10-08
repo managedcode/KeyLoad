@@ -63,6 +63,13 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
         => AdmitAsync(database.CreateNativeOperation(kind, id, principalId, clock.GetUtcNow(), payload), cancellationToken);
 
+    /// <inheritdoc />
+    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return AdmitAsync(database.VerifyOperationAuthority(operation), cancellationToken);
+    }
+
     private async Task<OperationResult> AdmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation.PrincipalId);

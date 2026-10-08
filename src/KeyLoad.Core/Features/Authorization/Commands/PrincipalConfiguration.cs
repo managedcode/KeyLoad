@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -21,8 +23,15 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, PolicyEpochMustAdvanceMessage);
         }
+        RequireNoMovementGrant(transaction, principal.Id);
         transaction.PutRecord(KeySpace.Principal(principal.Id), principal);
         return Result(principal);
+    }
+
+    private static void RequireNoMovementGrant(IKeyValueView view, string principalId)
+    {
+        if (PartitionMoveGrantStorage.Outstanding(view, principalId) > PartitionMoveProtocol.EmptyCount)
+        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
     }
 
     private OperationResult ExecuteConfigureApiKey(IAtomicTransaction transaction, ReplicatedOperation operation)
@@ -39,6 +48,9 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidConfiguredCredentialVerifierMessage);
         }
+        RequireNoMovementGrant(transaction, credential.PrincipalId);
+        if (transaction.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(credential.Id)) is { } previous)
+        { RequireNoMovementGrant(transaction, previous.PrincipalId); }
         transaction.PutRecord(KeySpace.ApiKey(credential.Id), credential);
         return Result(true);
     }

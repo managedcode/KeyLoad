@@ -30,6 +30,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<PhysicalOwnerExecutionOptions> PhysicalOwners,
+    IOptions<PartitionMovementExecutionOptions> PartitionMovement,
     IOptions<RemoteDocumentExecutionOptions> RemoteDocuments,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<NativeTextExecutionOptions> NativeText,
@@ -59,6 +60,7 @@ internal sealed record ServerRuntimeOptions(
         _ = Membership.Value;
         _ = GrainRouting.Value;
         _ = PhysicalOwners.Value;
+        _ = PartitionMovement.Value;
         _ = RemoteDocuments.Value;
         _ = AdminObservation.Value;
         _ = NativeText.Value;
@@ -89,6 +91,7 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
         services.AddSingleton(PhysicalOwners);
+        services.AddSingleton(PartitionMovement);
         services.AddSingleton(RemoteDocuments);
         services.AddSingleton(AdminObservation);
         services.AddSingleton(NativeText);

@@ -60,7 +60,7 @@ internal sealed class NativeOperationSemanticsTests
     {
         foreach (var kind in Enum.GetValues<OperationKind>())
         {
-            if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex)
+            if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MovePartition)
             {
                 await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
             }

@@ -72,7 +72,7 @@ internal static class NativeCoverageRf3FixtureArtifactValidation
 
     internal static void ValidatePreparation(NativeCoverageRf3MaterializerReceipt materializer,
         NativeCoverageRf3PreparedContext context,
-        NativeCoverageRf3BaseImageReceipt baseReceipt, byte[] baseReceiptBytes, string contextHash,
+        NativeCoverageRf3BaseImageReceipt baseReceipt, byte[] baseReceiptBytes, string contextHash, string expectedTemplateHash,
         string evidenceRoot, string materializerPath)
     {
         var expectedManifest = Path.Combine(materializer.Directory,
@@ -85,7 +85,7 @@ internal static class NativeCoverageRf3FixtureArtifactValidation
             || Path.GetFullPath(materializerPath) == Path.GetFullPath(materializer.ManifestPath)
             || context.BaseImageReference != baseReceipt.ImageReference
             || context.BaseImageReceiptSha256 != Hash(baseReceiptBytes)
-            || context.SourceTemplateDockerfileSha256 != baseReceipt.SourceSha256)
+            || context.SourceTemplateDockerfileSha256 != expectedTemplateHash)
         {
             throw Invalid();
         }

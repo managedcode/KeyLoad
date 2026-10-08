@@ -1,5 +1,7 @@
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -26,6 +28,9 @@ public sealed partial class DatabaseEngine
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
+        if (PartitionMoveGrantStorage.Outstanding(transaction,
+            PartitionMoveGrantStorage.DatabaseKey(request.TenantId, request.DatabaseId)) > PartitionMoveProtocol.EmptyCount)
+        { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
         BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
             BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);

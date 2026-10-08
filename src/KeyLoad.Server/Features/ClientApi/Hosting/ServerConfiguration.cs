@@ -45,6 +45,7 @@ internal static class ServerConfiguration
         ReplicaMembershipHealthEndpoints.Map(app);
         ReplicaMembershipAuthorityEndpoints.Map(app);
         RemoteDocumentEndpoints.Map(app);
+        PartitionMovementEndpoints.Map(app);
         PhysicalOwnerRegistrationServices.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();

@@ -49,6 +49,7 @@ public sealed partial class DatabaseEngine
         }
 
         var row = AtomicPartitionPlacementSerialization.ReadRow(transaction, request.Partition);
+        selectedOwner = ResolveMovementPlacementOwner(transaction, request.Partition, selectedOwner, row);
         return row is null ? CreatePlacement(transaction, request, directory, selectedOwner)
             : ValidateExistingPlacement(row, request, directory, selectedOwner);
     }

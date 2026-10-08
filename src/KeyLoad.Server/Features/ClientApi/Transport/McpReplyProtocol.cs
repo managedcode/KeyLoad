@@ -16,6 +16,7 @@ internal static class McpReplyProtocol
     private const string SelectedTextMismatch = "The native text projection does not match the authorized source cut.";
     private const string ConfiguredVectorMismatch = "The declared vector profile does not match the configured field.";
     private const string OwnedScopeDenied = "The principal cannot perform this operation in this scope.";
+    private const string CommandContentConflict = "The command ID was already used with different content.";
     private const string GenericFailure = "The database operation could not be completed.";
     private const string UnknownOutcome = "The write outcome is unknown. Retry with the same command identity and payload.";
     private const string RecoveryRequired = "The database requires recovery before another operation.";
@@ -36,6 +37,7 @@ internal static class McpReplyProtocol
         (ErrorCode.HistoryUnavailable, SelectedTextMismatch) => SelectedTextMismatch,
         (ErrorCode.Validation, ConfiguredVectorMismatch) => ConfiguredVectorMismatch,
         (ErrorCode.PermissionDenied, OwnedScopeDenied) => OwnedScopeDenied,
+        (ErrorCode.Conflict, CommandContentConflict) => CommandContentConflict,
         _ => CodeDetail(code)
     };
 

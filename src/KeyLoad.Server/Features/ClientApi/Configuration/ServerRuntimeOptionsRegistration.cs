@@ -17,11 +17,24 @@ internal static class ServerRuntimeOptionsRegistration
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
         RegisterClusterExecution(services, configuration);
+        RegisterPartitionMovement(services, configuration);
         RegisterStorageExecution(services, configuration);
         RegisterHostExecution(services, configuration);
         RegisterNodeProjections(services, configuration);
         services.AddSingleton<ServerRuntimeOptions>();
         return services;
+    }
+
+    private static void RegisterPartitionMovement(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(PartitionMovementExecutionOptions.SectionName);
+        if (section.Value is not null)
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(PartitionMovementExecutionOptions),
+                [PartitionMovementExecutionOptions.ValidationMessage]);
+        }
+        services.AddOptions<PartitionMovementExecutionOptions>()
+            .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true).ValidateOnStart();
     }
 
     private static void RegisterClusterExecution(IServiceCollection services, IConfiguration configuration)

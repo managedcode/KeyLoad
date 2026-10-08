@@ -108,5 +108,7 @@ public enum GrainReadKind
     /// <summary>Server-only individually admitted native partition-query leaf.</summary>
     PartitionQueryLeaf,
     /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
-    ApproximateSearch
+    ApproximateSearch,
+    /// <summary>A privately authenticated movement source image capability.</summary>
+    PartitionMovementCapture
 }

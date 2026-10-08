@@ -143,15 +143,7 @@ public sealed partial class GrainRequestCodec
     }
 
     private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
-    {
-        if (payload.Length > database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
-        }
-
-        GrainNativePayload.Validate(payload.Span);
-        return payload.ToArray();
-    }
+        => GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes);
 
     private string Issue(GrainRequestEnvelope request)
     {

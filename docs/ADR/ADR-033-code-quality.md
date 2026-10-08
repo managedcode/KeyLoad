@@ -339,3 +339,33 @@ Additive REQ-CQ-039/040 and AC-CQ-042 evidence observes only closed preparation 
 REQ-CQ-039/040 and AC-CQ-039/040/042 retain the existing native package archive, closure, source/image and collector gates. The native package producer emits nupkgSha512 as the canonical Base64 encoding of the actual 64-byte SHA-512 digest, matching the restored NuGet sidecar. The RF3 context reader must admit that exact format, with an 88-character bound, successful 64-byte decode and canonical round-trip equality; hex, whitespace, malformed padding and alternate encodings are rejected. No schema aliases, fallback or rewritten evidence is introduced.
 
 The shared validator belongs to KeyLoad.AppHost/Features/CodeQuality/Validation/NativeCoveragePackageDigestValidation.cs and is consumed by the existing IntegrationTests context reader. Extend the existing RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure operation: consume the actual native materialized package hash, compare it with the independently hashed original archive, reject controlled alternate representations, and preserve all source/context bytes and joined child/reader cleanup. This remains an ordinary infrastructure control. Original exact46a4 covered11 failures remain retained; their compound rejection does not independently identify every failed field. Full original covered RF3 and numeric coverage admission/merge remain required. Root joins the shared validator and the native producer-consumer regression together, builds and runs the existing normal/scalar operation, then delivers the source for the unchanged Linux covered RF3 and admission/merge gates. No dependency, topology, catalogue, deadline or threshold changes.
+
+
+### TASK-CQ-RF3-PREPARATION-TEMPLATE-001 — distinct native template and base-image source identity
+
+REQ-CQ-039/040/042 and AC-CQ-039/040/042, ADR-033 and ADR-117 retain the exact eleven contributors and all source/image, native materializer, create-only evidence, bounds and joined cleanup gates. The root Dockerfile hash authenticates the pinned ASP.NET base-image selection. The native image template hash independently authenticates scripts/Features/CodeQuality/functional-coverage.server-image.dockerfile from the actual selected source checkout. They are distinct inputs and MUST NOT be compared as if they were identical. The consumer reads that fixed source path through its existing bounded regular-file reader and compares the declared original context template digest against those exact bytes. Neither hash is omitted or replaced by a caller-selected file.
+
+The existing RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure whole-operation control must materialize the genuine current release closure, read and validate the actual generated context against the selected native template, alter the actual context's template digest, reject it without altering original input/receipt/other context bytes, restore the exact original manifest, and validate the complete healthy context again. Original child/process/readers remain joined and all failures retained. This ordinary control is not a product coverage contributor. Original Linux run37744013727/attempt1/source59e856254a4243ebc74780f95dec1623a9fe2dae retains covered RF3 0/11 failure; both authenticated archives omit the context manifest, so the exact historical predicate value is unobserved. The mismatch is established from actual producer/consumer code and the original base/materializer receipts; new native reproduction remains mandatory. Numeric product coverage remains NULL.
+
+### Current controlled-movement whole-flow census extension (2026-10-08)
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 retains REQ-CQ-039..045,
+AC-CQ-039..045 and ADR-033. Admit only the five source-reviewed whole-operation
+cases documented under REQ-MOVE-NATIVE-001 / AC-MOVE-NATIVE-001..004 and
+REQ-CLIENT-006 / AC-CLIENT-006 / AC-MCP-003 / AC-MCP-007. Preserve every existing
+3039 case identity and disposition, required ordinary controls, exclusions,
+benchmark moves and five cohort owners. Derive locations from the actual newly
+compiled native census and bind their current source hashes to the original
+PE/PDB/compile observation; derive confined selectors against the complete
+universe and verify every selected census. No UID, location, operation outcome
+or coverage value may be inferred from source review.
+
+R721 observes 3044 native cases: 2648 functional contributors and 396 required
+ordinary controls. These are discovery counts. The 46-case local R720 run passes
+the corrected complete seed/cold-reopen flow and affected routing, serialization
+and MCP regressions. R715 retains three macOS loopback bind failures; its initial
+seed queue oracle failure is corrected using a separate literal canonical JSON
+payload, preserving the original command/fingerprint. Actual Linux prepare,
+fence and capture flows, all full/instrumented suites, covered RF3 and the final
+source-bound merge remain required. Product functional coverage stays unmeasured;
+load/comparison and website JavaScript coverage remain separate.

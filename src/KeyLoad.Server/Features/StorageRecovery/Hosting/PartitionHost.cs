@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.Search;
@@ -30,12 +31,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         var options = runtimeOptions.Node.Value;
         var replicaOptions = runtimeOptions.ReplicaConfiguration;
         var executionOptions = runtimeOptions.ReplicaExecution;
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(authorization);
-        ArgumentNullException.ThrowIfNull(admission);
-        ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(logger);
-        options.Validate();
+        ValidateConstructorArguments(options, authorization, admission, clock, logger);
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
         ApplyProbe = new(Configuration.LocalId);
@@ -45,9 +41,11 @@ internal sealed class PartitionHost : IAsyncDisposable
         ITextProjection? openedText = null;
         NativeAnnMaintenanceService? openedAnnMaintenance = null;
         ClusterCoordinator? openedCoordinator = null;
+        CacheMemoryBudget? openedCacheMemory = null;
         ReplicaConsensus? openedConsensus = null;
         try
         {
+            CacheMemory = openedCacheMemory = new(runtimeOptions.Core.CacheMemory);
             Database = OpenCanonicalDatabase(runtimeOptions, authorization, clock);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
@@ -78,11 +76,24 @@ internal sealed class PartitionHost : IAsyncDisposable
             { ServerFailureObserver.Observe(openedText.Dispose, failures); }
             if (openedLog is not null)
             { ServerFailureObserver.Observe(() => openedLog.Dispose(), failures); }
+            if (openedCacheMemory is not null)
+            { ServerFailureObserver.Observe(() => openedCacheMemory.Dispose(), failures); }
             ServerFailureObserver.Observe(() => stores.Dispose(), failures);
             if (failures.Count > FailuresCountValidationBoundary)
             { throw new AggregateException(failures); }
             throw;
         }
+    }
+
+    private static void ValidateConstructorArguments(NodeOptions options, IAuthorizationPolicy authorization,
+        CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(authorization);
+        ArgumentNullException.ThrowIfNull(admission);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(logger);
+        options.Validate();
     }
 
     /// <summary>Private physical node directory; it is not an atomic partition identity.</summary>
@@ -97,6 +108,8 @@ internal sealed class PartitionHost : IAsyncDisposable
     public DatabaseEngine Database { get; }
     /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>
     public ITextProjection TextProjection { get; }
+    /// <summary>Single node-owned retention ledger borrowed by derived cache families and movement images.</summary>
+    internal CacheMemoryBudget CacheMemory { get; }
     internal NativeAnnMaintenanceService AnnMaintenance { get; }
     internal NativeTextIncrementalMaintenanceService TextMaintenance { get; }
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
@@ -158,6 +171,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         var closingLog = CloseLogAsync(applying);
         await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(TextProjection.Dispose, failures);
+        ServerFailureObserver.Observe(CacheMemory.Dispose, failures);
         var closingStores = CloseStoresAsync(closingLog);
         await ServerFailureObserver.ObserveAsync(() => closingStores, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

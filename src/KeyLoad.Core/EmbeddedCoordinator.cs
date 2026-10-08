@@ -22,6 +22,14 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
     }
 
     /// <inheritdoc />
+    public Task<OperationResult> SubmitVerifiedAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var verified = database.VerifyOperationAuthority(operation);
+        return Task.FromResult(database.ApplyEmbedded(verified, cancellationToken));
+    }
+
+    /// <inheritdoc />
     public Task ReadBarrierAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

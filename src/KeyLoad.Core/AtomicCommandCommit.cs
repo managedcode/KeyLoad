@@ -109,6 +109,7 @@ public sealed partial class DatabaseEngine
                 replayed = true;
                 return previous;
             }
+            RequireNoPartitionMovementFence(transaction, operation, partitionScope);
             ValidateCommandClock(transaction, operation.EvaluatedAt);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,

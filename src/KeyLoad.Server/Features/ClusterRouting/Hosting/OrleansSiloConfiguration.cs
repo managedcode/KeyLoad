@@ -20,8 +20,8 @@ internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
-        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation, IRemoteDocumentReadRouter? remoteDocuments = null,
-        IRemotePartitionQueryRouter? remoteQueries = null)
+        ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
+        IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
@@ -33,6 +33,10 @@ internal static class OrleansSiloConfiguration
             if (remoteQueries is not null)
             { builder.Services.AddSingleton(remoteQueries); }
         }
+        if (movementCapture is not null)
+        { builder.Services.AddSingleton(movementCapture); }
+        if (movementDispatcher is not null)
+        { builder.Services.AddSingleton(movementDispatcher); }
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
@@ -51,6 +55,7 @@ internal static class OrleansSiloConfiguration
             PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch);
         services.AddSingleton(expectedOwner);
         services.AddSingleton(partition.Database);
+        services.AddSingleton<ICacheMemoryBudget>(partition.CacheMemory);
         services.AddSingleton<INativeAnnMaintenance>(partition.AnnMaintenance);
         services.AddSingleton<INativeTextMaintenance>(partition.TextMaintenance);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);

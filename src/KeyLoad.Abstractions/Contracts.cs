@@ -370,7 +370,11 @@ public enum OperationKind
     /// <summary>Runs administrator-only native ANN generation maintenance through independently authorized child requests.</summary>
     MaintainAnnIndex,
     /// <summary>Runs protected native text generation maintenance through independently authorized child requests.</summary>
-    MaintainTextIndex
+    MaintainTextIndex,
+    /// <summary>Applies one receiver-verified private physical movement phase through RF3.</summary>
+    PartitionMovementPhase,
+    /// <summary>Coordinates protected partition movement through separately authorized child requests.</summary>
+    MovePartition
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

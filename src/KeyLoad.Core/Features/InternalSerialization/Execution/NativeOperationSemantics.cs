@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -23,6 +24,7 @@ public sealed partial class DatabaseEngine
 
     internal static Type? NativeOperationPayloadType(OperationKind kind) => kind switch
     {
+        OperationKind.PartitionMovementPhase => typeof(PartitionMovePhaseCommand),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
         OperationKind.Delivery => typeof(DeliveryCommand),

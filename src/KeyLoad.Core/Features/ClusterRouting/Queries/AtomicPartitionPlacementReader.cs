@@ -62,6 +62,7 @@ public sealed partial class DatabaseEngine
     {
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition);
+        defaultShard = ResolveMovementPlacementOwner(view, partition, defaultShard, row);
         return ResolvePlacement(partition, defaultShard, directory, row);
     }
 
