@@ -12,7 +12,11 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
 {
     private const long FirstTerm = 1;
     private const long IndexStep = 1;
-    private const long MaximumFixtureEntries = 64;
+    /// <summary>Maximum original supporting fixture history.</summary>
+    public const long SupportingHistoryEntries = 64;
+    /// <summary>Frozen mathematical terminal fixture history; native per-append ceilings remain unchanged.</summary>
+    public const long TerminalHistoryEntries = 426;
+    private readonly long maximumFixtureEntries;
     private const long FirstEntry = 1;
     private const string MissingEntry = "The original movement fixture replica entry is missing.";
     private readonly Lock gate = new();
@@ -28,9 +32,13 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
     /// <param name="database">The actual borrowed canonical database owner.</param>
     /// <param name="physical">Its immutable actual physical RF3 logical scope.</param>
     /// <param name="directory">The independently owned replica-store directory.</param>
+    /// <param name="maximumFixtureEntries">The exact supporting or terminal history bound.</param>
     public ControlledPartitionMovementNativeJournal(DatabaseEngine database,
-        PhysicalShardRecord physical, string directory)
+        PhysicalShardRecord physical, string directory, long maximumFixtureEntries = SupportingHistoryEntries)
     {
+        if (maximumFixtureEntries != SupportingHistoryEntries && maximumFixtureEntries != TerminalHistoryEntries)
+        { throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries)); }
+        this.maximumFixtureEntries = maximumFixtureEntries;
         this.database = database;
         voter = physical.VoterIds.First();
         configuration = CrashExecutionOptions.Configuration(voter, physical.VoterIds.ToArray(), directory, physical.Incarnation);
@@ -87,13 +95,13 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
             using var original = CancellationTokenSource.CreateLinkedTokenSource(caller, deadline.Token);
             original.Token.ThrowIfCancellationRequested();
             var actual = database.NormalizeOperation(operation);
-            var index = FindOriginal(actual);
+            var index = FindOriginal(actual, original.Token);
             if (index is null)
             {
                 if (Log.State.Term < FirstTerm)
                 { Log.SaveTermAndVote(FirstTerm, voter); }
                 index = checked(Log.State.LastIndex + IndexStep);
-                if (index > MaximumFixtureEntries)
+                if (index > maximumFixtureEntries)
                 { throw new InvalidOperationException(MissingEntry); }
                 Log.Append([new(index.Value, Log.State.Term, actual)]);
             }
@@ -104,18 +112,31 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
         }
     }
 
-    private long? FindOriginal(ReplicatedOperation actual)
+    private long? FindOriginal(ReplicatedOperation actual, CancellationToken cancellationToken)
     {
-        if (Log.State.LastIndex > MaximumFixtureEntries)
+        var lastIndex = Log.State.LastIndex;
+        if (lastIndex > maximumFixtureEntries)
         { throw new InvalidOperationException(MissingEntry); }
         var scope = CommandOutcomePartitionIdentity.Resolve(actual);
-        for (var index = FirstEntry; index <= Log.State.LastIndex; index += IndexStep)
+        var firstIndex = FirstEntry;
+        while (firstIndex <= lastIndex)
         {
-            var entry = Log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
-            if (entry.Operation is { } previous && previous.Id == actual.Id
-                && previous.PrincipalId == actual.PrincipalId
-                && CommandOutcomePartitionIdentity.Resolve(previous) == scope)
-            { return index; }
+            cancellationToken.ThrowIfCancellationRequested();
+            var page = Log.Read(firstIndex, configuration.Value.MaxAppendEntries,
+                configuration.Value.MaxAppendBytes);
+            if (page.IsDefaultOrEmpty)
+            { throw new InvalidOperationException(MissingEntry); }
+            foreach (var entry in page)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (entry.Index != firstIndex || entry.Index > lastIndex)
+                { throw new InvalidOperationException(MissingEntry); }
+                if (entry.Operation is { } previous && previous.Id == actual.Id
+                    && previous.PrincipalId == actual.PrincipalId
+                    && CommandOutcomePartitionIdentity.Resolve(previous) == scope)
+                { return entry.Index; }
+                firstIndex = checked(entry.Index + IndexStep);
+            }
         }
         return null;
     }

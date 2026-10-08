@@ -6,6 +6,14 @@ internal static class PartitionMoveResourceBinding
 {
     internal static void Require(PartitionMovePeerEnvelope envelope)
     {
+        if (envelope.Stage == PartitionMovePeerStage.ControlApplyCommand)
+        {
+            var apply = NativeSerialization.Deserialize<PartitionControlApplyBody>(envelope.Body.Span);
+            if (envelope.Grant is null || apply.Delegation.Resources.IsDefault || envelope.Grant.Resources.IsDefault
+                || JsonData.Fingerprint(apply.Delegation.Resources) != JsonData.Fingerprint(envelope.Grant.Resources))
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            return;
+        }
         if (envelope.Stage == PartitionMovePeerStage.PublishWitness)
         {
             var body = NativeSerialization.Deserialize<PartitionMovePublishBody>(envelope.Body.Span);

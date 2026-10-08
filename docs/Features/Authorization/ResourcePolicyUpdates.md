@@ -82,3 +82,5 @@ sequenceDiagram
   Caller->>Request: Search or current page
   Request->>Meta: Current resource policy and version fence
 ```
+
+Controlled movement reuses the existing pure SameNonPolicyDefinition comparer internally for authenticated A resource snapshots at the actual B document effect. It preserves all non-policy definition fields, including configured vectors/indexes, while existing A resource-policy CAS and outstanding durable command/grant pins remain authoritative. No B policy-table copy or new independent comparator is introduced. The private transaction supplies only exact bounded authenticated resource reads to existing document operations; public ordinary target effects remain fenced until the full A outcome bridge is qualified.

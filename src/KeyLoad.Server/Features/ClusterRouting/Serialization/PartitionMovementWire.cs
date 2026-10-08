@@ -7,8 +7,15 @@ internal static class PartitionMovementWire
     private const int FirstSignature = 0;
 
     internal static async Task<byte[]> ReadAsync(HttpRequest request, int maximumBytes, CancellationToken cancellationToken)
+        => await ReadExactAsync(request, PartitionMovementProtocol.Path, maximumBytes, cancellationToken).ConfigureAwait(false);
+
+    internal static Task<byte[]> ReadOutcomeAsync(HttpRequest request, int maximumBytes, CancellationToken cancellationToken)
+        => ReadExactAsync(request, PartitionMovementProtocol.OutcomePath, maximumBytes, cancellationToken);
+
+    private static async Task<byte[]> ReadExactAsync(HttpRequest request, PathString exactPath,
+        int maximumBytes, CancellationToken cancellationToken)
     {
-        if (request.Method != HttpMethods.Post || request.Path != PartitionMovementProtocol.Path
+        if (request.Method != HttpMethods.Post || request.Path != exactPath
             || request.QueryString.HasValue || request.ContentType != PartitionMovementProtocol.ContentType
             || request.ContentLength is not >= MinimumBodyBytes || request.ContentLength > maximumBytes
             || request.Headers.ContainsKey(Microsoft.Net.Http.Headers.HeaderNames.TransferEncoding)

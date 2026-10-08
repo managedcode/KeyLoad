@@ -50,10 +50,10 @@ internal static class RemoteDocumentWire
             ? Math.Min(RemoteDocumentProtocol.MaximumBodyBytes, PartitionQueryParallelRetention.ReplyBytes(leaf.Plan))
             : RemoteDocumentProtocol.MaximumBodyBytes;
 
-    internal static RemoteDocumentCallV1 DecodeCall(ReadOnlySpan<byte> body)
+    internal static RemoteDocumentTransportEnvelope DecodeCall(ReadOnlySpan<byte> body)
     {
         try
-        { return NativeSerialization.Deserialize<RemoteDocumentCallV1>(body); }
+        { return NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(body); }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
         { throw Errors.Fail(ErrorCode.Validation, RemoteDocumentProtocol.InvalidProof); }
     }

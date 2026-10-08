@@ -6,7 +6,9 @@ internal enum GrainRequestPhase
     RequestStarted,
     AuthorizationReload,
     BeforeSubmit,
-    SubmitReturned
+    SubmitReturned,
+    ControlledDocumentGrantSettled,
+    ControlledDocumentOutcomeReturned
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

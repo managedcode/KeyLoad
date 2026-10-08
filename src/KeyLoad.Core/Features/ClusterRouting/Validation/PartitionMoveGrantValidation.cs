@@ -28,5 +28,7 @@ internal static class PartitionMoveGrantValidation
             or PartitionMovePeerStage.ControlFinalize or PartitionMovePeerStage.ControlAuthorize
             or PartitionMovePeerStage.ControlAcknowledge or PartitionMovePeerStage.ControlAcceptFence
             or PartitionMovePeerStage.ControlBeginAbort or PartitionMovePeerStage.ControlFinalizeAbort
-            or PartitionMovePeerStage.ControlCompleteRetirement or PartitionMovePeerStage.ControlCancelGrants;
+            or PartitionMovePeerStage.ControlCompleteRetirement or PartitionMovePeerStage.ControlCancelGrants
+            or PartitionMovePeerStage.ControlAdmitCommand or PartitionMovePeerStage.ControlAcknowledgeCommand
+            or PartitionMovePeerStage.ControlFinalizeCommand;
 }

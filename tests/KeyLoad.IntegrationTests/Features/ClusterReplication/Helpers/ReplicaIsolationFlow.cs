@@ -60,7 +60,8 @@ internal static class ReplicaIsolationFlow
             receipt.Token.Incarnation, authority.Status.ConsensusTerm);
         await ReplicaIsolationStatusIdentity.VerifyOfficialAsync(fixture, authority.Leader, identities[authority.Leader],
             receipt.Token.Incarnation, after.ConsensusTerm, cancellationToken);
-        await ReplicaIsolationFlowAssertions.RefusedAsync(oldSdk, oldMcp, reference, next.Token, identity.Secret, cancellationToken);
+        await ReplicaIsolationFlowAssertions.RefusedAsync(oldSdk, oldMcp, reference, receipt.Token, next.Token,
+            identity.Secret, cancellationToken);
         await owner.VerifyObservedFaultAsync(cancellationToken);
         await owner.RestoreAsync(cancellationToken);
         await VerifyRestoredAsync(fixture, owner, reference, receipt, command, next, nextCommand, identity, identities, cancellationToken);

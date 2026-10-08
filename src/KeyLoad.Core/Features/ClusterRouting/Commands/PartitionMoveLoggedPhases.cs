@@ -18,6 +18,9 @@ public sealed partial class DatabaseEngine
         if (phase.Stage is not (PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire or PartitionMovePeerStage.SourceBeginAbort)
             && !PartitionMoveGrantValidation.IsLocalControl(phase.Stage))
         { PartitionMoveCleanupStorage.RequireOpen(transaction, phase.Partition, phase.MoveId, Limits.MaxBatchBytes); }
+        if (phase.Stage is PartitionMovePeerStage.ControlAdmitCommand or PartitionMovePeerStage.ControlAcknowledgeCommand
+            or PartitionMovePeerStage.ControlFinalizeCommand or PartitionMovePeerStage.ControlApplyCommand)
+        { return Result(ExecuteControlledDocumentPhase(transaction, principal, operation, phase, appliedPosition)); }
         return phase.Stage switch
         {
             PartitionMovePeerStage.ControlPrepare => Result(ExecuteMovePreparation(transaction,

@@ -11,6 +11,7 @@ internal sealed class AppHostControlOptions
     internal RequestCqrsProbeProfileSettings? RequestProbe { get; set; }
     internal bool RemoteDocumentReads { get; set; }
     internal bool RemotePartitionQueries { get; set; }
+    internal bool ProtectedDocumentMovement { get; set; }
     internal bool TwoRf3 { get; set; }
     internal bool ProtocolCohortEnabled { get; set; }
     internal bool Ephemeral { get; set; }

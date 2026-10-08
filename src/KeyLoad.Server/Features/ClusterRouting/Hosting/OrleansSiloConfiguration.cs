@@ -21,7 +21,8 @@ internal static class OrleansSiloConfiguration
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
-        IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries, CancellationToken startupCancellation)
+        IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries,
+        IControlledDocumentCommandRouter? controlledDocuments, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
@@ -33,6 +34,8 @@ internal static class OrleansSiloConfiguration
             if (remoteQueries is not null)
             { builder.Services.AddSingleton(remoteQueries); }
         }
+        if (controlledDocuments is not null)
+        { builder.Services.AddSingleton(controlledDocuments); }
         if (movementCapture is not null)
         { builder.Services.AddSingleton(movementCapture); }
         if (movementDispatcher is not null)

@@ -9,6 +9,8 @@ internal enum RequestCqrsProbePhase
     AuthorizationReload,
     BeforeSubmit,
     SubmitReturned,
+    ControlledDocumentGrantSettled,
+    ControlledDocumentOutcomeReturned,
     ProducerDisposed,
     CanonicalJournalFlushed,
     CanonicalOutboundObserved,

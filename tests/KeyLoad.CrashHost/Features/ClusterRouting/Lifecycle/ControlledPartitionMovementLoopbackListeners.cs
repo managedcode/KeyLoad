@@ -69,6 +69,30 @@ internal sealed class ControlledPartitionMovementLoopbackListeners : IDisposable
         return new(actual.Address, actual.Port);
     }
 
+    /// <summary>Joins every discovered listener before a child owns the physical roots.</summary>
+    internal void JoinForChild()
+    {
+        ObjectDisposedException.ThrowIf(closed, this);
+        var failures = new List<Exception>();
+        foreach (var socket in listeners)
+        { ServerFailureObserver.Observe(socket.Dispose, failures); }
+        ServerFailureObserver.ThrowIfAny(failures);
+        listeners.Clear();
+    }
+
+    /// <summary>Rebinds only the original immutable origins after all children have joined.</summary>
+    internal void OpenAfterChild()
+    {
+        ObjectDisposedException.ThrowIf(closed, this);
+        foreach (var endpoint in siloEndpoints)
+        { CreateListener(endpoint.Address, endpoint.Port); }
+        foreach (var origin in ControlOrigins.Concat(DestinationOrigins))
+        {
+            var uri = new Uri(origin);
+            CreateListener(IPAddress.Parse(uri.Host), uri.Port);
+        }
+    }
+
     private Socket CreateListener(IPAddress address, int port)
     {
         var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

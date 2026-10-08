@@ -21,10 +21,15 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
     /// <param name="root">The physical owner root, owned by the process trial.</param>
     /// <param name="owner">The actual listener-configured persisted physical owner.</param>
     /// <param name="observer">The existing storage observer for an armed actual canonical commit cut.</param>
+    /// <param name="maximumFixtureEntries">The exact selected supporting or terminal history bound.</param>
     public ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
-        Action<CommitStage, long, int>? observer = null)
+        Action<CommitStage, long, int>? observer = null,
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
     {
         ArgumentNullException.ThrowIfNull(owner);
+        if (maximumFixtureEntries != ControlledPartitionMovementNativeJournal.SupportingHistoryEntries
+            && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.TerminalHistoryEntries)
+        { throw new ArgumentOutOfRangeException(nameof(maximumFixtureEntries)); }
         Root = Path.GetFullPath(root);
         Store = new(new(Path.Combine(Root, CanonicalDirectory))
         { Incarnation = owner.Incarnation, FaultObserver = observer },
@@ -40,7 +45,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },
                 DatabaseEngine.Credential(InfrastructurePrincipal, InfrastructurePrincipal, InfrastructureCredential));
-            Journal = new(Database, owner, Path.Combine(Root, ReplicaDirectory));
+            Journal = new(Database, owner, Path.Combine(Root, ReplicaDirectory), maximumFixtureEntries);
         }
         catch (Exception primary)
         {

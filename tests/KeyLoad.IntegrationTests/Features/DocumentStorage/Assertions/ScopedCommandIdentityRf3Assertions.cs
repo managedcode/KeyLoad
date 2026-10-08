@@ -6,18 +6,6 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 /// <summary>Checks the exact public receipts and state for one scoped command identity.</summary>
 internal static class ScopedCommandIdentityRf3Assertions
 {
-    internal static async Task AssertReceiptAsync(CommitReceipt receipt, ScopedCommandIdentityRf3Scenario scenario,
-        string entity)
-    {
-        await Assert.That(receipt.CommandId).IsNotEqualTo(Guid.Empty);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await Assert.That(receipt.Mutations.Length).IsEqualTo(2);
-        await Assert.That(receipt.Mutations[0]).IsEqualTo(new MutationReceipt("putDocument", scenario.Collection,
-            entity, 1));
-        await Assert.That(receipt.Mutations[1]).IsEqualTo(new MutationReceipt("enqueue", scenario.Queue,
-            "same-message", 1));
-    }
-
     internal static async Task AssertRetryAsync(McpOfficialClient mcp, CommandRequest command,
         CommitReceipt expected, CancellationToken cancellationToken)
     {
@@ -49,53 +37,34 @@ internal static class ScopedCommandIdentityRf3Assertions
     }
 
     internal static async Task AssertStateAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        ScopedCommandIdentityRf3Scenario scenario, string firstEntity, string firstJson,
-        string secondEntity, string secondJson, CancellationToken cancellationToken)
+        ScopedCommandIdentityRf3Scenario scenario, CommitReceipt firstReceipt, CommitReceipt secondReceipt,
+        CancellationToken cancellationToken)
     {
-        await AssertDocumentAndMessageAsync(sdk, mcp, scenario, scenario.FirstPartition, firstEntity, firstJson,
-            cancellationToken);
-        await AssertDocumentAndMessageAsync(sdk, mcp, scenario, scenario.SecondPartition, secondEntity, secondJson,
-            cancellationToken);
+        await AssertDocumentAndMessageAsync(sdk, mcp, scenario, true, firstReceipt.Token, cancellationToken);
+        await AssertDocumentAndMessageAsync(sdk, mcp, scenario, false, secondReceipt.Token, cancellationToken);
     }
 
     private static async Task AssertDocumentAndMessageAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        ScopedCommandIdentityRf3Scenario scenario, PartitionRef partition, string entity, string expectedJson,
-        CancellationToken cancellationToken)
+        ScopedCommandIdentityRf3Scenario scenario, bool first, CommitToken minimum, CancellationToken cancellationToken)
     {
-        await AssertDocumentAsync(sdk, mcp, new(partition, scenario.Collection, entity), expectedJson,
-            cancellationToken);
-        var lane = new QueueLaneRef(partition, scenario.Queue);
-        var request = new InspectMessageRequest(lane, "same-message");
+        var document = ScopedCommandIdentityRf3Oracle.Document(scenario, first);
+        await AssertDocumentAsync(sdk, mcp, document, minimum, cancellationToken);
+        var request = new InspectMessageRequest(new(document.Reference.Partition, scenario.Queue), "same-message");
         var sdkMessage = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
         var mcpMessage = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await mcp.CallAsync(
             McpCallerTools.MessagesInspect, request, cancellationToken));
-        await Assert.That(sdkMessage).IsNotNull();
-        await Assert.That(mcpMessage.Value).IsNotNull();
-        await Assert.That(sdkMessage!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(mcpMessage.Value!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(sdkMessage.Metadata.ReadySequence).IsEqualTo(1L);
-        await Assert.That(mcpMessage.Value.Metadata.ReadySequence).IsEqualTo(1L);
-        await Assert.That(sdkMessage.Metadata.StateVersion).IsEqualTo(1L);
-        await Assert.That(mcpMessage.Value.Metadata.StateVersion).IsEqualTo(1L);
-        await Assert.That(sdkMessage.PayloadJson).IsEqualTo(expectedJson);
-        await Assert.That(mcpMessage.Value.PayloadJson).IsEqualTo(expectedJson);
-        await Assert.That(JsonDefaults.Serialize(sdkMessage).AsSpan()
-            .SequenceEqual(JsonDefaults.Serialize(mcpMessage.Value))).IsTrue();
+        var expected = ScopedCommandIdentityRf3Oracle.Message(first);
+        await ScopedCommandIdentityRf3Oracle.EqualAsync<MessageInspection?>(expected, sdkMessage);
+        await ScopedCommandIdentityRf3Oracle.EqualAsync<MessageInspection?>(expected, mcpMessage.Value);
     }
 
     private static async Task AssertDocumentAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        EntityRef reference, string expectedJson, CancellationToken cancellationToken)
+        DocumentResult expected, CommitToken minimum, CancellationToken cancellationToken)
     {
-        var sdkDocument = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken));
+        var sdkDocument = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(expected.Reference, minimum, cancellationToken));
         var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await mcp.CallAsync(
-            McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken));
-        await Assert.That(sdkDocument).IsNotNull();
-        await Assert.That(mcpDocument.Value).IsNotNull();
-        await Assert.That(sdkDocument!.Reference).IsEqualTo(reference);
-        await Assert.That(mcpDocument.Value!.Reference).IsEqualTo(reference);
-        await Assert.That(sdkDocument.Json).IsEqualTo(expectedJson);
-        await Assert.That(mcpDocument.Value.Json).IsEqualTo(expectedJson);
-        await Assert.That(JsonDefaults.Serialize(sdkDocument).AsSpan()
-            .SequenceEqual(JsonDefaults.Serialize(mcpDocument.Value))).IsTrue();
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(expected.Reference, minimum), cancellationToken));
+        await ScopedCommandIdentityRf3Oracle.EqualAsync<DocumentResult?>(expected, sdkDocument);
+        await ScopedCommandIdentityRf3Oracle.EqualAsync<DocumentResult?>(expected, mcpDocument.Value);
     }
 }

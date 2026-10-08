@@ -21,6 +21,7 @@ public sealed partial class DatabaseEngine
                 or PartitionMovePeerStage.SourceBeginAbort
                 => sourceMatches,
             PartitionMovePeerStage.StagePage or PartitionMovePeerStage.Install or PartitionMovePeerStage.PublishWitness
+                or PartitionMovePeerStage.ControlApplyCommand
                 => PhysicalOwnerEntryValidation.SameOwner(phase.DestinationOwner, receiver),
             PartitionMovePeerStage.Abort => sourceMatches
                 || PhysicalOwnerEntryValidation.SameOwner(phase.DestinationOwner, receiver),

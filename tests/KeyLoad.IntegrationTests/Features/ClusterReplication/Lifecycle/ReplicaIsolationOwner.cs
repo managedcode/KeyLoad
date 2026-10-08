@@ -120,7 +120,7 @@ internal sealed class ReplicaIsolationOwner
 
     internal async Task SettleAfterStopAsync(bool stopped, CancellationToken cancellationToken)
     {
-        if (!stopped || nodes.Count != plan.Targets.Count)
+        if (!stopped)
         { throw new InvalidOperationException("The actual fault topology did not settle; its root and images remain owned."); }
         var evidence = new List<ReplicaIsolationRetirementObservation>();
         var failures = new List<Exception>();

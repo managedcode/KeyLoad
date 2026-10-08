@@ -11,6 +11,13 @@ namespace KeyLoad.RecoveryTests;
 /// <summary>Explicit validated native options composition for genuine test-owned engine and replica fixtures.</summary>
 internal static class RecoveryExecutionOptions
 {
+    internal static IOptions<NativeProcessReadinessOptions> NativeProcessReadiness()
+    {
+        var settings = new NativeProcessReadinessOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
     internal static IOptions<NativeTextExecutionOptions> NativeText()
     {
         var settings = new NativeTextExecutionOptions();

@@ -12,13 +12,23 @@ internal static class PartitionControlCommandValidation
             || record.Identity != identity || record.ControlOwner is null || record.Destination is null
             || record.ControlOwner.Incarnation == Guid.Empty || record.EffectId == Guid.Empty
             || record.AdmissionPosition <= PartitionMoveProtocol.EmptyCount
-            || !Enum.IsDefined(record.Phase)
+            || record.Phase == PartitionControlCommandPhase.None || !Enum.IsDefined(record.Phase)
             || !PartitionMoveSourceFenceValidation.ValidDigest(record.Fingerprint)
             || record.Destination.Partition != identity.Partition
             || record.Destination.Incarnation == Guid.Empty
             || record.Destination.PlacementEpoch <= PartitionMoveProtocol.EmptyCount)
         { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
         _ = PartitionControlCommandKeys.Original(identity);
+        if (identity.ScopeKind != CommandOutcomeScopeKind.Partition || identity.Partition is null
+            || record.Delegation is null || record.OriginalOperation is null
+            || record.Delegation.Identity != identity || record.Delegation.EffectId != record.EffectId
+            || record.Delegation.Fingerprint != record.Fingerprint
+            || record.OriginalOperation.Id != identity.CommandId
+            || record.OriginalOperation.PrincipalId != identity.PrincipalId
+            || record.OriginalOperation.Kind != OperationKind.Batch)
+        { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
+
+        PartitionControlTargetBodyValidation.Require(record);
         if (record.Phase == PartitionControlCommandPhase.Admitted)
         {
             if (record.TargetEffect is not null || record.TargetEffectDigest is not null
@@ -29,7 +39,10 @@ internal static class PartitionControlCommandValidation
         RequireEffect(record);
         if (record.Phase == PartitionControlCommandPhase.Finalized
             && (record.OriginalOutcome is null || record.OriginalOutcome.Identity != identity
-                || record.OriginalOutcome.Fingerprint != record.Fingerprint))
+                || record.OriginalOutcome.Fingerprint != record.Fingerprint
+                || record.OriginalOutcome.Version != PartitionMoveProtocol.Version
+                || !record.OriginalOutcome.OutcomeKey.Span.SequenceEqual(PartitionControlCommandKeys.Original(identity))
+                || !PartitionMoveSourceFenceValidation.ValidDigest(record.OriginalOutcome.OutcomeDigest)))
         { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
     }
 

@@ -25,6 +25,7 @@ public sealed partial class DatabaseEngine
         {
             if (previous.CommandId != receipt.CommandId || previous.AppliedPosition != receipt.AppliedPosition
                 || previous.ControlIntentDigest != receipt.ControlIntentDigest
+                || previous.EffectDigest != receipt.EffectDigest
                 || !PhysicalOwnerEntryValidation.SameOwner(previous.PhysicalOwner, receipt.PhysicalOwner))
             { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
         }

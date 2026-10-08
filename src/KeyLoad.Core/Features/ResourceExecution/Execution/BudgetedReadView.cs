@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Authorization;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -8,6 +9,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
 {
     private readonly IKeyValueView view;
     private readonly ReadExecutionBudget budget;
+    private readonly ReadExecutionBudgetReadGrant? grant;
 
     private bool movementAuthorityAbsent;
     bool IPartitionMovementReadScope.MovementAuthorityAbsent
@@ -32,12 +34,14 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
     /// <summary>Creates a view whose lifetime is bounded by the wrapped storage action.</summary>
     /// <param name="view">The underlying view, valid only in its current storage action.</param>
     /// <param name="budget">The shared operation budget.</param>
-    public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget)
+    /// <param name="grant">Optional existing native leaf reservation charging actual examined records.</param>
+    public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant? grant = null)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(budget);
         this.view = view;
         this.budget = budget;
+        this.grant = grant;
     }
 
     /// <inheritdoc />
@@ -71,7 +75,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
         budget.Check();
         var found = view.ReadValue(key, reader, bytes =>
         {
-            budget.ChargeBytes(bytes);
+            Charge(bytes);
             observer?.Invoke(bytes);
             budget.Check();
         });
@@ -110,13 +114,21 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
     {
         StorageReadObserver charge = bytes =>
         {
-            budget.ChargeBytes(bytes);
+            Charge(bytes);
             observer?.Invoke(bytes);
             cancellationToken.ThrowIfCancellationRequested();
             budget.Check();
         };
         return reverse ? view.VisitReverseRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken)
             : view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken);
+    }
+
+    private void Charge(long bytes)
+    {
+        if (grant is null)
+        { budget.ChargeBytes(bytes); }
+        else
+        { budget.ChargeReadGrant(grant, bytes); }
     }
 
     private CancellationTokenSource? CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)

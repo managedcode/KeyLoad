@@ -11,6 +11,8 @@ internal static class ControlledPartitionMovementVerifiedSubmit
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest original, CancellationToken cancellationToken)
     {
+        if (ControlledPartitionMovementProcessScope.Current is { } process)
+        { return await process.SubmitAsync(receiver, runtime, original, cancellationToken); }
         OperationResult? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

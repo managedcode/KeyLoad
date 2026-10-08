@@ -46,6 +46,18 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     internal async Task WaitForRecordAsync(McpTransportStage stage,
         McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)
     {
+        try
+        { await WaitForRecordCoreAsync(stage, methodCategory, cancellationToken).ConfigureAwait(false); }
+        catch (OperationCanceledException error) when (cancellationToken.IsCancellationRequested)
+        {
+            RequestCqrsCaptureCancellationDiagnostics.WriteAndThrow(error, NativeSnapshot(), stage, methodCategory);
+            throw;
+        }
+    }
+
+    private async Task WaitForRecordCoreAsync(McpTransportStage stage,
+        McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)
+    {
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();

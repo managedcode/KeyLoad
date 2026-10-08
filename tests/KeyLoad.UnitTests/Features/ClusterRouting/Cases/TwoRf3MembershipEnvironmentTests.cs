@@ -3,10 +3,12 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -23,6 +25,31 @@ internal sealed class TwoRf3MembershipEnvironmentTests
     public async Task ActualTwoRf3ResourceEnvironmentBindsAndPassesStrictNativeValidation()
     {
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(VerifyEmittedResourcesAsync);
+    }
+
+    [Test]
+    public async Task RemoteReadAuthorityDependenciesExcludeLateDataAdmission()
+    {
+        await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
+        {
+            var builder = CreateBuilder();
+            var resources = TwoRf3ClusterResources.Add(builder, CreateProfile(), fixture.DataRoot);
+            TwoRf3RemoteReadResources.Configure(Options.Create(new AppHostControlOptions
+            { RemoteDocumentReads = true }), resources, registerOwners: true);
+            for (var index = 0; index < resources.Length; index++)
+            {
+                var checks = resources[index].Resource.Annotations.OfType<HealthCheckAnnotation>()
+                    .Select(annotation => annotation.Key).ToArray();
+                var name = resources[index].Resource.Name;
+                var authority = index < TwoRf3ProfileProtocol.MembersPerGroup;
+                await Assert.That(checks.Contains(name + "_http_/health/ready_200_check", StringComparer.Ordinal))
+                    .IsEqualTo(!authority);
+                await Assert.That(checks.Contains(name + "_http_/health/membership-authority_200_check", StringComparer.Ordinal))
+                    .IsEqualTo(authority);
+                await Assert.That(checks.Contains(name + "_http_/health/membership-ready_200_check", StringComparer.Ordinal))
+                    .IsEqualTo(!authority);
+            }
+        });
     }
 
     private static async Task VerifyEmittedResourcesAsync(RequestCqrsProbeAppHostFileFixture fixture)

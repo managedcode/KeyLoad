@@ -25,6 +25,12 @@ internal static class PartitionMovementControlPrincipal
                 NativeSerialization.Deserialize<PartitionMoveCompletionBody>(verified.Body.Span).OperatorPrincipalId,
             PartitionMovePeerStage.ControlFinalize =>
                 NativeSerialization.Deserialize<PartitionMoveControlBody>(verified.Body.Span).OperatorPrincipalId,
+            PartitionMovePeerStage.ControlAdmitCommand =>
+                NativeSerialization.Deserialize<PartitionControlAdmitBody>(verified.Body.Span).OperatorPrincipalId,
+            PartitionMovePeerStage.ControlAcknowledgeCommand =>
+                NativeSerialization.Deserialize<PartitionControlAcknowledgeBody>(verified.Body.Span).OperatorPrincipalId,
+            PartitionMovePeerStage.ControlFinalizeCommand =>
+                NativeSerialization.Deserialize<PartitionControlFinalizeBody>(verified.Body.Span).OperatorPrincipalId,
             _ => PartitionStoreProtocol.AdministratorId
         };
 

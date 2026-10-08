@@ -5,6 +5,8 @@ internal static class PartitionMovementProtocol
     internal const string ActionAlias = "keyload.server.v1.PartitionMovementTransportAction";
     internal const string ReplyAlias = "keyload.server.v1.PartitionMovementTransportReply";
     internal const string RequestAlias = "keyload.server.v1.PartitionMovementTransportRequest";
+    internal const string OutcomeRequestAlias = "keyload.server.v1.PartitionMovementOutcomeTransportRequest";
+    internal const string OutcomePath = "/internal/partitions/movement/v1/outcomes";
     internal const string Path = "/internal/partitions/movement/v1";
     internal const string ContentType = "application/octet-stream";
     internal const string SignatureHeader = "X-KeyLoad-Movement-Proof";

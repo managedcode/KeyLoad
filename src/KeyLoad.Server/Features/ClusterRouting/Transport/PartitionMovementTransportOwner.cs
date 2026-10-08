@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Owns the configured HTTP connection, authenticated reply validation and native address pins.</summary>
-internal sealed class PartitionMovementTransportOwner : IDisposable
+internal sealed partial class PartitionMovementTransportOwner : IDisposable
 {
     private const int FirstVoter = 0;
     private const int SingleSignature = 1;
@@ -56,8 +56,7 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
         }, failures).ConfigureAwait(false);
         try
         { ServerFailureObserver.ThrowIfAny(failures); }
-        catch (Exception error) when (submitted && !ContainsCancellation(error)
-            && NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (submitted && IsUnresolvedTransport(error))
         {
             var unknown = Errors.Fail(ErrorCode.UnknownWriteOutcome, PartitionMovementProtocol.Unavailable);
             unknown.Data[OriginalFailureKey] = error;
@@ -66,9 +65,9 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
         return terminal ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
     }
 
-    private static bool ContainsCancellation(Exception error)
-        => error is OperationCanceledException || error is AggregateException aggregate
-            && aggregate.Flatten().InnerExceptions.Any(value => value is OperationCanceledException);
+    private static bool IsUnresolvedTransport(Exception error)
+        => error is HttpRequestException or IOException or TimeoutException
+            || error is AggregateException aggregate && aggregate.Flatten().InnerExceptions.All(IsUnresolvedTransport);
 
     private HttpRequestMessage CreateRequest(string endpoint, byte[] body)
     {
@@ -97,8 +96,12 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
         }
     }
     private const int NoEncodings = 0;
-    private async Task<PartitionMovementTransportReply> ReadReplyAsync(HttpResponseMessage response, bool local,
+    private Task<PartitionMovementTransportReply> ReadReplyAsync(HttpResponseMessage response, bool local,
         CancellationToken cancellationToken)
+        => ReadReplyPurposeAsync(response, local, outcome: false, cancellationToken);
+
+    private async Task<PartitionMovementTransportReply> ReadReplyPurposeAsync(HttpResponseMessage response, bool local,
+        bool outcome, CancellationToken cancellationToken)
     {
         if (response.StatusCode != System.Net.HttpStatusCode.OK
             || response.Content.Headers.ContentType?.ToString() != PartitionMovementProtocol.ContentType
@@ -123,7 +126,8 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
         try
         {
             using var mac = new PartitionMovementMac(key, partition.Database.Limits.MaxBatchBytes);
-            if (signatures.Length != SingleSignature || !mac.Verify(body, signatures[FirstVoter], reply: true))
+            if (signatures.Length != SingleSignature || !(outcome ? mac.VerifyOutcome(body, signatures[FirstVoter], reply: true)
+                : mac.Verify(body, signatures[FirstVoter], reply: true)))
             { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
@@ -147,23 +151,11 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
-        RequireReplyValue(reply.Reply);
+        PartitionMovementTransportReplyValidation.RequireValue(reply.Reply);
         var address = SiloAddress.FromParsableString(discovery.SiloAddress);
         if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         await (local ? resources.ControlPins : resources.DestinationPins).PinCallerAsync(index, address.Endpoint.Address,
             cancellationToken).ConfigureAwait(false);
     }
-    private static void RequireReplyValue(GrainOperationReply reply)
-    {
-        if (reply.Error is { } code)
-        {
-            if (!Enum.IsDefined(code) || !reply.Payload.IsEmpty
-                || reply.SafeDetail != PartitionMovementProtocol.Unavailable)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
-        }
-        else if (reply.Payload.IsEmpty || reply.SafeDetail is not null)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
-    }
-
 }

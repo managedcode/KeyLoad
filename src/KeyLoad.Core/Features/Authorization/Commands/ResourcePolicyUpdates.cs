@@ -61,7 +61,7 @@ internal static class ResourcePolicyUpdates
         }
     }
 
-    private static bool SameNonPolicyDefinition(ResourceDefinition previous, ResourceDefinition replacement)
+    internal static bool SameNonPolicyDefinition(ResourceDefinition previous, ResourceDefinition replacement)
     {
         const int SchemaVersionEmptyCount = 0;
 

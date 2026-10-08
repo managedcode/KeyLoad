@@ -1,9 +1,12 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -21,12 +24,15 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private readonly bool remoteDocumentReads;
     private readonly bool remotePartitionQueries;
     private readonly bool queryProbe;
+    private readonly bool protectedDocuments;
     private RequestCqrsProbeFixture? queryControls;
     private readonly LocalRf3ImageSelection.Selection? localImageSelection;
     private LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false)
-    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; }
+    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false)
+    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; }
+
+    internal string? MovementTargetPeerKey { get; private set; }
 
     internal NodeEpochRf3Profile Profile
     {
@@ -52,6 +58,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal static Task<TwoRf3MembershipWave> StartRemoteDocumentsAsync(CancellationToken cancellationToken)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true), cancellationToken);
+
+    internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
 
     internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true), cancellationToken);
@@ -92,10 +101,15 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         }
         if (queryProbe)
         { queryControls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid()); }
-        var args = TwoRf3WaveArguments.Create(root, localImageSelection, registerPhysicalOwners, remoteDocumentReads, remotePartitionQueries, queryControls);
+        var args = TwoRf3WaveArguments.Create(root, localImageSelection, registerPhysicalOwners, remoteDocumentReads, remotePartitionQueries, queryControls, protectedDocuments);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
-        var containerNames = ReadContainerNames(builder.Resources.OfType<ContainerResource>());
+        if (protectedDocuments)
+        {
+            MovementTargetPeerKey = await builder.Resources.OfType<ParameterResource>()
+                .Single(resource => resource.Name == "membership-peer-b").GetValueAsync(cancellationToken).ConfigureAwait(false);
+        }
+        var containerNames = TwoRf3MembershipContainerNames.Read(builder.Resources.OfType<ContainerResource>());
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         if (remoteDocumentReads)
         { RemoteRuntimeOwner = new ContainerRuntimeControl(application, containerNames, repository); }
@@ -114,6 +128,12 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         startAttempted = true;
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         await WaitForSixHealthyAsync(cancellationToken).ConfigureAwait(false);
+        if (remoteDocumentReads)
+        {
+            await TwoRf3MembershipDataReadiness.WaitAsync(application,
+                application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(),
+                application.Services.GetRequiredService<TimeProvider>(), cancellationToken).ConfigureAwait(false);
+        }
         if (localImageIdentity is { } identity)
         {
             await LocalRf3ImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
@@ -147,6 +167,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             if (failures.Count == 0)
             { dataRoot = null; dataRootOwned = false; }
         }
+        MovementTargetPeerKey = null;
         cleanupFailed |= failures.Count > 0;
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -184,21 +205,6 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool CanDeleteRoot(List<Exception> failures)
         => dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
-
-    private static Dictionary<string, string> ReadContainerNames(IEnumerable<ContainerResource> resources)
-    {
-        var names = resources.Where(resource => TwoRf3MembershipProtocol.Nodes.Contains(resource.Name,
-                StringComparer.Ordinal))
-            .ToDictionary(resource => resource.Name,
-                resource => resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name,
-                StringComparer.Ordinal);
-        if (names.Count != TwoRf3MembershipProtocol.NodeCount
-            || TwoRf3MembershipProtocol.Nodes.Any(node => !names.ContainsKey(node)))
-        {
-            throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
-        }
-        return names;
-    }
 
     private void AssertAllNodeLocksReleased()
     {

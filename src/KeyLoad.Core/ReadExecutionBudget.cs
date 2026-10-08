@@ -66,6 +66,16 @@ public sealed class ReadExecutionBudget
         return new BudgetedReadView(view, this);
     }
 
+    internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(grant);
+        Check();
+        if (!grant.BelongsTo(this))
+        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        return new BudgetedReadView(view, this, grant);
+    }
+
     /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
     public void Check()
     {

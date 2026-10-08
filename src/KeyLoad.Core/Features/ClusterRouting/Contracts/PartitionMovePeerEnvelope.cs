@@ -21,6 +21,10 @@ internal enum PartitionMovePeerStage
     ControlCompleteRetirement = 16,
     ControlCancelGrants = 17,
     SourceBeginAbort = 18,
+    ControlAdmitCommand = 19,
+    ControlAcknowledgeCommand = 20,
+    ControlFinalizeCommand = 21,
+    ControlApplyCommand = 22,
 }
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.PeerEnvelopeAlias)]

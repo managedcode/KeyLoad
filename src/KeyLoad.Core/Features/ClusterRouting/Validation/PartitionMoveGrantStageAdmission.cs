@@ -12,6 +12,7 @@ internal static class PartitionMoveGrantStageAdmission
     {
         var admitted = phase.Stage switch
         {
+            PartitionMovePeerStage.ControlApplyCommand => control.Phase == PartitionMovePhase.Retired,
             PartitionMovePeerStage.Fence => control.Phase == PartitionMovePhase.Prepared,
             PartitionMovePeerStage.Capture => control.Phase == PartitionMovePhase.Fenced,
             PartitionMovePeerStage.StagePage or PartitionMovePeerStage.Install
@@ -26,6 +27,8 @@ internal static class PartitionMoveGrantStageAdmission
         { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
         if (phase.Stage is PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire or PartitionMovePeerStage.SourceBeginAbort)
         { RequireCleanup(view, phase, control, maximumBytes); }
+        if (phase.Stage == PartitionMovePeerStage.ControlApplyCommand)
+        { PartitionControlEffectGrantAdmission.Require(view, phase, control, maximumBytes); }
         if (phase.Stage == PartitionMovePeerStage.PublishWitness)
         { RequirePublication(view, phase, control); }
         if (phase.Stage == PartitionMovePeerStage.Fence)

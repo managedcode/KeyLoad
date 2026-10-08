@@ -62,12 +62,16 @@ internal sealed class RemoteDocumentClient : IDisposable
         return reply.QueryLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
     }
 
+    internal Task<ControlledDocumentReadResult> ReadControlledAsync(RemoteControlledDocumentCall call,
+        CancellationToken cancellationToken)
+        => RemoteControlledDocumentExchange.ReadAsync(http, pins, options, membership, clock, call, cancellationToken);
+
     private async Task<RemoteDocumentReplyV1> ReadReplyAsync(RemoteDocumentCallV1 call,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var destination = call.Fence.Destination;
-        var body = RemoteDocumentWire.Encode(call);
+        var body = RemoteDocumentWire.Encode(new RemoteDocumentTransportEnvelope(call, null));
         using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
         using var request = new HttpRequestMessage(HttpMethod.Post,
             new Uri(new Uri(destination.Endpoints[SelectedVoter]), RemoteDocumentProtocol.Path));
@@ -107,6 +111,7 @@ internal sealed class RemoteDocumentClient : IDisposable
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership)
             || SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort
+            || reply.Controlled is not null
             || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null)
             || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null)
             || reply.QueryLeaf is not null && call.QueryLeaf is null

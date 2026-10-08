@@ -15,6 +15,7 @@ internal static class NativeCoverageRf3FixtureArguments
         ArgumentException.ThrowIfNullOrWhiteSpace(storageRoot);
         ArgumentException.ThrowIfNullOrWhiteSpace(startupPollMilliseconds);
         var coverageRoot = Path.Combine(context.FixtureRoot, NativeCoverageRf3FixtureProtocol.CoverageDirectoryName);
+        Directory.CreateDirectory(coverageRoot);
         var fields = new (string Name, string Value)[]
         {
             (NativeCoverageRf3FixtureProtocol.DataRootArgumentName, storageRoot),

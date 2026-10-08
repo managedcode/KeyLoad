@@ -34,6 +34,9 @@ internal static class DocumentSessionReadRf3Assertions
         foreach (var failure in invalid)
         {
             var sdkFailure = await sdk.GetAsync(reference, failure.Token, token);
+            await Assert.That(sdkFailure.IsSuccess).IsFalse();
+            await Assert.That(sdkFailure.Value).IsNull();
+            await Assert.That(sdkFailure.Problem?.StatusCode).IsEqualTo(400);
             await Assert.That(sdkFailure.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
             await Assert.That(sdkFailure.Problem?.Detail).IsEqualTo(failure.Detail);
             var official = await mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, failure.Token), token);
@@ -43,10 +46,16 @@ internal static class DocumentSessionReadRf3Assertions
             await McpCallerAssertions.DoesNotDiscloseAsync(official, credential, FirstJson);
             var call = SqlRf3Protocol.Call(reference.Partition, McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, failure.Token));
             var sql = await sdk.ExecuteSqlAsync(call, token);
+            await Assert.That(sql.IsSuccess).IsFalse();
+            await Assert.That(sql.Value.ValueKind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);
+            await Assert.That(sql.Problem?.StatusCode).IsEqualTo(400);
             await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
             await Assert.That(sql.Problem?.Detail).IsEqualTo(failure.Detail);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token),
-                ErrorCode.TokenInvalidated, dispatched: true);
+            var sqlOfficial = await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
+            await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.TokenInvalidated, dispatched: true);
+            await Assert.That(sqlOfficial.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
+                .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(failure.Detail);
+            await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, credential, FirstJson);
             await HealthyAsync(sdk, mcp, reference, minimum, FirstJson, First, token);
         }
     }

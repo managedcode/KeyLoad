@@ -110,5 +110,9 @@ public enum GrainReadKind
     /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
     ApproximateSearch,
     /// <summary>A privately authenticated movement source image capability.</summary>
-    PartitionMovementCapture
+    PartitionMovementCapture,
+    /// <summary>Read the immutable original outcome of one privately authenticated movement phase.</summary>
+    PartitionMovementOutcome,
+    /// <summary>Read one authenticated A-authority document on its protected physical destination.</summary>
+    ControlledDocument
 }

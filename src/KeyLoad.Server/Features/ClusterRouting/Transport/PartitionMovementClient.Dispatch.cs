@@ -13,6 +13,16 @@ internal sealed partial class PartitionMovementClient
     {
         cancellationToken.ThrowIfCancellationRequested();
         RequireSenderAdmission();
+        return await DispatchAdmittedAsync(phaseCommandId, original, authorization, action, handleId,
+            ordinal, pinnedVoter, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<PartitionMovementDispatchResult> DispatchAdmittedAsync(Guid phaseCommandId,
+        PartitionMovePeerEnvelope original, PartitionMoveJournalReceipt? authorization,
+        PartitionMovementPeerAction action, Guid handleId, int ordinal, string? pinnedVoter,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         if (options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
             || !options.MembershipAuthority.RegisterPhysicalOwners || original.ExpiresAt <= clock.GetUtcNow())
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }

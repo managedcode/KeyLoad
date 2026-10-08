@@ -16,5 +16,6 @@
     <InternalsVisibleTo Include="KeyLoad.Core" />
     <InternalsVisibleTo Include="KeyLoad.Orleans" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.CrashHost" />
   </ItemGroup>
 </Project>

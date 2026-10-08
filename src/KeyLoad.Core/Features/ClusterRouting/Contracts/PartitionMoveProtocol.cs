@@ -2,8 +2,14 @@ namespace KeyLoad.Core.Features.ClusterRouting.Contracts;
 
 internal static class PartitionMoveProtocol
 {
+    internal const string DocumentCommandContextAlias = "keyload.core.partition-control-document-command-context.v1";
+    internal const string DocumentReadFrameAlias = "keyload.core.partition-control-document-read-frame.v1";
     internal const string CommandRecordAlias = "keyload.core.partition-control-command-record.v1";
     internal const string CommandPhaseAlias = "keyload.core.partition-control-command-phase.v1";
+    internal const string CommandAdmitBodyAlias = "keyload.core.partition-control-command-admit-body.v1";
+    internal const string CommandAckBodyAlias = "keyload.core.partition-control-command-ack-body.v1";
+    internal const string CommandFinalizeBodyAlias = "keyload.core.partition-control-command-finalize-body.v1";
+    internal const string CommandApplyBodyAlias = "keyload.core.partition-control-command-apply-body.v1";
     internal const string CommandEffectAlias = "keyload.core.partition-control-effect-payload.v1";
     internal const string PeerStageAlias = "keyload.core.partition-move-peer-stage.v1";
     internal const string PeerEnvelopeAlias = "keyload.core.partition-move-peer-envelope.v1";

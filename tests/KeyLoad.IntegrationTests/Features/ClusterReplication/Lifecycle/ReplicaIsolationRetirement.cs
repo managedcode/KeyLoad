@@ -27,7 +27,7 @@ internal static class ReplicaIsolationRetirement
     private const string NodeLock = "node.owner.lock";
     private const string DatabaseDirectory = "database";
     private const string ReplicaDirectory = "replica";
-    private const string StoreLock = "store.owner.lock";
+    private const string StoreLock = "owner.lock";
     private const int NoContainers = 0;
     private const int SingleContainer = 1;
     private const int ContainerIndex = 0;

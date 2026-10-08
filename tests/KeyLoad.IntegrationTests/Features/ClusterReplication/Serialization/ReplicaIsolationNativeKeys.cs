@@ -15,6 +15,7 @@ internal static class ReplicaIsolationNativeKeys
     internal const string NetworkMode = "NetworkMode";
     internal const string PidMode = "PidMode";
     internal const string Networks = "Networks";
+    internal const string NetworkId = "NetworkID";
     internal const string IpAddress = "IPAddress";
     internal const string Incarnation = "Incarnation";
     internal const string FaultSource = "FaultSource";

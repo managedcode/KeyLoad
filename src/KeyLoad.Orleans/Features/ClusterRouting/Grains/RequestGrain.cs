@@ -61,6 +61,9 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
 
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
+            var controlledReply = await TryExecuteControlledAsync(request, writer).ConfigureAwait(true);
+            if (controlledReply is not null)
+            { return GrainReplyFactory.StreamResult(controlledReply, options); }
             if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex)
             { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
             else if (command)
@@ -85,6 +88,27 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
             return GrainReplyFactory.StreamResult(reply: GrainReplyFactory.Failure(error: error, command: command, diagnostics: diagnostics,
                 requestId: requestId, stage: stage, cancellationToken: writer.CancellationToken, options: options), options: options);
         }
+    }
+
+    private async ValueTask<GrainOperationReply?> TryExecuteControlledAsync(DecodedGrainRequest request,
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+    {
+        if (request.Envelope.CommandKind != OperationKind.Batch)
+        { return null; }
+        var controlled = services.GetService<IControlledDocumentCommandRouter>();
+        if (controlled is null)
+        { return null; }
+        Func<CancellationToken, ValueTask>? grantSettled = null;
+        Func<CancellationToken, ValueTask>? outcomeObserved = null;
+        if (codec.HasPhaseObserver)
+        {
+            var context = ((IGrainBase)this).GrainContext;
+            grantSettled = token => codec.ObservePhaseAsync(request, GrainRequestPhase.ControlledDocumentGrantSettled, context, token);
+            outcomeObserved = token => codec.ObservePhaseAsync(request, GrainRequestPhase.ControlledDocumentOutcomeReturned, context, token);
+        }
+        var original = await controlled.TryExecuteAsync(request.Envelope, request.Payload,
+            writer.CancellationToken, grantSettled, outcomeObserved).ConfigureAwait(true);
+        return original is null ? null : GrainReplyFactory.Operation(original, options, writer.CancellationToken);
     }
 
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,

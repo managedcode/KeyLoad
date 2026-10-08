@@ -20,9 +20,15 @@ internal static class TwoRf3RemoteReadResources
         {
             foreach (var resource in resources)
             {
-                resource.WithEnvironment(TwoRf3ProfileProtocol.RemoteDocumentEnvironment, TwoRf3ProfileProtocol.Enabled)
-                    .WithHttpHealthCheck(DataReadyHealth, endpointName: Http);
+                resource.WithEnvironment(TwoRf3ProfileProtocol.RemoteDocumentEnvironment, TwoRf3ProfileProtocol.Enabled);
             }
+            foreach (var resource in resources.Skip(TwoRf3ProfileProtocol.MembersPerGroup))
+            { resource.WithHttpHealthCheck(DataReadyHealth, endpointName: Http); }
+        }
+        if (control.Value.ProtectedDocumentMovement)
+        {
+            foreach (var resource in resources)
+            { resource.WithEnvironment(TwoRf3ProfileProtocol.MovementEnvironment, TwoRf3ProfileProtocol.Enabled); }
         }
         if (control.Value.RemotePartitionQueries)
         {

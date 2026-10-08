@@ -21,6 +21,10 @@ internal static class CrashHostApplication
         {
             return;
         }
+        if (await ControlledPartitionMovementProcessScenario.TryRunAsync(args))
+        {
+            return;
+        }
         if (await C1OutcomeInspection.TryRunAsync(args) || await ExistingStoreInspector.TryRunAsync(args))
         {
             return;

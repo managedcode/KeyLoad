@@ -11,27 +11,58 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
 {
     private const string DirectoryPrefix = "keyload-controlled-movement-node-";
     private const string GuidFormat = "N";
-    private readonly PhysicalShardRecord owner;
     private readonly string root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private ControlledPartitionMovementNativeNode native;
     private bool closed;
 
-    internal ControlledPartitionMovementNode(PhysicalShardRecord owner)
+    internal ControlledPartitionMovementNode(PhysicalShardRecord owner,
+        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
     {
-        this.owner = owner;
-        native = new(root, owner);
+        PhysicalOwner = owner;
+        MaximumFixtureEntries = maximumFixtureEntries;
+        native = new(root, owner, maximumFixtureEntries: maximumFixtureEntries);
     }
 
     internal DatabaseEngine Database => native.Database;
     internal ZoneTreeStore Store => native.Store;
     internal ControlledPartitionMovementNativeJournal Journal => native.Journal;
     internal string Root => native.Root;
+    internal PhysicalShardRecord PhysicalOwner { get; }
+    internal long MaximumFixtureEntries { get; }
+    internal bool RetainRoot { get; set; }
+
+    internal void JoinForChild()
+    {
+        ObjectDisposedException.ThrowIf(closed, this);
+        native.Dispose();
+    }
+
+    internal void OpenAfterChild()
+    {
+        ObjectDisposedException.ThrowIf(closed, this);
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+    }
 
     internal void Reopen()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native.Dispose();
-        native = new(root, owner);
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+    }
+
+    internal KeyLoadException ReopenAfterExpectedCorruptApply()
+    {
+        ObjectDisposedException.ThrowIf(closed, this);
+        KeyLoadException? original = null;
+        try
+        { native.Dispose(); }
+        catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
+            && failure.Message == KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionMoveProtocol.Invalid)
+        { original = failure; }
+        if (original is null)
+        { throw new InvalidOperationException("The original faulted apply worker did not retain its corruption."); }
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+        return original;
     }
 
     public void Dispose()
@@ -44,7 +75,7 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         { native.Dispose(); }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        if (failures.Count == 0 && Directory.Exists(root))
+        if (!RetainRoot && failures.Count == 0 && Directory.Exists(root))
         {
             try
             { Directory.Delete(root, recursive: true); }

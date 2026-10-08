@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ControlledPartitionMovementCaptureScenario
 {
     internal static async Task<(PartitionMovementCaptureHandle Handle, PartitionMovementPageResult[] Pages,
-        PartitionMovePhaseResult Settlement)> ExecuteAsync(ControlledPartitionMovementNode source,
+        PartitionMovePhaseResult Settlement, PartitionMovePhaseResult Captured)> ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackCorpus corpus,
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission, string originalCallerAddress,
         byte[] originalReceipt, long initialPosition, CancellationToken cancellationToken)
@@ -29,8 +29,8 @@ internal static class ControlledPartitionMovementCaptureScenario
             capture.Handle, capture.Settlement);
         await ControlledPartitionMovementCaptureAcknowledgement.ExecuteAsync(source, runtime, admission, corpus,
             accepted, capture.Settlement, originalCallerAddress, observed.ExpiresAt, cancellationToken);
-        await ControlledPartitionMovementCapturedAdvance.ExecuteAsync(source, runtime, admission, corpus,
+        var captured = await ControlledPartitionMovementCapturedAdvance.ExecuteAsync(source, runtime, admission, corpus,
             accepted, capture.Handle.Descriptor, originalCallerAddress, observed.ExpiresAt, cancellationToken);
-        return capture;
+        return (capture.Handle, capture.Pages, capture.Settlement, captured);
     }
 }

@@ -133,6 +133,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             || marker.Phase is not (RequestCqrsProbePhase.ProducerDisposed
                 or RequestCqrsProbePhase.RequestStarted or RequestCqrsProbePhase.AuthorizationReload
                 or RequestCqrsProbePhase.BeforeSubmit or RequestCqrsProbePhase.SubmitReturned
+                or RequestCqrsProbePhase.ControlledDocumentGrantSettled or RequestCqrsProbePhase.ControlledDocumentOutcomeReturned
                 or RequestCqrsProbePhase.CanonicalJournalFlushed or RequestCqrsProbePhase.CanonicalOutboundObserved
                 or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class PartitionMovementEndpoint(PartitionMovementRuntime runtime,
+internal sealed partial class PartitionMovementEndpoint(PartitionMovementRuntime runtime,
     PartitionMovementPeerAdmission admission, PartitionMovementReceiver receiver,
     IOptions<NodeOptions> options, IOptions<GrainRoutingOptions> routing, IOptions<DatabaseLimits> limits, TimeProvider clock)
 {

@@ -16,9 +16,8 @@ internal static class ControlledPartitionMovementPrepareFlow
     {
         var placement = ControlledPartitionMovementPrepareAssertions.Placement(corpus);
         var request = ControlledPartitionMovementPrepareRequest.Create(source, runtime, corpus, placement, callerAddress);
-        await ControlledPartitionMovementAdmissionAssertions.RejectAsync(source, target, admission, request,
-            cancellationToken);
-        var unconfigured = await ControlledMovementOwnerAdmissionAssertions.RejectAsync(source, runtime, admission, request, cancellationToken);
+        var unconfigured = await ControlledPartitionMovementPrepareAdmission.RejectAsync(source, target,
+            runtime, admission, request, cancellationToken);
         var result = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
             request, cancellationToken);
         var prepared = await ControlledPartitionMovementPrepareAssertions.PreparedAsync(result, corpus);

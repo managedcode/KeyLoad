@@ -1,3 +1,6 @@
+using KeyLoad.ServiceDefaults.Features.Authorization.Configuration;
+using KeyLoad.ServiceDefaults.Features.Authorization.Contracts;
+using KeyLoad.ServiceDefaults.Features.Authorization.Diagnostics;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
@@ -39,10 +42,15 @@ public static class KeyLoadServiceDefaultsExtensions
             .Bind(builder.Configuration.GetSection(OrleansTelemetryOptions.SectionName))
             .Validate(options => options.IsValid(), OrleansTelemetryOptions.ValidationMessage)
             .ValidateOnStart();
+        builder.Services.AddOptions<HttpTelemetryPrivacyOptions>()
+            .Bind(builder.Configuration.GetSection(HttpTelemetryPrivacyOptions.SectionName))
+            .Validate(options => options.IsValid(), HttpTelemetryPrivacyOptions.ValidationMessage)
+            .ValidateOnStart();
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddRuntimeInstrumentation()
-                .AddMeter(OrleansTelemetryPolicy.OrleansMeterName, OrleansTelemetryPolicy.PrivacyMeterName)
+                .AddMeter(OrleansTelemetryPolicy.OrleansMeterName, OrleansTelemetryPolicy.PrivacyMeterName, HttpTelemetryPrivacyPolicy.PrivacyMeter)
                 .AddView(OrleansTelemetryPrivacyProcessor.ConfigureMetricView)
+                .AddView(HttpTelemetryPrivacyProcessor.ConfigureMetricView)
                 .SetExemplarFilter(ExemplarFilterType.AlwaysOff))
             .WithTracing(traces => traces.AddAspNetCoreInstrumentation(options => options.Filter = context =>
                 !context.Request.Path.StartsWithSegments(HealthRoutePrefix, StringComparison.OrdinalIgnoreCase)
@@ -51,8 +59,15 @@ public static class KeyLoadServiceDefaultsExtensions
                 .AddSource(OrleansTelemetryPolicy.ApplicationActivitySourceName,
                     OrleansTelemetryPolicy.LifecycleActivitySourceName)
                 .AddProcessor(services => new OrleansTelemetryPrivacyProcessor(
-                    services.GetRequiredService<IOptions<OrleansTelemetryOptions>>())));
-        builder.Logging.AddOpenTelemetry(options => { options.IncludeFormattedMessage = true; options.IncludeScopes = true; });
+                    services.GetRequiredService<IOptions<OrleansTelemetryOptions>>()))
+                .AddProcessor(services => new HttpTelemetryPrivacyProcessor(
+                    services.GetRequiredService<IOptions<HttpTelemetryPrivacyOptions>>())));
+        builder.Logging.AddOpenTelemetry(options =>
+        {
+            options.IncludeFormattedMessage = false;
+            options.IncludeScopes = false;
+            options.AddProcessor(new RuntimeLogPrivacyProcessor());
+        });
         if (!string.IsNullOrEmpty(builder.Configuration[OtlpExporterEndpointConfigurationKey]))
         {
             builder.Services.AddOpenTelemetry().WithMetrics(m => m.AddOtlpExporter()).WithTracing(t => t.AddOtlpExporter());

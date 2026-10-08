@@ -53,13 +53,15 @@ internal static class RequestCqrsProbeCodecInput
     internal static readonly RequestCqrsProbePhase[] ActivePhases =
     [
         RequestCqrsProbePhase.RequestStarted, RequestCqrsProbePhase.AuthorizationReload,
-        RequestCqrsProbePhase.BeforeSubmit, RequestCqrsProbePhase.SubmitReturned
+        RequestCqrsProbePhase.BeforeSubmit, RequestCqrsProbePhase.SubmitReturned,
+        RequestCqrsProbePhase.ControlledDocumentGrantSettled, RequestCqrsProbePhase.ControlledDocumentOutcomeReturned
     ];
     internal static readonly RequestCqrsProbeAction[] Actions = [RequestCqrsProbeAction.Hold, RequestCqrsProbeAction.ThrowOrdinary];
     internal static readonly RequestCqrsProbePhase[] MarkerPhases =
     [
         RequestCqrsProbePhase.RequestStarted, RequestCqrsProbePhase.AuthorizationReload,
         RequestCqrsProbePhase.BeforeSubmit, RequestCqrsProbePhase.SubmitReturned,
+        RequestCqrsProbePhase.ControlledDocumentGrantSettled, RequestCqrsProbePhase.ControlledDocumentOutcomeReturned,
         RequestCqrsProbePhase.ProducerDisposed
     ];
     internal static readonly RequestCqrsProbeOutcome[] Outcomes =

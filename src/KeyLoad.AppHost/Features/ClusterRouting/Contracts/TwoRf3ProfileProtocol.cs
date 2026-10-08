@@ -4,6 +4,8 @@ internal static class TwoRf3ProfileProtocol
 {
     internal const string Section = "KeyLoadTests:ClusterRouting";
     internal const string Setting = Section + ":Profile";
+    internal const string ProtectedDocumentMovementSetting = Section + ":ProtectedDocumentMovement";
+    internal const string MovementEnvironment = "KeyLoad__PartitionMovementExecution__Enabled";
     internal const string RemoteQuerySetting = Section + ":RemotePartitionQueries";
     internal const string RemoteQueryEnvironment = "KeyLoad__MembershipAuthority__RemotePartitionQueries";
     internal const string RemoteDocumentSetting = Section + ":RemoteDocumentReads";

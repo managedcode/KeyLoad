@@ -41,11 +41,22 @@ internal sealed class DocumentSessionReadTests
         ];
         foreach (var token in rejected)
         {
-            var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Root, reference, token));
-            await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
-            await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
-            await Assert.That(db.Store.Position).IsEqualTo(position);
-            await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+            var direct = new GetDocumentRequest(reference, token);
+            GetDocumentRequest[] wireRequests =
+            [
+                direct,
+                NativeSerialization.Deserialize<GetDocumentRequest>(NativeSerialization.Serialize(direct)),
+                JsonSerializer.Deserialize<GetDocumentRequest>(JsonSerializer.Serialize(direct, JsonDefaults.Options), JsonDefaults.Options)!
+            ];
+            foreach (var rejectedRequest in wireRequests)
+            {
+                var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Root,
+                    rejectedRequest.Reference, rejectedRequest.MinimumToken));
+                await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
+                await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
+                await Assert.That(db.Store.Position).IsEqualTo(position);
+                await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+            }
         }
         var next = Apply(db, SecondJson, First, Second);
         await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
@@ -115,6 +126,34 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
         await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues(bool truncated)
+    {
+        using var db = new TestDatabase();
+        db.Configure(Collection, ResourceKind.Collection);
+        var receipt = Apply(db, FirstJson, Invalid, First);
+        var reference = new EntityRef(db.Partition, Collection, DocumentId);
+        var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+            ?? throw new InvalidOperationException("The native applied seed is missing.");
+        var corrupt = truncated ? original[..^1] : NativeSerialization.Serialize(-First);
+        db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, corrupt); return true; });
+        var before = Snapshot(db);
+        var position = db.Store.Position;
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Root, reference, receipt.Token));
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(error.Message).IsEqualTo(truncated
+            ? "The internal binary payload is invalid." : "The canonical applied position is invalid.");
+        await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
+        await Assert.That(db.Store.Position).IsEqualTo(position);
+        db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
+        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+        var next = Apply(db, SecondJson, First, Second);
+        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
+        await LiteralAsync(db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
     }
 
     private static CommitReceipt Apply(TestDatabase db, string json, long revision, long applied)

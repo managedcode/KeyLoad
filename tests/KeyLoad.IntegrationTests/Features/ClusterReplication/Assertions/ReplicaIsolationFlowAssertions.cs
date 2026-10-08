@@ -35,12 +35,14 @@ internal static class ReplicaIsolationFlowAssertions
     }
 
     internal static async Task RefusedAsync(KeyLoadClient sdk, McpOfficialClient mcp, EntityRef reference,
-        CommitToken minimum, string secret, CancellationToken cancellationToken)
+        CommitToken original, CommitToken minimum, string secret, CancellationToken cancellationToken)
     {
         var failed = await sdk.GetAsync(reference, minimum, cancellationToken);
         await Assert.That(failed.IsSuccess).IsFalse();
         await Assert.That(failed.Value).IsNull();
-        await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, minimum, secret, cancellationToken);
+        CommitToken?[] minima = [null, original, minimum];
+        foreach (var token in minima)
+        { await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken); }
     }
 
     internal static async Task ReplayedAsync(KeyLoadClient client, CommandRequest command, CommitReceipt receipt,

@@ -28,11 +28,17 @@ internal static class ScopedCommandIdentityRf3Workflow
             var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
             await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
                 fixture.AdminKey, cancellationToken);
+            var firstBefore = await ScopedCommandIdentityRf3Oracle.BeforeCommandAsync(sdk, scenario,
+                commandId, first, true, cancellationToken);
             firstReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(first, cancellationToken));
+            await ScopedCommandIdentityRf3Oracle.ReceiptAsync(sdk, firstReceipt, scenario, commandId, true,
+                firstBefore, cancellationToken);
+            var secondBefore = await ScopedCommandIdentityRf3Oracle.BeforeCommandAsync(sdk, scenario,
+                commandId, second, false, cancellationToken);
             secondReceipt = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.DocumentsCommit, second, cancellationToken))).Value;
-            await ScopedCommandIdentityRf3Assertions.AssertReceiptAsync(firstReceipt, scenario, FirstEntity);
-            await ScopedCommandIdentityRf3Assertions.AssertReceiptAsync(secondReceipt, scenario, SecondEntity);
+            await ScopedCommandIdentityRf3Oracle.ReceiptAsync(sdk, secondReceipt, scenario, commandId, false,
+                secondBefore, cancellationToken);
             await ScopedCommandIdentityRf3Assertions.AssertRetryAsync(mcp, first, firstReceipt, cancellationToken);
             await ScopedCommandIdentityRf3Assertions.AssertRetryAsync(sdk, second, secondReceipt, cancellationToken);
             await Assert.That(JsonDefaults.Serialize(firstReceipt).AsSpan()
@@ -41,8 +47,7 @@ internal static class ScopedCommandIdentityRf3Workflow
                 ChangedFirstJson, cancellationToken);
             await ScopedCommandIdentityRf3Assertions.AssertConflictAsync(mcp, sdk, scenario, second,
                 ChangedSecondJson, cancellationToken);
-            await ScopedCommandIdentityRf3Assertions.AssertStateAsync(sdk, mcp, scenario, FirstEntity, FirstJson,
-                SecondEntity, SecondJson, cancellationToken);
+            await ScopedCommandIdentityRf3Assertions.AssertStateAsync(sdk, mcp, scenario, firstReceipt, secondReceipt, cancellationToken);
         }
 
         await RestartAllVotersAsync(fixture, cancellationToken);
@@ -52,8 +57,7 @@ internal static class ScopedCommandIdentityRf3Workflow
             fixture.AdminKey, cancellationToken);
         await ScopedCommandIdentityRf3Assertions.AssertRetryAsync(reopenedMcp, first, firstReceipt, cancellationToken);
         await ScopedCommandIdentityRf3Assertions.AssertRetryAsync(reopenedSdk, second, secondReceipt, cancellationToken);
-        await ScopedCommandIdentityRf3Assertions.AssertStateAsync(reopenedSdk, reopenedMcp, scenario, FirstEntity,
-            FirstJson, SecondEntity, SecondJson, cancellationToken);
+        await ScopedCommandIdentityRf3Assertions.AssertStateAsync(reopenedSdk, reopenedMcp, scenario, firstReceipt, secondReceipt, cancellationToken);
     }
 
     private static async Task RestartAllVotersAsync(ClusterFixture fixture, CancellationToken cancellationToken)

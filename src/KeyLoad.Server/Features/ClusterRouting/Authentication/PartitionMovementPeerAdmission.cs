@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Authenticates configured A movement traffic before any receiver-local native capability is issued.</summary>
-internal sealed class PartitionMovementPeerAdmission : IDisposable
+internal sealed partial class PartitionMovementPeerAdmission : IDisposable
 {
     private const int EmptyBodyBytes = 0;
     private const string NonceFormat = "N";

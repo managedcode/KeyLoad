@@ -12,7 +12,7 @@ internal static class TwoRf3WaveArguments
     private const string ProbeSession = "--KeyLoadTests:RequestCqrsProbe:SessionId=";
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
-        RequestCqrsProbeFixture? controls = null)
+        RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false)
     {
         var args = new List<string>
         {
@@ -20,6 +20,8 @@ internal static class TwoRf3WaveArguments
             TwoRf3MembershipProtocol.EphemeralArgument,
             TwoRf3MembershipProtocol.ProfileArgument
         };
+        if (protectedDocuments)
+        { args.Add("--KeyLoadTests:ClusterRouting:ProtectedDocumentMovement=true"); }
         if (registerPhysicalOwners)
         { args.Add(RegisterArgument); }
         if (remoteDocumentReads)

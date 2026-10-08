@@ -3,6 +3,7 @@ namespace KeyLoad.Core.Features.ClusterRouting.Contracts;
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.CommandPhaseAlias)]
 internal enum PartitionControlCommandPhase
 {
+    None = 0,
     Admitted = 1,
     EffectAcknowledged = 2,
     Finalized = 3,
@@ -21,7 +22,10 @@ internal sealed record PartitionControlCommandRecord(
     [property: Orleans.Id(8)] CommitReceipt? TargetEffect,
     [property: Orleans.Id(9)] string? TargetEffectDigest,
     [property: Orleans.Id(10)] PartitionControlOutcomeReference? OriginalOutcome,
-    [property: Orleans.Id(11)] OperationResult? OriginalResult);
+    [property: Orleans.Id(11)] OperationResult? OriginalResult,
+    [property: Orleans.Id(12)] PartitionControlDelegation? Delegation = null,
+    [property: Orleans.Id(13)] ReplicatedOperation? OriginalOperation = null,
+    [property: Orleans.Id(14)] ReadOnlyMemory<byte> TargetBody = default);
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.CommandEffectAlias)]
 internal sealed record PartitionControlEffectPayload(

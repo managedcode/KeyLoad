@@ -17,6 +17,9 @@ internal sealed class TestExecutionOptions
     private const int GraceSeconds = 1;
     private const int SettlementSeconds = 5;
     private const int PollMilliseconds = 100;
+    private const int ProtectedMovementSetupSeconds = 50;
+    private const int ProtectedMovementOutcomeSeconds = 25;
+    private const int ProtectedMovementCleanupSeconds = 30;
     private const int MaximumArgumentCharacters = 4096;
     private const int DefaultOutputCharacters = 4_096;
     private const int MinimumOutputCharacters = 1;
@@ -35,6 +38,10 @@ internal sealed class TestExecutionOptions
     public TimeSpan ImageCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ImageCleanupSeconds);
     public TimeSpan TerminationGrace { get; set; } = TimeSpan.FromSeconds(GraceSeconds);
     public TimeSpan ProcessSettlementTimeout { get; set; } = TimeSpan.FromSeconds(SettlementSeconds);
+    public TimeSpan ProtectedMovementSetupRequestLifetime { get; set; } = TimeSpan.FromSeconds(ProtectedMovementSetupSeconds);
+    public TimeSpan ProtectedMovementOutcomeRequestLifetime { get; set; } = TimeSpan.FromSeconds(ProtectedMovementOutcomeSeconds);
+    public TimeSpan ProtectedMovementCaptureCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ProtectedMovementCleanupSeconds);
+    public TimeSpan DatabaseReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(PollMilliseconds);
     public TimeSpan ProcessExitPollInterval { get; set; } = TimeSpan.FromMilliseconds(PollMilliseconds);
     public int CleanupOutputCharacters { get; set; } = DefaultOutputCharacters;
 
@@ -45,7 +52,13 @@ internal sealed class TestExecutionOptions
     internal bool IsValid() => Bounded(OrdinaryTimeout) && Bounded(ClusterTimeout) && Bounded(IntensiveTimeout)
         && Bounded(NativeControlTimeout) && Bounded(NativeScaledTimeout) && Bounded(NativeVectorTimeout)
         && Bounded(ApplicationCleanupTimeout) && Bounded(ImageCleanupTimeout) && Bounded(TerminationGrace)
-        && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval)
+        && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval) && Bounded(DatabaseReadinessPollInterval)
+        && Bounded(ProtectedMovementSetupRequestLifetime)
+        && ProtectedMovementSetupRequestLifetime.Ticks <= ProtectedMovementSetupSeconds * TimeSpan.TicksPerSecond
+        && Bounded(ProtectedMovementOutcomeRequestLifetime)
+        && ProtectedMovementOutcomeRequestLifetime.Ticks <= ProtectedMovementOutcomeSeconds * TimeSpan.TicksPerSecond
+        && Bounded(ProtectedMovementCaptureCleanupTimeout)
+        && ProtectedMovementCaptureCleanupTimeout.Ticks <= ProtectedMovementCleanupSeconds * TimeSpan.TicksPerSecond
         && MaximumFilterCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
         && MaximumPathCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
         && MaximumParallelTests is >= MinimumMaximumParallelTests and <= MaximumMaximumParallelTests

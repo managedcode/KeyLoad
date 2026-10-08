@@ -16,6 +16,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     private Task? disposal;
     internal bool IsJoined => work.IsJoined;
     internal IRemoteDocumentReadRouter? Router { get; private set; }
+    internal IControlledDocumentCommandRouter? CommandRouter { get; private set; }
     internal IRemotePartitionQueryRouter? QueryRouter { get; private set; }
     internal RemoteDocumentEndpoint? Endpoint { get; private set; }
 
@@ -50,7 +51,12 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         if (settings.Mode == MembershipAuthoritySettingsProtocol.Authority)
         {
             client = new(options.Node, options.Membership, clock);
-            Router = new RemoteDocumentRouter(node, partition, options.Node, client, work, clock);
+            Router = new RemoteDocumentRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
+            if (options.PartitionMovement.Value.Enabled)
+            {
+                CommandRouter = new ControlledDocumentCommandRouter(node, partition, options.Node,
+                options.Core.DatabaseLimits, clock);
+            }
             if (settings.RemotePartitionQueries)
             { QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock); }
         }
@@ -58,7 +64,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         {
             var receiver = new RemoteDocumentReceiver(node, partition, options.Node,
                 options.GrainRouting, options.Membership, clock);
-            Endpoint = new(options.Node, receiver, work, options.Membership, options.GrainRouting, clock);
+            var controlled = new RemoteControlledDocumentReceiver(node, partition, options.Node,
+                options.Membership, options.GrainRouting, clock);
+            Endpoint = new(options.Node, receiver, work, controlled, options.Membership, options.GrainRouting, clock);
         }
     }
 

@@ -12,6 +12,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private Task? disposal;
     private readonly NodeOptions options;
     private readonly RemoteDocumentReceiver receiver;
+    private readonly RemoteControlledDocumentReceiver controlled;
     private readonly RemoteDocumentWorkOwner owner;
     private readonly ReplicaMembershipAuthorityAddressPins pins;
     private readonly ReplicaMembershipAuthorityReplayCache replay;
@@ -19,11 +20,12 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private readonly TimeProvider clock;
 
     internal RemoteDocumentEndpoint(IOptions<NodeOptions> nodeOptions, RemoteDocumentReceiver receiver,
-        RemoteDocumentWorkOwner owner, IOptions<OrleansMembershipOptions> membershipOptions,
+        RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled, IOptions<OrleansMembershipOptions> membershipOptions,
         IOptions<GrainRoutingOptions> routingOptions, TimeProvider clock)
     {
         options = nodeOptions.Value;
         this.receiver = receiver;
+        this.controlled = controlled;
         this.owner = owner;
         this.clock = clock;
         routing = routingOptions.Value;
@@ -77,7 +79,16 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             using var callerMac = RemoteDocumentMac.FromConfiguredSecret(options.MembershipAuthority.AuthorityPeerSecret);
             if (!callerMac.Verify(body, RemoteDocumentWire.Signature(context.Request.Headers), reply: false))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-            var call = RemoteDocumentWire.DecodeCall(body);
+            var transport = RemoteDocumentWire.DecodeCall(body);
+            if ((transport.Document is null) == (transport.Controlled is null))
+            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+            if (transport.Controlled is { } controlledCall)
+            {
+                await RemoteControlledDocumentEndpointExecution.ExecuteAsync(context, controlledCall,
+                    controlled, options, pins, replay, clock, token).ConfigureAwait(false);
+                return;
+            }
+            var call = transport.Document!;
             receiver.Validate(call, token);
             if (!replay.TryUse(call.Nonce))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }

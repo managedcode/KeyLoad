@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.UnitTests;
 
 /// <summary>Explicit native options composition for standalone database and query regression fixtures.</summary>
-internal static class UnitExecutionOptions
+internal static partial class UnitExecutionOptions
 {
     internal static IOptions<ReplicaConfiguration> ReplicaConfiguration(ReplicaConfiguration value)
         => ReplicaExecutionTestOptions.Configuration(value);
