@@ -93,3 +93,17 @@ reducing redundant copies, decoding and repeated reads. Every optimization remai
 inside its owning feature and preserves its operation/error order. Rollback is a
 coherent source revert that leaves persisted data and public contracts unchanged;
 it cannot relax correctness, authorization, resource limits or delivery gates.
+
+
+## KL014 internal response-nullability implementation amendment
+
+Related REQ-CLIENT-002/005 and AC-MP-009/AC-CLIENT-005 in ClientApi. Preserve native streaming deserialize and strict required-constructor/nested nullability. An explicit internal allowNullResult parameter defaults false; only read operations may allow a root null. Exact reviewed sites: Client KeyLoadClient ordinary document GET/message inspection; Features/DocumentStorage session GET; Features/Messaging QueueTransferClient intent/receipt and RecurringSagaClient schedule/saga; Features/BlobStorage metadata/upload info. All other reads and every write require a typed value. Existing safe transport problems classify unavailable values; no reflection, route inference, public API/schema changes or automatic retry.
+
+Ordered stages: freeze ClientApi requirement/test map and this amendment; update single ClientApi transport/facade and nine native sites; retain actual Kestrel write unknown/retry full receipt test; add all-nine absent-read plus nonnullable Status null/malformed rejection/full healthy result; private guarded review; root joins/builds/normal+scalar native tests; current Linux fixture-owned RF3 cold bootstrap and SDK/official MCP committed-interruption stable replay evidence. Tests live in UnitTests Features/ClientApi/Cases; cold bootstrap remains IntegrationTests ClientApi and interruption remains ClusterRouting. Root owns shared source/compiler/Git joins; private author owns exact-site inventory and bounded fullflow oracles. Dependencies unchanged, no migration or persistent format changes, homogeneous internal recompile. Rollback coherent source only and retain original failures. Acceptance status remains open until authentic current required gates.
+
+
+### KL014 HTTP complete-oracle repair stage
+
+REQ-CLIENT-002/005 and AC-MP-009/AC-CLIENT-005: retain original R792 eight native failures. Complete independently literal HTTP request/Status values must compare using existing strict public JSON bytes, not internal Orleans reference-graph bytes. Exact pinned native StringCodec records/tracks reference identity; authored repeated strings and JSON-decoded equal strings can therefore have different native encodings without a wire-value change. Change only those two complete comparisons in UnitTests Features/ClientApi KeyLoadClientNullReadTests/NullWriteTests, preserving native fullreceipt/document comparisons, all null/unknown/ID/body/header/healthy/cleanup assertions and required supporting-control classification. No graph-shaping fixtures, product serializer, dependency, schema, public API or migration changes.
+
+Stages: source/exactoriginal failure review → docs/this amendment → private guarded minimal two-case repair → root joins/focused native Unit rebuild → actual normal/scalar fourcase runs with originals and immutable source/assembly binding → final complete solution build, census/PE/PDB source binding and current Linux whole-task gates. Root sole source/compiler/formatter/Git owner; author owns source/failure review and native runs on explicit grant. Rollback coherent source only; original failures immutable. No acceptance/coverage/production claim from this repair.

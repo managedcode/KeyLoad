@@ -27,11 +27,11 @@ internal sealed class KeyLoadClientTransport
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution;
 
     internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
-        HttpMethod? method = null)
-        => SendCore<T>(path, request, write, id, method ?? (request is null ? HttpMethod.Get : HttpMethod.Post), cancellationToken);
+        HttpMethod? method = null, bool allowNullResult = false)
+        => SendCore<T>(path, request, write, id, method ?? (request is null ? HttpMethod.Get : HttpMethod.Post), allowNullResult, cancellationToken);
 
     private async Task<Result<T>> SendCore<T>(string path, object? request, bool write, Guid? id,
-        HttpMethod method, CancellationToken cancellationToken)
+        HttpMethod method, bool allowNullResult, CancellationToken cancellationToken)
     {
         using var message = new HttpRequestMessage(method, path);
         message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
@@ -56,6 +56,11 @@ internal sealed class KeyLoadClientTransport
             }
             await using var body = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             var value = await JsonSerializer.DeserializeAsync<T>(body, JsonDefaults.Options, cancellationToken).ConfigureAwait(false);
+            if (value is null && (write || !allowNullResult))
+            {
+                return Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,
+                    write ? ClientTransportMessages.WriteResponseUnavailable : ClientTransportMessages.ReadResponseUnavailable);
+            }
             return Result<T>.Succeed(value!);
         }
         catch (Exception exception) when (exception is HttpRequestException or IOException or OperationCanceledException or JsonException)

@@ -14,7 +14,7 @@ public static class BlobClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<BlobMetadata?>(BlobOperationProtocol.Metadata, request, false, null, cancellationToken);
+        return client.Send<BlobMetadata?>(BlobOperationProtocol.Metadata, request, false, null, cancellationToken, allowNullResult: true);
     }
 
     /// <summary>Lists a bounded page of visible live blob metadata.</summary>
@@ -50,7 +50,7 @@ public static class BlobClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<BlobUploadInfo?>(BlobOperationProtocol.UploadInfo, request, false, null, cancellationToken);
+        return client.Send<BlobUploadInfo?>(BlobOperationProtocol.UploadInfo, request, false, null, cancellationToken, allowNullResult: true);
     }
 
     /// <summary>Starts one scoped upload with the caller's stable command identity.</summary>

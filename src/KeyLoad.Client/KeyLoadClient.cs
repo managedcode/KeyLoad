@@ -24,8 +24,8 @@ public sealed partial class KeyLoadClient
     internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 
     internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
-        HttpMethod? method = null)
-        => transport.Send<T>(path, request, write, id, cancellationToken, method);
+        HttpMethod? method = null, bool allowNullResult = false)
+        => transport.Send<T>(path, request, write, id, cancellationToken, method, allowNullResult);
     /// <summary>Submits one atomic command using its stable idempotency identifier.</summary>
     /// <param name="command">Typed command and caller-owned stable command identifier.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
@@ -40,7 +40,7 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The document result, including null when absent.</returns>
     public Task<Result<DocumentResult?>> GetAsync(EntityRef reference, CancellationToken cancellationToken = default)
-        => Send<DocumentResult?>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
+        => Send<DocumentResult?>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken, allowNullResult: true);
     /// <summary>Reads a bounded page from one event stream.</summary>
     /// <param name="request">Stream identity, cursor and page limit.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
@@ -145,7 +145,7 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The inspection result, or null when absent.</returns>
     public Task<Result<MessageInspection?>> InspectAsync(InspectMessageRequest request, CancellationToken cancellationToken = default)
-        => Send<MessageInspection?>(ClientApiRoutes.QueuesInspect, request, false, null, cancellationToken);
+        => Send<MessageInspection?>(ClientApiRoutes.QueuesInspect, request, false, null, cancellationToken, allowNullResult: true);
     /// <summary>Executes a parsed query request.</summary>
     /// <param name="request">Typed query and requested page controls.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>

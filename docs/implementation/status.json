@@ -239,13 +239,13 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "state": "PASS: complete native R787 Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r787-complete-parallel-wave-build-20261008-diagnostics.json",
-      "qualification": "Local source-bound build; current Linux delivery/runtime qualification remains mandatory."
+      "state": "PASS: complete native final SDK Release solution,0warnings/errors,0source drift.",
+      "evidence": "/private/tmp/keyload-current-r794-sdk-nullability-final-full-build-20261008-diagnostics.json",
+      "qualification": "Local development; required current-source Linux runtime qualification remains open."
     },
     "currentFormatter": {
-      "state": "PASS: complete native R788 readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r788-full-native-format-20261008-receipt.json"
+      "state": "PASS: complete native readonly formatter,0source drift.",
+      "evidence": "/private/tmp/keyload-current-r793-sdk-nullability-full-native-format-20261008-receipt.json"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -35857,7 +35857,7 @@
           "owner": "sol61_session_finish",
           "task": "KL-021",
           "scope": "Strong read/session tokens; malformed/negative native authority whole state/healthy regression and genuine isolated former-leader qualification.",
-          "state": "WholeKL011 sparse4normal+4scalarPASS and compositeRF3 joined; KL021 native6+6PASS, current Linux namespace/refusal gates open. WholeKL01410path nullable-response SDK/Kestrel packet private/sealed for nextstage.",
+          "state": "WholeKL014 response-nullability SDK transport integrated and actual normal/scalar supporting flows executed; current-source Linux cold bootstrap/replay gates and KL011/KL021 RF3 gates remain open.",
           "previousOwner": "sol_read_lock_regression"
         },
         {
@@ -35871,7 +35871,7 @@
           "owner": "root",
           "task": "TEST-PIPELINE-001",
           "scope": "Coherent native build/format, full original native census/classification, independent test lanes, current functional-only coverage, Linux original evidence, complete wave Git delivery.",
-          "state": "Completewave integration/build/formatter/native3087census/2686functional+401ordinary/all12discoveryPASS; committing all current authorized source then current Linux qualification."
+          "state": "Whole SDK stage integrated/verified, exact native census and coverage classification refreshed, complete authorized wave commit/push; owns remaining Linux Unit causes."
         }
       ],
       "liveMutationOwner": "root only during integration; no source/image mutation during native verification",
@@ -35880,6 +35880,138 @@
       "model": "gpt-6.1-sol",
       "reasoningEffort": "medium",
       "ownerModelSelection": "2026-10-08 explicit owner instruction"
+    },
+    "stageXXVClientTransportDevelopment": {
+      "sourceParentCommit": "3458f6111f94e93d40334bc2cdaae008dac58a01",
+      "task": "KL-014",
+      "sourceStage": "Default nonnullable SDK transport responses with nine explicit legitimate nullable read sites. Null/malformed successful writes retain the existing UnknownWriteOutcome and stable command retry; unavailable nonnullable reads retain OwnershipLost. Public API, HTTP JSON schema, authorization, RF3 barriers, native persistence and dependencies unchanged.",
+      "guardedSourceJoin": {
+        "receipt": "/private/tmp/keyload-kl014-response-nullability10-root-source-join-20261008.json",
+        "receiptSha256": "f07f5a6dfcaa4457331b6aca64d9ad8f076729298b1c3369547510f3ba214d58"
+      },
+      "privateRequiredTokenOrder": {
+        "receipt": "/private/tmp/keyload-kl014-private-token-order-root-review-20261008.json",
+        "receiptSha256": "1932fc05fac5be0faaf6e6832ea952f773e4f3595f792184ef577e2aedeba3a7"
+      },
+      "historicalEvidenceDocCorrection": {
+        "receipt": "/private/tmp/keyload-kl015-historical-telemetry-doc1-root-source-join-20261008.json",
+        "receiptSha256": "f9fc85155dba7af201f9c74f5aded925b7e1a8359e2904150953eaebdee89495"
+      },
+      "originalBuildR791": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r791-sdk-nullability-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 102.405,
+        "log": "/private/tmp/keyload-current-r791-sdk-nullability-full-build-20261008.log",
+        "logSha256": "1577953fed5b87b59c15c247c43417f1c1c6e9a7c5d41839da6ace6993857677",
+        "inputCount": 5280,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullReadTests.cs(63,74): error KLD0001: Machine key 'partition' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs(27,74): error KLD0001: Machine key 'partition' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs(70,39): error CA1859: Change type of parameter 'requests' from 'System.Collections.Generic.IReadOnlyList<KeyLoad.CommandRequest>' to 'System.Collections.Generic.List<KeyLoad.CommandRequest>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs(70,72): error CA1859: Change type of parameter 'headers' from 'System.Collections.Generic.IReadOnlyList<string?>' to 'System.Collections.Generic.List<string?>' for improved performance (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1859) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+        ],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalBuildR792": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r792-sdk-nullability-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 105.088,
+        "log": "/private/tmp/keyload-current-r792-sdk-nullability-full-build-20261008.log",
+        "logSha256": "825d0382ced1a7862114b34efcc2dde39a7693f6531afdc2494bd6af916d70ca",
+        "inputCount": 5280,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "finalBuild": {
+        "receipt": "/private/tmp/keyload-current-r794-sdk-nullability-final-full-build-20261008-diagnostics.json",
+        "receiptSha256": "4bd82f86ca4206fa5913071ddd96730e4f2259361c4775d431031cb628873105"
+      },
+      "finalFormatter": {
+        "receipt": "/private/tmp/keyload-current-r793-sdk-nullability-full-native-format-20261008-receipt.json",
+        "receiptSha256": "d463bde1824ab2d0672414e45e097751f61eed1689398074a6f5e5ecdd4cc920"
+      },
+      "nativeTransportFlows": {
+        "receipt": "/private/tmp/keyload-kl014-r794-native-nullability-both-lanes-evidence-ledger-r1-20261008.json",
+        "receiptSha256": "0a9d121a114f4b813716a2d57e3d155a66182592f7db8bd3cdb969dd61c0dbde"
+      },
+      "currentFunctionalUnitInventory": {
+        "receipt": "/private/tmp/keyload-r794-native-functional-inventory-sdk-nullability-20261008/selector-refresh-receipt.json",
+        "receiptSha256": "dd3b2cdc07922aec6b20de334683a6dd8970f91636d70848f7e85f64e14322b4",
+        "nativeCases": 3091,
+        "functionalCases": 2686,
+        "requiredOrdinaryCases": 405,
+        "groups": [
+          {
+            "id": "unit-functional-01",
+            "cases": 547,
+            "classes": 140
+          },
+          {
+            "id": "unit-functional-02",
+            "cases": 530,
+            "classes": 125
+          },
+          {
+            "id": "unit-functional-03",
+            "cases": 509,
+            "classes": 159
+          },
+          {
+            "id": "unit-functional-04",
+            "cases": 528,
+            "classes": 138
+          },
+          {
+            "id": "unit-functional-05",
+            "cases": 572,
+            "classes": 127
+          }
+        ],
+        "inventorySha256": "57bda1db2579a113318f89196e7ff885dc45cb1bf9ca6b991b048bca75fd9fc6",
+        "coverageGroupOwnersAndCaseIdentitiesUnchanged": true,
+        "canonicalFunctionalSelectorChangesOnly": true,
+        "evidenceRoot": "artifacts/local/keyload-r794-final-native-functional-discovery-r2-20261008",
+        "actualNormalAndScalarDiscovery": "All12 actual native full3091 and547/530/509/528/572 group identities passed per lane after canonical ordinary-prefix confinement.",
+        "productCoveragePercent": null
+      },
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Current-source full Linux normal/scalar, real process recovery and Docker/Aspire RF3 SDK/official MCP gates.",
+        "Current-source real cold bootstrap and committed-interruption stable receipt replay.",
+        "Complete functional-only collector evidence, endurance and resource/performance qualification."
+      ],
+      "httpFullOracleSourceJoin": {
+        "receipt": "/private/tmp/keyload-kl014-http-full-oracle4-root-source-join-20261008.json",
+        "receiptSha256": "309a37e056dec491a0d7d84f3b8aea421274628028f3fc2623aee6e89eb61887"
+      },
+      "originalFailedBothLanesR792": {
+        "receipt": "/private/tmp/keyload-kl014-r792-native-nullability-both-original-failed-lanes-r1-20261008.json",
+        "receiptSha256": "306a30d106b4453bad6a439341fd5b6bbf94b6be33489dc8266912fa76798272"
+      },
+      "existingTypedClientDocumentationCorrection": {
+        "receipt": "/private/tmp/keyload-kl014-existing-admin-doc1-root-source-join-20261008.json",
+        "receiptSha256": "152475f973a8da22eb389160b1097d8170fad36b279b5193b00c324e098f5b70"
+      },
+      "sourceParentOriginalLinuxTelemetry": {
+        "receipt": "/private/tmp/keyload-kl015-current-linux-37821315110-original-telemetry-trx-ledger-20261008.json",
+        "receiptSha256": "5374b54ea98bf6e6eecf25e494dc5b19d56bad55b7f778764f2e69405d9d547f"
+      },
+      "sourceParentOriginalLinuxUnitFailureMap": {
+        "receipt": "/private/tmp/keyload-3458-original-linux-unit-live-failure-map-20261008.json",
+        "receiptSha256": "2502fa6c1a56e0ffad2f6e8cd5cac41457b11352a81d18b828e4a918e55b42cd"
+      },
+      "sourceParentOriginalLinuxTelemetryDocsJoin": {
+        "receipt": "/private/tmp/keyload-kl015-current-linux-telemetry-doc2-root-source-join-20261008.json",
+        "receiptSha256": "5e55cbefe1ddd88aa69034e49b107cf749b6b4055287fc4bce7ebe1ac25a5a73"
+      },
+      "ordinaryPrefixDiscoveryCorrection": "Original first discovery admission rejected a stale functional class prefix after adding four ordinary cases. Existing canonical selector builder changed only unit-functional-01 selector; every owner and case identity remained unchanged. Fresh actual full/five-group discovery in both modes passed. Original failed evidence folder retained."
     }
   },
   "TIME-PROVIDER-001": {
@@ -38127,7 +38259,15 @@
     "evidence": [
       "src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs",
       "src/KeyLoad.Client/KeyLoadClient.cs"
-    ]
+    ],
+    "currentTransportDevelopment": {
+      "qualification": "Actual four native Kestrel transport flow cases in normal/scalar modes. Supporting transport controls, no database-effect or RF3 claim; whole-task Linux gates remain open.",
+      "nativeEvidence": {
+        "receipt": "/private/tmp/keyload-kl014-r794-native-nullability-both-lanes-evidence-ledger-r1-20261008.json",
+        "receiptSha256": "0a9d121a114f4b813716a2d57e3d155a66182592f7db8bd3cdb969dd61c0dbde"
+      },
+      "runtimeQualified": false
+    }
   },
   "KL-015": {
     "title": "Security і telemetry baseline",

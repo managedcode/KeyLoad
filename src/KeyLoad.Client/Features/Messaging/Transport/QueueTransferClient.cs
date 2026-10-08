@@ -18,7 +18,7 @@ public static class QueueTransferClient
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferInspection?>(InspectPath, request, false, null, cancellationToken);
+        return client.Send<QueueTransferInspection?>(InspectPath, request, false, null, cancellationToken, allowNullResult: true);
     }
 
     /// <summary>Reads the committed destination receipt without asserting source completion.</summary>
@@ -31,6 +31,6 @@ public static class QueueTransferClient
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferReceiptInspection?>(ReceiptPath, request, false, null, cancellationToken);
+        return client.Send<QueueTransferReceiptInspection?>(ReceiptPath, request, false, null, cancellationToken, allowNullResult: true);
     }
 }

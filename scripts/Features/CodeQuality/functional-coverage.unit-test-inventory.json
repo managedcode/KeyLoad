@@ -52675,6 +52675,94 @@
       "reviewBasis": "Existing case-specific source review witness in immutable R27 classification; current source hash comparison recorded separately."
     },
     {
+      "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+      "methodName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation",
+      "instanceName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation(null)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullReadTests.cs",
+      "sourceSha256": "24f3fc1e7c9e60afde3ebe2c147fbaa6ddc64385e4ceff7b201a1e2fd2001e1b",
+      "lineNumber": 24,
+      "endLineNumber": 60,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-002",
+        "REQ-CLIENT-005"
+      ],
+      "acceptance": [
+        "AC-MP-009",
+        "AC-CLIENT-005"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual bounded loopback Kestrel and native SDK transport unavailable response, exact stable retry or legal absent reads, then complete typed healthy continuation; controlled literal server outputs do not execute authenticated database effects or qualify RF3."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullReadTests",
+      "methodName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation",
+      "instanceName": "AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation({)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullReadTests.cs",
+      "sourceSha256": "24f3fc1e7c9e60afde3ebe2c147fbaa6ddc64385e4ceff7b201a1e2fd2001e1b",
+      "lineNumber": 24,
+      "endLineNumber": 60,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-002",
+        "REQ-CLIENT-005"
+      ],
+      "acceptance": [
+        "AC-MP-009",
+        "AC-CLIENT-005"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual bounded loopback Kestrel and native SDK transport unavailable response, exact stable retry or legal absent reads, then complete typed healthy continuation; controlled literal server outputs do not execute authenticated database effects or qualify RF3."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+      "methodName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads",
+      "instanceName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads(null)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+      "sourceSha256": "bf60f6b5fe6b2fd4798fb19e29a50cbaf1c904115c781421c75c3441963544ff",
+      "lineNumber": 23,
+      "endLineNumber": 68,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-002",
+        "REQ-CLIENT-005"
+      ],
+      "acceptance": [
+        "AC-MP-009",
+        "AC-CLIENT-005"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual bounded loopback Kestrel and native SDK transport unavailable response, exact stable retry or legal absent reads, then complete typed healthy continuation; controlled literal server outputs do not execute authenticated database effects or qualify RF3."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+      "methodName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads",
+      "instanceName": "UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads({)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+      "sourceSha256": "bf60f6b5fe6b2fd4798fb19e29a50cbaf1c904115c781421c75c3441963544ff",
+      "lineNumber": 23,
+      "endLineNumber": 68,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-002",
+        "REQ-CLIENT-005"
+      ],
+      "acceptance": [
+        "AC-MP-009",
+        "AC-CLIENT-005"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual bounded loopback Kestrel and native SDK transport unavailable response, exact stable retry or legal absent reads, then complete typed healthy continuation; controlled literal server outputs do not execute authenticated database effects or qualify RF3."
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.ClientApi.McpCatalogTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpCatalogTests",
       "methodName": "AcMcp001EveryFrozenOperationHasItsExactRouteAndOneCapability",
@@ -60769,7 +60857,7 @@
   "coverageGroups": [
     {
       "groupId": "unit-functional-01",
-      "selector": "/*/*/(AggregateReplayS*)|(AnnSeedC*)|(AnnSeedF*)|(AtomicPartitionRosterB*)|(BlobAu*)|(BlobCu*)|(BlobE*)|(BlobL*)|(C1OutcomeInspectionI*)|(CacheControlWireA*)|(CacheControlWireT*)|(CacheReadPermitC*)|(CliBackupRestoreL*)|(ClusterPrincipalA*)|(Con*)|(CurrentW*)|(DatabaseCompositionF*)|(DocumentE*)|(DocumentMutationImageT*)|(DueF*)|(DueWorkN*)|(EventProjectionI*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphSearchI*)|(GraphShortestPathC*)|(HybridE*)|(KeyCodecI*)|(KeyCodecM*)|(KeyL*)|(Li*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpNativeAuthenticationE*)|(McpNativeP*)|(McpPo*)|(McpRes*)|(MetadataB*)|(NativeCon*)|(NativeCqrsT*)|(NativeD*)|(NativeOperationF*)|(NativePublicN*)|(NativeReadCutCa*)|(NativeSagaTimeoutR*)|(NativeSt*)|(NativeTextB*)|(NativeTextProjectionA*)|(NativeTextProjectionO*)|(NativeTextProjectionRem*)|(NativeTextW*)|(NativeUnknownWellKnownHeaderR*)|(NativeV*)|(NativeWireSupportedScalarT*)|(Op*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(Proj*)|(QueueA*)|(ReadB*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RemoteTransferR*)|(ReplicaA*)|(ReplicaInspectionResolutionR*)|(ReplicaMembershipAd*)|(ReplicaNativeI*)|(ReplicaReplayD*)|(RequestCqrsCohortT*)|(RequestCqrsF*)|(ResourcePolicyUpdateV*)|(RuntimeJournalB*)|(RuntimeJournalL*)|(Sag*)|(SampleAggregateT*)|(SampleChunkC*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(Sec*)|(SqlBetweenB*)|(SqlClientO*)|(SqlGraphPathD*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(Ti*)|(TransactionP*)|(U*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!InvalidPolicyRejectsBeforeAnyStoreDirectory*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafNativePayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
+      "selector": "/*/*/(AggregateReplayS*)|(AnnSeedC*)|(AnnSeedF*)|(AtomicPartitionRosterB*)|(BlobAu*)|(BlobCu*)|(BlobE*)|(BlobL*)|(C1OutcomeInspectionI*)|(CacheControlWireA*)|(CacheControlWireT*)|(CacheReadPermitC*)|(CliBackupRestoreL*)|(ClusterPrincipalA*)|(Con*)|(CurrentW*)|(DatabaseCompositionF*)|(DocumentE*)|(DocumentMutationImageT*)|(DueF*)|(DueWorkN*)|(EventProjectionI*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphSearchI*)|(GraphShortestPathC*)|(HybridE*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(Li*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpNativeAuthenticationE*)|(McpNativeP*)|(McpPo*)|(McpRes*)|(MetadataB*)|(NativeCon*)|(NativeCqrsT*)|(NativeD*)|(NativeOperationF*)|(NativePublicN*)|(NativeReadCutCa*)|(NativeSagaTimeoutR*)|(NativeSt*)|(NativeTextB*)|(NativeTextProjectionA*)|(NativeTextProjectionO*)|(NativeTextProjectionRem*)|(NativeTextW*)|(NativeUnknownWellKnownHeaderR*)|(NativeV*)|(NativeWireSupportedScalarT*)|(Op*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(Proj*)|(QueueA*)|(ReadB*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RemoteTransferR*)|(ReplicaA*)|(ReplicaInspectionResolutionR*)|(ReplicaMembershipAd*)|(ReplicaNativeI*)|(ReplicaReplayD*)|(RequestCqrsCohortT*)|(RequestCqrsF*)|(ResourcePolicyUpdateV*)|(RuntimeJournalB*)|(RuntimeJournalL*)|(Sag*)|(SampleAggregateT*)|(SampleChunkC*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(Sec*)|(SqlBetweenB*)|(SqlClientO*)|(SqlGraphPathD*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(Ti*)|(TransactionP*)|(U*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!InvalidPolicyRejectsBeforeAnyStoreDirectory*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafNativePayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
       "classNames": [
         "KeyLoad.UnitTests.Features.Authorization.ClusterPrincipalAuthorizationTests",
         "KeyLoad.UnitTests.Features.Authorization.ResourcePolicyUpdateVisibilityTests",

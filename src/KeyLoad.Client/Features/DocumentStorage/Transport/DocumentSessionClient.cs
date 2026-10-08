@@ -15,6 +15,6 @@ public sealed partial class KeyLoadClient
     {
         ArgumentNullException.ThrowIfNull(minimumToken);
         return Send<DocumentResult?>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference, minimumToken),
-            false, null, cancellationToken);
+            false, null, cancellationToken, allowNullResult: true);
     }
 }

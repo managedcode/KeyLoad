@@ -14,7 +14,7 @@ public static class RecurringSagaClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<RecurringScheduleInspection?>(SchedulePath, request, false, null, cancellationToken);
+        return client.Send<RecurringScheduleInspection?>(SchedulePath, request, false, null, cancellationToken, allowNullResult: true);
     }
 
     /// <summary>Reads projected saga state without exposing its timeout template.</summary>
@@ -23,6 +23,6 @@ public static class RecurringSagaClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<SagaInspection?>(SagaPath, request, false, null, cancellationToken);
+        return client.Send<SagaInspection?>(SagaPath, request, false, null, cancellationToken, allowNullResult: true);
     }
 }

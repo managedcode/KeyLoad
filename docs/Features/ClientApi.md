@@ -232,8 +232,10 @@ credentials/authorization — [Authorization](Authorization.md). Every operation
 окремий Orleans request grain, тоді node-local host виконує операцію;
 [ADR-020](../ADR/ADR-020-independent-query-contexts.md) не дозволяє per-client
 head-of-line blocking або storage ownership у session facade. Native stateless
-transport does not capture a session principal. The .NET SDK's missing Backup and
-SetDispatch are explicit parity work, not completed methods.
+transport does not capture a session principal. The .NET SDK exposes typed BackupAsync in Features/BackupRestore and
+SetDispatchAsync in Features/Messaging through the shared authenticated transport.
+Their owning feature RF3 qualification remains distinct from source presence and
+the required supporting Kestrel transport controls.
 
 Canonical map: Client/Server `Features/ClientApi/` transport/adapters та matching IntegrationTests/UnitTests helpers; business operations/tests зберігають owning slice name. CLI — operator/worker entry point; окремий frontend N/A. Shared contracts і host composition мають одного integration owner. Freeze protocol → real parity tests → adapters → rollout/version contract → exact GitHub TUnit/recovery/Docker RF3 evidence. Existing source/test names не виконують planned MCP/agent AC; timeout не означає rollback.
 
@@ -697,3 +699,26 @@ Original run37744013727 retains a PerformInitializeHandshake failure and the gen
 REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/007 preserve the owned native `Conflict` detail `The command ID was already used with different content.` only for that exact ordinal code/literal pair. Arbitrary text, suffixes and wrong-code pairs retain existing generic safe mapping. Persisted authorization still precedes fingerprint disclosure; no caller roles or private payload enter the diagnostic.
 
 `McpCommandConflictDiagnosticWholeFlowTests.NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand` runs real ZoneTree commit, exact same-ID native receipt replay, changed-content conflict, full retained storage/position invariance, actual MCP reply encoding/privacy negatives, then an independently literal revision2 healthy operation. Existing official SDK/MCP `Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable` retains its complete conflict/no-disclosure and healthy read oracle. Original run37744013727/source59e85625 failure remains historical; this source repair is not execution or KL015 closure.
+
+
+### TASK-KL014-NULL-WRITE-RESPONSE-001
+
+REQ-CLIENT-002/005 / AC-MP-009 / AC-CLIENT-005, ADR-035 and ADR-117: an HTTP success status with JSON null is not an acknowledged typed write result. The shared SDK transport must return the existing UnknownWriteOutcome with the literal safe WriteResponseUnavailable message, retaining the caller's command ID and body for retry. Malformed JSON retains the same existing classification. Every nullable read remains unchanged: an absent document may legitimately be a successful null value. No schema, routing, persisted authorization, RF3 barrier or automatic retry changes.
+
+Actual loopback Kestrel cases KeyLoadClientNullWriteTests run null and malformed successful write responses, require failed/null-value exact unknown outcomes, retry the identical command through the same SDK and compare complete literal native receipt bytes, and verify both requests' complete command bodies and stable ID headers. The same SDK then reads a legitimate absent document followed by a full literal healthy document. This is transport qualification only: cold-bootstrap RF3 and the existing SubmitReturned SDK/official MCP interruption plus exact receipt replay remain mandatory whole-task Linux gates. No source-only PASS or clean-machine qualification is claimed.
+
+Canonical map: ClientApi SDK Transport and UnitTests Cases; server, schema, frontend and migration N/A because existing outcome semantics are preserved. Root owns source join, compile and normal/scalar native runs; current Linux RF3 prerequisite/bootstrap/unknown-write evidence remains required for KL014 closure.
+
+
+### TASK-KL014-RESPONSE-NULLABILITY-002
+
+REQ-CLIENT-002/005 / AC-MP-009 / AC-CLIENT-005 and ADR-035 implementation amendment freeze a default nonnullable internal SDK response contract, with explicit nullable read sites matching the existing native operation schemas: ordinary/session document GET, message inspection, queue transfer intent/receipt, recurring schedule/saga inspection, blob metadata/upload info. Writes always require a value, even if an internal read allowance is incorrectly supplied. This preserves legitimate absent reads while null root responses for Status and all other nonnullable results return the existing safe read OwnershipLost or write UnknownWriteOutcome classification. No reflection, guessed routes, public API change, schema relaxation or second transport.
+
+KeyLoadClientNullReadTests executes every one of the nine actual SDK nullable call sites against native Kestrel null responses, then tests null/malformed HTTP200 Status responses for failed/no-value exact OwnershipLost and a complete literal successful Status response through that same SDK. Complete request and Status comparisons use strict typed public JSON bytes; full retry receipt and full document continuation retain native-byte comparisons. Existing KeyLoadClientNullWriteTests retains same ID/body/header unknown-write retry and complete literal receipt plus absent/full document continuation. JsonDefaults required-constructor and nested-null enforcement remains unchanged. Frozen native call map and ADR own implementation/join/rollback; current normal/scalar and Linux cold-bootstrap plus SDK/official MCP committed-interruption receipt replay remain mandatory.
+
+
+### TASK-KL014-HTTP-FULL-ORACLE-003
+
+REQ-CLIENT-002/005 / AC-MP-009 / AC-CLIENT-005 retains original R792 four normal and four scalar failures. Every null/malformed classification and nine nullable-site assertion reached its expected relation; two read cases failed only complete native Status comparison, and two write cases failed only complete captured-request comparison after successful full native receipt equality. They remain failed cases. Independently authored NodeStatus shares the same literal Node string in NodeId/Leader; PutDocument(Collection) inherits Mutation(Collection), sharing Collection/Resource. Exact pinned Orleans10.4.0 StringCodec/ReferenceCodec tracks CLR object references, whereas HTTP JSON carries value fields without that graph identity. No assertion of canonical semantic native bytes is made.
+
+Repair only those two complete transport comparisons to strict typed public JSON bytes against the original independently literal fixtures, retaining all fields and every other assertion: exact unknown/read failures, full original stable body/header/ID retry, native fullreceipt parity, legal absent reads, native fulldocument continuation and joined cleanup. Do not manufacture distinct expected strings or alter product/native serializers. These four cases are required supporting real Kestrel transport controls, not functional database coverage contributors. Actual native normal/scalar reproduction and fresh complete build/census/source+PE/PDB binding remain required. Current committed3458 Linux RF3 bootstrap/SDKofficialMCP stable replay remains separate from the new dirty SDK image.
