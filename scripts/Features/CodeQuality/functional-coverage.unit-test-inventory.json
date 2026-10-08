@@ -11886,9 +11886,9 @@
       "methodName": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
       "instanceName": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/RequestCqrsCohortUnavailableTests.cs",
-      "sourceSha256": "c9e9999a85799d194d3a86b9ea2fdb6903b9c43f53b276680dd0ce3ef1b470de",
-      "lineNumber": 11,
-      "endLineNumber": 50,
+      "sourceSha256": "2a80c8bbb2bcb389d9c0da151ee16fb5a4a82d7cfd2aac7bad593d83174953c6",
+      "lineNumber": 12,
+      "endLineNumber": 51,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [

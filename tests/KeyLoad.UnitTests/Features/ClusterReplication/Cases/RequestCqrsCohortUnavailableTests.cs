@@ -1,4 +1,5 @@
 using KeyLoad.Orleans;
+using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
@@ -37,7 +38,7 @@ internal sealed class RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntime
 
             var deniedAdmission = await Assert.ThrowsExactlyAsync<KeyLoadException>(
                 () => unavailable.Client.EnsureCompatibleCohortAsync(deadline.Token));
-            await AssertUnavailableAsync(deniedAdmission);
+            await AssertUnavailableAsync(deniedAdmission, ReplicaProtocol.NoLeader);
             await Assert.That(unavailable.Client.HasCompatibleCohort).IsFalse();
         }
 
@@ -49,10 +50,11 @@ internal sealed class RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntime
         await Assert.That(healthy.Client.HasCompatibleCohort).IsTrue();
     }
 
-    private static async Task AssertUnavailableAsync(KeyLoadException? failure)
+    private static async Task AssertUnavailableAsync(KeyLoadException? failure,
+        string detail = ReplicaTransportProtocol.InvalidDiscovery)
     {
         var observed = failure ?? throw new InvalidOperationException("The stopped socket was accepted.");
         await Assert.That(observed.Code).IsEqualTo(ErrorCode.OwnershipLost);
-        await Assert.That(observed.Message).IsEqualTo(ReplicaTransportProtocol.InvalidDiscovery);
+        await Assert.That(observed.Message).IsEqualTo(detail);
     }
 }

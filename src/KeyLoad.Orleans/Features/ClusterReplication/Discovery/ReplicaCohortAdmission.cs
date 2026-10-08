@@ -101,7 +101,7 @@ internal sealed class ReplicaCohortAdmission
 
         if (compatible < configuration.Majority)
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         }
     }
 

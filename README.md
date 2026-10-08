@@ -351,11 +351,19 @@ records the actual source, test results and remaining acceptance gates.
 
 The current source stage also adds protected incremental text-index maintenance
 with explicit generation reads, default-off public ANN reads, and bounded
-parallel document/partition queries across two configured RF3 groups. The current
-local solution build and formatter pass; 213 focused native operation scenarios
+parallel document/partition queries across two configured RF3 groups. That stage's
+local solution build and formatter passed; 213 focused native operation scenarios
 pass in both normal and scalar modes, and three FTS process-recovery scenarios
 pass. The native inventory contains 3039 tests. Exact-source Linux RF3 and complete
 acceptance gates remain open; these additions do not increase the accepted task count.
+
+The latest correction preserves exact failure diagnostics for individual replica
+discovery and returns `NoLeader` when the compatible voters cannot form a quorum.
+The current local solution build and formatter pass, and nine complete cohort
+flows pass in both normal and scalar modes. RF3 container rejection now reports
+the first failed admission check while retaining every original predicate. The
+full Linux normal and scalar unit steps for the prior source failed; their
+original reports and current RF3 qualification are still pending.
 
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,

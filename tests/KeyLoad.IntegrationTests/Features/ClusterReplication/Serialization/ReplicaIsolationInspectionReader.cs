@@ -7,11 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 /// <summary>Decodes bounded safe native Docker output and rejects ambiguous or privileged namespaces.</summary>
 internal static class ReplicaIsolationInspectionReader
 {
-    private const int SingleNetwork = 1;
-    private const int SingleCapability = 1;
     private const int FirstIndex = 0;
-    private const string NamePrefix = "/";
-    private const string IncarnationFormat = "D";
 
     internal static async Task<ReplicaIsolationInspection> ContainerAsync(string name,
         ReplicaIsolationBuildPlan plan, ReplicaIsolationBuildTarget target, CancellationToken cancellationToken)
@@ -22,14 +18,9 @@ internal static class ReplicaIsolationInspectionReader
         var value = document.RootElement;
         var networks = value.GetProperty(Networks).EnumerateObject().ToArray();
         var capabilities = value.GetProperty(CapAdd).EnumerateArray().Select(item => item.GetString()).ToArray();
-        if (value.GetProperty(State).GetString() != Running || value.GetProperty(Privileged).GetBoolean()
-            || !string.IsNullOrEmpty(Text(value, PidMode)) || networks.Length != SingleNetwork
-            || value.GetProperty(NetworkMode).GetString() != networks[FirstIndex].Name
-            || capabilities.Length != SingleCapability || capabilities[FirstIndex] != NetAdmin
-            || Text(value, Name) != NamePrefix + name || Text(value, ConfigImage) != target.ImageReference
-            || Text(value, User) != target.ServiceUser || Text(value, FaultSource) != plan.DockerfileSha256
-            || Guid.ParseExact(Text(value, Incarnation), IncarnationFormat) != plan.Incarnation)
-        { throw new InvalidOperationException("The inspected namespace is not the exact admitted non-root fault cohort."); }
+        var mismatch = ReplicaIsolationContainerAdmission.Observe(value, networks, capabilities, name, plan, target);
+        if (mismatch != ReplicaIsolationAdmissionMismatch.None)
+        { ReplicaIsolationAdmissionDiagnostics.Throw(mismatch); }
         var id = Text(value, Id);
         _ = ReplicaIsolationRules.NativeArguments(id, []);
         return new(id, Text(value, Name), Text(value, Image), Text(value, ConfigImage), Text(value, User),

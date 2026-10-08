@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Original R668/R669 two analyzer diagnostics retained and corrected without suppression. Current frozen4860-input full Release R670 and full formatter R671 pass; actual complete native materializer operation R672 normal1/1 and R673 scalar1/1 pass with zero source/image drift. Required original RF311 and same-job coverage gates remain open; no accepted task or numeric coverage increase.",
+    "verificationStage": "Current frozen4863-input full Release R675 and full formatter R676 pass. Nine complete original cohort flows pass9/9 in normal R677 and scalar R678 with no source/image drift. Actual native census3039, original image source1237 and all twelve production discoveries match the strict preserved inventory. This is local development evidence; required Linux RF3, task acceptance and numeric product coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,13 +240,13 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 137.999,
-      "log": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008.log",
-      "logSha256": "5d71193e398f07b280723404b6fa9e2981250d72b12d82fb2136d839e5e401aa",
-      "inputCount": 4860,
+      "elapsedSeconds": 184.99,
+      "log": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008.log",
+      "logSha256": "a6947fbcb6039d8ce615ea5971572038375a2775350bd7d6c00ca0bcc89ce656",
+      "inputCount": 4863,
       "inputDrift": [],
       "uniqueErrors": [],
       "qualification": "local development; source drift invalidates exact-current-source qualification"
@@ -262,10 +262,10 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 132.778,
-      "log": "/private/tmp/keyload-current-r671-stage-xviii-native-digest-analyzer-correction-full-format-20261008.log",
+      "elapsedSeconds": 158.402,
+      "log": "/private/tmp/keyload-current-r676-stage-xix-original-cohort-isolation-full-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4860,
+      "inputCount": 4863,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -27546,7 +27546,562 @@
       "observedStatus": "in_progress",
       "runtimeQualified": false,
       "productCoveragePercent": null,
-      "qualification": "Actual exact-source Linux dispatch observed; terminal artifacts/gates not yet available. It does not qualify current uncommitted XVIII."
+      "qualification": "Actual exact-source b68 Linux full normal and scalar steps failed; recovery and SDK/MCP RF3 remain running. Original terminal artifacts not yet available, so failing cases and causes remain unobserved. Current XIX local9/9 cohort is not a replacement for this required full gate.",
+      "observedNormalUnitConclusion": "failure",
+      "observedScalarUnitConclusion": "failure",
+      "originalJobId": 113184955921,
+      "originalJobLogAvailable": false,
+      "observedAtUtc": "2026-10-08T07:15:06Z"
+    },
+    "stageXIXOriginalDevelopment": {
+      "sourceParentCommit": "7881176146d6a0dbdc2d28a496bc033330c7f51f",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "canonicalBuildPassed": true,
+      "canonicalFormatterPassed": true,
+      "originalTaskCounts": {
+        "done": 12,
+        "in_progress": 92,
+        "pending": 0
+      },
+      "actualCatalogOperations": 74,
+      "initialGatewayTools": 3,
+      "closedCoveredRf3Cases": 11,
+      "originalFullBuildR675": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 184.99,
+        "log": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008.log",
+        "logSha256": "a6947fbcb6039d8ce615ea5971572038375a2775350bd7d6c00ca0bcc89ce656",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalFullFormatterR676": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 158.402,
+        "log": "/private/tmp/keyload-current-r676-stage-xix-original-cohort-isolation-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalCohortNormalR677": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r677-stage-xix-original-cohort-normal-whole-flows-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(RequestCqrsCohort*)|(RequestCqrsReaderCapabilityTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-b7y3kher",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 9.599,
+        "log": "/private/tmp/keyload-current-r677-stage-xix-original-cohort-normal-whole-flows-20261008.log",
+        "logSha256": "2a7c1e4a502cba1d4cc3156bfd7585ef4c19544e9a9242a14dd7c1ebdcfab292",
+        "sourceInputs": 4864,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r677-stage-xix-original-cohort-normal-whole-flows-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "060985c691080bb4271ef063e412a482d38a04aebff1e9676ddb58bcd95c51ef",
+            "counters": {
+              "total": "9",
+              "executed": "9",
+              "passed": "9",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "cases": [
+              {
+                "name": "ShutdownSharesSettlementStopsAdmissionAndReleasesOnlyAfterLeaseExit",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CallerCancellationDuringHeadersAndBodySettlesBeforeHealthyLookup",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AsyncDisposeStopsAdmissionAndJoinsGatedHttpAttempt",
+                "outcome": "Passed"
+              },
+              {
+                "name": "SyncDisposeStartsSameShutdownAndAsyncDisposeJoinsIt",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AuthenticatedCacheTransitionsExpireAndAdmitOneCompatibleRemote",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReachableAuthenticatedThirdMismatchRejectsAnExistingMajority",
+                "outcome": "Passed"
+              },
+              {
+                "name": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ZeroAndUnknownReaderCapabilitiesRejectAndRecoverWithHealthyVoter",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReachableNotReadyThirdVoterWithUnsupportedReaderRejectsMajority",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "originalCohortScalarR678": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit-scalar",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r678-stage-xix-original-cohort-scalar-whole-flows-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(RequestCqrsCohort*)|(RequestCqrsReaderCapabilityTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-hd5ru_kf",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 11.439,
+        "log": "/private/tmp/keyload-current-r678-stage-xix-original-cohort-scalar-whole-flows-20261008.log",
+        "logSha256": "e6989d9445ac0d12fd794b7238daec568c416e2a4dfbb675acd911b1c042f998",
+        "sourceInputs": 4864,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r678-stage-xix-original-cohort-scalar-whole-flows-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "4c9855ae128ab49d85de1b3cd7bd4390819eb47f86345b7dd45ef485318fd17a",
+            "counters": {
+              "total": "9",
+              "executed": "9",
+              "passed": "9",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "cases": [
+              {
+                "name": "ShutdownSharesSettlementStopsAdmissionAndReleasesOnlyAfterLeaseExit",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CallerCancellationDuringHeadersAndBodySettlesBeforeHealthyLookup",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AsyncDisposeStopsAdmissionAndJoinsGatedHttpAttempt",
+                "outcome": "Passed"
+              },
+              {
+                "name": "SyncDisposeStartsSameShutdownAndAsyncDisposeJoinsIt",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AuthenticatedCacheTransitionsExpireAndAdmitOneCompatibleRemote",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReachableAuthenticatedThirdMismatchRejectsAnExistingMajority",
+                "outcome": "Passed"
+              },
+              {
+                "name": "StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ZeroAndUnknownReaderCapabilitiesRejectAndRecoverWithHealthyVoter",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReachableNotReadyThirdVoterWithUnsupportedReaderRejectsMajority",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "originalNativeCensusR679": {
+        "phases": [
+          {
+            "command": [
+              "/opt/homebrew/bin/dotnet",
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+              "--help"
+            ],
+            "nativeExitCode": 0,
+            "elapsedSeconds": 0.169,
+            "stdout": "/private/tmp/keyload-current-r679-stage-xix-original-native-unit-census-20261008-help.stdout.txt",
+            "stdoutBytes": 8428,
+            "stdoutSha256": "c2420d754b63d2b3594162ba496b72a3486dd037ae0f8d3e0d97e44899966f69",
+            "stderr": "/private/tmp/keyload-current-r679-stage-xix-original-native-unit-census-20261008-help.stderr.txt",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "command": [
+              "/opt/homebrew/bin/dotnet",
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+              "--list-tests",
+              "json",
+              "--disable-logo",
+              "--ansi",
+              "off",
+              "--progress",
+              "off",
+              "--output",
+              "Detailed",
+              "--results-directory",
+              "/private/tmp/kl-list-nobcuxqi/native"
+            ],
+            "nativeExitCode": 0,
+            "elapsedSeconds": 1.228,
+            "stdout": "/private/tmp/keyload-current-r679-stage-xix-original-native-unit-census-20261008-list-tests.stdout.txt",
+            "stdoutBytes": 2948612,
+            "stdoutSha256": "c2d4220f8be097ecec814b8ab12a6d13bee8bb82db4e34ce676107ac3bec28a5",
+            "stderr": "/private/tmp/keyload-current-r679-stage-xix-original-native-unit-census-20261008-list-tests.stderr.txt",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "temporaryRoot": "/private/tmp/kl-list-nobcuxqi",
+        "sourceInputs": 4864,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "native unfiltered discovery only; not operation PASS; original stdout retained for actual schema review"
+      },
+      "originalCompiledImageR680": {
+        "path": "/private/tmp/keyload-current-r680-stage-xix-native-unit-image-observation-20261008.json",
+        "sha256": "6edbe3e956a5b652a47fbaee8e33bf2752dbbb40af31c8d549f3c84e740a42cb",
+        "mvid": "43b800f1-7688-482f-89e6-e19adeb87416",
+        "dllSha256": "63b2532edb0be436c68b5bf54177497d4910da1a402b7c331a56d5fc15766bd2",
+        "pdbSha256": "2a53aa281f6ab7cfdeb1f19a9cc17fc0b2a378128751778d05e6318db9691f75",
+        "nativeDeclaredSourceCount": 1237,
+        "qualification": "Native DLL MVID, matching PDB identity and declared compile-source inspection only; no numeric coverage or Linux operation qualification."
+      },
+      "originalTwelveProductionDiscoveriesR681": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 98.029,
+        "evidenceRoot": "/Users/ksemenenko/Developer/KeyLoad/artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008",
+        "logSha256": "69743bde1405805d200a822f46ccc43d24459bffe5aa4d77f707abf733a87074",
+        "guardedInputs": 5313,
+        "sourceImageScriptDrift": [],
+        "originalFiles": [
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery/native-list.json",
+            "sha256": "c2d4220f8be097ecec814b8ab12a6d13bee8bb82db4e34ce676107ac3bec28a5"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery/native-process.json",
+            "sha256": "5e2f7c5ff02a70374c7a42ecee662fd9ebcb1d50bd362436df580bfbfbe6257b"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-01/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-01/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-01/native-list.json",
+            "sha256": "3d6eae9bb2ee0455802438208faff63f2ceb21b586baaa77eb21046bef3159d2"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-01/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-01/native-process.json",
+            "sha256": "00fcb22a801ada238819d040cf5be68dd486d2d88362758afdc837104677784b"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-02/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-02/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-02/native-list.json",
+            "sha256": "dc14460061dfd808c358afedec1694b815cb3f774cc449de5a4ca73b51c582ab"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-02/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-02/native-process.json",
+            "sha256": "d029ce0f9e9185359a3e411459b87af155ee2c3937e7b43cd78c3481e695775c"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-03/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-03/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-03/native-list.json",
+            "sha256": "6662220610c38eed2bc3fd8c052e1ebb0ed315a641474504887d0eda04092dbe"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-03/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-03/native-process.json",
+            "sha256": "b15942485898c764088726146c7bbfb5acfe9b7b8ed084c021babb26d5a66bfa"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-04/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-04/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-04/native-list.json",
+            "sha256": "841569b466c43afefb608737cd1084c1a5f0c08fa91eadbc65de5e67a3448880"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-04/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-04/native-process.json",
+            "sha256": "281d93779c216f7056c47c5138bf2c313c4400bd6fd100eeca7390fc11896af5"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-05/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-05/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-05/native-list.json",
+            "sha256": "d7af1d123451d14908838cf5a589d32ba8abf3c9a0fd24b318542fc51dd72bcc"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-05/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-discovery-unit-functional-05/native-process.json",
+            "sha256": "54de28eca095490b6a1f21ae7bf808fe696461a0018f3d66fe7bad9b921cf434"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery/native-list.json",
+            "sha256": "c2d4220f8be097ecec814b8ab12a6d13bee8bb82db4e34ce676107ac3bec28a5"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery/native-process.json",
+            "sha256": "1835d4f6d02b9fabd90598d333f90b8fd09bf07e84d4ec5b6e23a8c54cbf7b1e"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-01/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-01/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-01/native-list.json",
+            "sha256": "3d6eae9bb2ee0455802438208faff63f2ceb21b586baaa77eb21046bef3159d2"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-01/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-01/native-process.json",
+            "sha256": "bcaa26637a7d9fffe0f59e6c4125ce9111dbf2f11f69223eb2139543714280bb"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-02/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-02/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-02/native-list.json",
+            "sha256": "dc14460061dfd808c358afedec1694b815cb3f774cc449de5a4ca73b51c582ab"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-02/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-02/native-process.json",
+            "sha256": "5e1bd3545ea8a72aa410ee5b8e6241c5cdead0add539a02979d99343d9148dd9"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-03/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-03/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-03/native-list.json",
+            "sha256": "6662220610c38eed2bc3fd8c052e1ebb0ed315a641474504887d0eda04092dbe"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-03/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-03/native-process.json",
+            "sha256": "cc7b28f9408806ba92c741cb34ce2583d8e065248ce809c8de9ac47af35fddbf"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-04/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-04/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-04/native-list.json",
+            "sha256": "841569b466c43afefb608737cd1084c1a5f0c08fa91eadbc65de5e67a3448880"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-04/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-04/native-process.json",
+            "sha256": "44c61cde7e5b1e667ca118cbd574643999e4c081498847f879357b464409da7c"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-05/native-image-after.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-05/native-image-observation.json",
+            "sha256": "247c635f5b1e8064457768436b883d930115d0f9af380d6735c882dafd6d4e7a"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-05/native-list.json",
+            "sha256": "d7af1d123451d14908838cf5a589d32ba8abf3c9a0fd24b318542fc51dd72bcc"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-05/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r681-stage-xix-twelve-original-production-discoveries-20261008/unit-scalar-discovery-unit-functional-05/native-process.json",
+            "sha256": "944c5de95337a34a665fba2cd893b92f3633d788a3bd247b4f4937edeeb602e4"
+          }
+        ],
+        "qualification": "Actual full plus five filtered native discoveries in both modes only; no executed operation pass, numeric coverage or Linux qualification."
+      },
+      "inventorySourceRebind": {
+        "packet": "/private/tmp/keyload-stage-xix-native-inventory-rebind-r1-20261008",
+        "manifestSha256": "85a7247dd731ce2fe908799e945483d95e6a3c3b506c7a82c0c80501f67bf890",
+        "joinReceiptSha256": "f06f5c96f6dbeb32c490603111c9d3fcf39fc5c742cc6adb2ebbb1a0fcbe8cfd",
+        "caseCount": 3039,
+        "allOtherRowsAndSelectorsUnchanged": true,
+        "qualification": "One existing functional case source checksum and exact native line12..51 rebound from actual R679 census and R680 native MVID/PDB source observation; no case, classification, selector or task acceptance change."
+      },
+      "sourceRepairs": [
+        "Final insufficient compatible-voter majority now returns existing safe NoLeader detail while individual unauthenticated, unavailable, unsupported or invalid discovery and identity diagnostics retain their original exact contracts.",
+        "Original whole socket-stop/eviction/fresh signed majority flow retains all effects and healthy recovery, asserting exact NoLeader solely at the final quorum rejection; nine original complete flows pass in both modes.",
+        "The original exact twelve namespace admission predicates and short-circuit order remain; first genuine mismatch is emitted as a bounded closed enum through the existing failure observer before preserving the original primary failure. No actual Linux namespace mismatch is asserted without original evidence."
+      ],
+      "remaining": [
+        "Exact-source complete Linux normal/scalar/recovery and required real SDK/official MCP RF3, including every original unresolved failure.",
+        "Original covered11 RF3 collector/session/exports followed by same-job descriptor, source/image admission and numeric coverage merge.",
+        "Complete task acceptance, fault/resource/endurance and measured performance gates."
+      ],
+      "verificationStage": "Current frozen4863-input full Release R675 and full formatter R676 pass. Nine complete original cohort flows pass9/9 in normal R677 and scalar R678 with no source/image drift. Actual native census3039, original image source1237 and all twelve production discoveries match the strict preserved inventory. This is local development evidence; required Linux RF3, task acceptance and numeric product coverage remain open."
+    },
+    "stageXVIIIDeliveredCommit": "7881176146d6a0dbdc2d28a496bc033330c7f51f",
+    "stageXVIIIDeliveredRemoteVerified": true,
+    "stageXVIIIOriginalLinux": {
+      "runId": 37740437554,
+      "sourceRevision": "7881176146d6a0dbdc2d28a496bc033330c7f51f",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37740437554",
+      "observedStatus": "in_progress",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "qualification": "Actual exact-source dispatch observed; terminal artifacts and required qualification remain open."
     }
   },
   "TIME-PROVIDER-001": {
