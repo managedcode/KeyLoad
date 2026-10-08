@@ -21,6 +21,7 @@ internal enum ContainerRestartSampleStage
 {
     BeforeStart,
     AfterStartSucceeded,
+    AcceptedStartRetained,
     Failure
 }
 
@@ -28,6 +29,7 @@ internal enum ContainerRestartSampleStage
 internal sealed class ContainerRestartFailureCapture
 {
     private const string StartSucceededLine = "Aspire Start command succeeded.";
+    private const string StartRetainedLine = "Original accepted Aspire Start retained; no new Start command issued.";
 
     private readonly DistributedApplication app;
     private readonly ContainerRuntimeKillReceipt receipt;
@@ -61,6 +63,13 @@ internal sealed class ContainerRestartFailureCapture
     {
         lines.Add(StartSucceededLine);
         AddSafeSample(ContainerRestartSampleStage.AfterStartSucceeded);
+    }
+
+    /// <summary>Records actual retained acceptance without manufacturing a new Start result.</summary>
+    internal void StartRetained()
+    {
+        lines.Add(StartRetainedLine);
+        AddSafeSample(ContainerRestartSampleStage.AcceptedStartRetained);
     }
 
     /// <summary>Captures the failure snapshot and one bounded read-only Docker inspection.</summary>
@@ -218,6 +227,7 @@ internal static class ContainerRestartDiagnostics
     {
         ContainerRestartSampleStage.BeforeStart => "BeforeStart",
         ContainerRestartSampleStage.AfterStartSucceeded => "AfterStartSucceeded",
+        ContainerRestartSampleStage.AcceptedStartRetained => "AcceptedStartRetained",
         ContainerRestartSampleStage.Failure => "Failure",
         _ => OtherValue
     };

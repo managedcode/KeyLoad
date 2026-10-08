@@ -1,7 +1,6 @@
 using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Microsoft.Extensions.DependencyInjection;
 using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterReplicationTestSupport;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -15,6 +14,7 @@ internal sealed class ContainerRuntimeControl(
     IReadOnlyDictionary<string, string> containerNames,
     string repositoryRoot)
 {
+    private readonly Dictionary<string, ContainerRestartOwnership> restartOwners = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
     private readonly ClusterFailureReceipts restartFailureReceipts = new(ClusterFailureReceiptKind.Restart);
     private const string RestartDiagnosticsFailureKey = "KeyLoad.Rf3RestartDiagnosticsFailure";
@@ -25,6 +25,8 @@ internal sealed class ContainerRuntimeControl(
     /// <param name="cancellationToken">The existing external operation cancellation.</param>
     public async Task KillAsync(string resourceName, string scenario, CancellationToken cancellationToken)
     {
+        if (pendingReceipts.ContainsKey(resourceName))
+        { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
         var containerName = GetContainerName(resourceName);
         var before = await ContainerRuntimeDocker.InspectAsync(containerName, cancellationToken);
         if (before.State != ContainerRuntimeProtocol.RunningState)
@@ -65,6 +67,7 @@ internal sealed class ContainerRuntimeControl(
         {
             await RestartAndRecordAsync(receipt, capture, progress, cancellationToken);
             pendingReceipts.Remove(resourceName);
+            restartOwners.Remove(resourceName);
         }
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
@@ -77,20 +80,15 @@ internal sealed class ContainerRuntimeControl(
         ContainerRestartFailureCapture capture, RestartProgress progress, CancellationToken cancellationToken)
     {
         var resourceName = receipt.ResourceName;
-        var commands = app.Services.GetRequiredService<ResourceCommandService>();
-        var command = await commands.ExecuteCommandAsync(resourceName, KnownResourceCommands.StartCommand, cancellationToken);
-        if (!command.Success)
-        {
-            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
-                ContainerRuntimeProtocol.StartFailure, resourceName, command.Message ?? ContainerRuntimeProtocol.UnknownCommandFailure));
-        }
-
-        capture.StartSucceeded();
+        var owner = RequireRestartOwner(resourceName);
+        await owner.AcceptAsync(app, receipt, capture, cancellationToken);
         progress.Stage = ContainerRestartStage.HealthWait;
+        cancellationToken.ThrowIfCancellationRequested();
         await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName,
             WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         progress.Stage = ContainerRestartStage.RuntimeInspection;
         var after = await ContainerRuntimeDocker.InspectRunningAsync(receipt.ContainerName, resourceName, cancellationToken);
+        owner.RequireSameReplacement(after);
         progress.Stage = ContainerRestartStage.IdentityValidation;
         var startedAtChanged = !string.Equals(receipt.Before.StartedAt, after.StartedAt, StringComparison.Ordinal);
         if (!startedAtChanged)
@@ -104,12 +102,43 @@ internal sealed class ContainerRuntimeControl(
         var completed = new ContainerRuntimeRestartReceipt(receipt.Scenario, resourceName, receipt.ContainerName, receipt.Before.Id,
             receipt.Before.ConfigImage, receipt.Before.ImageId, receipt.Before.State, receipt.KillExitCode, receipt.KillOutput, receipt.KillError,
             receipt.Stopped.State, after.Id, after.ConfigImage, after.ImageId, after.State, receipt.Before.StartedAt,
-            after.StartedAt, startedAtChanged, true, command.Message, sourceSha, repositoryRoot)
+            after.StartedAt, startedAtChanged, true, owner.StartMessage, sourceSha, repositoryRoot)
         {
             KillStartedAtUtc = receipt.KillStartedAtUtc,
             KillCompletedAtUtc = receipt.KillCompletedAtUtc
         };
         await ContainerRuntimeReceiptStore.WriteAsync(completed, cancellationToken);
+    }
+
+    /// <summary>Accepts one native Start and retains its inspected replacement before health settlement.</summary>
+    /// <param name="resourceName">The owned resource with an unsettled verified kill.</param>
+    /// <param name="cancellationToken">The original bounded owner token.</param>
+    /// <returns>The actual running replacement identity retained for subsequent settlement.</returns>
+    internal async Task<ContainerRuntimeInspection> BeginRestartAsync(string resourceName,
+        CancellationToken cancellationToken)
+    {
+        if (!pendingReceipts.TryGetValue(resourceName, out var receipt))
+        { throw new InvalidOperationException(ContainerRestartOwnership.PendingFailure); }
+        var capture = new ContainerRestartFailureCapture(app, receipt, repositoryRoot, restartFailureReceipts);
+        var owner = RequireRestartOwner(resourceName);
+        try
+        { return await owner.AcceptAsync(app, receipt, capture, cancellationToken); }
+        catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
+        {
+            var stage = owner.StartAccepted ? ContainerRestartStage.RuntimeInspection : ContainerRestartStage.StartCommand;
+            await SaveRestartFailureAsync(capture, stage, failure);
+            throw;
+        }
+    }
+
+    private ContainerRestartOwnership RequireRestartOwner(string resourceName)
+    {
+        if (!restartOwners.TryGetValue(resourceName, out var owner))
+        {
+            owner = new ContainerRestartOwnership();
+            restartOwners.Add(resourceName, owner);
+        }
+        return owner;
     }
 
     private static async Task SaveRestartFailureAsync(ContainerRestartFailureCapture capture,

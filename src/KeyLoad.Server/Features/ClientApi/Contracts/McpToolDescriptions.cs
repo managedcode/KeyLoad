@@ -34,6 +34,7 @@ internal static class McpToolDescriptions
     private const string QueryLiveRead = "Read the next bounded live query page using the original query and returned cursor.";
     private const string OutboxStatus = "Read administrator-authorized outbox usage and projection-consumer progress.";
     private const string ProjectionsRead = "Read a bounded administrator-authorized projection batch and retain its acknowledgement token.";
+    private const string WaitForIndex = "Publish the authorized native lexical generation at an acknowledged minimum applied cut with bounded cancellation and deadline.";
     private const string SearchExecute = "Search authorized documents with lexical, vector or hybrid ranking and explicit result limits.";
     private const string SearchGraph = "Search with versioned graph scope and shortest-hop retrieval in one authorized read cut; optional bounded context is expanded only from selected hits.";
     private const string AdminBackup = "Create an administrator-authorized physical node backup. Retrying can create another archive; this operation has filesystem side effects.";
@@ -84,6 +85,7 @@ internal static class McpToolDescriptions
         McpToolNames.ChangesRead => ChangesRead,
         McpToolNames.OutboxStatus => OutboxStatus,
         McpToolNames.ProjectionsRead => ProjectionsRead,
+        WaitForIndexProtocol.Tool => WaitForIndex,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
         McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus

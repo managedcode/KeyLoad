@@ -14,9 +14,9 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
     private const string BodyFormat = "{{\"value\":\"{0}\"}}";
     private readonly ZoneTreeStore replica;
 
-    internal ReplicaAppliedPositionWaitFixture()
+    internal ReplicaAppliedPositionWaitFixture(DatabaseLimits? limits = null, TimeProvider? timeProvider = null)
     {
-        Canonical = new TestDatabase();
+        Canonical = new TestDatabase(limits, timeProvider: timeProvider);
         Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
             Canonical.Store.Identity.Incarnation)
         { BenchmarkTopology = true };

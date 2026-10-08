@@ -41,7 +41,9 @@ internal static class CrossTenantRf3WholeFlow
     }
     private static async Task<McpDocumentScenario> SeedAsync(ClusterFixture fixture, KeyLoadClient admin, CancellationToken token)
     {
-        var scenario = await McpDocumentScenario.CreateAsync(fixture, token);
+        var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+            McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
+        var scenario = new McpDocumentScenario(partition);
         var resource = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, scenario.Partition.TransactionDomainId)
         { Indexes = [new(Index, ["/secret"])] };
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),

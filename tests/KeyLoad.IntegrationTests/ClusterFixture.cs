@@ -1,14 +1,15 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.TestInfrastructure;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
+using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixtureResourceCleanup;
 
 namespace KeyLoad.IntegrationTests;
 
@@ -25,6 +26,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     private NativeCoverageRf3FixtureOwner? coverage;
     private LocalRf3ImageTestSession? localImageSession;
     private bool localImageCleanupIncomplete;
+    private readonly bool isolateReplicaNamespace;
+    private ReplicaIsolationOwner? isolationOwner;
+    private ReplicaIsolationBuilderOwnership? isolationBuilder;
+    private bool isolationCleanupIncomplete;
     private readonly string coverageFixtureId = Guid.NewGuid().ToString("D");
     private byte[] peerSecret = [];
 
@@ -33,6 +38,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 
     /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
     public ClusterFixture() { }
+
+    /// <summary>Creates only the explicitly selected Linux native namespace fault cohort.</summary>
+    internal ClusterFixture(ReplicaIsolationProfile profile)
+        => isolateReplicaNamespace = ReplicaIsolationAdmission.Require(profile);
 
     /// <summary>Creates an RF3 fixture with a smaller command admission budget.</summary>
     /// <param name="commandBytes">The per-node retained command byte limit.</param>
@@ -77,6 +86,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         try
         {
             using var preparation = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
+            if (isolateReplicaNamespace)
+            { await ReplicaIsolationAdmission.PreflightAsync(preparation.Token).ConfigureAwait(false); }
             localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(preparation.Token)
                 .ConfigureAwait(false);
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
@@ -93,19 +104,31 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             {
                 arguments = [.. arguments, .. localImageSession.Selection.CreateWaveArguments()];
             }
+            if (isolateReplicaNamespace && (localImageSession is not null || coverage is not null))
+            { throw new InvalidOperationException("The native namespace fault cohort cannot mix local-image or covered selection."); }
             ObserveColdStart();
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
+            if (isolateReplicaNamespace)
+            { isolationBuilder = new(builder); }
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);
-            App = await builder.BuildAsync(timeout.Token);
+            if (isolateReplicaNamespace)
+            {
+                isolationOwner = await ReplicaIsolationOwner.PrepareAsync(builder, Root, repository.FullName,
+                    containerNames, timeout.Token).ConfigureAwait(false);
+            }
+            App = isolationBuilder is null ? await builder.BuildAsync(timeout.Token)
+                : await isolationBuilder.BuildAsync(timeout.Token).ConfigureAwait(false);
             containerRuntime = new(App, containerNames, repository.FullName);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
             await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
             ReadPrivateProfile();
+            if (isolationOwner is not null)
+            { await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false); }
         }
         catch (Exception startupFailure)
         {
@@ -118,8 +141,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 
     private Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
         string repository, CancellationToken token)
-        => ClusterFixtureApplicationStartup.StartAsync(App, repository, containerNames, coverage,
-            localImageSession?.Selection, token);
+        => isolationOwner is null
+            ? ClusterFixtureApplicationStartup.StartAsync(App, repository, containerNames, coverage, localImageSession?.Selection, token)
+            : isolationOwner.StartAsync(App, token);
+
+    internal ReplicaIsolationOwner RequireReplicaIsolation() => isolationOwner
+        ?? throw new InvalidOperationException("This fixture does not own a native namespace fault cohort.");
 
     internal void RegisterNativeCoverageCase<TCase>(string methodName) => coverage?.RegisterCase<TCase>(methodName);
 
@@ -174,9 +201,13 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     {
         using var deadline = coverage?.CreateCleanupDeadline();
         using var localCleanup = localImageSession?.CreateApplicationCleanupCancellation();
-        var token = deadline?.Token ?? localCleanup?.Token ?? CancellationToken.None;
+        using var faultCleanup = isolateReplicaNamespace
+            ? new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System) : null;
+        var token = deadline?.Token ?? localCleanup?.Token ?? faultCleanup?.Token ?? CancellationToken.None;
         var failures = new List<Exception>();
-        await SaveDiagnosticsAsync(deadline, failures).ConfigureAwait(false);
+        if (isolationOwner is not null)
+        { await CollectCleanupAsync(deadline, () => isolationOwner.RestoreAsync(token), failures).ConfigureAwait(false); }
+        await SaveDiagnosticsAsync(diagnostics, peerSecret, deadline, failures).ConfigureAwait(false);
         if (diagnostics is not null)
         {
             var disposal = diagnostics.DisposeAsync().AsTask();
@@ -187,6 +218,17 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         App = null!;
         var (appStopped, stoppedNodes) = await ClusterFixtureApplicationShutdown.CollectAsync(
             ownedApp, deadline, coverage, containerRuntime is not null, failures, token).ConfigureAwait(false);
+        if (isolationBuilder is not null)
+        {
+            var disposal = isolationBuilder.DisposeAsync().AsTask();
+            await CollectCleanupAsync(deadline, disposal, failures).ConfigureAwait(false);
+        }
+        if (isolationOwner is not null)
+        {
+            await CollectCleanupAsync(deadline, () => isolationOwner.SettleAfterStopAsync(appStopped, token), failures)
+                .ConfigureAwait(false);
+        }
+        isolationCleanupIncomplete |= isolateReplicaNamespace && failures.Count > 0;
         var ownedLocalImage = localImageSession is not null;
         if (localImageSession is not null)
         {
@@ -195,8 +237,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             localImageSession = null;
         }
         localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
-        if (!localImageCleanupIncomplete)
-        { await DeleteOwnedRootAsync(deadline, failures).ConfigureAwait(false); }
+        if (!localImageCleanupIncomplete && !isolationCleanupIncomplete)
+        { await DeleteOwnedRootAsync(coverage, Root, deadline, failures).ConfigureAwait(false); }
         if (coverage is not null && appStopped && failures.Count == 0 && stoppedNodes is not null)
         {
             await deadline!.CollectAsync(() => coverage.PublishReceiptAsync(stoppedNodes, token), failures)
@@ -210,61 +252,18 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         }
     }
 
-    private async Task SaveDiagnosticsAsync(NativeCoverageCleanupDeadline? deadline, List<Exception> failures)
-    {
-        if (diagnostics is not { } owned)
-        {
-            return;
-        }
-        await CollectCleanupAsync(deadline,
-            () => owned.SaveAsync(peerSecret, deadline?.Token ?? owned.LifetimeToken), failures).ConfigureAwait(false);
-    }
-
-    private async Task DeleteOwnedRootAsync(NativeCoverageCleanupDeadline? deadline, List<Exception> failures)
-    {
-        if (coverage is null)
-        {
-            if (Directory.Exists(Root))
-            {
-                await ClusterFixtureCleanup.CollectFailureAsync(() => DeleteRootAsync(Root), failures).ConfigureAwait(false);
-            }
-        }
-        else if (Directory.Exists(Root) && failures.Count == 0)
-        {
-            await deadline!.CollectAsync(() => Task.Run(() => Directory.Delete(Root, recursive: true)), failures)
-                .ConfigureAwait(false);
-        }
-    }
-
-    private static void Rethrow(Exception failure) => System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
-    private static Task DeleteRootAsync(string root)
-    {
-        Directory.Delete(root, recursive: true);
-        return Task.CompletedTask;
-    }
-
-    private static Task CollectCleanupAsync(NativeCoverageCleanupDeadline? deadline, Func<Task> operation,
-        List<Exception> failures)
-        => deadline is null
-            ? ClusterFixtureCleanup.CollectFailureAsync(operation, failures)
-            : deadline.CollectAsync(operation, failures);
-    private static Task CollectCleanupAsync(NativeCoverageCleanupDeadline? deadline, Task operation,
-        List<Exception> failures)
-        => deadline is null
-            ? ClusterFixtureCleanup.CollectFailureAsync(operation, failures)
-            : deadline.CollectAsync(operation, failures);
     private void ReadPrivateProfile()
     {
         (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
     }
 
-    private Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
+    internal Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
         RequireDiagnostics().SaveAsync(peerSecret, cancellationToken);
 
     private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics
         ?? throw new InvalidOperationException(DiagnosticsUnavailable);
 
-    private ContainerRuntimeControl RequireContainerRuntime() => containerRuntime
+    internal ContainerRuntimeControl RequireContainerRuntime() => containerRuntime
         ?? throw new InvalidOperationException(RuntimeControllerUnavailable);
 
     private DistributedApplication RequireApp() => App

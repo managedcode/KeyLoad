@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
-using KeyLoad.Replication;
+using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -13,19 +13,13 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 /// <summary>Owns RF3 resource log capture and bounded signed-discovery failure artifacts.</summary>
 internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
 {
-    private static readonly TimeSpan DiagnosticRequestTimeout = TimeSpan.FromSeconds(3);
-    private const int MaximumResponseBytes = 8 * 1_024;
-    private const string DiscoveryUnavailable = "Signed peer discovery unavailable.";
-    private const string OversizedResponse = "Signed discovery response exceeds the diagnostic byte limit.";
     private const string ResourceStateUnavailable = "Resource state unavailable";
     private const string DiagnosticMessage = "Bounded RF3 diagnostics saved to {OutputPath} ({LineCount} lines).";
     private const string ResourceStateFormat = "Resource {0}, state {1}, exit {2}, health {3}";
     private const string DiagnosticLineFormat = "{0}: {1}";
-    private const string HttpStatusFormat = "{0} HTTP {1}.";
     private const int SavedEventId = 100;
     private static readonly CompositeFormat ResourceStateTemplate = CompositeFormat.Parse(ResourceStateFormat);
     private static readonly CompositeFormat DiagnosticLineTemplate = CompositeFormat.Parse(DiagnosticLineFormat);
-    private static readonly CompositeFormat HttpStatusTemplate = CompositeFormat.Parse(HttpStatusFormat);
     private static readonly Action<ILogger, string, int, Exception?> LogSaved = LoggerMessage.Define<string, int>(
         LogLevel.Information, new EventId(SavedEventId), DiagnosticMessage);
 
@@ -41,6 +35,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private const int MaximumCapturedLineBytes = 1_024;
     private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
     private Task? resourceCapture;
+    private readonly ConcurrentDictionary<string, NativeLogSubscriptionEvidence> logEvidence = new(StringComparer.Ordinal);
 
     /// <summary>Gets cancellation for the fixture-owned log subscriptions.</summary>
     internal CancellationToken LifetimeToken => lifetime.Token;
@@ -74,12 +69,18 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
                 ? string.Format(CultureInfo.InvariantCulture, ResourceStateTemplate, current.ResourceId,
                     current.Snapshot.State?.Text, current.Snapshot.ExitCode, current.Snapshot.HealthStatus)
                 : ResourceStateUnavailable;
-            var discovery = await ReadDiscoveryAsync(name, peerSecret, cancellationToken).ConfigureAwait(false);
-            var lines = new List<string> { string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state) };
+            var evidence = await new ClusterNodeHttpEvidence(app).ReadAsync(name, peerSecret, cancellationToken).ConfigureAwait(false);
+            var lines = new List<string>
+            {
+                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state),
+                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, evidence.Readiness),
+                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, evidence.Discovery)
+            };
+            lines.AddRange(logEvidence.Values.Where(entry => entry.NodeName == name)
+                .OrderByDescending(entry => entry.StartedAt).Take(1).Select(entry => entry.Snapshot()));
             lines.AddRange(ReadFailures(name).Select(line =>
                 string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, line)));
-            lines.Add(string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, discovery));
-            lines.AddRange(ReadTail(name).Select(line =>
+            lines.AddRange(ReadTail(name).Reverse().Select(line =>
                 string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, line)));
             nodeGroups.Add(lines);
         }
@@ -110,14 +111,24 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     /// <summary>Cancels subscriptions and waits for their actual Aspire streams to finish.</summary>
     public async ValueTask DisposeAsync()
     {
-        await lifetime.CancelAsync().ConfigureAwait(false);
+        var failures = new List<Exception>();
+        var cancelFailure = await OwnedProcessFailureObserver.CaptureAsync(lifetime.CancelAsync()).ConfigureAwait(false);
+        if (cancelFailure is not null)
+        { failures.Add(cancelFailure); }
         if (resourceCapture is not null)
         {
-            await resourceCapture.ConfigureAwait(false);
+            var resourceFailure = await OwnedProcessFailureObserver.CaptureAsync(resourceCapture).ConfigureAwait(false);
+            if (resourceFailure is not null)
+            { failures.Add(resourceFailure); }
         }
-
-        await Task.WhenAll(logCapture.Values).ConfigureAwait(false);
+        var logsFailure = await OwnedProcessFailureObserver.CaptureAsync(Task.WhenAll(logCapture.Values)).ConfigureAwait(false);
+        if (logsFailure is not null)
+        { failures.Add(logsFailure); }
         lifetime.Dispose();
+        if (failures.Count == 1)
+        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        if (failures.Count > 1)
+        { throw new AggregateException("Native diagnostic subscriptions and disposal failed.", failures); }
     }
 
     private async Task CaptureResourcesAsync(ResourceLoggerService logs)
@@ -140,6 +151,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
 
     private async Task CaptureLogsAsync(ResourceLoggerService logs, string resourceId, string name)
     {
+        var observation = logEvidence.GetOrAdd(resourceId, _ => new NativeLogSubscriptionEvidence(name));
         var buffer = nodeLogs.GetOrAdd(name, _ => new());
         var failures = nodeFailures.GetOrAdd(name, _ => new());
         try
@@ -148,13 +160,20 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
             {
                 foreach (var line in batch)
                 {
+                    observation.Received();
                     CaptureLogLine(buffer, failures, line.Content);
                 }
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+        { observation.Terminal(NativeLogSubscriptionPhase.Canceled); }
+        catch (Exception)
         {
+            observation.Terminal(NativeLogSubscriptionPhase.Faulted);
+            throw;
         }
+        finally
+        { observation.Terminal(NativeLogSubscriptionPhase.Completed); }
     }
 
     private string[] ReadTail(string name) => nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
@@ -179,59 +198,6 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         {
             buffer.TryDequeue(out _);
         }
-    }
-
-    private async Task<string> ReadDiscoveryAsync(string name, ReadOnlyMemory<byte> peerSecret,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var deadlineTimeout = new CancellationTokenSource(DiagnosticRequestTimeout, TimeProvider.System);
-            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
-            using var security = new PeerSecurity(peerSecret, TimeProvider.System, IntegrationRoutingOptions.Discovery());
-            using var http = new HttpClient(security.CreateHandler())
-            { Timeout = Timeout.InfiniteTimeSpan };
-            using var request = new HttpRequestMessage(HttpMethod.Get,
-                new Uri(app.GetEndpoint(name, ClusterFixtureProtocol.HttpEndpointName), ReplicaProtocol.DiscoveryPath));
-            using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token)
-                .ConfigureAwait(false);
-            return response.StatusCode == System.Net.HttpStatusCode.OK
-                ? await ReadBoundedTextAsync(response.Content, deadline.Token).ConfigureAwait(false)
-                : string.Format(CultureInfo.InvariantCulture, HttpStatusTemplate, DiscoveryUnavailable,
-                    (int)response.StatusCode);
-        }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        {
-            return DiscoveryUnavailable;
-        }
-        catch (Exception error) when (error is HttpRequestException or IOException or InvalidOperationException or KeyLoad.KeyLoadException)
-        {
-            return DiscoveryUnavailable;
-        }
-    }
-
-    private static async Task<string> ReadBoundedTextAsync(HttpContent content, CancellationToken cancellationToken)
-    {
-        if (content.Headers.ContentLength > MaximumResponseBytes)
-        {
-            return OversizedResponse;
-        }
-
-        var bytes = new byte[MaximumResponseBytes + 1];
-        await using var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        var count = 0;
-        while (count < bytes.Length)
-        {
-            var read = await stream.ReadAsync(bytes.AsMemory(count), cancellationToken).ConfigureAwait(false);
-            if (read == 0)
-            {
-                return Encoding.UTF8.GetString(bytes, 0, count);
-            }
-
-            count += read;
-        }
-
-        return OversizedResponse;
     }
 
 }

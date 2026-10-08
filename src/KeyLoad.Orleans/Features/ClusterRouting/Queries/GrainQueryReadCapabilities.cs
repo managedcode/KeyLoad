@@ -14,6 +14,10 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
                 GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(payload), expectedOwner, clock,
                 cancellationToken);
         }
+        if (kind == GrainReadKind.WaitForIndex)
+        {
+            return await search.WaitForIndexAsync(principal, GrainNativePayload.Read<WaitForIndexRequest>(payload), cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.Search)
         {
             return await search.SearchAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken).ConfigureAwait(true);

@@ -33,6 +33,8 @@ internal static class McpCanonicalTestData
     private const int ContractVersion = 1;
     private const string PlacementShardIdText = "79214e37-a89c-431f-b4e2-202d5d967883";
     private const long Generation = 1;
+    private const long WaitMinimumPosition = 1;
+    private const long WaitPlacementEpoch = 1;
     private const long Position = 0;
     private const int Limit = 10;
     internal static readonly Guid StableId = Guid.Parse(StableIdText);
@@ -110,6 +112,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QueryLiveRead, new ReadLiveQueryRequest(Ast(), Cursor)),
         Read(McpCatalogExpectations.OutboxStatus, new GetOutboxStatusRequest(Partition)),
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
+        Read(WaitForIndexProtocol.Tool, new WaitForIndexRequest(Partition, Resource, FieldPath, new CommitToken(StableId, Partition.AtomicPartitionId, WaitMinimumPosition, WaitPlacementEpoch))),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),

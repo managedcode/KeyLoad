@@ -12,20 +12,29 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
     [Test]
     public async Task AcEvent008SnapshotTailCommandRecoversAcrossLeaderLossAndContainerRestart()
     {
+        await ExecuteAsync(interruptAcceptedRestart: false);
+    }
+
+    [Test]
+    public async Task AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay()
+        => await ExecuteAsync(interruptAcceptedRestart: true);
+
+    private async Task ExecuteAsync(bool interruptAcceptedRestart)
+    {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await AggregateReplayRf3Scenario.CreateAsync(fixture, deadline.Token);
         var nodes = new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 };
-        using var clients = new WorkerClients(fixture, scenario.WorkerSecret, nodes);
+        using var clients = new AggregateReplayRf3WorkerClients(fixture, scenario.WorkerSecret, nodes);
         var append = await scenario.AppendInitialAsync(clients.Items[0], Guid.NewGuid(), deadline.Token);
         await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await clients.Items[0].CommitAsync(
             scenario.InitialSnapshotCommand(Guid.NewGuid()), deadline.Token));
         await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await RunLeaderLossAsync(scenario, nodes, clients.Items, clients.AdminItems, deadline.Token);
+        await RunLeaderLossAsync(scenario, nodes, clients.Items, clients.AdminItems, interruptAcceptedRestart, deadline.Token);
     }
 
     private async Task RunLeaderLossAsync(AggregateReplayRf3Scenario scenario, string[] nodes,
-        KeyLoadClient[] clients, KeyLoadClient[] administrators, CancellationToken cancellationToken)
+        KeyLoadClient[] clients, KeyLoadClient[] administrators, bool interruptAcceptedRestart, CancellationToken cancellationToken)
     {
         string? stoppedNode = null;
         var restarted = false;
@@ -47,13 +56,23 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
             await Assert.That(JsonDefaults.Serialize(retry).AsSpan()
                 .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
 
+            ContainerRuntimeInspection? accepted = null;
+            if (interruptAcceptedRestart)
+            {
+                accepted = await fixture.BeginContainerRestartAsync(stoppedNode, cancellationToken);
+                await AcceptedRestartCancellationAssertions.InterruptAsync(fixture, stoppedNode, cancellationToken);
+            }
             await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
             restarted = true;
+            if (accepted is not null)
+            { await AcceptedRestartCancellationAssertions.SameReplacementAsync(accepted, cancellationToken); }
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await WaitForClusterReadyAsync(nodes, administrators, cancellationToken);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
             await VerifyAllNodeParityAsync(scenario, nodes, clients, cancellationToken);
+            if (interruptAcceptedRestart)
+            { await NativeRestartReadinessEvidenceAssertions.HealthyAsync(fixture, cancellationToken); }
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))
         {
@@ -159,31 +178,4 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
         }
     }
 
-    private sealed class WorkerClients : IDisposable
-    {
-        internal KeyLoadClient[] Items { get; }
-        internal KeyLoadClient[] AdminItems { get; }
-        private readonly HttpClient[] clients;
-        private readonly HttpClient[] adminClients;
-
-        internal WorkerClients(ClusterFixture fixture, string secret, string[] nodes)
-        {
-            clients = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-            Items = clients.Select(client => new KeyLoadClient(client, secret, IntegrationClientOptions.Execution())).ToArray();
-            adminClients = nodes.Select(node => McpCallerHttp.Create(fixture, node)).ToArray();
-            AdminItems = adminClients.Select(client => new KeyLoadClient(client, fixture.AdminKey, IntegrationClientOptions.Execution())).ToArray();
-        }
-
-        public void Dispose()
-        {
-            foreach (var client in clients)
-            {
-                client.Dispose();
-            }
-            foreach (var client in adminClients)
-            {
-                client.Dispose();
-            }
-        }
-    }
 }

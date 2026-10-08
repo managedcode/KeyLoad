@@ -96,5 +96,7 @@ public enum GrainReadKind
     /// <summary>Reads the complete admitted private native runtime journal catalog.</summary>
     RuntimeJournalCatalog,
     /// <summary>Reads one current revisioned derived time-series rollup.</summary>
-    SampleRollup
+    SampleRollup,
+    /// <summary>Publishes the eligible native lexical generation at an acknowledged applied cut.</summary>
+    WaitForIndex
 }

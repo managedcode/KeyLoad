@@ -7,7 +7,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.Search;
 
 /// <summary>Persists the canonical three-document text/vector corpus through the actual SDK.</summary>
-internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDefinition Resource)
+internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDefinition Resource, CommitToken SeedToken)
 {
     internal const string Collection = "native-text";
     internal const string TextField = "/text";
@@ -49,8 +49,8 @@ internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDef
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(SeedCommand(partition), cancellationToken));
-        return new(partition, resource);
+        var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(SeedCommand(partition), cancellationToken));
+        return new(partition, resource, receipt.Token);
     }
 
     internal static CommandRequest SeedCommand(PartitionRef partition)

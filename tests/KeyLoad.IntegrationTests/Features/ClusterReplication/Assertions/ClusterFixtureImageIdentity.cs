@@ -34,7 +34,15 @@ internal static class ClusterFixtureImageIdentity
         var reference = await ReadVerifiedReferenceAsync(cancellationToken);
         var digest = reference[(reference.LastIndexOf(ReferenceDigestPrefix, StringComparison.Ordinal)
             + ReferenceDigestPrefix.Length)..];
-        await VerifyResourcesAsync(app, reference, digest);
+        await VerifyResourcesAsync(app, reference, digest, useBuiltImage: true);
+    }
+
+    internal static async Task VerifyFaultBaseAsync(DistributedApplication app, CancellationToken cancellationToken)
+    {
+        var reference = await ReadVerifiedReferenceAsync(cancellationToken);
+        var digest = reference[(reference.LastIndexOf(ReferenceDigestPrefix, StringComparison.Ordinal)
+            + ReferenceDigestPrefix.Length)..];
+        await VerifyResourcesAsync(app, reference, digest, useBuiltImage: false);
     }
 
     internal static Task<ClusterFixtureSourceImage> ReadVerifiedImageAsync(CancellationToken cancellationToken)
@@ -77,7 +85,7 @@ internal static class ClusterFixtureImageIdentity
         return new(reference, digest, Convert.ToHexStringLower(SHA256.HashData(bytes)));
     }
 
-    private static async Task VerifyResourcesAsync(DistributedApplication app, string reference, string digest)
+    private static async Task VerifyResourcesAsync(DistributedApplication app, string reference, string digest, bool useBuiltImage)
     {
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         var nodes = model.Resources.OfType<ContainerResource>().Where(node => ClusterFixtureProtocol.IsNodeName(node.Name)).ToArray();
@@ -90,7 +98,7 @@ internal static class ClusterFixtureImageIdentity
             await Assert.That(annotation.Image).IsEqualTo(imageName);
             await Assert.That(annotation.Tag).IsNull();
             await Assert.That(annotation.SHA256).IsEqualTo(digest);
-            await Assert.That(node.TryGetContainerImageName(out var actual)).IsTrue();
+            await Assert.That(node.TryGetContainerImageName(useBuiltImage, out var actual)).IsTrue();
             await Assert.That(actual!.EndsWith(ReferenceDigestPrefix + digest, StringComparison.Ordinal)).IsTrue();
         }
     }

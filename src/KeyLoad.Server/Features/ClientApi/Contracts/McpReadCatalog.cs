@@ -51,6 +51,7 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<ReadLiveQueryRequest, LiveQueryPage>(McpToolNames.QueryLiveRead, McpToolRoutes.QueryLiveRead, GrainReadKind.LiveQueryRead),
         McpOperationFactory.Read<GetOutboxStatusRequest, OutboxStatus>(McpToolNames.OutboxStatus, McpToolRoutes.OutboxStatus, GrainReadKind.OutboxStatus),
         McpOperationFactory.Read<ReadProjectionBatchRequest, ProjectionBatch>(McpToolNames.ProjectionsRead, McpToolRoutes.ProjectionsRead, GrainReadKind.ProjectionBatch),
+        McpOperationFactory.Read<WaitForIndexRequest, WaitForIndexResult>(WaitForIndexProtocol.Tool, WaitForIndexProtocol.Route, GrainReadKind.WaitForIndex),
         McpOperationFactory.Read<SearchRequest, RankedDocument[]>(McpToolNames.SearchExecute, McpToolRoutes.SearchExecute, GrainReadKind.Search),
         McpOperationFactory.Read<GraphSearchRequest, GraphSearchResult>(McpToolNames.SearchGraph, McpToolRoutes.SearchGraph, GrainReadKind.GraphSearch),
         McpOperationFactory.Read<BackupReceipt>(McpToolNames.AdminBackup, McpToolRoutes.AdminBackup, GrainReadKind.Backup),

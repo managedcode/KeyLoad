@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Query;
 
 /// <summary>Runs exact text, vector and hybrid ranking within one authorized read cut.</summary>
-public sealed class SearchEngine
+public sealed partial class SearchEngine
 {
     private readonly DatabaseEngine database;
     private readonly ITextProjection? textProjection;
