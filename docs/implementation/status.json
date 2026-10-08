@@ -28971,7 +28971,374 @@
         "Successful producer final dispatch and original bounded wait admission",
         "Failed/skipped/cancelled producer suppresses dispatch; actual failed terminal producer is rejected"
       ],
-      "qualification": "Static YAML/path/dependency inspection only; no new live GitHub dispatch or Pages result claimed."
+      "qualification": "Static path/dependency checks passed; actual trusted-main site/build push launched Website; actual failed terminal producer was rejected before build/deploy. Original Linux browser/coverage gate failed. Successful-producer dispatch/wait, backend-only push omission and final Pages qualification remain open.",
+      "firstNativeSitePush": {
+        "sourceCommit": "9d4dc435036bbd1f1de8163b8237a3dab16560ce",
+        "runId": 37747849535,
+        "runAttempt": 1,
+        "event": "push",
+        "checkJobId": 113213517814,
+        "publishJobId": 113216595996,
+        "checkConclusion": "failure",
+        "publishConclusion": "skipped",
+        "artifactId": 11537490120,
+        "archiveSha256": "8fc62998b8335c8a54e623f96d833a4496d2ec01f075e411bee4bd52a72c9a73",
+        "originalReport": {
+          "artifactRelativePath": "site-qualification-9d4dc435036bbd1f1de8163b8237a3dab16560ce-1/artifacts/site-evidence/site-tests/KeyLoad.SiteTests_net10.0_x64.trx",
+          "sha256": "7292c1787cc3b203fbe07264b03c90773bbf260852bed35d5547f3d327f45cd7",
+          "counters": {
+            "total": "6",
+            "executed": "6",
+            "passed": "4",
+            "failed": "2",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        "failedFlow": "Restored mobile scene after about:blank, before original browser completion; original boolean assertion omitted actual scene state. After-session coverage also failed with no completed browser receipt.",
+        "pagesPublished": false
+      },
+      "actualFailedProducerRejection": {
+        "sourceCommit": "9d4dc435036bbd1f1de8163b8237a3dab16560ce",
+        "consumerRunId": 37748814992,
+        "event": "workflow_dispatch",
+        "producerRunId": 37492665238,
+        "producerConclusion": "failure",
+        "checkJobId": 113216699229,
+        "waitConclusion": "failure",
+        "sourceDownloadConclusion": "skipped",
+        "websiteChecksConclusion": "skipped",
+        "publishJobId": 113216743936,
+        "publishConclusion": "skipped",
+        "originalGitHubMetadataSha256": "85eabbdfc4d1fea48983f5548307cf276064cd5144761bef702cbc5b5bfa2516",
+        "qualification": "Actual authenticated Linux bash-e bounded wait rejected the terminal failed own-main Benchmarks producer before source checkout and publication."
+      }
+    },
+    "stageXXOriginalLinux": {
+      "sourceCommit": "59e856254a4243ebc74780f95dec1623a9fe2dae",
+      "runId": 37744013727,
+      "runAttempt": 1,
+      "verifyJobId": 113201173382,
+      "verifyJobConclusion": "success",
+      "artifactId": 11537231168,
+      "archiveSha256": "e98c54682e7fc823855d5a2b7d5880c96d09a50a30f151116da3b4284e2db082",
+      "originalReports": {
+        "analyzers": {
+          "artifactRelativePath": "test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+          "sha256": "75d32b5ad0ffe2b822ef1310a66426a676c621a92a5dbf16d20f7714cdc4188e",
+          "counters": {
+            "total": "388",
+            "executed": "388",
+            "passed": "388",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "nativeCaseIdentitySha256": "a725506792922a13635a12fd8729683fadd19c4cd608d7b32bc07c1f5e009d04"
+        },
+        "native-source-ownership": {
+          "artifactRelativePath": "test-results-ubuntu-latest/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "bedc98e17fdd5491045f4f9f4f51a6cbc423b3935749e9fd1b324bdf0c299e33",
+          "counters": {
+            "total": "10",
+            "executed": "10",
+            "passed": "10",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "nativeCaseIdentitySha256": "31e5062642c2be8de94781c1c79541a4bfe0d025347cf68ad27bc8cf5b53f84b"
+        },
+        "recovery": {
+          "artifactRelativePath": "test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+          "sha256": "1f97d23f53e1993dc2ebea4634b9f86cbb5c4cfd76e534f3191ccaeee9901faf",
+          "counters": {
+            "total": "270",
+            "executed": "270",
+            "passed": "270",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "nativeCaseIdentitySha256": "e8cfd93a99f5e32a02b86091017fd0c06d88f3b4432475d0c3be3b18e60001fd"
+        },
+        "unit": {
+          "artifactRelativePath": "test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "8122f14f35b383294118d9b60c55fb514a5dec6c30618d9ce2c781a60e52634c",
+          "counters": {
+            "total": "3039",
+            "executed": "3039",
+            "passed": "3039",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "nativeCaseIdentitySha256": "909a5bdd891ca95e3d2d1c13295f617a02e3a822c9cbeafa72a2f0921f54e233"
+        },
+        "unit-scalar": {
+          "artifactRelativePath": "test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "ee7a256cefe84f72aa3cbbf7ec7ab98292192b59aa9cc6ea9a1f11639bc39413",
+          "counters": {
+            "total": "3039",
+            "executed": "3039",
+            "passed": "3039",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "nativeCaseIdentitySha256": "909a5bdd891ca95e3d2d1c13295f617a02e3a822c9cbeafa72a2f0921f54e233"
+        }
+      },
+      "normalScalarCaseIdentitiesEqual": true,
+      "rf3JobId": 113201104531,
+      "rf3RequiredStepConclusionObserved": "failure",
+      "coveredInputsStillRunningAtUtc": "2026-10-08T08:46:43Z",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "qualification": "Authenticated original complete Linux verify job only. Original required RF3 step failed; covered suite inputs still running. No full RF3, merged product coverage, endurance or task closure claim."
+    },
+    "stageXXIWebsiteDiagnosticDevelopment": {
+      "sourceParentCommit": "9d4dc435036bbd1f1de8163b8237a3dab16560ce",
+      "testFile": "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteContentBrowserTests.cs",
+      "testSourceSha256": "b4e11bdd72a000d7329dd362d7e280750032ba139dd4211ed0d611d8cd409612",
+      "change": "Retain actual scene state, backend/frame, real canvas count, page visibility and measured viewport/scroll geometry when the existing ready-or-unsupported assertion fails. No rendering, allowed states, timeouts, test selector or coverage thresholds changed.",
+      "originalUnchangedFlowR690": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=site",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-site-current-r690-original-content-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/SiteContent*/*"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 11.417,
+        "logSha256": "ce03fc4038847a6a5332b830e49d5f33586ce7c4609fa4a2d959bb8cf5c932e2",
+        "sourceInputs": 4864,
+        "assemblyInputs": 119,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "artifactRelativePath": "/private/tmp/keyload-site-current-r690-original-content-20261008-results/KeyLoad.SiteTests_net10.0_arm64.trx",
+            "sha256": "b90c2fdbd0edb85034028d151347cd6e019e1e90e06e8d696d0ce10a30212965",
+            "counters": {
+              "total": "5",
+              "executed": "5",
+              "passed": "5",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "siteJavaScriptCoverage": {
+          "sha256": "141cff9ad8b8a7e67cec63801229826651a8ae89417f7613c2d6a3aaa5cd3075",
+          "passed": true,
+          "totals": {
+            "executableLines": 1008,
+            "coveredLines": 946,
+            "aggregateLinesPercent": 93,
+            "blockOutcomes": 150,
+            "coveredBlockOutcomes": 126,
+            "aggregateBranchesPercent": 84
+          },
+          "critical": [
+            {
+              "path": "site/Features/BenchmarkComparisons/build-site.mjs",
+              "coveragePercent": 96,
+              "passed": true
+            },
+            {
+              "path": "site/Features/BenchmarkComparisons/bootstrap.mjs",
+              "coveragePercent": 93,
+              "passed": true
+            }
+          ],
+          "originalBrowserSessions": 1,
+          "scope": "Site JavaScript local native V8 coverage only; not product .NET functional coverage."
+        }
+      },
+      "diagnosticFlowR691": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=site",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-site-current-r691-diagnostic-content-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/SiteContent*/*"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 13.226,
+        "logSha256": "0039fe760ad2b691ad464ec17b03950919afadde0d4a32ba8183736f0be06321",
+        "sourceInputs": 4864,
+        "assemblyInputs": 119,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "originalReports": [
+          {
+            "artifactRelativePath": "/private/tmp/keyload-site-current-r691-diagnostic-content-20261008-results/KeyLoad.SiteTests_net10.0_arm64.trx",
+            "sha256": "6820f76ec8556184d3d6202d311d270e2a7982809322be950a35db8ee94fe15c",
+            "counters": {
+              "total": "5",
+              "executed": "5",
+              "passed": "5",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "siteJavaScriptCoverage": {
+          "sha256": "2874f5630eb4a35df4bd1f68b48ed4dbd1ada8bb3e227c288026653195d5b5f0",
+          "passed": true,
+          "totals": {
+            "executableLines": 1008,
+            "coveredLines": 946,
+            "aggregateLinesPercent": 93,
+            "blockOutcomes": 150,
+            "coveredBlockOutcomes": 126,
+            "aggregateBranchesPercent": 84
+          },
+          "critical": [
+            {
+              "path": "site/Features/BenchmarkComparisons/build-site.mjs",
+              "coveragePercent": 96,
+              "passed": true
+            },
+            {
+              "path": "site/Features/BenchmarkComparisons/bootstrap.mjs",
+              "coveragePercent": 93,
+              "passed": true
+            }
+          ],
+          "originalBrowserSessions": 1,
+          "scope": "Site JavaScript local native V8 coverage only; not product .NET functional coverage."
+        }
+      },
+      "localSetupFailures": "R687 stale site NuGet assets were restored; R688 sandbox socket denied before tests; R689 missed NODE_V8_COVERAGE and failed required session preparation. These are not scene execution or qualification. R692 owned build aborted after sandbox denied MSBuild IPC; R693 identified stale references to the deliberately removed own temporary NuGet cache. Canonical solution restore completed without package/source changes.",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Original new-source Linux scene diagnostic and final browser/coverage qualification",
+        "Successful producer wait and final Pages provider proof",
+        "Complete RF3 fault and current covered input/merge gates"
+      ],
+      "originalFullBuildR694": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-site-current-r694-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 172.242,
+        "log": "/private/tmp/keyload-site-current-r694-native-full-build-20261008.log",
+        "logSha256": "b76ad40c7e8e87b1658a8d8291a62e8b187c23a0c965c72ce785a68d3f4c54ef",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalFullFormatterR695": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 93.615,
+        "log": "/private/tmp/keyload-site-current-r695-native-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "staticGovernance": "passed_27_projects_4_modules_root_prefix_and_all_local_policies_preserved",
+      "sourceReview": "Only diagnostic evaluation on the original disallowed scene state; ready/unsupported, blank/restored/mobile whole flow and native coverage gates unchanged. README internal run history removed under the standing root README rule."
     }
   },
   "TIME-PROVIDER-001": {

@@ -128,7 +128,13 @@ internal sealed class SiteContentBrowserTests
 
     private static async Task AssertSceneStateAsync(SiteBrowserCdpClient cdp, string? state, CancellationToken token)
     {
-        await Assert.That(state is SiteBrowserUiTokens.StateReady or SiteBrowserUiTokens.StateUnsupported).IsTrue();
+        if (state is not (SiteBrowserUiTokens.StateReady or SiteBrowserUiTokens.StateUnsupported))
+        {
+            var diagnostic = await cdp.EvaluateAsync(SiteContentBrowserTokens.SceneFailureDiagnosticScript, false, token);
+            await Assert.That(state is SiteBrowserUiTokens.StateReady or SiteBrowserUiTokens.StateUnsupported)
+                .IsTrue().Because(diagnostic.GetRawText());
+        }
+
         var snapshot = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneSnapshotScript, false, token);
         if (state == SiteBrowserUiTokens.StateReady)
         {
@@ -147,6 +153,17 @@ internal sealed class SiteContentBrowserTests
 
 internal static class SiteContentBrowserTokens
 {
+    public const string SceneFailureDiagnosticScript = """
+        (() => {
+          const host = document.querySelector('#cluster-scene');
+          const box = host?.getBoundingClientRect();
+          return {state:host?.dataset.sceneState,frame:host?.dataset.frameState,
+            backend:host?.dataset.graphicsBackend,canvasCount:host?.querySelectorAll('canvas').length,
+            documentState:document.readyState,pageVisible:document.visibilityState,
+            scrollY:window.scrollY,viewportHeight:innerHeight,hostTop:box?.top,hostBottom:box?.bottom,
+            hash:location.hash,status:document.querySelector('[data-scene-status]')?.textContent.trim()};
+        })()
+        """;
     public const string ContentReadyPredicate = "document.readyState === 'complete' && document.querySelector('#benchmarks .empty-state') !== null";
     public const string Mobile = "mobile";
     public const string Empty = "empty";

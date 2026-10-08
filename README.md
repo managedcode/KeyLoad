@@ -349,25 +349,10 @@ qualification, full SQL and its native client protocol, foreign keys, scaling an
 endurance remain in progress. The [status tracker](docs/implementation/status.json)
 records the actual source, test results and remaining acceptance gates.
 
-The current source stage also adds protected incremental text-index maintenance
-with explicit generation reads, default-off public ANN reads, and bounded
-parallel document/partition queries across two configured RF3 groups. That stage's
-local solution build and formatter passed; 213 focused native operation scenarios
-pass in both normal and scalar modes, and three FTS process-recovery scenarios
-pass. The native inventory contains 3039 tests. Exact-source Linux RF3 and complete
-acceptance gates remain open; these additions do not increase the accepted task count.
-
-The quorum correction preserves exact failure diagnostics for individual replica
-discovery and returns `NoLeader` when the compatible voters cannot form a quorum.
-Its nine complete cohort flows passed in both normal and scalar modes. RF3 container rejection now reports
-the first failed admission check while retaining every original predicate. The
-latest correction validates malformed placement rows before unnecessary owner
-lookups and reports unregistered committed owners as corruption. The current
-local solution build and formatter pass, and all 3039 native unit cases pass,
-including 73 placement, owner-registration, graph and query flows and both
-original Linux unit failures. These local results are development evidence. The
-prior complete Linux run passed 3037/3039 unit cases in both modes and 270/270
-recovery cases. Exact-source Linux full-suite and RF3 qualification remain open.
+The latest Linux verification passed the complete unit suites in normal and
+scalar modes and the process-recovery suite. RF3 fault, complete model and
+performance qualification remain open. Original source identities, results and
+remaining gates belong in the [qualification records](docs/implementation/status.json).
 
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,
