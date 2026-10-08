@@ -96,58 +96,13 @@ public sealed partial class DatabaseEngine
     }
     private AtomicPartitionPlacementResolution AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
     {
-        const int EmptyMutationsLength = 0;
-
         var placement = ReadPlacementWitness(view, request.Partition);
         if (request.OwnershipEpoch != placement.PlacementEpoch)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
         }
 
-        if (!allowEmpty && request.Mutations.Length == EmptyMutationsLength || request.Mutations.Length > Limits.MaxBatchMutations)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, MutationCountBudgetMessage);
-        }
-
-        foreach (var mutation in request.Mutations)
-        {
-            ValidateMutationStructure(mutation);
-            if (allowEmpty && mutation is QueueToGraph or GraphToQueueMutation)
-            {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, CompositionBatchRequiredMessage);
-            }
-            JsonData.Identifier(mutation.Resource);
-            var capability = mutation switch
-            {
-                PutDocument or PatchDocument or DeleteDocument => Capability.DocumentsWrite,
-                AppendEvents => Capability.EventsAppend,
-                PublishTopic => Capability.TopicsPublish,
-                PurgeTopic => Capability.SchemaManage | Capability.TopicsRead,
-                EnqueueMessage => Capability.QueuePublish,
-                UpsertEdge or DeleteEdge or QueueToGraph or ApplyCrossPartitionReverseEdge
-                    or CompleteCrossPartitionReverseEdge => Capability.GraphWrite,
-                GraphToQueueMutation => Capability.QueuePublish,
-                CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer => Capability.QueuePublish,
-                ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule
-                    or CompareExchangeSaga or ExpireSaga => Capability.SchedulerManage | Capability.QueuePublish,
-                AppendSamples => Capability.SeriesAppend,
-                ExpireSamples => Capability.SeriesManage,
-                RefreshSampleRollup => Capability.SeriesManage | Capability.SeriesRead,
-                DropSampleRollup => Capability.SeriesManage,
-                StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
-                PutVector => Capability.DocumentsWrite,
-                global::KeyLoad.ApplyVectorProjection => Capability.DocumentsWrite,
-                _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedBatchMutationMessage)
-            };
-            Authorization.Require(principal, request.Partition, mutation.Resource, capability);
-            var resource = Resource(view, request.Partition, mutation.Resource);
-            if (mutation is StoreAggregateSnapshot)
-            {
-                Authorization.RequireReplayInput(principal, resource);
-            }
-            AuthorizeComposition(view, principal, request.Partition, mutation);
-            AuthorizeExtendedMutation(view, principal, request.Partition, mutation);
-        }
+        AuthorizeBatchMutations(view, principal, request, allowEmpty, BatchResourceAdmission.CurrentPhysicalOwner);
         return placement;
     }
 

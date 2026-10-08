@@ -239,13 +239,13 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "state": "PASS: complete native final SDK Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r794-sdk-nullability-final-full-build-20261008-diagnostics.json",
-      "qualification": "Local development; required current-source Linux runtime qualification remains open."
+      "state": "PASS: complete native current movement foundation Release solution,0warnings/errors,0source drift.",
+      "evidence": "/private/tmp/keyload-current-r798-movement-foundation-full-build-20261008-diagnostics.json",
+      "qualification": "Local development; exact current-source Linux runtime qualification remains open."
     },
     "currentFormatter": {
       "state": "PASS: complete native readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r793-sdk-nullability-full-native-format-20261008-receipt.json"
+      "evidence": "/private/tmp/keyload-current-r799-movement-foundation-full-native-format-20261008-receipt.json"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -35850,28 +35850,28 @@
           "owner": "sol61_security_finish",
           "task": "KL-015",
           "scope": "Security and telemetry acceptance, including actual exported HTTP/log privacy and native negative→healthy client flows; exclusive ServiceDefaults privacy join.",
-          "state": "WholeKL015: actual12normal+12scalar native HTTP/Orleans PASS; owns current Linux C1/authorization lifecycle gate and repair.",
+          "state": "Owns wholeKL015 C1/auth/cancellation and sole originalRF3 artifact harvest; prepared full foreign SDK Result denial oracle; native Linux telemetry12+12 passed separately.",
           "previousOwner": "sol_public_bridge_finish"
         },
         {
           "owner": "sol61_session_finish",
           "task": "KL-021",
           "scope": "Strong read/session tokens; malformed/negative native authority whole state/healthy regression and genuine isolated former-leader qualification.",
-          "state": "WholeKL014 response-nullability SDK transport integrated and actual normal/scalar supporting flows executed; current-source Linux cold bootstrap/replay gates and KL011/KL021 RF3 gates remain open.",
+          "state": "Owns wholeKL014/KL011/KL021; prepared full interrupted-write same-ID Conflict/original receipt/fresh healthy flow packet; current-source RF3 bootstrap/replay/composite/session gates remain required.",
           "previousOwner": "sol_read_lock_regression"
         },
         {
           "owner": "sol61_movement_finish",
           "task": "KL-036",
           "scope": "Controlled movement full acceptance; missing actual Install/Retire/Abort process/full-model gates and public move orchestration gaps.",
-          "state": "Owns wholeKL036; coherent public parent/checkpoint/native authenticated witness and meaningful wholeflow tests private/unsealed; terminalprocess15sourcejoined, Linux executionopen.",
+          "state": "WholeKL036 parent continues with first-issued phases/native reconciliation, original read metrics/downward budget/deadline and supported retained-mutation matrix; unsealed/unexecuted, no whole-task closure.",
           "previousOwner": "sol_terminal_abort_join"
         },
         {
           "owner": "root",
           "task": "TEST-PIPELINE-001",
           "scope": "Coherent native build/format, full original native census/classification, independent test lanes, current functional-only coverage, Linux original evidence, complete wave Git delivery.",
-          "state": "Whole SDK stage integrated/verified, exact native census and coverage classification refreshed, complete authorized wave commit/push; owns remaining Linux Unit causes."
+          "state": "Foundation16-path stage joined, full native build/format and10+10 actual outcome regressions passed; native3093 census and12discovery passed; full stage commit/push and genuine RF3 namespace root causes owned."
         }
       ],
       "liveMutationOwner": "root only during integration; no source/image mutation during native verification",
@@ -36012,6 +36012,116 @@
         "receiptSha256": "5e55cbefe1ddd88aa69034e49b107cf749b6b4055287fc4bce7ebe1ac25a5a73"
       },
       "ordinaryPrefixDiscoveryCorrection": "Original first discovery admission rejected a stale functional class prefix after adding four ordinary cases. Existing canonical selector builder changed only unit-functional-01 selector; every owner and case identity remained unchanged. Fresh actual full/five-group discovery in both modes passed. Original failed evidence folder retained."
+    },
+    "stageXXVIPartitionMovementFoundationDevelopment": {
+      "sourceParentCommit": "931e2d5e45132b1710751a864e2ad01cb97397ac",
+      "task": "KL-036",
+      "sourceStage": "Retained original successful Batch receipt reads require fresh native persisted permissions, genuine canonical retired source/control/fence/current-placement authority and exact original receipt/cut identity. Ordinary effect resource/owner admission is unchanged. Native abort fence13 oracle now executes before the actual later control commits14/15. No expected value is derived from the failing output.",
+      "guardedSourceJoin": {
+        "receipt": "/private/tmp/keyload-kl036-foundation16-root-source-join-20261008.json",
+        "receiptSha256": "125f6d55511b7362bc3fc2d94c99fbd1d5372f2bf30b27f6851300b45c398bbe"
+      },
+      "finalSourceReview": {
+        "receipt": "/private/tmp/keyload-kl036-foundation-root-final-source-review-20261008.json",
+        "receiptSha256": "2a71ba2d979f4c80509004ee0726509d544ae72741d842d78552184b00b7b310"
+      },
+      "originalBuildR796": {
+        "receipt": "/private/tmp/keyload-current-r796-movement-foundation-full-build-20261008-diagnostics.json",
+        "receiptSha256": "14c3f41645890a83da1ad46b22fa4411f706d7e272ae996dd36774534e330d8d"
+      },
+      "originalBuildR797": {
+        "receipt": "/private/tmp/keyload-current-r797-movement-foundation-full-build-20261008-diagnostics.json",
+        "receiptSha256": "4229518bf4c42be65511203650a374317307e9f7e605a9ad577cabb40f75a3c5"
+      },
+      "finalBuild": {
+        "receipt": "/private/tmp/keyload-current-r798-movement-foundation-full-build-20261008-diagnostics.json",
+        "receiptSha256": "0c1071b38b09563d2fc2f27bc63841d9f5c017ab80c730077fac8ea3dac5688f"
+      },
+      "finalFormatter": {
+        "receipt": "/private/tmp/keyload-current-r799-movement-foundation-full-native-format-20261008-receipt.json",
+        "receiptSha256": "9f74329f8928a7f98f0cf5c2cccd065dac4a66ebbce1c5e72701075975da7740"
+      },
+      "nativeExistingOutcomeRegressions": {
+        "receipt": "/private/tmp/keyload-kl036-r798-native-current-outcome-both-lanes-ledger-r1-20261008.json",
+        "receiptSha256": "23fff034f18b888810ac71a0047ecfe7891bd0aa069741ff587186ebc68027dc"
+      },
+      "newWholeNativeFlows": {
+        "cases": [
+          "RetiredPartitionOutcomeAuthorizationTests.ActualRetirementColdOwnerRevocationAndRestorationKeepOriginalEpochBoundOutcome",
+          "RetiredOutcomeMetadataAuthorizationTests.ActualRetiredColdOwnerKeepsCorruptMetadataBehindCurrentPersistedAuthorization"
+        ],
+        "requirements": [
+          "REQ-MOVE-002",
+          "REQ-MOVE-005",
+          "REQ-MOVE-007"
+        ],
+        "acceptance": [
+          "AC-MOVE-002",
+          "AC-MOVE-005",
+          "AC-MOVE-007"
+        ],
+        "execution": "Authored, discovered and current compiled source bound; actual Linux retired/cold topology execution pending. No local PASS inferred."
+      },
+      "currentFunctionalUnitInventory": {
+        "receipt": "/private/tmp/keyload-r798-native-functional-inventory-movement-foundation-20261008/selector-refresh-receipt.json",
+        "receiptSha256": "d7da58e3e550c7a766037471a3e9c6bb87106e83859a400b507c48b9c2f6a24c",
+        "nativeCases": 3093,
+        "functionalCases": 2688,
+        "requiredOrdinaryCases": 405,
+        "groups": [
+          {
+            "id": "unit-functional-01",
+            "cases": 547,
+            "classes": 140
+          },
+          {
+            "id": "unit-functional-02",
+            "cases": 530,
+            "classes": 125
+          },
+          {
+            "id": "unit-functional-03",
+            "cases": 511,
+            "classes": 161
+          },
+          {
+            "id": "unit-functional-04",
+            "cases": 528,
+            "classes": 138
+          },
+          {
+            "id": "unit-functional-05",
+            "cases": 572,
+            "classes": 127
+          }
+        ],
+        "inventorySha256": "21eb67d024f41a334123991597e401d081f43a9fe496212daee515fb4fbb4dd9",
+        "actualNormalAndScalarDiscovery": "All12 actual native full3093 and547/530/511/528/572 group identities passed per lane.",
+        "evidenceRoot": "artifacts/local/keyload-r798-final-native-functional-discovery-20261008",
+        "productCoveragePercent": null
+      },
+      "originalLinuxFoundationFailures": {
+        "source": "3458f6111f94e93d40334bc2cdaae008dac58a01",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37821315110",
+        "unit": "Original normal3068/3087 and scalar3068/3087; all19+19 retained failures belong to movement foundation.",
+        "recovery": "Original275/275 passed.",
+        "telemetryOriginalArtifact": {
+          "receipt": "/private/tmp/keyload-kl015-current-linux-37821315110-original-telemetry-trx-ledger-20261008.json",
+          "receiptSha256": "5374b54ea98bf6e6eecf25e494dc5b19d56bad55b7f778764f2e69405d9d547f"
+        },
+        "failureMap": {
+          "receipt": "/private/tmp/keyload-3458-original-linux-unit-live-failure-map-20261008.json",
+          "receiptSha256": "2502fa6c1a56e0ffad2f6e8cd5cac41457b11352a81d18b828e4a918e55b42cd"
+        },
+        "rf3": "Ordinary original RF3 test step failure observed; covered suites and terminal original artifact harvesting pending. No failing case diagnosis or acceptance inferred."
+      },
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Execute complete current-source Linux unit/scalar, process recovery and Docker/Aspire RF3 with original reports.",
+        "Complete KL036 public parent orchestration and extended/composition retained-read admission with every original policy, full-operation oracle and original bounded metrics/deadline.",
+        "Complete functional-only collector, endurance and resource/performance qualification."
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -40688,6 +40798,14 @@
         "Exact-current-source Linux normal/scalar/recovery and required Aspire Docker RF3 through real SDK/official MCP clients",
         "Terminal movement/install/publication/abort/retirement, genuine process cuts and public document bridge/native six-silo acceptance"
       ]
+    },
+    "currentFoundationDevelopment": {
+      "qualification": "Coherent native source repair for authentic Linux19+19 shared roots, existing10+10 native supporting regression flows passed; two new complete retired/cold authorization/corruption flows authored/current-discovered. Actual full current Linux execution and public movement remain open.",
+      "evidence": {
+        "receipt": "/private/tmp/keyload-kl036-r798-native-current-outcome-both-lanes-ledger-r1-20261008.json",
+        "receiptSha256": "23fff034f18b888810ac71a0047ecfe7891bd0aa069741ff587186ebc68027dc"
+      },
+      "runtimeQualified": false
     }
   },
   "KL-037": {

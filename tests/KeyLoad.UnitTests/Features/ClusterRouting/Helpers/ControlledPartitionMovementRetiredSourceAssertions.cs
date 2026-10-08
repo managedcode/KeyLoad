@@ -27,6 +27,8 @@ internal static class ControlledPartitionMovementRetiredSourceAssertions
         var replay = source.Journal.Submit(ControlledPartitionMovementCorpus.SeedOperation(source.Database,
             originalRecordedAt), cancellationToken);
         await ControlledPartitionMovementReceiptAssertions.ReplayAsync(replay, originalReceipt);
+        await ControlledPartitionMovementRetiredOutcomeRejections.AssertAsync(source, originalReceipt,
+            originalRecordedAt, cancellationToken);
         await Assert.That(source.Store.Position).IsEqualTo(position);
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(index);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store)

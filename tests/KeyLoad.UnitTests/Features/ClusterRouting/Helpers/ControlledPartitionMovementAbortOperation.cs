@@ -19,11 +19,11 @@ internal static class ControlledPartitionMovementAbortOperation
             sourceRuntime, sourceAdmission, callerAddress, cancellationToken);
         var fence = await ControlledPartitionMovementGrantFlow.ExecuteAsync(source, sourceRuntime,
             sourceAdmission, corpus, prepared.Prepared, callerAddress, prepared.ExpiresAt, cancellationToken);
+        await ControlledPartitionMovementFenceStateAssertions.RetainedAsync(source, originalReceipt,
+            initialPosition, cancellationToken);
         var accepted = await ControlledPartitionMovementFenceSettlementFlow.ExecuteAsync(source, sourceRuntime,
             sourceAdmission, corpus, prepared.Prepared, fence.Authorization, fence.Fence, callerAddress,
             prepared.ExpiresAt, cancellationToken);
-        await ControlledPartitionMovementFenceStateAssertions.RetainedAsync(source, originalReceipt,
-            initialPosition, cancellationToken);
         await ControlledPartitionMovementActiveAbort.ExecuteAsync(source, target, sourceRuntime, targetRuntime,
             sourceAdmission, targetAdmission, corpus, accepted, callerAddress, prepared.ExpiresAt,
             cancellationToken);
