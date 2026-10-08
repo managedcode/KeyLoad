@@ -60,18 +60,8 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
 
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
-            if (request.Envelope.CommandKind == OperationKind.ReceiveAcrossLanes)
-            {
-                var result = await MultiLaneReceiveExecution.ExecuteAsync(request, GrainFactory, services, codec,
-                    clock, chunkSerializer, options, diagnostics, writer.CancellationToken).ConfigureAwait(true);
-                try
-                { reply = GrainReplyFactory.Value(result, options, writer.CancellationToken); }
-                catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-                {
-                    GrainFailureDiagnostics.Mark(error, GrainFailureStage.ReplyEncoding);
-                    throw;
-                }
-            }
+            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex)
+            { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
             else if (command)
             {
                 stage = GrainFailureStage.PartitionResolution;
@@ -93,6 +83,31 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         {
             return GrainReplyFactory.StreamResult(reply: GrainReplyFactory.Failure(error: error, command: command, diagnostics: diagnostics,
                 requestId: requestId, stage: stage, cancellationToken: writer.CancellationToken, options: options), options: options);
+        }
+    }
+
+    private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+    {
+        if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
+        {
+            var result = await AnnMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,
+                clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
+            return EncodeParent(result, writer.CancellationToken);
+        }
+        var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, GrainFactory, services, codec,
+            clock, chunkSerializer, options, diagnostics, writer.CancellationToken).ConfigureAwait(true);
+        return EncodeParent(lanes, writer.CancellationToken);
+    }
+
+    private GrainOperationReply EncodeParent<T>(T result, CancellationToken token)
+    {
+        try
+        { return GrainReplyFactory.Value(result, options, token); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.ReplyEncoding);
+            throw;
         }
     }
 }

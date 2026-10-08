@@ -12,6 +12,25 @@ const safeFailure = 'Original-node coverage image preparation failed.\n';
 const safeChildTimeout = 'The original native child exceeded its operation bound.';
 const safeSettlementTimeout = 'The original native child or readers did not settle within the captured deadline.';
 const safeOutputOverflow = 'Original native child output exceeded its bound.';
+const preparationObservation = { schemaVersion: 1, stage: 'Arguments', terminal: null };
+const maximumObservationBytes = 1024;
+
+function writeObservation() {
+  const line = `Original-node coverage preparation observation: ${JSON.stringify(preparationObservation)}\n`;
+  if (Buffer.byteLength(line, 'utf8') <= maximumObservationBytes) {
+    try {
+      writeSync(process.stderr.fd, line);
+    } catch {
+      // Diagnostic output cannot replace the original failed native outcome or leak a raw IO exception.
+      process.exitCode = 1;
+    }
+  }
+}
+
+function closedSignal(signal) {
+  if (signal === null || signal === 'SIGTERM' || signal === 'SIGKILL') return signal;
+  return 'Other';
+}
 
 function positive(value) {
   if (typeof value !== 'string' || !decimalPattern.test(value) || !Number.isSafeInteger(Number(value))) {
@@ -20,11 +39,12 @@ function positive(value) {
   return Number(value);
 }
 
-async function collect(stream, bound, state) {
+async function collect(stream, bound, state, terminal, channel) {
   const chunks = [];
   let length = 0;
   for await (const chunk of stream) {
     length += chunk.length;
+    terminal[channel] += chunk.length;
     state.totalBytes += chunk.length;
     if (state.totalBytes > bound) {
       if (!state.overflow) {
@@ -100,7 +120,7 @@ function settleFailure(primary, failures, originalTasksUnsettled = false) {
   throw failure;
 }
 
-async function settle(child, stdout, stderr, timeoutMs, settlementMs) {
+async function settle(child, stdout, stderr, timeoutMs, settlementMs, terminal) {
   const childErrors = [];
   const outcomes = [];
   const failures = [];
@@ -118,9 +138,16 @@ async function settle(child, stdout, stderr, timeoutMs, settlementMs) {
     },
   };
   const tasks = [
-    observe(closeTask(child, childErrors), outcomes, 0),
-    observe(collect(child.stdout, stdout.bound, state), outcomes, 1),
-    observe(collect(child.stderr, stderr.bound, state), outcomes, 2),
+    observe(closeTask(child, childErrors).then(value => {
+      terminal.exitCode = value.code;
+      terminal.signal = closedSignal(value.signal);
+      terminal.originalExitJoined = true;
+      return value;
+    }), outcomes, 0),
+    observe(collect(child.stdout, stdout.bound, state, terminal, 'stdoutBytes')
+      .finally(() => { terminal.stdoutJoined = true; }), outcomes, 1),
+    observe(collect(child.stderr, stderr.bound, state, terminal, 'stderrBytes')
+      .finally(() => { terminal.stderrJoined = true; }), outcomes, 2),
   ];
   const operationDeadline = performance.now() + timeoutMs;
   const outcome = await waitForOutcome(operationDeadline, tasks, overflow);
@@ -162,11 +189,18 @@ async function settle(child, stdout, stderr, timeoutMs, settlementMs) {
 }
 
 async function run(executable, args, cwd, maximumBytes, timeoutMs, settlementMs) {
+  preparationObservation.terminal = null;
   const child = spawn(executable, args, {
     cwd, shell: false, windowsHide: true, detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
-  return settle(child, { bound: maximumBytes }, { bound: maximumBytes }, timeoutMs, settlementMs);
+  const terminal = { stage: preparationObservation.stage, exitCode: null, signal: null, stdoutBytes: 0, stderrBytes: 0,
+    originalExitJoined: false, stdoutJoined: false, stderrJoined: false };
+  try {
+    return await settle(child, { bound: maximumBytes }, { bound: maximumBytes }, timeoutMs, settlementMs, terminal);
+  } finally {
+    preparationObservation.terminal = { ...terminal };
+  }
 }
 
 async function writeCreateOnly(destination, bytes) {
@@ -306,11 +340,13 @@ async function main(args) {
   const operationSeconds = positive(operationSecondsText);
   const settlementSeconds = positive(settlementSecondsText);
   const root = path.resolve(outputRoot);
+  preparationObservation.stage = 'InvocationRead';
   const invocationBytes = await readRegularBounded(invocationPath, maximumBytes);
   const invocation = JSON.parse(invocationBytes.toString('utf8'));
   const context = path.resolve(invocation.contextDirectory);
   const runPath = path.join(root, 'functional-coverage.rf3-run.v1.json');
   const runManifest = JSON.parse((await readRegularBounded(runPath, maximumBytes)).toString('utf8'));
+  preparationObservation.stage = 'BaseVerification';
   const base = await verifyBaseReceipt(root, maximumBytes, runManifest.sourceRevision);
   const expectedImageReference = `keyload/functional-coverage:${runManifest.runId.replaceAll('-', '')}`;
   if (!context.startsWith(`${root}${path.sep}`) || imageReference !== expectedImageReference ||
@@ -320,23 +356,29 @@ async function main(args) {
   const materializerArgs = [materializerPath, `--invocation=${invocationPath}`,
     `--maximum-descriptor-bytes=${maximumBytes}`];
   await verifyBaseUnchanged(base, maximumBytes);
+  preparationObservation.stage = 'Materialize';
   const materialized = await run(process.execPath, materializerArgs, path.dirname(materializerPath), maximumBytes,
     operationSeconds * 1000, settlementSeconds * 1000);
+  preparationObservation.stage = 'BaseVerification';
   await verifyBaseUnchanged(base, maximumBytes);
+  preparationObservation.stage = 'MaterializerReceipt';
   const materializerReceipt = validateMaterializerReceipt(materialized.outBytes);
   if (path.resolve(materializerReceipt.contextDirectory) !== context) {
     throw new Error('context');
   }
   await writeCreateOnly(path.join(root, 'functional-coverage.materializer-result.json'), materialized.outBytes);
+  preparationObservation.stage = 'DockerBuild';
   const build = await run('docker', ['build', '--tag', imageReference, context], root, maximumBytes,
     operationSeconds * 1000, settlementSeconds * 1000);
   void build;
+  preparationObservation.stage = 'ImageInspect';
   const inspected = await run('docker', ['image', 'inspect', imageReference, '--format', '{{json .Id}}'], root,
     maximumBytes, operationSeconds * 1000, settlementSeconds * 1000);
   const imageId = JSON.parse(inspected.outBytes.toString('utf8'));
   if (typeof imageId !== 'string' || !imageIdPattern.test(imageId)) {
     throw new Error('image');
   }
+  preparationObservation.stage = 'ImageReceipt';
   await writeCreateOnly(path.join(root, 'functional-coverage.image-inspect.json'), inspected.outBytes);
 }
 
@@ -346,10 +388,12 @@ try {
   if (failure.originalTasksUnsettled === true) {
     try {
       writeSync(process.stderr.fd, safeFailure);
+      writeObservation();
     } finally {
       process.exit(1);
     }
   }
   process.stderr.write(safeFailure);
+  writeObservation();
   process.exitCode = 1;
 }

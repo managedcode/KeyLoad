@@ -16,6 +16,8 @@ public static class KeySpace
     private const string AppliedName = "last-applied";
     private const string ClockName = "clock";
 
+    internal static byte[] ResourcePrefix(string tenant, string database) => KeyCodec.Encode(CatalogSpace, tenant, database);
+
     internal static byte[] AppliedBytes { get; } = KeyCodec.Encode(SystemSpace, AppliedName);
     internal static byte[] ClockBytes { get; } = KeyCodec.Encode(SystemSpace, ClockName);
 

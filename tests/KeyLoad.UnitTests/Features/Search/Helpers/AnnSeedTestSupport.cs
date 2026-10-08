@@ -24,7 +24,7 @@ internal static class AnnSeedTestSupport
 
     internal static TestDatabase Create(int count = 3, DatabaseLimits? limits = null)
     {
-        var database = new TestDatabase(limits);
+        var database = new TestDatabase(limits, nativeReplicaAdmission: true);
         try
         {
             database.Configure(Collection, ResourceKind.Collection, fields:
@@ -45,9 +45,11 @@ internal static class AnnSeedTestSupport
             Persist(database, Principal, Capability.VectorSearch, [FieldUse], owner: Owner, restrictRows: true);
             return database;
         }
-        catch (Exception)
+        catch (Exception primary)
         {
-            database.Dispose();
+            try
+            { database.Dispose(); }
+            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
     }

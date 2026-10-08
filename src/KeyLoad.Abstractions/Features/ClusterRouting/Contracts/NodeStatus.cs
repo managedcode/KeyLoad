@@ -1,7 +1,7 @@
 namespace KeyLoad;
 
 /// <summary>Reports node identity, replication progress, and readiness.</summary>
-/// <param name="NodeId">The configured node identifier.</param>
+/// <param name="NodeId">The canonical persisted physical storage owner identifier, formatted as a GUID.</param>
 /// <param name="Incarnation">The unique identifier for this process incarnation.</param>
 /// <param name="Applied">The highest committed position applied by this node.</param>
 /// <param name="Leader">The current leader identifier, if known.</param>

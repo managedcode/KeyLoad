@@ -45,9 +45,10 @@ internal sealed class McpReplyOwner : IDisposable
     /// <param name="code">The database error category, never an exception or caller message.</param>
     /// <param name="requestId">The actual execution identity, or null before database dispatch.</param>
     /// <param name="maximumBytes">The inclusive complete wrapper ceiling and private writer capacity.</param>
+    /// <param name="ownedDetail">Actual server diagnostic considered only by the closed safe mapping.</param>
     /// <returns>An owner for the fixed safe failure response.</returns>
-    internal static McpReplyOwner Failure(ErrorCode code, Guid? requestId, int maximumBytes)
-        => Open(McpReplyWriter.Failure(code, requestId, maximumBytes), isError: true);
+    internal static McpReplyOwner Failure(ErrorCode code, Guid? requestId, int maximumBytes, string? ownedDetail = null)
+        => Open(McpReplyWriter.Failure(code, requestId, maximumBytes, ownedDetail), isError: true);
 
     /// <summary>Creates fresh native result and text objects while borrowing this owner's structured-content element.</summary>
     /// <returns>A native tool result whose document must not outlive this owner.</returns>

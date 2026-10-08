@@ -534,3 +534,85 @@ Original KL034 is Search freshness contract (architecture-v0.3.uk.md), not ANN a
 6. Actual native tests must prove acknowledged prefix success, wrong scope/future token, fresh field denial, elapsed deadline and cancellation after observed real work, full canonical image/cut invariance and subsequent healthy literal text ranks. Actual SDK/official MCP/Q1 CALL must use an acknowledged token, compare full typed wait results on an owning node/cut where comparable and then independent literal search results. Node cuts must not be assumed equal across nodes. Required after-join Linux normal/scalar/RF3 qualification is explicit and unexecuted.
 
 REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 → NativeTextWaitForIndexTests.RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy (future/wrong-incarnation two native cases); same-cut applied token authority and complete healthy literal Ukrainian/English output. REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002 → NativeTextWaitObservedWorkTests.ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy (original cancellation/deadline two cases); real native range-work, exact safe errors/no partial, full canonical bytes/cut and complete healthy output. REQ-SEARCH-WAIT-003 / AC-SEARCH-WAIT-003 → NativeTextWaitRf3Tests.AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted; actual persisted ordinary identity, protected field denial, SDK/official MCP and both existing Q1 CALL routes, complete result parity and literal deleted-document exclusion. Existing native catalog/decode cases verify shared generated schemas and71 operations/30 body read DTOs as supporting controls, not product operation evidence. All execution evidence is pending root native runs.
+
+
+## TASK-KL031-NATIVE-ADMIN-MAINTENANCE-001 (private first-release contract)
+
+REQ-ANN-MAINT-001 / AC-ANN-MAINT-001: one native admin maintenance parent is dispatched through the distinct RequestGrain special-parent boundary; every configure/read/exact-through/checkpoint/release child uses fresh signed native CQRS identity and the existing canonical operation. The parent is absent from CoreAtomic payload mappings and standalone Core submit rejects it without effects. Persisted ClusterAdministrator is reloaded after each quorum barrier, before any seed or owner access. SDK and official MCP invoke the same bounded generated operation schema via authorized on-demand discovery; ordinary VectorSearch remains unchanged and public ANN remains disabled until AC-ANN-008.
+
+REQ-ANN-MAINT-002 / AC-ANN-MAINT-002: the typed request freezes command, canonical scope, vector space, consumer generation and physical NodeId/incarnation/placement. Only bounded generation/cut/digest/status and genuine canonical child receipts leave the physical owner. Existing native CQRS started/progress/terminal/error/cancellation/maximum-buffer limits apply; typed closed maintenance stages carry no payload or credentials. A wrong physical owner fails OwnershipLost, stale generation/incarnation fails TokenInvalidated, missing/corrupt canonical authority fails Corruption, denied admin fails PermissionDenied, budget/deadline exhaustion returns original BudgetExceeded without partial success.
+
+REQ-ANN-MAINT-003 / AC-ANN-MAINT-003: restart/replay never uses a disposable manifest as durable outcome authority. An active nonempty checkpoint is reauthorized against its genuine canonical ProjectionReceipt; release invalidates prior generation outcomes and empty checkpoints do not gain fabricated expired-token receipts. Cancellation after a canonical child may commit remains UnknownWriteOutcome and original diagnostic; fresh signed read/checkpoint reconciliation is required. Owning maintenance work is joined before node-local owner shutdown; primary and cleanup failures are retained. Native Unit/process and real SDK/official MCP RF3 positive/revoked/wrong-owner/cancel/restart/healthy flows remain required, source-authored is not PASS.
+
+Canonical details and file/lifetime/pin stages: [Managed ANN](Search/ManagedAnn.md), [ADR-019](../ADR/ADR-019-managed-ann.md). Rollout is current first-release native generated aliases/IDs only, with no legacy reader/migration/fallback; no SQL language extension or public approximate query eligibility is implied. Root owns catalog/schema/native integration and actual Linux qualification.
+
+## Native dependency invalidation and explicit rebuild (owner-approved 2026-10-08)
+
+REQ/AC-ANN-GEN-004/006 and AC-ANN-007: exact-through replay consumes same-partition native putDocument, patchDocument, deleteDocument, putVector and applyVectorProjection entries, including canonical nested Target. Consumer Resources is empty (all same-partition resources) to retain source-document transitions as well as target writes. Native mutation limits, byte/work admission and signed checkpoint contracts remain unchanged.
+
+Pinned capture records a bounded native identity of current resource policy/configuration within the admitted atomic transaction domain; it excludes user documents and credentials, is computed inside the same cut, and is checked under fresh persisted authorization before generation use. Configuration transitions without native outbox history explicitly invalidate the generation. Replay never imports fresh U vector values as deltas. It may remove rows excluded by the actual fresh authorized U cut, then verifies complete actual replay corpus bytes/digest against U. Any remaining eligible row absent/different in replay, or unavailable policy/dependency history, fails HistoryUnavailable with exact safe detail "The native ANN dependency history is unavailable; explicitly rebuild the generation." No partial generation/results are served.
+
+An explicit Build maintenance request can provision a fresh active generation/canonical cut and publish only after native seed/replay verification. Restore validates and loads original arrays and applies actual deltas; it never invokes Build as a fallback. Policy hide/restore must demonstrate invalidation/no partial/full canonical no-effect, then explicitly invoked fresh build and independent literal results. All new public progress/error/owner use boundaries share this rule; public approximate Search remains disabled pending AC-ANN-008. Native source declaration is not execution/qualification.
+
+### ANN physical-owner discovery (private implementation contract)
+
+The existing persisted-administrator NodeStatus operation already exposes `NodeId` as the actual canonical `Store.Identity.NodeId.ToString()`; consumers must strictly parse a nonempty GUID. No duplicate identity field is added; Id9 consensus term remains unchanged. This value is discovery, never caller authority. Administrative ANN maintenance must bind this GUID, current physical placement and persisted partition incarnation, then reload authorization and fresh quorum at each separately signed child request. SDK and official MCP discovery followed by the fenced maintenance operation are required real RF3 proof; an unavailable or moved owner fails closed, without translating an identity from a process name. Ordinary callers do not acquire administrative authorization from this field.
+
+The two native ANN admin RF3 argument instances register their actual standard execution identity with the existing fixture ledger. They do not expand the frozen eleven-case covered RF3 selection; covered-profile eligibility requires a separately reviewed exact inventory and real collected evidence. No new case is relabeled as a completed covered operation.
+
+
+## Closed owned diagnostic parity (TASK-MCP-OWNED-SAFE-DETAIL-PARITY-001)
+
+REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/005/007 require the actual SDK and
+MCP/Q1 CALL safe diagnostics to agree for the accepted owned failures. Preserve
+the exact owned ordinal pairs listed in this contract: `TokenInvalidated` / `The document session token belongs
+to another incarnation.` and `Validation` / `The declared vector profile does
+not match the configured field.`. The native MCP invocation forwards the actual
+server-owned KeyLoad detail to this closed selector, which returns a fixed owned
+literal; arbitrary, null, mismatched-code and private details retain the existing
+generic code-derived response. No roles, model identity, field path, payload or
+exception detail is reflected. Wrapper bytes, request identity, status, summary,
+resource reservation and joined owner lifetime remain unchanged.
+
+Implementation: ClientApi McpToolDispatcher -> McpRequestState -> McpReplyOwner
+-> McpReplyWriter -> McpReplyProtocol. Native `McpOwnedDiagnosticWholeFlowTests`
+executes real ZoneTree document session rejection and direct/projection vector
+failed receipts/replay/no-effects followed by literal healthy results and the
+actual bounded MCP reply writer. The supporting unknown-detail control remains
+non-product evidence. Root must rerun the existing official SDK/MCP/Q1 RF3
+foreign-incarnation and configured-vector-profile cases; source/unit evidence
+does not qualify those transports. No schema/catalog, fallback, timeout,
+authorization or failure-retention contract changes. Rollback removes this
+closed mapping and its forwarding/tests, restoring generic diagnostic loss.
+
+
+### Exact additional session categories from the existing RF3 oracle
+
+The unchanged DocumentSessionReadRf3Assertions.RejectedAsync tests five real rejected tokens; besides foreign incarnation, its actual Core path requires exact TokenInvalidated literals `The document session token belongs to another atomic partition or placement.`, `The document session token position must be positive.`, and `The document session token is beyond the current quorum-applied cut.`. Add only these exact code/literal pairs. This closes the same operation parity repair; no arbitrary detail or new diagnostic category is admitted. Native wholeflow executes all five token failures and healthy reads under one unchanged store cut.
+
+
+## Exact scope-denied diagnostic follow-on (TASK-MCP-SCOPE-DENIED-PARITY-002)
+
+REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/005/007 under ADR-039 also preserve
+exact `PermissionDenied` / `The principal cannot perform this operation in this
+scope.` from the actual persisted AuthorizationPolicy and unchanged
+CrossTenantRf3ErrorAssertions.McpAsync oracle. This adds exactly one closed
+code/literal pair, returning an owned constant; arbitrary text, suffix, private
+data and mismatched code remain the prior fixed safe response. No row/entity,
+field, grant, payload or credential is disclosed. New
+`McpScopeDeniedDiagnosticWholeFlowTests` performs a real persisted principal
+denial before invalid-token diagnostics, complete native store/cut invariance,
+native bounded MCP problem parity, then fresh persisted epoch/grant and literal
+healthy session read. Original official SDK/MCP cross-tenant wholeflow remains
+required; no source/runtime qualification or acceptance closure is inferred.
+This packet layers on TASK-MCP-OWNED-SAFE-DETAIL-PARITY-001, retaining its exact
+five pairs, wrapper ownership/budgets/summary and existing generic fallbacks.
+
+## c028 native WaitForIndex discovery oracle correction
+
+AC-MCPGW-001/002/004 and the existing KL034 WaitForIndex contract require the official SDK discovery whole flow to request the independently named `keyload_search_wait_for_index` capability, with required partition/collection/textField/minimumToken request fields and appliedToken/schemaVersion/policyEpoch result fields; read-only/idempotent/destructive hints remain true/true/false. TASK-C028-MCP-WAIT-INDEX-INVENTORY-001 corrects the omitted independent expectation. The actual runtime operation is already registered; canonical tool count71 remains unchanged. The original c028 case discovered only its70 expected entries before failing count71, so that failure is not evidence of a missing runtime operation. Existing official-client schema/effect discovery case must execute again; no runtime qualification is claimed. ADR: existing ADR009 native publication and ADR039 public schema contracts remain unchanged.
+
+
+### Stage XVI canonical catalog join
+
+The original c028 inventory failure concerned its unchanged71-operation baseline and omitted independent WaitForIndex expectation. The next native ANN maintenance stage adds one actual authorized parent operation, making the current complete catalog72. The current independent schema/effect expectations retain both WaitForIndex and ANN maintenance; neither addition lowers the expected count. Initial bounded discovery and the closed eleven covered-RF3 cases remain unchanged. Actual official SDK discovery and full RF3 qualification are pending.

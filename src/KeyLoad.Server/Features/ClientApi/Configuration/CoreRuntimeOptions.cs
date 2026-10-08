@@ -18,6 +18,8 @@ internal sealed record CoreRuntimeOptions(
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
     IOptions<KeyLoad.Query.Features.Search.PackedAnnOptions> PackedAnn,
     IOptions<KeyLoad.Core.Features.Search.AnnSeedOptions> AnnSeed,
+    IOptions<KeyLoad.Query.Features.Search.PackedAnnStorageOptions> PackedAnnStorage,
+    IOptions<AnnMaintenanceOptions> AnnMaintenance,
     IOptions<QueryExecutionOptions> QueryExecution,
     IOptions<CacheMemoryLimits> CacheMemory,
     IOptions<CacheReadPermitOptions> CacheReadPermit,
@@ -38,6 +40,8 @@ internal sealed record CoreRuntimeOptions(
         _ = TimeSeriesExecution.Value;
         _ = PackedAnn.Value;
         _ = AnnSeed.Value;
+        _ = PackedAnnStorage.Value;
+        _ = AnnMaintenance.Value;
         _ = QueryExecution.Value;
         _ = CacheMemory.Value;
         _ = CacheReadPermit.Value;
@@ -59,6 +63,8 @@ internal sealed record CoreRuntimeOptions(
         services.AddSingleton(TimeSeriesExecution);
         services.AddSingleton(PackedAnn);
         services.AddSingleton(AnnSeed);
+        services.AddSingleton(PackedAnnStorage);
+        services.AddSingleton(AnnMaintenance);
         services.AddSingleton(QueryExecution);
         services.AddSingleton(CacheMemory);
         services.AddSingleton(CacheReadPermit);

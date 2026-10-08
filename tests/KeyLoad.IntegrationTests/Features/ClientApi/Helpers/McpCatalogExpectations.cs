@@ -7,6 +7,14 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations
 {
+    private const string AnnMaintainName = "keyload_search_ann_maintain";
+    private static readonly string[] AnnRequiredFields = ["commandId", "consumer", "collection", "field", "space", "indexGeneration", "nodeId", "placement", "mode"];
+    private const string WaitForIndexName = "keyload_search_wait_for_index";
+    private const string TextFieldProperty = "textField";
+    private const string MinimumTokenProperty = "minimumToken";
+    private const string AppliedTokenProperty = "appliedToken";
+    private const string SchemaVersionProperty = "schemaVersion";
+    private const string PolicyEpochProperty = "policyEpoch";
     private const string MultiLaneReceiveName = "keyload_messages_receive_across_lanes";
     private const string RequestsProperty = "requests";
     private const string DashboardName = "keyload_admin_dashboard";
@@ -15,6 +23,7 @@ internal static class McpCatalogExpectations
     internal static ImmutableArray<McpToolExpectation> Entries { get; } =
     [
         .. McpBlobCatalogExpectations.Entries,
+        new(AnnMaintainName, false, false, true, McpExpectedBody.Object, false, [.. AnnRequiredFields]),
         Read(McpCallerTools.DocumentsGet, [McpDiscoveryProtocol.Reference]),
         Read(McpCallerTools.StreamsRead, [McpDiscoveryProtocol.Stream]),
         Read(McpCallerTools.StreamsReplay, [McpDiscoveryProtocol.Stream, McpDiscoveryProtocol.ReducerVersion]),
@@ -68,6 +77,9 @@ internal static class McpCatalogExpectations
         Read(McpCallerTools.QueryLiveRead, [McpDiscoveryProtocol.Query, McpDiscoveryProtocol.Cursor]),
         Read(McpCallerTools.OutboxStatus, [McpDiscoveryProtocol.Partition]),
         Read(McpCallerTools.ProjectionsRead, [McpDiscoveryProtocol.Consumer]),
+        Read(WaitForIndexName, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
+            TextFieldProperty, MinimumTokenProperty],
+            [AppliedTokenProperty, SchemaVersionProperty, PolicyEpochProperty]),
         Read(McpCallerTools.SearchExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]),
         Read(McpCallerTools.SearchGraph, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Search]),
         new(McpCallerTools.AdminBackup, false, false, false, McpExpectedBody.None, false, []),

@@ -88,8 +88,10 @@ internal static class NativeTextRf3ReplayAssertions
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
         var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, token));
-        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(JsonDefaults.Serialize(official.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue()
+            .Because(NativeTextRf3ResultDiagnostic.Describe("SDK", actual, expected));
+        await Assert.That(JsonDefaults.Serialize(official.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue()
+            .Because(NativeTextRf3ResultDiagnostic.Describe("MCP", official.Value, expected));
     }
 
     private static async Task DocumentAsync(DocumentResult? actual, PartitionRef partition, string id,

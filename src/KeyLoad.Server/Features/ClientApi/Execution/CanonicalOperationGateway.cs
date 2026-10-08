@@ -57,12 +57,13 @@ internal static class CanonicalOperationGateway
             return new(requestId, McpBoundedJson.Serialize(value.Value,
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
-        catch (Exception failure) when (commandKind == OperationKind.ReceiveAcrossLanes
+        catch (Exception failure) when (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
             && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException)
         {
             GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
                 failure, requestId, GrainFailureStage.ReplyEncoding, ErrorCode.UnknownWriteOutcome);
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, MultiLaneReceiveProtocol.Interrupted);
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, commandKind == OperationKind.MaintainAnnIndex
+                ? AnnMaintenanceProtocol.Interrupted : MultiLaneReceiveProtocol.Interrupted);
         }
     }
 

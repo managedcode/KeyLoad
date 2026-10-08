@@ -20,13 +20,15 @@ internal sealed class TestDatabase : IDisposable
     private const string Wildcard = "*";
     private const string RootCredential = "root.unit-test-credential-32-characters";
 
+    private readonly TestDatabaseReplicaAdmission? replicaAdmission;
     public string Directory { get; }
     public ZoneTreeStore Store { get; }
     public DatabaseEngine Database { get; }
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
-        NativeClaimsExecutionOptions? claimsExecution = null, TimeProvider? timeProvider = null)
+        NativeClaimsExecutionOptions? claimsExecution = null, TimeProvider? timeProvider = null,
+        bool nativeReplicaAdmission = false)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
@@ -47,6 +49,8 @@ internal sealed class TestDatabase : IDisposable
             {
                 PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipalId);
             }
+            if (nativeReplicaAdmission)
+            { replicaAdmission = new(this); }
         }
         catch (Exception)
         {
@@ -65,6 +69,8 @@ internal sealed class TestDatabase : IDisposable
     {
         var operation = new ReplicatedOperation(id ?? Guid.NewGuid(), kind, principal,
             time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        if (replicaAdmission is { } native)
+        { return native.Submit(operation, time.HasValue); }
         return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
     }
 
@@ -83,6 +89,11 @@ internal sealed class TestDatabase : IDisposable
     }
     public void Dispose()
     {
+        if (replicaAdmission is not null)
+        {
+            DisposeNative();
+            return;
+        }
         try
         {
             Store.Dispose();
@@ -91,6 +102,18 @@ internal sealed class TestDatabase : IDisposable
         {
             DeleteOwnedDirectory();
         }
+    }
+
+    private void DisposeNative()
+    {
+        var failures = new List<Exception>();
+        try
+        { replicaAdmission?.Dispose(); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+        KeyLoad.Server.ServerFailureObserver.Observe(Store.Dispose, failures);
+        KeyLoad.Server.ServerFailureObserver.Observe(DeleteOwnedDirectory, failures);
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private void DeleteOwnedDirectory()

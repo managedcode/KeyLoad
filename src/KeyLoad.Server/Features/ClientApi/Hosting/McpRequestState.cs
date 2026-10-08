@@ -113,9 +113,9 @@ internal sealed class McpRequestState : IDisposable
     }
 
     /// <summary>Creates only fixed safe error content, retaining null or actual execution identity.</summary>
-    internal CallToolResult Failure(ErrorCode code, Guid? requestId)
+    internal CallToolResult Failure(ErrorCode code, Guid? requestId, string? ownedDetail = null)
     {
-        var owner = McpReplyOwner.Failure(code, requestId, settings.MaximumControlReplyBytes);
+        var owner = McpReplyOwner.Failure(code, requestId, settings.MaximumControlReplyBytes, ownedDetail);
         replies.Add(owner);
         return owner.ToolResult();
     }

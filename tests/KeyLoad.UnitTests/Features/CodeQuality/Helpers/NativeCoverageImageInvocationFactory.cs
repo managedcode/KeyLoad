@@ -3,6 +3,7 @@ using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using KeyLoad.AppHost.Features.CodeQuality;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
@@ -15,7 +16,7 @@ internal static partial class NativeCoverageImageInvocationFactory
     private const string DockerfilePinPattern = "^FROM (?<reference>mcr\\.microsoft\\.com/dotnet/aspnet:[^\\s]+@sha256:[0-9a-f]{64})\\s+AS runtime$";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    internal static NativeCoverageImageInvocation Create(NativeCoverageImageFixture fixture,
+    internal static async Task<NativeCoverageImageInvocation> CreateAsync(NativeCoverageImageFixture fixture,
         string serverDirectory, string contextPath)
     {
         var dllPath = Path.Combine(serverDirectory, NativeCoverageImageConstants.ServerDll);
@@ -28,8 +29,8 @@ internal static partial class NativeCoverageImageInvocationFactory
         var baseReference = ReadPinnedImage(fixture.Options.Coverage.Value.MaximumManifestBytes);
         var baseReceipt = WriteBaseReceipt(fixture, baseReference);
         var descriptorPath = Path.Combine(fixture.Inputs, $"invocation-{Guid.NewGuid():N}.json");
-        WriteDescriptor(descriptorPath, fixture, serverDirectory, contextPath, dllHash, pdbHash, mvid,
-            baseReference, sourceReceipt, baseReceipt);
+        await WriteDescriptorAsync(descriptorPath, fixture, serverDirectory, contextPath, dllHash, pdbHash, mvid,
+            baseReference, sourceReceipt, baseReceipt).ConfigureAwait(false);
         var invocationId = ReadInvocationId(descriptorPath, fixture.Options.Coverage.Value.MaximumDescriptorBytes);
         return new(descriptorPath, invocationId, contextPath, serverDirectory, dllHash, pdbHash, mvid,
             baseReference, sourceReceipt, baseReceipt);
@@ -86,7 +87,7 @@ internal static partial class NativeCoverageImageInvocationFactory
         return matches[0].Groups[NativeCoverageImageFields.Reference].Value;
     }
 
-    private static void WriteDescriptor(string path, NativeCoverageImageFixture fixture,
+    private static async Task WriteDescriptorAsync(string path, NativeCoverageImageFixture fixture,
         string serverDirectory, string contextPath, string dllHash, string pdbHash, string mvid,
         string baseReference, string serverReceipt, string baseReceipt)
     {
@@ -128,7 +129,8 @@ internal static partial class NativeCoverageImageInvocationFactory
         var bytes = JsonSerializer.SerializeToUtf8Bytes(descriptor, JsonOptions);
         if (bytes.Length > options.MaximumDescriptorBytes)
         { throw new InvalidDataException("The test image invocation exceeds its admitted descriptor bound."); }
-        WritePrivate(path, bytes, options.MaximumDescriptorBytes);
+        await NativeCoverageRf3InvocationWriter.WriteCreateOnlyAsync(path, bytes, options.ReadBufferBytes,
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 
     private static string ReadMvid(string path, int maximumBytes)

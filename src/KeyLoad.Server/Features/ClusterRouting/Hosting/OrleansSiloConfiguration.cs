@@ -41,6 +41,7 @@ internal static class OrleansSiloConfiguration
             PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch);
         services.AddSingleton(expectedOwner);
         services.AddSingleton(partition.Database);
+        services.AddSingleton<INativeAnnMaintenance>(partition.AnnMaintenance);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);

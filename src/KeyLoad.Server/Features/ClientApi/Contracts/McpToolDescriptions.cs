@@ -92,6 +92,7 @@ internal static class McpToolDescriptions
             or McpToolNames.AdminPartitionPlacementBind or McpToolNames.AdminPartitionPlacementRead
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
+        McpToolNames.SearchAnnMaintain => AnnMaintenanceProtocol.Description,
         McpToolNames.MessagesReceiveAcrossLanes => MessagesReceiveAcrossLanes,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,

@@ -52,6 +52,8 @@ internal static class CrashHostApplication
                 or SampleRollupCrashContract.DropFaultMode or SampleRollupCrashContract.RefreshRecoverMode
                 or SampleRollupCrashContract.DropRecoverMode or SampleRollupCrashContract.VerifyMode
                 => SampleRollupCrashScenario.RunAsync(directory, store, boundary, mode),
+            NativeAnnCrashContract.Prepare or NativeAnnCrashContract.Fault or NativeAnnCrashContract.Recover or NativeAnnCrashContract.Verify
+                => NativeAnnCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),

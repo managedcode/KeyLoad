@@ -27,14 +27,15 @@ internal static class McpReplyWriter
     /// <param name="code">The domain failure classification.</param>
     /// <param name="requestId">The real execution identity, absent before dispatch.</param>
     /// <param name="maximumBytes">The pre-reserved private wrapper capacity.</param>
+    /// <param name="ownedDetail">Actual server diagnostic admitted only through the closed safe mapping.</param>
     /// <returns>The complete independent wrapper bytes.</returns>
-    internal static byte[] Failure(ErrorCode code, Guid? requestId, int maximumBytes)
+    internal static byte[] Failure(ErrorCode code, Guid? requestId, int maximumBytes, string? ownedDetail = null)
     {
         using var stream = new McpBoundedWriteStream(maximumBytes);
         using var writer = new Utf8JsonWriter(stream);
         writer.WriteStartObject();
         writer.WritePropertyName(McpReplyProtocol.Error);
-        JsonSerializer.Serialize(writer, Errors.Problem(code, McpReplyProtocol.SafeDetail(code)), JsonDefaults.Options);
+        JsonSerializer.Serialize(writer, Errors.Problem(code, McpReplyProtocol.SafeDetail(code, ownedDetail)), JsonDefaults.Options);
         WriteRequestId(writer, requestId);
         writer.WriteEndObject();
         writer.Flush();

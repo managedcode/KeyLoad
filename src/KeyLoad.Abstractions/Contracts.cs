@@ -366,7 +366,9 @@ public enum OperationKind
     /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
     ReceiveAcrossLanes,
     /// <summary>Commits server-confirmed physical owner registration at the stable control authority.</summary>
-    RegisterPhysicalOwner
+    RegisterPhysicalOwner,
+    /// <summary>Runs administrator-only native ANN generation maintenance through independently authorized child requests.</summary>
+    MaintainAnnIndex
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

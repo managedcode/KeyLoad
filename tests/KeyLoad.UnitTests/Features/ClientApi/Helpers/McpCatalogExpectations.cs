@@ -124,9 +124,12 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 71;
+    private const string AnnMaintain = "keyload_search_ann_maintain";
+    private const string AnnMaintainRoute = "/v1/search/ann/maintain";
+    internal const int Count = 72;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
+        (AnnMaintain, AnnMaintainRoute, null, OperationKind.MaintainAnnIndex),
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
         (StreamsReplay, StreamsReplayRoute, GrainReadKind.AggregateReplay, null),

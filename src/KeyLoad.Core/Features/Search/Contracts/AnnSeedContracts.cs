@@ -12,7 +12,15 @@ internal sealed record AnnSeedScope(string PrincipalId, long PolicyEpoch,
 
 internal sealed record AnnSeed(AnnSeedScope Scope, AnnSeedCut Cut,
     ImmutableArray<VectorRecord> Records, string CorpusSha256,
-    long OwnedBytesUpperBound, long PeakBytesUpperBound, long ReadBytes, long WorkUnits);
+    long OwnedBytesUpperBound, long PeakBytesUpperBound, long ReadBytes, long WorkUnits)
+{
+    internal string? DependencySha256 { get; init; }
+    internal long? ProjectionCheckpoint { get; init; }
+}
 
 internal sealed record AnnSeedCaptured(AnnSeedScope Scope, AnnSeedCut Cut,
-    ImmutableArray<VectorRecord> Records, byte[] HashScratch, long OwnedBytes, long PeakBytes, AnnSeedWork Work);
+    ImmutableArray<VectorRecord> Records, byte[] HashScratch, long OwnedBytes, long PeakBytes, AnnSeedWork Work)
+{
+    internal string? DependencySha256 { get; init; }
+    internal long? ProjectionCheckpoint { get; init; }
+}

@@ -11,7 +11,6 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
     private const int AdjacentElementOffset = 1;
     private const int InitialSequence = 0;
     private const int FirstElementIndex = 0;
-    private const long IdentifierTerminatorWork = 1L;
     private const int EmptyElementCount = 0;
     private const int VectorSpaceIdentityPartCount = 3;
     private const int MinimumVectorDimension = 1;
@@ -31,7 +30,7 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         ValidateRecordCount(count, options);
         try
         {
-            return Calculate(space, records, options, budget, count);
+            return Calculate(space, records, null, options, budget, count);
         }
         catch (OverflowException)
         {
@@ -39,7 +38,23 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         }
     }
 
-    private static PackedAnnAdmission Calculate(VectorSpace space, IReadOnlyList<VectorRecord> records,
+    internal static PackedAnnAdmission CreateRestored(VectorSpace space, string[] ids,
+        PackedAnnOptions options, AnnWorkBudget budget)
+    {
+        ValidateOptions(options);
+        ValidateSpace(space, budget);
+        ValidateRecordCount(ids.Length, options);
+        try
+        {
+            return Calculate(space, null, ids, options, budget, ids.Length);
+        }
+        catch (OverflowException)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceExceeded);
+        }
+    }
+
+    private static PackedAnnAdmission Calculate(VectorSpace space, IReadOnlyList<VectorRecord>? records, string[]? ids,
         PackedAnnOptions options, AnnWorkBudget budget, int count)
     {
         var dimension = space.Dimension;
@@ -49,8 +64,10 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         var offsetsLength = ArrayLength(checked((long)count + AdjacentElementOffset));
         var sumLevels = CalculateSumLevels(count, options, budget);
         var upperSlots = ArrayLength(checked(sumLevels * options.Connections));
-        var retained = CalculateRetainedBytes(records, space, count, baseSlots, offsetsLength, upperSlots,
-            vectorsPerBlock, blocks, dimension, budget);
+        var identityBytes = records is not null ? PackedAnnIdentityReservations.FromRecords(records, budget)
+            : PackedAnnIdentityReservations.FromIds(ids!, budget);
+        var retained = CalculateRetainedBytes(identityBytes, space, count, baseSlots, offsetsLength, upperSlots,
+            vectorsPerBlock, blocks, dimension);
         var buildScratch = CalculateBuildScratchBytes(count, options);
         if (retained > options.MaxIndexBytes || buildScratch > options.MaxScratchBytes)
         {
@@ -72,9 +89,8 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         return total;
     }
 
-    private static long CalculateRetainedBytes(IReadOnlyList<VectorRecord> records, VectorSpace space, int count,
-        int baseSlots, int offsetsLength, int upperSlots, int vectorsPerBlock, int blocks, int dimension,
-        AnnWorkBudget budget)
+    private static long CalculateRetainedBytes(long identityBytes, VectorSpace space, int count,
+        int baseSlots, int offsetsLength, int upperSlots, int vectorsPerBlock, int blocks, int dimension)
     {
         var bytes = PackedAnnReservations.FixedRetainedBytes;
         bytes = AddArray(bytes, sizeof(long), count);
@@ -85,13 +101,7 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         bytes = AddArray(bytes, sizeof(long), blocks);
         bytes = AddVectorBlocks(bytes, count, vectorsPerBlock, dimension);
         bytes = AddArray(bytes, sizeof(long), count);
-        for (var ordinal = FirstElementIndex; ordinal < count; ordinal++)
-        {
-            budget.Check();
-            var id = records[ordinal].DocumentId;
-            budget.Charge(checked(id.Length + IdentifierTerminatorWork));
-            bytes = checked(bytes + PackedAnnReservations.String(id.Length));
-        }
+        bytes = checked(bytes + identityBytes);
         bytes = checked(bytes + PackedAnnReservations.String(space.Id.Length)
             + PackedAnnReservations.String(space.Model.Length) + PackedAnnReservations.String(space.Version.Length));
         return bytes;

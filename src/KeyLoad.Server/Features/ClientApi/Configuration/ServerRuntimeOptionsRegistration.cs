@@ -54,6 +54,8 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<NativeAnnExecutionOptions>().Bind(configuration.GetSection(NativeAnnExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), NativeAnnExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<NativeTextExecutionOptions>().Bind(configuration.GetSection(NativeTextExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), NativeTextExecutionOptions.ValidationMessage).ValidateOnStart();
     }

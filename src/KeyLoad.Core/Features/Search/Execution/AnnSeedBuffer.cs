@@ -45,24 +45,15 @@ internal sealed class AnnSeedBuffer
     }
 
     internal byte[] HashScratch { get; }
+    internal string? DependencySha256 { get; set; }
+    internal long? ProjectionCheckpoint { get; set; }
     private AnnSeedScope Scope => scope ?? throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
 
     internal void InitializeScope(PrincipalRecord principal, PartitionRef partition, string collection,
         string field, VectorSpace space, long schemaVersion, DateTimeOffset evaluatedAt)
     {
         work.Check();
-        var principalId = CopyString(principal.Id);
-        var tenantId = CopyString(partition.TenantId);
-        var databaseId = CopyString(partition.DatabaseId);
-        var domainId = CopyString(partition.TransactionDomainId);
-        var partitionKey = CopyString(partition.PartitionKey);
-        var ownedPartition = new PartitionRef(tenantId, databaseId, domainId, partitionKey);
-        var ownedCollection = CopyString(collection);
-        var ownedField = CopyString(field);
-        var ownedSpace = new VectorSpace(CopyString(space.Id), space.Dimension, space.Metric,
-            CopyString(space.Model), CopyString(space.Version));
-        scope = new(principalId, principal.PolicyEpoch, ownedPartition, ownedCollection,
-            ownedField, schemaVersion, ownedSpace, evaluatedAt);
+        scope = AnnSeedScopeCapture.Capture(this, principal, partition, collection, field, space, schemaVersion, evaluatedAt);
     }
 
     internal void SetCut(AnnSeedCut value)
@@ -116,7 +107,8 @@ internal sealed class AnnSeedBuffer
         }
         var immutableRecords = FinishRecords();
         work.Check();
-        return new(scope, cut, immutableRecords, HashScratch, maximumOwned, peak, work);
+        return new(scope, cut, immutableRecords, HashScratch, maximumOwned, peak, work)
+        { DependencySha256 = DependencySha256, ProjectionCheckpoint = ProjectionCheckpoint };
     }
 
     internal ImmutableArray<VectorRecord> FinishRecords()
@@ -148,7 +140,7 @@ internal sealed class AnnSeedBuffer
         return exact;
     }
 
-    private string CopyString(string value)
+    internal string CopyString(string value)
     {
         work.Charge(value.Length);
         var bytes = AnnSeedValidation.Utf8Length(value);

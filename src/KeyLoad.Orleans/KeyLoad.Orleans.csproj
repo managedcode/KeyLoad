@@ -2,6 +2,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.CrashHost" />
+    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />

@@ -35,7 +35,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             };
         }
         catch (KeyLoadException error)
-        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context)); }
+        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message); }
         catch (JsonException)
         { return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context)); }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
@@ -66,7 +66,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             return state.Success(reply, cancellationToken);
         }
         catch (KeyLoadException error)
-        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context)); }
+        { return state.Failure(error.Code, CanonicalOperationGateway.RequestId(context), error.Message); }
         catch (JsonException)
         { return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context)); }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)

@@ -31,6 +31,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<PhysicalOwnerExecutionOptions> PhysicalOwners,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<NativeTextExecutionOptions> NativeText,
+    IOptions<NativeAnnExecutionOptions> NativeAnn,
     IOptions<ServerExecutionOptions> ServerExecution,
     IOptions<DatabasePhaseExecutionOptions> DatabasePhaseExecution,
     CoreRuntimeOptions Core)
@@ -58,6 +59,7 @@ internal sealed record ServerRuntimeOptions(
         _ = PhysicalOwners.Value;
         _ = AdminObservation.Value;
         _ = NativeText.Value;
+        _ = NativeAnn.Value;
         _ = ServerExecution.Value;
         _ = DatabasePhaseExecution.Value;
         Core.ValidateBeforePhysicalOwnership();
@@ -86,6 +88,7 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(PhysicalOwners);
         services.AddSingleton(AdminObservation);
         services.AddSingleton(NativeText);
+        services.AddSingleton(NativeAnn);
         services.AddSingleton(ServerExecution);
         services.AddSingleton(DatabasePhaseExecution);
         Core.RegisterBorrowed(services);

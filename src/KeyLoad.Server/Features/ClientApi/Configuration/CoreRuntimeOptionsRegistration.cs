@@ -40,8 +40,12 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), NativeClaimsExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnStorageOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnStorageOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnStorageOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<KeyLoad.Core.Features.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Features.Search.AnnSeedOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoad.Core.Features.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<AnnMaintenanceOptions>().Bind(configuration.GetSection(AnnMaintenanceOptions.SectionName))
+            .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage).ValidateOnStart();
         services.AddSingleton<CoreRuntimeOptions>();
     }
 }

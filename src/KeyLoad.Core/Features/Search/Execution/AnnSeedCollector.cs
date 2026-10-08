@@ -11,6 +11,18 @@ internal static class AnnSeedCollector
     internal static AnnSeed Capture(DatabaseEngine database, string principalId,
         PartitionRef partition, string collection, string field, VectorSpace space,
         IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget)
+        => CaptureCore(database, principalId, partition, collection, field, space,
+            configuredOptions, readBudget, null);
+
+    internal static AnnSeed CapturePinned(DatabaseEngine database, string principalId,
+        AnnMaintenanceRequest request, IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget)
+        => CaptureCore(database, principalId, request.Consumer.Partition, request.Collection,
+            request.Field, request.Space, configuredOptions, readBudget, request);
+
+    private static AnnSeed CaptureCore(DatabaseEngine database, string principalId,
+        PartitionRef partition, string collection, string field, VectorSpace space,
+        IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget,
+        AnnMaintenanceRequest? pin)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(readBudget);
@@ -22,7 +34,7 @@ internal static class AnnSeedCollector
         AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
         var startingReadBytes = readBudget.ReadBytes;
         var buffer = database.Store.Read(view => CaptureCut(database, view, principalId,
-            partition, collection, field, space, options, readBudget, work));
+            partition, collection, field, space, options, readBudget, work, pin));
         readBudget.Check();
         var captured = buffer.Finish();
         var digest = AnnSeedFingerprint.Compute(captured.Scope, captured.Records,
@@ -30,12 +42,14 @@ internal static class AnnSeedCollector
         captured.Work.Check();
         return new(captured.Scope, captured.Cut, captured.Records, digest,
             captured.OwnedBytes, captured.PeakBytes,
-            checked(readBudget.ReadBytes - startingReadBytes), captured.Work.Units);
+            checked(readBudget.ReadBytes - startingReadBytes), captured.Work.Units)
+        { DependencySha256 = captured.DependencySha256, ProjectionCheckpoint = captured.ProjectionCheckpoint };
     }
 
     private static AnnSeedBuffer CaptureCut(DatabaseEngine database, IKeyValueView view,
         string principalId, PartitionRef partition, string collection, string field,
-        VectorSpace space, AnnSeedOptions options, ReadExecutionBudget budget, AnnSeedWork work)
+        VectorSpace space, AnnSeedOptions options, ReadExecutionBudget budget, AnnSeedWork work,
+        AnnMaintenanceRequest? pin)
     {
         const int CaptureCutAbsentCount = 0;
         const int AppliedValidationBoundary = 0;
@@ -49,6 +63,11 @@ internal static class AnnSeedCollector
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAuthority);
         }
+        if (pin is not null)
+        {
+            buffer.ProjectionCheckpoint = AnnProjectionPinValidation.Require(database, metadata, principal, partition, pin);
+            buffer.DependencySha256 = AnnDependencyIdentity.Capture(database, view, partition, budget, work);
+        }
         database.Authorization.Require(principal, partition, collection, Capability.VectorSearch);
         var resource = database.Resource(metadata, partition, collection, ResourceKind.Collection);
         if (!AnnSeedSourceValidator.IdentityEquals(resource.Name, collection, work))
@@ -58,6 +77,10 @@ internal static class AnnSeedCollector
         database.Authorization.RequireFieldUse(principal, resource, field);
         var head = database.ReadOutboxHead(metadata, partition);
         var appliedBytes = metadata.ReadOwnedValue(KeySpace.AppliedBytes);
+        if (pin is not null && appliedBytes is null)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);
+        }
         var applied = appliedBytes is null ? CaptureCutAbsentCount : NativeSerialization.Deserialize<long>(appliedBytes);
         if (applied < AppliedValidationBoundary)
         {

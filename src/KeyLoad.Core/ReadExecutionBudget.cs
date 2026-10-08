@@ -26,6 +26,7 @@ public sealed class ReadExecutionBudget
     private int examinedGrantRecords;
     private int reservedGrantRecords;
     private long textTokens;
+    private ReadExecutionBudgetStageCancellation? stageCancellation;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
     /// <param name="options">Native centrally validated operation limits, captured once for this read.</param>
@@ -69,10 +70,18 @@ public sealed class ReadExecutionBudget
     public void Check()
     {
         cancellationToken.ThrowIfCancellationRequested();
+        Volatile.Read(ref stageCancellation)?.Check();
         if (clock.GetElapsedTime(started) > TimeSpan.FromSeconds(limits.QueryDeadlineSeconds))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
         }
+    }
+
+    internal ReadExecutionBudgetStageCancellationLease EnterStageCancellation(CancellationToken stageToken)
+    {
+        Check();
+        var stages = LazyInitializer.EnsureInitialized(ref stageCancellation, static () => new());
+        return stages.Enter(stageToken);
     }
 
     /// <summary>Reserves one non-borrowable raw-byte ceiling for a sequential query leaf.</summary>

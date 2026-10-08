@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.Server" />
     <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
   </ItemGroup>

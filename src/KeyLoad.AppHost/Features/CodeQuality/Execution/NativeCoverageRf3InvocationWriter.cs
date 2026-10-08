@@ -121,10 +121,21 @@ internal static class NativeCoverageRf3InvocationWriter
         return bytes;
     }
 
-    private static async Task WriteCreateOnlyAsync(string path, byte[] bytes, int bufferBytes, CancellationToken token)
+    internal static async Task WriteCreateOnlyAsync(string path, byte[] bytes, int bufferBytes, CancellationToken token)
     {
-        await using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-            bufferBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
+        var creation = new FileStreamOptions
+        {
+            Mode = FileMode.CreateNew,
+            Access = FileAccess.Write,
+            Share = FileShare.None,
+            BufferSize = bufferBytes,
+            Options = FileOptions.Asynchronous | FileOptions.WriteThrough
+        };
+        if (!OperatingSystem.IsWindows())
+        {
+            creation.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        }
+        await using var stream = new FileStream(path, creation);
         await stream.WriteAsync(bytes, token).ConfigureAwait(false);
         await stream.FlushAsync(token).ConfigureAwait(false);
         FlushToDisk(stream);

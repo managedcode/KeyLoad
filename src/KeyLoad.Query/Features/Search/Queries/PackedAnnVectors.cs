@@ -78,6 +78,20 @@ internal sealed class PackedAnnVectors
         return new(blocks, layout.Count, layout.Dimension, layout.VectorsPerBlock);
     }
 
+    internal static PackedAnnVectors Restore(PackedAnnAdmission layout, AnnWorkBudget budget)
+        => new(AllocateBlocks(layout, budget), layout.Count, layout.Dimension, layout.VectorsPerBlock);
+
+    internal void RestoreNode(int ordinal, ReadOnlySpan<float> source, AnnWorkBudget budget)
+    {
+        ValidateOrdinal(ordinal);
+        if (source.Length != dimension)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidVectors);
+        }
+        budget.Charge(source.Length);
+        source.CopyTo(blocks[ordinal / vectorsPerBlock].AsSpan(ordinal % vectorsPerBlock * dimension, dimension));
+    }
+
     private void ValidateOrdinal(int ordinal)
     {
         if (dimension is < MinimumPositiveCount or > MaximumDimension || (uint)ordinal >= (uint)Count)

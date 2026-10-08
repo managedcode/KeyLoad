@@ -853,3 +853,39 @@ AC-REP-READINESS-EVIDENCE-001 maps to the actual AcEvent008AcceptedRestartCancel
 The owned namespace-isolation whole flow uses `ReplicaIsolationFixtureLifecycle` to retain the actual fixture until successful startup, then join exactly one final disposal. Failed `ClusterFixture.InitializeAsync` continues to join its original startup cleanup before returning the failure; the outer scope must not issue a second cleanup. Each restored voter has its own native HTTP/official MCP scope, joined before advancing to the next voter, preserving all primary and cleanup failures.
 
 The four `NativeTextWait*` unit flows must seed the actual canonical prefix through the native `DurableReplicaLog` and `ReplicaMaterializer`, wait for completed apply and resolve the original persisted complete receipt. `ReplicaAppliedPositionWaitFixture` accepts optional database limits and evaluation clock for this actual ordered-apply component flow. Direct embedded commits cannot substitute for the persisted replication-applied cut; tests must not write `AppliedBytes` manually or weaken production cut validation. This component fixture remains an explicit single-voter unit control; genuine RF3 authority is verified only by the independently owned Aspire/Docker integration flow.
+
+## Native fixed-name restart recreation observation (c028 failure repair)
+
+REQ-REP-PARTIAL-RESTART-001 / AC-REP-PARTIAL-RESTART-001: after the one accepted native Aspire Start, fixed-name container removal/recreation is an observable lifecycle transition. Successful native `docker container ls --all --no-trunc` scoped to the exact anchored owned name may report no container until creation. The original bounded runtime observation continues under its original token, timeout and polling interval; this is not another Start or a database retry. A present observation must contain exactly one full ID and the exact name, followed by native inspection of that ID; existing image/start identity and health settlement fences remain mandatory. Docker command failure, malformed or foreign identity, cancellation and cleanup failures remain failures, never absence.
+
+TASK-C028-RESTART-OBSERVATION-001 retains the actual `AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay` SDK/official MCP complete receipt/state flow and original retained-replica/leader-loss scenarios as native qualification. Source review does not qualify these cases. Original c028 required TRX failures and all later cascades remain retained; this correction does not establish a cause for unrelated failures.
+
+## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
+
+REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN
+Unit and CrashHost fixtures must submit original commands through independently
+owned native DurableReplicaLog and ReplicaMaterializer; embedded Apply does not
+establish a replicated cut. Every configure/seed/consumer/checkpoint command
+retains its exact identifier, payload, explicit time and outcome. The native
+materializer writes applied authority through original canonical Apply(index).
+After actual bounded WaitForApplyAsync the original operation is replayed only
+to retrieve its persisted outcome, with exact no-effect assertions unchanged.
+No manual AppliedBytes, no synthetic no-op authority, no collector weakening.
+
+The opt-in TestDatabase native admission preserves every default embedded and
+explicit-time caller. It owns its separate replica store/log/snapshots/materializer
+and joins the materializer before disposing log/replica/canonical owners. Local
+fixture commit is not a claim of RF3 quorum; public RF3 gates remain mandatory.
+Original validated ReplicaExecutionOptions.CommandTimeout bounds apply settlement;
+original caller cancellation remains linked. Native worker failure is propagated,
+not retried or hidden. Constructor and terminal cleanup retain primary plus owner
+failures. CrashHost keeps distinct acknowledged and JournalFlushed original cuts
+and reopens the same actual durable replica log before replay. Process-kill is
+not power-loss evidence. Original R4 defect receipt remains immutable history.
+
+Known native command IDs bind their ORIGINAL retained ReplicaEntry index. If a
+restart/canceled wait left that entry unsettled, admission publishes only its
+original commit index if not already committed, joins its original apply cut
+under the same existing timeout/caller token and resolves its fresh original
+outcome. RecoveryRequired cannot cause a second append for a retained ID. Native
+entry absence within LastIndex fails closed; no fabricated command authority.

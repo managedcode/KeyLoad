@@ -41,8 +41,8 @@ internal static class ContainerRuntimeDocker
         var deadline = clock.GetTimestamp();
         while (clock.GetElapsedTime(deadline) < ContainerRuntimeProtocol.ContainerStartTimeout)
         {
-            var current = await InspectAsync(containerName, cancellationToken);
-            if (current.State == ContainerRuntimeProtocol.RunningState)
+            var current = await ContainerRestartRuntimeObservation.ReadAsync(containerName, cancellationToken);
+            if (current?.State == ContainerRuntimeProtocol.RunningState)
             {
                 return current;
             }

@@ -8,6 +8,7 @@ internal static class PartitionRootAdmission
 {
     private const string InvalidLayout = "The physical node directory is not a supported current layout.";
     private const string SearchIndexDirectory = "search-indexes";
+    private const string AnnIndexDirectory = "ann-indexes";
     private const string BackupDirectory = "backups";
     private const FileAttributes NoAttributes = (FileAttributes)0;
     private const FileAttributes DirectoryAttribute = FileAttributes.Directory;
@@ -108,7 +109,7 @@ internal static class PartitionRootAdmission
 
     private static bool IsCurrentDirectory(string name) => name is PartitionStoreProtocol.CanonicalDirectory
         or ReplicaProtocol.ReplicaDirectory or ReplicaProtocol.SnapshotDirectory
-        or SearchIndexDirectory or BackupDirectory;
+        or SearchIndexDirectory or AnnIndexDirectory or BackupDirectory;
 
     private static KeyLoadException Unsupported() => Errors.Fail(ErrorCode.FormatUnsupported, InvalidLayout);
 }

@@ -56,6 +56,7 @@ internal sealed class PartitionHost : IAsyncDisposable
             Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled ? ApplyProbe.Enter : null);
             Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
             Coordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
+            AnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
         }
         catch (Exception error)
         {
@@ -85,6 +86,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     public DatabaseEngine Database { get; }
     /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>
     public ITextProjection TextProjection { get; }
+    internal NativeAnnMaintenanceService AnnMaintenance { get; }
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
     public ReplicaMaterializer Materializer { get; }
     /// <summary>Node-owned protocol endpoint attached by the Orleans Grain Service.</summary>
@@ -131,6 +133,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => AnnMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Coordinator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         var applying = Materializer.DisposeAsync().AsTask();

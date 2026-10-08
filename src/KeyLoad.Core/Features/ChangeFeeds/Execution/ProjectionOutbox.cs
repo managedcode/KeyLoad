@@ -105,7 +105,8 @@ public sealed partial class DatabaseEngine
                 or MutationDiscriminatorNames.DeleteDocument or MutationDiscriminatorNames.AppendEvents
                 or MutationDiscriminatorNames.PublishTopic or MutationDiscriminatorNames.EnqueueMessage
                 or MutationDiscriminatorNames.UpsertEdge or MutationDiscriminatorNames.DeleteEdge
-                or MutationDiscriminatorNames.AppendSamples or MutationDiscriminatorNames.PutVector))
+                or MutationDiscriminatorNames.AppendSamples or MutationDiscriminatorNames.PutVector
+                or MutationDiscriminatorNames.ApplyVectorProjection))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedProjectionMutationDetail);
             }
@@ -193,10 +194,11 @@ public sealed partial class DatabaseEngine
 
         var head = ReadOutboxHead(view, request.Consumer.Partition);
         CheckOutboxPosition(head, state.Checkpoint);
+        var upper = ProjectionUpperSequence(request, state, head);
         var entries = new List<OutboxEntry>();
         var through = state.Checkpoint;
         var bytes = InitialProjectionPageBytes;
-        foreach (var stored in StoredOutboxReader.ReadRange(view, request.Consumer.Partition, through, head.Tail, request.Limit))
+        foreach (var stored in StoredOutboxReader.ReadRange(view, request.Consumer.Partition, through, upper, request.Limit))
         {
             var entry = stored.Entry;
             if (!ProjectionAccepts(state.Definition, entry))
@@ -220,8 +222,20 @@ public sealed partial class DatabaseEngine
             through = entry.Sequence;
         }
         return new(state, entries.ToImmutableArray(), through, Sign(new ProjectionBatchClaims(ProjectionBatchTokenPurpose, Store.Identity.Incarnation,
-            request.Consumer, state.Definition.IndexGeneration, state.Checkpoint, through, now.Add(changeFeedExecution.ProjectionBatchLifetime))), through < head.Tail);
+            request.Consumer, state.Definition.IndexGeneration, state.Checkpoint, through, now.Add(changeFeedExecution.ProjectionBatchLifetime))), through < upper);
     });
+    private const string InvalidProjectionUpperSequence = "The projection upper sequence is outside the current consumer checkpoint and retained head.";
+
+    private static long ProjectionUpperSequence(ReadProjectionBatchRequest request,
+        ProjectionConsumerInfo state, OutboxHead head)
+    {
+        var upper = request.ThroughSequence ?? head.Tail;
+        if (upper < state.Checkpoint || upper > head.Tail)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidProjectionUpperSequence);
+        }
+        return upper;
+    }
     private static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims)
         => KeySpace.Partition(ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, claims.After, claims.Through);
     private ProjectionBatchClaims ProjectionClaims(IKeyValueView view, CommitProjectionBatchRequest request, DateTimeOffset now, bool allowExpiredReceipt = false)

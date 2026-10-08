@@ -98,5 +98,7 @@ public enum GrainReadKind
     /// <summary>Reads one current revisioned derived time-series rollup.</summary>
     SampleRollup,
     /// <summary>Publishes the eligible native lexical generation at an acknowledged applied cut.</summary>
-    WaitForIndex
+    WaitForIndex,
+    /// <summary>Executes one signed internal administrator ANN maintenance phase on the exact native owner.</summary>
+    AnnMaintenance
 }

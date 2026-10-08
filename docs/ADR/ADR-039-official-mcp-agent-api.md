@@ -405,3 +405,51 @@ required implementation and qualification exist.
 TASK-KL014-COLD-BOOTSTRAP-SDK-001 under REQ/AC-CLIENT-004/005 and REQ/AC-TEST-010 adds fixture-only operation proof, with no product API/format/topology change. Implement docs first, then ClientApi integration Cases/Helpers/Assertions/Processes; root joins, builds/format verifies, and executes actual new fresh Aspire RF3 case plus existing Unknown recovery. Rollback removes only this authored regression. Existing ClusterFixture owns startup/readiness/private profile/node resources/joined shutdown; CLI borrows discovered endpoint/private profile and owns only its original process/readers through existing AppHost process settlement policy. Source absent-root admission is distinct from clean Linux qualification. No alternate coordinator, image whitelist, trusted roles, receipt authority or migrations.
 
 R3 fixture-only refinement captures a fixed typed actual pre-builder selected-root existence observation in ClusterFixture and ClusterReplication/Models; it does not expose a generic callback or new product diagnostics. The case asserts that actual pre-start observation plus full native startup/SDK/CLI/cleanup flows. Covered selection remains the original closed eleven, with existing strict ledger admission.
+
+
+## Closed owned diagnostic parity (TASK-MCP-OWNED-SAFE-DETAIL-PARITY-001)
+
+REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/005/007 require the actual SDK and
+MCP/Q1 CALL safe diagnostics to agree for the accepted owned failures. Preserve
+the exact owned ordinal pairs listed in this contract: `TokenInvalidated` / `The document session token belongs
+to another incarnation.` and `Validation` / `The declared vector profile does
+not match the configured field.`. The native MCP invocation forwards the actual
+server-owned KeyLoad detail to this closed selector, which returns a fixed owned
+literal; arbitrary, null, mismatched-code and private details retain the existing
+generic code-derived response. No roles, model identity, field path, payload or
+exception detail is reflected. Wrapper bytes, request identity, status, summary,
+resource reservation and joined owner lifetime remain unchanged.
+
+Implementation: ClientApi McpToolDispatcher -> McpRequestState -> McpReplyOwner
+-> McpReplyWriter -> McpReplyProtocol. Native `McpOwnedDiagnosticWholeFlowTests`
+executes real ZoneTree document session rejection and direct/projection vector
+failed receipts/replay/no-effects followed by literal healthy results and the
+actual bounded MCP reply writer. The supporting unknown-detail control remains
+non-product evidence. Root must rerun the existing official SDK/MCP/Q1 RF3
+foreign-incarnation and configured-vector-profile cases; source/unit evidence
+does not qualify those transports. No schema/catalog, fallback, timeout,
+authorization or failure-retention contract changes. Rollback removes this
+closed mapping and its forwarding/tests, restoring generic diagnostic loss.
+
+
+### Exact additional session categories from the existing RF3 oracle
+
+The unchanged DocumentSessionReadRf3Assertions.RejectedAsync tests five real rejected tokens; besides foreign incarnation, its actual Core path requires exact TokenInvalidated literals `The document session token belongs to another atomic partition or placement.`, `The document session token position must be positive.`, and `The document session token is beyond the current quorum-applied cut.`. Add only these exact code/literal pairs. This closes the same operation parity repair; no arbitrary detail or new diagnostic category is admitted. Native wholeflow executes all five token failures and healthy reads under one unchanged store cut.
+
+
+## Exact scope-denied diagnostic follow-on (TASK-MCP-SCOPE-DENIED-PARITY-002)
+
+REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/005/007 under ADR-039 also preserve
+exact `PermissionDenied` / `The principal cannot perform this operation in this
+scope.` from the actual persisted AuthorizationPolicy and unchanged
+CrossTenantRf3ErrorAssertions.McpAsync oracle. This adds exactly one closed
+code/literal pair, returning an owned constant; arbitrary text, suffix, private
+data and mismatched code remain the prior fixed safe response. No row/entity,
+field, grant, payload or credential is disclosed. New
+`McpScopeDeniedDiagnosticWholeFlowTests` performs a real persisted principal
+denial before invalid-token diagnostics, complete native store/cut invariance,
+native bounded MCP problem parity, then fresh persisted epoch/grant and literal
+healthy session read. Original official SDK/MCP cross-tenant wholeflow remains
+required; no source/runtime qualification or acceptance closure is inferred.
+This packet layers on TASK-MCP-OWNED-SAFE-DETAIL-PARITY-001, retaining its exact
+five pairs, wrapper ownership/budgets/summary and existing generic fallbacks.

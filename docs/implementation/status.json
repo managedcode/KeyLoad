@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "All five exact guarded source packets joined with six owning specifications/ADR updates first. Native build, formatter, focused complete-operation tests and fresh source/image-bound inventory pending; no runtime or original task closure inferred.",
+    "verificationStage": "Final local native full Release build/formatter, normal120/120, scalar120/120, actual four-process ANN recovery1/1 and all12 genuine3009-case full/group discoveries PASS with zero source/image/script drift. Stable implementation stage ready for requested full-scope commit/push; Linux RF3/coveredRF3/coverage/endurance/full104 acceptance unqualified.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,13 +240,13 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-current-r583-stage-xv-final-full-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-current-r624-stage-xvi-final-oracle-full-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 133.847,
-      "log": "/private/tmp/keyload-current-r583-stage-xv-final-full-build-20261008.log",
-      "logSha256": "5e0a596065d678e1c3e587a829c8948d53309076b0d313c6ba8a1f9c7ead0ad7",
-      "inputCount": 4519,
+      "elapsedSeconds": 124.934,
+      "log": "/private/tmp/keyload-current-r624-stage-xvi-final-oracle-full-build-20261008.log",
+      "logSha256": "12e4dd5e278989173239287d12d0a3c05efc4ad5e1e222c7b69794e271f5818e",
+      "inputCount": 4627,
       "inputDrift": [],
       "uniqueErrors": [],
       "qualification": "local development; source drift invalidates exact-current-source qualification"
@@ -262,10 +262,10 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 129.694,
-      "log": "/private/tmp/keyload-current-r584-stage-xv-final-full-format-20261008.log",
+      "elapsedSeconds": 93.435,
+      "log": "/private/tmp/keyload-current-r623-stage-xvi-lineage-oracle-full-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4519,
+      "inputCount": 4627,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -19231,6 +19231,1874 @@
       "localFullUnitModesPassed": true,
       "localOriginalPrefixGcProcessFlowsPassed": true,
       "checkpointQualification": "Stable local development checkpoint; original Linux c028157/199 RF3 and0/11 covered failures retained. This new source requires genuine Linux RF3/coverage and remaining complete feature fault/performance/endurance gates; no task closure or numeric coverage inferred."
+    },
+    "stageXVDeliveredCommit": "3e84e3ee2f9eb82ded73b895218a9711ba5bebe1",
+    "stageXVOriginalLinux": {
+      "runId": 37719059118,
+      "sourceRevision": "3e84e3ee2f9eb82ded73b895218a9711ba5bebe1",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37719059118",
+      "observedStatus": "in_progress",
+      "runtimeQualified": false,
+      "qualification": "Authenticated completed Linux verify job and original SHA256 verified archives/TRX for exact delivered 3e84 source. Original RF3/coverage still running; no cohort completion or task promotion.",
+      "verifyJob": {
+        "id": 113122269587,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/37719059118/job/113122269587",
+        "conclusion": "success",
+        "completedAt": "2026-10-08T03:17:16Z",
+        "qualification": "Authenticated completed job steps; exact original artifact capture pending."
+      },
+      "originalVerifyArtifacts": [
+        {
+          "artifactId": 11526277759,
+          "name": "test-results-ubuntu-latest",
+          "apiDigest": "sha256:d7e7729b006249e02b11b703c962d4b3f4cc168644d448d98e30550558d0d9f8",
+          "archiveSha256": "d7e7729b006249e02b11b703c962d4b3f4cc168644d448d98e30550558d0d9f8",
+          "archiveBytes": 15696235,
+          "elapsedSeconds": 3.637,
+          "originalReports": [
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+              "sha256": "dabb8dc7b35f3fae354bb10aa7ad6420d53d12bc11c01f0aa63040e608c5ecae",
+              "counters": {
+                "total": "388",
+                "executed": "388",
+                "passed": "388",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            },
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "7f35ac1918c129df33b267069ef9697ca9708f43edcec4e9d1b5f23ced702824",
+              "counters": {
+                "total": "10",
+                "executed": "10",
+                "passed": "10",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            },
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+              "sha256": "d585df3c98d346aacbbbe690081b45147a82df25f79dc196709fb966ef6b84aa",
+              "counters": {
+                "total": "266",
+                "executed": "266",
+                "passed": "266",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            },
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "7d28f104ffa9ccddc9555d1c2e569d8d5ee42e5e81941be33a0fd4cbf08bbcae",
+              "counters": {
+                "total": "2991",
+                "executed": "2991",
+                "passed": "2991",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            },
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "f80dfcfe16b2aa30b6c1bfdbd0062a64e3d698cc41cb1e9901643d26e98199a5",
+              "counters": {
+                "total": "2991",
+                "executed": "2991",
+                "passed": "2991",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            }
+          ]
+        },
+        {
+          "artifactId": 11525943691,
+          "name": "code-quality-ubuntu-latest",
+          "apiDigest": "sha256:b6e369196651b3a35d3354d9469cbde82bddf2767c442b3ab4ada2563d58a094",
+          "archiveSha256": "b6e369196651b3a35d3354d9469cbde82bddf2767c442b3ab4ada2563d58a094",
+          "archiveBytes": 2163438,
+          "elapsedSeconds": 2.046,
+          "originalReports": []
+        },
+        {
+          "artifactId": 11524813952,
+          "name": "analyzer-rule-evidence",
+          "apiDigest": "sha256:0b414fd35c8eb03b6feec8955868c6c78ea94e9722d8bce9c52998f6bea38c36",
+          "archiveSha256": "0b414fd35c8eb03b6feec8955868c6c78ea94e9722d8bce9c52998f6bea38c36",
+          "archiveBytes": 1412149,
+          "elapsedSeconds": 1.804,
+          "originalReports": [
+            {
+              "path": "/private/tmp/keyload-ci-37719059118-verify-original-r1-20261008/reports/analyzer-rule-evidence/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+              "sha256": "e487fd2c00e46cd98355cda2b12efee95a5667df9d50726ce31e7d9e6abe87a0",
+              "counters": {
+                "total": "388",
+                "executed": "388",
+                "passed": "388",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            }
+          ]
+        }
+      ],
+      "verifiedOriginalCounts": {
+        "unit": 2991,
+        "unitScalar": 2991,
+        "processRecovery": 266,
+        "sourceOwnership": 10,
+        "analyzers": 388
+      }
+    },
+    "stageXVIOriginalDevelopment": {
+      "sourceParentCommit": "3e84e3ee2f9eb82ded73b895218a9711ba5bebe1",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "docsJoinedBeforeImplementation": true,
+      "joinedUniquePaths": 164,
+      "guardedJoinReceipt": "/private/tmp/keyload-stage-xvi-guarded-join-r2-20261008/join-receipt.json",
+      "guardedJoinReceiptSha256": "f437ac0dac41623de08804d41edcfcc16df5f2c1844b5c491327d1e34e2e5f8e",
+      "canonicalBuildPassed": true,
+      "canonicalFormatterPassed": true,
+      "originalTasksRemain": {
+        "done": 12,
+        "inProgress": 92,
+        "pending": 0
+      },
+      "joinedWorkstreams": [
+        "First native durable ANN administrative generation/save/load/replay/release lifecycle, retained original budget/current-child cancellation and joined admission/shutdown; public approximate search remains disabled",
+        "Closed exact server-owned MCP safe-detail parity including scoped denial; original unknown/private messages remain generic",
+        "Actual CreateNew0600 coverage descriptor producer and genuine ordinary materializer flow; bounded original preparation phase/outcome observer",
+        "Original single accepted Aspire restart observes exact owned-name recreation without another Start; independent current catalog72 retains ANN and omitted WaitForIndex",
+        "Original fixed-corpus full FTS result oracle retained with bounded field-difference evidence"
+      ],
+      "sourceReadyPeerReceipts": [
+        {
+          "path": "/private/tmp/keyload-kl031-independent-review-r4-20261008/receipt.json",
+          "sha256": "6a828dfb3c132e02901fd5711a1497c1dc7ed4d6eca1ca9c4ee9a87aa446eb72"
+        },
+        {
+          "path": "/private/tmp/keyload-mcp-owned-safe-detail-independent-review-r1-20261008/receipt.json",
+          "sha256": "5135b1aedcced21bf507e3ab4dc41ff12bee3efc6831541e7d354ab54d31bdcc"
+        },
+        {
+          "path": "/private/tmp/keyload-native-coverage-private-invocation-independent-review-r1-20261008/receipt.json",
+          "sha256": "7ad5ab0f35736e6324bee0e43838e37568a75a748b7245853586c97d02ffa0a1"
+        },
+        {
+          "path": "/private/tmp/keyload-c028-native-restart-absence-independent-review-r1-20261008/receipt.json",
+          "sha256": "483f4470cc96222383df850598441f173e9ead399df8af0f91e638c380d4f533"
+        }
+      ],
+      "rootDerivedSeamReview": {
+        "derivedSeamsReviewed": true,
+        "derivedSeamRules": "Preserve every existing/source-ready document byte then append each exact isolated contract delta. Preserve all actual ANN catalog fields+72 count; add the original omitted WaitForIndex literal in two independent exact insertion anchors. Current GC authority/cleanup appendix remains before the appended ANN process contract. Lowercase ADR033 packet path normalized to the canonical existing docs/ADR path; no duplicate Linux directory.",
+        "boundedRootSourceReviews": [
+          "Closed exact MCP errorCode/owned-literal map; unknown/null/wrong-code/private details remain generic",
+          "Original CreateNew owner-only0600 descriptor creation before bytes; same actual writer exercised by ordinary native control",
+          "Safe phase observer actual child outcomes/byte counts only, no raw errors/payloads/deadline/retry change",
+          "Single accepted Aspire restart; successful exact owned-name list absence only, no Start replay; inspected full ID/image/health fences remain",
+          "Unchanged full static-corpus FTS equality with bounded field categories only"
+        ],
+        "runtimeQualified": false
+      },
+      "verificationStage": "Final local native full Release build/formatter, normal120/120, scalar120/120, actual four-process ANN recovery1/1 and all12 genuine3009-case full/group discoveries PASS with zero source/image/script drift. Stable implementation stage ready for requested full-scope commit/push; Linux RF3/coveredRF3/coverage/endurance/full104 acceptance unqualified.",
+      "originalFullBuildR590": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r590-stage-xvi-first-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 33.485,
+        "log": "/private/tmp/keyload-current-r590-stage-xvi-first-native-full-build-20261008.log",
+        "logSha256": "b3c2b8c6705f7745db34569e9296be90eb623b6580b08d89e49151ad75fbcff7",
+        "inputCount": 4622,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ChangeFeeds/Queries/ProjectionConsumerAuthority.cs(18,37): error CA1822: Member 'RequireReleasedProjectionConsumer' does not access instance data and can be marked as static (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1822) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ChangeFeeds/Queries/ProjectionConsumerAuthority.cs(7,37): error CA1822: Member 'RequireActiveProjectionConsumer' does not access instance data and can be marked as static (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1822) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]"
+        ],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "nativeDiagnosticRepair": "Observed CA1822 pure projection authority helpers are static and both actual call sites use DatabaseEngine; no analyzer suppression or authority weakening. Observed EOF whitespace removed. Query metadata snapshot loop retains intended one-record native work charge, and purely constant-size retained-byte arithmetic removes its unused budget argument. Original bounds/cancellation/retention unchanged. Generated nested native ANN child identity is internal, preserving exact alias/field IDs and allowing native Orleans generated access. Awaited Verify operation retained with discarded unused reply before Publish; no operation removed. Four native Search storage/codec files import the actual owning KeyLoad.Core.ReadExecutionBudget; no duplicated type/fallback. Native stage/replay consume original typed IOptions; actual ConfigurationBinding factories validate and only lower seed/file/peak reservations from central policy. Existing formulas/deadlines retained. NativeAnnGenerationOwner directly joins worker before original readers/root and retains both fatal/nonfatal errors; no suppression. Native app-only options internal; actual runtime zeros use domain constants; lexical unused import removed.",
+      "remaining": [
+        "Successful original current-source genuine SDK/official MCP Linux RF3, coveredRF3 and numeric source/image-bound coverage",
+        "Public ANN/complete maintained FTS/remote movement and parallel query qualification, endurance and measured performance",
+        "Full104 REQ/AC acceptance closure; current12 accepted/92 in progress unchanged"
+      ],
+      "originalServerCompilerR591": {
+        "command": "dotnet build src/KeyLoad.Server/KeyLoad.Server.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r591-stage-xvi-server-native-preflight-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 19.229,
+        "log": "/private/tmp/keyload-current-r591-stage-xvi-server-native-preflight-20261008.log",
+        "logSha256": "37e7cba46d3f3b03b8715b4340f5c09d619b8395d702ec00b087eed87f2a2f0d",
+        "inputCount": 4622,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Query/Features/Search/Admission/PackedAnnAdmission.cs(94,23): error IDE0060: Remove unused parameter 'budget' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0060) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Query/KeyLoad.Query.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Query/Features/Search/Serialization/PackedAnnRecordSnapshot.cs(26,20): error CS7036: There is no argument given that corresponds to the required parameter 'units' of 'AnnWorkBudget.Charge(long)' [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Query/KeyLoad.Query.csproj]"
+        ],
+        "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+      },
+      "originalServerCompilerR592": {
+        "command": "dotnet build src/KeyLoad.Server/KeyLoad.Server.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r592-stage-xvi-server-native-preflight-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 21.671,
+        "log": "/private/tmp/keyload-current-r592-stage-xvi-server-native-preflight-20261008.log",
+        "logSha256": "7cdeab3a2dbc1faca671b15592da3d29ef49ed5bc9125b520e9d29f224108665",
+        "inputCount": 4622,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceParentFlow.cs(39,9): error IDE0059: Unnecessary assignment of a value to 'state' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0059) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/KeyLoad.Orleans.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/Features/Search/Identity/AnnMaintenanceChildIdentity.cs(15,27): error ORLEANS0107: The type global::KeyLoad.Orleans.AnnMaintenanceChildIdentity.Identity is marked as being serializable but it is inaccessible from generated code [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/KeyLoad.Orleans.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/obj/Release/net10.0/Orleans.CodeGenerator/Orleans.CodeGenerator.OrleansSerializationSourceGenerator/KeyLoad.Orleans.orleans.metadata.g.cs(123,145): error CS0122: 'AnnMaintenanceChildIdentity.Identity' is inaccessible due to its protection level [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Orleans/KeyLoad.Orleans.csproj]"
+        ],
+        "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+      },
+      "originalServerCompilerR593": {
+        "command": "dotnet build src/KeyLoad.Server/KeyLoad.Server.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r593-stage-xvi-server-native-preflight-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 24.948,
+        "log": "/private/tmp/keyload-current-r593-stage-xvi-server-native-preflight-20261008.log",
+        "logSha256": "a0e600fb748828cf8d14823900806c519309e0724699edd5f01862a16a1f0a74",
+        "inputCount": 4622,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Serialization/NativeAnnLoadedSource.cs(16,76): error CS0246: The type or namespace name 'ReadExecutionBudget' could not be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Serialization/NativeAnnPendingCodec.cs(26,93): error CS0246: The type or namespace name 'ReadExecutionBudget' could not be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnPendingFiles.cs(61,58): error CS0246: The type or namespace name 'ReadExecutionBudget' could not be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnStageStore.cs(34,53): error CS0246: The type or namespace name 'ReadExecutionBudget' could not be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnStageStore.cs(42,71): error CS0246: The type or namespace name 'ReadExecutionBudget' could not be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]"
+        ],
+        "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+      },
+      "originalServerCompilerR594": {
+        "command": "dotnet build src/KeyLoad.Server/KeyLoad.Server.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r594-stage-xvi-server-native-preflight-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 49.241,
+        "log": "/private/tmp/keyload-current-r594-stage-xvi-server-native-preflight-20261008.log",
+        "logSha256": "c8aac597652520a6b2992d8ca4c0a990e30a921ad32033d79b3c3652aefca801",
+        "inputCount": 4622,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Admission/NativeAnnDiskAdmission.cs(31,16): error KLD0037: 'Options.Create(bounded)' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Configuration/NativeAnnExecutionOptions.cs(5,22): error CA1515: Because an application's API isn't typically referenced from outside the assembly, types can be made internal (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1515) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs(4,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs(67,45): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs(67,48): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs(67,63): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs(84,64): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceSession.cs(20,37): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceSession.cs(20,77): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceSession.cs(21,52): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnReplay.cs(16,22): error KLD0037: 'options' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Execution/NativeAnnReplay.cs(25,83): error KLD0037: 'options' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Serialization/NativeAnnLoadedSource.cs(22,23): error KLD0037: 'Options.Create(storage.Value with [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Serialization/NativeAnnLoadedSource.cs(31,31): error KLD0037: 'Options.Create(bounded.Value with { MaxPeakBytes = snapshotPeak })' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Serialization/NativeAnnLoadedSource.cs(50,83): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationOwner.cs(19,38): error CA2213: 'NativeAnnGenerationOwner' contains field 'worker' that is of IDisposable type 'NativeAnnWorker', but it is never disposed. Change the Dispose method on 'NativeAnnGenerationOwner' to call Close or Dispose on this field. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2213) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationOwner.cs(197,43): error IDE0200: Lambda expression can be removed (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0200) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Storage/NativeAnnStageStore.cs(8,68): error KLD0037: 'options' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Validation/NativeAnnMaintenanceAdmission.cs(18,16): error KLD0037: 'Options.Create(original with { MaxOwnedBytes = owned, [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Validation/NativeAnnMaintenanceAdmission.cs(25,76): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/Search/Validation/NativeAnnPaths.cs(32,14): error IDE0007: use 'var' instead of explicit type (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0007) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/KeyLoad.Server.csproj]"
+        ],
+        "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+      },
+      "originalServerCompilerR595": {
+        "command": "dotnet build src/KeyLoad.Server/KeyLoad.Server.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r595-stage-xvi-server-native-preflight-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 40.634,
+        "log": "/private/tmp/keyload-current-r595-stage-xvi-server-native-preflight-20261008.log",
+        "logSha256": "245129766cb72f93c59bcae5a5d200d442c8ab94dd9fea97276eb990f7c5dfa9",
+        "inputCount": 4624,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+      },
+      "originalUnitDependencyCompilerR596": {
+        "receipt": "/private/tmp/keyload-current-r596-stage-xvi-unit-native-preflight-20261008-diagnostics.json",
+        "receiptSha256": "c19e6f973223efeb2e93c49ad10ee5c423c07807a376471dc70697f751d4b534",
+        "actual": {
+          "command": "dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-current-r596-stage-xvi-unit-native-preflight-20261008-msbuild-debug",
+          "nativeExitCode": 1,
+          "buildCompletedSuccessfully": false,
+          "elapsedSeconds": 71.591,
+          "log": "/private/tmp/keyload-current-r596-stage-xvi-unit-native-preflight-20261008.log",
+          "logSha256": "e56ae3278a6faab8a40a6db52ca26d2b7594289101f55e0c3c6a5aabbfae797f",
+          "inputCount": 4624,
+          "inputDrift": [],
+          "uniqueErrors": [
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Contracts/NativeAnnCrashContract.cs(34,47): error KLD0036: Runtime text literal ann-process- must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Contracts/NativeAnnCrashContract.cs(34,66): error KLD0036: Runtime text literal :D2 must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(16,26): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(18,112): error KLD0036: Runtime text literal \"{}\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(19,71): error KLD0035: Runtime numeric literal '0.25f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(19,78): error KLD0035: Runtime numeric literal '1f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(19,83): error KLD0035: Runtime numeric literal '0.5f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(26,122): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(8,110): error KLD0036: Runtime text literal \"applyVectorProjection\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(8,47): error KLD0036: Runtime text literal \"putDocument\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(8,62): error KLD0036: Runtime text literal \"patchDocument\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(8,79): error KLD0036: Runtime text literal \"deleteDocument\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashOperations.cs(8,97): error KLD0036: Runtime text literal \"putVector\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashReplay.cs(19,27): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(31,101): error KLD0035: Runtime numeric literal '0' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(31,105): error KLD0035: Runtime numeric literal '11.25f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(31,114): error KLD0035: Runtime numeric literal '2.5f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(31,120): error KLD0035: Runtime numeric literal '0.75f' must use a domain-named constant or configured option [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(48,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(directory, database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs(78,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(directory, database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs(16,49): error KLD0036: Runtime text literal \":\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs(32,21): error KLD0037: 'Options.Create(new AnnSeedOptions())' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs(32,36): error KLD0037: 'new AnnSeedOptions()' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs(48,45): error KLD0036: Runtime text literal \"changed-ann-process-token\" must use a domain-named constant or nameof [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]"
+          ],
+          "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+        }
+      },
+      "originalWholeFormatterR597": {
+        "receipt": "/private/tmp/keyload-current-r597-stage-xvi-native-format-preflight-20261008-receipt.json",
+        "receiptSha256": "6d65178b22445535b5dd93c61fafa34498613cd7291215d576c8e94a24cf1cee",
+        "actual": {
+          "commandArgs": [
+            "dotnet",
+            "format",
+            "KeyLoad.slnx",
+            "--no-restore",
+            "--verify-no-changes",
+            "--verbosity",
+            "minimal"
+          ],
+          "nativeExitCode": 2,
+          "elapsedSeconds": 124.95,
+          "log": "/private/tmp/keyload-current-r597-stage-xvi-native-format-preflight-20261008.log",
+          "logSha256": "5fcc43c8f6e856052b5078f6cfe81ad06cafe5c213c17fcce7c04506c3b23b6b",
+          "inputCount": 4624,
+          "inputDrift": [],
+          "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+        }
+      },
+      "originalUnitComponentCompilerR598": {
+        "receipt": "/private/tmp/keyload-current-r598-stage-xvi-unit-component-native-preflight-20261008-diagnostics.json",
+        "receiptSha256": "eec76a2e92a515780215559cc4b1725c8162ae23662eaa56db091ef58a76ec19",
+        "actual": {
+          "command": "dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-dependencies --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-current-r598-stage-xvi-unit-component-native-preflight-20261008-msbuild-debug",
+          "nativeExitCode": 1,
+          "buildCompletedSuccessfully": false,
+          "elapsedSeconds": 49.31,
+          "log": "/private/tmp/keyload-current-r598-stage-xvi-unit-component-native-preflight-20261008.log",
+          "logSha256": "4782491addc73f96b4a3bf5062adb0b02fa502d78b584c985898ea88626648e4",
+          "inputCount": 4624,
+          "inputDrift": [],
+          "uniqueErrors": [
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/AnnExactPrefixTests.cs(3,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnCaptureShutdownTests.cs(18,24): error CA2000: Call System.IDisposable.Dispose on object created by 'AnnSeedTestSupport.Create(Count)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnCaptureShutdownTests.cs(39,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database, clock)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLaterChildCancellationTests.cs(17,24): error CA2000: Call System.IDisposable.Dispose on object created by 'AnnSeedTestSupport.Create(Count)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLaterChildCancellationTests.cs(36,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database, clock)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLineageLifecycleTests.cs(22,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnObservedWorkBudgetTests.cs(27,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database, clock)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingIntegrityTests.cs(24,24): error CA1849: 'File.ReadAllBytes(string)' synchronously blocks. Await 'File.ReadAllBytesAsync(string, CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingIntegrityTests.cs(25,9): error CA1849: 'File.WriteAllBytes(string, byte[])' synchronously blocks. Await 'File.WriteAllBytesAsync(string, byte[], CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingIntegrityTests.cs(27,9): error CA1849: 'File.WriteAllBytes(string, byte[])' synchronously blocks. Await 'File.WriteAllBytesAsync(string, byte[], CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingIntegrityTests.cs(39,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingLifecycleTests.cs(21,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingLifecycleTests.cs(67,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPersistedAdminTests.cs(32,21): error CS7036: There is no argument given that corresponds to the required parameter 'Page' of 'AnnMaintenanceCapabilityRequest.AnnMaintenanceCapabilityRequest(AnnMaintenanceRequest, Guid, AnnMaintenanceCapabilityKind, ProjectionBatch?, CommitProjectionBatchRequest?)' [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnSourceLineageReplayTests.cs(23,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(103,9): error CA1849: 'CancellationTokenSource.Cancel()' synchronously blocks. Await 'CancellationTokenSource.CancelAsync()' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(36,9): error CA1849: 'FileStream.Flush(bool)' synchronously blocks. Await 'Stream.FlushAsync()' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(42,27): error CA1849: 'File.ReadAllBytes(string)' synchronously blocks. Await 'File.ReadAllBytesAsync(string, CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(42,80): error CA1849: 'File.ReadAllBytes(string)' synchronously blocks. Await 'File.ReadAllBytesAsync(string, CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(58,21): error CA1849: 'File.ReadAllBytes(string)' synchronously blocks. Await 'File.ReadAllBytesAsync(string, CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs(78,27): error CA1849: 'File.ReadAllBytes(string)' synchronously blocks. Await 'File.ReadAllBytesAsync(string, CancellationToken)' instead. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1849) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnCaptureShutdownAssertions.cs(63,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnLaterChildCancellationAssertions.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnLineageTestData.cs(44,56): error CS1061: 'IKeyValueView' does not contain a definition for 'GetRecord' and no accessible extension method 'GetRecord' accepting a first argument of type 'IKeyValueView' could be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnLineageTestData.cs(55,17): error CS1729: 'ConfigureResourceRequest' does not contain a constructor that takes 4 arguments [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenancePhaseAssertions.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestData.cs(1,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestRuntime.cs(1,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPendingIntegrityAssertions.cs(48,23): error CA2000: Call System.IDisposable.Dispose on object created by 'new(database)' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPublishedImageAssertions.cs(27,21): error CA2000: Call System.IDisposable.Dispose on object created by 'NativeAnnOwnership.Create(database.Directory, database.Store.Identity,' before all references to it are out of scope (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+          ],
+          "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+        }
+      },
+      "rootUnitDiagnosticRepairR598": {
+        "receipt": "/private/tmp/keyload-stage-xvi-r598-unit-diagnostic-corrections-r1-20261008/receipt.json",
+        "sha256": "086294c384f06654183ef43a9ccf996a21cbe1dac22494af341bb94a7a4ed470",
+        "sourcePaths": 20,
+        "qualification": "Actual observed compiler corrections only; native verification pending. Direct joined native Dispose retains primary and cleanup. Native async I/O retains OS FlushToDisk barrier; current typed request fields/version precondition preserved."
+      },
+      "originalUnitComponentCompilerR599": {
+        "receipt": "/private/tmp/keyload-current-r599-stage-xvi-unit-component-native-preflight-20261008-diagnostics.json",
+        "receiptSha256": "be8f98d30f3ac003adcee4266fba9d254deaf15ca3bcef56c2033ab058ad766c",
+        "actual": {
+          "command": "dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-dependencies --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-current-r599-stage-xvi-unit-component-native-preflight-20261008-msbuild-debug",
+          "nativeExitCode": 1,
+          "buildCompletedSuccessfully": false,
+          "elapsedSeconds": 43.088,
+          "log": "/private/tmp/keyload-current-r599-stage-xvi-unit-component-native-preflight-20261008.log",
+          "logSha256": "873ac9cfa619cae9c682727ca4e333a523108c339c14ca72cfe41694d54c6e88",
+          "inputCount": 4624,
+          "inputDrift": [],
+          "uniqueErrors": [
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnCaptureShutdownTests.cs(18,24): error CA2000: Use recommended dispose pattern to ensure that object created by 'AnnSeedTestSupport.Create(Count)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnCaptureShutdownTests.cs(44,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database, clock)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLaterChildCancellationTests.cs(17,24): error CA2000: Use recommended dispose pattern to ensure that object created by 'AnnSeedTestSupport.Create(Count)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLaterChildCancellationTests.cs(41,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database, clock)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnLineageLifecycleTests.cs(22,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnObservedWorkBudgetTests.cs(27,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database, clock)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingIntegrityTests.cs(40,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingLifecycleTests.cs(21,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPendingLifecycleTests.cs(72,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnPersistedAdminTests.cs(23,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnSourceLineageReplayTests.cs(23,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnCaptureShutdownAssertions.cs(63,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPendingIntegrityAssertions.cs(48,23): error CA2000: Use recommended dispose pattern to ensure that object created by 'new(database)' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPublishedImageAssertions.cs(27,21): error CA2000: Use recommended dispose pattern to ensure that object created by 'NativeAnnOwnership.Create(database.Directory, database.Store.Identity,' is disposed on all paths. If possible, wrap the creation within a 'using' statement or a 'using' declaration. Otherwise, use a try-finally pattern, with a dedicated local variable declared before the try region and an unconditional Dispose invocation on non-null value in the 'finally' region, say 'x?.Dispose()'. If the object is explicitly disposed within the try region or the dispose ownership is transfered to another object or method, assign 'null' to the local variable just after such an operation to prevent double dispose in 'finally'. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2000) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+          ],
+          "qualification": "Actual targeted native compiler preflight only; not whole-solution or runtime acceptance. Source drift invalidates exact-current-source qualification."
+        }
+      },
+      "nativeFixtureAdmissionR2": {
+        "receipt": "/private/tmp/keyload-stage-xvi-ann-native-fixture-join-r2-20261008/receipt.json",
+        "receiptSha256": "e68f267af3b720591a320267eeccdcc46c431418ed7ef367d9cb94fbce098eaf",
+        "guards": 14,
+        "exactPatchReconstructed": true,
+        "qualification": "Source-only independent peer + guarded join. Actual Unit and CrashHost commands use original native replica journal/materializer; prior embedded-path defect and pending original-index R1 race retained, no acknowledged quorum or runtime claim."
+      },
+      "nativeOwnerScopesR599": {
+        "receipt": "/private/tmp/keyload-stage-xvi-r599-native-ownership-scopes-r1-20261008/receipt.json",
+        "sha256": "a3d17178aa1586b0f54682aa7de4c9803ded1cc3321e9a8695cca4d3fe83b7a1",
+        "sourcePaths": 12,
+        "qualification": "Native using/await using scopes preserve original complete workflows and ordered primary/cleanup failures; actual full build pending."
+      },
+      "originalFullBuildR600": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r600-stage-xvi-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 53.791,
+        "log": "/private/tmp/keyload-current-r600-stage-xvi-native-full-build-20261008.log",
+        "logSha256": "2818a16ccb6ec9b627806590873233c0f79ce517ee554e2076de0fc3b7570d7a",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs(19,5): error IDE0032: Use auto property (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0032) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs(20,36): error CA2213: 'NativeAnnCrashCommandOwner' contains field 'replica' that is of IDisposable type 'ZoneTreeStore', but it is never disposed. Change the Dispose method on 'NativeAnnCrashCommandOwner' to call Close or Dispose on this field. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2213) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs(21,40): error CA2213: 'NativeAnnCrashCommandOwner' contains field 'log' that is of IDisposable type 'DurableReplicaLog', but it is never disposed. Change the Dispose method on 'NativeAnnCrashCommandOwner' to call Close or Dispose on this field. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2213) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs(28,65): error KLD0037: 'new(Voter, [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj]"
+        ],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "nativeFixtureOwnerCorrectionR600": {
+        "receipt": "/private/tmp/keyload-stage-xvi-r600-native-fixture-owner-corrections-r1-20261008/receipt.json",
+        "sha256": "bc54cd865cb0a16696d0ea4dc6110ac09379e7655297f5232f7b3066b06d76fd",
+        "qualification": "Actual source correction; native compiler and runtime pending."
+      },
+      "originalFullBuildR601": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r601-stage-xvi-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 158.703,
+        "log": "/private/tmp/keyload-current-r601-stage-xvi-native-full-build-20261008.log",
+        "logSha256": "1923ab0d6da3795a955d8ce35843cb6c75d59e5f39fd45c3c5c47591c498bf67",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/Features/Search/Helpers/NativeAnnMaintenanceRf3Scenario.cs(24,50): error CS0121: The call is ambiguous between the following methods or properties: 'KeyLoad.IntegrationTests.Features.Search.NativeAnnMaintenanceRf3Scenario.NativeAnnMaintenanceRf3Scenario(KeyLoad.PartitionRef)' and 'KeyLoad.IntegrationTests.Features.Search.NativeAnnMaintenanceRf3Scenario.NativeAnnMaintenanceRf3Scenario(KeyLoad.IntegrationTests.Features.Search.NativeAnnMaintenanceRf3Scenario)' [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/Features/Search/Helpers/NativeAnnMaintenanceRf3Scenario.cs(41,86): error CS0411: The type arguments for method 'McpOfficialClient.CallAsync<T>(string, T, CancellationToken)' cannot be inferred from the usage. Try specifying the type arguments explicitly. [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs(63,37): error CS1061: 'TestContext' does not contain a definition for 'CancellationToken' and no accessible extension method 'CancellationToken' accepting a first argument of type 'TestContext' could be found (are you missing a using directive or an assembly reference?) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/TestDatabase.cs(23,43): error IDE0044: Make field readonly (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0044) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+        ],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalWholeFormatterR602": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 2,
+        "elapsedSeconds": 157.957,
+        "log": "/private/tmp/keyload-current-r602-stage-xvi-native-format-preflight-20261008.log",
+        "logSha256": "39d03e209d002882dc21d93d0c3a435eed7c054a285ad20b7812d9ce2883a1c3",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "observedNativeWhitespaceR603": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "whitespace",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--include",
+          "src/KeyLoad.Core/Features/ResourceExecution/Lifecycle/ReadExecutionBudgetStageCancellation.cs",
+          "src/KeyLoad.Core/Features/Search/Serialization/AnnDependencyIdentity.cs",
+          "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
+          "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceChildCalls.cs",
+          "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceExecution.cs",
+          "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceParentFlow.cs",
+          "src/KeyLoad.Query/Features/Search/Validation/PackedAnnStorageValidation.cs",
+          "src/KeyLoad.Server/Features/Search/Admission/NativeAnnDiskAdmission.cs",
+          "src/KeyLoad.Server/Features/Search/Configuration/NativeAnnExecutionOptions.cs",
+          "src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs",
+          "src/KeyLoad.Server/Features/Search/Execution/NativeAnnReplay.cs",
+          "src/KeyLoad.Server/Features/Search/Execution/NativeAnnSessionOperations.cs",
+          "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnGenerationSlot.cs",
+          "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnMaintenanceAdmissions.cs",
+          "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnOwnership.cs",
+          "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnSlotRetention.cs",
+          "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnWorker.cs",
+          "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnHashStream.cs",
+          "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnPendingCodec.cs",
+          "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnReceiptFiles.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnCompletedPublication.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationFiles.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationOwner.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnPendingFiles.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnPublication.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnRootLease.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnStageStore.cs",
+          "src/KeyLoad.Server/Features/Search/Storage/NativeAnnUntransferred.cs",
+          "src/KeyLoad.Server/Features/Search/Validation/NativeAnnCanonicalSource.cs",
+          "src/KeyLoad.Server/Features/Search/Validation/NativeAnnPaths.cs",
+          "src/KeyLoad.Server/Features/Search/Validation/NativeAnnRootInventory.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashReplay.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashRuntime.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs",
+          "tests/KeyLoad.IntegrationTests/Features/Search/Assertions/NativeAnnMaintenanceReleaseAssertions.cs",
+          "tests/KeyLoad.IntegrationTests/Features/Search/Assertions/NativeTextRf3ResultDiagnostic.cs",
+          "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/NativeAnnProcessAssertions.cs",
+          "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpScopeDeniedDiagnosticWholeFlowTests.cs",
+          "tests/KeyLoad.UnitTests/Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnExactPrefixTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/AnnSeedTestSupport.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnCaptureShutdownAssertions.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnFixtureFileSnapshot.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenancePhaseAssertions.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestData.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestRuntime.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPinnedLifetimeAssertions.cs",
+          "tests/KeyLoad.UnitTests/TestDatabase.cs",
+          "--verbosity",
+          "minimal",
+          "--report",
+          "/private/tmp/keyload-current-r603-stage-xvi-observed-native-whitespace-correction-20261008-report.json"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 8.481,
+        "log": "/private/tmp/keyload-current-r603-stage-xvi-observed-native-whitespace-correction-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceCount": 4616,
+        "observedCorrectionPaths": 51,
+        "changedPaths": [
+          {
+            "path": "src/KeyLoad.Core/Features/ResourceExecution/Lifecycle/ReadExecutionBudgetStageCancellation.cs",
+            "beforeSha256": "63b5db34c4867a8397c001de30b7f6fe8745565dbc3c24bc08b20a225f9752b4",
+            "afterSha256": "d59975e0fb3cef5081a84e4eca058c1dd05233e47c2aa8dcc2e677953cc625e9"
+          },
+          {
+            "path": "src/KeyLoad.Core/Features/Search/Serialization/AnnDependencyIdentity.cs",
+            "beforeSha256": "4d5f15da1cc8e4458c903742c3b9627e611930eff1fb7968b26f3134291d4e79",
+            "afterSha256": "a90edd72609a99547da83668eb6329abccf64963e7e38635322230ecba4bf1b0"
+          },
+          {
+            "path": "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
+            "beforeSha256": "38e3fd4726b6bc0fa4190ad0cdd9159f58964b8bd490e5b403ba32326d63c7f6",
+            "afterSha256": "78d1bad0ef5ca0a78bc79b4160f56df2a82dad4f412c647be936a76bf3c92f59"
+          },
+          {
+            "path": "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceChildCalls.cs",
+            "beforeSha256": "0c7e3746b123586984885038c43df98db45acf1304461b1c7356c3902fe945f2",
+            "afterSha256": "99ab5f7a4e3d922a9d91f3781129606bc8b06f40f03db6f4a24b556cfd404a66"
+          },
+          {
+            "path": "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceExecution.cs",
+            "beforeSha256": "47057035df947665f0fe22902400c76f99a0968482ac1087cfbd376e24fa2787",
+            "afterSha256": "a17e929550261a6ed386399581c3d570956b9680dfb4d4b8ac0e8069f3084107"
+          },
+          {
+            "path": "src/KeyLoad.Orleans/Features/Search/Execution/AnnMaintenanceParentFlow.cs",
+            "beforeSha256": "bce047f235990914d7dface801f61f479c9c7096e475fc7b5699f7734479e10e",
+            "afterSha256": "327ed1395d695e42d7e3c276daac72b51c4f8949f5a584dd32e430e131caf96e"
+          },
+          {
+            "path": "src/KeyLoad.Query/Features/Search/Validation/PackedAnnStorageValidation.cs",
+            "beforeSha256": "e3544280b0df02d445c47f84902520cc3c403f5a454452e26d6a25a97983a608",
+            "afterSha256": "c517733f75ef6ac5fda51455a2843a27ebe126c928b309cb767464024d6846d7"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Admission/NativeAnnDiskAdmission.cs",
+            "beforeSha256": "e815a5b5d9223e6797b6daaee52f8455db04d38f265f8087567654dbe4cbfbc7",
+            "afterSha256": "245f74eb94bf7f163583bf295f1f3d84a18fb2ef9a3915317f87f38d065bf3e7"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Configuration/NativeAnnExecutionOptions.cs",
+            "beforeSha256": "8064c3372862b879ec7dd6ebafbf13d218f2fe5fb9ed9d0475576df45b034d10",
+            "afterSha256": "dda451206d67a2f96a5dee9feb05fe1a9371bff75bcc98f68ca847d758a0b48c"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Execution/NativeAnnMaintenanceService.cs",
+            "beforeSha256": "a42d98262562a66fa5af35e35c0fa00c7f2371f9e3759bce0d2f2dc3a4e892a0",
+            "afterSha256": "3e5b1530e7cc6edaec8b30c9f6a6e8a62d3b6ba94b8d3d6b619d1794769e605f"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Execution/NativeAnnReplay.cs",
+            "beforeSha256": "cfbfb290f96e4b64fdd2121eade6e997a635f8b1a5361a0273417e654b061ce2",
+            "afterSha256": "47fd4da0f6f11ff484dba28b6f9e3a5331a29e4713f03441041b941ad3db7cbc"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Execution/NativeAnnSessionOperations.cs",
+            "beforeSha256": "f326d9c89c5922b1cad7f9f61f4581d74dee24cffb2040e0279bc3b25a825ce3",
+            "afterSha256": "071805dc2ee1abc33f09fbf8e131b401b04136e54e991d2a24e81994c38f0c00"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnGenerationSlot.cs",
+            "beforeSha256": "00bba88177987cc854e632284af266b39723ba2a3e21632d4fe7178365479bcd",
+            "afterSha256": "c1d1c01b92d5561b65f4f3374dac18bc7a5bf99f5a1c45200c5963ed7dad2a43"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnMaintenanceAdmissions.cs",
+            "beforeSha256": "d366193cbe8ba1e147cac503a8cee928e591cd995cc2c690e3b0d7ca44aecc82",
+            "afterSha256": "b56e8b1311749784baaf5929ed109f856255885c1af9c686ba54ac82b31c7550"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnOwnership.cs",
+            "beforeSha256": "52704350006046819d8c1d323d04abb9b9d7c75c7a41a7b2848ff570693825d7",
+            "afterSha256": "56f2f71ce9e0960683096be9fd6fcf4970b31b61152ee9012f993cedc4a1533c"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnSlotRetention.cs",
+            "beforeSha256": "cf42af8dd8e7fb43dfca9aab0e14ef0191476718a981f3ec0334ff0a40a7c4c9",
+            "afterSha256": "aa515d16e880f88ba38f5d381c67bc448ebab0f1a5347f6c406f6bae283bf6a5"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Lifecycle/NativeAnnWorker.cs",
+            "beforeSha256": "73a1f9fa94031ca73be368353e28af8817f689f43ad0b134e9ff4e8fe0587e03",
+            "afterSha256": "af4f8e33e68453f1948fef6ca036dc3b68289d3867f5b1f8153e7afdec624d2c"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnHashStream.cs",
+            "beforeSha256": "cbf6dfe93118fcf43deaf62666552dc7944504e1a991f9d9c5ebc4a74704e75f",
+            "afterSha256": "428e333c1ff476ead7fbadcfb9a0abd0aa73953b4d82e97461d2a612a52cf354"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnPendingCodec.cs",
+            "beforeSha256": "399a4e71184100709478988fc79965083411ad053be8301f2d017e79d8707288",
+            "afterSha256": "0623189683e92fc5cbbc885652b7ace380a4ab95a3353883e0882269f3667232"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Serialization/NativeAnnReceiptFiles.cs",
+            "beforeSha256": "83edac4724bf818b0e3616d9ffc865b5a0be462fb213e054b4beb35bc383610e",
+            "afterSha256": "6f06e7a0e5b082b8c3b3b86bfcd36bf69abad47c3c106f3ce1dbab6abaaa1530"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnCompletedPublication.cs",
+            "beforeSha256": "973fa5ee2f5e95b72bc7944af0fd9eaf905227b81e3e3b8ac9571720227acff9",
+            "afterSha256": "7c9a98287e67c69269cb69fb486f93898f6d429d14546b905e92e8de617d91d9"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationFiles.cs",
+            "beforeSha256": "1c9ab21b64070289d0715b41387a9b70d1ba6ac2d04ada9c9d0cc4b8966a93ef",
+            "afterSha256": "c4d7bcf52d44eeb5e35a9651462d380b951a0206493d453579c8c85c4ecfae37"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnGenerationOwner.cs",
+            "beforeSha256": "99543d246ef87fe238ea9f0f168b7a63139a21d1ab2eed3eda4f488189d60995",
+            "afterSha256": "4477e6e6aefe2d6f51fecb3e7a95c226ba7f2cac13801690f21987ee77d9a143"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnPendingFiles.cs",
+            "beforeSha256": "3dc16896744d1012fdf97783adac13a6c2f62b19354dfc98daaabc894102eb35",
+            "afterSha256": "eb551379dc2f8661c99056e274131352f1eb34f69e00970c640bf94b3bf40bb6"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnPublication.cs",
+            "beforeSha256": "fd02360953e19de4e3bb39e8dba390ce7461d0d6b4778d87ea808c484ca10f17",
+            "afterSha256": "529202d11d80666c8367185901e8e03ed5d85fa996b0f88eaab3707faa5a916f"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnRootLease.cs",
+            "beforeSha256": "8c108890d37b23dc08aac733982a67f7693df4cc44ac3baec92663797b20a2d4",
+            "afterSha256": "d520178c0b6e8b8824baad3f1ab6caa51962a13e6a7926bded32e4a6a584588e"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnStageStore.cs",
+            "beforeSha256": "b4fa4248229ee17ba7cf59e2c69b0da7cd5ca496ba28ac8fcc995d1cf347d110",
+            "afterSha256": "b63dae0ba7186d3ab1111eb3175b54eb7a1f982d788da3a662946e27c93ff4ce"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Storage/NativeAnnUntransferred.cs",
+            "beforeSha256": "ab6c0068b485665aa4714cb9499c2047c9776e85efd711d19625dd7fbae5287d",
+            "afterSha256": "443670b6533a17a95b915008f9447e2eda23be4752f2a5cdc3ee14a814273487"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Validation/NativeAnnCanonicalSource.cs",
+            "beforeSha256": "d4c89bc48c4566040be957054ade9941fe9a87988a54e632a5c34646e1ebce84",
+            "afterSha256": "13a800e6a22e563d6bc116643713a060ed5cece811bde3a5996d9b15097824e9"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Validation/NativeAnnPaths.cs",
+            "beforeSha256": "61ca8ae1c40a59c4fc2d4b111bad60ec773f80334e1e70096269525fc8a51ce8",
+            "afterSha256": "1da9d4c86b0fa6645796208e69f663954d593b2cdeb39f58ed600994ab1568d5"
+          },
+          {
+            "path": "src/KeyLoad.Server/Features/Search/Validation/NativeAnnRootInventory.cs",
+            "beforeSha256": "f6b02daa1a9e7da848e1ef6264e4389d27b985e6606a429a21011fa54363d4f0",
+            "afterSha256": "2a9c0f22e38cb1235ad94511b8afe74c3cd216a0dc1643dc3478898bd55a1f40"
+          },
+          {
+            "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashCommandOwner.cs",
+            "beforeSha256": "f305bbd6db3076ff57f89aafbf2dea89ac07deefd715facbff9f88741e822fc0",
+            "afterSha256": "508830b87a071f1fc0e5d25a42b58bed913212d9bacf729ac8ee17d38e7cdda8"
+          },
+          {
+            "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashReplay.cs",
+            "beforeSha256": "1e18881e1ce5669dd9ffb2a1ec56804a5b9bc1fab789b90e61d67ea360a9084d",
+            "afterSha256": "6ad02454b4edd89b43e286ff7cc446978c0028ab7ac83f1ca2aafa8678aa6bf8"
+          },
+          {
+            "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashRuntime.cs",
+            "beforeSha256": "baa0a5efec2f15e29ca6932ee5613668cca3fddb96d66e11a4e2d51501f893f9",
+            "afterSha256": "5468e78e2f065f0bd30a79286c50c17f4face44e7cbfff7ac2c7983b3e11aa8e"
+          },
+          {
+            "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashScenario.cs",
+            "beforeSha256": "c33b39832c91f0189e9a6d63d0d2d90690adc5a30de5d6d79d8e80523b89b76d",
+            "afterSha256": "5777419fe00aceba98daf619da9e254e9e522e0facf2c24626b91fa5c7388a77"
+          },
+          {
+            "path": "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashState.cs",
+            "beforeSha256": "dc9b5b80d4b097cdf4c6597ffc5047817a97d10528695becc7bacf17fd649633",
+            "afterSha256": "5539cd2e4ca2dd1bd939ba3dcb8cde6e1b1a125583b304af1169b2f4d8fb546a"
+          },
+          {
+            "path": "tests/KeyLoad.IntegrationTests/Features/Search/Assertions/NativeAnnMaintenanceReleaseAssertions.cs",
+            "beforeSha256": "d6d20cddeb4a4c6c1f664cb18b052f65f8f5edefbcedb006269d15ea9c05e77a",
+            "afterSha256": "1d3069504f199a76ba5e31e9dc7add684f5d0b4265551461a2fb07bcc4309c3a"
+          },
+          {
+            "path": "tests/KeyLoad.IntegrationTests/Features/Search/Assertions/NativeTextRf3ResultDiagnostic.cs",
+            "beforeSha256": "82fd6b0be3bb0f819d869e94a992bf139893654a0cfbd51fc2cb60b7b208c7b0",
+            "afterSha256": "b49ab263ad152377116c5ec06f55d0f0925a4d86d4aa9fc37d3e8777b56e6e86"
+          },
+          {
+            "path": "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/NativeAnnProcessAssertions.cs",
+            "beforeSha256": "b01cf3dc857b70c036295155b7218e29bb147c10eeb65c9ab7538f10b66dc153",
+            "afterSha256": "7675e2b4dcbb50b2a1d891bc3e2c1bb4e0aa5c7bd6e5f9f80c57efb4df6f4fc1"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpScopeDeniedDiagnosticWholeFlowTests.cs",
+            "beforeSha256": "14c026d90e79fe19c00af5ee2c2c470c011bd6d588f2b1cc56ab50d813f3d308",
+            "afterSha256": "c14528b31797734fb41aebf28125d0436ef4811c0b41ed64aeea692d53a4dc04"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs",
+            "beforeSha256": "0b98f2e0c50ad4b5fd1590dfdb0169724730a7399514b1f404b700ba162b120b",
+            "afterSha256": "54cf803dbcb607a5110121937cad833f72942418ef6d4d8e972e5a6305c3e983"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnExactPrefixTests.cs",
+            "beforeSha256": "9ed2c3f69f832f414e7d79efb8e6161fcd853b3889a88faac92fcd8f0ba53312",
+            "afterSha256": "9cc65b1f121d24adcf3f6a1c40b7c1616ce7392950342b036b8a2ada42c4284d"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnNativeStorageTests.cs",
+            "beforeSha256": "93dd419cc7ea73a3c90b926d64fce53b845283e7c5ec497f22c340045a9aad77",
+            "afterSha256": "fa53a110855f696e375455cbb6d91189e7432742ea45939e5b9b9deb3035a757"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/AnnSeedTestSupport.cs",
+            "beforeSha256": "49bbdf2701536424682ed04bea95bf858c23e3c43dcdfc236a248f137a04efd1",
+            "afterSha256": "91e2e058ebcd628a4cfdfd72d41065f7d94385b8dc3102546767346b8925e21d"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnCaptureShutdownAssertions.cs",
+            "beforeSha256": "4c338382402553d7dc89428e11be857a7b5f4fc2e5a6845ddc226cbb47399126",
+            "afterSha256": "1f31e11a92bba6b1e68c64fafdda480ab91b5589c6e7cee449de4a3faafdfa38"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnFixtureFileSnapshot.cs",
+            "beforeSha256": "b2853356f486fb50154e07de1ff09a957c8a31b352c41adcac67bcdb938f0d99",
+            "afterSha256": "5c9118f5a1156e8e3ab3bcb6ecbcd7b22a87fd4cc3ba6aa31901f0c83a197659"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenancePhaseAssertions.cs",
+            "beforeSha256": "c5399e4454043b05c10edf97be6b973b3b1ec3a361899a3957fb4c51bbe09433",
+            "afterSha256": "c2179ac1f3246ae80df245f930e0c15976d0053579a32f310205c2443dc4eddd"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestData.cs",
+            "beforeSha256": "bbb1804866ca307635e7d334ae52fb5bbc0c66cf33090566595500067dada406",
+            "afterSha256": "72ac290bf963e484a028c0740065990b221db28ddbaae5b0ab7266e582b8edb9"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenanceTestRuntime.cs",
+            "beforeSha256": "80fb7c0914dff71e73fe431758676e79c7599ec4f217d09649188a132ea71a94",
+            "afterSha256": "5e513815b5d29d134bc1a8cccca1680ee2e45202ca7204329e15abf444da8dc6"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnPinnedLifetimeAssertions.cs",
+            "beforeSha256": "3468636a19467d586221d093e49369690dad89dfa7832f022cd80b9361a0e9c7",
+            "afterSha256": "35019e6b9474edb2a5b16423155f27c1350d6af36a2f4d1b368b3a682dc58a7a"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/TestDatabase.cs",
+            "beforeSha256": "d8f5e750b7e4e16d61dc35a4d9a5f2732c2b24e66a8865cb04e21b7bde666e24",
+            "afterSha256": "583abd1028248eb97160d7b05ad179403d540e3b171e26e4e3454c54bd2a8243"
+          }
+        ],
+        "unexpectedSourceChanges": [],
+        "qualification": "Actual native whitespace/import correction on observed R602 scope only; source diff review and fresh native build/tests required."
+      },
+      "nativeWhitespaceSourceReviewR603": {
+        "receipt": "/private/tmp/keyload-current-r603-stage-xvi-observed-native-whitespace-correction-20261008-source-review.json",
+        "sha256": "ad3cb8d0f1904bc4544a6aab16a057e9617584fdd77424455d9ec1ded66786b7",
+        "reviewedChangedPaths": 51,
+        "unexpectedCodeLiteralTokenChanges": 0,
+        "qualification": "Source lexical review only; original literal bytes, ordered code tokens and import inventory preserved; not runtime proof."
+      },
+      "originalFullBuildR604": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r604-stage-xvi-final-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 151.689,
+        "log": "/private/tmp/keyload-current-r604-stage-xvi-final-native-full-build-20261008.log",
+        "logSha256": "1b0cfb926952d14f6288ee69cb64fcfe65fc531f3c752595c406f534f33b15d6",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalWholeFormatterR605": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 2,
+        "elapsedSeconds": 149.705,
+        "log": "/private/tmp/keyload-current-r605-stage-xvi-final-native-format-verification-20261008.log",
+        "logSha256": "4d9dca6e63b85bdf191067eead324c3c6077cbab2b08b2659ac1dd1e4d118a73",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "finalOriginalFullBuildR612": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r612-stage-xvi-final-native-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 181.484,
+        "log": "/private/tmp/keyload-current-r612-stage-xvi-final-native-full-build-20261008.log",
+        "logSha256": "a4f9f526869b4fab9ed204381bd112a36b3b237c6f1930c4a92cce2b4d26beb8",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "finalOriginalWholeFormatterR613": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 178.256,
+        "log": "/private/tmp/keyload-current-r613-stage-xvi-final-native-format-verification-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalNormalWholeFlowR608": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r608-stage-xvi-ann-unit-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-8oox36u8",
+        "nativeExitCode": 2,
+        "elapsedSeconds": 89.982,
+        "log": "/private/tmp/keyload-current-r608-stage-xvi-ann-unit-20261008.log",
+        "logSha256": "13cb65e875e9182bcc523e0a9138b4d393bfd484388bac07720e20d83f031826",
+        "sourceInputs": 4627,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r608-stage-xvi-ann-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "d8b88587946057b82ec066416aada73b9ea7f0d89f03dc16325fb33ffcc00b73",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "117",
+              "failed": "3",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r608-stage-xvi-ann-unit-20261008-receipt.json",
+        "receiptSha256": "5bae4deeca070ecc9c972fe444d9af7e2f6589e206de36a4933fe6b3a8965a77",
+        "originalFullFailures": {
+          "path": "/private/tmp/keyload-current-r608-stage-xvi-ann-unit-20261008-original-failures.json",
+          "sha256": "d6835724590bb82b2ef25385d383aab2aa5cc407e30321e353a37bf11a8fbc8b"
+        }
+      },
+      "originalScalarWholeFlowR609": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit-scalar",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r609-stage-xvi-ann-scalar-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-52vqzikq",
+        "nativeExitCode": 2,
+        "elapsedSeconds": 96.799,
+        "log": "/private/tmp/keyload-current-r609-stage-xvi-ann-scalar-20261008.log",
+        "logSha256": "74b11a1e3c3df8b80c31827d4542e5eaec5eb9a1d31e1ed31d80c3c6ff24756d",
+        "sourceInputs": 4627,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r609-stage-xvi-ann-scalar-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "aec7e2e925d543df809f3164e303604840aa8572ccd1f1fd4f9f6a2683c332a0",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "117",
+              "failed": "3",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r609-stage-xvi-ann-scalar-20261008-receipt.json",
+        "receiptSha256": "e45158efda545fec0530e7814d1e301bd74c42fb62b72f9cf81c51a47204f6fc",
+        "originalFullFailures": {
+          "path": "/private/tmp/keyload-current-r609-stage-xvi-ann-scalar-20261008-original-failures.json",
+          "sha256": "9a2de3398dc88593351f079aab6907d028d02abacc81cdc3a0b64fe19f0258d0"
+        }
+      },
+      "originalProcessRecoveryR610": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=recovery",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r610-stage-xvi-ann-process-recovery-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/NativeAnnProcessRecoveryTests/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-574k1n4u",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 15.254,
+        "log": "/private/tmp/keyload-current-r610-stage-xvi-ann-process-recovery-20261008.log",
+        "logSha256": "763afa966e8aa7264d04dc08ebca8cfc8d7b6f3d0474c797335ecad512ee0fc9",
+        "sourceInputs": 4627,
+        "assemblyInputs": 437,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r610-stage-xvi-ann-process-recovery-20261008-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+            "sha256": "ddd4bf8a1e39cc93d8f1e02c5335c6b6eca77e905fadccdab9cc499093b2661e",
+            "counters": {
+              "total": "1",
+              "executed": "1",
+              "passed": "1",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 1
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r610-stage-xvi-ann-process-recovery-20261008-receipt.json",
+        "receiptSha256": "6657f15fe81abf44120b06eab25b96330459c7138f0283f6ba42be7f94259dc5"
+      },
+      "originalPreCorrectionImageR607": {
+        "path": "/private/tmp/keyload-current-r607-stage-xvi-final-native-unit-image-observation-20261008.json",
+        "sha256": "df8d6c6f9a73c885373577038b5537ebb2010a666038d752ff8591e13b226238",
+        "qualification": "Actual historical R606/R607 native cohort before the three R608/R609 qualification corrections; not current source/image binding."
+      },
+      "filteredPageCorrectionR2": {
+        "path": "/private/tmp/keyload-stage-xvi-ann-filtered-page-join-r2-20261008/receipt.json",
+        "sha256": "11323b3a090b91de3046b49359b09078cd26bcbdfb04f86d530a42a7454076a3",
+        "guardedPaths": 3,
+        "runtimeExecuted": false,
+        "contract": "Advancing signed empty pages retain actual Apply/Stage/ACK; terminal only exact no-advance at upper. Original Limit1/MaximumPages12/canonical corpus/budgets unchanged."
+      },
+      "originalDeadlineHealthyParentCorrectionR1": {
+        "path": "/private/tmp/keyload-stage-xvi-r608-original-deadline-healthy-parent-fix-r1-20261008/receipt.json",
+        "sha256": "5fb99c53b62f589e318a5f751297b74c99c75fa13e4419c6b14a0b28e75da783",
+        "contract": "Repeat exact spent original-parent rejection/no-effects; join native runtime; new Restore CommandId and original budget on same advanced clock; reconcile/load/verify/publish exact old digests and literal count. No budget/clock reset."
+      },
+      "nativeWhitespaceR614": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "whitespace",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--include",
+          "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnObservedWorkBudgetTests.cs",
+          "tests/KeyLoad.UnitTests/Features/Search/Helpers/NativeAnnMaintenancePhaseAssertions.cs",
+          "tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeAnnCrashReplay.cs",
+          "--verbosity",
+          "minimal",
+          "--report",
+          "/private/tmp/keyload-current-r614-stage-xvi-native-ann-three-file-whitespace-20261008-report.json"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 6.507,
+        "log": "/private/tmp/keyload-current-r614-stage-xvi-native-ann-three-file-whitespace-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceCount": 4616,
+        "observedCorrectionPaths": 3,
+        "changedPaths": [],
+        "unexpectedSourceChanges": [],
+        "qualification": "Actual native whitespace correction only on the three just changed ANN qualification files; source diff review and fresh native build/tests required."
+      },
+      "postCorrectionOriginalFullBuildR615": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r615-stage-xvi-ann-corrections-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 144.525,
+        "log": "/private/tmp/keyload-current-r615-stage-xvi-ann-corrections-full-build-20261008.log",
+        "logSha256": "39816014fff4dcfcb2dd7740a92640d9fa7e070cbf9bb0df79f150a56802e5bd",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "postCorrectionOriginalFullFormatterR616": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 148.583,
+        "log": "/private/tmp/keyload-current-r616-stage-xvi-ann-corrections-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4626,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalCorrectedNormalWholeFlowR617": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r617-stage-xvi-ann-corrected-unit-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-7dthbmnd",
+        "nativeExitCode": 2,
+        "elapsedSeconds": 92.365,
+        "log": "/private/tmp/keyload-current-r617-stage-xvi-ann-corrected-unit-20261008.log",
+        "logSha256": "6fd65d37b9ffbd6fe758d9278d5d8fde9905f3b39ae31995eb7aecdfb0c67eef",
+        "sourceInputs": 4627,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r617-stage-xvi-ann-corrected-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "f861f370639ca8bd0158a204379345f92f5ba79600cf831c8b64ca286910e122",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "119",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r617-stage-xvi-ann-corrected-unit-20261008-receipt.json",
+        "receiptSha256": "0fb4293a9cbae5bd313c527b30b6c844f9112636a1e7d1c2745d61abedbf6208",
+        "originalFullFailures": {
+          "path": "/private/tmp/keyload-current-r617-stage-xvi-ann-corrected-unit-20261008-original-failures.json",
+          "sha256": "921b838afa5bf6dcd96bedd9443d1bf03a0805e85701a908890c0077dffe0413"
+        }
+      },
+      "originalCorrectedScalarWholeFlowR618": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit-scalar",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r618-stage-xvi-ann-corrected-scalar-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-17he4uu8",
+        "nativeExitCode": 2,
+        "elapsedSeconds": 103.223,
+        "log": "/private/tmp/keyload-current-r618-stage-xvi-ann-corrected-scalar-20261008.log",
+        "logSha256": "73c067932f94b0e0586cdcef4acf22c478167a398a30e8d76f0ff019b8490cc6",
+        "sourceInputs": 4627,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r618-stage-xvi-ann-corrected-scalar-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "29f816f7329742ad37457b56157b899f433febc02ea1bcffb135be625867d6d0",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "119",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r618-stage-xvi-ann-corrected-scalar-20261008-receipt.json",
+        "receiptSha256": "dcfec1945764b55093ff242bd3e8478eb9ecc233c3f18e5b830a0d0851b53470",
+        "originalFullFailures": {
+          "path": "/private/tmp/keyload-current-r618-stage-xvi-ann-corrected-scalar-20261008-original-failures.json",
+          "sha256": "921b838afa5bf6dcd96bedd9443d1bf03a0805e85701a908890c0077dffe0413"
+        }
+      },
+      "originalCorrectedProcessR619": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=recovery",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r619-stage-xvi-ann-corrected-process-recovery-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/NativeAnnProcessRecoveryTests/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-p0sc4tno",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 14.168,
+        "log": "/private/tmp/keyload-current-r619-stage-xvi-ann-corrected-process-recovery-20261008.log",
+        "logSha256": "d904a54be035140af50823300f07c3499122b331b05e39947e21d55022c864d2",
+        "sourceInputs": 4627,
+        "assemblyInputs": 437,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r619-stage-xvi-ann-corrected-process-recovery-20261008-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+            "sha256": "6784c0cbf9d77cad957437b6ee8061ed315eafe4b450ae112f998c78718df46e",
+            "counters": {
+              "total": "1",
+              "executed": "1",
+              "passed": "1",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 1
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r619-stage-xvi-ann-corrected-process-recovery-20261008-receipt.json",
+        "receiptSha256": "9d30f0be066e209ef48e8960a519edb32eb665094dd5ea0a12e700e80a4d59f9"
+      },
+      "lineagePolicyVersusCorpusOracleR1": {
+        "path": "/private/tmp/keyload-stage-xvi-r617-lineage-policy-vs-corpus-oracle-r1-20261008/receipt.json",
+        "sha256": "a84b9e3b8b56e69b252e82ea4bc287eee51543a615a9469d74d42ed19c142073"
+      },
+      "finalOriginalFullBuildR624": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r624-stage-xvi-final-oracle-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 124.934,
+        "log": "/private/tmp/keyload-current-r624-stage-xvi-final-oracle-full-build-20261008.log",
+        "logSha256": "12e4dd5e278989173239287d12d0a3c05efc4ad5e1e222c7b69794e271f5818e",
+        "inputCount": 4627,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "finalOriginalWholeFormatterR623": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 93.435,
+        "log": "/private/tmp/keyload-current-r623-stage-xvi-lineage-oracle-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4627,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "finalOriginalNormalWholeFlowR625": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r625-stage-xvi-final-whole-flow-unit-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-pe0ml_zp",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 125.494,
+        "log": "/private/tmp/keyload-current-r625-stage-xvi-final-whole-flow-unit-20261008.log",
+        "logSha256": "176d5ed134c8d9d696066ffafeb06c4994e8cf253dc77038a8dd5f2e52c89766",
+        "sourceInputs": 4628,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r625-stage-xvi-final-whole-flow-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "a266acfcf3f8ef8c0808442bdbb7ad75ffa65943906db6c1414a9c2db1985f88",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "120",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r625-stage-xvi-final-whole-flow-unit-20261008-receipt.json",
+        "receiptSha256": "54a63e8fd6d75de788d0f1e62c39b116aa1b5a088dd79efd9b45c19b1dd1a2ea"
+      },
+      "finalOriginalScalarWholeFlowR626": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit-scalar",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r626-stage-xvi-final-whole-flow-scalar-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(Ann*)|(NativeAnn*)|(PackedAnn*)|(NativeOperationSemanticsTests)|(BlobAgentCatalogTests)|(McpCatalogTests)|(McpOwnedDiagnosticWholeFlowTests)|(McpScopeDeniedDiagnosticWholeFlowTests)|(NativeCoverageImageMaterializationTests)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-8365wf79",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 131.637,
+        "log": "/private/tmp/keyload-current-r626-stage-xvi-final-whole-flow-scalar-20261008.log",
+        "logSha256": "83831e99e38568d2771b56361433109a0189d39ad578a5500725f9ebed3bcfd8",
+        "sourceInputs": 4628,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r626-stage-xvi-final-whole-flow-scalar-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "a3e2486928328e3f2177221c7a8bdb0e4aa5f9f210ebd6a8eaaacccab509807a",
+            "counters": {
+              "total": "120",
+              "executed": "120",
+              "passed": "120",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 120
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r626-stage-xvi-final-whole-flow-scalar-20261008-receipt.json",
+        "receiptSha256": "bd2d20727e36bc4b0899a1df906984fccb0e72963ee1c0ed3b1437b08ffaf357"
+      },
+      "finalOriginalAnnProcessRecoveryR627": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=recovery",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r627-stage-xvi-final-ann-process-recovery-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/NativeAnnProcessRecoveryTests/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-7yfopgee",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 14.36,
+        "log": "/private/tmp/keyload-current-r627-stage-xvi-final-ann-process-recovery-20261008.log",
+        "logSha256": "b5ffe9f695ae17698c0853f88f2a63348864a8ac55c1a5bce8e9b239abab81ff",
+        "sourceInputs": 4628,
+        "assemblyInputs": 437,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r627-stage-xvi-final-ann-process-recovery-20261008-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+            "sha256": "8cedab3561487d8df125662bde68330fcf6e28cd11b07acd4d74499e9fed53c7",
+            "counters": {
+              "total": "1",
+              "executed": "1",
+              "passed": "1",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "casesCount": 1
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+        "receiptPath": "/private/tmp/keyload-current-r627-stage-xvi-final-ann-process-recovery-20261008-receipt.json",
+        "receiptSha256": "ce32b970304698960d91d9c7d28df3398a3b16ea2d0e350f131b1df5055e54be"
+      },
+      "finalNativeInventoryJoin": {
+        "path": "/private/tmp/keyload-stage-xvi-native-inventory-join-r2-20261008/root-join-receipt.json",
+        "sha256": "270a6f4e80bd4d9c958e23f050289bedec22e9027c593779e60fda56a754229b",
+        "counts": {
+          "total": 3009,
+          "functional": 2616,
+          "requiredOrdinary": 393,
+          "groups": {
+            "unit-functional-01": 522,
+            "unit-functional-02": 528,
+            "unit-functional-03": 466,
+            "unit-functional-04": 528,
+            "unit-functional-05": 572
+          }
+        },
+        "productCoveragePercent": null
+      },
+      "finalNativeCensusR628": {
+        "phases": [
+          {
+            "command": [
+              "/opt/homebrew/bin/dotnet",
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+              "--help"
+            ],
+            "nativeExitCode": 0,
+            "elapsedSeconds": 0.165,
+            "stdout": "/private/tmp/keyload-current-r628-stage-xvi-final-native-unit-census-20261008-help.stdout.txt",
+            "stdoutBytes": 8428,
+            "stdoutSha256": "c2420d754b63d2b3594162ba496b72a3486dd037ae0f8d3e0d97e44899966f69",
+            "stderr": "/private/tmp/keyload-current-r628-stage-xvi-final-native-unit-census-20261008-help.stderr.txt",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "command": [
+              "/opt/homebrew/bin/dotnet",
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+              "--list-tests",
+              "json",
+              "--disable-logo",
+              "--ansi",
+              "off",
+              "--progress",
+              "off",
+              "--output",
+              "Detailed",
+              "--results-directory",
+              "/private/tmp/kl-list-60bh6g7g/native"
+            ],
+            "nativeExitCode": 0,
+            "elapsedSeconds": 1.354,
+            "stdout": "/private/tmp/keyload-current-r628-stage-xvi-final-native-unit-census-20261008-list-tests.stdout.txt",
+            "stdoutBytes": 2917787,
+            "stdoutSha256": "16575e9f8a7622956f8eeaefbaf233137f53d97d9bf81f541b97397ff70dbb3b",
+            "stderr": "/private/tmp/keyload-current-r628-stage-xvi-final-native-unit-census-20261008-list-tests.stderr.txt",
+            "stderrBytes": 0,
+            "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ],
+        "temporaryRoot": "/private/tmp/kl-list-60bh6g7g",
+        "sourceInputs": 4628,
+        "assemblyInputs": 541,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "native unfiltered discovery only; not operation PASS; original stdout retained for actual schema review"
+      },
+      "finalNativeImageR629": {
+        "path": "/private/tmp/keyload-current-r629-stage-xvi-final-native-unit-image-observation-20261008.json",
+        "sha256": "bb8f8dd0600ec58e6e039951ad4dd96f6b502f4b90fae1536601330c5fe22822",
+        "mvid": "03844abe-57ff-443f-8ef3-54efbe5379ef",
+        "dllSha256": "9d0f38b1e2cf59afdb4e23adb854f21dd314d047417261106cc9a074087c2ffa",
+        "pdbSha256": "4b16f278e7eab2019789bfea6dd3690b7dc9ddce8ab13480f5245935c8be124f",
+        "declaredSourceCount": 1193,
+        "compiledSourceBindingComplete": true,
+        "qualification": "Native DLL MVID, matching PDB identity and declared compile-source inspection only; no numeric coverage or Linux operation qualification."
+      },
+      "finalTwelveNativeProductionDiscoveryR630": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 66.446,
+        "evidenceRoot": "/Users/ksemenenko/Developer/KeyLoad/artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008",
+        "logSha256": "16cd5642dd10f2f0d42a60c20929165f5e8d6767f5c00c943131e09e938a510c",
+        "guardedInputs": 5077,
+        "sourceImageScriptDrift": [],
+        "originalFiles": [
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery/native-list.json",
+            "sha256": "16575e9f8a7622956f8eeaefbaf233137f53d97d9bf81f541b97397ff70dbb3b"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery/native-process.json",
+            "sha256": "ff211f5ecd11fb848540c6210d6f0860d1f1b7dc4e8cf902929d3049d0bade93"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-01/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-01/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-01/native-list.json",
+            "sha256": "c86c3092d6fcf11b1c35fd5e7cc8c24781e9183e6edbc7982ee9ff6124900de9"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-01/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-01/native-process.json",
+            "sha256": "d2feeba3da4510702100082c7fa654360eda64e7adc011ec8e4dd401cbc8476d"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-02/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-02/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-02/native-list.json",
+            "sha256": "8efe00a94c7d6cac67f6598fcefa6ada6cd8325fdfc774464d56ae2df61be284"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-02/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-02/native-process.json",
+            "sha256": "accc4f30b08b9bb30211957e54f6079f0643d6776bc4f93d38f81e9abf9052f0"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-03/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-03/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-03/native-list.json",
+            "sha256": "5217e7bd0172d88b51ad39433bf4b1b82f6477446a3f07b855884fa55b900cfc"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-03/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-03/native-process.json",
+            "sha256": "24193a2cd59af54c339e595275cd9cbfabee98413a0f09f524b00126a5ece0f8"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-04/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-04/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-04/native-list.json",
+            "sha256": "c97f5d8d8ff3577a9b024e2ad409dd8ba8173e46a10e28afbd8a23b7073d7247"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-04/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-04/native-process.json",
+            "sha256": "b0c2cd2630c2c99bdbf0e20fecaa7bedfd65fd6de03979697084bfaf5b50316f"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-05/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-05/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-05/native-list.json",
+            "sha256": "1b8cb3b31a661d8a4dd023f22ed48327c65b0df567cb907ff207b2d475667628"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-05/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-discovery-unit-functional-05/native-process.json",
+            "sha256": "437f0b7d461389726cd20b77477c4f6fe0560cdd98d92952f47eb0d255f224a0"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery/native-list.json",
+            "sha256": "16575e9f8a7622956f8eeaefbaf233137f53d97d9bf81f541b97397ff70dbb3b"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery/native-process.json",
+            "sha256": "ca44f750fcd008c43ec60356d98ff5a3f219b4dd2134c3ca31c8b109c94944cf"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-list.json",
+            "sha256": "c86c3092d6fcf11b1c35fd5e7cc8c24781e9183e6edbc7982ee9ff6124900de9"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-process.json",
+            "sha256": "1991979edbf873df8d855e788c8138e8877f73f01aee7039a364c01baf95bf7d"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-list.json",
+            "sha256": "8efe00a94c7d6cac67f6598fcefa6ada6cd8325fdfc774464d56ae2df61be284"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-process.json",
+            "sha256": "2300e0be80c5332d4d5be2b3a9ad211ce9969093079339324115f10aedddbdef"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-list.json",
+            "sha256": "5217e7bd0172d88b51ad39433bf4b1b82f6477446a3f07b855884fa55b900cfc"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-process.json",
+            "sha256": "dc5a76f3806a36163b179e33092a4a4f07cd922c18a7b14fa60b6593d0b58b1e"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-list.json",
+            "sha256": "c97f5d8d8ff3577a9b024e2ad409dd8ba8173e46a10e28afbd8a23b7073d7247"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-process.json",
+            "sha256": "487077fb3210ebf473607aaba7e50cf8457384c9a273965380671687a2000a51"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-image-after.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-image-observation.json",
+            "sha256": "c845b9658da6eb0acd0f4569e406e97eab5d6a372ad16b4a8402fe61eb2897be"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-list.json",
+            "sha256": "1b8cb3b31a661d8a4dd023f22ed48327c65b0df567cb907ff207b2d475667628"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-list.stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "artifacts/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-process.json",
+            "sha256": "7291150440fa1ce196e41a453063948b461aac27da161090a696351ed986c4a3"
+          }
+        ],
+        "qualification": "Actual full plus five filtered native discoveries in both modes only; no executed operation pass, numeric coverage or Linux qualification.",
+        "receiptPath": "/private/tmp/keyload-current-r630-stage-xvi-final-twelve-production-discovery-20261008-receipt.json",
+        "receiptSha256": "3e1567f5bb517e23a5f12cd7e50d24b80c14525bb8dab68ad51857f9a126ea1f"
+      },
+      "localStagePassed": true
     }
   },
   "TIME-PROVIDER-001": {
@@ -23580,6 +25448,19 @@
       "performanceImprovementEstablished": false,
       "runtimeQualified": false,
       "allAcceptanceClosed": false
+    },
+    "stageXVISourceDevelopment": {
+      "status": "joined_native_admin_source_runtime_pending",
+      "runtimeQualified": false,
+      "taskComplete": false,
+      "sourceParentCommit": "3e84e3ee2f9eb82ded73b895218a9711ba5bebe1",
+      "scope": "Actual durable administrative native ANN lifecycle only; ordinary approximate Search remains disabled; ACANN008/public query/recall/performance/endurance remain open.",
+      "localWholeFlowPassed": true,
+      "allAcceptanceClosed": false,
+      "localSelectedWholeFlowNormalCases": 120,
+      "localSelectedWholeFlowScalarCases": 120,
+      "localAnnProcessRecoveryCases": 1,
+      "localWholeFlowSelection": "ANN seed/packed/native generation plus Core parent mapping, MCP catalog/owned diagnostics and actual private coverage descriptor producer/materializer; 120 native instances in each mode."
     }
   },
   "KL-032": {

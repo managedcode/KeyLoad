@@ -608,3 +608,37 @@ An explicit reclamation call with an already-deleted prefix still verifies the c
 R2 GC test ownership: each actual native node/materializer operation is observed to terminal completion before every original disposal; all primary and cleanup identities remain retained. Invalid-image restoration observes deletion and original-image rename separately, preserving either failure and attempting both. ReplicaCrashNode construction/disposal joins Log, replica store and canonical store independently. These source corrections do not change GC semantics, fault cuts, resource caps or qualification.
 
 Native GC negative-image setup drains actual FileStream buffers with caller-canceled FlushAsync, then joins RandomAccess.FlushToDisk on the same owned handle before testing corruption. This preserves the actual synchronous OS durability barrier; async buffer drain alone does not substitute for it. The API contract is documented by [Microsoft .NET10 RandomAccess](https://learn.microsoft.com/en-us/dotnet/api/system.io.randomaccess.flushtodisk?view=net-10.0) and [FileStream.FlushAsync](https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream.flushasync?view=net-10.0). These are process-recovery fixture actions, not a power-loss qualification claim.
+
+### AC-ANN-007 native staged replay process ownership
+
+`NativeAnnProcessRecoveryTests` owns actual child processes through the existing Aspire recovery entry and original finite child/pipe/file-lock settlement. The declared first stage covers an acknowledged durable pending-page publication before its canonical ACK, then an actual canonical ACK killed at the original JournalFlushed boundary, followed by cold pending-array load, same-ID original receipt recovery and bounded remaining-prefix replay. A later child cold-loads the completed native graph, verifies complete literal vector records and performs a genuine healthy explicit vector mutation and replay. Pending arrays never serve readers; recovered original nonempty checkpoint receipts establish progress. These process-kill cuts do not establish power-loss durability, arbitrary partial-write coverage or AC-ANN-008 public approximate search qualification. Full original recovery and RF3 gates remain required.
+
+## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
+
+REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN
+Unit and CrashHost fixtures must submit original commands through independently
+owned native DurableReplicaLog and ReplicaMaterializer; embedded Apply does not
+establish a replicated cut. Every configure/seed/consumer/checkpoint command
+retains its exact identifier, payload, explicit time and outcome. The native
+materializer writes applied authority through original canonical Apply(index).
+After actual bounded WaitForApplyAsync the original operation is replayed only
+to retrieve its persisted outcome, with exact no-effect assertions unchanged.
+No manual AppliedBytes, no synthetic no-op authority, no collector weakening.
+
+The opt-in TestDatabase native admission preserves every default embedded and
+explicit-time caller. It owns its separate replica store/log/snapshots/materializer
+and joins the materializer before disposing log/replica/canonical owners. Local
+fixture commit is not a claim of RF3 quorum; public RF3 gates remain mandatory.
+Original validated ReplicaExecutionOptions.CommandTimeout bounds apply settlement;
+original caller cancellation remains linked. Native worker failure is propagated,
+not retried or hidden. Constructor and terminal cleanup retain primary plus owner
+failures. CrashHost keeps distinct acknowledged and JournalFlushed original cuts
+and reopens the same actual durable replica log before replay. Process-kill is
+not power-loss evidence. Original R4 defect receipt remains immutable history.
+
+Known native command IDs bind their ORIGINAL retained ReplicaEntry index. If a
+restart/canceled wait left that entry unsettled, admission publishes only its
+original commit index if not already committed, joins its original apply cut
+under the same existing timeout/caller token and resolves its fresh original
+outcome. RecoveryRequired cannot cause a second append for a retained ID. Native
+entry absence within LastIndex fails closed; no fabricated command authority.

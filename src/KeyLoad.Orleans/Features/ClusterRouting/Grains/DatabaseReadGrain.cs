@@ -132,6 +132,12 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
 
         var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        if (kind == GrainReadKind.AnnMaintenance)
+        {
+            GrainRequestAuthority.RequireAdministrator(principal);
+            return await services.GetRequiredService<INativeAnnMaintenance>().ExecuteAsync(principal,
+                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
+        }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
             return RuntimeJournalReadCapabilities.Execute(localDatabase, principal.Id, kind, request.Payload, cancellationToken);
