@@ -4,6 +4,25 @@ internal static class SiteContentInteractionAssertions
 {
     private const string OpenMenu = "document.querySelector('.nav-toggle').click(); document.getElementById('site-menu').matches(':popover-open')";
     private const string FollowProduct = "document.querySelector('#site-menu a[href=\"#product\"]').click(); document.getElementById('site-menu').matches(':popover-open')";
+    private const string ProductNavigationComplete = """
+        (() => {
+          const target = document.getElementById('product');
+          const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+          const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+          const root = document.scrollingElement;
+          const desired = target.getBoundingClientRect().top + scrollY - padding - margin;
+          const expected = Math.max(0, Math.min(root.scrollHeight - root.clientHeight, desired));
+          return location.hash === '#product' && Math.abs(scrollY - expected) <= 1;
+        })()
+        """;
+    private const string ProductNavigationDiagnostic = """
+        (() => {
+          const target = document.getElementById('product');
+          return {hash:location.hash,scrollY,top:target.getBoundingClientRect().top,
+            padding:getComputedStyle(document.documentElement).scrollPaddingTop,
+            margin:getComputedStyle(target).scrollMarginTop,viewport:innerHeight};
+        })()
+        """;
     private const string MenuClosed = "!document.getElementById('site-menu').matches(':popover-open')";
     private const string ClickCopy = "document.getElementById('copy-command').click(); true";
     private const string CopyUnavailable = "document.getElementById('copy-command').textContent === 'Source checkout'";
@@ -19,6 +38,12 @@ internal static class SiteContentInteractionAssertions
     {
         await Assert.That((await cdp.EvaluateAsync(OpenMenu, false, token)).GetBoolean()).IsTrue();
         await Assert.That((await cdp.EvaluateAsync(FollowProduct, false, token)).GetBoolean()).IsFalse();
+        var navigated = await cdp.WaitForExpressionAsync(ProductNavigationComplete, token);
+        if (!navigated)
+        {
+            var diagnostic = await cdp.EvaluateAsync(ProductNavigationDiagnostic, false, token);
+            await Assert.That(navigated).IsTrue().Because(diagnostic.GetRawText());
+        }
         await Assert.That((await cdp.EvaluateAsync(OpenMenu, false, token)).GetBoolean()).IsTrue();
         await cdp.CommandAsync(SiteBrowserTokens.SetDeviceMetrics, new Dictionary<string, object?>
         {

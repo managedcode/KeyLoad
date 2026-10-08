@@ -119,6 +119,7 @@ internal sealed class SiteContentBrowserTests
         await chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, token);
         await chrome.NavigateAsync(baseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, token);
         await Assert.That(await cdp.WaitForExpressionAsync(SiteContentBrowserTokens.ContentReadyPredicate, token)).IsTrue();
+        await SiteBrowserVisualAssertions.AssertSceneIsLazyBeforeHeroNavigation(cdp, token);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, token);
         var restored = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneReadyScript, true, token);
         await AssertSceneStateAsync(cdp, restored.GetString(), token);

@@ -28971,7 +28971,7 @@
         "Successful producer final dispatch and original bounded wait admission",
         "Failed/skipped/cancelled producer suppresses dispatch; actual failed terminal producer is rejected"
       ],
-      "qualification": "Static path/dependency checks passed; actual trusted-main site/build push launched Website; actual failed terminal producer was rejected before build/deploy. Original Linux browser/coverage gate failed. Successful-producer dispatch/wait, backend-only push omission and final Pages qualification remain open.",
+      "qualification": "Static path/dependency checks passed; trusted-main site/build push launched Website; failed producer rejected before checkout/deploy; successful authenticated producer wait and content-only Pages passed at284dd842. Backend-only push omission and successful current final all-producer dispatch remain open. Original flaky restored-navigation failure retained and strengthened below.",
       "firstNativeSitePush": {
         "sourceCommit": "9d4dc435036bbd1f1de8163b8237a3dab16560ce",
         "runId": 37747849535,
@@ -29022,6 +29022,139 @@
         "publishConclusion": "skipped",
         "originalGitHubMetadataSha256": "85eabbdfc4d1fea48983f5548307cf276064cd5144761bef702cbc5b5bfa2516",
         "qualification": "Actual authenticated Linux bash-e bounded wait rejected the terminal failed own-main Benchmarks producer before source checkout and publication."
+      },
+      "actualSuccessfulProducerAdmissionAndPublication": {
+        "sourceCommit": "284dd842914c4c4acc5ccd4a16d455400497bfb8",
+        "consumerRunId": 37754209989,
+        "event": "workflow_dispatch",
+        "producerRunId": 37129441460,
+        "producerSourceCommit": "3ae408fe173bf0dd69dd335e688c17fe99457ad3",
+        "producerOriginalMetadataSha256": "e227012ed46d658dae476e80470d1237d1778acaa5edda620fb8c0889e4d772a",
+        "waitConclusion": "success",
+        "checkJobId": 113234629690,
+        "checkConclusion": "success",
+        "publishJobId": 113240569353,
+        "publishConclusion": "success",
+        "qualificationArtifactId": 11540032773,
+        "qualificationArchiveSha256": "76f84c25776bb9129b766e618b5dd5a012ebf1ea9c220461664cf54498b5dede",
+        "publicationArtifactId": 11540290807,
+        "publicationArchiveSha256": "06bb87542045971ba98225c870c8fb0f773ff553d0372fb251df1fb37cfe5e9b",
+        "originalReports": {
+          "analyzer-tests": {
+            "sha256": "b94af6ba419f9aeba7deaf4658c960cfb35d481ed098d01fd483159becc18a9d",
+            "counters": {
+              "total": "388",
+              "executed": "388",
+              "passed": "388",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          },
+          "selection-tests": {
+            "sha256": "75ea9b94f18e3315a2dcfab1e0139527cd55b732abc230704b9dfec580e08595",
+            "counters": {
+              "total": "7",
+              "executed": "7",
+              "passed": "7",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          },
+          "site-tests": {
+            "sha256": "b28d11cc03f0a9e601a83c1eda7d92d676ed17582cb7d2452233cde7b610d6a3",
+            "counters": {
+              "total": "5",
+              "executed": "5",
+              "passed": "5",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          },
+          "startup-tests": {
+            "sha256": "36cd29556312e9f1ed09e0a664a41e796f01dbc72f963ca0b3f8c897ca72aaeb",
+            "counters": {
+              "total": "6",
+              "executed": "6",
+              "passed": "6",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        },
+        "siteJavaScriptCoverage": {
+          "sha256": "b2a80a7d61830bc907878b91516d9dfa3fa70977ac6e46f54a172abe5b433cf8",
+          "totals": {
+            "executableLines": 1008,
+            "coveredLines": 946,
+            "aggregateLinesPercent": 93,
+            "blockOutcomes": 151,
+            "coveredBlockOutcomes": 127,
+            "aggregateBranchesPercent": 84
+          },
+          "critical": [
+            {
+              "path": "site/Features/BenchmarkComparisons/build-site.mjs",
+              "coveragePercent": 96,
+              "passed": true
+            },
+            {
+              "path": "site/Features/BenchmarkComparisons/bootstrap.mjs",
+              "coveragePercent": 93,
+              "passed": true
+            }
+          ],
+          "browserSessions": 1
+        },
+        "deploymentReceiptSha256": "a86fb4712bec99efbdef553424ba5806a11ea02d8b26cebb72f653f4dd20124c",
+        "livePublicationSha256": "70ad08b85869f23378482e8be99740d40cacd561da982c12e74bf82c9870abc3",
+        "liveMatchesOriginalPublication": true,
+        "benchmarkMode": "none",
+        "productCoveragePercent": null,
+        "qualification": "Actual authenticated successful producer wait and original Linux content-only qualification/Pages delivery. This historical producer supplies no current measured figures and does not prove the new final all-producer dispatch graph."
       }
     },
     "stageXXOriginalLinux": {
@@ -29155,7 +29288,96 @@
       "coveredInputsStillRunningAtUtc": "2026-10-08T08:46:43Z",
       "runtimeQualified": false,
       "productCoveragePercent": null,
-      "qualification": "Authenticated original complete Linux verify job only. Original required RF3 step failed; covered suite inputs still running. No full RF3, merged product coverage, endurance or task closure claim."
+      "qualification": "Authenticated original complete Linux verify job only. Original required RF3 step failed; covered suite inputs still running. No full RF3, merged product coverage, endurance or task closure claim.",
+      "rf3TerminalOriginal": {
+        "sourceCommit": "59e856254a4243ebc74780f95dec1623a9fe2dae",
+        "runId": 37744013727,
+        "runAttempt": 1,
+        "jobId": 113201104531,
+        "conclusion": "failure",
+        "artifactId": 11540260540,
+        "archiveSha256": "acca30f942dac04f34109991fdfb6668403f949d3b0c5f9d6fb6d9b1dd43c600",
+        "required": {
+          "sha256": "af8d95dbb1e5abc69ebfead2f60f3f9f471a01063422b0dd75122caa722a052e",
+          "counters": {
+            "total": "85",
+            "executed": "85",
+            "passed": "77",
+            "failed": "8",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        "originalFailedCases": [
+          {
+            "test": "Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+            "failureType": "AssertionException"
+          },
+          {
+            "test": "Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm",
+            "failureType": "AggregateException"
+          },
+          {
+            "test": "NativeRf3AppendProgressesDuringOwnedJournalFlushAndStableBatchReplaysExactly",
+            "failureType": "TaskCanceledException"
+          },
+          {
+            "test": "AcOwnerRegister001To003RegistersConfiguredOwnersThenJoinsAllNodesAndReopensLiteralDirectory",
+            "failureType": "TaskCanceledException"
+          },
+          {
+            "test": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+            "failureType": "AggregateException"
+          },
+          {
+            "test": "TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration",
+            "failureType": "HttpRequestException"
+          },
+          {
+            "test": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+            "failureType": "AggregateException"
+          },
+          {
+            "test": "AcOwnerDoc001To006DestinationFreshDenialGrantPublicReadReceiptReplayAndOwnedRestart",
+            "failureType": "AggregateException"
+          }
+        ],
+        "coveredRf3": {
+          "sha256": "2ab57a5d51f9854a101d138493cf9be4e671f87bb676137535624748548acab6",
+          "counters": {
+            "total": "11",
+            "executed": "11",
+            "passed": "0",
+            "failed": "11",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        "coveredFailure": "All eleven original covered RF3 operations rejected preparation at NativeCoverageRf3FixtureArtifactValidation.ValidatePreparation, before database execution.",
+        "coveredUnitInputsAllPassed": true,
+        "productCoveragePercent": null,
+        "qualification": "Authenticated original terminal Linux RF3 failure; ordinary unit/scalar/recovery success is distinct. No merged product coverage, full RF3, task closure, endurance or power-loss claim."
+      }
     },
     "stageXXIWebsiteDiagnosticDevelopment": {
       "sourceParentCommit": "9d4dc435036bbd1f1de8163b8237a3dab16560ce",
@@ -29339,6 +29561,123 @@
       },
       "staticGovernance": "passed_27_projects_4_modules_root_prefix_and_all_local_policies_preserved",
       "sourceReview": "Only diagnostic evaluation on the original disallowed scene state; ready/unsupported, blank/restored/mobile whole flow and native coverage gates unchanged. README internal run history removed under the standing root README rule."
+    },
+    "stageXXIIWebsiteNavigationDevelopment": {
+      "sourceParentCommit": "284dd842914c4c4acc5ccd4a16d455400497bfb8",
+      "task": "TASK-WEB-NAVIGATION-001",
+      "acceptance": "AC-BC-WEB-003",
+      "changedSourceHashes": {
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Assertions/SiteBrowserVisualAssertions.cs": "e1528e93cebb3735d110a2bb0ad8c13541ca80b6efd1d79df19a6e810060feea",
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Assertions/SiteContentInteractionAssertions.cs": "d93a8f047413c10b744c44aae58307b3b54a8f8b408ebef28491a5db0b7af525",
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteContentBrowserTests.cs": "3562c18144ab7d2d1ec9e32224422cf70bd475b0bb8f7a0f4191190c84417273",
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Contracts/SiteBrowserUiTokens.cs": "0bfde19ea89f9c83743200f49765097c3b6b494c60c786f865c92347c288bb14"
+      },
+      "change": "Observe real product fragment and CSS-adjusted scroll completion within clamped document range; require returned benchmark target and original lazy poster before hero navigation. No production renderer, allowed states, timeouts, selector or coverage threshold changed.",
+      "originalLinuxFailure": {
+        "runId": 37753944709,
+        "jobId": 113233738442,
+        "sourceCommit": "284dd842914c4c4acc5ccd4a16d455400497bfb8",
+        "originalLogSha256": "9ec8e4118aaf3a343062989fe681803d1cf91f860621576e40a69cb78d91c71f",
+        "actualState": "paused",
+        "backend": "webgl2",
+        "canvasCount": 1,
+        "hash": "#product",
+        "scrollY": 4438,
+        "hostTop": -3540.859375,
+        "hostBottom": -3011.296875
+      },
+      "localPreparationAndOracleFailures": "R697 missed the required existing coverage directory and failed before-session setup. R698/R700 identified the new oracle omitted scroll-range clamping: product target top70 versus CSS padding96, correct actual scrollY0. These failed originals remain distinct from the corrected flow.",
+      "nativeFlow": {
+        "exitCode": 0,
+        "elapsedSeconds": 5.167,
+        "logSha256": "2a070ef62b3512d30388fee81126236eb2711c8fd91c8afa9de74372b2a2892e",
+        "sourceInputs": 4864,
+        "assemblyInputs": 119,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalReports": [
+          {
+            "sha256": "1c7f240fd45e877fb845776aa53b1ad4ec2bae4c70e118fd6bc6bbd56f3700a6",
+            "counters": {
+              "total": "5",
+              "executed": "5",
+              "passed": "5",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ]
+      },
+      "siteJavaScriptCoverage": {
+        "sha256": "f25fb1b886a1ef5b643b0076b984564c91ca6348ae82a0e9e33a69123e971f85",
+        "totals": {
+          "executableLines": 1008,
+          "coveredLines": 946,
+          "aggregateLinesPercent": 93,
+          "blockOutcomes": 150,
+          "coveredBlockOutcomes": 126,
+          "aggregateBranchesPercent": 84
+        },
+        "critical": [
+          {
+            "path": "site/Features/BenchmarkComparisons/build-site.mjs",
+            "coveragePercent": 96,
+            "passed": true
+          },
+          {
+            "path": "site/Features/BenchmarkComparisons/bootstrap.mjs",
+            "coveragePercent": 93,
+            "passed": true
+          }
+        ],
+        "browserSessions": 1,
+        "scope": "Local site JavaScript only, not .NET product coverage."
+      },
+      "fullReleaseBuild": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-site-current-r703-navigation-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 129.362,
+        "log": "/private/tmp/keyload-site-current-r703-navigation-full-build-20261008.log",
+        "logSha256": "2fe0dc578d61551ca821d87673cb104863e601e0cde81715894bb837ab4a9737",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "fullFormat": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 122.848,
+        "log": "/private/tmp/keyload-site-current-r704-navigation-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": "Exact new-source original Linux Website/browser/coverage/freshness/Pages outcome; full RF3 and product coverage remain required."
     }
   },
   "TIME-PROVIDER-001": {

@@ -88,6 +88,8 @@ internal static class SiteBrowserVisualAssertions
 
     private static async Task AssertLazyScene(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
     {
+        await Assert.That(await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.SceneBenchmarkPositionScript,
+            cancellationToken)).IsTrue();
         var atBenchmarkFragment = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneBenchmarkFragmentScript, false, cancellationToken);
         await Assert.That(atBenchmarkFragment.GetBoolean()).IsTrue();
         var state = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneIdleSnapshotScript, false, cancellationToken);

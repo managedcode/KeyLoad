@@ -66,6 +66,17 @@ internal static class SiteBrowserUiTokens
     public const string SceneScrollAwayScript = "window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'})";
     public const string SceneIdleSnapshotScript = "({state:document.querySelector('#cluster-scene')?.getAttribute('data-scene-state')??'poster',canvasCount:document.querySelectorAll('#cluster-scene canvas').length})";
     public const string SceneBenchmarkFragmentScript = "window.location.hash==='" + SiteBrowserTokens.PageHideFragment + "'";
+    public const string SceneBenchmarkPositionScript = """
+        (() => {
+          const target = document.getElementById('benchmarks');
+          const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+          const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+          const root = document.scrollingElement;
+          const desired = target.getBoundingClientRect().top + scrollY - padding - margin;
+          const expected = Math.max(0, Math.min(root.scrollHeight - root.clientHeight, desired));
+          return location.hash === '#benchmarks' && Math.abs(scrollY - expected) <= 1;
+        })()
+        """;
     public const string ScenePausedScript = "document.querySelector('#cluster-scene')?.getAttribute('data-frame-state')==='paused'";
     public const string MotionDisabledScript = "document.querySelector('#scene-motion')?.disabled===true";
     public const string SceneGeometrySnapshotScript = "(()=>{const host=document.querySelector('#cluster-scene');const canvas=host?.querySelector('canvas');return{canvasCount:host?.querySelectorAll('canvas').length??0,canvasWidth:canvas?.width??0,canvasHeight:canvas?.height??0,pixelRatio:host&&canvas?Math.max(canvas.width/host.clientWidth,canvas.height/host.clientHeight):0,frame:host?.getAttribute('data-frame-state'),bufferPixels:Number(host?.getAttribute('data-buffer-pixels')??0),drawCalls:Number(host?.getAttribute('data-draw-calls')??0),renderCalls:Number(host?.getAttribute('data-render-calls')??0),triangles:Number(host?.getAttribute('data-triangles')??0)}})()";
