@@ -27333,6 +27333,13 @@
           572
         ],
         "qualification": "Actual native discovered identities and matching MVID/PDB/declared source bytes; no numerical product coverage or full current Linux execution claim."
+      },
+      "terminalWhitespaceCorrection": {
+        "path": "tests/KeyLoad.IntegrationTests/Features/Search/Contracts/NativeTextMaintenanceOriginalMutation.cs",
+        "beforeSha256": "f3e8d2763cb5401c336b30633ae5156b2340f31e33fc230e49444c0847084a9e",
+        "afterSha256": "c7db88d92b09c1df7eeecebdae654ac38e855247b84c50bc4d8a191cdfa592d7",
+        "change": "Remove only one redundant terminal blank line; no C# token or literal changes.",
+        "buildAndFunctionalEvidence": "R659-R666 original recorded source; final Linux rebuild required."
       }
     }
   },
