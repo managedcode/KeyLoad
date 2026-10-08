@@ -554,3 +554,7 @@ A bounded website qualification candidate contains the20-project historical runt
 ## TUnit owns test invocation, owner correction 2026-10-07
 
 - CI MUST invoke native TUnit/Microsoft.Testing.Platform tests directly after build, with native Detailed output. TUnit fixtures own the Aspire testing builder, resource startup/readiness, real C# client requests, benchmark measurements and joined shutdown. Do not put Aspire CLI or an outer test-runner AppHost between CI and TUnit. This explicit correction supersedes earlier prohibitions on direct TUnit entry; all RF3, recovery, scalar, artifact and qualification gates remain mandatory. Benchmarks and their contract tests remain exclusively in Benchmarks.
+
+## Website automatic trigger scope, owner correction 2026-10-08
+
+- Website MUST automatically run on trusted main pushes that change the site or its qualification/build/publication inputs, and after a successful Benchmarks producer. Use an explicit push path filter; unrelated database-only pushes MUST NOT start Website. The final Benchmarks dispatch MUST require every producer prerequisite, database matrix and aggregate to succeed, and Website MUST authenticate that triggering producer's successful terminal conclusion before qualification. This rule-specific correction supersedes unfiltered Website push triggers and dispatch after failed benchmark work; retain manual dispatch, independent site publication, bounded REST admission, original metric provenance, all applicable tests/coverage/freshness gates and least-privilege Pages delivery.

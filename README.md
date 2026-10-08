@@ -363,8 +363,9 @@ Its nine complete cohort flows passed in both normal and scalar modes. RF3 conta
 the first failed admission check while retaining every original predicate. The
 latest correction validates malformed placement rows before unnecessary owner
 lookups and reports unregistered committed owners as corruption. The current
-local solution build and formatter pass, and 73 placement, owner-registration,
-graph and query flows pass, including both original Linux unit failures. The
+local solution build and formatter pass, and all 3039 native unit cases pass,
+including 73 placement, owner-registration, graph and query flows and both
+original Linux unit failures. These local results are development evidence. The
 prior complete Linux run passed 3037/3039 unit cases in both modes and 270/270
 recovery cases. Exact-source Linux full-suite and RF3 qualification remain open.
 
@@ -401,7 +402,7 @@ supplies explicit clocks for timestamps, elapsed budgets and managed timers.
 Controlled-time regressions and the remaining runtime qualification gates
 are tracked in the feature specification.
 
-Website publication runs independently in CI when source changes. It uses the newest completed benchmark run with a verified aggregate when available; otherwise it publishes the product site without performance figures. A completed benchmark run triggers a fresh website build. [ADR-112](docs/ADR/ADR-112-independent-website-publication.md) records the source, artifact and publication checks; the revised route still needs delivered-source Linux CI and Pages verification.
+Website publication runs automatically on main pushes that change the site or its tests, build and publication inputs. Documentation and database-only pushes do not trigger it. It uses the newest completed benchmark run with a verified aggregate when available; otherwise it publishes the product site without performance figures. A successful benchmark run triggers a fresh website build after every producer job and aggregation succeeds. [ADR-112](docs/ADR/ADR-112-independent-website-publication.md) records the source, artifact and publication checks; the revised route still needs delivered-source Linux CI and Pages verification.
 
 ## FAQ
 

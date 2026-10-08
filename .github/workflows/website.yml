@@ -2,6 +2,21 @@ name: Website
 on:
   push:
     branches: [main]
+    paths:
+      - 'site/**'
+      - 'tests/KeyLoad.SiteTests/**'
+      - 'scripts/Features/BenchmarkComparisons/site-*'
+      - 'scripts/Features/BenchmarkComparisons/composite-site-*'
+      - '.github/workflows/website.yml'
+      - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
+      - 'scripts/Features/TestInfrastructure/run-tests.mjs'
+      - '.editorconfig'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'Directory.Packages.props'
+      - 'global.json'
   workflow_dispatch:
     inputs:
       benchmark_run_id:
@@ -58,6 +73,7 @@ jobs:
               (.event == "push" or .event == "workflow_dispatch") and
               (.head_sha | test("^[a-f0-9]{40}$"))' <<< "$benchmark_metadata" > /dev/null
             if [[ "$(jq -r .status <<< "$benchmark_metadata")" == completed ]]; then
+              jq -e '.conclusion == "success"' <<< "$benchmark_metadata" > /dev/null
               exit 0
             fi
             benchmark_poll=$((benchmark_poll + 1))

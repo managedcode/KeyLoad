@@ -97,3 +97,7 @@
 
 ## Native TUnit entry, owner correction 2026-10-07
 - ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.
+
+## Website automatic trigger scope, owner correction 2026-10-08
+
+- Website main pushes MUST be filtered to site and actual qualification/build/publication inputs; database-only pushes MUST NOT enqueue it. Benchmarks' final bounded dispatch MUST require all producer prerequisites, database matrices and aggregate to succeed. Website MUST authenticate successful terminal completion of a supplied triggering producer before proceeding. This explicit correction supersedes unfiltered push and failed-producer dispatch clauses only; preserve the existing manual/final-dispatch executor, independent site push path, optional metrics, bounded waits, immutable provenance, all qualification/freshness checks and least privileges.
