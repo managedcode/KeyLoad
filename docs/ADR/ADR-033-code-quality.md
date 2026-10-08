@@ -369,3 +369,34 @@ payload, preserving the original command/fingerprint. Actual Linux prepare,
 fence and capture flows, all full/instrumented suites, covered RF3 and the final
 source-bound merge remain required. Product functional coverage stays unmeasured;
 load/comparison and website JavaScript coverage remain separate.
+
+
+### Owner-admission whole-flow census extension (2026-10-08)
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-044 retains the existing coverage
+REQ/AC-CQ-FUNC-039..045 source, census and contributor gates. R735 observes
+3045 actual native cases after the configured-owner admission repair: 2649
+functional contributors and 396 required ordinary controls. Preserve every
+previous3044 identity, disposition, REQ/AC mapping, exclusion and group owner;
+only rebind actual current source checksums/native locations and add the one
+reviewed operation contributor. No guessed native UID or source range is allowed.
+
+UnconfiguredMovementAuthorityWholeFlowTests is an actual canonical native store
+operation. It injects each independently literal malformed movement authority
+family, rejects construction and current-cut access without effects, executes
+a genuine global principal command with retained failed outcome/replay and no
+principal effect, removes the actual fault, and reads the complete literal
+DocumentResult. It maps REQ-MOVE-NATIVE-001 to AC-MOVE-NATIVE-005; supporting
+configured Prepare/Grant flows also exercise real null-owner issuance/apply,
+restoration and source-fenced original command replay. These supporting flows
+retain their existing identities and require Linux loopback execution.
+
+The new class belongs to existing group unit-functional-01, whose U* selector
+already selects it. Native groups become527/528/494/528/572; no selector,
+threshold, exclusion, ordinary control or contributor is removed. R735
+PE/PDB/compiled-source observation and canonical full plus five selected
+normal/scalar discovery must independently bind the current inventory/image.
+Read-only discovery is not a scalar operation rerun, coverage measurement or
+complete acceptance. Original R733 eleven read-budget/owner whole flows pass
+locally with unchanged exact budgets; full normal/recovery, original Linux
+RF3 and admitted merged product coverage remain separately required.

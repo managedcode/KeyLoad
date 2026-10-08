@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current controlled-movement source full Release R727 and full formatterR728 pass with zero warnings/errors and no source drift. Original unfiltered native unitR725 is3036/3044: five exact read-cost regressions under repair and three macOS configured-loopback bind failures, no skipped cases. Recorded R720seed/routing46/46 and R710site5/5 are local development cohorts; exact-current final runtime/Linux RF3, Pages, task acceptance and numeric product coverage remain open.",
+    "verificationStage": "Current fullReleaseR739 and fullformatterR741 pass with zero source drift. FullnormalR7423042/3045: all52originalR736recursive read regressions pass; only3actual macOS additional-loopback bind cases fail, no skips. FullprocessrecoveryR743270/270 and all12 currentnormal/scalar native discoveriesR744 pass; both runtime suites retain zero source/DLL/PDB drift. OriginalR725/R736/R738 failures remain retained. Exact delivered-source Linux normal/scalar/recovery/RF3/Pages and measured product coverage remain mandatory/open; no skipped or failed gate counts as passing.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,16 +240,17 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r739-final-oracle-read-ownership-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 178.05,
-      "log": "/private/tmp/keyload-movement-current-r727-final-format-owned-build-20261008.log",
-      "logSha256": "c275402e564d219db0a3d6ffdd6838cf3e1108c6f03c8cd0a4f48a151090b9cb",
-      "inputCount": 5056,
+      "elapsedSeconds": 130.585,
+      "log": "/private/tmp/keyload-movement-current-r739-final-oracle-read-ownership-build-20261008.log",
+      "logSha256": "0fb4105c6f5bdef2157dcd904b5837d2da65055e75905b8be69118214c9e247e",
+      "inputCount": 5064,
       "inputDrift": [],
       "uniqueErrors": [],
-      "qualification": "local development; source drift invalidates exact-current-source qualification"
+      "qualification": "local development; source drift invalidates exact-current-source qualification",
+      "receiptSha256": "2df12868bde0efb0ed918320ebb35cd6b4fe359b9a4c6bfdb6a03214be10d78f"
     },
     "currentFormatter": {
       "commandArgs": [
@@ -262,12 +263,13 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 101.51,
-      "log": "/private/tmp/keyload-movement-current-r728-final-imports-format-20261008.log",
+      "elapsedSeconds": 100.18,
+      "log": "/private/tmp/keyload-movement-current-r741-final-oracle-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 5056,
+      "inputCount": 5064,
       "inputDrift": [],
-      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      "qualification": "native local source-bound formatter verification, not functional or Linux proof",
+      "receiptSha256": "ce48060efb3b6c295bd73ef5a121b0ad5a166f0bed54e7516108d82ebeb8ef71"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -29847,7 +29849,7 @@
         "unchangedExpectedDocumentPointReads": 10,
         "annExtraReadBytes": 76,
         "sourceReadExactBudgetExceeded": true,
-        "repairStatus": "in_progress; no test thresholds or resource limits increased"
+        "repairStatus": "All original five exact point/byte budget regressions plus associated owner controls pass in R733 eleven actual whole flows, unchanged oracles; current full normal R736 and recovery remain pending."
       },
       "inventoryR721": {
         "originalInventorySha256": "b40f54594e4c7119e14d0d5afb6b9994a918d992c029a5c11312ab2628421ecb",
@@ -30688,6 +30690,1013 @@
         "inputCount": 5056,
         "inputDrift": [],
         "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "ownerAdmissionRepair": {
+        "packet": "keyload-r725-movement-read-cost-r4-20261008",
+        "patchSha256": "ede1f773194976f3ee8efbe699993b2fc579256a05c95c09a1991df8e9ff1ecf",
+        "manifestSha256": "18f44cb11dd01eda6c07ad1267238682489db7af6ca0bb53e1f9c808b29eb8cb",
+        "independentSourceReady": "keyload-r725-movement-read-cost-independent-review-r4-20261008",
+        "requirements": [
+          "REQ-MOVE-NATIVE-001"
+        ],
+        "acceptance": [
+          "AC-MOVE-NATIVE-005"
+        ],
+        "newWholeFlowCases": 1,
+        "originalFiveBudgetOraclesUnchanged": true,
+        "unconfiguredGlobalScopeGapClosed": true,
+        "configuredOwnerFreshFencesPreserved": true,
+        "firstOrChangedCutNativeRanges": 14,
+        "stableSameCutNegativeProofReusable": true,
+        "stagedViewsNeverPublishProof": true,
+        "performanceImprovementClaimed": false,
+        "initialBuildR729": {
+          "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r729-same-cut-owner-admission-build-20261008-msbuild-debug",
+          "nativeExitCode": 1,
+          "buildCompletedSuccessfully": false,
+          "elapsedSeconds": 26.508,
+          "log": "/private/tmp/keyload-movement-current-r729-same-cut-owner-admission-build-20261008.log",
+          "logSha256": "950b71ab4488ddbdf9add83503a4ac9544e825e36260624842c5a569c73c30b0",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "uniqueErrors": [
+            "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementAbsenceCut.cs(12,15): error KLD0034: Use System.Threading.Lock for short shared-service critical sections and Orleans turn scheduling for activation-owned state instead of 'movementAbsenceGate' [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementAbsenceCut.cs(17,15): error KLD0034: Use System.Threading.Lock for short shared-service critical sections and Orleans turn scheduling for activation-owned state instead of 'movementAbsenceGate' [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementOwnerAdmission.cs(45,11): error IDE0031: Null check can be simplified (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0031) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]",
+            "/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementOwnerAdmission.cs(51,9): error IDE0031: Null check can be simplified (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0031) [/Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Core/KeyLoad.Core.csproj]"
+          ],
+          "qualification": "local development; source drift invalidates exact-current-source qualification"
+        },
+        "compilerCorrections": "Original KLD0034/IDE0031 and unused-import failures retained; System.Threading.Lock/C#14 assignments/import removal/scoped whitespace fixed, final R732 build and R734 formatter pass.",
+        "compilerFailureR730": {
+          "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r730-native-lock-owner-admission-build-20261008-msbuild-debug",
+          "nativeExitCode": 1,
+          "buildCompletedSuccessfully": false,
+          "elapsedSeconds": 96.019,
+          "log": "/private/tmp/keyload-movement-current-r730-native-lock-owner-admission-build-20261008.log",
+          "logSha256": "41633dfdc4d0876bb5608d7b526a0b1c2229dd2138fc15938a5eca01ad9e230a",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "uniqueErrors": [
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs(2,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+          ],
+          "qualification": "local development; source drift invalidates exact-current-source qualification",
+          "originalReceiptSha256": "cc7ac108478ae2dde6d20a65774d0966af7e7fae17ce82dca7a4c8ed1d27b220"
+        },
+        "scopedWhitespaceR731": {
+          "commandArgs": [
+            "dotnet",
+            "format",
+            "whitespace",
+            "KeyLoad.slnx",
+            "--no-restore",
+            "--verbosity",
+            "minimal",
+            "--include",
+            "src/KeyLoad.Core/Features/ClusterRouting/Serialization/PartitionMovePublishedPlacementStorage.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/IPartitionMovementReadScope.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementOwnerAdmission.cs",
+            "src/KeyLoad.Core/DatabaseEngine.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMoveTargetReadFence.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMoveCommandFence.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Identity/PartitionMoveNativeAuthority.cs",
+            "src/KeyLoad.Core/AtomicCommandCommit.cs",
+            "src/KeyLoad.Core/Features/ResourceExecution/Execution/BudgetedReadView.cs",
+            "src/KeyLoad.Core/Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementUnconfiguredEngine.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementOwnerAdmissionAssertions.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementPrepareFlow.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementConfiguredFenceAssertions.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementGrantTests.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementAbsenceCut.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/UnconfiguredMovementGlobalCommandAssertions.cs"
+          ],
+          "nativeExitCode": 0,
+          "elapsedSeconds": 5.621,
+          "scope": [
+            "src/KeyLoad.Core/Features/ClusterRouting/Serialization/PartitionMovePublishedPlacementStorage.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/IPartitionMovementReadScope.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementOwnerAdmission.cs",
+            "src/KeyLoad.Core/DatabaseEngine.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMoveTargetReadFence.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMoveCommandFence.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Identity/PartitionMoveNativeAuthority.cs",
+            "src/KeyLoad.Core/AtomicCommandCommit.cs",
+            "src/KeyLoad.Core/Features/ResourceExecution/Execution/BudgetedReadView.cs",
+            "src/KeyLoad.Core/Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementUnconfiguredEngine.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementOwnerAdmissionAssertions.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementPrepareFlow.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledMovementConfiguredFenceAssertions.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementGrantTests.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementAbsenceCut.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/UnconfiguredMovementGlobalCommandAssertions.cs"
+          ],
+          "changedFiles": [
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementOwnerAdmission.cs",
+            "src/KeyLoad.Core/Features/ResourceExecution/Execution/BudgetedReadView.cs",
+            "src/KeyLoad.Core/Features/ClusterRouting/Authorization/PartitionMovementAbsenceCut.cs",
+            "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/UnconfiguredMovementGlobalCommandAssertions.cs"
+          ],
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "Scoped canonical whitespace edits only, not test/runtime proof.",
+          "originalReceiptSha256": "e76ca14d6e24ed978ea8fe2cef879f2a7b03f203416aef2094fe5a828d883abe"
+        },
+        "finalBuildR732": {
+          "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r732-final-owner-admission-build-20261008-msbuild-debug",
+          "nativeExitCode": 0,
+          "buildCompletedSuccessfully": true,
+          "elapsedSeconds": 103.241,
+          "log": "/private/tmp/keyload-movement-current-r732-final-owner-admission-build-20261008.log",
+          "logSha256": "3a41c19893a5d2c2302b7221c01c37622db598562156c9aabd97b290c383040c",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "uniqueErrors": [],
+          "qualification": "local development; source drift invalidates exact-current-source qualification",
+          "originalReceiptSha256": "21ab93904cc3639d64e53f7967b1716fd13867150e5ddcc5bc1a296cc13ddbd4"
+        },
+        "finalFormatterR734": {
+          "commandArgs": [
+            "dotnet",
+            "format",
+            "KeyLoad.slnx",
+            "--no-restore",
+            "--verify-no-changes",
+            "--verbosity",
+            "minimal"
+          ],
+          "nativeExitCode": 0,
+          "elapsedSeconds": 96.099,
+          "log": "/private/tmp/keyload-movement-current-r734-final-owner-admission-format-20261008.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "qualification": "native local source-bound formatter verification, not functional or Linux proof",
+          "originalReceiptSha256": "48451e4841d1db3aa2b541b77b2f77c9066a9b464fe00afb3aaa7a69438ffa41"
+        },
+        "exactBudgetAndOwnerWholeFlowsR733": {
+          "commandArgs": [
+            "node",
+            "scripts/Features/TestInfrastructure/run-tests.mjs",
+            "--KeyLoadTests:Suite=unit",
+            "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r733-exact-budget-owner-wholeflows-20261008-results",
+            "--KeyLoadTests:ReportTrx=true",
+            "--KeyLoadTests:Filter=/*/*/(DocumentMutationImageReadTests)|(SourceReadBudgetTests)|(AnnSeedReadBudgetTests)|(UnconfiguredMovementAuthorityWholeFlowTests)/*"
+          ],
+          "nativeExitCode": 0,
+          "elapsedSeconds": 19.052,
+          "log": "/private/tmp/keyload-movement-current-r733-exact-budget-owner-wholeflows-20261008.log",
+          "logSha256": "ff648b381fb97a169e0f549f9d4bc0dfbdf1ac65dbe40c5e79e50644ad3f1af2",
+          "sourceInputs": 5065,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-movement-current-r733-exact-budget-owner-wholeflows-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "58ed397fd0a5d77f6384e75f1234dc251af07828e46cf71527d44801a6d7ae4b",
+              "counters": {
+                "total": "11",
+                "executed": "11",
+                "passed": "11",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReceiptSha256": "c038e317c0cdd3cb614126971d624802857525879678ddba0570cd9adfdcd260"
+        },
+        "inventoryR735": {
+          "originalInventorySha256": "054d7e96050f58ec2c3288a585feb4ba03304d71b715488b0d3edb70553d5818",
+          "currentInventorySha256": "def796d39642e8aff0f722c2729a878cb6d6c6aa69c5677c71c3a31e16cabfa7",
+          "nativeCensusSha256": "40fb067ccd3958c4eb37aa2a1dfe4168730986cd78c4c58f7182e51059866789",
+          "nativeImageObservationSha256": "cdf49f6f1750bfa7c433e84d918604854dae8cdfa20d56fc213e061d4a19d5ea",
+          "newNativeCase": {
+            "uid": "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests.1.1.RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead.1.1.0",
+            "displayName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+            "type": {
+              "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+              "namespace": "KeyLoad.UnitTests.Features.ClusterRouting",
+              "typeName": "UnconfiguredMovementAuthorityWholeFlowTests",
+              "methodName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+              "methodArity": 0,
+              "returnTypeFullName": "System.Threading.Tasks.Task",
+              "parameterTypeFullNames": []
+            },
+            "location": {
+              "file": "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs",
+              "lineStart": 23,
+              "lineEnd": 61
+            }
+          },
+          "newFunctionalCase": {
+            "className": "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests",
+            "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests",
+            "methodName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+            "instanceName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+            "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs",
+            "sourceSha256": "8a94a1ac6401a4554fb50b8c6c19e7f7f09417eafae04c8ecaf6c1a258779d39",
+            "lineNumber": 23,
+            "endLineNumber": 61,
+            "classification": "functional",
+            "exclusionReason": null,
+            "requirements": [
+              "REQ-MOVE-NATIVE-001"
+            ],
+            "acceptance": [
+              "AC-MOVE-NATIVE-005"
+            ]
+          },
+          "sourceClassification": "Complete real configured native store operation: malformed authoritative rows reject startup and fresh current-cut access; actual global principal command persists original rejection/replay and no principal effect; removing each actual fault restores full literal DocumentResult. Source-reviewed by author, independent peer and root; no criterion/RF3 closure or numeric coverage claim.",
+          "old3044IdentitiesDispositionsMappingsAndOwnersPreserved": true,
+          "changedSourceOrNativeLocations": [
+            {
+              "identity": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests|ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen|ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+              "changes": {
+                "sourceSha256": {
+                  "before": "2bd29fbdb3c11696c7f63c1d16a104bbffcf07d02e35fb1eb94c34e64e0d2ec7",
+                  "after": "0a050bff7b9634763b26acc431d153309b2f2ab53366b4cd964b555cc3a9373d"
+                },
+                "endLineNumber": {
+                  "before": 59,
+                  "after": 60
+                }
+              }
+            }
+          ],
+          "functionalCases": 2649,
+          "requiredOrdinaryCases": 396,
+          "nativeCases": 3045,
+          "groups": [
+            {
+              "id": "unit-functional-01",
+              "cases": 527,
+              "selectorBytes": 2197
+            },
+            {
+              "id": "unit-functional-02",
+              "cases": 528,
+              "selectorBytes": 2005
+            },
+            {
+              "id": "unit-functional-03",
+              "cases": 494,
+              "selectorBytes": 2168
+            },
+            {
+              "id": "unit-functional-04",
+              "cases": 528,
+              "selectorBytes": 2399
+            },
+            {
+              "id": "unit-functional-05",
+              "cases": 572,
+              "selectorBytes": 2107
+            }
+          ],
+          "qualification": "Actual native census and PE/PDB/source observation binding only; selected discovery/runtime/coverage remains separately required.",
+          "originalReceiptSha256": "8a6af626c89d6072d01831ba8857a4acf4f469cda6f86f727b0a41bc056d714a"
+        },
+        "canonicalSelectedDiscoveryR737": {
+          "fullNativeCases": 3045,
+          "functionalGroups": [
+            527,
+            528,
+            494,
+            528,
+            572
+          ],
+          "normalAndScalarReadOnlyDiscoveryPassed": true,
+          "passedPhases": 12,
+          "originalLogSha256": "5aefcc7d5b055fd12a4df04b0022d897c805e3976909034300fac437bb4aceb2",
+          "evidenceRoot": "artifacts/local/stage-xxiii-owner-admission-native-discovery-20261008",
+          "qualification": "Actual native source/image/case identity equality. Read-only listing executes no scalar operations, supplies no numeric coverage and closes no original task."
+        },
+        "fullNormalUnitR736": {
+          "commandArgs": [
+            "node",
+            "scripts/Features/TestInfrastructure/run-tests.mjs",
+            "--KeyLoadTests:Suite=unit",
+            "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r736-full-normal-native-unit-20261008-results",
+            "--KeyLoadTests:ReportTrx=true"
+          ],
+          "temporaryRoot": "/private/tmp/kl-w3ezj9x6",
+          "nativeExitCode": 2,
+          "elapsedSeconds": 426.778,
+          "log": "/private/tmp/keyload-movement-current-r736-full-normal-native-unit-20261008.log",
+          "logSha256": "3d8911cd49d05af58165200cc9aa0996b505a1b74d42bd8c0a758d40c8455599",
+          "sourceInputs": 5065,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-movement-current-r736-full-normal-native-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "5fbc1831aaeed0f17877efadf1076e5c5bf27884c5344351c055aa45c7aebbbc",
+              "counters": {
+                "total": "3045",
+                "executed": "3045",
+                "passed": "2990",
+                "failed": "55",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "receiptSha256": "4f4fd1a9d186a84939de5420ce7155f6a9c491996de6593ed3b67f6785e952f8",
+          "originalFailures": [
+            {
+              "name": "PersistedDomainFailureStillHasPartitionLocatorWithoutDomainWrite",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.CommandOutcomePartitionScopeTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PartitionOutcomeAndV2LocatorCommitAndReplayTogether",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.CommandOutcomePartitionScopeTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "GlobalAndPartitionOperationsCanReuseOnePrincipalCommandId",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.CommandOutcomePartitionScopeTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(6)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(4)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(3)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MissingMalformedOrUnsignedAuthorityIsRejectedBeforeEffects(1)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MissingMalformedOrUnsignedAuthorityIsRejectedBeforeEffects(2)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(2)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MissingMalformedOrUnsignedAuthorityIsRejectedBeforeEffects(3)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "EvenValidMacMustMatchActualAuthorityFields(0)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(5)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MissingMalformedOrUnsignedAuthorityIsRejectedBeforeEffects(0)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "EvenValidMacMustMatchActualAuthorityFields(3)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "EvenValidMacMustMatchActualAuthorityFields(1)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AuthenticatedWrongTypeOrTrailingAuthorityStillFailsStrictNativeDecode(True)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(0)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(7)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AuthenticatedWrongTypeOrTrailingAuthorityStillFailsStrictNativeDecode(False)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "ProofFromAnotherDurableStoreFailsBeforeMutation",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "EvenValidMacMustMatchActualAuthorityFields(2)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MutatedNativeBodyProofOrFrozenIdentityCannotProduceAnyOutcome(1)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationAuthorityTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicDecodeFailureIsSignedAndStillEvaluatedAtItsOriginalDomainCallSite",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationMarkerTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "SignedDecodeMarkerDoesNotPreemptTheCommittedBusinessClock",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationMarkerTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NullPublicPayloadRetainsItsExistingCorruptionFailureMarker",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationMarkerTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "BorrowedProjectionAuthenticatesWithoutDecodingThePublicJsonPayload",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationMarkerTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "SignedDecodeMarkerDoesNotPreemptCurrentPrincipalAuthentication",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationMarkerTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "IndependentlyAuthenticatedDifferentTypedBodyIsNotAReplayOfTheSameFrozenIdentity",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationSemanticsTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicMcpNullElementsRouteAndRetainOneDurableDomainOutcome(NullPatch)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicCommandTransportTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicMcpNullElementsRouteAndRetainOneDurableDomainOutcome(NullMutation)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicCommandTransportTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicMcpNullElementsRouteAndRetainOneDurableDomainOutcome(NullGrant)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicCommandTransportTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NativeFactoryAndSemanticComparerRetainPublicNullElements(NullPatch)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullMutation)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NativeFactoryAndSemanticComparerRetainPublicNullElements(NullMutation)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullMutation)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullGrant)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullPatch)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NullMutationRetainsStaleOwnershipBeforeElementValidation",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NullGrantRetainsProtectedTargetBeforeGrantValidation",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullGrant)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "ConfiguredNullGrantDoesNotPreemptCurrentClusterAdministration",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "MalformedAlreadyNativeOperationStillPropagatesCorruptionWithoutAnOutcome",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "NativeFactoryAndSemanticComparerRetainPublicNullElements(NullGrant)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullPatch)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativePublicNormalizationTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "WrongNativeNullableErrorScalarMetadataRemainsRejected(String)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.ReplicaNativeEnumHeaderTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "WrongNativeNullableErrorScalarMetadataRemainsRejected(Int64)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.ReplicaNativeEnumHeaderTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "WrongNativeOperationEnumScalarMetadataRemainsRejected(String)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.ReplicaNativeEnumHeaderTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "WrongNativeOperationEnumScalarMetadataRemainsRejected(Int64)",
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.ReplicaNativeEnumHeaderTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AcRoc003NullResourceProtocolPersistsValidationWithoutPartialCatalogEffects({\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":{\"name\":\"protocol-guard\",\"kind\":\"collection\",\"transactionDomainId\":\"orders\",\"eventRetention\":null}})",
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ResourceProtocolFailureTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AcRoc003NullResourceProtocolPersistsValidationWithoutPartialCatalogEffects({\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":{\"name\":\"protocol-guard\",\"kind\":\"collection\",\"transactionDomainId\":\"orders\",\"queuePolicy\":null}})",
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ResourceProtocolFailureTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AcRoc003NullResourceProtocolPersistsValidationWithoutPartialCatalogEffects({\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":null})",
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ResourceProtocolFailureTests",
+              "originalMessage": "LockRecursionException: Recursive read lock acquisitions not allowed in this mode.",
+              "classification": "test_oracle_nested_native_read"
+            },
+            {
+              "name": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+              "originalMessage": "SocketException: Can't assign requested address",
+              "classification": "macOS_secondary_loopback_address_bind"
+            },
+            {
+              "name": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+              "originalMessage": "SocketException: Can't assign requested address",
+              "classification": "macOS_secondary_loopback_address_bind"
+            },
+            {
+              "name": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+              "originalMessage": "SocketException: Can't assign requested address",
+              "classification": "macOS_secondary_loopback_address_bind"
+            }
+          ]
+        },
+        "oracleReadOwnershipRepair": {
+          "sourceJoin": "/private/tmp/keyload-r736-recursive-read-root-join-20261008.json",
+          "manifestSha256": "bec0d8028c22b85bf504a4296b8587c4fc6b7da40d0fe59d75ed86edb24e91bc",
+          "patchSha256": "b9d042f329eff710db952b042e86a5f887324b4bbc4ab7697eb895342b9a9d99",
+          "originalAffectedUnitCases": 52,
+          "originalAffectedGroupedCases": {
+            "sharedOracle": 33,
+            "nativeNormalizationFixture": 16,
+            "partitionScopeFixture": 3
+          },
+          "changedHelperFiles": 6,
+          "canonicalCaptureStillOneView": true,
+          "productionLockAuthorizationBudgetsOraclesPreserved": true,
+          "additionalVerifiedControlPrincipalBeforeRead": true,
+          "verification": "Full current native normal3042/3045 withall original52recursive-read failures nowPASS andonly3 unchanged macOS address-bind failures; fullprocessrecovery270/270; zero source/assembly drift; no fullnormal/Linux/RF3/coverage PASS claimed.",
+          "initialBuildR738": {
+            "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+            "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r738-oracle-read-ownership-build-20261008-msbuild-debug",
+            "nativeExitCode": 1,
+            "buildCompletedSuccessfully": false,
+            "elapsedSeconds": 112.068,
+            "log": "/private/tmp/keyload-movement-current-r738-oracle-read-ownership-build-20261008.log",
+            "logSha256": "1b5c8e8c5ffbe63e9640c1475eb2181ff877b4caf45f184a861802f8ecc6832d",
+            "inputCount": 5064,
+            "inputDrift": [],
+            "uniqueErrors": [
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Assertions/CommandOutcomePartitionScopeTestData.cs(4,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+              "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/InternalSerialization/Fixtures/NativePublicNormalizationFixture.cs(3,1): error IDE0005: Using directive is unnecessary. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0005) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+            ],
+            "qualification": "local development; source drift invalidates exact-current-source qualification",
+            "receiptSha256": "3d23dd7bf22e6c199efa376361f349b8e736a98eb71709c2526de67a346de3bf"
+          },
+          "compilerCorrections": [
+            "Removed unused KeyLoad.Storage import from shared-oracle adapters in CommandOutcomePartitionScopeTestData and NativePublicNormalizationFixture; no behavior or diagnostic severity change."
+          ],
+          "scopedWhitespaceR740": {
+            "commandArgs": [
+              "dotnet",
+              "format",
+              "whitespace",
+              "KeyLoad.slnx",
+              "--no-restore",
+              "--include",
+              "tests/KeyLoad.UnitTests/OutcomeStoreOracle.cs",
+              "tests/KeyLoad.RecoveryTests/OutcomeStoreOracle.cs",
+              "tests/KeyLoad.UnitTests/Features/InternalSerialization/Fixtures/NativePublicNormalizationFixture.cs",
+              "tests/KeyLoad.UnitTests/Features/ClusterRouting/Assertions/CommandOutcomePartitionScopeTestData.cs",
+              "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/EventProjectionRecoveryStoreOracle.cs",
+              "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementCaptureFlow.cs",
+              "--verbosity",
+              "minimal"
+            ],
+            "nativeExitCode": 0,
+            "elapsedSeconds": 5.743,
+            "scope": [
+              "tests/KeyLoad.UnitTests/OutcomeStoreOracle.cs",
+              "tests/KeyLoad.RecoveryTests/OutcomeStoreOracle.cs",
+              "tests/KeyLoad.UnitTests/Features/InternalSerialization/Fixtures/NativePublicNormalizationFixture.cs",
+              "tests/KeyLoad.UnitTests/Features/ClusterRouting/Assertions/CommandOutcomePartitionScopeTestData.cs",
+              "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/EventProjectionRecoveryStoreOracle.cs",
+              "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementCaptureFlow.cs"
+            ],
+            "changedFiles": [],
+            "outsideScopeChangedFiles": [],
+            "log": "/private/tmp/keyload-movement-current-r740-oracle-whitespace-20261008.log",
+            "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "qualification": "local canonical whitespace only",
+            "receiptSha256": "f7222d768a22dbe5c53894cc6ca522eabce17599f442766e3bde8866bfc436e1"
+          },
+          "original52RecursionRegressionProof": {
+            "path": "/private/tmp/keyload-r742-original-recursion-regression-proof-20261008.json",
+            "sha256": "7e19ffe06663a2caf77fb8e1b27be6415b47835278d80d9025f73a0e7abe6b3f",
+            "originalRecursionFailures": 52,
+            "allOriginal52NowPassed": true,
+            "failedCurrent": [
+              {
+                "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+                "name": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+                "outcome": "Failed",
+                "message": "SocketException: Can't assign requested address"
+              },
+              {
+                "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+                "name": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+                "outcome": "Failed",
+                "message": "SocketException: Can't assign requested address"
+              },
+              {
+                "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+                "name": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+                "outcome": "Failed",
+                "message": "SocketException: Can't assign requested address"
+              }
+            ],
+            "skippedCurrent": 0,
+            "qualification": "current local whole-suite original TRX proof; macOS address-bind failures remain required Linux cases"
+          }
+        },
+        "originalMacLoopbackIdentityConstraint": {
+          "analysis": "/private/tmp/keyload-r736-loopback-identity-analysis-r2-20261008/analysis.txt",
+          "cases": 3,
+          "nativeSiloPort": 11111,
+          "targetNativeEndpointsRequiredDistinct": 3,
+          "localCause": "macOS cannot bind the additional IPv4 loopback addresses used by six configured actual listeners",
+          "ephemeralPortSubstitutionRejected": "would violate unchanged fixed-port, hostname and distinct per-voter native admission",
+          "skipAliasesOrAdmissionBypass": false,
+          "qualification": "unchanged cases remain required in Linux; local failures retained"
+        },
+        "finalOracleBuildR739": {
+          "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+          "msbuildDebugDirectory": "/private/tmp/keyload-movement-current-r739-final-oracle-read-ownership-build-20261008-msbuild-debug",
+          "nativeExitCode": 0,
+          "buildCompletedSuccessfully": true,
+          "elapsedSeconds": 130.585,
+          "log": "/private/tmp/keyload-movement-current-r739-final-oracle-read-ownership-build-20261008.log",
+          "logSha256": "0fb4105c6f5bdef2157dcd904b5837d2da65055e75905b8be69118214c9e247e",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "uniqueErrors": [],
+          "qualification": "local development; source drift invalidates exact-current-source qualification",
+          "receiptSha256": "2df12868bde0efb0ed918320ebb35cd6b4fe359b9a4c6bfdb6a03214be10d78f"
+        },
+        "finalOracleFormatterR741": {
+          "commandArgs": [
+            "dotnet",
+            "format",
+            "KeyLoad.slnx",
+            "--no-restore",
+            "--verify-no-changes",
+            "--verbosity",
+            "minimal"
+          ],
+          "nativeExitCode": 0,
+          "elapsedSeconds": 100.18,
+          "log": "/private/tmp/keyload-movement-current-r741-final-oracle-format-20261008.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "inputCount": 5064,
+          "inputDrift": [],
+          "qualification": "native local source-bound formatter verification, not functional or Linux proof",
+          "receiptSha256": "ce48060efb3b6c295bd73ef5a121b0ad5a166f0bed54e7516108d82ebeb8ef71"
+        },
+        "finalFullNormalUnitR742": {
+          "commandArgs": [
+            "node",
+            "scripts/Features/TestInfrastructure/run-tests.mjs",
+            "--KeyLoadTests:Suite=unit",
+            "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r742-full-normal-oracle-unit-20261008-results",
+            "--KeyLoadTests:ReportTrx=true"
+          ],
+          "temporaryRoot": "/private/tmp/kl-ywasjmnu",
+          "nativeExitCode": 2,
+          "elapsedSeconds": 502.0,
+          "log": "/private/tmp/keyload-movement-current-r742-full-normal-oracle-unit-20261008.log",
+          "logSha256": "c9b6d87eb29b2421b3dfb3648ab6b7605f875887c665b218bf5e6d434624053d",
+          "sourceInputs": 5065,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-movement-current-r742-full-normal-oracle-unit-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "ad3f24dae95dad26256e53c3c69fc91f35b534a82c9af289779c828c274f6f00",
+              "counters": {
+                "total": "3045",
+                "executed": "3045",
+                "passed": "3042",
+                "failed": "3",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "receiptSha256": "80d68540c5bb10aba2cfb6ffa35e45c624922e74b068b6fbaab8adcaaab04ace"
+        },
+        "finalFullProcessRecoveryR743": {
+          "commandArgs": [
+            "node",
+            "scripts/Features/TestInfrastructure/run-tests.mjs",
+            "--KeyLoadTests:Suite=recovery",
+            "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-movement-current-r743-full-oracle-process-recovery-20261008-results",
+            "--KeyLoadTests:ReportTrx=true"
+          ],
+          "temporaryRoot": "/private/tmp/kl-sy052q4n",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 276.682,
+          "log": "/private/tmp/keyload-movement-current-r743-full-oracle-process-recovery-20261008.log",
+          "logSha256": "5108c1baf575e7795aa69bced133d1a06b6df5c3b029e3a654c534becbb53481",
+          "sourceInputs": 5065,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-movement-current-r743-full-oracle-process-recovery-20261008-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "eaeb76ba6e5500ae23105a866917aa4abd5c6a76c1a64ba22ea29d4405d2a568",
+              "counters": {
+                "total": "270",
+                "executed": "270",
+                "passed": "270",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "receiptSha256": "15fd2127196d7a3e992b85e4630200880e10e9efec266220986e704dec543d0a"
+        },
+        "finalCanonicalSelectedDiscoveryR744": {
+          "root": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008",
+          "inventorySha256": "def796d39642e8aff0f722c2729a878cb6d6c6aa69c5677c71c3a31e16cabfa7",
+          "actualFullCounts": {
+            "normal": 3045,
+            "scalar": 3045
+          },
+          "actualGroupCounts": [
+            527,
+            528,
+            494,
+            528,
+            572
+          ],
+          "nativeProcesses": [
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery/native-process.json",
+              "sha256": "609721f223d9a17d664e955d80093836df6160af1606527c566014d4d3de125c",
+              "suite": "unit",
+              "groupId": "",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery-unit-functional-01/native-process.json",
+              "sha256": "b1bf0cebfa433da6c00566cb4ff6bb659554869b79731a6008c06f0eb1d6a829",
+              "suite": "unit",
+              "groupId": "unit-functional-01",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery-unit-functional-02/native-process.json",
+              "sha256": "2cb7481b3dd5b867775b16495d87e5e7e149a9f5b18b3103a2cf5282f191a4d1",
+              "suite": "unit",
+              "groupId": "unit-functional-02",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery-unit-functional-03/native-process.json",
+              "sha256": "c85e1772c07098c570e8950e0683979fad222596d7e2c8450dd480945312e0cc",
+              "suite": "unit",
+              "groupId": "unit-functional-03",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery-unit-functional-04/native-process.json",
+              "sha256": "2729a947c01e97281f9a93cc7caca501eaeef9d39281eb853ac9fb50fe42beee",
+              "suite": "unit",
+              "groupId": "unit-functional-04",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-discovery-unit-functional-05/native-process.json",
+              "sha256": "9dec964dcdf0382b5c447d4dbcba298a2fff9c7f2c1527716b21b85d2c89adac",
+              "suite": "unit",
+              "groupId": "unit-functional-05",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery/native-process.json",
+              "sha256": "2a772da743d541c1d86159a784bfe9f4d83ed6dd82b97e082d308f08beda3950",
+              "suite": "unit-scalar",
+              "groupId": "",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery-unit-functional-01/native-process.json",
+              "sha256": "8e8c2fbafab2066dccc11be64db71f6ffb486980e5091b2eacbb76c272994a3a",
+              "suite": "unit-scalar",
+              "groupId": "unit-functional-01",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery-unit-functional-02/native-process.json",
+              "sha256": "359e28de59becc45db6c2aafd003d1b42ceb63b7a1c343040c71f8ab5b450f3c",
+              "suite": "unit-scalar",
+              "groupId": "unit-functional-02",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery-unit-functional-03/native-process.json",
+              "sha256": "050f2e5b10f16bc58fda0f8cad9ae10890dd052bf87956ac8bf5f8804d6c54dd",
+              "suite": "unit-scalar",
+              "groupId": "unit-functional-03",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery-unit-functional-04/native-process.json",
+              "sha256": "a4126d9d5bcdfbe4ad68d1fb37640a2038053bbfe62f212b3b2d936fa4c3e115",
+              "suite": "unit-scalar",
+              "groupId": "unit-functional-04",
+              "nativeExitCode": 0
+            },
+            {
+              "path": "/Users/ksemenenko/Developer/KeyLoad/artifacts/local/stage-xxiii-oracle-repair-native-discovery-20261008/unit-scalar-discovery-unit-functional-05/native-process.json",
+              "sha256": "7cc3d5a6a05bbee8995048d4ac639cffbb725ebafc0cd2ca76448c54d9d73f24",
+              "suite": "unit-scalar",
+              "groupId": "unit-functional-05",
+              "nativeExitCode": 0
+            }
+          ],
+          "allTwelveNativeProcessesPassed": true,
+          "qualification": "current actual DLL/PDB native discovery only; scalar operations/functional coverage not measured"
+        }
       }
     }
   },

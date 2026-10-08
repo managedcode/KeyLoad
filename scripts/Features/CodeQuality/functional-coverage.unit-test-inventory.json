@@ -6096,6 +6096,26 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
+      "methodName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
+      "instanceName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpCommandConflictDiagnosticWholeFlowTests.cs",
+      "sourceSha256": "db7f0250b6ffbb4d765b5a26d97fb16e974fa26a2733f887c016c84b97ba2cf3",
+      "lineNumber": 20,
+      "endLineNumber": 58,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-006"
+      ],
+      "acceptance": [
+        "AC-CLIENT-006",
+        "AC-MCP-003",
+        "AC-MCP-007"
+      ]
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.ClientApi.McpCommandDecodeTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpCommandDecodeTests",
       "methodName": "AcMcp002EveryCommandPreservesItsCallerIdAndFullTypedPayload",
@@ -12611,6 +12631,78 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+      "methodName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+      "instanceName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementCaptureTests.cs",
+      "sourceSha256": "203d0eda3abf1801050f8e17d47a4e989a476cdf4d19400fe6088bf863bb2e95",
+      "lineNumber": 14,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MOVE-NATIVE-001"
+      ],
+      "acceptance": [
+        "AC-MOVE-NATIVE-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
+      "methodName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+      "instanceName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementGrantTests.cs",
+      "sourceSha256": "0a050bff7b9634763b26acc431d153309b2f2ab53366b4cd964b555cc3a9373d",
+      "lineNumber": 15,
+      "endLineNumber": 60,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MOVE-NATIVE-001"
+      ],
+      "acceptance": [
+        "AC-MOVE-NATIVE-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
+      "methodName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+      "instanceName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementPrepareTests.cs",
+      "sourceSha256": "08ee5b09dcc5bcdc3136c5ad2fcd4cab29f6dd26ab688c3ee9c01bb672a1fb0a",
+      "lineNumber": 15,
+      "endLineNumber": 57,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MOVE-NATIVE-001"
+      ],
+      "acceptance": [
+        "AC-MOVE-NATIVE-002"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
+      "methodName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
+      "instanceName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementSeedTests.cs",
+      "sourceSha256": "54322321ac8f25b69700acac6cb52bf965c155e8c61e54971e4f57a9f0b84c0c",
+      "lineNumber": 11,
+      "endLineNumber": 68,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MOVE-NATIVE-001"
+      ],
+      "acceptance": [
+        "AC-MOVE-NATIVE-001"
+      ]
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.ClusterRouting.EpochGrainRequestPurposeTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.EpochGrainRequestPurposeTests",
       "methodName": "AcEpoch005UnsupportedSignedRequestPurposeFailsBeforeActorRouting",
@@ -15427,6 +15519,24 @@
       ],
       "acceptance": [
         "AC-ORL-013"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests",
+      "methodName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+      "instanceName": "RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/UnconfiguredMovementAuthorityWholeFlowTests.cs",
+      "sourceSha256": "8a94a1ac6401a4554fb50b8c6c19e7f7f09417eafae04c8ecaf6c1a258779d39",
+      "lineNumber": 23,
+      "endLineNumber": 61,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MOVE-NATIVE-001"
+      ],
+      "acceptance": [
+        "AC-MOVE-NATIVE-005"
       ]
     },
     {
@@ -51332,98 +51442,6 @@
       "acceptance": [
         "AC-REP-006"
       ]
-    },
-    {
-      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
-      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementSeedTests",
-      "methodName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
-      "instanceName": "ParentAndPrivateMintingRejectBeforeNativeMixedAndBlobJournalSeedReplaysExactly",
-      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementSeedTests.cs",
-      "sourceSha256": "54322321ac8f25b69700acac6cb52bf965c155e8c61e54971e4f57a9f0b84c0c",
-      "lineNumber": 11,
-      "endLineNumber": 68,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-MOVE-NATIVE-001"
-      ],
-      "acceptance": [
-        "AC-MOVE-NATIVE-001"
-      ]
-    },
-    {
-      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
-      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementPrepareTests",
-      "methodName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
-      "instanceName": "ActualConfiguredPeerPrepareRetainsOriginalReceiptAndMixedStateAcrossColdReopen",
-      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementPrepareTests.cs",
-      "sourceSha256": "08ee5b09dcc5bcdc3136c5ad2fcd4cab29f6dd26ab688c3ee9c01bb672a1fb0a",
-      "lineNumber": 15,
-      "endLineNumber": 57,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-MOVE-NATIVE-001"
-      ],
-      "acceptance": [
-        "AC-MOVE-NATIVE-002"
-      ]
-    },
-    {
-      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
-      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementGrantTests",
-      "methodName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
-      "instanceName": "ActualPersistedGrantFencesSourceAndRetainsOriginalMixedReceiptAcrossColdReopen",
-      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementGrantTests.cs",
-      "sourceSha256": "2bd29fbdb3c11696c7f63c1d16a104bbffcf07d02e35fb1eb94c34e64e0d2ec7",
-      "lineNumber": 15,
-      "endLineNumber": 59,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-MOVE-NATIVE-001"
-      ],
-      "acceptance": [
-        "AC-MOVE-NATIVE-003"
-      ]
-    },
-    {
-      "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
-      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
-      "methodName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
-      "instanceName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
-      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementCaptureTests.cs",
-      "sourceSha256": "203d0eda3abf1801050f8e17d47a4e989a476cdf4d19400fe6088bf863bb2e95",
-      "lineNumber": 14,
-      "endLineNumber": 62,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-MOVE-NATIVE-001"
-      ],
-      "acceptance": [
-        "AC-MOVE-NATIVE-004"
-      ]
-    },
-    {
-      "className": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
-      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.McpCommandConflictDiagnosticWholeFlowTests",
-      "methodName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
-      "instanceName": "NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand",
-      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/McpCommandConflictDiagnosticWholeFlowTests.cs",
-      "sourceSha256": "db7f0250b6ffbb4d765b5a26d97fb16e974fa26a2733f887c016c84b97ba2cf3",
-      "lineNumber": 20,
-      "endLineNumber": 58,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CLIENT-006"
-      ],
-      "acceptance": [
-        "AC-CLIENT-006",
-        "AC-MCP-003",
-        "AC-MCP-007"
-      ]
     }
   ],
   "requiredNonContributorCases": [
@@ -59990,6 +60008,7 @@
         "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAddressPinTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFatalSettlementTests",
         "KeyLoad.UnitTests.Features.ClusterRouting.RuntimeJournalLifecycleTests",
+        "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests",
         "KeyLoad.UnitTests.Features.DatabaseComposition.DatabaseCompositionFlowTests",
         "KeyLoad.UnitTests.Features.DocumentStorage.DocumentExactContentTests",
         "KeyLoad.UnitTests.Features.DocumentStorage.DocumentMutationImageTests",
@@ -60229,6 +60248,7 @@
         "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFatalSettlementTests|AcCrs003NativePullFatalNeverBecomesFailedAndJoinsProducer|AcCrs003NativePullFatalNeverBecomesFailedAndJoinsProducer",
         "KeyLoad.UnitTests.Features.ClusterRouting.RuntimeJournalLifecycleTests|MetadataCasFencesOwnerAndPoisonButNotSameOwnerBookkeeping|MetadataCasFencesOwnerAndPoisonButNotSameOwnerBookkeeping",
         "KeyLoad.UnitTests.Features.ClusterRouting.RuntimeJournalLifecycleTests|RealStoreCreatesAppendsReplacesReadsAndDeletesOpaqueContent|RealStoreCreatesAppendsReplacesReadsAndDeletesOpaqueContent",
+        "KeyLoad.UnitTests.Features.ClusterRouting.UnconfiguredMovementAuthorityWholeFlowTests|RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead|RetainedAndMalformedAuthorityRejectsStartupAndCurrentCutThenExactHealthyRead",
         "KeyLoad.UnitTests.Features.DatabaseComposition.DatabaseCompositionFlowTests|AcComp002And003ForwardAndReverseKeepSourcesAndCanonicalReferences|AcComp002And003ForwardAndReverseKeepSourcesAndCanonicalReferences",
         "KeyLoad.UnitTests.Features.DatabaseComposition.DatabaseCompositionFlowTests|AcComp002EmptyScheduledAndExpiredReadySourcesProduceNoEffects|AcComp002EmptyScheduledAndExpiredReadySourcesProduceNoEffects",
         "KeyLoad.UnitTests.Features.DatabaseComposition.DatabaseCompositionFlowTests|AcComp004CommittedEffectsAndRejectedEffectsSurviveRealStoreReopen|AcComp004CommittedEffectsAndRejectedEffectsSurviveRealStoreReopen",

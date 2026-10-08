@@ -41,6 +41,7 @@ public sealed partial class DatabaseEngine
 
     private void RequireMovementReceiver(PartitionMovePeerEnvelope request)
     {
+        RequireConfiguredMovementOwner();
         var expected = request.Stage switch
         {
             PartitionMovePeerStage.ControlPrepare or PartitionMovePeerStage.ControlAdvance

@@ -53,6 +53,7 @@ internal sealed class ControlledPartitionMovementGrantTests
                 await seeded.Authority.RemainsControlOwnedAsync(source, target);
                 await ControlledPartitionMovementBlobAssertions.ReadAsync(source, seeded.Blob, token);
                 await ControlledPartitionMovementModelAssertions.ReadAsync(source, seeded.RecordedAt, captured.Position, token);
+                await ControlledMovementConfiguredFenceAssertions.WriteBlockedAsync(source, seeded.RecordedAt, token);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

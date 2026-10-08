@@ -41,7 +41,10 @@ internal static class OutcomeStoreOracle
         => ReadStored(store, operation)?.Result;
 
     internal static StoredOutcome? ReadStored(IAtomicStore store, ReplicatedOperation operation)
-        => store.Read(view => view.GetRecord<StoredOutcome>(Key(store, operation)));
+    {
+        var key = Key(store, operation);
+        return store.Read(view => view.GetRecord<StoredOutcome>(key));
+    }
 
     internal static OperationResult? ReadPartition(IAtomicStore store, PartitionRef partition, string principalId, Guid commandId)
         => store.Read(view => view.GetRecord<StoredOutcome>(PartitionKey(partition, principalId, commandId))?.Result);

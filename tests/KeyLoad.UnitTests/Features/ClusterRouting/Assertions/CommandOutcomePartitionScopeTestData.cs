@@ -1,7 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -19,7 +18,7 @@ internal static class CommandOutcomePartitionScopeTestData
             JsonSerializer.Serialize(request, JsonDefaults.Options));
 
     internal static StoredOutcome ReadStored(TestDatabase database, ReplicatedOperation operation)
-        => database.Store.Read(view => view.GetRecord<StoredOutcome>(OutcomeStoreOracle.Key(database.Store, operation)))!;
+        => OutcomeStoreOracle.ReadStored(database.Store, operation)!;
 
     internal static async Task AssertCorruptionWithoutMutationAsync(TestDatabase database,
         ReplicatedOperation operation)

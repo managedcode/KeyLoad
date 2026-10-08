@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.ClusterRouting.Serialization;
 
 internal static class PartitionMovePublishedPlacementStorage
 {
-    private const string Space = "partition-move-published-placement-v1";
+    internal const string Space = "partition-move-published-placement-v1";
 
     internal static byte[] Key(PartitionRef partition) => KeySpace.Partition(Space, partition);
 

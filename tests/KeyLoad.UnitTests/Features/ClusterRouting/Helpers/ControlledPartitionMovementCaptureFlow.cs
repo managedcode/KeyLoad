@@ -64,7 +64,10 @@ internal static class ControlledPartitionMovementCaptureFlow
     }
 
     internal static PrincipalRecord Principal(ControlledPartitionMovementNode source,
-        PartitionMovementTransportRequest verified) => source.Store.Read(view => source.Database.Principal(view,
-            PartitionMovementControlPrincipal.Resolve(source.Database, verified.Envelope),
+        PartitionMovementTransportRequest verified)
+    {
+        var principalId = PartitionMovementControlPrincipal.Resolve(source.Database, verified.Envelope);
+        return source.Store.Read(view => source.Database.Principal(view, principalId,
             source.Database.EvaluationClock.GetUtcNow()));
+    }
 }

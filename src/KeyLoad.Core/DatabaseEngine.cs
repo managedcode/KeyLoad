@@ -71,6 +71,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
         Authorization = authorization;
         Limits = operationLimits;
+        ValidateMovementRestoration();
         analyticalReadGate = new(operationLimits.MaxConcurrentQueries);
         DueDiscoveryDeadline = dueExecution.DiscoveryDeadline;
         eventSourceCursorLifetime = eventSourceExecution.CursorLifetime;

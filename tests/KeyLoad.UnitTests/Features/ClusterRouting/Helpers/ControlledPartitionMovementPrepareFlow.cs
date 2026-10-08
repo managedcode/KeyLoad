@@ -18,9 +18,12 @@ internal static class ControlledPartitionMovementPrepareFlow
         var request = ControlledPartitionMovementPrepareRequest.Create(source, runtime, corpus, placement, callerAddress);
         await ControlledPartitionMovementAdmissionAssertions.RejectAsync(source, target, admission, request,
             cancellationToken);
+        var unconfigured = await ControlledMovementOwnerAdmissionAssertions.RejectAsync(source, runtime, admission, request, cancellationToken);
         var result = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, runtime, admission,
             request, cancellationToken);
         var prepared = await ControlledPartitionMovementPrepareAssertions.PreparedAsync(result, corpus);
+        await ControlledMovementOwnerAdmissionAssertions.RejectRetainedReadAsync(unconfigured, source);
+        await ControlledMovementOwnerAdmissionAssertions.RejectRestorationAsync(source);
         var receipt = NativeSerialization.Serialize(result);
         var sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var targetImage = ControlledPartitionMovementRawImage.Bytes(target.Store);

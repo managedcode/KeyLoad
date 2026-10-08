@@ -1,14 +1,19 @@
 using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Core.Features.BackupRestore.Validation;
+using KeyLoad.Core.Features.ClusterRouting.Authorization;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction
+internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
+    bool IPartitionMovementReadScope.MovementAuthorityAbsent { get; set; }
+    private bool movementViewChanged;
+    bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence => !movementViewChanged;
+    bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence => false;
     private readonly IOptions<DatabaseLimits> limits;
     private readonly long storePosition;
     private readonly long appliedIndex;
@@ -43,6 +48,8 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction
 
     public void Put(byte[] key, byte[] value)
     {
+        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
+        movementViewChanged = true;
         var candidate = PrepareCandidate(key, value, hasValue: true);
         inner.Put(key, value);
         RetainCandidate(candidate);
@@ -50,6 +57,8 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction
 
     public void Delete(byte[] key)
     {
+        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
+        movementViewChanged = true;
         var candidate = PrepareCandidate(key, [], hasValue: false);
         inner.Delete(key);
         RetainCandidate(candidate);
@@ -57,6 +66,8 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction
 
     public void Reset()
     {
+        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
+        movementViewChanged = true;
         candidates.Clear();
         retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();

@@ -10,13 +10,16 @@ internal static class EventProjectionRecoveryStoreOracle
 {
     internal static ProjectionCrashCut CaptureCut(ZoneTreeStore store, ReplicatedOperation operation,
         ApplyVectorProjection projection, long priorOutboxTail)
-        => store.Read(view => new ProjectionCrashCut(
+    {
+        var outcomeKey = OutcomeStoreOracle.Key(store, operation);
+        return store.Read(view => new ProjectionCrashCut(
             view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId)),
             view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey()),
             view.ReadOwnedValue(EventProjectionCrashScenario.EffectKey(projection)),
-            view.ReadOwnedValue(OutcomeStoreOracle.Key(store, operation)),
+            view.ReadOwnedValue(outcomeKey),
             view.ReadOwnedValue(EventProjectionCrashScenario.OutboxHeadKey()),
             view.ReadOwnedValue(EventProjectionCrashScenario.OutboxEntryKey(priorOutboxTail + 1))));
+    }
 
     internal static async Task<(OutboxHead Head, byte[] Bytes)> ReadBeforeOutboxHeadAsync(string root,
         CancellationToken cancellationToken)
@@ -131,14 +134,17 @@ internal static class EventProjectionRecoveryStoreOracle
 
     internal static ProjectionCommittedBytes CaptureCommittedBytes(ZoneTreeStore store,
         ReplicatedOperation operation, ApplyVectorProjection projection)
-        => store.Read(view => new ProjectionCommittedBytes(
+    {
+        var outcomeKey = OutcomeStoreOracle.Key(store, operation);
+        return store.Read(view => new ProjectionCommittedBytes(
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId))),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey())),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.EffectKey(projection))),
-            Required(view.ReadOwnedValue(OutcomeStoreOracle.Key(store, operation))),
+            Required(view.ReadOwnedValue(outcomeKey)),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.OutboxHeadKey())),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.OutboxEntryKey(
                 view.GetRecord<OutboxHead>(EventProjectionCrashScenario.OutboxHeadKey())!.Tail)))));
+    }
 
     private static (OutboxHead? Head, OutboxEntry? Entry, byte[]? Vector) ReadOutbox(ZoneTreeStore store,
         long sequence)

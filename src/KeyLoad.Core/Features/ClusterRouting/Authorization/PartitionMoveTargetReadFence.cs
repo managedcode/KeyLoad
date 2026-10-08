@@ -8,6 +8,8 @@ public sealed partial class DatabaseEngine
 {
     private void RequireNoUnpublishedPartitionMoveTarget(IKeyValueView view, PartitionRef partition)
     {
+        if (configuredPhysicalOwner is null)
+        { RequireUnconfiguredMovementAbsent(view); return; }
         var stage = PartitionMoveTargetStorage.Read<PartitionMoveTargetStage>(view,
             PartitionMoveTargetStorage.Key(partition), Limits.MaxBatchBytes);
         if (stage is not null)

@@ -40,6 +40,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
         }
+        if (operation.Kind == OperationKind.PartitionMovementPhase)
+        { RequireConfiguredMovementOwner(); }
         operation = NormalizeOperation(operation);
         return Store.Commit((transaction, position) =>
         {
