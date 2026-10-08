@@ -99,3 +99,6 @@ flowchart LR
   R --> H[Authorized healthy write and receipt replay]
   H --> C[Changed-content Conflict and no second effect]
 ```
+
+
+TASK-AUTH-KL015-ORDERED-RECEIPT-001 refines AC-AUTH-KL015-001: compare complete serialized SDK replay, official MCP replay and literal healthy document output by ordered byte content. Byte-array reference identity cannot establish the required receipt contract. Preserve the entire existing persisted authorization, foreign denial, unchanged target/index, changed-content Conflict and healthy continuation flow. The original exact46a4 reference-equality failure stays retained; actual native RF3 execution remains required before closure. Existing ADR-002/022/039 contracts are unchanged.

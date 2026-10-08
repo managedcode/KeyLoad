@@ -115,7 +115,7 @@ internal static class NativeCoverageRf3FixtureContextArtifactReader
             || !NativeCoverageRf3FixtureArtifactValidation.IsSha256(
                 NativeCoverageRf3FixtureArtifactValidation.RequiredString(tool,
                     NativeCoverageRf3FixtureProtocol.NupkgSha256Property))
-            || !IsSha512(NativeCoverageRf3FixtureArtifactValidation.RequiredString(tool,
+            || !NativeCoveragePackageDigestValidation.IsCanonicalSha512(NativeCoverageRf3FixtureArtifactValidation.RequiredString(tool,
                 NativeCoverageRf3FixtureProtocol.NupkgSha512Property))
             || collector.PackageId != NativeCoverageRf3FixtureProtocol.CoverageToolPackageId
             || collector.Version != expectedTool.Version)
@@ -142,9 +142,6 @@ internal static class NativeCoverageRf3FixtureContextArtifactReader
             throw Invalid();
         }
     }
-
-    private static bool IsSha512(string value) => value.Length == NativeCoverageRf3Protocol.JsonShaHexLength * 2
-        && value.AsSpan().IndexOfAnyExcept(NativeCoverageRf3FixtureProtocol.ShaCharacters) < 0;
 
     private static InvalidOperationException Invalid() =>
         NativeCoverageRf3FixtureArtifactValidation.Invalid();

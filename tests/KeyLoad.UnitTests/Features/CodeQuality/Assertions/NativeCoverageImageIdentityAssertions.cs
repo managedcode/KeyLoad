@@ -86,6 +86,7 @@ internal static class NativeCoverageImageIdentityAssertions
             && tool.GetProperty(NativeCoverageImageFields.NupkgSha512).GetString() == identity.Sha512
             && tool.GetProperty(NativeCoverageImageFields.ClosureDigest).GetString() == closureDigest,
             "The context tool receipt differs from the restored package archive and closure.");
+        NativeCoverageImagePackageDigestAssertions.Verify(tool.GetProperty(NativeCoverageImageFields.NupkgSha512).GetString()!);
         var nuspecPath = Path.Combine(package.PackageRoot,
             $"{NativeCoverageImageConstants.CoveragePackageId}.nuspec");
         var nuspec = Encoding.UTF8.GetString(NativeCoverageImageOracleSupport.ReadBounded(nuspecPath, maximumManifestBytes));

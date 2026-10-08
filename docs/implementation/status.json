@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current frozen-source local full Release R659 and full formatter R660 passed. Native R661 normal213/213, R663 scalar213/213 and R662 three real FTS process cuts3/3 passed with zero source/image drift; original R658 ANN process-cut flow passed on its recorded earlier source cohort. Original failures and repairs remain retained. Current native census3039 preserves all old3009 identities/dispositions; original MVID/PDB/source binding and all12 production discoveries passed. Delivered current-source Linux fullRF3, coverage admission/merge and remaining acceptance gates stay open.",
+    "verificationStage": "Original R668/R669 two analyzer diagnostics retained and corrected without suppression. Current frozen4860-input full Release R670 and full formatter R671 pass; actual complete native materializer operation R672 normal1/1 and R673 scalar1/1 pass with zero source/image drift. Required original RF311 and same-job coverage gates remain open; no accepted task or numeric coverage increase.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,13 +240,13 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-current-r659-stage-xvii-remote-query-fts-inventory-full-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 141.897,
-      "log": "/private/tmp/keyload-current-r659-stage-xvii-remote-query-fts-inventory-full-build-20261008.log",
-      "logSha256": "3189fdb9220c18eeca5e8cd85993acb9c50becb403ca950a9a7a3207d6135b61",
-      "inputCount": 4858,
+      "elapsedSeconds": 137.999,
+      "log": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008.log",
+      "logSha256": "5d71193e398f07b280723404b6fa9e2981250d72b12d82fb2136d839e5e401aa",
+      "inputCount": 4860,
       "inputDrift": [],
       "uniqueErrors": [],
       "qualification": "local development; source drift invalidates exact-current-source qualification"
@@ -262,10 +262,10 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 126.694,
-      "log": "/private/tmp/keyload-current-r660-stage-xvii-remote-query-fts-inventory-full-format-20261008.log",
+      "elapsedSeconds": 132.778,
+      "log": "/private/tmp/keyload-current-r671-stage-xviii-native-digest-analyzer-correction-full-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4858,
+      "inputCount": 4860,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -27341,6 +27341,212 @@
         "change": "Remove only one redundant terminal blank line; no C# token or literal changes.",
         "buildAndFunctionalEvidence": "R659-R666 original recorded source; final Linux rebuild required."
       }
+    },
+    "stageXVIIIOriginalDevelopment": {
+      "sourceParentCommit": "b68fd63d3411215b05e49b728a71ef15d4f7b23c",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "canonicalBuildPassed": true,
+      "canonicalFormatterPassed": true,
+      "originalTaskCounts": {
+        "done": 12,
+        "in_progress": 92,
+        "pending": 0
+      },
+      "actualCatalogOperations": 74,
+      "initialGatewayTools": 3,
+      "closedCoveredRf3Cases": 11,
+      "originalFullBuildR668": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r668-stage-xviii-rf3-receipt-digest-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 1,
+        "buildCompletedSuccessfully": false,
+        "elapsedSeconds": 131.344,
+        "log": "/private/tmp/keyload-current-r668-stage-xviii-rf3-receipt-digest-full-build-20261008.log",
+        "logSha256": "06f9c3f1fd11dbffcf69a9c7a4b9d0a47a1fe0de873f87cafd9fe07a3ecb5167",
+        "inputCount": 4860,
+        "inputDrift": [],
+        "uniqueErrors": [
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/CodeQuality/Assertions/NativeCoverageImagePackageDigestAssertions.cs(14,47): error CA1307: 'string.IndexOf(char)' has a method overload that takes a 'StringComparison' parameter. Replace this call in 'KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImagePackageDigestAssertions.Verify(string)' with a call to 'string.IndexOf(char, System.StringComparison)' for clarity of intent. (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1307) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/CodeQuality/Assertions/NativeCoverageImagePackageDigestAssertions.cs(21,13): error CA1308: In method 'Verify', replace the call to 'ToLowerInvariant' with 'ToUpperInvariant' (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1308) [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+        ],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalFullFormatterR669": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 2,
+        "elapsedSeconds": 133.688,
+        "log": "/private/tmp/keyload-current-r669-stage-xviii-rf3-receipt-digest-full-format-20261008.log",
+        "logSha256": "e92650e12f55af4d15861917b34e7669fae154ad7235150fdac88419db8924f2",
+        "inputCount": 4860,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalFullBuildR670": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 137.999,
+        "log": "/private/tmp/keyload-current-r670-stage-xviii-native-digest-analyzer-correction-full-build-20261008.log",
+        "logSha256": "5d71193e398f07b280723404b6fa9e2981250d72b12d82fb2136d839e5e401aa",
+        "inputCount": 4860,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalFullFormatterR671": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 132.778,
+        "log": "/private/tmp/keyload-current-r671-stage-xviii-native-digest-analyzer-correction-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4860,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalNativeMaterializerNormalR672": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r672-stage-xviii-original-native-materializer-normal-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/NativeCoverageImageMaterializationTests/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-ftxqc_w7",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 5.861,
+        "log": "/private/tmp/keyload-current-r672-stage-xviii-original-native-materializer-normal-20261008.log",
+        "logSha256": "8eba0fb070d621194b25d6d779582c7c81908eb66007235f9515d0863ff094b2",
+        "sourceInputs": 4861,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r672-stage-xviii-original-native-materializer-normal-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "942eb169b4c1778dc235fdd22bf8d4383882f2a6e8bf164d7f096ba34c3717ef",
+            "counters": {
+              "total": "1",
+              "executed": "1",
+              "passed": "1",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "cases": [
+              {
+                "name": "RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "originalNativeMaterializerScalarR673": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit-scalar",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r673-stage-xviii-original-native-materializer-scalar-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/NativeCoverageImageMaterializationTests/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-wxtmrmar",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 7.422,
+        "log": "/private/tmp/keyload-current-r673-stage-xviii-original-native-materializer-scalar-20261008.log",
+        "logSha256": "6cb1cbecb9450d43b925872f47266ba2f14cda7ec7c94f477e913dba2aeeea90",
+        "sourceInputs": 4861,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r673-stage-xviii-original-native-materializer-scalar-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "c29ccf61e5aaff17544ff595e897ef54655454628698ece605f8ee2aa6a9e1d7",
+            "counters": {
+              "total": "1",
+              "executed": "1",
+              "passed": "1",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "cases": [
+              {
+                "name": "RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "sourceReview": {
+        "path": "/private/tmp/keyload-stage-xviii-rf3-five-path-independent-review-r2-20261008/receipt.json",
+        "sha256": "846708cbcd787899d779770eee186d4960d8158cf76a6348da4daad687fad436"
+      },
+      "sourceRepairs": [
+        "Preserve all complete public ordered receipt/document byte oracles in the existing KL015 denied/replay/conflict/healthy SDK and official MCP RF3 flow.",
+        "Consume the unchanged native NuGet SHA512 Base64 archive digest with an88-character bound, actual64-byte decode and canonical round-trip; retain all full package/closure/source/image checks.",
+        "Actual whole native materializer control consumes the real archive-derived emitted digest, rejects controlled alternate representations and re-admits the original; supporting infrastructure evidence only."
+      ],
+      "remaining": [
+        "Exact delivered-source Linux normal/scalar/recovery and required SDK/official MCP RF3 including original11 failures.",
+        "Original covered11 RF3 collector/session/exports followed by same-job descriptor, source/image admission and numeric coverage merge.",
+        "Complete task acceptance, fault/resource/endurance and measured performance gates."
+      ],
+      "verificationStage": "Original R668/R669 two analyzer diagnostics retained and corrected without suppression. Current frozen4860-input full Release R670 and full formatter R671 pass; actual complete native materializer operation R672 normal1/1 and R673 scalar1/1 pass with zero source/image drift. Required original RF311 and same-job coverage gates remain open; no accepted task or numeric coverage increase."
+    },
+    "stageXVIIDeliveredCommit": "b68fd63d3411215b05e49b728a71ef15d4f7b23c",
+    "stageXVIIDeliveredRemoteVerified": true,
+    "stageXVIIOriginalLinux": {
+      "runId": 37738944514,
+      "sourceRevision": "b68fd63d3411215b05e49b728a71ef15d4f7b23c",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37738944514",
+      "observedStatus": "in_progress",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "qualification": "Actual exact-source Linux dispatch observed; terminal artifacts/gates not yet available. It does not qualify current uncommitted XVIII."
     }
   },
   "TIME-PROVIDER-001": {

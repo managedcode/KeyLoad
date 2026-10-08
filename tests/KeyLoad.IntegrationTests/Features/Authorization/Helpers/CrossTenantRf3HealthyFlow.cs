@@ -20,8 +20,8 @@ internal static class CrossTenantRf3HealthyFlow
         await Assert.That(receipt.Mutations[0]).IsEqualTo(new MutationReceipt("putDocument", McpDocumentProtocol.Collection, McpDocumentProtocol.Entity, 2));
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
         var official = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token));
-        await Assert.That(JsonDefaults.Serialize(replay)).IsEqualTo(JsonDefaults.Serialize(receipt));
-        await Assert.That(JsonDefaults.Serialize(official.Value)).IsEqualTo(JsonDefaults.Serialize(receipt));
+        await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(official.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var changed = command with
         {
             Mutations = [new PutDocument(McpDocumentProtocol.Collection,
@@ -39,7 +39,7 @@ internal static class CrossTenantRf3HealthyFlow
         await CrossTenantRf3StateAssertions.StateAsync(sdk, owned, CrossTenantRf3WholeFlow.HealthyJson, 2, token);
         var read = await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(owned.Reference), token));
-        await Assert.That(JsonDefaults.Serialize(read.Value)).IsEqualTo(JsonDefaults.Serialize(
-            new DocumentResult(owned.Reference, 2, CrossTenantRf3WholeFlow.HealthyJson, false, [])));
+        await Assert.That(JsonDefaults.Serialize(read.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(
+            new DocumentResult(owned.Reference, 2, CrossTenantRf3WholeFlow.HealthyJson, false, [])))).IsTrue();
     }
 }
