@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current frozen4863-input full Release R675 and full formatter R676 pass. Nine complete original cohort flows pass9/9 in normal R677 and scalar R678 with no source/image drift. Actual native census3039, original image source1237 and all twelve production discoveries match the strict preserved inventory. This is local development evidence; required Linux RF3, task acceptance and numeric product coverage remain open.",
+    "verificationStage": "Full local native Release R683 and formatter R684 pass; original placement/registration/graph/query whole flows R685 pass73/73, including both unchanged original Linux failing regression cases, with no source/image drift. Local non-math focused scalar repetition omitted; required complete Linux scalar suite remains mandatory. Task acceptance, RF3 and numeric product coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -240,12 +240,12 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 184.99,
-      "log": "/private/tmp/keyload-current-r675-stage-xix-original-cohort-isolation-full-build-20261008.log",
-      "logSha256": "a6947fbcb6039d8ce615ea5971572038375a2775350bd7d6c00ca0bcc89ce656",
+      "elapsedSeconds": 199.745,
+      "log": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008.log",
+      "logSha256": "9d52c58e5b72243fbe05a8bf24f17123eacf2b623a8684e4c33f7d29e6f79733",
       "inputCount": 4863,
       "inputDrift": [],
       "uniqueErrors": [],
@@ -262,8 +262,8 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 158.402,
-      "log": "/private/tmp/keyload-current-r676-stage-xix-original-cohort-isolation-full-format-20261008.log",
+      "elapsedSeconds": 167.609,
+      "log": "/private/tmp/keyload-current-r684-stage-xx-pmap-corruption-full-format-20261008.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "inputCount": 4863,
       "inputDrift": [],
@@ -27546,12 +27546,20 @@
       "observedStatus": "in_progress",
       "runtimeQualified": false,
       "productCoveragePercent": null,
-      "qualification": "Actual exact-source b68 Linux full normal and scalar steps failed; recovery and SDK/MCP RF3 remain running. Original terminal artifacts not yet available, so failing cases and causes remain unobserved. Current XIX local9/9 cohort is not a replacement for this required full gate.",
+      "qualification": "Original authenticated b68 verify artifacts and terminal job log retained. Both full modes fail only the exact committed-owner and malformed-row corruption flows. Recovery270/270 passes. Required RF3 remains independently open; these old artifacts do not qualify later source.",
       "observedNormalUnitConclusion": "failure",
       "observedScalarUnitConclusion": "failure",
       "originalJobId": 113184955921,
-      "originalJobLogAvailable": false,
-      "observedAtUtc": "2026-10-08T07:15:06Z"
+      "originalJobLogAvailable": true,
+      "observedAtUtc": "2026-10-08T07:15:06Z",
+      "originalVerifyJobConclusion": "failure",
+      "originalVerifyArtifactReceiptPath": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/receipt.json",
+      "originalVerifyArtifactReceiptSha256": "7821f364156d6d7c35706bcf7c31617a235c87985a52ecdb665aaa197530f555",
+      "observedRecoveryPassed": 270,
+      "observedFullNormalPassed": 3037,
+      "observedFullNormalTotal": 3039,
+      "observedFullScalarPassed": 3037,
+      "observedFullScalarTotal": 3039
     },
     "stageXIXOriginalDevelopment": {
       "sourceParentCommit": "7881176146d6a0dbdc2d28a496bc033330c7f51f",
@@ -28102,6 +28110,782 @@
       "runtimeQualified": false,
       "productCoveragePercent": null,
       "qualification": "Actual exact-source dispatch observed; terminal artifacts and required qualification remain open."
+    },
+    "stageXXOriginalDevelopment": {
+      "sourceParentCommit": "5a8760ed70c6bb9f6cb74cb6edbef186503fa74b",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "originalTaskCounts": {
+        "done": 12,
+        "in_progress": 92,
+        "pending": 0
+      },
+      "nativeCaseCount": 3039,
+      "allNativeCasesSelectorsAndClassificationsUnchanged": true,
+      "originalFullBuildR683": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 199.745,
+        "log": "/private/tmp/keyload-current-r683-stage-xx-pmap-corruption-full-build-20261008.log",
+        "logSha256": "9d52c58e5b72243fbe05a8bf24f17123eacf2b623a8684e4c33f7d29e6f79733",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "originalFullFormatterR684": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 167.609,
+        "log": "/private/tmp/keyload-current-r684-stage-xx-pmap-corruption-full-format-20261008.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4863,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "originalPlacementGraphQueryNormalR685": {
+        "commandArgs": [
+          "node",
+          "scripts/Features/TestInfrastructure/run-tests.mjs",
+          "--KeyLoadTests:Suite=unit",
+          "--KeyLoadTests:ResultsDirectory=/private/tmp/keyload-current-r685-stage-xx-placement-graph-query-normal-whole-flows-20261008-results",
+          "--KeyLoadTests:ReportTrx=true",
+          "--KeyLoadTests:Filter=/*/*/(AtomicPartitionPlacement*)|(PhysicalOwner*)|(PartitionQuery*)|(RemotePartition*)|(RemoteDocument*)|(GraphCrossPartition*)/*"
+        ],
+        "temporaryRoot": "/private/tmp/kl-0cdtb2h4",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 8.041,
+        "log": "/private/tmp/keyload-current-r685-stage-xx-placement-graph-query-normal-whole-flows-20261008.log",
+        "logSha256": "4bcdd85c01dd6e152db6bb0b7edbf63ee5abebcb919d4198fcd7954dae03c0d0",
+        "sourceInputs": 4864,
+        "assemblyInputs": 553,
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "originalTrx": [
+          {
+            "path": "/private/tmp/keyload-current-r685-stage-xx-placement-graph-query-normal-whole-flows-20261008-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "83870347774defa5cfc4714b8957dcf31967a0e5d5340df6e761d60ccae2b54e",
+            "counters": {
+              "total": "73",
+              "executed": "73",
+              "passed": "73",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "cases": [
+              {
+                "name": "AcPmap001GeneratedContractsRoundTripFullPartitionAndRevisions",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap002InvalidRequestVersionIsValidationWithoutPlacementWrites",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001WrongFullIdentityAndInvalidDirectoryFailClosed",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001OversizedPersistedValueIsCorruption",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap002RejectsNonAdminAndNonDefaultOwnerWithoutMutation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap002CasRetryAndCommandIdentityPreserveOneAssignment",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003OrphanRowWithoutHeaderIsCorruptionAndNeverFallsBack",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003OrdinaryAuthorizedReaderResolvesFullOwnerAndChargesExactThreePointReads",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001MissingRowsReturnCommittedDefaultWithoutWriting",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003CancellationStopsBeforeMetadataReadAndUnauthorizedPrincipalNeverEntersCallback",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003OneByteShortGrantFailsWithoutChangingMetadata",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003DirectoryAndRowMissesAreChargedAndResolveSameViewFallback",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap003FallbackCarriesCurrentDirectoryRevisionWithoutCreatingARow",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerRegister001DeniedLoggedFailureReplaysWithoutDirectoryEffectThenHealthyRegistration",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerRegister001NativeRegistrationReplayAndReopenRetainCompleteLiteralDirectory",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001RowsUseAllFourPartitionComponentsAndSurviveReopen",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerDoc003And005SourcePolicyChangeInvalidatesCapturedRouteWithoutDestinationEffect",
+                "outcome": "Passed"
+              },
+              {
+                "name": "IndependentlyAllocatedEqualReferencesDoNotChangeDeliveryIdentity",
+                "outcome": "Passed"
+              },
+              {
+                "name": "FullTargetIdentityAndCanonicalAttributesChangeTheFingerprint",
+                "outcome": "Passed"
+              },
+              {
+                "name": "SeparatelyStoredCanonicalEdgeKeepsTheOriginalDeliveryFingerprint",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CompletionMutationPreservesInheritedScopeAndLocatorAcrossBothSerializers",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ApplyMutationPreservesInheritedScopeAndLocatorAcrossBothSerializers",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CapacityDirectionAliasValuesAndFieldIdsRemainStable",
+                "outcome": "Passed"
+              },
+              {
+                "name": "EveryGeneratedRecordAliasAndDeclaredFieldIdMatchesItsIndependentContract",
+                "outcome": "Passed"
+              },
+              {
+                "name": "IncomingRequestRoundTripPreservesVersionTargetGraphAndLimit",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CapacityAndFingerprintRoundTripsPreserveTheirDistinctFieldLayouts",
+                "outcome": "Passed"
+              },
+              {
+                "name": "IncomingRowAndPageRoundTripsPreserveDeliveryAndReadCut",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerDoc002RegisteredRemoteMapRejectsLocalWriteAndReplaysFailureBeforeHealthyLocalEffect",
+                "outcome": "Passed"
+              },
+              {
+                "name": "TombstoneIntentCannotDeleteItsStillCurrentCanonicalDestination",
+                "outcome": "Passed"
+              },
+              {
+                "name": "PendingIntentOneOverCapacityRejectsWholeSourceMutation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "OwnerVersionRoundTripPreservesIndependentRevisionAndDeletedFields",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReceiverStateRoundTripPreservesHighWaterFieldsWithoutIdCollision",
+                "outcome": "Passed"
+              },
+              {
+                "name": "DeliveryIntentRoundTripPreservesEveryScopedFieldAndSnapshot",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerDoc005And006OriginalCancellationReturnsNoWitnessOrPartialDocumentBeforeLiteralHealthyRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcOwnerDoc003DestinationDenialThenFreshGrantReadReplayAndNativeReopenRetainFullLiteralState",
+                "outcome": "Passed"
+              },
+              {
+                "name": "DuplicateTargetApplyIsAnIdempotentNativeNoOp",
+                "outcome": "Passed"
+              },
+              {
+                "name": "EqualRevisionDifferentFingerprintFailsConflictWithoutReplacingReceiver",
+                "outcome": "Passed"
+              },
+              {
+                "name": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+                "outcome": "Passed"
+              },
+              {
+                "name": "DeleteCommitsOwnerTombstoneAndRemovesDeliveredIncomingEdge",
+                "outcome": "Passed"
+              },
+              {
+                "name": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+                "outcome": "Passed"
+              },
+              {
+                "name": "CoalescedMultiHopRepairTombstonesEveryPreviouslyDeliveredDestination",
+                "outcome": "Passed"
+              },
+              {
+                "name": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+                "outcome": "Passed"
+              },
+              {
+                "name": "UnsupportedAstVersionFailsBeforeStorageRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+                "outcome": "Passed"
+              },
+              {
+                "name": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+                "outcome": "Passed"
+              },
+              {
+                "name": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+                "outcome": "Passed"
+              },
+              {
+                "name": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidPublicVersionFailsBeforeStorageRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+                "outcome": "Passed"
+              },
+              {
+                "name": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+                "outcome": "Passed"
+              },
+              {
+                "name": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+                "outcome": "Passed"
+              },
+              {
+                "name": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+                "outcome": "Passed"
+              },
+              {
+                "name": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+                "outcome": "Passed"
+              },
+              {
+                "name": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+                "outcome": "Passed"
+              },
+              {
+                "name": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+                "outcome": "Passed"
+              },
+              {
+                "name": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+                "outcome": "Passed"
+              },
+              {
+                "name": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+                "outcome": "Passed"
+              },
+              {
+                "name": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+                "outcome": "Passed"
+              },
+              {
+                "name": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+                "outcome": "Passed"
+              },
+              {
+                "name": "BothIndependentNativeLeafReadsAreObservedBeforeCallerCancellationAndJoinedBeforeLiteralHealthyMerge",
+                "outcome": "Passed"
+              },
+              {
+                "name": "OriginalCallerCancellationAfterActualNativeLeafReturnsNoPageAndSettlesBeforeHealthyMerge",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ResourcePolicyCasAfterBothActualLeavesRejectsOldPageThenCurrentLiteralSchemaIsHealthy",
+                "outcome": "Passed"
+              },
+              {
+                "name": "SourceGrantRevocationRejectsBeforeOwnerReadThenFreshGrantReturnsLiteralMerge",
+                "outcome": "Passed"
+              },
+              {
+                "name": "SourceGrantChangedAfterBothActualLeavesRejectsCompletePageThenFreshGrantIsHealthy",
+                "outcome": "Passed"
+              },
+              {
+                "name": "AcPmap001AcceptsExactCapacityAndRejectsTheNextAssignment",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ReceivingGrantDenialHasNoPartialPageThenIndependentOwnerPoliciesMergeLiteralRows",
+                "outcome": "Passed"
+              },
+              {
+                "name": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+                "outcome": "Passed"
+              }
+            ]
+          }
+        ],
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "originalLinuxInitiatingFailures": {
+        "receiptPath": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/receipt.json",
+        "receiptSha256": "7821f364156d6d7c35706bcf7c31617a235c87985a52ecdb665aaa197530f555",
+        "sourceRevision": "b68fd63d3411215b05e49b728a71ef15d4f7b23c",
+        "runId": 37738944514,
+        "runAttempt": 1,
+        "reports": [
+          {
+            "artifactId": 11534945538,
+            "name": "test-results-ubuntu-latest",
+            "apiDigest": "sha256:5a59e23c551770c226148f9abba4a501fc3309916ee26644638635b0334a144b",
+            "archiveSha256": "5a59e23c551770c226148f9abba4a501fc3309916ee26644638635b0334a144b",
+            "archiveBytes": 16153424,
+            "elapsedSeconds": 4.47,
+            "originalReports": [
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+                "sha256": "ee634d7875bc71ad481c84c8c237e0511c703145767a7904c7f6117531976ef5",
+                "counters": {
+                  "total": "388",
+                  "executed": "388",
+                  "passed": "388",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "b48c2ede3dce0dbb7ec836f6847672472655332af5133af575ad44737945ca2e",
+                "counters": {
+                  "total": "10",
+                  "executed": "10",
+                  "passed": "10",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+                "sha256": "e9180124a76cb7b53665e8986093d8150b6aa815459ad3af1fcfbc8786a8bc73",
+                "counters": {
+                  "total": "270",
+                  "executed": "270",
+                  "passed": "270",
+                  "failed": "0",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": []
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "615a346129fcfacef9431b515212b1daf58896c811137c972ec29761aad1ebe7",
+                "counters": {
+                  "total": "3039",
+                  "executed": "3039",
+                  "passed": "3037",
+                  "failed": "2",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": [
+                  {
+                    "test": "AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption",
+                    "outcome": "Failed",
+                    "duration": "00:00:00.0795337",
+                    "message": "AssertionException: Expected to be equal to Corruption\nbut received UnsupportedCapability\n\nat Assert.That(readFailure.Code).IsEqualTo(ErrorCode.Corruption)",
+                    "stack": "   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementCorruptionTests.AssertCorruptOwnerTuple(PhysicalShardCatalogFixture fixture, PartitionRef partition, AtomicPartitionPlacementV1 row) in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementCorruptionTests.cs:line 75\n   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementCorruptionTests.AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption() in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementCorruptionTests.cs:line 57\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---"
+                  },
+                  {
+                    "test": "AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation",
+                    "outcome": "Failed",
+                    "duration": "00:00:00.2598680",
+                    "message": "AssertionException: Expected to be equal to Corruption\nbut received BudgetExceeded\n\nat Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption)",
+                    "stack": "   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementQueryViewTests.AssertCorruptionAsync(Byte[] key) in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementQueryViewTests.cs:line 140\n   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementQueryViewTests.AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation() in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementQueryViewTests.cs:line 110\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---"
+                  }
+                ]
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "3df816b054ab712ea019863f03c1075b020a8b31b49be1d634f167d060f11033",
+                "counters": {
+                  "total": "3039",
+                  "executed": "3039",
+                  "passed": "3037",
+                  "failed": "2",
+                  "error": "0",
+                  "timeout": "0",
+                  "aborted": "0",
+                  "inconclusive": "0",
+                  "passedButRunAborted": "0",
+                  "notRunnable": "0",
+                  "notExecuted": "0",
+                  "disconnected": "0",
+                  "warning": "0",
+                  "completed": "0",
+                  "inProgress": "0",
+                  "pending": "0"
+                },
+                "failures": [
+                  {
+                    "test": "AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption",
+                    "outcome": "Failed",
+                    "duration": "00:00:00.0301299",
+                    "message": "AssertionException: Expected to be equal to Corruption\nbut received UnsupportedCapability\n\nat Assert.That(readFailure.Code).IsEqualTo(ErrorCode.Corruption)",
+                    "stack": "   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementCorruptionTests.AssertCorruptOwnerTuple(PhysicalShardCatalogFixture fixture, PartitionRef partition, AtomicPartitionPlacementV1 row) in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementCorruptionTests.cs:line 75\n   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementCorruptionTests.AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption() in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementCorruptionTests.cs:line 57\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---"
+                  },
+                  {
+                    "test": "AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation",
+                    "outcome": "Failed",
+                    "duration": "00:00:00.1343877",
+                    "message": "AssertionException: Expected to be equal to Corruption\nbut received BudgetExceeded\n\nat Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption)",
+                    "stack": "   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementQueryViewTests.AssertCorruptionAsync(Byte[] key) in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementQueryViewTests.cs:line 140\n   at KeyLoad.UnitTests.Features.ClusterRouting.AtomicPartitionPlacementQueryViewTests.AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation() in /_/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/AtomicPartitionPlacementQueryViewTests.cs:line 110\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---"
+                  }
+                ]
+              }
+            ],
+            "extractedFiles": [
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+                "sha256": "2767449e1839daba54af432f5ba23e136bc49c24271ac4b5c137e543207ab9d5",
+                "bytes": 1165859
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+                "sha256": "ee634d7875bc71ad481c84c8c237e0511c703145767a7904c7f6117531976ef5",
+                "bytes": 538696
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-identity/functional-coverage.production-source-manifest.json",
+                "sha256": "6f95664c4074810f9f98c09d9e8101a1a1fce1c477603fda1315975b2b0dbee9",
+                "bytes": 1202295
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-identity/functional-coverage.test-image.recovery.json",
+                "sha256": "1a8bf116eb2591f0280a99cbd258fb51bd1282ff1825ff3ba8d9ec9fe0f9fd51",
+                "bytes": 88849
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-identity/functional-coverage.test-image.rf3.json",
+                "sha256": "964d2c2c68fcd631ddcaaac9ea0a6b3d54b0d4d28ebe0bea1b6e618e7f97b941",
+                "bytes": 328416
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-identity/functional-coverage.test-image.unit.json",
+                "sha256": "ed18d73ade8676ff5f09c49e735b7966e5205992142232560d0bd19c8996059d",
+                "bytes": 980587
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-ownership/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+                "sha256": "05bf7be825f84633a5915e4f9bbd6d6bea1fb2b3b7e463c77c75ab92b5a0f333",
+                "bytes": 34628
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "b48c2ede3dce0dbb7ec836f6847672472655332af5133af575ad44737945ca2e",
+                "bytes": 15158
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/native-source-ownership/test-receipt.json",
+                "sha256": "1310f00cd67169a33287768d48edfc716fa5a7fc5d3554a989be06ee7f5386fb",
+                "bytes": 199
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests-linux-net10.0.tunit-report.json",
+                "sha256": "a3fabe5a3491856a860d61682c2beb70ed5ee596a1284e9e055f17c61e2b9986",
+                "bytes": 809931
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+                "sha256": "e9180124a76cb7b53665e8986093d8150b6aa815459ad3af1fcfbc8786a8bc73",
+                "bytes": 370024
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+                "sha256": "2124b3e49be7a5043ceee459f7c94e96908762ea2878541fa69d975ffb8a262c",
+                "bytes": 11395275
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "615a346129fcfacef9431b515212b1daf58896c811137c972ec29761aad1ebe7",
+                "bytes": 4134428
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/_runnervmmprz5_2026-10-08_07_02_41.5848520/In/66b48a96-df67-4d4d-ab47-ba1cc03f485d/runnervmmprz5/tooling-inputs.v1.json",
+                "sha256": "b1c10d900e8fe7e754f2de558ef4ab15279cd27212af3c0744da661800ea5ab8",
+                "bytes": 389
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/_runnervmmprz5_2026-10-08_07_02_41.5848520/In/66b48a96-df67-4d4d-ab47-ba1cc03f485d/runnervmmprz5/tooling-proof.json",
+                "sha256": "962da1dd5eef1342e1d19b815a077e30060d0a50951da5a22050a1fc1911dc36",
+                "bytes": 658481
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/native-coverage-merge-03d371d84fbf4550a2f7fb682d77cdc6/merge-output/tooling-proof.json",
+                "sha256": "962da1dd5eef1342e1d19b815a077e30060d0a50951da5a22050a1fc1911dc36",
+                "bytes": 658481
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit/native-coverage-merge-03d371d84fbf4550a2f7fb682d77cdc6/tooling-inputs.v1.json",
+                "sha256": "b1c10d900e8fe7e754f2de558ef4ab15279cd27212af3c0744da661800ea5ab8",
+                "bytes": 389
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+                "sha256": "41c3dba2958bd943585526bd6974022e7fe2d2bc758dcd091070eab43b4285b4",
+                "bytes": 11386786
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+                "sha256": "3df816b054ab712ea019863f03c1075b020a8b31b49be1d634f167d060f11033",
+                "bytes": 4134432
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/_runnervmmprz5_2026-10-08_07_12_20.7485362/In/caf16cbd-9c3a-43eb-ba74-50eb1ae398cb/runnervmmprz5/tooling-inputs.v1.json",
+                "sha256": "6ec60875c2014b6a50f82c1483e5d8de43dc9d1476da3ba77ceb8ad462d2a859",
+                "bytes": 389
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/_runnervmmprz5_2026-10-08_07_12_20.7485362/In/caf16cbd-9c3a-43eb-ba74-50eb1ae398cb/runnervmmprz5/tooling-proof.json",
+                "sha256": "962da1dd5eef1342e1d19b815a077e30060d0a50951da5a22050a1fc1911dc36",
+                "bytes": 658481
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/native-coverage-merge-8e38dbda369c4345ab66f5845dade4be/merge-output/tooling-proof.json",
+                "sha256": "962da1dd5eef1342e1d19b815a077e30060d0a50951da5a22050a1fc1911dc36",
+                "bytes": 658481
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/TestResults/unit-scalar/native-coverage-merge-8e38dbda369c4345ab66f5845dade4be/tooling-inputs.v1.json",
+                "sha256": "6ec60875c2014b6a50f82c1483e5d8de43dc9d1476da3ba77ceb8ad462d2a859",
+                "bytes": 389
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-CommitAcknowledgedb0e1d5a465d9406d9b7087640d0c169a.json",
+                "sha256": "92ee8cfb3df98f86af076570659385f53d7e843b1ea471d71a368529cab95af3",
+                "bytes": 257
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-EntryAcknowledged34cccba2f6904c4d84b6a59adcbe95d2.json",
+                "sha256": "ac17463cbf8610e4be0168bd888d5235c9f9307ba1fd9647fecd128f2e68a7e8",
+                "bytes": 256
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-EntryAcknowledged82351c8806a1432593ee264f34f4bcea.json",
+                "sha256": "a4b0315e20e079a9d798d6381fdd2a69b5e1ab23aaf3ecb59d0a8015d38357fd",
+                "bytes": 256
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotChunkAcknowledged07639ebb193e49c293c17a5092365a2d.json",
+                "sha256": "0f75c111e2f3613077de8ad7339ba44852c5eda2f58f3e102ee63b08c6111270",
+                "bytes": 264
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotInstalled284eb9c99152430686475b3bdf23d717.json",
+                "sha256": "792eedfb30846016decea073ba32b2ed216163ea3f4eaa5edcfb3912cd696ad7",
+                "bytes": 256
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotInstalled3e3546a78fbc42599100c290cbfa9ef9.json",
+                "sha256": "a1299906fbfde52b434bb89f06d12f0fefbd7fb81f7b1d95f7a9624f3c03e813",
+                "bytes": 256
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotInstallede1709ac86c35446bb706d7a12bdccc5d.json",
+                "sha256": "eb19da49f88e63e0e38c83d6f9d7410c27742aef4bdca1d6f4140dfaf8d74059",
+                "bytes": 256
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotPublished7da9e26e01e0432da74484c90d7f6e84.json",
+                "sha256": "f318c36f6eb90f6e733a85ccc1be767c7be568b20d2ceeb833d61829fd07c7c6",
+                "bytes": 254
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotRejectedfe2a4088c31848c1a257822fd067f85b.json",
+                "sha256": "f7c6da46e7d80ce0d8e37772214678086bd874be6d6d50df49dfc34297e8c966",
+                "bytes": 254
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotVerified1808ea066359447991bbc454f30b2c9a.json",
+                "sha256": "8d4278f109f60827e295759ed676a0f5fca0fcbbe82040259b0c6c6abe05c80d",
+                "bytes": 255
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotTransferBegunce2be90db8ec4ca28f2af4761f020ede.json",
+                "sha256": "122a2daddec4af191a879766a368f8f0bfadf618cb7d04bb5e9c24b1eb4c31a8",
+                "bytes": 260
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotVerified8c7d8a42149d44d6a656bb02bbfd5c02.json",
+                "sha256": "adccbd02f01bbfad2971c2c8556ca985af24ead0702459b17f46f25df52446c3",
+                "bytes": 255
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotVerifiedd7b597c7f9df4224941eeafd83ee5916.json",
+                "sha256": "f2ce747448471138e2f1c921e88c748e5f5ce85fe227c0709f3090c113266e70",
+                "bytes": 255
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-SnapshotVerifiede3cd192b4f884549ad8fbcc2c371c2c2.json",
+                "sha256": "f48198d05bc85fb8e2b4d35e66af2a77850790ad233b85693340d5476a094d2d",
+                "bytes": 255
+              },
+              {
+                "path": "/private/tmp/keyload-ci-37738944514-original-verify-r1-20261008/reports/test-results-ubuntu-latest/artifacts/qualification/replica-process-TermSavede33d7be9e18244c1b1ed37f5c37b250d.json",
+                "sha256": "60c90443b7f022186c0e4b10cb3b4464801cefb986aafed9c2b737ede11d66f6",
+                "bytes": 248
+              }
+            ]
+          },
+          {
+            "artifactId": 11534386948,
+            "name": "code-quality-ubuntu-latest",
+            "apiDigest": "sha256:86dd5cc7ddb4dd7d2852a80cd2a5414fc869d054d691de850a794ce9381b7e0e",
+            "archiveSha256": "86dd5cc7ddb4dd7d2852a80cd2a5414fc869d054d691de850a794ce9381b7e0e",
+            "archiveBytes": 2170560,
+            "elapsedSeconds": 2.138,
+            "originalReports": [],
+            "extractedFiles": []
+          }
+        ],
+        "qualification": "Authenticated original Linux normal3037/3039, scalar3037/3039, recovery270/270, analyzer388/388 and source-owner10/10 artifacts. Same two corruption-category failures retained in both full unit modes; no report rewrite or reclassification."
+      },
+      "sourceReview": {
+        "path": "/private/tmp/keyload-stage-xx-pmap-corruption-source-review-r1-20261008/manifest.json",
+        "sha256": "4696826d2d7c0a8efcfcd120e10d2ebeed32f12496f72efeaa0e98650b4d67e4",
+        "paths": 6,
+        "existingTestOraclesUnchanged": true
+      },
+      "sourceRepairs": [
+        "Validate malformed decoded PMAP row version/full identity/nonempty owner/positive revision/present voters before an unnecessary registered-owner lookup; actual reads retain original budget charges.",
+        "Unregistered owner referenced by committed placement is Corruption; a new bind proposing an unregistered owner retains UnsupportedCapability. Complete same-view incarnation/ordered voter/epoch and header/revision checks remain strict.",
+        "Persisted placement reads for administrator, authorized query and graph use the same corrected resolver; no format, topology, serialized identity, stored-byte repair, budget or fallback change."
+      ],
+      "verificationStage": "Full local native Release R683 and formatter R684 pass; original placement/registration/graph/query whole flows R685 pass73/73, including both unchanged original Linux failing regression cases, with no source/image drift. Local non-math focused scalar repetition omitted; required complete Linux scalar suite remains mandatory. Task acceptance, RF3 and numeric product coverage remain open.",
+      "remaining": [
+        "Exact delivered-source full Linux normal/scalar/recovery and real SDK/official MCP Aspire RF3, including all unresolved original fault flows.",
+        "Actual covered RF3 collector/session/exports and same-job descriptor/source-image admission/coverage merge.",
+        "Complete104-task acceptance, resource/endurance and measured performance."
+      ]
+    },
+    "stageXIXDeliveredCommit": "5a8760ed70c6bb9f6cb74cb6edbef186503fa74b",
+    "stageXIXDeliveredRemoteVerified": true,
+    "stageXIXOriginalLinux": {
+      "runId": 37742632093,
+      "sourceRevision": "5a8760ed70c6bb9f6cb74cb6edbef186503fa74b",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/37742632093",
+      "observedStatus": "in_progress",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "qualification": "Actual delivered-source dispatch observed; terminal full and RF3 artifacts pending. It does not qualify current XX corrections."
     }
   },
   "TIME-PROVIDER-001": {

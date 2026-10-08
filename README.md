@@ -357,13 +357,16 @@ pass in both normal and scalar modes, and three FTS process-recovery scenarios
 pass. The native inventory contains 3039 tests. Exact-source Linux RF3 and complete
 acceptance gates remain open; these additions do not increase the accepted task count.
 
-The latest correction preserves exact failure diagnostics for individual replica
+The quorum correction preserves exact failure diagnostics for individual replica
 discovery and returns `NoLeader` when the compatible voters cannot form a quorum.
-The current local solution build and formatter pass, and nine complete cohort
-flows pass in both normal and scalar modes. RF3 container rejection now reports
+Its nine complete cohort flows passed in both normal and scalar modes. RF3 container rejection now reports
 the first failed admission check while retaining every original predicate. The
-full Linux normal and scalar unit steps for the prior source failed; their
-original reports and current RF3 qualification are still pending.
+latest correction validates malformed placement rows before unnecessary owner
+lookups and reports unregistered committed owners as corruption. The current
+local solution build and formatter pass, and 73 placement, owner-registration,
+graph and query flows pass, including both original Linux unit failures. The
+prior complete Linux run passed 3037/3039 unit cases in both modes and 270/270
+recovery cases. Exact-source Linux full-suite and RF3 qualification remain open.
 
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,

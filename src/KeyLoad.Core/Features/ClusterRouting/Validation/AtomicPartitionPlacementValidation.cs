@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 
@@ -58,15 +59,24 @@ internal static class AtomicPartitionPlacementValidation
         }
     }
 
-    internal static void ValidateRow(AtomicPartitionPlacementV1? row, PartitionRef requestedPartition,
-        PhysicalShardRecord defaultShard)
+    internal static void ValidateRowShape([NotNull] AtomicPartitionPlacementV1? row, PartitionRef requestedPartition)
     {
         const int RevisionValidationBoundary = 0;
 
         if (row is null || row.Version != AtomicPartitionPlacementProtocol.CurrentVersion
             || row.Partition is null || row.PhysicalShardId == Guid.Empty || row.Revision <= RevisionValidationBoundary
-            || row.Partition != requestedPartition || row.PhysicalShardId != defaultShard.PhysicalShardId
-            || row.Incarnation != defaultShard.Incarnation || row.VoterIds.IsDefaultOrEmpty
+            || row.Partition != requestedPartition || row.VoterIds.IsDefaultOrEmpty)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidRow);
+        }
+    }
+
+    internal static void ValidateRow(AtomicPartitionPlacementV1? row, PartitionRef requestedPartition,
+        PhysicalShardRecord defaultShard)
+    {
+        ValidateRowShape(row, requestedPartition);
+        if (row.PhysicalShardId != defaultShard.PhysicalShardId
+            || row.Incarnation != defaultShard.Incarnation
             || !row.VoterIds.SequenceEqual(defaultShard.VoterIds, StringComparer.Ordinal)
             || row.PlacementEpoch != defaultShard.PlacementEpoch)
         {

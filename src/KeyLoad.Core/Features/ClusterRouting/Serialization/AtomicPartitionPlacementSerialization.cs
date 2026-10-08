@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
@@ -22,13 +23,22 @@ internal static class AtomicPartitionPlacementSerialization
         => Read<AtomicPartitionPlacementDirectoryV1>(view, DirectoryKey());
 
     internal static AtomicPartitionPlacementV1? ReadRow(IKeyValueView view, PartitionRef partition)
-        => Read<AtomicPartitionPlacementV1>(view, RowKey(partition));
+        => ValidateReadRow(Read<AtomicPartitionPlacementV1>(view, RowKey(partition)), partition);
 
     internal static AtomicPartitionPlacementDirectoryV1? ReadDirectory(IKeyValueView view,
         ReadExecutionBudgetReadGrant grant) => Read<AtomicPartitionPlacementDirectoryV1>(view, DirectoryKey(), grant);
 
     internal static AtomicPartitionPlacementV1? ReadRow(IKeyValueView view, PartitionRef partition,
-        ReadExecutionBudgetReadGrant grant) => Read<AtomicPartitionPlacementV1>(view, RowKey(partition), grant);
+        ReadExecutionBudgetReadGrant grant)
+        => ValidateReadRow(Read<AtomicPartitionPlacementV1>(view, RowKey(partition), grant), partition);
+
+    private static AtomicPartitionPlacementV1? ValidateReadRow(AtomicPartitionPlacementV1? row,
+        PartitionRef partition)
+    {
+        if (row is not null)
+        { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
+        return row;
+    }
 
     internal static T? Read<T>(IKeyValueView view, byte[] key) where T : class
     {

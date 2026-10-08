@@ -69,3 +69,9 @@ flowchart TD
 ```
 
 Ownership movement and current same-view session tokens retain the contract in [ADR-017](ADR-017-ownership-session-tokens.md). Unknown or unverifiable lineage invalidates explicitly.
+
+## Original Linux corruption correction contract, 2026-10-08
+
+TASK-PMAP-CORRUPTION-ORDER-001 implements the existing REQ/AC-PMAP-001 and REQ/AC-PQUERY-003 failure contract. Ordered stages: root first freezes this amendment; separates decoded row-shape validation from complete same-view owner-tuple validation in `ClusterRouting/Validation/AtomicPartitionPlacementValidation.cs`; applies shape validation in both bounded `Serialization/AtomicPartitionPlacementSerialization.cs` row readers before owner lookup; and supplies an explicit internal missing-owner failure category to the existing resolver. `RegisteredAtomicPartitionPlacementReader.cs`, `AuthorizedQueryAtomicPartitionPlacementReader.cs` and `GraphTraversal/Validation/DatabaseEngine.GraphCrossPartitionPlacement.cs` use `Corruption` for committed references; `Commands/AtomicPartitionPlacementBinding.cs` retains `UnsupportedCapability` for a proposed target. No new dispatcher, provider, stored format, alias/field ID, schema, topology, limit or compatibility path is introduced.
+
+Root runs the existing real ZoneTree corruption flows with their exact no-mutation oracles plus placement, owner-registration, graph and query regressions, solution build and formatter. Original b68 Linux normal/scalar failures and recovery270/270 are retained. Delivery commits the completed correction on main, then requires exact-source Linux full suites and genuine Aspire RF3; local development passes cannot close this ADR or any task. No data conversion or automatic repair is performed; rollback uses the existing verified source/backup procedure without redefining a committed row.

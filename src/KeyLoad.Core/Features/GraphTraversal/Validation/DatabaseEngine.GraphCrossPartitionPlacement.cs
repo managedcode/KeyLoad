@@ -39,7 +39,8 @@ public sealed partial class DatabaseEngine
         var row = grant is null ? AtomicPartitionPlacementSerialization.ReadRow(view, partition)
             : AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
         var owner = row is null ? defaultShard
-            : ResolveRegisteredPlacementOwner(view, defaultShard, row.PhysicalShardId, grant);
+            : ResolveRegisteredPlacementOwner(view, defaultShard, row.PhysicalShardId,
+                ErrorCode.Corruption, grant);
         return ResolvePlacement(partition, owner, directory, row);
     }
 }

@@ -52,3 +52,9 @@ flowchart TD
   CAS -->|fallback lookup| Witness[Return default tuple, fallback=true, revision=0]
   Pair --> Commit[Commit once through existing ZoneTree apply gate]
 ```
+
+## Persisted placement corruption correction, 2026-10-08
+
+TASK-PMAP-CORRUPTION-ORDER-001 preserves REQ/AC-PMAP-001 and REQ/AC-PQUERY-003 under ADR-101. Validate a decoded row's version, full key identity, nonempty physical owner, positive revision and present voters before resolving its registered owner. A persisted row selecting an unregistered owner is `Corruption`; a new bind request proposing an unregistered owner retains `UnsupportedCapability`. Valid registered owners retain their complete incarnation, ordered voter and epoch checks. Each actual metadata read remains charged before decode; no budget, read cut, authorization, fallback or stored bytes change.
+
+Root owns the existing Core ClusterRouting row validation/serialization, registered and authorized placement readers, bind selection and GraphTraversal placement call site. The unchanged real-store `AcPmap001OwnerTupleMismatchFailsReadAndBindAsCorruption` and `AcPquery003MalformedCatalogDirectoryAndRowFailClosedWithoutMutation` are the regressions. Preserve their exact failure categories and unchanged-state assertions, then run the broader placement, registered-owner, graph and query flows. The original Linux b68 normal/scalar failures remain evidence until a later exact-source required run qualifies the repair; no task closure is asserted here.

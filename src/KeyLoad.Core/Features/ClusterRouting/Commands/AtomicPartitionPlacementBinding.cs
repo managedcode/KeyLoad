@@ -33,7 +33,8 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(transaction)
             ?? throw Errors.Fail(ErrorCode.NotFound, BindPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        var selectedOwner = ResolveRegisteredPlacementOwner(transaction, catalog.DefaultShard, request.PhysicalShardId);
+        var selectedOwner = ResolveRegisteredPlacementOwner(transaction, catalog.DefaultShard,
+            request.PhysicalShardId, ErrorCode.UnsupportedCapability);
 
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(transaction);
         if (directory is not null)
