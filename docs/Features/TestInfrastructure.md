@@ -860,6 +860,34 @@ REQ-REP-PARTIAL-RESTART-001 / AC-REP-PARTIAL-RESTART-001: after the one accepted
 
 TASK-C028-RESTART-OBSERVATION-001 retains the actual `AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay` SDK/official MCP complete receipt/state flow and original retained-replica/leader-loss scenarios as native qualification. Source review does not qualify these cases. Original c028 required TRX failures and all later cascades remain retained; this correction does not establish a cause for unrelated failures.
 
+## Signed public read admission cancellation (AC-ANN-008)
+
+The actual current-image Aspire RF3 wave may accept the same centrally validated
+QueryExecutionOptions already owned by ClusterFixture. A typed optional profile
+is applied before BuildAsync; null preserves every existing caller. It changes
+no image whitelist, authority, deadline, signed control format or covered-eleven
+inventory. The explicit ANN profile is disabled outside its owned scenario.
+
+AnnPublicCancellationScenario arms the existing signed v2 AuthorizationReload
+read phase for one newly persisted c1-probe identity, empty command identifier,
+ApproximateSearch read kind and actual discovered voter. It cancels the original
+SDK/official MCP token only after that exact signed observation; cancellation and
+ProducerDisposed settle before retiring the arm, rereading the full canonical
+literal corpus and performing healthy SDK/MCP/Q1 ANN reads. SDK read cancellation
+is Cancelled with no page, never UnknownWriteOutcome. Official cancellation is
+its actual interruption. This proves public admission cancellation only; native
+observed-work and partial-file-write cases separately prove execution cancellation.
+Existing parent/wave/cleanup deadlines, original task joins, locks and primary
+plus cleanup retention remain unchanged. No runtime success is claimed.
+
+Source-bound phase precision: the existing signed AuthorizationReload observation
+is immediately BEFORE GrainRequestAuthority.ReloadForRequest, followed by the
+original scope recheck and fresh persisted reload. This cancellation case proves
+pre-reload public read admission settlement, not completed authorization or
+during-index work. The ordinary healthy follow-up performs actual current
+persisted authorization and one-cut search; separate native worker cases retain
+the genuine after-work cancellation oracle. No control semantics are renamed.
+
 ## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
 
 REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN

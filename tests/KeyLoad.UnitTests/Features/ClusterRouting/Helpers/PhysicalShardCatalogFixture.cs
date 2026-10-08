@@ -16,10 +16,14 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
     private const string GuidFormat = "N";
     private readonly string directory = Path.Combine(Path.GetTempPath(),
         DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly Guid? incarnation;
+    private readonly PhysicalShardRecord? physicalOwner;
     private ZoneTreeStore? store;
 
-    internal PhysicalShardCatalogFixture()
+    internal PhysicalShardCatalogFixture(Guid? incarnation = null, PhysicalShardRecord? physicalOwner = null)
     {
+        this.incarnation = incarnation;
+        this.physicalOwner = physicalOwner;
         var failures = new List<Exception>();
         KeyLoad.Server.ServerFailureObserver.Observe(Initialize, failures);
         if (failures.Count == 0)
@@ -89,9 +93,9 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
 
     private void OpenExisting()
     {
-        var opened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        var opened = new ZoneTreeStore(new(directory) { Incarnation = incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store = opened;
-        Database = new(opened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        Database = new(opened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), physicalOwner: physicalOwner);
     }
 
     public void Dispose()

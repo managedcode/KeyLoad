@@ -132,6 +132,27 @@ public sealed class ReadExecutionBudget
         grant.Accept(count);
     }
 
+    internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
+    {
+        Check();
+        ArgumentNullException.ThrowIfNull(grant);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfNegative(records);
+        if (!grant.BelongsTo(this))
+        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        if (count > grant.RemainingBytes || count > reservedReadGrantBytes
+            || count > limits.MaxQueryReadBytes - bytes)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded); }
+        if (records > grant.RemainingRecords || records > reservedGrantRecords
+            || records > limits.MaxScanRecords - examinedGrantRecords)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded); }
+        bytes += count;
+        reservedReadGrantBytes -= count;
+        examinedGrantRecords += records;
+        reservedGrantRecords -= records;
+        grant.AcceptObserved(count, records);
+    }
+
     /// <summary>Accepts examined storage bytes before the consumer allocates or decodes them.</summary>
     /// <param name="count">Nonnegative key/value work, including matching scan lookahead.</param>
     public void ChargeBytes(long count)

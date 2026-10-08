@@ -1,5 +1,5 @@
-using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
@@ -7,25 +7,24 @@ namespace KeyLoad.Server;
 internal static class ServerFailureObserver
 {
     /// <summary>Captures synchronous invocation failures, every actual task fault and task cancellation without relocating stage work.</summary>
-    /// <param name="stage">Actual lifecycle operation to invoke in an async wrapper.</param>
+    /// <param name="stage">Actual lifecycle operation invoked inline before observing its returned task.</param>
     /// <param name="failures">Existing ordered failures to append without replacing exception identities.</param>
     /// <returns>Completion after the actual operation reaches its terminal state.</returns>
     internal static async Task ObserveAsync(Func<Task> stage, List<Exception> failures)
     {
         ArgumentNullException.ThrowIfNull(stage);
         ArgumentNullException.ThrowIfNull(failures);
-        var actual = new StrongBox<Task?>();
-        async Task InvokeAsync()
+        Task terminal;
+        try
+        { terminal = stage(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); return; }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); return; }
+        await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        if (terminal.Exception is { } terminalFailure)
         {
-            actual.Value = stage();
-            await actual.Value.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        }
-        var invocation = InvokeAsync();
-        await invocation.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        var terminal = actual.Value ?? invocation;
-        if (terminal.Exception is { } error)
-        {
-            failures.AddRange(error.InnerExceptions);
+            failures.AddRange(terminalFailure.InnerExceptions);
         }
         else if (terminal.IsCanceled)
         {
@@ -33,18 +32,19 @@ internal static class ServerFailureObserver
         }
     }
 
-    /// <summary>Runs synchronous cleanup inline through the same invocation and terminal-failure observation boundary.</summary>
+    /// <summary>Runs synchronous work inline and retains its actual exception without converting cancellation into a task.</summary>
     /// <param name="stage">Actual synchronous cleanup operation; no asynchronous work is relocated.</param>
     /// <param name="failures">Existing ordered failures to append while preserving their identities.</param>
     internal static void Observe(Action stage, List<Exception> failures)
     {
         ArgumentNullException.ThrowIfNull(stage);
         ArgumentNullException.ThrowIfNull(failures);
-        ObserveAsync(() =>
-        {
-            stage();
-            return Task.CompletedTask;
-        }, failures).GetAwaiter().GetResult();
+        try
+        { stage(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
     }
 
     /// <summary>Returns for no failures, rethrows one original failure, or emits every ordered failure as an aggregate.</summary>

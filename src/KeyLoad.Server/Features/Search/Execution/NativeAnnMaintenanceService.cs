@@ -1,13 +1,16 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Orleans;
+using KeyLoad.Query.Features.Search;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngine database,
-    ServerRuntimeOptions configured, TimeProvider clock) : INativeAnnMaintenance, IAsyncDisposable
+    ServerRuntimeOptions configured, TimeProvider clock) : INativeAnnMaintenance, IAnnProjection, IAsyncDisposable
 {
     private const int Empty = 0;
+    private const int BuildRetentionFrames = 2;
     private readonly Lock gate = new();
     private readonly NativeAnnMaintenanceAdmissions admitted = new();
     private NativeAnnGenerationOwner? owner;
@@ -37,8 +40,22 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             currentSession = session ?? throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership);
             currentSession.Require(request.SessionId, request.Maintenance, principal.Id);
         }
-        return await currentOwner.RunAsync(stages => NativeAnnSessionOperations.Execute(database, currentOwner,
+        return await currentOwner.RunAsync(stages => NativeAnnMaintenanceStage.Execute(database, currentOwner,
             stages, currentSession, principal, request, configured, clock, cancellationToken)).ConfigureAwait(false);
+    }
+
+    public IAnnProjectionLease Acquire(IKeyValueView view, ApproximateSearchRequest request,
+        ReadExecutionBudget budget)
+    {
+        using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+        budget.Check();
+        NativeAnnGenerationOwner actual;
+        lock (gate)
+        {
+            ObjectDisposedException.ThrowIf(closed, this);
+            actual = owner ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory);
+        }
+        return NativeAnnPublicAcquisition.Acquire(database, view, actual, request, configured, budget);
     }
 
     private async Task<AnnMaintenanceCapabilityResult> ReleaseAsync(PrincipalRecord principal,
@@ -77,29 +94,66 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
             beginning = true;
         }
+        NativeAnnMaintenanceMemoryLease? memory = null;
         try
         {
             var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             long available;
             lock (gate)
-            { available = owner?.RemainingResident(Empty) ?? configured.NativeAnn.Value.MaximumResidentBytes; }
-            var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, available);
-            var captured = AnnSeedCollector.CapturePinned(database, principal.Id, request.Maintenance, seeds, read);
-            var actualOwner = EnsureOwner();
-            return await actualOwner.RunAsync(stages =>
             {
-                var original = request.Maintenance.Mode == AnnMaintenanceMode.Restore
-                    ? stages.Describe(request.Maintenance, captured) : null;
-                var created = new NativeAnnMaintenanceSession(request.SessionId, request.Maintenance,
-                    principal.Id, captured, original);
-                if (request.Maintenance.Mode == AnnMaintenanceMode.Build)
-                { NativeAnnSessionOperations.BeginBuild(created, seeds, read); }
-                lock (gate)
-                { session = created; }
-                return NativeAnnSessionOperations.Result(created, captured, original?.CheckpointIntent);
-            }).ConfigureAwait(false);
+                memory = owner?.MaintenanceMemory.Reserve();
+                available = memory?.Bytes ?? configured.NativeAnn.Value.MaximumResidentBytes;
+            }
+            var seedAvailable = request.Maintenance.Mode == AnnMaintenanceMode.Build
+                ? available / BuildRetentionFrames : available;
+            var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, seedAvailable);
+            var captured = AnnSeedCollector.CapturePinned(database, principal.Id, request.Maintenance, seeds, read);
+            var actualOwner = CaptureOwner(captured, ref memory);
+            var retainedMemory = memory ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
+            var completed = await actualOwner.RunAsync(stages => CreateSession(stages, actualOwner,
+                retainedMemory, principal, request, captured, seeds, read)).ConfigureAwait(false);
+            memory = null;
+            return completed;
+        }
+        catch (Exception primary)
+        {
+            try
+            { memory?.Dispose(); }
+            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
+            throw;
         }
         finally { lock (gate) { beginning = false; } }
+    }
+
+    private NativeAnnGenerationOwner CaptureOwner(AnnSeed captured, ref NativeAnnMaintenanceMemoryLease? memory)
+    {
+        lock (gate)
+        {
+            var actual = EnsureOwner();
+            memory ??= actual.MaintenanceMemory.Reserve();
+            _ = actual.MaintenanceMemory.Remaining(captured.PeakBytesUpperBound);
+            return actual;
+        }
+    }
+
+    private AnnMaintenanceCapabilityResult CreateSession(NativeAnnStageStore stages, NativeAnnGenerationOwner actualOwner,
+        NativeAnnMaintenanceMemoryLease memory, PrincipalRecord principal, AnnMaintenanceCapabilityRequest request,
+        AnnSeed captured, Microsoft.Extensions.Options.IOptions<AnnSeedOptions> seeds, ReadExecutionBudget read)
+    {
+        var original = request.Maintenance.Mode == AnnMaintenanceMode.Restore
+            ? stages.Describe(request.Maintenance, captured) : null;
+        var created = new NativeAnnMaintenanceSession(request.SessionId, request.Maintenance,
+            principal.Id, captured, original, memory);
+        if (request.Maintenance.Mode == AnnMaintenanceMode.Build)
+        {
+            _ = actualOwner.MaintenanceMemory.Remaining(checked(captured.OwnedBytesUpperBound + seeds.Value.MaxPeakBytes));
+            NativeAnnSessionOperations.BeginBuild(created, seeds, read);
+        }
+        actualOwner.MaintenanceMemory.Retain(memory, created.RetainedBytes);
+        var result = NativeAnnSessionOperations.Result(created, captured, original?.CheckpointIntent);
+        lock (gate)
+        { session = created; }
+        return result;
     }
 
     private NativeAnnGenerationOwner EnsureOwner()
@@ -119,7 +173,8 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         {
             if (closed || session?.Id != id || session.Replay is null)
             { return null; }
-            return new(id, session.Replay.WorkUnits);
+            var observed = session.Observation;
+            return new(id, session.Replay.WorkUnits, observed?.Kind, observed?.Budget.WrittenBytes ?? NativeAnnMaintenanceWork.NoWrittenBytes);
         }
     }
 
@@ -133,7 +188,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         await actual.RunAsync(_ =>
         {
             lock (gate)
-            { if (session?.Id == id) { session = null; } }
+            { if (session?.Id == id) { session.Memory.Dispose(); session = null; } }
             return true;
         }).ConfigureAwait(false);
     }

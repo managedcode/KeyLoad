@@ -23,6 +23,7 @@ internal static class NativeTextIndex
             FactoryConfigurator1 = factory =>
             {
                 factory.Options.MutableSegmentBloomFilterBitsPerItem = DisabledBloomFilterBits;
+                factory.Options.EnableSingleSegmentGarbageCollection = false;
                 factory.SetMutableSegmentMaxItemCount(executionOptions.Value.MutableSegmentMaximumItems)
                     .ConfigureWriteAheadLogOptions(wal => wal.WriteAheadLogMode = WriteAheadLogMode.Sync);
             }

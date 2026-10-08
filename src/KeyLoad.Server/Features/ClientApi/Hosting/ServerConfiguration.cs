@@ -6,6 +6,7 @@ using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -43,6 +44,7 @@ internal static class ServerConfiguration
         ReplicaDiscoveryEndpoints.Map(app);
         ReplicaMembershipHealthEndpoints.Map(app);
         ReplicaMembershipAuthorityEndpoints.Map(app);
+        RemoteDocumentEndpoints.Map(app);
         PhysicalOwnerRegistrationServices.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();

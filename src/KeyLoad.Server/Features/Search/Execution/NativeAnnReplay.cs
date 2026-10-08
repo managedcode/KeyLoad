@@ -45,6 +45,7 @@ internal sealed class NativeAnnReplay
     internal IDisposable EnterStageCancellation(CancellationToken token) => originalBudget.EnterStageCancellation(token);
     internal long Through => through;
     internal long RetainedBytes => retained;
+    internal long MaximumStagePeakBytes => options.MaxPeakBytes;
 
     internal void Apply(ProjectionBatch batch, long upper)
     {

@@ -7,8 +7,10 @@ namespace KeyLoad.Orleans;
 
 internal static class NativeRequestContextAdmission
 {
+    private const int EmptyContextBytes = 0;
+
     internal static void Admit(IServiceProvider services, ClaimsPrincipal? principal,
-        GrainRequestContextState state, CancellationToken cancellationToken)
+        GrainRequestContextState state, CancellationToken cancellationToken, SiloAddress? placement = null)
     {
         var options = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         cancellationToken.ThrowIfCancellationRequested();
@@ -26,7 +28,15 @@ internal static class NativeRequestContextAdmission
                 maximumBytes: options.Value.MaximumPrincipalBytes, cancellationToken: cancellationToken, options: options);
         }
 
-        GrainNativeByteCounter.Measure(serializer: services.GetRequiredService<Serializer<GrainRequestContextState>>(), value: state,
+        var stateBytes = GrainNativeByteCounter.Measure(serializer: services.GetRequiredService<Serializer<GrainRequestContextState>>(), value: state,
             maximumBytes: options.Value.MaximumContextBytes, cancellationToken: cancellationToken, options: options);
+        if (placement is not null)
+        {
+            var remaining = checked(options.Value.MaximumContextBytes - (int)stateBytes);
+            if (remaining <= EmptyContextBytes)
+            { throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded); }
+            GrainNativeByteCounter.Measure(services.GetRequiredService<Serializer<SiloAddress>>(), placement,
+                remaining, options, cancellationToken);
+        }
     }
 }

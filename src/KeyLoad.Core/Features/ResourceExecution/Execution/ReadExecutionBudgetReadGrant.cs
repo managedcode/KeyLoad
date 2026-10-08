@@ -59,5 +59,11 @@ internal sealed class ReadExecutionBudgetReadGrant
         examinedRecords++;
     }
 
+    internal void AcceptObserved(long count, int records)
+    {
+        acceptedBytes += count;
+        examinedRecords += records;
+    }
+
     private void ChargeBytes(long count) => budget.ChargeReadGrant(this, count);
 }

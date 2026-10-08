@@ -38,7 +38,7 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        return ResolvePlacement(view, partition, catalog.DefaultShard);
+        return ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
     }
 
     internal static AtomicPartitionPlacementResolution ReadPlacementWitness(IKeyValueView view,
@@ -51,7 +51,10 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReadPlacementWitnessDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        return ResolvePlacement(view, partition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
+        if (placement.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        return placement;
     }
 
     private static AtomicPartitionPlacementResolution ResolvePlacement(IKeyValueView view,

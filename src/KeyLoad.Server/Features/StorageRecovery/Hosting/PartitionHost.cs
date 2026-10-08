@@ -43,6 +43,9 @@ internal sealed class PartitionHost : IAsyncDisposable
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
+        NativeAnnMaintenanceService? openedAnnMaintenance = null;
+        ClusterCoordinator? openedCoordinator = null;
+        ReplicaConsensus? openedConsensus = null;
         try
         {
             Database = OpenCanonicalDatabase(runtimeOptions, authorization, clock);
@@ -54,13 +57,21 @@ internal sealed class PartitionHost : IAsyncDisposable
             TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, SearchIndexDirectoryName),
                 runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
             Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled ? ApplyProbe.Enter : null);
-            Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
-            Coordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
-            AnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
+            Consensus = openedConsensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
+            Coordinator = openedCoordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
+            AnnMaintenance = openedAnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
+            TextMaintenance = new(Database, DirectoryPath, Database.Store.Identity.NodeId, runtimeOptions, clock);
+            TextProjection = new NativeTextSelectedProjection(TextProjection, TextMaintenance, TextMaintenance);
         }
         catch (Exception error)
         {
             var failures = new List<Exception> { error };
+            if (openedAnnMaintenance is not null)
+            { ServerFailureObserver.Observe(() => openedAnnMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            if (openedCoordinator is not null)
+            { ServerFailureObserver.Observe(() => openedCoordinator.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            if (openedConsensus is not null)
+            { ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
             if (applying is not null)
             { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
             if (openedText is not null)
@@ -87,6 +98,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     /// <summary>Borrowed derived text projection; physical ownership remains in this host.</summary>
     public ITextProjection TextProjection { get; }
     internal NativeAnnMaintenanceService AnnMaintenance { get; }
+    internal NativeTextIncrementalMaintenanceService TextMaintenance { get; }
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
     public ReplicaMaterializer Materializer { get; }
     /// <summary>Node-owned protocol endpoint attached by the Orleans Grain Service.</summary>
@@ -98,8 +110,12 @@ internal sealed class PartitionHost : IAsyncDisposable
     {
         var core = runtimeOptions.Core;
         RuntimeJournalStorePreparation.Prepare(stores);
+        var options = runtimeOptions.Node.Value;
+        var physicalOwner = options.MembershipAuthority.RemoteDocumentReads
+            ? new PhysicalShardRecord(options.PhysicalShardId, Configuration.Incarnation,
+                Configuration.VoterIds, PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch) : null;
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
-            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, clock);
+            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, clock, physicalOwner);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);
         return database;
     }
@@ -133,6 +149,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => TextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => AnnMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Coordinator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);

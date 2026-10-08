@@ -40,6 +40,7 @@ internal static class McpToolNames
     internal const string AdminStatus = "keyload_admin_status";
     internal const string DocumentsCommit = "keyload_documents_commit";
     internal const string SearchAnnMaintain = AnnMaintenanceProtocol.ToolName;
+    internal const string SearchTextMaintain = TextIndexMaintenanceProtocol.ToolName;
     internal const string MessagesReceiveAcrossLanes = MultiLaneReceiveProtocol.ToolName;
     internal const string MessagesReceive = "keyload_messages_receive";
     internal const string MessagesComplete = "keyload_messages_complete";

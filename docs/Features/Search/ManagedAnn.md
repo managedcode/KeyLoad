@@ -603,6 +603,47 @@ REQ-ANN-GEN-009 / AC-ANN-GEN-009: an internal node-owned readonly maintenance ob
 
 REQ/AC-ANN-GEN-003/009 and AC-ANN-007 retain the same centrally bound NativeAnn/AnnSeed/PackedAnnStorage limits. Feature-local Configuration/NativeAnnSeedOptionsFactory and NativeAnnStorageOptionsFactory own only validated downward derivation from those original IOptions and actual remaining resident/disk reservations. They never read environment/configuration, introduce defaults, raise quotas or reset the original read budget. Replay and stage-store constructors consume those typed options; storage and seed admission keep their existing formulas and fail closed. Native generation shutdown directly joins the actual worker before original reader settlement and root disposal, retaining every primary/cleanup failure. Existing whole operation, cancellation, cold replay and shutdown flows remain the verification contract; compiler success is not runtime acceptance.
 
+
+## AC-ANN-008 current first-release read and physical partial-write stage
+
+REQ-ANN-008 / AC-ANN-008: additive vector-only ApproximateSearchRequest v1 owns explicit RequestedMode=Approximate, Consumer and IndexGeneration; AnnSearchPage v1 reports separately requested/actual Mode, CompleteTopK, and the actual same authorized Position, even for empty pages. Default-off centrally bound QueryExecutionOptions.EnableApproximateSearch is a qualification rollout gate, not authority. Native query grain and fresh quorum/persisted row+field read admission precede generation lookup. Existing exact Search remains unchanged. No public corpus count/digest, consumer/admin capability, load/rebuild or self-provisioning occurs on read. Missing/stale/corrupt state fails closed; only actual charged native insufficient-candidate exact work reports ExactFallback.
+
+SDK ApproximateSearchAsync, HTTP /v1/search/ann and discovered official MCP/shared SQL CALL keyload_search_ann_read share one canonical typed descriptor and executor. New generated aliases/field IDs are the explicit version-one request/page/mode contracts; no existing persisted generation format changes or legacy reader. Initial discovery and covered-eleven selection are unchanged.
+
+Each public native owner frame reserves both capture peaks, ordinal bitmap, configured packed scratch and complete projected result/ranking retention before allocation, counts all simultaneous index/frame reservations, and transfers to an original pinned lease. Original cancellation/time/read/result/work limits remain. Shutdown and every failure join/release actual admitted capture, native worker, index reader and memory frame.
+
+REQ-ANN-007 / AC-ANN-007 physical write observation is internal bounded native operational diagnostics: exact session GUID, actual admitted closed capability kind, actual current work and completed frame-write bytes. PackedAnnStorageFrames increments bytes only after successful actual synchronous header/payload writes; this is not flush/durability evidence. A Volatile-published immutable stage holder and Interlocked counters prevent torn observation; the session owns its holder until abort/shutdown, and no corpus, credentials, callback or injected test switch is exposed. The owning TimeProvider can observe this native counter and cancel the original current child to exercise actual partial-file cleanup; it cannot modify the operation or fabricate an outcome. Existing signed fault v2 JournalFlushed does not observe this separate native ANN writer, so no alternate fault framework is introduced.
+
+Required actual native wholeflows: provisioned exact/approximate/fallback and zero eligible modes; persisted ordinary row/field caller admission; disabled/missing/stale/budget denial without partial/provisioning; original cancellation and elapsed budget after native read work; concurrent pinned lease resident admission and shutdown joins; physical partial frame write cancellation before publication/ACK, full canonical/native file invariance and healthy resume; actual Aspire RF3 SDK/official MCP/both CALL equivalence. Authored source does not establish these gates or task closure.
+
+## Signed public read admission cancellation (AC-ANN-008)
+
+The actual current-image Aspire RF3 wave may accept the same centrally validated
+QueryExecutionOptions already owned by ClusterFixture. A typed optional profile
+is applied before BuildAsync; null preserves every existing caller. It changes
+no image whitelist, authority, deadline, signed control format or covered-eleven
+inventory. The explicit ANN profile is disabled outside its owned scenario.
+
+AnnPublicCancellationScenario arms the existing signed v2 AuthorizationReload
+read phase for one newly persisted c1-probe identity, empty command identifier,
+ApproximateSearch read kind and actual discovered voter. It cancels the original
+SDK/official MCP token only after that exact signed observation; cancellation and
+ProducerDisposed settle before retiring the arm, rereading the full canonical
+literal corpus and performing healthy SDK/MCP/Q1 ANN reads. SDK read cancellation
+is Cancelled with no page, never UnknownWriteOutcome. Official cancellation is
+its actual interruption. This proves public admission cancellation only; native
+observed-work and partial-file-write cases separately prove execution cancellation.
+Existing parent/wave/cleanup deadlines, original task joins, locks and primary
+plus cleanup retention remain unchanged. No runtime success is claimed.
+
+Source-bound phase precision: the existing signed AuthorizationReload observation
+is immediately BEFORE GrainRequestAuthority.ReloadForRequest, followed by the
+original scope recheck and fresh persisted reload. This cancellation case proves
+pre-reload public read admission settlement, not completed authorization or
+during-index work. The ordinary healthy follow-up performs actual current
+persisted authorization and one-cut search; separate native worker cases retain
+the genuine after-work cancellation oracle. No control semantics are renamed.
+
 ## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
 
 REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN
@@ -633,6 +674,12 @@ under the same existing timeout/caller token and resolves its fresh original
 outcome. RecoveryRequired cannot cause a second append for a retained ID. Native
 entry absence within LastIndex fails closed; no fabricated command authority.
 
+AC-ANN-008 source-authored stale-page regression: `AnnPublicStaleGenerationTests.CanonicalVectorChangeRejectsStalePageThenExplicitNativeRestoreReturnsCompleteLiteralPage` performs a real committed vector change after published generation admission, requires `HistoryUnavailable` with no page and unchanged complete canonical bytes/cut/native files, then explicitly settles the old maintenance session and runs native Restore/page replay/checkpoint/Verify/Publish before a complete independently literal healthy page. The public read never restores or provisions. This source is unexecuted; runtime acceptance remains required.
+
+## R3 native simultaneous maintenance reservation contract (before code)
+
+REQ/AC-ANN-GEN-003/009 and AC-ANN-007/008 retain unchanged MaximumResidentBytes and the original seed/build/load/public-frame formulas. A node owner accounts one active maintenance session's retained memory alongside published/retired indexes and all public read frames. Before every actual maintenance capture/load/construction, the original worker expands that session's reservation under the same native owner gate to the actual remaining resident capacity. Allocation runs outside that gate and uses only the reservation's downward remaining capacity; public reads subtract the live reservation before retaining a frame. This avoids lock inversion with canonical Store.Read. After stage settlement, the reservation shrinks to the complete modeled retained session bytes. A completed index transfers its actual modeled retention into the published slot under the same gate before the stage reservation can admit other work; failed construction retains the original frame through cleanup. Abort and joined shutdown release once after original worker settlement. No generation format, quota, default, public privilege, retry or deadline changes. Initial source capture before first owner publication remains bounded by the unchanged cap while no resident index/read owner exists; owner+reservation handoff is protected by the service gate before exposing that owner. The real native regression observes actual maintenance read work, attempts a complete public operation while its original stage reservation is live, requires resident admission rejection/no partial/full store+files invariant, then proves full literal healthy publication/read and original teardown.
+
 ### AC-ANN-007 native filtered-page qualification orchestration correction
 
 `NativeAnnLineageLifecycleTests.RealProjectionTargetIsPinnedAndPolicyHideRestorePermanentlyInvalidatesUntilExplicitRebuild` and `NativeAnnSourceLineageReplayTests.ActualSourcePatchAndNativeProjectionTargetReappearOnlyThroughAdmittedCanonicalOutboxReplay` retain their complete actual lineage/policy/corpus/healthy oracles. An empty `ProjectionBatch.Entries` is not a terminal condition: a bounded source-record scan may examine excluded event mutations, advance signed `ThroughSequence`, and still report `HasMore`. The native lifecycle helper must execute the same actual ApplyPage → StagePage → canonical checkpoint ACK/replay for every advancing signed prefix, including filtered empty pages. Only `ThroughSequence == Consumer.Checkpoint`, with no entries, no more range and equality to the admitted upper, is the empty terminal admission. This matches the existing actual CQRS parent protocol; Limit=1, MaximumPages=12, all bytes/deadlines and strict canonical upper verification stay unchanged. Original R608/R609 failures remain retained; this source correction is unexecuted and does not qualify AC-ANN-007 or AC-ANN-008.
@@ -642,3 +689,21 @@ The real-process `NativeAnnCrashReplay.FinishAsync` uses the same exact signed n
 The original R608/R609 elapsed-budget failure also retains the correct product rejection: the same maintenance parent's original deadline cannot become healthy after it expires. `NativeAnnObservedWorkBudgetTests` repeats Verify on that spent parent and requires the same exact BudgetExceeded detail, no returned page, unchanged complete canonical bytes and unchanged position. It joins that native runtime, preserves the already advanced observed-work clock, and admits a new Restore parent with a new CommandId and its own original budget. Native pending reconciliation, Load, Verify and Publish must retain the prior exact index/corpus digests and literal count. The cancellation branch retains its unexpired original parent and healthy publication after the failed child's cancellation scope is released. No clock rollback, original-budget reset, quota extension or weaker state oracle is permitted; fresh native execution is required.
 
 The original R617/R618 lineage flow reaches the explicit healthy rebuild and correctly retains the vector corpus digest after policy hide/restore: no vector value or document revision changed. Its oracle must require changed native DependencySha256 and advancing SchemaVersion, while both original/rebuilt corpus digests equal the independent frozen preimage of all three literal IDs, revisions, fields, vector spaces and complete vector values. Both obsolete Restore attempts still require exact HistoryUnavailable and complete unchanged canonical bytes/position. Policy dependencies remain distinct from the vector corpus; changing the corpus preimage to include policy state or weakening the denial is prohibited. This fixture correction does not establish public RF3 or full AC closure.
+
+R3 exact source trace: `AnnPublicMaintenanceReservationTests.ActualMaintenanceReadReservationRejectsConcurrentPublicFrameThenSettledStageReturnsLiteralHealthyPage` maps REQ-ANN-008 / AC-ANN-008 and REQ/AC-ANN-GEN-003/009 / AC-ANN-007 to actual native Verify capture bytes, one joined original-token public operation, exact ResourceExhausted owned detail/null page, complete canonical image/cut/native-file invariance and complete literal healthy page after reservation contraction. Build Begin derives two simultaneous seed/replay frames downward from the same original resident cap; restore Load derives two source/replay frames downward. Existing replay maximum-stage peak is reserved before native stage capture, and current capture peak remains accounted during final index construction. No expected native UID, runtime PASS or coverage count is manufactured. Original unit catalog expectation is 73, matching the actual additive ANN descriptor; closed initial/covered selections stay unchanged.
+
+
+### Stage XVII native compiler contract corrections
+
+The initial unpublished AnnSearchPage Id1 uses ImmutableArray<RankedDocument>, matching native generated collection contracts. The executor transfers its exclusively owned completed projection array into that immutable container without copying or retaining a mutable alias; JSON remains the same complete array. Field IDs/alias/modes and complete literal caller oracles are unchanged. Native public acquisition transfers index/frame ownership only after construction succeeds, retains direct cleanup on every exceptional construction path, and its returned lease directly disposes both original resources under an idempotent lifetime gate. The owner shares one native gate with a separate read-lifetime owner for exact admission, pending reader joins and retained retirement errors. Maintenance memory receives the same centrally validated IOptions snapshot. These are required ownership/configuration/shape corrections from original native diagnostics, not cap, deadline, authority or format-migration changes.
+
+### Stage XVII directly owned ANN read construction
+
+REQ-ANN-008 / AC-ANN-008 and REQ/AC-ANN-GEN-003/009 require the actual public read lifetime to own its reserved frame and pinned native index from their creation. Its constructor reserves the unchanged original frame before source capture, captures under the same authorized canonical view outside the node owner gate, and acquires the exact published index only after that source validation. Every failed construction directly disposes the same partially initialized lifetime; every successful read retains it until ordered search/teardown settlement. Disposal attempts both native resources exactly once under the original lifetime gate and retains primary, nonfatal and fatal cleanup failures. The acquisition helper owns no escaping disposable locals. This corrects the original R637 ownership diagnostics without a new budget, authority, deadline, format or public wire contract; the genuine public failure, cancellation, pinned-reader, shutdown and healthy continuation tests remain mandatory.
+
+
+### R648 public fixture admission and explicit restore sequence
+
+REQ-ANN-008 / AC-ANN-008 retains strict persisted principal policy advancement: the ordinary seed caller starts at epoch1, its explicit public-grant update commits epoch2, and the subsequent rival row-owner update commits epoch3. No product authorization validation changes. AnnPublicPersistedCallerTests preserves exact no-grant rejection before generation lookup, full redacted literal results, hidden-row empty results, privileged literal continuation and complete unchanged canonical image/cut after each read.
+
+AnnPublicStaleGenerationTests must explicitly execute Begin then Load under its freshly admitted Restore parent before existing ApplyPage/StagePage/canonical ACK/replay/Verify/Publish. Begin only admits the original native manifest; Load is the mandatory native generation read, not an implicit rebuild. Both stages retain full canonical image/cut invariance. The original real vector write/stale rejection/null page/native file invariant and independently complete changed healthy ranking remain mandatory. Original R648 failed before Load and does not demonstrate a product replay defect; no replay fences or source validation are relaxed. Root requires fresh native execution. The shared synchronous cancellation identity repair is specified in ClientApi and preserves the three existing native ANN actual cancellation whole flows.

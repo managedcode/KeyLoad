@@ -6,8 +6,9 @@ using KeyLoad.Storage;
 namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEngine database,
-    ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null)
+    ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null, string? expectedTenant = null)
 {
+    private const string ReceivingIdentityChangedDetail = "The partition query receiving identity changed.";
     private const int EmptyElementCount = 0;
     private const int VersionOne = 1;
 
@@ -16,9 +17,12 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
     {
         var leafGrant = new PartitionQueryLeafReadGrant(grant, plan.MaxExaminedRecords);
         var retention = new PartitionQueryLeafRetention(plan.MaxRetainedBytes, plan.MaxCandidates);
-        return database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection,
-            (view, principal, resource) => Capture(view, principal, resource, plan, normalized,
-                leafGrant, retention));
+        PartitionQueryLeafResultV1 Read(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource)
+            => Capture(view, principal, resource, plan, normalized, leafGrant, retention);
+        return expectedTenant is null
+            ? database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection, Read)
+            : database.WithPartitionQueryView(principalId, plan.Partition, normalized.Query.Collection,
+                grant, Read);
     }
 
     private PartitionQueryLeafResultV1 Capture(IKeyValueView view, PrincipalRecord principal,
@@ -26,6 +30,8 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         PartitionQueryLeafReadGrant grant, PartitionQueryLeafRetention retention)
     {
         budget.Check();
+        if (expectedTenant is not null && principal.TenantId != expectedTenant)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingIdentityChangedDetail); }
         engine.Bind(principal, resource, request);
         ValidatePlacement(view, plan.Partition, grant);
         PreparedQuery? prepared = null;

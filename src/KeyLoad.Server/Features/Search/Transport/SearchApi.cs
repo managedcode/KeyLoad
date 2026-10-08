@@ -7,6 +7,8 @@ internal static class SearchApi
 
     internal static void Map(WebApplication app)
     {
+        app.MapPost(AnnSearchProtocol.Route, (ApproximateSearchRequest request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.ApproximateSearch, request));
         app.MapPost(WaitForIndexProtocol.Route, (HttpContext context, WaitForIndexRequest request) =>
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.WaitForIndex, request));
         app.MapPost(SearchPath, (SearchRequest request, HttpContext context) =>

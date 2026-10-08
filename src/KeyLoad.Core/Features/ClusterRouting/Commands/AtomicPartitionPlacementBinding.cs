@@ -9,7 +9,6 @@ public sealed partial class DatabaseEngine
 {
     private const string AdminRequired = "Cluster administration is required.";
     private const string PlacementRevisionConflict = "The atomic partition placement revision is stale.";
-    private const string PlacementOwnerUnsupported = "Only the committed default physical shard is supported.";
     private const string PlacementCapacityExceeded = "The atomic partition placement directory is full.";
     private const string PlacementRevisionExhausted = "The atomic partition placement revision is exhausted.";
 
@@ -34,10 +33,7 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(transaction)
             ?? throw Errors.Fail(ErrorCode.NotFound, BindPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        if (request.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, PlacementOwnerUnsupported);
-        }
+        var selectedOwner = ResolveRegisteredPlacementOwner(transaction, catalog.DefaultShard, request.PhysicalShardId);
 
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(transaction);
         if (directory is not null)
@@ -52,8 +48,8 @@ public sealed partial class DatabaseEngine
         }
 
         var row = AtomicPartitionPlacementSerialization.ReadRow(transaction, request.Partition);
-        return row is null ? CreatePlacement(transaction, request, directory, catalog.DefaultShard)
-            : ValidateExistingPlacement(row, request, directory, catalog.DefaultShard);
+        return row is null ? CreatePlacement(transaction, request, directory, selectedOwner)
+            : ValidateExistingPlacement(row, request, directory, selectedOwner);
     }
 
     private static OperationResult CreatePlacement(IAtomicTransaction transaction,

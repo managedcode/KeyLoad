@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Replication;
+using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
@@ -20,16 +21,38 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
             Canonical.Store.Identity.Incarnation)
         { BenchmarkTopology = true };
-        replica = new(new(Configuration.Directory)
+        ZoneTreeStore? acquiredReplica = null;
+        DurableReplicaLog? acquiredLog = null;
+        ReplicaMaterializer? acquiredMaterializer = null;
+        ReplicaConsensus? acquiredConsensus = null;
+        try
         {
-            Incarnation = Configuration.Incarnation,
-            SigningKey = Canonical.Store.Identity.SigningKey
-        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
-        var execution = ReplicaExecutionTestOptions.Execution();
-        Log = new(replica, configuration, canonicalDatabase: Canonical.Database);
-        Materializer = CreateMaterializer(configuration, execution);
-        Consensus = new(Materializer, configuration, execution, TimeProvider.System);
+            replica = acquiredReplica = new(new(Configuration.Directory)
+            {
+                Incarnation = Configuration.Incarnation,
+                SigningKey = Canonical.Store.Identity.SigningKey
+            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
+            var execution = ReplicaExecutionTestOptions.Execution();
+            Log = acquiredLog = new(replica, configuration, canonicalDatabase: Canonical.Database);
+            Materializer = acquiredMaterializer = CreateMaterializer(configuration, execution);
+            Consensus = acquiredConsensus = new(Materializer, configuration, execution, TimeProvider.System);
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            if (acquiredConsensus is not null)
+            { ServerFailureObserver.ObserveAsync(() => acquiredConsensus.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult(); }
+            if (acquiredMaterializer is not null)
+            { ServerFailureObserver.ObserveAsync(() => acquiredMaterializer.DisposeAsync().AsTask(), failures).GetAwaiter().GetResult(); }
+            if (acquiredLog is not null)
+            { ServerFailureObserver.Observe(acquiredLog.Dispose, failures); }
+            if (acquiredReplica is not null)
+            { ServerFailureObserver.Observe(acquiredReplica.Dispose, failures); }
+            ServerFailureObserver.Observe(Canonical.Dispose, failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
     }
 
     internal TestDatabase Canonical { get; }
@@ -104,22 +127,15 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures);
+        await ServerFailureObserver.ObserveAsync(() => Materializer.DisposeAsync().AsTask(), failures);
+        ServerFailureObserver.Observe(Log.Dispose, failures);
         try
-        {
-            await Consensus.DisposeAsync();
-        }
-        finally
-        {
-            try
-            {
-                await Materializer.DisposeAsync();
-            }
-            finally
-            {
-                Log.Dispose();
-                replica.Dispose();
-                Canonical.Dispose();
-            }
-        }
+        { replica.Dispose(); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
+        ServerFailureObserver.Observe(Canonical.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

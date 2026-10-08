@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Serialization;
@@ -15,6 +16,13 @@ internal static class PhysicalOwnerDirectorySerialization
     {
         PhysicalOwnerDirectoryV1? value = null;
         view.ReadValue(Key(), bytes => value = Decode(bytes));
+        return value;
+    }
+
+    internal static PhysicalOwnerDirectoryV1? Read(IKeyValueView view, ReadExecutionBudgetReadGrant grant)
+    {
+        PhysicalOwnerDirectoryV1? value = null;
+        grant.ReadValue(view, Key(), bytes => value = Decode(bytes));
         return value;
     }
 

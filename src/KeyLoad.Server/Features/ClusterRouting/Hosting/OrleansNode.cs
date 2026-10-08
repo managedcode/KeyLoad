@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -29,20 +30,24 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private Task? startup;
     private PhysicalShardCatalogStartup? physicalShardCatalog;
     private PhysicalOwnerRegistrationRuntime? ownerRegistration;
+    private RemoteDocumentRuntime? remoteDocuments;
+    internal RemoteDocumentRuntime? RemoteDocuments => Volatile.Read(ref remoteDocuments);
     private int siloJoined;
 
     /// <summary>Factory published only after native silo startup completes.</summary>
     public IGrainFactory? Grains => Volatile.Read(ref grains);
 
     /// <summary>Allows physical cleanup only after every admitted native frame has actually joined.</summary>
-    internal bool HasJoinedRequestWork => requestWork.IsJoined;
+    internal bool HasJoinedRequestWork => requestWork.IsJoined && (RemoteDocuments?.IsJoined ?? true);
 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
 
     internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
 
-    internal bool DatabaseReady => Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
+    internal bool DatabaseReady => (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
+        || Options.MembershipAuthority.RemoteDocumentReads
+            && (Options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority || OwnerRegistration?.Verified == true))
         && CatalogReady && Volatile.Read(ref host)?.Services.GetRequiredService<RuntimeJournalAdmission>().IsReady == true;
 
     internal PhysicalOwnerRegistrationObservation? OwnerRegistration => Volatile.Read(ref ownerRegistration)?.Observe();
@@ -77,6 +82,8 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
         ? running.Services : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
 
+    internal KeyLoad.Query.QueryEngine BorrowPartitionQueries() => RuntimeServices.GetRequiredService<KeyLoad.Query.QueryEngine>();
+
     internal GrainRequestCodec CatalogRequestCodec() => RuntimeServices.GetRequiredService<GrainRequestCodec>();
 
     /// <summary>Starts the native transport before its quorum-backed membership provider initializes.</summary>
@@ -100,19 +107,23 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         if (Options.MembershipAuthority.RegisterPhysicalOwners && physicalOwnerWork is null)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
         var address = await OrleansNodeAddressResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
+        Volatile.Write(ref remoteDocuments, await RemoteDocumentRuntime.CreateAsync(this, partition,
+            runtimeOptions, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
-            address, runtimeOptions, runtimeClock, cancellationToken);
+            address, runtimeOptions, runtimeClock, cancellationToken, RemoteDocuments?.Router, RemoteDocuments?.QueryRouter);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy
+            && !Options.MembershipAuthority.RemoteDocumentReads)
         { return; }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
             built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution);
         Volatile.Write(ref physicalShardCatalog, catalog);
         var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local)
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
+            || Options.MembershipAuthority.RemoteDocumentReads)
         {
             await RuntimeJournalStartup.InitializeAsync(built.Services, partition, administrator, Options,
                 runtimeOptions, cancellationToken).ConfigureAwait(false);
@@ -178,11 +189,18 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
+        if (RemoteDocuments is { } remote)
+        { await ServerFailureObserver.ObserveAsync(() => remote.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(Volatile.Read(ref ownerRegistration),
             physicalOwnerWork, failures).ConfigureAwait(false);
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
         {
             await membershipAuthority.StopAdmissionJoinAndClearProviderAsync(failures).ConfigureAwait(false);
+        }
+        if (RemoteDocuments is { IsJoined: false })
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
         }
         if (stopping is not null)
         {
@@ -207,28 +225,9 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task StopHostAsync(IHost stopping, List<Exception> failures)
-    {
-        var shutdownTimeout = runtimeOptions.Membership.Value.ShutdownTimeout;
-        using var deadline = new CancellationTokenSource(shutdownTimeout, runtimeClock);
-        await ServerFailureObserver.ObserveAsync(() => stopping.StopAsync(deadline.Token), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
-        if (!requestWork.IsJoined)
-        {
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
-        }
-        stopping.Services.GetRequiredService<RuntimeJournalAdmission>().Close();
-        Volatile.Write(ref grains, null);
-        // A failed native Start has no lifecycle rollback. Drain the endpoint while its transport still exists.
-        ServerFailureObserver.Observe(() => stopping.Services.GetService<ReplicaSiloDiscoveryState>()?.StopDiscovery(), failures);
-        await ServerFailureObserver.ObserveAsync(() => partition.Consensus.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
-        Volatile.Write(ref host, null);
-        if (stopping is IAsyncDisposable asynchronous)
-        { await ServerFailureObserver.ObserveAsync(() => asynchronous.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
-        else
-        { ServerFailureObserver.Observe(stopping.Dispose, failures); }
-    }
+    private Task StopHostAsync(IHost stopping, List<Exception> failures)
+        => OrleansNodeHostShutdown.JoinAsync(stopping, partition, requestWork, runtimeOptions, runtimeClock,
+            () => Volatile.Write(ref grains, null), () => Volatile.Write(ref host, null), failures);
 
     internal Task EnsureCatalogAdmissionAsync(CancellationToken cancellationToken)
     {

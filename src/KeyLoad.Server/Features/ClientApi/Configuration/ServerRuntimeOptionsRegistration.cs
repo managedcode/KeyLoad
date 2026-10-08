@@ -1,6 +1,7 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -41,6 +42,9 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<RemoteDocumentExecutionOptions>()
+            .Bind(configuration.GetSection(RemoteDocumentExecutionOptions.SectionName), binding => binding.ErrorOnUnknownConfiguration = true)
+            .Validate(options => options.IsValid(), RemoteDocumentExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<PhysicalOwnerExecutionOptions>()
             .Bind(configuration.GetSection(PhysicalOwnerExecutionOptions.SectionName), binding => binding.ErrorOnUnknownConfiguration = true)
             .Validate(options => options.IsValid(), PhysicalOwnerExecutionOptions.ValidationMessage).ValidateOnStart();

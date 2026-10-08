@@ -132,12 +132,36 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
 
         var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        if (kind == GrainReadKind.TextMaintenance)
+        {
+            GrainRequestAuthority.RequireAdministrator(principal);
+            return await services.GetRequiredService<INativeTextMaintenance>().ExecuteAsync(principal,
+                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
+        }
+        if (kind == GrainReadKind.Document
+            && services.GetService<IRemoteDocumentReadRouter>() is { } remoteDocuments)
+        {
+            return await remoteDocuments.ReadAsync(request.Envelope, principal,
+                GrainNativePayload.Read<GetDocumentRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
+        }
+        if (kind == GrainReadKind.PartitionQuery
+            && services.GetService<IRemotePartitionQueryRouter>() is { } remoteQueries)
+        {
+            return await remoteQueries.ReadAsync(request.Envelope, principal,
+                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(request.Payload), cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.AnnMaintenance)
         {
             GrainRequestAuthority.RequireAdministrator(principal);
             return await services.GetRequiredService<INativeAnnMaintenance>().ExecuteAsync(principal,
                 GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
         }
+        return await ReadNativeCapabilityAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
+        DecodedGrainRequest request, CancellationToken cancellationToken)
+    {
         if (RuntimeJournalRequestScope.Handles(kind))
         {
             return RuntimeJournalReadCapabilities.Execute(localDatabase, principal.Id, kind, request.Payload, cancellationToken);

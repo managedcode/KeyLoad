@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,14 +12,15 @@ namespace KeyLoad.Orleans;
 /// <param name="clock">Runtime system clock for persisted principal expiry.</param>
 /// <param name="workOwner">Silo-local admission and cancellation owner for verified commands.</param>
 /// <param name="diagnostics">Logs unexpected node failures without serializing exceptions.</param>
+/// <param name="services">Native silo services for opt-in physical command routing.</param>
 /// <param name="options">The centrally validated signed request lifetime settings.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.CommandAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
     TimeProvider clock, NativeRequestWorkOwner workOwner, ILogger<CommandPartitionGrain> diagnostics,
-    IOptions<GrainRoutingOptions> options)
+    IOptions<GrainRoutingOptions> options, IServiceProvider services)
     : Grain, ICommandPartitionGrain
 {
-    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, options, codec, workOwner);
+    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, options, codec, workOwner, services.GetService<IPhysicalRequestPlacement>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>

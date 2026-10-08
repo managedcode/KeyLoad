@@ -24,6 +24,7 @@ public sealed partial class DatabaseEngine
     /// <param name="blobOptions">Centrally validated blob restore and catalog proof policy.</param>
     /// <param name="claimsOptions">Centrally validated native signed-claim decoding limits.</param>
     /// <param name="timeSeriesOptions">Centrally validated time-series append admission.</param>
+    /// <param name="physicalOwner">Optional immutable configured owner enabling explicit multi-owner local execution fences.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
@@ -31,7 +32,7 @@ public sealed partial class DatabaseEngine
         IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<BlobExecutionOptions> blobOptions,
         IOptions<NativeClaimsExecutionOptions> claimsOptions,
         IOptions<TimeSeriesExecutionOptions> timeSeriesOptions,
-        TimeProvider? timeProvider = null)
+        TimeProvider? timeProvider = null, PhysicalShardRecord? physicalOwner = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(authorization);
@@ -65,6 +66,9 @@ public sealed partial class DatabaseEngine
         dueExecution.Validate();
         eventSourceExecution.Validate();
         Store = store;
+        configuredPhysicalOwner = physicalOwner;
+        if (physicalOwner is not null && physicalOwner.Incarnation != store.Identity.Incarnation)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
         Authorization = authorization;
         Limits = operationLimits;
         analyticalReadGate = new(operationLimits.MaxConcurrentQueries);
@@ -74,6 +78,7 @@ public sealed partial class DatabaseEngine
         Durability = store.Identity.Durability;
     }
 
+    private readonly PhysicalShardRecord? configuredPhysicalOwner;
     private readonly ChangeFeedExecutionOptions changeFeedExecution;
     internal BlobExecutionOptions BlobExecution { get; }
     internal NativeClaimsExecutionOptions ClaimsExecution { get; }
@@ -112,6 +117,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
+        RequireLocalResourceOwner(view, partition);
         var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
             ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
         if (resource.TransactionDomainId != partition.TransactionDomainId)

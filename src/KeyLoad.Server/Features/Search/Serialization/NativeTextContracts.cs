@@ -88,13 +88,20 @@ internal static class NativeTextEnvelopeCodec
 
     internal static T Decode<T>(ReadOnlySpan<byte> bytes)
     {
-        var envelope = NativeSerialization.Deserialize<NativeTextEnvelope>(bytes);
-        if (envelope is null || envelope.FormatVersion != NativeTextProtocol.FormatVersion || envelope.Payload is null
-            || envelope.Sha256 is null || envelope.Sha256.Length != SHA256.HashSizeInBytes
-            || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Sha256))
+        try
         {
-            throw KeyLoad.Errors.Fail(KeyLoad.ErrorCode.Corruption, NativeTextProtocol.ProjectionCorrupt);
+            var envelope = NativeSerialization.Deserialize<NativeTextEnvelope>(bytes);
+            if (envelope is null || envelope.FormatVersion != NativeTextProtocol.FormatVersion || envelope.Payload is null
+                || envelope.Sha256 is null || envelope.Sha256.Length != SHA256.HashSizeInBytes
+                || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Sha256))
+            {
+                throw KeyLoad.Errors.Fail(KeyLoad.ErrorCode.Corruption, NativeTextProtocol.ProjectionCorrupt);
+            }
+            return NativeSerialization.Deserialize<T>(envelope.Payload);
         }
-        return NativeSerialization.Deserialize<T>(envelope.Payload);
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+        {
+            throw NativeTextErrors.Corrupt();
+        }
     }
 }

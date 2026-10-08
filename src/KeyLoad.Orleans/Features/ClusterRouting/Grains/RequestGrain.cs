@@ -1,5 +1,6 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
@@ -60,12 +61,12 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
 
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
-            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex)
+            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex)
             { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
             else if (command)
             {
                 stage = GrainFailureStage.PartitionResolution;
-                var partition = GrainPartitionResolver.Resolve(request);
+                var partition = PhysicalCommandActorKey.Resolve(request, services.GetService<IPhysicalRequestPlacement>());
                 stage = GrainFailureStage.CapabilityExecution;
                 var target = GrainFactory.GetGrain<ICommandPartitionGrain>(partition);
                 reply = await target.ExecuteAsync(signedRequest, writer.CancellationToken).ConfigureAwait(true);
@@ -89,6 +90,12 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
+        if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
+        {
+            var result = await TextMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,
+                clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
+            return EncodeParent(result, writer.CancellationToken);
+        }
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
         {
             var result = await AnnMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,

@@ -18,6 +18,7 @@ internal sealed class AnnWorkBudget
     private long workUnits;
     private long distanceEvaluations;
     private long edgeVisits;
+    private long writtenBytes;
 
     internal AnnWorkBudget(ReadExecutionBudget readBudget, long maxWorkUnits)
     {
@@ -28,6 +29,14 @@ internal sealed class AnnWorkBudget
         }
         this.readBudget = readBudget;
         this.maxWorkUnits = maxWorkUnits;
+    }
+
+    internal long WrittenBytes => Interlocked.Read(ref writtenBytes);
+
+    internal void RecordWritten(int bytes)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(bytes);
+        Interlocked.Exchange(ref writtenBytes, checked(Interlocked.Read(ref writtenBytes) + bytes));
     }
 
     internal long WorkUnits => Interlocked.Read(ref workUnits);

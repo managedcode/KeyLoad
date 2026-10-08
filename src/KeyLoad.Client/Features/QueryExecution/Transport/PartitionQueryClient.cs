@@ -2,7 +2,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
 
-/// <summary>Reads complete same-owner partition queries through the authenticated SDK transport.</summary>
+/// <summary>Reads complete bounded partition queries through the authenticated SDK transport.</summary>
 public static class PartitionQueryClient
 {
     private const string Route = "/v1/query/partitions";

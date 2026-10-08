@@ -93,14 +93,7 @@ public sealed partial class DatabaseEngine
     {
         cancellationToken.ThrowIfCancellationRequested();
         var principal = Principal(view, principalId, Clock.GetUtcNow());
-        Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
-        if (minimumToken is not null)
-        { ValidateDocumentSessionToken(view, reference.Partition, minimumToken); }
-        var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
-        var record = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
-        var result = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access) ? null : Project(principal, resource, record);
-        cancellationToken.ThrowIfCancellationRequested();
-        return result;
+        return ReadDocumentAtCut(view, principal, reference, minimumToken, cancellationToken);
     });
     /// <summary>Projects one already authorized document using persisted field policies.</summary>
     /// <param name="principal">Persisted principal.</param>

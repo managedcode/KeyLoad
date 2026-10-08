@@ -4,6 +4,7 @@ using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Orleans;
+using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
     RequestCqrsProbeFixture? controls, string? physicalShardOverrideNode,
-    Guid? physicalShardOverrideId, RequestCqrsLifecycleEvidence? lifecycleEvidence,
+    Guid? physicalShardOverrideId, RequestCqrsLifecycleEvidence? lifecycleEvidence, QueryExecutionOptions? queryExecution,
     CancellationToken cancellationToken) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
@@ -31,11 +32,12 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
         string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
         RequestCqrsProbeFixture? controls = null, string? physicalShardOverrideNode = null,
-        Guid? physicalShardOverrideId = null, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
+        Guid? physicalShardOverrideId = null, RequestCqrsLifecycleEvidence? lifecycleEvidence = null,
+        QueryExecutionOptions? queryExecution = null)
     {
         return await RequestCqrsRf3StartupExecution.RunAsync(() => new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
             requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
-            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, cancellationToken)).ConfigureAwait(false);
+            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, queryExecution, cancellationToken)).ConfigureAwait(false);
     }
 
     private void ApplyPhysicalShardOverride(IDistributedApplicationTestingBuilder builder)
@@ -75,6 +77,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             cancellationToken).ConfigureAwait(false);
         testingBuilder = builder;
         ApplyPhysicalShardOverride(builder);
+        ClusterFixtureQueryResultLimits.Configure(builder, queryExecution);
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();

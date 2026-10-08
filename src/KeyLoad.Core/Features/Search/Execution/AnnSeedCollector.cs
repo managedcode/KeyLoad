@@ -35,6 +35,37 @@ internal static class AnnSeedCollector
         var startingReadBytes = readBudget.ReadBytes;
         var buffer = database.Store.Read(view => CaptureCut(database, view, principalId,
             partition, collection, field, space, options, readBudget, work, pin));
+        return Finish(buffer, readBudget, startingReadBytes);
+    }
+
+    internal static AnnSeed CapturePinnedView(DatabaseEngine database, IKeyValueView view,
+        string principalId, AnnMaintenanceRequest pin, IOptions<AnnSeedOptions> configuredOptions,
+        ReadExecutionBudget readBudget, AnnSeedWork? scopeWork = null)
+        => CaptureView(database, view, principalId, pin.Consumer.Partition, pin.Collection,
+            pin.Field, pin.Space, configuredOptions, readBudget, pin, scopeWork);
+
+    internal static AnnSeed CaptureView(DatabaseEngine database, IKeyValueView view,
+        string principalId, PartitionRef partition, string collection, string field,
+        VectorSpace space, IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget,
+        AnnMaintenanceRequest? pin = null, AnnSeedWork? scopeWork = null)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(readBudget);
+        ArgumentNullException.ThrowIfNull(configuredOptions);
+        var options = configuredOptions.Value;
+        options.Validate();
+        var work = scopeWork ?? new AnnSeedWork(readBudget, options.MaxWorkUnits);
+        AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
+        var startingReadBytes = readBudget.ReadBytes;
+        var buffer = CaptureCut(database, view, principalId, partition,
+            collection, field, space, options, readBudget, work, pin);
+        return Finish(buffer, readBudget, startingReadBytes);
+    }
+
+    private static AnnSeed Finish(AnnSeedBuffer buffer, ReadExecutionBudget readBudget,
+        long startingReadBytes)
+    {
         readBudget.Check();
         var captured = buffer.Finish();
         var digest = AnnSeedFingerprint.Compute(captured.Scope, captured.Records,

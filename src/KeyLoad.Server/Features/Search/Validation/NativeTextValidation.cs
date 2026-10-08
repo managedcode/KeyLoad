@@ -112,7 +112,7 @@ internal static class NativeTextValidation
         }
     }
 
-    private static void ValidateFiles(NativeTextFile[] files, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void ValidateFiles(NativeTextFile[] files, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         const int BytesInitialValue = 0;
         const char SlashCharacter = '/';

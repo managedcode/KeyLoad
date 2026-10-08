@@ -10,6 +10,19 @@ public sealed partial class DatabaseEngine
     internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedQuery(
         IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
     {
+        var (local, placement) = ReadAuthorizedQueryPlacement(view, partition, grant);
+        if (placement.PhysicalShardId != local.PhysicalShardId)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
+        return placement;
+    }
+
+    internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedRouting(
+        IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
+        => ReadAuthorizedQueryPlacement(view, partition, grant).Placement;
+
+    private static (PhysicalShardRecord Local, AtomicPartitionPlacementResolution Placement) ReadAuthorizedQueryPlacement(
+        IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
+    {
         const string ReadAtomicPartitionPlacementForAuthorizedQueryDetailText = "The physical shard catalog is not initialized.";
 
         ArgumentNullException.ThrowIfNull(view);
@@ -22,6 +35,9 @@ public sealed partial class DatabaseEngine
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
-        return ResolvePlacement(partition, catalog.DefaultShard, directory, row);
+        var owner = row is null ? catalog.DefaultShard
+            : ResolveRegisteredPlacementOwner(view, catalog.DefaultShard, row.PhysicalShardId, grant);
+        var placement = ResolvePlacement(partition, owner, directory, row);
+        return (catalog.DefaultShard, placement);
     }
 }

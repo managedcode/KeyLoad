@@ -13,6 +13,7 @@ internal static class McpReplyProtocol
     private const string DocumentOutOfScope = "The document session token belongs to another atomic partition or placement.";
     private const string DocumentInvalidPosition = "The document session token position must be positive.";
     private const string DocumentFuturePosition = "The document session token is beyond the current quorum-applied cut.";
+    private const string SelectedTextMismatch = "The native text projection does not match the authorized source cut.";
     private const string ConfiguredVectorMismatch = "The declared vector profile does not match the configured field.";
     private const string OwnedScopeDenied = "The principal cannot perform this operation in this scope.";
     private const string GenericFailure = "The database operation could not be completed.";
@@ -32,6 +33,7 @@ internal static class McpReplyProtocol
         (ErrorCode.TokenInvalidated, DocumentOutOfScope) => DocumentOutOfScope,
         (ErrorCode.TokenInvalidated, DocumentInvalidPosition) => DocumentInvalidPosition,
         (ErrorCode.TokenInvalidated, DocumentFuturePosition) => DocumentFuturePosition,
+        (ErrorCode.HistoryUnavailable, SelectedTextMismatch) => SelectedTextMismatch,
         (ErrorCode.Validation, ConfiguredVectorMismatch) => ConfiguredVectorMismatch,
         (ErrorCode.PermissionDenied, OwnedScopeDenied) => OwnedScopeDenied,
         _ => CodeDetail(code)

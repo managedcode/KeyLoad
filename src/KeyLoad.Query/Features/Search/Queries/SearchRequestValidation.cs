@@ -23,6 +23,10 @@ internal static class SearchRequestValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidSearch);
         }
         ValidateText(request, execution.MaximumSearchTextBytes);
+        if (request.TextIndex is { } selected && (selected.Generation < MinimumPositiveCount || selected.Consumer is null
+            || selected.Consumer.Partition != request.Partition || string.IsNullOrWhiteSpace(selected.Consumer.Name)
+            || string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.TextField)))
+        { throw Errors.Fail(ErrorCode.Validation, InvalidText); }
         ValidateVector(request);
     }
 

@@ -19,11 +19,11 @@ internal static class SearchBranchExecution
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
             execution.MaximumDocumentWords, execution.MaximumWordCharacters);
-        if (!ranker.HasTerms)
+        if (!ranker.HasTerms && request.TextIndex is null)
         {
             return ranker.Rank();
         }
-        var lease = textProjection?.Acquire(TextProjectionLifecycle.CreateScope(database, principal, resource, request), budget);
+        var lease = SelectedTextProjectionAdmission.Acquire(database, textProjection, view, principal, resource, request, budget);
         Exception? primaryFailure = null;
         try
         {

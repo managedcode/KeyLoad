@@ -25,7 +25,8 @@ internal static class PartitionQueryMerge
 
     internal static PartitionQueryResultV1 Complete(PartitionQueryPlanV1 plan,
         ImmutableArray<PartitionQueryLeafResultV1> leaves, StoreIdentity owner, DatabaseLimits limits,
-        ReadExecutionBudget budget, QueryExecutionOptions execution)
+        ReadExecutionBudget budget, QueryExecutionOptions execution,
+        ImmutableArray<PhysicalShardRecord> physicalOwners = default)
     {
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(budget);
@@ -35,7 +36,7 @@ internal static class PartitionQueryMerge
             throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage);
         }
 
-        var totals = ValidateLeaves(plan, leaves, partitions, owner, budget);
+        var totals = ValidateLeaves(plan, leaves, partitions, owner, budget, physicalOwners);
         var query = plan.Leaves[FirstElementIndex].Request.Query;
         var rows = MergeRuns(leaves, query.Order, plan.Limit, budget);
         var retainedBytes = RetainedBytes(leaves, rows.Length, budget);
@@ -49,23 +50,25 @@ internal static class PartitionQueryMerge
 
     private static (int ExaminedRecords, long ReadBytes, long RetainedBytes) ValidateLeaves(
         PartitionQueryPlanV1 plan, ImmutableArray<PartitionQueryLeafResultV1> leaves,
-        PartitionRef[] partitions, StoreIdentity owner, ReadExecutionBudget budget)
+        PartitionRef[] partitions, StoreIdentity owner, ReadExecutionBudget budget,
+        ImmutableArray<PhysicalShardRecord> physicalOwners)
     {
         var examined = EmptyElementCount;
         long readBytes = NoRetainedBytes;
         long retained = NoRetainedBytes;
-        long? policyEpoch = null;
+        var policies = new Dictionary<Guid, (long PolicyEpoch, Guid NodeId, long ReadGeneration)>();
+        if (!physicalOwners.IsDefault && physicalOwners.Length != leaves.Length)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage); }
         for (var index = FirstElementIndex; index < leaves.Length; index++)
         {
             budget.Check();
             var leaf = leaves[index];
-            ValidateLeaf(plan.Leaves[index], leaf, partitions[index], owner, budget);
-            if (policyEpoch is null)
-            {
-                policyEpoch = leaf.PolicyEpoch;
-            }
-
-            if (policyEpoch != leaf.PolicyEpoch)
+            var physical = physicalOwners.IsDefault ? null : physicalOwners[index];
+            ValidateLeaf(plan.Leaves[index], leaf, partitions[index], owner, budget, physical);
+            var policyOwner = physical?.PhysicalShardId ?? owner.NodeId;
+            if (!policies.TryGetValue(policyOwner, out var policyEpoch))
+            { policies.Add(policyOwner, (leaf.PolicyEpoch, leaf.NodeId, leaf.ReadGeneration)); }
+            else if (policyEpoch != (leaf.PolicyEpoch, leaf.NodeId, leaf.ReadGeneration))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, InconsistentOwnerMessage);
             }
@@ -82,10 +85,11 @@ internal static class PartitionQueryMerge
         return (examined, readBytes, retained);
     }
 
-    private static void ValidateLeaf(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1? result,
-        PartitionRef partition, StoreIdentity owner, ReadExecutionBudget budget)
+    internal static void ValidateLeaf(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1? result,
+        PartitionRef partition, StoreIdentity owner, ReadExecutionBudget budget,
+        PhysicalShardRecord? physicalOwner = null)
     {
-        ValidateLeafOwner(result, partition, owner);
+        PartitionQueryLeafOwnerValidation.Validate(result, partition, owner, physicalOwner);
         ValidateLeafShape(result!);
         ValidateLeafBudgets(plan, result!);
         ValidateCandidates(result!, plan, partition, budget);
@@ -98,16 +102,6 @@ internal static class PartitionQueryMerge
         if (result.RetainedBytes != expectedRetained)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
-        }
-    }
-
-    private static void ValidateLeafOwner(PartitionQueryLeafResultV1? result, PartitionRef partition,
-        StoreIdentity owner)
-    {
-        if (result is null || result.Partition != partition || result.NodeId != owner.NodeId
-            || result.Incarnation != owner.Incarnation || result.ReadGeneration != owner.ReadGeneration)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, InconsistentOwnerMessage);
         }
     }
 

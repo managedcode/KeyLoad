@@ -83,13 +83,11 @@ internal static class TwoRf3ClusterResources
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
+        var probe = TwoRf3QueryProbe.Create(builder, root, image, localImage);
         var resources = AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
-        if (registerOwners)
-        {
-            foreach (var resource in resources)
-            { resource.WithEnvironment(TwoRf3ProfileProtocol.RegistrationEnvironment, TwoRf3ProfileProtocol.Enabled); }
-        }
+        TwoRf3QueryProbe.Apply(probe, resources, Nodes);
+        TwoRf3RemoteReadResources.Configure(AppHostOptionsRegistration.Get(builder).Control, resources, registerOwners);
         return resources;
     }
 
@@ -205,8 +203,7 @@ internal static class TwoRf3ClusterResources
         ClusterProfileStore.Validate(profile);
         if (!AppHostOptionsRegistration.Get(builder).Control.Value.Ephemeral
             || AppHostOptionsRegistration.Get(builder).Control.Value.BenchmarksEnabled
-            || AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled
-            || AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is not null)
+            || AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
     }
 

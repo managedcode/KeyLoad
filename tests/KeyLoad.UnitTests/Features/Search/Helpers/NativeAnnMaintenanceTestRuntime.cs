@@ -11,9 +11,9 @@ internal sealed class NativeAnnMaintenanceTestRuntime : IAsyncDisposable
     private readonly ServiceProvider services;
     internal NativeAnnMaintenanceService Owner { get; }
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal NativeAnnMaintenanceTestRuntime(TestDatabase database, TimeProvider? phaseClock = null)
+    internal NativeAnnMaintenanceTestRuntime(TestDatabase database, TimeProvider? phaseClock = null, IConfiguration? configuration = null)
     {
-        var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
+        var registrations = new ServiceCollection().AddRuntimeOptions(configuration ?? new ConfigurationBuilder().Build());
         registrations.AddSingleton(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         services = registrations.BuildServiceProvider();
         try

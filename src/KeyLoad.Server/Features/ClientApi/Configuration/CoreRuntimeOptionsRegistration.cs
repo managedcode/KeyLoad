@@ -46,6 +46,8 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), KeyLoad.Core.Features.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<AnnMaintenanceOptions>().Bind(configuration.GetSection(AnnMaintenanceOptions.SectionName))
             .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<TextIndexMaintenanceOptions>().Bind(configuration.GetSection(TextIndexMaintenanceOptions.SectionName))
+            .Validate(options => options.IsValid(), TextIndexMaintenanceOptions.ValidationMessage).ValidateOnStart();
         services.AddSingleton<CoreRuntimeOptions>();
     }
 }

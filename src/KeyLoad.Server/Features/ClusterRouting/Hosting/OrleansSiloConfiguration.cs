@@ -6,6 +6,7 @@ using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
@@ -19,10 +20,19 @@ internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
-        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation)
+        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation, IRemoteDocumentReadRouter? remoteDocuments = null,
+        IRemotePartitionQueryRouter? remoteQueries = null)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
+        if (options.MembershipAuthority.RemoteDocumentReads)
+        {
+            builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
+            if (remoteDocuments is not null)
+            { builder.Services.AddSingleton(remoteDocuments); }
+            if (remoteQueries is not null)
+            { builder.Services.AddSingleton(remoteQueries); }
+        }
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
@@ -42,6 +52,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(expectedOwner);
         services.AddSingleton(partition.Database);
         services.AddSingleton<INativeAnnMaintenance>(partition.AnnMaintenance);
+        services.AddSingleton<INativeTextMaintenance>(partition.TextMaintenance);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);
@@ -49,7 +60,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection));
+        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection, partition.AnnMaintenance));
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)

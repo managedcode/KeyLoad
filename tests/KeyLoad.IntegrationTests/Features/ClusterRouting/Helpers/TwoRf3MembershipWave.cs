@@ -10,6 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 {
     private DistributedApplication? application;
+    private ContainerRuntimeControl? RemoteRuntimeOwner { get; set; }
     private string? dataRoot;
     private bool dataRootOwned;
     private bool startAttempted;
@@ -17,17 +18,23 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool nodeLocksReleased;
     private bool cleanupFailed;
     private readonly bool registerPhysicalOwners;
+    private readonly bool remoteDocumentReads;
+    private readonly bool remotePartitionQueries;
+    private readonly bool queryProbe;
+    private RequestCqrsProbeFixture? queryControls;
     private readonly LocalRf3ImageSelection.Selection? localImageSelection;
     private LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false)
-    { localImageSelection = selection; registerPhysicalOwners = register; }
+    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false)
+    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; }
 
     internal NodeEpochRf3Profile Profile
     {
         get => field
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); private set;
     }
+    internal ContainerRuntimeControl RemoteRuntime => RemoteRuntimeOwner
+        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
@@ -42,6 +49,18 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal static Task<TwoRf3MembershipWave> StartRegistrationAsync(CancellationToken cancellationToken)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true), cancellationToken);
+
+    internal static Task<TwoRf3MembershipWave> StartRemoteDocumentsAsync(CancellationToken cancellationToken)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true), cancellationToken);
+
+    internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true), cancellationToken);
+
+    internal static Task<TwoRf3MembershipWave> StartProbedRemoteQueriesAsync(CancellationToken token)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true), token);
+
+    internal RequestCqrsProbeFixture QueryControls => queryControls
+        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
     private static async Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
     {
@@ -71,11 +90,15 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repository, localImageSelection, cancellationToken)
                 .ConfigureAwait(false) ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
         }
-        var args = CreateArguments(root, localImageSelection);
+        if (queryProbe)
+        { queryControls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid()); }
+        var args = TwoRf3WaveArguments.Create(root, localImageSelection, registerPhysicalOwners, remoteDocumentReads, remotePartitionQueries, queryControls);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
         var containerNames = ReadContainerNames(builder.Resources.OfType<ContainerResource>());
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
+        if (remoteDocumentReads)
+        { RemoteRuntimeOwner = new ContainerRuntimeControl(application, containerNames, repository); }
         if (localImageSelection is null)
         {
             await TwoRf3MembershipImageAssertions.VerifyAsync(application,
@@ -110,9 +133,13 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
+        if (queryControls is { } controls)
+        { ServerFailureObserver.Observe(controls.StopAdmission, failures); }
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
         if (CanCheckLocks)
         { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
+        if (applicationDisposed && nodeLocksReleased && queryControls is { } joinedControls)
+        { await ServerFailureObserver.ObserveAsync(joinedControls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;
@@ -157,23 +184,6 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool CanDeleteRoot(List<Exception> failures)
         => dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
-
-    private string[] CreateArguments(string root, LocalRf3ImageSelection.Selection? selection)
-    {
-        var args = new List<string>
-        {
-            TwoRf3MembershipProtocol.DataRootPrefix + root,
-            TwoRf3MembershipProtocol.EphemeralArgument,
-            TwoRf3MembershipProtocol.ProfileArgument
-        };
-        if (registerPhysicalOwners)
-        { args.Add("--KeyLoadTests:ClusterRouting:RegisterPhysicalOwners=true"); }
-        if (selection is not null)
-        {
-            args.AddRange(selection.CreateWaveArguments());
-        }
-        return [.. args];
-    }
 
     private static Dictionary<string, string> ReadContainerNames(IEnumerable<ContainerResource> resources)
     {

@@ -27,6 +27,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, DifferentPhysicalOwner);
         }
+        if (sourcePlacement.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution); }
     }
 
     private static AtomicPartitionPlacementResolution ResolveGraphPlacement(IKeyValueView view,
@@ -36,6 +38,8 @@ public sealed partial class DatabaseEngine
             : AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
         var row = grant is null ? AtomicPartitionPlacementSerialization.ReadRow(view, partition)
             : AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
-        return ResolvePlacement(partition, defaultShard, directory, row);
+        var owner = row is null ? defaultShard
+            : ResolveRegisteredPlacementOwner(view, defaultShard, row.PhysicalShardId, grant);
+        return ResolvePlacement(partition, owner, directory, row);
     }
 }

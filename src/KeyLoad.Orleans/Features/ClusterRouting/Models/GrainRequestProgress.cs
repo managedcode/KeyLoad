@@ -8,4 +8,7 @@ public sealed record GrainRequestProgress([property: global::Orleans.Id(0)] Guid
     /// <summary>Gets the completed bounded administrative ANN phase, when applicable.</summary>
     [global::Orleans.Id(1), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public AnnMaintenancePhase? AnnPhase { get; init; }
+    /// <summary>Gets the completed bounded native text-maintenance phase, when applicable.</summary>
+    [global::Orleans.Id(2), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public TextIndexMaintenancePhase? TextPhase { get; init; }
 }

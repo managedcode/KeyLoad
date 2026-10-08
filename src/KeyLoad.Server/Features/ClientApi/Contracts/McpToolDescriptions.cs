@@ -27,7 +27,7 @@ internal static class McpToolDescriptions
     private const string SeriesRetention = "Read the persisted exclusive UTC retention floor, cumulative physical purge count and remaining-page status under current series read authorization.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
-    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions on the same physical owner. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
+    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Default admission requires one physical owner; explicitly configured two-owner deployments may route separately authorized leaves. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
     private const string ChangesRead = "Read a bounded document change-feed page and preserve the returned signed cursor.";
     private const string QueryLiveStart = "Start a bounded live query snapshot and retain its cursor for subsequent reads.";
@@ -86,6 +86,7 @@ internal static class McpToolDescriptions
         McpToolNames.OutboxStatus => OutboxStatus,
         McpToolNames.ProjectionsRead => ProjectionsRead,
         WaitForIndexProtocol.Tool => WaitForIndex,
+        AnnSearchProtocol.Tool => AnnSearchProtocol.Description,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
         McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
@@ -93,6 +94,7 @@ internal static class McpToolDescriptions
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
         McpToolNames.SearchAnnMaintain => AnnMaintenanceProtocol.Description,
+        McpToolNames.SearchTextMaintain => TextIndexMaintenanceProtocol.Description,
         McpToolNames.MessagesReceiveAcrossLanes => MessagesReceiveAcrossLanes,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,

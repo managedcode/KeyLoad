@@ -7,6 +7,10 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations
 {
+    private const string TextMaintainName = "keyload_search_text_maintain";
+    private static readonly string[] TextRequiredFields = ["commandId", "consumer", "collection", "field", "indexGeneration", "nodeId", "placement", "mode"];
+    private const string AnnReadName = "keyload_search_ann_read";
+    private static readonly string[] AnnReadFields = ["version", "search", "consumer", "indexGeneration"];
     private const string AnnMaintainName = "keyload_search_ann_maintain";
     private static readonly string[] AnnRequiredFields = ["commandId", "consumer", "collection", "field", "space", "indexGeneration", "nodeId", "placement", "mode"];
     private const string WaitForIndexName = "keyload_search_wait_for_index";
@@ -23,7 +27,9 @@ internal static class McpCatalogExpectations
     internal static ImmutableArray<McpToolExpectation> Entries { get; } =
     [
         .. McpBlobCatalogExpectations.Entries,
+        Read(AnnReadName, [.. AnnReadFields]),
         new(AnnMaintainName, false, false, true, McpExpectedBody.Object, false, [.. AnnRequiredFields]),
+        new(TextMaintainName, false, false, true, McpExpectedBody.Object, false, [.. TextRequiredFields]),
         Read(McpCallerTools.DocumentsGet, [McpDiscoveryProtocol.Reference]),
         Read(McpCallerTools.StreamsRead, [McpDiscoveryProtocol.Stream]),
         Read(McpCallerTools.StreamsReplay, [McpDiscoveryProtocol.Stream, McpDiscoveryProtocol.ReducerVersion]),

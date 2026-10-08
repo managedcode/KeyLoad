@@ -41,6 +41,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
             GrainReadKind.AtomicPartitionPlacement => database.ReadAtomicPartitionPlacement(principal,
                 GrainNativePayload.ReadPublicInput<AtomicPartitionPlacementReadRequest>(payload)),
+            GrainReadKind.OwnedDocument => OwnedDocument(principal,
+                GrainNativePayload.Read<OwnedDocumentReadRequestV1>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
@@ -51,7 +53,11 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.AggregateReplay
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
         or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
-        or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges;
+        or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges or GrainReadKind.OwnedDocument;
+
+    private OwnedDocumentReadResultV1 OwnedDocument(string principal,
+        OwnedDocumentReadRequestV1 request, CancellationToken cancellationToken)
+        => database.ReadOwnedDocument(principal, request.Tenant, request.Request, request.Owner, cancellationToken);
 
     private DocumentResult? Document(string principal, GetDocumentRequest request, CancellationToken cancellationToken)
         => database.GetDocument(principal, request.Reference, request.MinimumToken, cancellationToken);

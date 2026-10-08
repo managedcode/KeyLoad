@@ -22,9 +22,9 @@ internal static class AnnSeedTestSupport
         string id = "seed-space", string model = Model, string version = Version)
         => new(id, dimension, metric, model, version);
 
-    internal static TestDatabase Create(int count = 3, DatabaseLimits? limits = null)
+    internal static TestDatabase Create(int count = 3, DatabaseLimits? limits = null, TimeProvider? timeProvider = null)
     {
-        var database = new TestDatabase(limits, nativeReplicaAdmission: true);
+        var database = new TestDatabase(limits, timeProvider: timeProvider, nativeReplicaAdmission: true);
         try
         {
             database.Configure(Collection, ResourceKind.Collection, fields:

@@ -16,6 +16,7 @@ public sealed record QueryExecutionOptions
     private const int DefaultMaximumParameters = 256;
     private const int DefaultMaximumInValues = 256;
     private const int DefaultMaximumPartitions = 8;
+    private const int DefaultMaximumConcurrentPartitionLeaves = 2;
     private const int DefaultMaximumSearchResults = 1_000;
     private const int DefaultMaximumSearchTextBytes = 4_096;
     private const int DefaultTextBudgetCheckInterval = 512;
@@ -29,6 +30,9 @@ public sealed record QueryExecutionOptions
     private const int MaximumConformingPartitions = 8;
     private const int MaximumCursorLifetimeDays = 365;
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
+
+    /// <summary>Explicitly enables the qualified provisioned vector-only native ANN read surface.</summary>
+    public bool EnableApproximateSearch { get; init; }
 
     /// <summary>Gets an additional complete query/read result byte ceiling; null retains the native batch ceiling.</summary>
     public int? MaximumResultBytes { get; init; }
@@ -46,6 +50,9 @@ public sealed record QueryExecutionOptions
     public int MaximumInValues { get; init; } = DefaultMaximumInValues;
     /// <summary>Gets the maximum leaves admitted to one partition query plan.</summary>
     public int MaximumPartitions { get; init; } = DefaultMaximumPartitions;
+
+    /// <summary>Gets the downward concurrency ceiling for independently admitted physical-owner leaves.</summary>
+    public int MaximumConcurrentPartitionLeaves { get; init; } = DefaultMaximumConcurrentPartitionLeaves;
 
     /// <summary>Gets the maximum ranked search results within the existing search contract.</summary>
     public int MaximumSearchResults { get; init; } = DefaultMaximumSearchResults;
@@ -66,6 +73,7 @@ public sealed record QueryExecutionOptions
         && MaximumProjection >= MinimumWorkCount && MaximumOrdering >= MinimumWorkCount
         && MaximumParameters is >= MinimumWorkCount and <= DefaultMaximumParameters && MaximumInValues >= MinimumWorkCount
         && MaximumPartitions >= MinimumWorkCount && MaximumPartitions <= MaximumConformingPartitions
+        && MaximumConcurrentPartitionLeaves is >= MinimumWorkCount and <= MaximumConformingPartitions
         && MaximumSearchResults >= MinimumWorkCount && MaximumSearchResults <= MaximumConformingSearchResults
         && MaximumSearchTextBytes >= MinimumWorkCount && MaximumSearchTextBytes <= MaximumConformingSearchTextBytes
         && TextBudgetCheckInterval >= MinimumWorkCount && MaximumDocumentWords >= MinimumWorkCount

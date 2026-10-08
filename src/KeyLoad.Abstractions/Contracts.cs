@@ -368,7 +368,9 @@ public enum OperationKind
     /// <summary>Commits server-confirmed physical owner registration at the stable control authority.</summary>
     RegisterPhysicalOwner,
     /// <summary>Runs administrator-only native ANN generation maintenance through independently authorized child requests.</summary>
-    MaintainAnnIndex
+    MaintainAnnIndex,
+    /// <summary>Runs protected native text generation maintenance through independently authorized child requests.</summary>
+    MaintainTextIndex
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

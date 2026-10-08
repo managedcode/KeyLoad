@@ -14,14 +14,14 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
     private readonly NativeAnnExecutionOptions options;
     private readonly IOptions<PackedAnnOptions> policy;
     private readonly IOptions<PackedAnnStorageOptions> storage;
-    private readonly int maximumReaders;
+    private readonly IOptions<NativeAnnExecutionOptions> configuredOptions;
+    private readonly NativeAnnGenerationReadLifetime readLifetime;
     private readonly List<NativeAnnGenerationSlot> slots = [];
     private bool closed;
     private readonly NativeAnnWorker worker = new();
+    private readonly NativeAnnReadReservations publicReads = new();
+    internal NativeAnnMaintenanceMemory MaintenanceMemory { get; }
     private Task? disposal;
-    private TaskCompletionSource? noReaders;
-    private int readers;
-    private Exception? readerFailure;
 
     internal NativeAnnGenerationOwner(NativeAnnRootLease root, IOptions<NativeAnnExecutionOptions> configured,
         IOptions<PackedAnnOptions> policy, IOptions<PackedAnnStorageOptions> storage, int maximumReaders)
@@ -36,7 +36,9 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.Bound); }
         this.policy = policy;
         this.storage = storage;
-        this.maximumReaders = maximumReaders;
+        configuredOptions = configured;
+        readLifetime = new(gate, maximumReaders);
+        MaintenanceMemory = new(gate, slots, configured, publicReads);
     }
 
     internal Task<T> RunAsync<T>(Func<NativeAnnStageStore, T> operation)
@@ -48,12 +50,21 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         }
     }
 
-    internal long RemainingResident(long incoming)
+    internal NativeAnnReadReservation ReserveRead(long desiredBytes)
     {
         lock (gate)
         {
-            NativeAnnSlotRetention.RequireResident(slots, options, incoming);
-            return checked(options.MaximumResidentBytes - incoming - slots.Sum(item => item.Index.RetainedBytesUpperBound));
+            ObjectDisposedException.ThrowIf(closed, this);
+            return NativeAnnPublicReadAdmission.Reserve(slots, options, publicReads, desiredBytes, MaintenanceMemory.Bytes);
+        }
+    }
+
+    internal NativeAnnManifest DescribePublished(NativeAnnOwnedKey key)
+    {
+        lock (gate)
+        {
+            ObjectDisposedException.ThrowIf(closed, this);
+            return NativeAnnPublicReadAdmission.Describe(slots, key);
         }
     }
 
@@ -65,7 +76,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            NativeAnnSlotRetention.RequireResident(slots, options, seed.PeakBytesUpperBound);
+            NativeAnnSlotRetention.RequireResident(slots, options, checked(seed.PeakBytesUpperBound + publicReads.Bytes));
             return worker.RunAsync(() => BuildAndPublish(request, seed, intent, budget));
         }
     }
@@ -73,15 +84,19 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
     internal NativeAnnManifest BuildAndPublish(AnnMaintenanceRequest request, AnnSeed seed,
         CommitProjectionBatchRequest? intent, AnnWorkBudget budget, long? checkpointAfter = null, long retainedSession = Empty)
     {
+        using var transient = MaintenanceMemory.Active ? null : MaintenanceMemory.Reserve();
         var plan = PackedAnnAdmission.Create(seed.Scope.Space, seed.Records, policy.Value, budget);
+        _ = MaintenanceMemory.Remaining(checked(retainedSession + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound)));
         lock (gate)
-        { NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound))); }
+        { NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + publicReads.Bytes + NativeAnnPhysicalAdmission.Construction(plan, seed.PeakBytesUpperBound))); }
         var index = PackedAnnIndex.Build(seed.Scope.Space, seed.Records, policy, budget);
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + seed.OwnedBytesUpperBound + index.RetainedBytesUpperBound + index.BuildScratchBytesUpperBound));
-            return NativeAnnCompletedPublication.Save(this, root, slots, options, policy, storage, request, seed, index, intent, budget, checkpointAfter);
+            NativeAnnSlotRetention.RequireResident(slots, options, checked(retainedSession + publicReads.Bytes + seed.OwnedBytesUpperBound + index.RetainedBytesUpperBound + index.BuildScratchBytesUpperBound));
+            var completed = NativeAnnCompletedPublication.Save(this, root, slots, options, policy, storage, request, seed, index, intent, budget, checkpointAfter);
+            MaintenanceMemory.TransferIndex(index.RetainedBytesUpperBound);
+            return completed;
         }
     }
 
@@ -95,11 +110,12 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
             { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
             if (slots.Any(item => !item.Retired && item.Manifest.GenerationLeaf == manifest.GenerationLeaf))
             { return manifest; }
-            NativeAnnSlotRetention.RequireResident(slots, options, index.RetainedBytesUpperBound);
+            NativeAnnSlotRetention.RequireResident(slots, options, checked(index.RetainedBytesUpperBound + publicReads.Bytes));
             var key = new NativeAnnOwnedKey(manifest.Consumer, manifest.IndexGeneration);
             foreach (var slot in slots.Where(item => !item.Retired && NativeAnnSlotRetention.SameKey(item.Manifest, key)))
             { slot.Retire(); }
             slots.Add(new(this, manifest, index));
+            MaintenanceMemory.TransferIndex(index.RetainedBytesUpperBound);
             NativeAnnSlotRetention.RetireUnpinned(root, slots, options);
             return manifest;
         }
@@ -141,13 +157,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
                 || slot.Manifest.Source.ThroughSequence != current.Cut.OutboxTail
                 || slot.Manifest.Source.CorpusSha256 != current.CorpusSha256)
             { throw Errors.Fail(ErrorCode.HistoryUnavailable, NativeAnnProtocol.MissingDependencyHistory); }
-            if (readers == maximumReaders)
-            { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
-            var pendingZero = readers == Empty ? new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously) : noReaders;
-            var lease = slot.Acquire(maximumReaders);
-            noReaders = pendingZero;
-            readers++;
-            return lease;
+            return readLifetime.Acquire(slot);
         }
     }
 
@@ -157,26 +167,8 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         {
             if (!slots.Contains(slot))
             { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
-            slot.ReleaseUnderOwnerGate();
-            readers--;
-            try
-            { NativeAnnSlotRetention.RetireUnpinned(root, slots, options); }
-            catch (Exception error)
-            {
-                readerFailure = readerFailure is null ? error : new AggregateException(readerFailure, error);
-                throw;
-            }
-            finally { if (readers == Empty) { SignalReaders(); } }
+            readLifetime.Release(slot, root, slots, configuredOptions);
         }
-    }
-
-    private void SignalReaders()
-    {
-        if (readerFailure is null)
-        { noReaders?.TrySetResult(); }
-        else
-        { noReaders?.TrySetException(readerFailure); }
-        noReaders = null;
     }
 
     public ValueTask DisposeAsync()
@@ -189,8 +181,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
             { return new(disposal); }
             closed = true;
             start = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            actual = CompleteDisposeAsync(start.Task, noReaders?.Task
-                ?? (readerFailure is null ? Task.CompletedTask : Task.FromException(readerFailure)));
+            actual = CompleteDisposeAsync(start.Task, readLifetime.OriginalReaders);
             disposal = actual;
         }
         start.TrySetResult();
@@ -208,6 +199,7 @@ internal sealed class NativeAnnGenerationOwner : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => originalReaders, failures).ConfigureAwait(false);
         lock (gate)
         {
+            MaintenanceMemory.Close();
             slots.Clear();
             ServerFailureObserver.Observe(root.Dispose, failures);
         }

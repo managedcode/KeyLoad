@@ -1,4 +1,5 @@
 using KeyLoad.Query;
+using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Orleans;
 
@@ -8,6 +9,11 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
     internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (kind == GrainReadKind.PartitionQueryLeaf)
+        {
+            return PartitionQueryLeafExecution.Execute(queries, principal,
+                GrainNativePayload.Read<PartitionQueryOwnedLeafRequest>(payload), expectedOwner, clock, cancellationToken);
+        }
         if (kind == GrainReadKind.PartitionQuery)
         {
             return queries.QueryPartitions(principal,
@@ -17,6 +23,10 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         if (kind == GrainReadKind.WaitForIndex)
         {
             return await search.WaitForIndexAsync(principal, GrainNativePayload.Read<WaitForIndexRequest>(payload), cancellationToken).ConfigureAwait(true);
+        }
+        if (kind == GrainReadKind.ApproximateSearch)
+        {
+            return await search.ApproximateSearchAsync(principal, GrainNativePayload.Read<ApproximateSearchRequest>(payload), cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.Search)
         {

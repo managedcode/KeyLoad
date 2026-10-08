@@ -47,7 +47,7 @@ internal static class McpCallerProtocol
     internal const string ProblemStatus = "status";
     internal const string ProblemDetail = "detail";
     internal const string ProblemCode = "errorCode";
-    internal const int ToolCount = 72;
+    internal const int ToolCount = 74;
     internal const int InitialToolCount = 3;
     internal const int MaximumSearchResults = 4;
     internal const int AstVersion = 1;

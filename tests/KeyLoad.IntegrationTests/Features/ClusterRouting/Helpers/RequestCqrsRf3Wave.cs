@@ -3,6 +3,7 @@ using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.Query;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -57,9 +58,10 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal static Task<RequestCqrsRf3Wave> StartProbedAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, RequestCqrsProbeFixture controls,
-        CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null)
+        CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null,
+        QueryExecutionOptions? queryExecution = null)
         => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort: false, requireHealthy: true,
-            null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle);
+            null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle, queryExecution: queryExecution);
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
         ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,

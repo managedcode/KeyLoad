@@ -349,6 +349,14 @@ qualification, full SQL and its native client protocol, foreign keys, scaling an
 endurance remain in progress. The [status tracker](docs/implementation/status.json)
 records the actual source, test results and remaining acceptance gates.
 
+The current source stage also adds protected incremental text-index maintenance
+with explicit generation reads, default-off public ANN reads, and bounded
+parallel document/partition queries across two configured RF3 groups. The current
+local solution build and formatter pass; 213 focused native operation scenarios
+pass in both normal and scalar modes, and three FTS process-recovery scenarios
+pass. The native inventory contains 3039 tests. Exact-source Linux RF3 and complete
+acceptance gates remain open; these additions do not increase the accepted task count.
+
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,
 excludes load and comparison runs, and requires matching source and build reports.

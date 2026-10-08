@@ -1,16 +1,25 @@
 using KeyLoad.Core.Features.Search;
+using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest request,
-    string principalId, AnnSeed upper, NativeAnnManifest? original)
+    string principalId, AnnSeed upper, NativeAnnManifest? original, NativeAnnMaintenanceMemoryLease memory)
 {
+    private NativeAnnStageObservation? observation;
+
+    internal void ObserveStage(AnnMaintenanceCapabilityKind kind, AnnWorkBudget budget)
+        => Volatile.Write(ref observation, new(kind, budget));
+
+    internal NativeAnnStageObservation? Observation => Volatile.Read(ref observation);
+
     private const long EmptyBytes = 0;
     internal Guid Id { get; } = id;
     internal AnnMaintenanceRequest Request { get; } = request;
     internal string PrincipalId { get; } = principalId;
     internal AnnSeed Upper { get; } = upper;
+    internal NativeAnnMaintenanceMemoryLease Memory { get; } = memory;
     internal NativeAnnManifest? Manifest { get; set; } = original;
     internal PackedAnnIndex? LoadedIndex { get; set; }
     internal NativeAnnReplay? Replay { get; set; }

@@ -2,6 +2,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed record MembershipAuthoritySettings
 {
+    public bool RemotePartitionQueries { get; init; }
+    public bool RemoteDocumentReads { get; init; }
     public bool RegisterPhysicalOwners { get; init; }
     public string Mode { get; init; } = MembershipAuthoritySettingsProtocol.Local;
     public Guid AuthorityPhysicalShardId { get; init; }

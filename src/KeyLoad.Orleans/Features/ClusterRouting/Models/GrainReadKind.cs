@@ -100,5 +100,13 @@ public enum GrainReadKind
     /// <summary>Publishes the eligible native lexical generation at an acknowledged applied cut.</summary>
     WaitForIndex,
     /// <summary>Executes one signed internal administrator ANN maintenance phase on the exact native owner.</summary>
-    AnnMaintenance
+    AnnMaintenance,
+    /// <summary>Executes one signed protected native text maintenance stage on its exact owner.</summary>
+    TextMaintenance,
+    /// <summary>Read a receiving-only document with its private physical cut witness.</summary>
+    OwnedDocument,
+    /// <summary>Server-only individually admitted native partition-query leaf.</summary>
+    PartitionQueryLeaf,
+    /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
+    ApproximateSearch
 }

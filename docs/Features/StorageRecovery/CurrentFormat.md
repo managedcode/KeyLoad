@@ -306,3 +306,22 @@ Owning contract: Search/ManagedAnn and ADR-019. Source-authored format/provider 
 
 ### Native multi-page staged replay ownership
 Before each real nonempty page checkpoint submission the node owner persists a bounded generated-native pending replay record containing the actual immutable records after that page, original admitted canonical upper cut U, exact page Through P, native corpus digest of those pending arrays, and the original signed empty-effects checkpoint intent. P is replay progress, never relabeled as an observed canonical source cut. Pending records cannot serve readers or replace a completed generation. Resume first validates current persisted consumer/generation and reconciles the exact original nonempty checkpoint receipt through a fresh signed child request grain; only after canonical checkpoint equals P may loaded arrays resume P..U. No checkpoint ACK can precede its durable pending record. A malformed/partial pending record fails closed; load never builds missing state. Original U must remain verifiable through a fresh actual canonical view before completion; changed dependency identity, missing history, or an unavailable original upper corpus yields explicit HistoryUnavailable/rebuild-required without partial output. Publication occurs only after the complete replay arrays match that real admitted upper corpus/digest. Actual multi-page process interruption before/after checkpoint ACK and reopen/resume are mandatory proof, not inferred from serialization or local compilation.
+
+
+## AC-ANN-008 generated public vector page contracts
+
+Feature-owned AnnSearchContractAliases reserves generated first-release v1
+identities. ApproximateSearchRequest: Id0 Version, Id1 Search, Id2 Consumer,
+Id3 IndexGeneration, Id4 RequestedMode. AnnSearchPage: Id0 Version, Id1 Documents,
+Id2 Position, Id3 actual Mode, Id4 CompleteTopK, Id5 IndexGeneration,
+Id6 RequestedMode. AnnPageMode has its own stable generated alias. JSON remains
+public HTTP/MCP/Q1; inter-grain request/reply remains native generated binary.
+RequestedMode is Approximate only; actual completed search may be Exact,
+Approximate or ExactFallback. Empty eligible search retains truthful same-cut
+mode/completeness. No public corpus/candidate count, digest or maintainer authority.
+
+This additive transport changes no PackedAnn snapshot/manifest/pending v1,
+canonical storage, signed outbox/fault v2 or ordinary exact Search identity.
+No migration/legacy reader, Load rebuild or hidden administration exists.
+Missing/stale/corrupt generations fail closed; the central gate defaults false
+until native/RF3 AC-ANN-008 qualification. Authored source is not runtime evidence.

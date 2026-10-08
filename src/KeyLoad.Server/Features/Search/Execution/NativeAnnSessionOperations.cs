@@ -9,6 +9,7 @@ namespace KeyLoad.Server.Features.Search;
 internal static class NativeAnnSessionOperations
 {
     private const long Empty = 0;
+    private const int LoadRetentionFrames = 2;
 
     internal static void BeginBuild(NativeAnnMaintenanceSession session, IOptions<AnnSeedOptions> seeds, ReadExecutionBudget budget)
     {
@@ -24,11 +25,14 @@ internal static class NativeAnnSessionOperations
     {
         token.ThrowIfCancellationRequested();
         var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
-        var available = owner.RemainingResident(session.RetainedBytes);
+        owner.MaintenanceMemory.Expand(session.Memory);
+        var available = owner.MaintenanceMemory.Remaining(checked(session.RetainedBytes
+            + (session.Replay?.MaximumStagePeakBytes ?? Empty)));
         var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, available);
+        var indexBudget = new AnnWorkBudget(read, configured.Core.AnnSeed.Value.MaxWorkUnits);
+        session.ObserveStage(request.Kind, indexBudget);
         var current = AnnSeedCollector.CapturePinned(database, principal.Id, request.Maintenance, seeds, read);
         session.RequireUpper(current);
-        var indexBudget = new AnnWorkBudget(read, configured.Core.AnnSeed.Value.MaxWorkUnits);
         using var currentStage = session.Replay?.EnterStageCancellation(token);
         switch (request.Kind)
         {
@@ -58,6 +62,8 @@ internal static class NativeAnnSessionOperations
     {
         if (session.Replay is not null)
         { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.Stale); }
+        var available = owner.MaintenanceMemory.Remaining(checked(session.RetainedBytes + current.PeakBytesUpperBound));
+        seeds = NativeAnnMaintenanceAdmission.Seeds(seeds, available / LoadRetentionFrames);
         var manifest = stages.Describe(session.Request, current);
         NativeAnnReplaySource source;
         if (manifest.IsPending)
@@ -65,7 +71,7 @@ internal static class NativeAnnSessionOperations
         else
         {
             var loaded = stages.LoadCompleted(session.Request, current, seeds.Value,
-                owner.RemainingResident(checked(session.RetainedBytes + current.PeakBytesUpperBound)), indexBudget, read);
+                available / LoadRetentionFrames, indexBudget, read);
             source = NativeAnnReplaySource.From(loaded.Seed);
             session.LoadedIndex = loaded.Index;
         }
@@ -110,7 +116,8 @@ internal static class NativeAnnSessionOperations
         if (intent is null)
         { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
         session.Manifest = owner.BuildAndPublish(session.Request, verified, intent, budget,
-            session.LastPage?.Consumer.Checkpoint ?? session.Manifest?.ReplayAfter, session.RetainedBytes);
+            session.LastPage?.Consumer.Checkpoint ?? session.Manifest?.ReplayAfter,
+            checked(session.RetainedBytes + current.PeakBytesUpperBound));
         session.LoadedIndex = null;
     }
 

@@ -19,10 +19,14 @@ internal static class MembershipAuthoritySettingsValidator
         ArgumentNullException.ThrowIfNull(node);
         if (settings.Mode == MembershipAuthoritySettingsProtocol.Local)
         {
-            if (settings.RegisterPhysicalOwners || HasAuthorityFields(settings) || HasTrustedFields(settings))
+            if (settings.RemotePartitionQueries || settings.RemoteDocumentReads || settings.RegisterPhysicalOwners || HasAuthorityFields(settings) || HasTrustedFields(settings))
             { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
             return;
         }
+        if (settings.RemotePartitionQueries && !settings.RemoteDocumentReads)
+        { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
+        if (settings.RemoteDocumentReads && !settings.RegisterPhysicalOwners)
+        { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
         ValidateTwoGroupNode(node);
         if (settings.Mode == MembershipAuthoritySettingsProtocol.Proxy)
         { ValidateProxy(settings, node); return; }
@@ -39,9 +43,9 @@ internal static class MembershipAuthoritySettingsValidator
         {
             MembershipAuthoritySettingsProtocol.Local => new[] { nameof(MembershipAuthoritySettings.Mode) },
             MembershipAuthoritySettingsProtocol.Authority => new[]
-            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId), nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.RemoteDocumentReads), nameof(MembershipAuthoritySettings.RemotePartitionQueries), nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId), nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
             MembershipAuthoritySettingsProtocol.Proxy => new[]
-            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.RegisterPhysicalOwners), nameof(MembershipAuthoritySettings.RemoteDocumentReads), nameof(MembershipAuthoritySettings.RemotePartitionQueries), nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
             _ => []
         };
         if (children.Any(child => !allowed.Contains(child.Key, StringComparer.Ordinal))

@@ -4,7 +4,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad;
 
-/// <summary>Contains one bounded same-owner partition query.</summary>
+/// <summary>Contains one bounded partition query; configured physical-owner routing remains explicitly opt-in.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(PartitionQueryContractAliases.Request)]
 public sealed record PartitionQueryRequestV1(

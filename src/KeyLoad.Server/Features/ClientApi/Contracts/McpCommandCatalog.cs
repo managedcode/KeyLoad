@@ -9,6 +9,7 @@ internal static class McpCommandCatalog
     [
         McpOperationFactory.Command<CommandRequest, CommitReceipt>(McpToolNames.DocumentsCommit, McpToolRoutes.DocumentsCommit, OperationKind.Batch, static request => request.CommandId),
         McpOperationFactory.Command<AnnMaintenanceRequest, AnnMaintenanceResult>(McpToolNames.SearchAnnMaintain, McpToolRoutes.SearchAnnMaintain, OperationKind.MaintainAnnIndex, static request => request.CommandId),
+        McpOperationFactory.Command<TextIndexMaintenanceRequest, TextIndexMaintenanceResult>(McpToolNames.SearchTextMaintain, McpToolRoutes.SearchTextMaintain, OperationKind.MaintainTextIndex, static request => request.CommandId),
         McpOperationFactory.Command<MultiLaneReceiveRequest, MultiLaneReceiveResult>(McpToolNames.MessagesReceiveAcrossLanes, McpToolRoutes.MessagesReceiveAcrossLanes, OperationKind.ReceiveAcrossLanes, static request => request.RequestId),
         McpOperationFactory.Command<ReceiveRequest, ReceiveResult>(McpToolNames.MessagesReceive, McpToolRoutes.MessagesReceive, OperationKind.Receive, static request => request.RequestId),
         McpOperationFactory.Command<DeliveryCommand, CommitReceipt>(McpToolNames.MessagesComplete, McpToolRoutes.MessagesComplete, OperationKind.Delivery, static request => request.CommandId),

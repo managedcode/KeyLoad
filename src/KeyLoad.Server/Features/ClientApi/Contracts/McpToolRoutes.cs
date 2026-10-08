@@ -40,6 +40,7 @@ internal static class McpToolRoutes
     internal const string AdminStatus = "/v1/status";
     internal const string DocumentsCommit = "/v1/commands";
     internal const string SearchAnnMaintain = AnnMaintenanceProtocol.Route;
+    internal const string SearchTextMaintain = TextIndexMaintenanceProtocol.Route;
     internal const string MessagesReceiveAcrossLanes = MultiLaneReceiveProtocol.Route;
     internal const string MessagesReceive = "/v1/queues/receive";
     internal const string MessagesComplete = "/v1/queues/delivery";

@@ -1,6 +1,7 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -29,6 +30,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<PhysicalOwnerExecutionOptions> PhysicalOwners,
+    IOptions<RemoteDocumentExecutionOptions> RemoteDocuments,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<NativeAnnExecutionOptions> NativeAnn,
@@ -57,6 +59,7 @@ internal sealed record ServerRuntimeOptions(
         _ = Membership.Value;
         _ = GrainRouting.Value;
         _ = PhysicalOwners.Value;
+        _ = RemoteDocuments.Value;
         _ = AdminObservation.Value;
         _ = NativeText.Value;
         _ = NativeAnn.Value;
@@ -86,6 +89,7 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
         services.AddSingleton(PhysicalOwners);
+        services.AddSingleton(RemoteDocuments);
         services.AddSingleton(AdminObservation);
         services.AddSingleton(NativeText);
         services.AddSingleton(NativeAnn);

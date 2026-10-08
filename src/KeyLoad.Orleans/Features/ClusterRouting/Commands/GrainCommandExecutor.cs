@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null)
+    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -28,6 +28,11 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.AuthorizationReload, context,
                 operationToken).ConfigureAwait(true);
             var principal = GrainRequestAuthority.ReloadForRequest(database, envelope, clock);
+            if (physical is not null)
+            {
+                database.VerifyPhysicalCommandOwner(physical.Owner,
+                request.Envelope.CommandKind == OperationKind.BootstrapPhysicalShardCatalog, operationToken);
+            }
             var kind = envelope.CommandKind ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             stage = GrainFailureStage.CapabilityExecution;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,
@@ -65,14 +70,11 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         return error;
     }
 
-    private static void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
+    private void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
-        if (GrainPartitionResolver.Resolve(request) != actorKey)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
+        PhysicalCommandActorKey.Validate(request, actorKey, physical);
     }
 
     private void ValidateFreshRequest(DecodedGrainRequest request, CancellationToken cancellationToken)

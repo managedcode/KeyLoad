@@ -29,7 +29,9 @@ internal static class PackedAnnStorageFrames
         Span<byte> length = stackalloc byte[sizeof(int)];
         BinaryPrimitives.WriteInt32LittleEndian(length, payload.Length);
         destination.Write(length);
+        budget.RecordWritten(length.Length);
         destination.Write(payload);
+        budget.RecordWritten(payload.Length);
         budget.Check();
     }
 

@@ -10,6 +10,7 @@ public sealed partial class SearchEngine
     private readonly DatabaseEngine database;
     private readonly ITextProjection? textProjection;
     private readonly QueryExecutionOptions execution;
+    private readonly IOptions<QueryExecutionOptions> configuration;
 
     /// <summary>Creates an authorized search owner with one frozen native execution policy.</summary>
     /// <param name="database">Node-owned canonical database.</param>
@@ -19,6 +20,7 @@ public sealed partial class SearchEngine
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(options);
+        configuration = options;
         execution = options.Value;
         execution.Validate();
         this.database = database;

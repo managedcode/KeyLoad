@@ -9,6 +9,8 @@ internal sealed class AppHostControlOptions
 {
     internal TestSuiteSettings? Tests { get; set; }
     internal RequestCqrsProbeProfileSettings? RequestProbe { get; set; }
+    internal bool RemoteDocumentReads { get; set; }
+    internal bool RemotePartitionQueries { get; set; }
     internal bool TwoRf3 { get; set; }
     internal bool ProtocolCohortEnabled { get; set; }
     internal bool Ephemeral { get; set; }

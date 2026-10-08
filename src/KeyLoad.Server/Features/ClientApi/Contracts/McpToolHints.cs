@@ -34,6 +34,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.OutboxStatus => new(true, true, false),
         GrainReadKind.ProjectionBatch => new(true, true, false),
         GrainReadKind.WaitForIndex => new(true, true, false),
+        GrainReadKind.ApproximateSearch => new(true, true, false),
         GrainReadKind.Search => new(true, true, false),
         GrainReadKind.GraphSearch or GrainReadKind.SqlGraphSearch => new(true, true, false),
         GrainReadKind.Backup => new(false, false, false),
@@ -50,7 +51,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
     internal static McpToolHints ForCommand(OperationKind kind) => kind switch
     {
         OperationKind.Batch => new(false, true, true),
-        OperationKind.MaintainAnnIndex => new(false, false, true),
+        OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex => new(false, false, true),
         OperationKind.ReceiveAcrossLanes => new(false, false, true),
         OperationKind.Receive => new(false, true, true),
         OperationKind.Delivery => new(false, true, true),
