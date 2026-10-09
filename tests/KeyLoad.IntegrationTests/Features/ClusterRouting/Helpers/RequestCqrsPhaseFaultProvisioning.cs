@@ -10,6 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Creates one isolated, persisted non-administrator document identity through public admin operations.</summary>
 internal static class RequestCqrsPhaseFaultProvisioning
 {
+    internal const long InitialPolicyEpoch = 1;
     private const string PrincipalPrefix = "c1-probe-";
     private const string KeySuffix = "-key";
     private const int SecretBytes = 32;
@@ -46,7 +47,7 @@ internal static class RequestCqrsPhaseFaultProvisioning
         var principal = new PrincipalRecord(principalId, partition.TenantId,
             [new(partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [])
-        { ClusterAdministrator = false };
+        { ClusterAdministrator = false, PolicyEpoch = InitialPolicyEpoch };
         var credential = new ApiKeyRecord(credentialId, principalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         var definition = new ResourceDefinition(RequestCqrsRf3Protocol.AdminCollection, ResourceKind.Collection,
@@ -58,6 +59,7 @@ internal static class RequestCqrsPhaseFaultProvisioning
             principal, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(stored.Id).IsEqualTo(principalId);
         await Assert.That(stored.ClusterAdministrator).IsFalse();
+        await Assert.That(stored.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
         await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
             Guid.NewGuid(), credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsTrue();
     }

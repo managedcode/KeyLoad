@@ -226,12 +226,12 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-r835-c1-fresh-native-readiness-full-build-20261009-msbuild-debug",
+      "msbuildDebugDirectory": "/private/tmp/keyload-r838-canonical-package-restore-and-kl009-full-build-20261009-msbuild-debug",
       "nativeExitCode": 0,
       "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 122.536,
-      "log": "/private/tmp/keyload-r835-c1-fresh-native-readiness-full-build-20261009.log",
-      "logSha256": "97a25422f7d4924a003e986ce59637c39525b62ff45c97d5674aeeffbb85f8d1",
+      "elapsedSeconds": 106.291,
+      "log": "/private/tmp/keyload-r838-canonical-package-restore-and-kl009-full-build-20261009.log",
+      "logSha256": "23b94793eb2ea6dd1019f7dd36f8fa38395a43e41a8556091fd9b0156408b7be",
       "inputCount": 5337,
       "inputDrift": [],
       "uniqueErrors": [],
@@ -248,8 +248,8 @@
         "minimal"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 94.499,
-      "log": "/private/tmp/keyload-r835-c1-fresh-native-readiness-format-20261009.log",
+      "elapsedSeconds": 97.55,
+      "log": "/private/tmp/keyload-r837-restore-policy-and-kl009-epoch-format-20261009.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "inputCount": 5337,
       "inputDrift": [],
@@ -37484,6 +37484,1763 @@
         "Fresh exact-source Linux normal/scalar KL014 whole SDK/official-MCP RF3 cases",
         "Complete current unit/recovery/RF3, functional coverage, endurance, power-loss and representative performance gates"
       ]
+    },
+    "stageXXXIVOriginalDevelopment": {
+      "sourceCheckoutBeforeCommit": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+      "tasks": [
+        "TASK-STORAGE-MAINTENANCE-SNAPSHOT-003",
+        "TASK-KL009-PERSISTED-POLICY-EPOCH-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-SNAPSHOT-005",
+        "AC-REP-APPLY-SCOPE-001"
+      ],
+      "implementation": "Restore authority reopens native ZoneTree through ResolveExecutionOptions with the original centrally bound IOptions owner. KL009 seed uses persisted epoch1 and its genuine queue-grant update uses epoch2 with complete principal-result equality.",
+      "originalLinuxRestoreFailures": {
+        "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+        "runId": 37868406144,
+        "attempt": 1,
+        "jobId": 113620582336,
+        "artifactId": 11590685637,
+        "artifactSha256": "5f5586f89a4eb92ceff44090984cb521c0e83804c4c76b80843add1f25cf0efd",
+        "failureReportPath": "/private/tmp/keyload-current-original-harvest-20261009/47c-full-unit/original-failures.json",
+        "failureReportSha256": "5ffd5b8460efc37613d91c733f69b61d3ba6d9c4cd96c9be7fe47cd486ed084a",
+        "unitNormal": {
+          "executed": 3122,
+          "passed": 3071,
+          "failed": 51
+        },
+        "unitScalar": {
+          "executed": 3122,
+          "passed": 3071,
+          "failed": 51
+        },
+        "recovery": {
+          "executed": 275,
+          "passed": 273,
+          "failed": 2
+        },
+        "initiatingFailure": "All51 unit failures in each mode and both recovery failures originate at the native Restore authority reopen missing the resolved maintenance execution policy."
+      },
+      "rejectedEarlierDevelopment": {
+        "r836BuildExitCode": 1,
+        "logPath": "/private/tmp/keyload-r836-native-policy-snapshot-and-kl009-epoch-full-build-20261009.log",
+        "logSha256": "f32fcfb323d2b43263e3de17ac4d22f85c0238403580c75327518d146a98a30b",
+        "cause": "KLD0037 rejected the intermediate Options.Create scalar snapshot wrapper; wrapper was removed before the final native IOptions repair."
+      },
+      "priorContaminatedCacheDevelopment": {
+        "r837BuildPassed": true,
+        "unitNormal": {
+          "executed": 77,
+          "passed": 72,
+          "failed": 5
+        },
+        "unitScalar": {
+          "executed": 77,
+          "passed": 77,
+          "failed": 0
+        },
+        "recovery": {
+          "executed": 11,
+          "passed": 11,
+          "failed": 0
+        },
+        "remainingFailure": "Five actual CLI children exited134 from Coverlet Orleans.Serialization tracker mutex failure; original logs and failed TRX retained. The exact earlier cache instrumentation producer is unproven."
+      },
+      "localNugetCacheIntegrityRepair": {
+        "receiptPath": "/private/tmp/keyload-original-orleans-cache-restoration-20261009/restoration-receipt.json",
+        "receiptSha256": "471ead6245df757aa1f5f60a444ec4ffc2244862866d26979239dcd81c3b4ffd",
+        "usedDllCount": 305,
+        "usedPackageCount": 253,
+        "mismatchedDllCount": 8,
+        "allPackageSignaturesVerified": true,
+        "allRestoreAndArchiveHashesVerified": true,
+        "allInputsVerifiedBeforeMutation": true,
+        "packageVersionsChanged": false,
+        "scope": "Only eight locally instrumented Orleans10.4.0 DLLs restored atomically to their verified published original bytes; no dependency implementation/version or source change.",
+        "restoredDlls": [
+          {
+            "name": "Orleans.Core.Abstractions.dll",
+            "length": 402232,
+            "sha256": "9842005a99bdc3165cf97fb506b394ccc0b8778698c7ec0cc82cf8809671143f",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Core.dll",
+            "length": 1314616,
+            "sha256": "32d7b2136b5e13131df09b57849a061a59f4db75d01ed75c59e19ef287773e1e",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Persistence.Memory.dll",
+            "length": 65336,
+            "sha256": "414ab619b89a97cd81db043877c230b4c702959506d256f0dabc5171274790b6",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Reminders.dll",
+            "length": 235320,
+            "sha256": "5bb24d92fc862b3bbb10dfa0bfa9e2077447c0362f0284e4295e92191bd155ec",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Runtime.dll",
+            "length": 2054968,
+            "sha256": "086bcbbc6510505c6a1481b31fca1f3be9e6db84f8f1fa60e096de3bd9f904ce",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Serialization.Abstractions.dll",
+            "length": 31544,
+            "sha256": "12e91772f53646efa3d0fcfd63eaed9125718d85279f54d8306dad16b8d159c8",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Serialization.dll",
+            "length": 569144,
+            "sha256": "9f1973682d622d2c4e146df132b9d35dac78a3f3d4d34729ebf5eb2725a916b2",
+            "nativeSignatureVerificationExitCode": 0
+          },
+          {
+            "name": "Orleans.Streaming.dll",
+            "length": 847672,
+            "sha256": "804c8a5da3cda98f67492bdb0211a74d8d333f6ab89797ed2e17c930c69309e7",
+            "nativeSignatureVerificationExitCode": 0
+          }
+        ]
+      },
+      "currentFullBuild": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-r838-canonical-package-restore-and-kl009-full-build-20261009-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 106.291,
+        "log": "/private/tmp/keyload-r838-canonical-package-restore-and-kl009-full-build-20261009.log",
+        "logSha256": "23b94793eb2ea6dd1019f7dd36f8fa38395a43e41a8556091fd9b0156408b7be",
+        "inputCount": 5337,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "currentFullFormatter": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 97.55,
+        "log": "/private/tmp/keyload-r837-restore-policy-and-kl009-epoch-format-20261009.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 5337,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "relatedNativeWholeFlows": {
+        "unit": {
+          "receiptPath": "/private/tmp/keyload-r838-original-restore-union-unit20-20261009-receipt.json",
+          "receiptSha256": "bcaebb9bc0ffefeaec4cf82af81d4e6c39ac34cc10a6d3e9ce9a0dfcf576a711",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 32.319,
+          "logSha256": "be2ea44fbd5f1d19a9d9ad960ff83a6abd82efeebbdaa2bf178470664b3a4627",
+          "originalTrxSha256": "5a1b37dbb812219608c3b2348510a20de6d8bdc57c1044905be7085c1f85fa97",
+          "counts": {
+            "total": "77",
+            "executed": "77",
+            "passed": "77",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "maximumParallelTests": 20,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 28.42437,
+            "systemCpuSeconds": 11.983017,
+            "childMaximumResidentBytesDarwin": 519290880,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          }
+        },
+        "unit-scalar": {
+          "receiptPath": "/private/tmp/keyload-r838-original-restore-union-unit-scalar20-20261009-receipt.json",
+          "receiptSha256": "8ea4d65727c15bc8023487b686abfa49bf75e951f8d717fdb93da3142db4c188",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 36.459,
+          "logSha256": "4845f0e25a2e676ba8116beedbb48cd95cb6117e65b31b432b30220113519192",
+          "originalTrxSha256": "be245d31db63435e5a65cfcde24f05238d94afd1d601368166f7206bd43dcb04",
+          "counts": {
+            "total": "77",
+            "executed": "77",
+            "passed": "77",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "maximumParallelTests": 20,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 41.314337,
+            "systemCpuSeconds": 12.035181,
+            "childMaximumResidentBytesDarwin": 532824064,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          }
+        },
+        "recovery": {
+          "receiptPath": "/private/tmp/keyload-r838-original-restore-union-recovery20-20261009-receipt.json",
+          "receiptSha256": "5b42bf45d925c7f4b96c7efd635d96c6e00c95d15336d76f32783aaa7e6adbae",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 7.125,
+          "logSha256": "73d97852dfc9453769b9d1610553ba1f1e620e9b0c3847df31f3f70c93f98b59",
+          "originalTrxSha256": "71f1f4948c01f3204d5cf6da6fa57ec6c2b51936aad605862b69c4a2035f7e72",
+          "counts": {
+            "total": "11",
+            "executed": "11",
+            "passed": "11",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "maximumParallelTests": 20,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 4.951207,
+            "systemCpuSeconds": 1.102665,
+            "childMaximumResidentBytesDarwin": 167788544,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          }
+        }
+      },
+      "sourceManifestOriginals": [
+        {
+          "path": "/private/tmp/keyload-r838-restore-policy-and-kl009-source-20261009/functional-coverage.production-source-manifest.json",
+          "sha256": "c4e6d7224b99f38d91c24348b6572c3e6eb5db1c115d1a4373693761b656ceae",
+          "length": 1368488
+        },
+        {
+          "path": "/private/tmp/keyload-r838-restore-policy-and-kl009-source-20261009/functional-coverage.test-image.recovery.json",
+          "sha256": "4b7d1f2277d6233c01c38215de1f308462f57eb6e0c2291e8376029f285df67a",
+          "length": 97340
+        },
+        {
+          "path": "/private/tmp/keyload-r838-restore-policy-and-kl009-source-20261009/functional-coverage.test-image.rf3.json",
+          "sha256": "dc84cdc6970837a4f5bdf50aeaa973afc264aa05f16bb29110d4f915d384f2aa",
+          "length": 352775
+        },
+        {
+          "path": "/private/tmp/keyload-r838-restore-policy-and-kl009-source-20261009/functional-coverage.test-image.unit.json",
+          "sha256": "db85c0c96681d69e87f2b8a5305e6cb3dd5a4074bd7daa94b3121e1b6097c4c8",
+          "length": 1080536
+        }
+      ],
+      "sourcePrepareExitCode": 0,
+      "sourceVerifyExitCode": 0,
+      "authenticatedOriginalLinuxTaskCohorts": {
+        "source904": {
+          "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+          "runId": 37869976384,
+          "attempt": 1,
+          "ledgerPath": "/private/tmp/keyload-current-original-harvest-20261009/source904-eight-task-lanes-authentic-ledger.json",
+          "ledgerSha256": "2cf8e66e3e2eac339d8651a01aa3c8b8a7cefd3260787eb33f3991efbea6d193",
+          "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+          "originals": [
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-008-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "a4bd335bd44660d0b4c2775dbe7456694a5b35752d169770bd2317fbb2601b9f",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572680,
+                "jobConclusion": "success",
+                "artifactId": 11590281081,
+                "artifactSha256": "196d1d0aa20a0158e64a43da8b76c5843e629a3bb569b56744745e7a0fe90733",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "28d50b2670458ae521cac6a2a91181bd5b9cc764a3088904eebe7c215393502f",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-008-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "b15e86c83351c1d976b0c2728cae813767b51a150687a602eb0d9dfd607d8b1d",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572565,
+                "jobConclusion": "success",
+                "artifactId": 11590296223,
+                "artifactSha256": "cc3f95e34da1e7286879b6801f2829f61dfa57080d1d536349126136063416a3",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "1f06f730b7ce48b978202df78d281925e4e6584d83a362c0b97588f9a33bef04",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-011-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "8f28a59843b90e01e103f6e13c00df3488c86cd8724d271c006e19c8a0e6122f",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572795,
+                "jobConclusion": "success",
+                "artifactId": 11590890205,
+                "artifactSha256": "3febd2d40c5cfb4275d920dc8702329f40eef4afeb797b258cfac6719574a1fc",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "b0d4cd20dc9af06f5afe084d3df7b193a244af21d7ccf5f84fcd15268e41ffeb",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "50888e1d914547ff3066592a540695ae6032b2863f010e9acd87d905aadafe00",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "965c12ebeb1681f9581d96d70b432b51487e0239b3c8e54afe29bba3fd77ba7d",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "0cf58a93414dcc58cfd8f6dac59c7834b4bb49cca4a9b695d35153a4061b9952",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "a3b5d407387141fc75007c5a790b5b0f45462ad22c17393787ece73492c4efbd"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "6d5f29958a3d3cb1c47b4c4508c22a236acce0448c8c8e09868f798241934f83",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "manifestDigest": "sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "registryDigest": "sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:9d7e1185de7d1f9041584e078875539ba6cfdff45a0e9ce6abd95ed5c2f530ff"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-011-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "560e87f2317e72dba07f7b994c9f5099aae919d88434af3b8368b66199408d6a",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572674,
+                "jobConclusion": "success",
+                "artifactId": 11590455740,
+                "artifactSha256": "1cabba71349888f62646fbfbe47b410865b867ee13ebfbacd3d2697c963ec551",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "52b68bb88fa5d173a90bdf4271b106daa54ee7412357f55a23ccbed8d936073b",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "79b2e3d9ac34dfb59256132ce1b19971540b6d9efb0fbda56ac293cc7f82d2bb",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "e2068af5273d8483c71a9738704b498c3aa301025161884a155d3e80cafe8497",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "86ae30d0402fdedce299f4d442977cee3f384e0363c0a3328dc33923b5fafb57",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "a3b5d407387141fc75007c5a790b5b0f45462ad22c17393787ece73492c4efbd"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "99a55e578211db012ec2bc9552e3ceeca6369c93aaae357b523f0944f30495e8",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "manifestDigest": "sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "registryDigest": "sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:a8ac679fb93d101f12482e4512cf0d584845489ad7e618b5a333d0263ee021d2"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-014-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "3b4cc9a33977ed232a207b0e44768d6739962fcd6555abfff1be9e8404ea6a81",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572710,
+                "jobConclusion": "success",
+                "artifactId": 11590351125,
+                "artifactSha256": "86b5fdc7c8b30642e29b4eec9995bd254cea8309a564c9604176234e28b05e9d",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "769276b5696b6a8896db7c712a6ab33b17f6ff20af728b6729c3b7092304d50b",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "2027ffb0d5aeeac9cc560072fc6f1b342e80fd5b70fee38ffadbb5a2eb72d9ad",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "manifestDigest": "sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "registryDigest": "sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:b4de28ddd8c96ced38ee0694041a6331a49559d18e4d4cc124def50fb0193274"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-014-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "056e639d7f60d5a1825f2b664fdb1f8c4cdced61bd684171c7b3d80e15cfc866",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572500,
+                "jobConclusion": "success",
+                "artifactId": 11589839884,
+                "artifactSha256": "ea98a6a339d0e6a86cf6deb971c36ff76f9f039b7f5f316bdaa3822f19ba2c00",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "07971cbca97a5372954dc50dbe40425bbe7226d8ef35a5329be061f7b9f9bc5a",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "f83c5eebcec01143881ae076b15912e95e2acec170e640c82b1a4f0b58bcd815",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "manifestDigest": "sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "registryDigest": "sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:88ec0d59a53f7dbda4adc401b60b5382b95262384fc6c4b018e09aa1db5578f4"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-027-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "fe6eb0fe5bef3d9dda90271ab498202e3f431dccce50a99d16d9532f48ee3b5e",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572766,
+                "jobConclusion": "success",
+                "artifactId": 11590840188,
+                "artifactSha256": "53c462bae6fadf80bd687aad0f4bed0ef362b41a3ac9ab1975684ddf330c464a",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "4a5f35e4c386e339dce2ad4dd244c7f60ba5dbabc78a1292b8dc8fb20b2bce19",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "c6aaf6e106056c12ff86405805456896605dab23b60110166bcb22f184ba90b6",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "manifestDigest": "sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "registryDigest": "sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:3ba54861fae9d352856c5d1bacffa915106ffb1f6b79ed55d7e6bdf526fb9f30"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-027-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "2f710abc9a8ad70515dc49a5ac40586e5658600bbe312a9708b344d4315f4a59",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572747,
+                "jobConclusion": "success",
+                "artifactId": 11590061366,
+                "artifactSha256": "0511a14cb57427d411a549016b3cb9dbcfc30fa78fc4cc86610d4523c16529d5",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "7edd781fe54e83b05ed9c965d2e5f543c90343bd4d57244afe45b3cd32550325",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "9bf15a925cbb7a9986127f1fd265b01320e6b510fd28e20447407e52773b15af",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "manifestDigest": "sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "registryDigest": "sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:d0fa12f4be212d53953bf64168ba013d1a8df1359d65de62c105259e62e9921e"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        },
+        "source023": {
+          "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+          "runId": 37872325740,
+          "attempt": 1,
+          "ledgerPath": "/private/tmp/keyload-023-original-harvest-20261009/source023-eight-task-lanes-authentic-ledger.json",
+          "ledgerSha256": "5c1d6498a2a1f7f248aa475e5f7b6084e2dcd88b50ce347e5d9ea374ebd2b142",
+          "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+          "originals": [
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-008-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "89c0541158da3d805d00569c399cbed931b14700efdc734fef905ea41caf4ece",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995420,
+                "jobConclusion": "success",
+                "artifactId": 11590719494,
+                "artifactSha256": "4a2998860eeb9812b74b8799d2f2c5b1b3bc2a99d3bcc3d8160438d4d7cf335c",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "10d16ab20fcfa62fa59c7d7407677e18a0891e216e16be07c61398a106bbdc3c",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-008-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "0f5c165e789d072dca6bfaf001b29d71562b810cf5bcdf6880af4d568129f687",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995640,
+                "jobConclusion": "success",
+                "artifactId": 11591265488,
+                "artifactSha256": "53fb405b21f1355f55d8d9f5e26866e89c83a813f60788cc09757fb865b248e4",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "30f18394dff9e84e07f3462a11263f2347b99180a8047d9e54f0513213d269ed",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-011-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "1e8b964d07d34a6144f8272f7a486713fc260765ec352a294f98e4fdf8d9fe53",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995549,
+                "jobConclusion": "success",
+                "artifactId": 11591156081,
+                "artifactSha256": "4566ef0d45497eaa2c623ef91d460a51907c84ddde26ca99ae41fa5a1435572f",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "3f8a9ac34eb15973e169da8874c5199fd9d1aeb5301b8d52daefd279037c37b3",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "cc426755cfea0f3e96ae2b6fc8612021eef12b0bc322a0ad3d2c85f1a29dd25c",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "38530190fa306a2d408865f1a1e520cf6647a9849f999af124be362df539d233",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "0d3c077851fc0b16085d88bf75d04f5fc883cb1680cd401f364fde7190fa6abf",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "89fdcae35bc78974ba5092be8be53c24cec1e4efa3b1b03573e1d023f156b590"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "ef875c159e1d5795d3c9a307a426d41130821b9323b0bfee1d3e329533c820b3",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "manifestDigest": "sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "registryDigest": "sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:338bd6dd8bdb789903aeb2ae186636db288c95942bdbf02bfa6a1c035e213f65"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-011-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "61e4a14c0a4d767445590a46f7d154ac833aed1d914280252472c71936fa5be2",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995743,
+                "jobConclusion": "success",
+                "artifactId": 11591176084,
+                "artifactSha256": "26ad36a6a15f08ccb24c894158ecc58b48faf0a0992a5dd4d7510d84fccc3625",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "6b86fb2724263088ce360f079acc38ce5f163537ab86138f87c8cabac5da3e49",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "aeca9e7daa4462e40741e43a2013824cfebd16d2e091646c4daab26253a04423",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "e61f69848f748a21dcd38d0d8f071d4af1f3a6b9cc8bfde9e2d4040036f000c4",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "770199897564b36d481100ae1582edc0ab6a6815fd6c8df1ca051e0d1fa0b7aa",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "89fdcae35bc78974ba5092be8be53c24cec1e4efa3b1b03573e1d023f156b590"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "a16d7d28a4c1c2fd716773bed71d5a2bd37896b4977f5e288891f7e60c51c5a2",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "manifestDigest": "sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "registryDigest": "sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:b5b120eef2ca57aa8def7e503d95aba7338f5e148076b7f1efbf87f1006d3469"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-014-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "dbdfad49f27748cf32f0134483f7a2237b4a7cb5b8dc8bb5f777331626b7580c",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995680,
+                "jobConclusion": "success",
+                "artifactId": 11591161263,
+                "artifactSha256": "8af22f4629f6bfbd615f98050c8e747a24404347ecbb3dfb13760ec0b350f8fb",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "779ee0da3d1cde2125e80a731145c4258c8a0067f351b0b5f5ac37bca01ca624",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "d20e22578ffcd5afa1118236288dd8593e8a348679f83a333d8b7770f182ca32",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "manifestDigest": "sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "registryDigest": "sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:f60a780ab1ae8430079f25ce63f020ad6bb5477e3530b4037b63863d351221d7"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-014-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "92d95cf4723cde998115b187b7e5c09e6dbe4c10b3e3e27e9da492966224260a",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995638,
+                "jobConclusion": "success",
+                "artifactId": 11591091900,
+                "artifactSha256": "0380b3834c1c6bb2cbac310b8b06affe5f3c127e19ffeebce2f00e631e2729ef",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "3012c76d78ecea48be81ace947545e08dbf188ae6758ebd20db6a58d94de1294",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "284388473c07bea99ed8cdf415c793e12bcc02f9e41259bc916afc4c28016057",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "manifestDigest": "sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "registryDigest": "sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:4a1edfb17294fb7f952b12e5d8149e7f243c3ddd7533eb426aeaffacea858c44"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-027-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "b266906391715df1d4c3f250c7dc87d34c73b9383ea37de233c8c013a96bf5da",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995525,
+                "jobConclusion": "success",
+                "artifactId": 11591315267,
+                "artifactSha256": "754fd22a9cfb188b084d6824d1fe2268c31d77e3f4a2a925fb80f2b9483176e4",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "915ff33c1931f3a4810af8c9a56124c555c20dbd3fc3b01fbdf1ecfa234d3fbd",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "554b0c3beb1325dd9da45d3d5ea8839f2f0ece902f4601515d993c8070fcce8f",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "manifestDigest": "sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "registryDigest": "sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:08f74db57afbd3bcaf5408ad7dcf2d6affc2b6710c1d63db53f5316b674bb0e5"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-027-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "8bab22426f53d34c0bdc00b76775d0a7477483a783281a0c9d4f015dcc334349",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995683,
+                "jobConclusion": "success",
+                "artifactId": 11591166077,
+                "artifactSha256": "37f28efad7578f601830bed937aecb9561847afc71de9cc20373f3159a325210",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "17af0710fcf67632fc130a817c86f6d8143b9e6c8b4e702162f270278606607e",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "0668617999c7222b4df9851c310f46786810006a9033c42cb8230360c5c9076d",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "manifestDigest": "sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "registryDigest": "sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:87e3ec1fe09fa7a5e1110baf579fb42dc3aec19804cef6a088f77427f3faa9ad"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        }
+      },
+      "fullProductCoverage": null,
+      "qualification": "Current local source-bound restore flows PASS; authenticated delivered task slices PASS at904 and023; dirty restore/KL009 source still requires fresh Linux delivery. No whole-task promotion.",
+      "remaining": [
+        "Current committed Linux full native unit/scalar and process recovery after restore repair",
+        "Current committed genuine KL009 SDK/MCP canonical-apply RF3 flow after persisted epoch repair",
+        "Complete current Linux RF3, functional coverage, native movement parent acceptance, endurance, power-loss and representative performance gates"
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -39403,6 +41160,198 @@
         ],
         "runtimeQualified": false
       }
+    },
+    "authenticatedOriginalLinuxTaskCohorts20261009": {
+      "developmentStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment",
+      "cohorts": [
+        {
+          "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+          "runId": 37869976384,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-008-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "a4bd335bd44660d0b4c2775dbe7456694a5b35752d169770bd2317fbb2601b9f",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572680,
+                "jobConclusion": "success",
+                "artifactId": 11590281081,
+                "artifactSha256": "196d1d0aa20a0158e64a43da8b76c5843e629a3bb569b56744745e7a0fe90733",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "28d50b2670458ae521cac6a2a91181bd5b9cc764a3088904eebe7c215393502f",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-008-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "b15e86c83351c1d976b0c2728cae813767b51a150687a602eb0d9dfd607d8b1d",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572565,
+                "jobConclusion": "success",
+                "artifactId": 11590296223,
+                "artifactSha256": "cc3f95e34da1e7286879b6801f2829f61dfa57080d1d536349126136063416a3",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "1f06f730b7ce48b978202df78d281925e4e6584d83a362c0b97588f9a33bef04",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        },
+        {
+          "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+          "runId": 37872325740,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-008-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "89c0541158da3d805d00569c399cbed931b14700efdc734fef905ea41caf4ece",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995420,
+                "jobConclusion": "success",
+                "artifactId": 11590719494,
+                "artifactSha256": "4a2998860eeb9812b74b8799d2f2c5b1b3bc2a99d3bcc3d8160438d4d7cf335c",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "10d16ab20fcfa62fa59c7d7407677e18a0891e216e16be07c61398a106bbdc3c",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-008-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "0f5c165e789d072dca6bfaf001b29d71562b810cf5bcdf6880af4d568129f687",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-008",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995640,
+                "jobConclusion": "success",
+                "artifactId": 11591265488,
+                "artifactSha256": "53fb405b21f1355f55d8d9f5e26866e89c83a813f60788cc09757fb865b248e4",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 27,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "30f18394dff9e84e07f3462a11263f2347b99180a8047d9e54f0513213d269ed",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  }
+                ],
+                "verifiedOriginalCount": 16,
+                "gitSourceAndBuildInputCount": 1413,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": null,
+                "cleanup": null,
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        }
+      ],
+      "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
     }
   },
   "KL-009": {
@@ -39411,7 +41360,14 @@
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs"
-    ]
+    ],
+    "currentPersistedPolicyEpochRepair": {
+      "task": "TASK-KL009-PERSISTED-POLICY-EPOCH-002",
+      "acceptance": "AC-REP-APPLY-SCOPE-001",
+      "developmentStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment",
+      "fullBuildPassed": true,
+      "currentLinuxRf3Qualified": false
+    }
   },
   "KL-010": {
     "title": "Document CRUD та CAS",
@@ -39803,6 +41759,558 @@
       ],
       "fullProductQualification": false,
       "qualification": "Exact sixteen-case index acceptance scope passes both profiles; DocumentStorage current complete normal/scalar/recovery/full RF3 prerequisite remains mandatory before KL-011 closure."
+    },
+    "authenticatedOriginalLinuxTaskCohorts20261009": {
+      "developmentStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment",
+      "cohorts": [
+        {
+          "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+          "runId": 37869976384,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-011-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "8f28a59843b90e01e103f6e13c00df3488c86cd8724d271c006e19c8a0e6122f",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572795,
+                "jobConclusion": "success",
+                "artifactId": 11590890205,
+                "artifactSha256": "3febd2d40c5cfb4275d920dc8702329f40eef4afeb797b258cfac6719574a1fc",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "b0d4cd20dc9af06f5afe084d3df7b193a244af21d7ccf5f84fcd15268e41ffeb",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "50888e1d914547ff3066592a540695ae6032b2863f010e9acd87d905aadafe00",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "965c12ebeb1681f9581d96d70b432b51487e0239b3c8e54afe29bba3fd77ba7d",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "0cf58a93414dcc58cfd8f6dac59c7834b4bb49cca4a9b695d35153a4061b9952",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "a3b5d407387141fc75007c5a790b5b0f45462ad22c17393787ece73492c4efbd"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "6d5f29958a3d3cb1c47b4c4508c22a236acce0448c8c8e09868f798241934f83",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "manifestDigest": "sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "registryDigest": "sha256:80931263cdf25086287e6a9cb891d7d60acaf089549a2608152dd1170ad12fc0",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:9d7e1185de7d1f9041584e078875539ba6cfdff45a0e9ce6abd95ed5c2f530ff"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-011-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "560e87f2317e72dba07f7b994c9f5099aae919d88434af3b8368b66199408d6a",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572674,
+                "jobConclusion": "success",
+                "artifactId": 11590455740,
+                "artifactSha256": "1cabba71349888f62646fbfbe47b410865b867ee13ebfbacd3d2697c963ec551",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "52b68bb88fa5d173a90bdf4271b106daa54ee7412357f55a23ccbed8d936073b",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "79b2e3d9ac34dfb59256132ce1b19971540b6d9efb0fbda56ac293cc7f82d2bb",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "e2068af5273d8483c71a9738704b498c3aa301025161884a155d3e80cafe8497",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "86ae30d0402fdedce299f4d442977cee3f384e0363c0a3328dc33923b5fafb57",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "a3b5d407387141fc75007c5a790b5b0f45462ad22c17393787ece73492c4efbd"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "99a55e578211db012ec2bc9552e3ceeca6369c93aaae357b523f0944f30495e8",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "manifestDigest": "sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "registryDigest": "sha256:3417537eefbe084eea16e46be37cb906cc729f1cbe73dfcba2ae6ab4c4093b6e",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:a8ac679fb93d101f12482e4512cf0d584845489ad7e618b5a333d0263ee021d2"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        },
+        {
+          "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+          "runId": 37872325740,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-011-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "1e8b964d07d34a6144f8272f7a486713fc260765ec352a294f98e4fdf8d9fe53",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995549,
+                "jobConclusion": "success",
+                "artifactId": 11591156081,
+                "artifactSha256": "4566ef0d45497eaa2c623ef91d460a51907c84ddde26ca99ae41fa5a1435572f",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "3f8a9ac34eb15973e169da8874c5199fd9d1aeb5301b8d52daefd279037c37b3",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "cc426755cfea0f3e96ae2b6fc8612021eef12b0bc322a0ad3d2c85f1a29dd25c",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "38530190fa306a2d408865f1a1e520cf6647a9849f999af124be362df539d233",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "0d3c077851fc0b16085d88bf75d04f5fc883cb1680cd401f364fde7190fa6abf",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "89fdcae35bc78974ba5092be8be53c24cec1e4efa3b1b03573e1d023f156b590"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "ef875c159e1d5795d3c9a307a426d41130821b9323b0bfee1d3e329533c820b3",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "manifestDigest": "sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "registryDigest": "sha256:55c51871ef7a99ef62cdf0647b31831da107642cdc98636afd3a4bf5a94d3a2d",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:338bd6dd8bdb789903aeb2ae186636db288c95942bdbf02bfa6a1c035e213f65"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-011-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "61e4a14c0a4d767445590a46f7d154ac833aed1d914280252472c71936fa5be2",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-011",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995743,
+                "jobConclusion": "success",
+                "artifactId": 11591176084,
+                "artifactSha256": "26ad36a6a15f08ccb24c894158ecc58b48faf0a0992a5dd4d7510d84fccc3625",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 16,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 11,
+                    "originalTrx": [
+                      {
+                        "sha256": "6b86fb2724263088ce360f079acc38ce5f163537ab86138f87c8cabac5da3e49",
+                        "passed": 11,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-conflict",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "aeca9e7daa4462e40741e43a2013824cfebd16d2e091646c4daab26253a04423",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "unit-mcp-control",
+                    "suite": "unit",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "e61f69848f748a21dcd38d0d8f071d4af1f3a6b9cc8bfde9e2d4040036f000c4",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "process",
+                    "suite": "recovery",
+                    "caseCount": 2,
+                    "originalTrx": [
+                      {
+                        "sha256": "770199897564b36d481100ae1582edc0ab6a6815fd6c8df1ca051e0d1fa0b7aa",
+                        "passed": 2,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "89fdcae35bc78974ba5092be8be53c24cec1e4efa3b1b03573e1d023f156b590"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 1,
+                    "originalTrx": [
+                      {
+                        "sha256": "a16d7d28a4c1c2fd716773bed71d5a2bd37896b4977f5e288891f7e60c51c5a2",
+                        "passed": 1,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 54,
+                "gitSourceAndBuildInputCount": 2123,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "manifestDigest": "sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "registryDigest": "sha256:4c7441b333b56dbbf0743fa2865914179bc3930fd50210e1e092a9164e92977e",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:b5b120eef2ca57aa8def7e503d95aba7338f5e148076b7f1efbf87f1006d3469"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        }
+      ],
+      "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
     }
   },
   "KL-012": {
@@ -40417,16 +42925,402 @@
           "receiptPath": "/private/tmp/keyload-47-kl014-normal-original-20261009/authenticity-and-original-failures.json",
           "receiptSha256": "6313568de6d5992ddf553bfd2f9704600b7b7827bdab580921537ff2cab153d4"
         },
-        "remaining": "Fresh exact-source normal/scalar Linux whole RF3 cases must validate the one-shot native readiness observation; original source47 failed artifact and historical f80 acceptance remain immutable.",
+        "remaining": "Source023 normal/scalar original whole RF3 readiness flows PASS. The next restore/KL009 fixture source still requires its fresh committed Linux qualification; original failed source47 and historical f80 remain immutable.",
         "currentRepair": {
           "task": "TASK-CRS-C1-FRESH-READINESS-ORACLE-002",
           "acceptance": "AC-CRS-FRESH-READINESS-002",
           "developmentStage": "TEST-PIPELINE-001.stageXXXIIIOriginalDevelopment",
           "localBuildPassed": true,
           "localFormatterPassed": true,
-          "currentLinuxRf3Qualified": false
+          "currentLinuxRf3Qualified": false,
+          "deliveredSource023ReadinessFlowsPassed": true,
+          "deliveredSource023EvidenceStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment.authenticatedOriginalLinuxTaskCohorts.source023"
         }
       }
+    },
+    "authenticatedOriginalLinuxTaskCohorts20261009": {
+      "developmentStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment",
+      "cohorts": [
+        {
+          "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+          "runId": 37869976384,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-014-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "3b4cc9a33977ed232a207b0e44768d6739962fcd6555abfff1be9e8404ea6a81",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572710,
+                "jobConclusion": "success",
+                "artifactId": 11590351125,
+                "artifactSha256": "86b5fdc7c8b30642e29b4eec9995bd254cea8309a564c9604176234e28b05e9d",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "769276b5696b6a8896db7c712a6ab33b17f6ff20af728b6729c3b7092304d50b",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "2027ffb0d5aeeac9cc560072fc6f1b342e80fd5b70fee38ffadbb5a2eb72d9ad",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "manifestDigest": "sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "registryDigest": "sha256:89bdeab231009cb1db44da67532444bab5d82315e144b3ad1bf861bf02621785",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:b4de28ddd8c96ced38ee0694041a6331a49559d18e4d4cc124def50fb0193274"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-014-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "056e639d7f60d5a1825f2b664fdb1f8c4cdced61bd684171c7b3d80e15cfc866",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572500,
+                "jobConclusion": "success",
+                "artifactId": 11589839884,
+                "artifactSha256": "ea98a6a339d0e6a86cf6deb971c36ff76f9f039b7f5f316bdaa3822f19ba2c00",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "07971cbca97a5372954dc50dbe40425bbe7226d8ef35a5329be061f7b9f9bc5a",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "f83c5eebcec01143881ae076b15912e95e2acec170e640c82b1a4f0b58bcd815",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "manifestDigest": "sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "registryDigest": "sha256:64d3330b487ea48d882578f4fde3e6de6b88ee870fe6d4e482145a08abad9923",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:88ec0d59a53f7dbda4adc401b60b5382b95262384fc6c4b018e09aa1db5578f4"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        },
+        {
+          "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+          "runId": 37872325740,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-014-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "dbdfad49f27748cf32f0134483f7a2237b4a7cb5b8dc8bb5f777331626b7580c",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995680,
+                "jobConclusion": "success",
+                "artifactId": 11591161263,
+                "artifactSha256": "8af22f4629f6bfbd615f98050c8e747a24404347ecbb3dfb13760ec0b350f8fb",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "779ee0da3d1cde2125e80a731145c4258c8a0067f351b0b5f5ac37bca01ca624",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "d20e22578ffcd5afa1118236288dd8593e8a348679f83a333d8b7770f182ca32",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "manifestDigest": "sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "registryDigest": "sha256:6777e04e5a8d6398a3d4d1ec1670395e49c255e34eda4d9d2121298be5a35787",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:f60a780ab1ae8430079f25ce63f020ad6bb5477e3530b4037b63863d351221d7"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-014-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "92d95cf4723cde998115b187b7e5c09e6dbe4c10b3e3e27e9da492966224260a",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-014",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995638,
+                "jobConclusion": "success",
+                "artifactId": 11591091900,
+                "artifactSha256": "0380b3834c1c6bb2cbac310b8b06affe5f3c127e19ffeebce2f00e631e2729ef",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 12,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 7,
+                    "originalTrx": [
+                      {
+                        "sha256": "3012c76d78ecea48be81ace947545e08dbf188ae6758ebd20db6a58d94de1294",
+                        "passed": 7,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 5,
+                    "originalTrx": [
+                      {
+                        "sha256": "284388473c07bea99ed8cdf415c793e12bcc02f9e41259bc916afc4c28016057",
+                        "passed": 5,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "manifestDigest": "sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "registryDigest": "sha256:503a7bb94ce2cc15129ea95aaec415a9be353319206b8025a7f395ae022e81bd",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:4a1edfb17294fb7f952b12e5d8149e7f243c3ddd7533eb426aeaffacea858c44"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        }
+      ],
+      "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
     }
   },
   "KL-015": {
@@ -42561,6 +45455,390 @@
         "Current-source Linux exact normal/scalar complete task flows",
         "Mandatory complete current normal/scalar/recovery/RF3 qualification"
       ]
+    },
+    "authenticatedOriginalLinuxTaskCohorts20261009": {
+      "developmentStage": "TEST-PIPELINE-001.stageXXXIVOriginalDevelopment",
+      "cohorts": [
+        {
+          "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+          "runId": 37869976384,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-027-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "fe6eb0fe5bef3d9dda90271ab498202e3f431dccce50a99d16d9532f48ee3b5e",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "normal",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572766,
+                "jobConclusion": "success",
+                "artifactId": 11590840188,
+                "artifactSha256": "53c462bae6fadf80bd687aad0f4bed0ef362b41a3ac9ab1975684ddf330c464a",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "4a5f35e4c386e339dce2ad4dd244c7f60ba5dbabc78a1292b8dc8fb20b2bce19",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "c6aaf6e106056c12ff86405805456896605dab23b60110166bcb22f184ba90b6",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "manifestDigest": "sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "registryDigest": "sha256:00544936e17693dc2de133b2f01a6cfb43a385762e91c04d5f9fa816dabc6b65",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:3ba54861fae9d352856c5d1bacffa915106ffb1f6b79ed55d7e6bdf526fb9f30"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-current-original-harvest-20261009/904-kl-027-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "2f710abc9a8ad70515dc49a5ac40586e5658600bbe312a9708b344d4315f4a59",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "scalar",
+                "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                "runId": 37869976384,
+                "attempt": 1,
+                "jobId": 113625572747,
+                "jobConclusion": "success",
+                "artifactId": 11590061366,
+                "artifactSha256": "0511a14cb57427d411a549016b3cb9dbcfc30fa78fc4cc86610d4523c16529d5",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "7edd781fe54e83b05ed9c965d2e5f543c90343bd4d57244afe45b3cd32550325",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "74d672ae2656fa2b4a63823f3f7d42a3bbb8463013312a17e01e6f3b3f332345"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "9bf15a925cbb7a9986127f1fd265b01320e6b510fd28e20447407e52773b15af",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "1d4c6464385b660f6cc1ddb91d7f97ca9d147ba36444445267b2ba32738d606a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "904d234c1c652626057673fd5fa127d924dd25f5",
+                  "github": {
+                    "runId": "37869976384",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:904d234c1c652626057673fd5fa127d924dd25f5-37869976384-1@sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "manifestDigest": "sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "registryDigest": "sha256:a8c249c52b51319f66bdf9c475e44307d3bf6c578e405877510764c99e5b83e3",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "904d234c1c652626057673fd5fa127d924dd25f5",
+                      "configId": "sha256:d0fa12f4be212d53953bf64168ba013d1a8df1359d65de62c105259e62e9921e"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37869976384-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        },
+        {
+          "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+          "runId": 37872325740,
+          "attempt": 1,
+          "profiles": [
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-027-normal/authenticity-and-original-reports.json",
+              "receiptSha256": "b266906391715df1d4c3f250c7dc87d34c73b9383ea37de233c8c013a96bf5da",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "normal",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995525,
+                "jobConclusion": "success",
+                "artifactId": 11591315267,
+                "artifactSha256": "754fd22a9cfb188b084d6824d1fe2268c31d77e3f4a2a925fb80f2b9483176e4",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "915ff33c1931f3a4810af8c9a56124c555c20dbd3fc3b01fbdf1ecfa234d3fbd",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "554b0c3beb1325dd9da45d3d5ea8839f2f0ece902f4601515d993c8070fcce8f",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "manifestDigest": "sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "registryDigest": "sha256:d4f6fcb2f7ed56486880839a8a98850cbed3a23c7c2c86d008483e8f1a2b4429",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:08f74db57afbd3bcaf5408ad7dcf2d6affc2b6710c1d63db53f5316b674bb0e5"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            },
+            {
+              "receiptPath": "/private/tmp/keyload-023-original-harvest-20261009/023-kl-027-scalar/authenticity-and-original-reports.json",
+              "receiptSha256": "8bab22426f53d34c0bdc00b76775d0a7477483a783281a0c9d4f015dcc334349",
+              "originalAdmission": {
+                "schemaVersion": 1,
+                "task": "KL-027",
+                "profile": "scalar",
+                "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                "runId": 37872325740,
+                "attempt": 1,
+                "jobId": 113632995683,
+                "jobConclusion": "success",
+                "artifactId": 11591166077,
+                "artifactSha256": "37f28efad7578f601830bed937aecb9561847afc71de9cc20373f3159a325210",
+                "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+                "caseCount": 31,
+                "selections": [
+                  {
+                    "selectionId": "unit",
+                    "suite": "unit",
+                    "caseCount": 27,
+                    "originalTrx": [
+                      {
+                        "sha256": "17af0710fcf67632fc130a817c86f6d8143b9e6c8b4e702162f270278606607e",
+                        "passed": 27,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "cba27f51fa7815c9395e7ca66ae70d6adcc403ccf8ce78d6ddbe7827c2cd9e55"
+                  },
+                  {
+                    "selectionId": "rf3",
+                    "suite": "rf3",
+                    "caseCount": 4,
+                    "originalTrx": [
+                      {
+                        "sha256": "0668617999c7222b4df9851c310f46786810006a9033c42cb8230360c5c9076d",
+                        "passed": 4,
+                        "failed": 0,
+                        "skipped": 0
+                      }
+                    ],
+                    "nativeImageManifestSha256": "51e564a7cfb0d36287d97ee7bc47d2b81fb519324e64b5e918be3a309972fa6a"
+                  }
+                ],
+                "verifiedOriginalCount": 26,
+                "gitSourceAndBuildInputCount": 1988,
+                "originalNativeProcessReadersExitJoinedDisposed": true,
+                "sourcePdbBindingComplete": true,
+                "preparedImageEqualsBeforeAfter": true,
+                "sourceVerificationPassed": true,
+                "serverImage": {
+                  "schemaVersion": 1,
+                  "sourceRevision": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                  "github": {
+                    "runId": "37872325740",
+                    "attempt": "1",
+                    "repository": "managedcode/KeyLoad",
+                    "ref": "refs/heads/main"
+                  },
+                  "bases": {
+                    "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                    "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                    "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+                  },
+                  "images": {
+                    "server": {
+                      "reference": "127.0.0.1:5000/keyload/server:0235772347b21fa45f9d45e3dc92bb5f6ed22e60-37872325740-1@sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "manifestDigest": "sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "registryDigest": "sha256:9c727ae43f32aefdb0976580a665c8e71837009dd9c11fde31a37f2751b3fc43",
+                      "manifestFile": "server-manifest.json",
+                      "revisionLabel": "0235772347b21fa45f9d45e3dc92bb5f6ed22e60",
+                      "configId": "sha256:87e3ec1fe09fa7a5e1110baf579fb42dc3aec19804cef6a088f77427f3faa9ad"
+                    }
+                  }
+                },
+                "cleanup": {
+                  "cleanup": {
+                    "containerName": "keyload-images-37872325740-1",
+                    "owned": true,
+                    "found": true,
+                    "removed": true,
+                    "exitCode": null,
+                    "result": "success",
+                    "outputTruncated": true
+                  }
+                },
+                "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion"
+              }
+            }
+          ]
+        }
+      ],
+      "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
     }
   },
   "KL-028": {

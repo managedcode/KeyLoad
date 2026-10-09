@@ -25,7 +25,7 @@ internal static class ZoneTreeBackupRestoreRestore
             var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy),
                 newIncarnation, newSigningKey);
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
-            var restoredIdentity = ApplyRestoreAuthorityState(staging, policy);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions);
             Publish(staging, destinationPath);
             return restoredIdentity;
         }
@@ -80,9 +80,10 @@ internal static class ZoneTreeBackupRestoreRestore
         };
     }
 
-    private static StoreIdentity ApplyRestoreAuthorityState(string destination, ZoneTreeStorageExecutionOptions policy)
+    private static StoreIdentity ApplyRestoreAuthorityState(string destination,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
-        var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).WithExecutionSnapshot(policy));
+        var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(executionOptions));
         using var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
         restored.Commit((tx, _) =>
         {

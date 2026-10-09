@@ -117,6 +117,10 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 
 `BackupRestoreStagingJoinTests.AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte` and `AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte` each have two trailing-separator cases. Their bodies directly call the native restore API, reopen the target, verify new identity/incarnation, paused dispatch, restored data and exact archive bytes. Map them to REQ-BACKUP-002 / AC-BACKUP-002 and the identity/pause portion of REQ-BACKUP-003 / AC-BACKUP-003 only. They do not exercise SQL, so the source's AC-SQLC-011 label is not an acceptance mapping. The cases do not close the complete cursor/lease fencing and operator reconciliation parts of AC-BACKUP-003. Their original native report rows remain failed-cohort historical evidence until current-source normal/scalar qualification.
 
+### TASK-STORAGE-MAINTENANCE-SNAPSHOT-003: complete restore execution snapshot
+
+REQ/AC-BACKUP-001/002/003 map to StorageRecovery REQ-STORAGE-MAINTENANCE-JOIN-003 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 and ADR046. The existing restore owner carries its original centrally bound IOptions into ApplyRestoreAuthorityState and invokes the canonical ResolveExecutionOptions before opening the staging runtime; the scalar helper is insufficient for native maintenance. Validation, canonical data, new authority and paused dispatch remain unchanged. Root joins the single owning restore implementation after the linked frozen contract, then verifies all original failed whole backup/restore/CLI/metadata/blob/recovery classes in normal/scalar and exact Linux complete suites. The source47 original51-per-profile unit and2 recovery failures remain immutable. Current qualification is pending; no local fix or isolated property assertion constitutes restore acceptance.
+
 TASK-GENERAL-OPTIONS-RESTORE-INPUT-001 maps REQ-BACKUP-002 / AC-BACKUP-002 to
 `MissingBackupManifestTests`: the real embedded restore normalizes only a missing
 manifest or its directory to the existing `FormatUnsupported` Problem and fixed

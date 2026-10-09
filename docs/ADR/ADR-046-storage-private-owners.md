@@ -57,6 +57,10 @@ gates stay open until actually qualified. No production, format, dependency,
 public API or deployment change is permitted by this test-only stage. Rollback
 removes only the added regression.
 
+## TASK-STORAGE-MAINTENANCE-SNAPSHOT-003
+
+REQ-STORAGE-MAINTENANCE-JOIN-003 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 in StorageRecovery, with BackupRestore REQ/AC-BACKUP-001/002/003, carry the original centrally bound IOptions through the existing restore owner into its private ApplyRestoreAuthorityState and use the canonical ResolveExecutionOptions before native runtime construction. Retain scalar WithExecutionSnapshot and configuration ownership; do not manufacture an execution-side wrapper, suppress KLD0037 or supply defaults. Root owns only the existing restore implementation, preserves per-store overrides/validation/native lifecycle and original failed source47 archive, then builds/formats, executes the genuine original failing class union in both unit profiles and recovery, and joins exact Linux complete suites. No format, public authority, provider, deadline, limit, fallback or maintenance bypass changes. This Accepted private snapshot repair remains unqualified until original native evidence exists. Rollback removes the one-source repair coherently; no original failure or required gate is waived.
+
 ## Decision
 
 Preserve the public ZoneTreeStore facade and every format/caller contract. Compose

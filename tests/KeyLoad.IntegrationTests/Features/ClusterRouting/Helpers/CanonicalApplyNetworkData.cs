@@ -19,10 +19,11 @@ internal static class CanonicalApplyNetworkData
             [new(identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite),
              new(identity.Partition.DatabaseId, Queue, Capability.QueuePublish | Capability.QueueInspect)], [])
-        { ClusterAdministrator = false };
+        { ClusterAdministrator = false, PolicyEpoch = checked(RequestCqrsPhaseFaultProvisioning.InitialPolicyEpoch + 1) };
         var stored = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That(stored.ClusterAdministrator).IsFalse();
         await Assert.That(stored.Id).IsEqualTo(identity.PrincipalId);
+        await Assert.That(JsonDefaults.Serialize(stored).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
     }
     internal static CommandRequest Command(RequestCqrsPhaseFaultIdentity identity, Guid id)
         => new(id, identity.Partition,
