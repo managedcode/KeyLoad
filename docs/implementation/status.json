@@ -25,9 +25,9 @@
     "websiteBaselineInputs": 1716,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "sourceStage": "Shared native workloads and exclusive RF3 load are implemented. Original e0678227 full solution build passed with zero warnings/errors; formatter and repository rules passed. Its interrupted contracts printed 771 passed cases and one CPU-envelope failure without terminal qualification, and old yes was killed by job cleanup. CPU and memory file boundaries now normalize kernel line endings while retaining strict quota/counter grammar, root/minimum/identity contracts and bounds; 23 normative positive/negative/healthy format cases supplement required actual Linux evidence. Native pipe settlement is delivered in 50d2a505 and canonical fixture evidence-profile keys in 6c99f16a. Exact-source normal/scalar, actual native document operations, exclusive 1M RF3 and complete scale remain unqualified. All verification is GitHub Actions only.",
+    "sourceStage": "Shared native workloads and exclusive RF3 load are implemented. Original e0678227 full solution build passed with zero warnings/errors; formatter and repository rules passed. Its interrupted contracts printed 771 passed cases and one CPU-envelope failure without terminal qualification, and old yes was killed by job cleanup. CPU and memory file boundaries now normalize kernel line endings while retaining strict quota/counter grammar, root/minimum/identity contracts and bounds; 23 normative positive/negative/healthy format cases supplement required actual Linux evidence. Native pipe settlement is delivered in 50d2a505 and canonical fixture evidence-profile keys in 6c99f16a. Exact-source normal/scalar, actual native document operations, exclusive 1M RF3 and complete scale remain unqualified. All verification is GitHub Actions only. Original a0123483 build/check and Docker prerequisites failed before tests with 10 CS1061 errors in nullable RequestCqrsProbeArmRecord member access. The exact nullable value is now extracted by a pattern while preserving every original pair/marker/cardinality rejection; repaired-source compilation and all runtime gates remain pending.",
     "verification": {
-      "canonicalBuild": "original_linux_e0678227_full_solution_passed_0_warnings_0_errors; latest_native_kernel_text_source_pending",
+      "canonicalBuild": "original_linux_a0123483_full_solution_failed_0_warnings_10_CS1061_errors_nullable_RequestCqrsProbeArmRecord_member_access; exact_value_extraction_repair_authored; current_source_GitHub_verification_pending",
       "format": "original_linux_e0678227_canonical_formatter_passed; latest_native_kernel_text_source_pending",
       "governance": "original_linux_e0678227_repository_rules_passed; latest_native_kernel_text_source_pending",
       "nativeRegressions": "original_linux_0c0378e6_resource_models_107_passed_and_request_admission_3_passed_and_document_admission_15_passed_all_zero_failed_skipped; actual_native_step_22_total_22_failed_0_passed_0_skipped_at_fixture_startup_before_operations; isolated_AppHost_fixture_source_repair_authored; original_852_contracts_interrupted_without_terminal_summary_or_qualification_752_passed_case_lines_and_19_failed_case_lines_observed; controlled_repairs_authored; native_cgroup_envelope_cause_open; heavy_gates_skipped; earlier_local_failure_history_retained",
@@ -140,6 +140,24 @@
       "documentNativeCaseSkipped": 0,
       "failure": "ComparisonWorkerSelection.Validate before acquisition; fixture Profile key corrected to canonical EvidenceProfile constant",
       "documentNativeOperationsExecuted": false,
+      "heavyRf3Executed": false,
+      "scaleExecuted": false
+    },
+    "newestOriginalCompile": {
+      "sourceCommit": "a01234835fb88fd148996e550bb461704969c12c",
+      "runId": 37930077670,
+      "runAttempt": 1,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37930077670",
+      "conclusion": "failure",
+      "buildJobId": 113818546263,
+      "dockerJobId": 113818546314,
+      "buildWarnings": 0,
+      "buildErrors": 10,
+      "diagnostic": "CS1061 RequestCqrsReceiverIssueAdjunct.cs64-72 nullable RequestCqrsProbeArmRecord? member access; exact value pattern extraction repair authored with all rejection guards preserved",
+      "formatterExecuted": false,
+      "contractSuiteExecuted": false,
+      "scalarContractsExecuted": false,
+      "documentNativeExecuted": false,
       "heavyRf3Executed": false,
       "scaleExecuted": false
     }

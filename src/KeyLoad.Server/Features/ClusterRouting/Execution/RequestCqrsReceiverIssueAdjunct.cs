@@ -61,15 +61,15 @@ internal sealed class RequestCqrsReceiverIssueAdjunct(RequestCqrsProbeFiles file
         if (target.Phase != RequestCqrsProbePhase.ParentReceiverIssueObserved || target.SourceArmId is null)
         { return; }
         var primary = arms.SingleOrDefault(arm => arm.Record.ArmId == target.SourceArmId)?.Record;
-        if (primary is null || primary.Phase != RequestCqrsProbePhase.ParentReceiverIssueAcknowledged
-            || primary.Action != RequestCqrsProbeAction.Hold || primary.PrincipalId != target.PrincipalId
-            || primary.CommandId != target.CommandId || primary.ReadKind is not null
-            || primary.SessionId != target.SessionId
-            || !markers.Any(marker => marker.ArmId == primary.ArmId && marker.CommandId == primary.CommandId
-                && marker.RequestId == target.SourceRequestId && marker.Phase == primary.Phase
+        if (primary is not { } source || source.Phase != RequestCqrsProbePhase.ParentReceiverIssueAcknowledged
+            || source.Action != RequestCqrsProbeAction.Hold || source.PrincipalId != target.PrincipalId
+            || source.CommandId != target.CommandId || source.ReadKind is not null
+            || source.SessionId != target.SessionId
+            || !markers.Any(marker => marker.ArmId == source.ArmId && marker.CommandId == source.CommandId
+                && marker.RequestId == target.SourceRequestId && marker.Phase == source.Phase
                 && marker.Outcome == RequestCqrsProbeOutcome.Observed)
             || arms.Count(arm => arm.Record.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved
-                && arm.Record.SourceArmId == primary.ArmId) != ExactlyOneAdjunct)
+                && arm.Record.SourceArmId == source.ArmId) != ExactlyOneAdjunct)
         { throw Invalid(); }
     }
 
