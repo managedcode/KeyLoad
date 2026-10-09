@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
@@ -20,6 +22,7 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private const string PasswordParameter = "isolated-surrealdb-password";
     private const string Basic = "Basic";
     private const string User = "root:";
+    private const string ComparisonRunner = "comparisons";
     private static TimeSpan Deadline => NativeExecutionPolicyFixture.Harness().Value.NativeDatabaseFlowTimeout;
 
     internal static IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
@@ -28,40 +31,49 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     internal static async Task<NativeDatabaseFlowFixture> CreateAsync(string target, CancellationToken token)
     {
         var root = Path.Combine(Path.GetTempPath(), "keyload-native-flow-" + Guid.NewGuid().ToString("N"));
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(["--KeyLoadTests:Suite=comparison"], token);
-        foreach (var runner in builder.Resources.OfType<ExecutableResource>().ToArray())
+        try
         {
+            return await StartNativeApplicationAsync(target, root, token);
+        }
+        catch (Exception failure)
+        {
+            await CleanupNativeFlowAsync(null, root, failure);
+            throw;
+        }
+    }
+
+    private static async Task<DistributedApplication> BuildNativeApplicationAsync(string target, string root, CancellationToken token)
+    {
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
+            ["--Benchmarks:Enabled=true", "--Benchmarks:Target=" + target,
+                "--Benchmarks:NodeCount=1", "--Benchmarks:Scenario=" + Scenario.PointRead,
+                "--Benchmarks:Profile=" + IsolatedComparisonContract.Current.Profile,
+                "--Benchmarks:DataRoot=" + root, "--Benchmarks:Output=" + Path.Combine(root, "reports")], token);
+        try
+        {
+            var runner = builder.Resources.OfType<ContainerResource>().Single(resource => resource.Name == ComparisonRunner);
             builder.Resources.Remove(runner);
+            return await builder.BuildAsync(token);
         }
-
-        var unusedRunner = builder.AddContainer("native-flow-anchor", "mcr.microsoft.com/dotnet/runtime", "10.0");
-        var selection = new ComparisonWorkerSelection(target, 1, Scenario.PointRead, IsolatedComparisonContract.Current.Profile);
-        var context = new IsolatedResourceContext(builder, selection, unusedRunner, root);
-        if (target == Surreal)
+        catch (Exception failure)
         {
-            IsolatedSurrealDbResources.Add(context);
+            await CleanupNativeFlowAsync(builder, null, failure);
+            throw;
         }
-        else
-        {
-            IsolatedHelixDbResources.Add(context);
-        }
+    }
 
-        builder.Resources.Remove(unusedRunner.Resource);
-        var app = await builder.BuildAsync(token);
+    private static async Task<NativeDatabaseFlowFixture> StartNativeApplicationAsync(string target, string root, CancellationToken token)
+    {
+        var app = await BuildNativeApplicationAsync(target, root, token);
         try
         {
             await app.StartAsync(token);
             await app.ResourceNotifications.WaitForResourceHealthyAsync(target == Surreal ? SurrealNode : HelixNode, token).WaitAsync(Deadline, TimeProvider.System, token);
             return new(app, root, target);
         }
-        catch (Exception)
+        catch (Exception failure)
         {
-            await app.DisposeAsync();
-            if (Directory.Exists(root))
-            {
-                Directory.Delete(root, recursive: true);
-            }
-
+            await CleanupNativeFlowAsync(app, null, failure);
             throw;
         }
     }
@@ -77,12 +89,26 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
         }
         return client;
     }
-    public async ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync() => await CleanupNativeFlowAsync(application, root, null);
+
+    private static async Task CleanupNativeFlowAsync(IAsyncDisposable? owner, string? directory, Exception? primary)
     {
-        await application.DisposeAsync();
-        if (Directory.Exists(root))
+        var failures = new List<Exception>();
+        if (owner is not null)
         {
-            Directory.Delete(root, recursive: true);
+            await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() => owner.DisposeAsync().AsTask(), failures);
+        }
+        await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() =>
+        {
+            if (directory is not null && Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+            return Task.CompletedTask;
+        }, failures);
+        if (OpenLoopFailure.Combine(primary, failures.ToImmutableArray()) is { } failure)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
         }
     }
 }
