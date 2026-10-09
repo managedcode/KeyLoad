@@ -1,6 +1,6 @@
 using KeyLoad.Client;
-using KeyLoad.Server;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 

@@ -33,7 +33,8 @@ internal static class ZoneTreeBackupRestoreRestore
         {
             try
             {
-                if (Directory.Exists(staging)) { Directory.Delete(staging, recursive: true); }
+                if (Directory.Exists(staging))
+                { Directory.Delete(staging, recursive: true); }
             }
             catch (Exception cleanup)
             { throw new AggregateException(primary, cleanup); }
@@ -115,10 +116,12 @@ internal static class ZoneTreeBackupRestoreRestore
 
     private static void DisposeRestoredStore(ZoneTreeStore restored, Exception? primary)
     {
-        try { restored.Dispose(); }
+        try
+        { restored.Dispose(); }
         catch (Exception cleanup)
         {
-            if (primary is null) { throw; }
+            if (primary is null)
+            { throw; }
             throw new AggregateException(primary, cleanup);
         }
     }

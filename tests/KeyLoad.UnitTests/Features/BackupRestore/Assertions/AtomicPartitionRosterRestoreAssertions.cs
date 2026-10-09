@@ -16,14 +16,16 @@ internal static class AtomicPartitionRosterRestoreAssertions
         while (true)
         {
             var page = view.Scan([], OneRecord, after);
-            if (page.Records.IsEmpty) { return Convert.ToHexString(digest.GetHashAndReset()); }
+            if (page.Records.IsEmpty)
+            { return Convert.ToHexString(digest.GetHashAndReset()); }
             var row = page.Records[FirstRecord];
             digest.AppendData(BitConverter.GetBytes(row.Key.Length));
             digest.AppendData(row.Key.Span);
             digest.AppendData(BitConverter.GetBytes(row.Value.Length));
             digest.AppendData(row.Value.Span);
             after = row.Key.ToArray();
-            if (!page.HasMore) { return Convert.ToHexString(digest.GetHashAndReset()); }
+            if (!page.HasMore)
+            { return Convert.ToHexString(digest.GetHashAndReset()); }
         }
     });
 

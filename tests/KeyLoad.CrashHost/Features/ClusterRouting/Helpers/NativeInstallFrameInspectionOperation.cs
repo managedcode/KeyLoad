@@ -32,7 +32,8 @@ internal static class NativeInstallFrameInspectionOperation
                     KeySpace.PartitionOutcome(request.Partition, request.PrincipalId, request.CommandId), TimeProvider.System, CancellationToken.None);
                 receipt = RequireOutcome(frame, request);
             }, failures);
-            if (failures.Count > NoFailures) { evidence.Capture(failures[FirstFailure]); }
+            if (failures.Count > NoFailures)
+            { evidence.Capture(failures[FirstFailure]); }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

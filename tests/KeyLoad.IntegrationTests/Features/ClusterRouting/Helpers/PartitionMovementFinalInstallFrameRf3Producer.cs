@@ -109,7 +109,8 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
 
     private static async Task JoinObservationAsync(Task<RequestCqrsProbeMarkerRecord> observed, CancellationToken ownedWait)
     {
-        try { _ = await observed.ConfigureAwait(false); }
+        try
+        { _ = await observed.ConfigureAwait(false); }
         catch (OperationCanceledException) when (ownedWait.IsCancellationRequested) { }
     }
 

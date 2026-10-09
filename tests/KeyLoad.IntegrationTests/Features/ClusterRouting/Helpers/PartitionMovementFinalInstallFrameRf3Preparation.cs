@@ -1,6 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 

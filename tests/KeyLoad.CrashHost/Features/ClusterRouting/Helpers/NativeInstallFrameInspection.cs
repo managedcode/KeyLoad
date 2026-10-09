@@ -18,7 +18,8 @@ internal static class NativeInstallFrameInspection
         try
         {
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
-            if (args.Length != SingleArgument) { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
+            if (args.Length != SingleArgument)
+            { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var bytes = await C1OutcomeInspection.ReadRequestBytesAsync().ConfigureAwait(false);
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
@@ -33,7 +34,8 @@ internal static class NativeInstallFrameInspection
             evidence.Capture(failure);
             var failures = new List<Exception> { failure };
             await ServerFailureObserver.ObserveAsync(() => C1OutcomeInspection.WriteBytesAsync(evidence.Bytes(), true), failures).ConfigureAwait(false);
-            if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal)) { ServerFailureObserver.ThrowIfAny(failures); }
+            if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
+            { ServerFailureObserver.ThrowIfAny(failures); }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
             GC.KeepAlive(failures);
         }

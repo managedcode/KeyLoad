@@ -30,7 +30,8 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             _ = await Task.WhenAny(issue, call).ConfigureAwait(false);
-            if (!issue.IsCompletedSuccessfully) { throw new InvalidOperationException(MissingIssue); }
+            if (!issue.IsCompletedSuccessfully)
+            { throw new InvalidOperationException(MissingIssue); }
             var marker = await issue.ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, acknowledged, seed.FirstRequest.MoveId,
                 RequestCqrsProbePhase.ParentReceiverIssueAcknowledged, discovery).ConfigureAwait(false);
@@ -46,7 +47,8 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
             if (!allReceivers)
             { await ReleaseObservedAsync(wave, seed, observed, discovery, call, cancellationToken).ConfigureAwait(false); }
             terminal = await call.ConfigureAwait(false);
-            if (allReceivers) { await RequireNoObservedMarkerAsync(wave, seed.FirstRequest.MoveId); }
+            if (allReceivers)
+            { await RequireNoObservedMarkerAsync(wave, seed.FirstRequest.MoveId); }
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(originalCaller.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () => { _ = await call.ConfigureAwait(false); }, failures).ConfigureAwait(false);
@@ -79,7 +81,8 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             _ = await Task.WhenAny(observation, call).ConfigureAwait(false);
-            if (!observation.IsCompletedSuccessfully) { throw new InvalidOperationException(MissingObservation); }
+            if (!observation.IsCompletedSuccessfully)
+            { throw new InvalidOperationException(MissingObservation); }
             var marker = await observation.ConfigureAwait(false);
             await RequestCqrsPhaseFaultAssertions.VerifyMarkerAsync(marker, arm, seed.FirstRequest.MoveId,
                 RequestCqrsProbePhase.ParentReceiverIssueObserved, discovery).ConfigureAwait(false);
@@ -97,7 +100,8 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Producer
     private static async Task JoinObservationWaitAsync(Task<RequestCqrsProbeMarkerRecord> observation,
         CancellationToken ownedWait)
     {
-        try { _ = await observation.ConfigureAwait(false); }
+        try
+        { _ = await observation.ConfigureAwait(false); }
         catch (OperationCanceledException) when (ownedWait.IsCancellationRequested) { }
     }
 

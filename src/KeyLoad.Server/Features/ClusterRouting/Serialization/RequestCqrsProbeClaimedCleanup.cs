@@ -33,9 +33,11 @@ internal sealed class RequestCqrsProbeClaimedCleanup(string root, byte[] ownerBy
     {
         RequestCqrsProbePaths.RequireDirectory(root);
         var owner = RequestCqrsProbeFiles.ReadRecord(Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile), options);
-        if (!CryptographicOperations.FixedTimeEquals(ownerBytes, owner)) { throw Invalid(); }
+        if (!CryptographicOperations.FixedTimeEquals(ownerBytes, owner))
+        { throw Invalid(); }
         var entries = Directory.EnumerateFileSystemEntries(root).Take(options.Value.MaximumFiles + OverflowEntry).ToArray();
-        if (entries.Length > options.Value.MaximumFiles) { throw Invalid(); }
+        if (entries.Length > options.Value.MaximumFiles)
+        { throw Invalid(); }
         var arms = new List<RequestCqrsProbeLoadedArm>();
         var releases = new List<RequestCqrsProbeReleaseRecord>();
         var markers = new List<RequestCqrsProbeMarkerRecord>();
@@ -46,7 +48,8 @@ internal sealed class RequestCqrsProbeClaimedCleanup(string root, byte[] ownerBy
         {
             var name = Path.GetFileName(path);
             total = checked(total + validateEntry(path, name));
-            if (total > options.Value.MaximumAggregateBytes) { throw Invalid(); }
+            if (total > options.Value.MaximumAggregateBytes)
+            { throw Invalid(); }
             inventory.Read(path, name, arms, releases, markers, present);
         }
         inventory.RequireKnownArmPresence(arms);
@@ -58,8 +61,10 @@ internal sealed class RequestCqrsProbeClaimedCleanup(string root, byte[] ownerBy
     private void RequireClaim(RequestCqrsProbeLoadedArm claim, RequestCqrsProbeSnapshot snapshot)
     {
         var current = snapshot.Arms.SingleOrDefault(arm => arm.Record.ArmId == claim.Record.ArmId);
-        if (current is not null && CryptographicOperations.FixedTimeEquals(current.ExactBytes, claim.ExactBytes)) { return; }
-        if (current is null && records.IsRetiredArm(claim.Record.ArmId, claim.ExactBytes)) { return; }
+        if (current is not null && CryptographicOperations.FixedTimeEquals(current.ExactBytes, claim.ExactBytes))
+        { return; }
+        if (current is null && records.IsRetiredArm(claim.Record.ArmId, claim.ExactBytes))
+        { return; }
         throw Invalid();
     }
 

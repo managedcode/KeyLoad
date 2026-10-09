@@ -12,7 +12,8 @@ internal static class AtomicPartitionRosterOriginValidation
     {
         var origin = view.GetRecord<AtomicPartitionRosterRestoreOrigin>(
             AtomicPartitionRosterRestoreOriginSerialization.OriginKey(entry.Partition));
-        if (origin is null) { return NoHistoricalBound; }
+        if (origin is null)
+        { return NoHistoricalBound; }
         var identity = view.GetRecord<AtomicPartitionRosterRestoreIdentity>(
             AtomicPartitionRosterRestoreOriginSerialization.IdentityKey());
         if (identity is null || !AtomicPartitionRosterRestoreOriginSerialization.MatchesIdentity(identity, currentIncarnation))

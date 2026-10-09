@@ -16,14 +16,17 @@ internal sealed class RequestCqrsProbeCleanupInventory(
         if (name.StartsWith(RequestCqrsProbeProtocol.ArmFilePrefix, StringComparison.Ordinal))
         {
             var known = arms.SingleOrDefault(pair => RequestCqrsProbeFiles.ArmName(pair.Value.Record) == name);
-            if (known.Key == Guid.Empty) { return; }
+            if (known.Key == Guid.Empty)
+            { return; }
             RequireBytes(path, known.Value.Bytes);
             loaded.Add(new(known.Value.Record, known.Value.Bytes));
             return;
         }
         if (name == RequestCqrsProbeProtocol.OwnerFile
-            || name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal)) { return; }
-        if (!controls.TryGetValue(name, out var bytes)) { throw Invalid(); }
+            || name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal))
+        { return; }
+        if (!controls.TryGetValue(name, out var bytes))
+        { throw Invalid(); }
         RequireBytes(path, bytes);
         present.Add(name);
         if (name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal))
@@ -46,13 +49,15 @@ internal sealed class RequestCqrsProbeCleanupInventory(
             .Concat(arms.Values.Select(arm => RequestCqrsProbeFiles.ArmName(arm.Record)))
             .Concat(retired.Select(id => RequestCqrsProbeProtocol.ArmFilePrefix + id.ToString(RequestCqrsProbeProtocol.SessionIdFormat)
                 + RequestCqrsProbeProtocol.JsonFileSuffix)).Distinct(StringComparer.Ordinal).Count();
-        if (count > options.Value.MaximumArms) { throw Invalid(); }
+        if (count > options.Value.MaximumArms)
+        { throw Invalid(); }
     }
 
     private void RequireBytes(string path, byte[] expected)
     {
         var actual = RequestCqrsProbeFiles.ReadRecord(path, options);
-        if (!CryptographicOperations.FixedTimeEquals(expected, actual)) { throw Invalid(); }
+        if (!CryptographicOperations.FixedTimeEquals(expected, actual))
+        { throw Invalid(); }
     }
 
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);

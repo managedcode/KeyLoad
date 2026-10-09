@@ -25,7 +25,8 @@ internal sealed class RequestCqrsReceiverIssueAdjunct(RequestCqrsProbeFiles file
                 || arm.Record.SourceRequestId == primary.Identity.RequestId
                 || arm.Record.PrincipalId == primary.Identity.PrincipalId
                     && arm.Record.CommandId == primary.Identity.CommandId)).Take(PairMatchCeiling).ToArray();
-        if (linked.Length == NoAdjunct) { return false; }
+        if (linked.Length == NoAdjunct)
+        { return false; }
         if (linked.Length != ExactlyOneAdjunct || primary.ReceiverIssueAdjunct is not null)
         { throw Invalid(); }
         var arm = linked[FirstAdjunct];
@@ -49,7 +50,8 @@ internal sealed class RequestCqrsReceiverIssueAdjunct(RequestCqrsProbeFiles file
 
     internal void ProducerDisposed(RequestCqrsProbeClaim primary)
     {
-        if (primary.ReceiverIssueAdjunct is not { } adjunct) { return; }
+        if (primary.ReceiverIssueAdjunct is not { } adjunct)
+        { return; }
         files.WriteClaimedProducerDisposed(createMarker(adjunct, RequestCqrsProbePhase.ProducerDisposed,
             RequestCqrsProbeOutcome.Observed), adjunct.Arm);
     }

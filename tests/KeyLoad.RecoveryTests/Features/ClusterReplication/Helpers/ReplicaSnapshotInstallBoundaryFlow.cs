@@ -48,7 +48,8 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
                 ReplicaPrefixGcOwners.MaterializerAsync(node, materializer =>
                     InstallAsync(active, node, materializer, image, canceled, token)));
         }, failures);
-        if (source is { } owned) { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        if (source is { } owned)
+        { ServerFailureObserver.Observe(owned.Dispose, failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -73,7 +74,8 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
                 materializer.InstallCheckpointAsync(image.TransferId, original.Token)) ?? throw new InvalidOperationException();
             await Assert.That(failure.CancellationToken).IsEqualTo(original.Token);
         }
-        else { await RejectCeilingAsync(node, image); }
+        else
+        { await RejectCeilingAsync(node, image); }
         await ReplicaSnapshotInstallBoundaryAssertions.UnchangedAsync(node, before);
         await Assert.That(await materializer.InstallCheckpointAsync(image.TransferId, token)).IsEqualTo(image);
         await ReplicaProcessAssertions.DocumentAsync(node, SnapshotCut);
@@ -89,8 +91,11 @@ internal static class ReplicaSnapshotInstallBoundaryFlow
     {
         await Assert.That(image.Length).IsGreaterThan(OneByte);
         var bound = checked(image.Length - OneByte);
-        var configuration = node.Configuration with { MaxSnapshotBytes = bound,
-            SnapshotChunkBytes = checked((int)Math.Min(node.Configuration.SnapshotChunkBytes, bound)) };
+        var configuration = node.Configuration with
+        {
+            MaxSnapshotBytes = bound,
+            SnapshotChunkBytes = checked((int)Math.Min(node.Configuration.SnapshotChunkBytes, bound))
+        };
         var receiver = new ReplicaSnapshotStore(node.Canonical, node.Log,
             RecoveryExecutionOptions.Configuration(configuration), RecoveryExecutionOptions.Replica());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => receiver.Begin(image));

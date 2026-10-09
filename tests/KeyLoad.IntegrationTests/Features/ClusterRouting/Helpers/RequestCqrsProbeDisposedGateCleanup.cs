@@ -12,8 +12,10 @@ internal static class RequestCqrsProbeDisposedGateCleanup
             || arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed || arm.Action != RequestCqrsProbeAction.Hold
             || arm.GateVoter is not { } voter || arm.Settled || arm.Retired)
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
-        if (arm.DisposedGateJoined) { return; }
-        if (gates[voter] < OneGate) { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
+        if (arm.DisposedGateJoined)
+        { return; }
+        if (gates[voter] < OneGate)
+        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
         gates[voter] -= OneGate;
         arm.DisposedGateJoined = true;
     }

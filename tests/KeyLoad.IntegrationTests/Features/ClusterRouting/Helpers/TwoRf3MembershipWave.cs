@@ -81,7 +81,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     {
         new KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions { MaxFrameBytes = maxFrameBytes }.Validate();
         var wave = new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
-            probe: true, protectedDocument: true) { movementMaxFrameBytes = maxFrameBytes };
+            probe: true, protectedDocument: true)
+        { movementMaxFrameBytes = maxFrameBytes };
         return StartOwnedAsync(wave, token);
     }
 

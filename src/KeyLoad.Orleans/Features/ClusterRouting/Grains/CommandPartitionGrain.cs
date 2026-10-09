@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using Orleans.Runtime.Placement;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Runtime.Placement;
 
 namespace KeyLoad.Orleans;
 

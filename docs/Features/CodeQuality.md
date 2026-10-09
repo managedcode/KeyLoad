@@ -50,14 +50,18 @@ flowchart LR
     Repair --> Gates[Canonical format and build]
 ```
 
-Local Roslynk inspection on2026-10-09 loaded all27/27 projects to Ready and
+Local Roslynk inspection on 2026-10-09 loaded all 27/27 projects to Ready and
 rechecked the solution with compiler errors, warnings and analyzers included.
-The initial27 errors were repaired; the recheck reported zero errors and zero
-warnings. Informational/hidden suggestions remain advisory, including existing
+The initial 27 errors were repaired; the final native MCP recheck reported zero
+errors and zero warnings, with zero workspace load diagnostics. The canonical
+whole-solution formatter passed. The full Release build passed with zero warnings
+and errors using `--disable-build-servers -m:1` after a parallel MSBuild attempt
+failed with `MSB4166`. Informational/hidden suggestions remain advisory, including existing
 namespace/folder differences and intentionally unused fluent assertion results;
 this result does not claim every style suggestion has been eliminated. The
-owner-scoped follow-up performs formatting and compilation only, without test
-execution or additional runtime qualification. Original diagnostic reports are
+owner-scoped follow-up performed formatting and compilation only; no tests were
+executed after the owner's scope clarification. Runtime qualification remains
+outside this inspection. Original diagnostic and build reports are
 kept outside the checkout.
 
 TASK-CQ-UNIT64-010 implements the owner's 2026-10-06 rule-specific correction:

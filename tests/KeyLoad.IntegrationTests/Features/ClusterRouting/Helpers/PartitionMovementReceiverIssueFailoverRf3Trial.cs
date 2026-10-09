@@ -19,11 +19,15 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Trial
             var terminal = await PartitionMovementReceiverIssueFailoverRf3Producer.ExecuteAsync(wave, seed,
                 allReceivers, caller.Token).ConfigureAwait(false);
             if (allReceivers)
-            { await PartitionMovementReceiverIssueFailoverRf3LostObservation.RequireAsync(wave, seed, terminal,
-                caller.Token).ConfigureAwait(false); }
+            {
+                await PartitionMovementReceiverIssueFailoverRf3LostObservation.RequireAsync(wave, seed, terminal,
+                caller.Token).ConfigureAwait(false);
+            }
             else
-            { await PartitionMovementReceiverIssueFailoverRf3Healthy.RequireAsync(wave, seed, terminal,
-                caller.Token).ConfigureAwait(false); }
+            {
+                await PartitionMovementReceiverIssueFailoverRf3Healthy.RequireAsync(wave, seed, terminal,
+                caller.Token).ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
         { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
