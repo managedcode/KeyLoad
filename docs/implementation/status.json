@@ -33,7 +33,8 @@
       "nativeRegressions": "original_linux_852aef07_resource_models_107_passed_0_failed_0_skipped; request_admission_2_passed_1_failed_0_skipped_due_invalid_negative_fixture; contracts_interrupted_no_terminal_summary_or_qualification; observed_752_passed_case_lines_and_19_failed_case_lines; controlled_repairs_authored; native_cgroup_envelope_cause_open; document_native_and_heavy_gates_not_reached; earlier_local_failure_history_retained",
       "actualLinuxScale": "pending_original_exact_source_workflow",
       "workflowSyntax": "original_linux_0c0378e6_workflow_started_and_plan_passed; latest_repair_source_pending",
-      "canonicalPlanner": "original_linux_0c0378e6_plan_passed_418_documents_and_1898_total_named_database_cells"
+      "canonicalPlanner": "original_linux_0c0378e6_plan_passed_418_documents_and_1898_total_named_database_cells",
+      "websiteSourceClosure": "original_linux_0c0378e6_website_37921138249_failed_exact_document_contract_path_admission_before_tests; exact_84_path_allowlist_join_source_repair_authored"
     },
     "latestOriginalLinux": {
       "sourceCommit": "852aef0796e8455e155e1769af9e137d861b2a56",

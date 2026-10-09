@@ -87,7 +87,7 @@ runs:
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
         sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
         while IFS= read -r relative; do
-          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.mjs|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract\.json)$ ]]
+          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.mjs|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/(isolated-contract|Documents/document-contract)\.json)$ ]]
           for root in control website; do
             [[ -f "$root/$relative" && ! -L "$root/$relative" ]]
             [[ "$(realpath -e "$root/$relative")" == "$GITHUB_WORKSPACE/$root/$relative" ]]
