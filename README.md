@@ -33,7 +33,7 @@
 
 ## Why an AI-native database?
 
-**Agents shouldn't need a dozen databases.** Yet an agent that needs memory and the ability to act can easily end up wired to seven: Postgres for records, a vector database for embeddings, Redis or RabbitMQ for tasks, S3 for files, Kafka for events, a graph database for relationships and a time-series database for metrics. Every one of them brings its own client, credentials, permission model, backups and failure modes. The agent, and your team, spend their time keeping seven copies of the truth in sync.
+**Agents shouldn't need a dozen databases.** Records, embeddings, tasks, files, events and relationships often mean separate systems, credentials and backups. KeyLoad puts that context and those actions in one database for AI agents.
 
 ```mermaid
 flowchart TB
@@ -54,22 +54,20 @@ flowchart TB
     Today ~~~ One
 ```
 
-KeyLoad is an **AI-native database**: it's designed around how agents work, not bolted onto a database built for something else.
-
-- **One reference for everything.** All models share canonical entity references. A queue message can point to a document, that document can be a node in a knowledge graph, and its files, embeddings and history stay attached to it.
-- **One language.** SQL is the familiar shared language for querying and combining the models. Agents get the same operations as MCP tools, and applications get them through a typed .NET SDK.
-- **One permission model.** API keys and access policies live in the database itself. Every call is checked, down to rows and fields, and neither clients nor prompts can grant themselves extra roles.
-- **One atomic write.** A document, its event, a graph edge and the follow-up task in the same partition commit together, or not at all.
-- **Limits on every operation.** Full scans must be requested explicitly, and every request has caps on work and memory, so a runaway request is rejected at its limit instead of running unbounded.
-- **Replicated from day one.** The default server is a three-node cluster that keeps three copies of your data (RF3), on [Orleans](https://github.com/dotnet/orleans) with [ZoneTree](https://github.com/ZoneTree/ZoneTree) storage on each node.
+| Built around agents | What that means for you |
+|---|---|
+| **Linked models** | Documents, typed tables, graphs, blobs, queues, events, vectors/search and time series share canonical entity references |
+| **Shared operations** | SQL is the familiar shared language; MCP and the typed .NET SDK reach the same operations |
+| **Persisted permissions** | Database-owned API keys and row/field policies; callers cannot grant themselves roles |
+| **Atomic batches** | A document, event, graph edge and queued task in one partition commit together |
+| **Bounded work** | Explicit full-scan permission and caps on work and memory |
+| **Three replicas** | An Orleans RF3 cluster with node-local ZoneTree storage |
 
 ### Why we think this is the future
 
-Agents don't think in tables, queues or buckets. Picture a support agent handling a refund: it takes the ticket off a queue, loads the customer and the order, finds similar past cases with vector search, links the case into a knowledge graph, attaches the receipt and schedules a follow-up. Spread across separate systems, that one step turns into a distributed saga held together by glue code and stale copies, and the agent needs a key to every one of them.
+A support agent needs a ticket, customer history, similar cases, relationships and a follow-up task. Those belong together. Our goal is **one authorized operation** that builds context and records the next action.
 
-When everything lives in one database, that step should become **one authorized operation**. Today its writes within one partition already commit atomically, while leased receives, blob uploads and cross-partition work are still separate steps. Our goal is that building context becomes one query instead of a join written in prompt code, and that access is one policy you can read. That's why we're building KeyLoad: so that nobody has to stand up and run a stack of databases just to let agents get work done.
-
-KeyLoad is a development preview today: the [status section](#project-status) lists what works and what's still in progress. If you'd rather run one database than seven, **star the repo** to follow along, [try the quick start](#quick-start) and [open an issue](https://github.com/managedcode/KeyLoad/issues) describing the agent workload you want it to handle.
+Same-partition writes already commit atomically; leased receives, blob uploads and cross-partition work are separate steps today. [Try the development preview](#quick-start), [check its status](#project-status) and [share your workload](https://github.com/managedcode/KeyLoad/issues).
 
 ## What you can build
 
@@ -102,10 +100,10 @@ KeyLoad is a development preview today: the [status section](#project-status) li
 
 ### Models that work together
 
-These aren't separate silos. Collections, tables and queues live in the same database and reference each other, so one request can work across models:
-
-- **Queue to knowledge graph** (`QueueToGraph`). Reads ready messages from a queue, resolves their linked entities and writes the new knowledge-graph relationships.
-- **Graph to queued actions** (`GraphToQueueMutation`). Follows graph relationships and can enqueue actions for each entity it finds.
+| Flow | What one request does |
+|---|---|
+| **Queue to knowledge graph** (`QueueToGraph`) | Reads ready messages, resolves linked entities and writes knowledge-graph relationships |
+| **Graph to queued actions** (`GraphToQueueMutation`) | Follows relationships and can enqueue actions for linked entities |
 
 ```mermaid
 flowchart LR
@@ -114,14 +112,16 @@ flowchart LR
     G -->|"GraphToQueueMutation"| A[["Queue: actions"]]
 ```
 
-**What the first version does.** The current composition API runs through .NET `CommitAsync`, SQL `CALL keyload_documents_commit(@arguments)` or the official MCP server:
+The current composition API uses .NET `CommitAsync`, SQL `CALL keyload_documents_commit(@arguments)` or the official MCP server.
 
-- All data in one request must live in the same atomic partition and transaction domain, which is the `PartitionRef` you pass in. The whole batch succeeds or rolls back together.
-- Reading a queue into the graph does not lease or ACK the messages, so they stay in the queue for their regular consumers.
-- Blobs remain part of the same database, but use their separate upload and publication operations.
-- KeyLoad is a development preview. Full declarative SQL, the native SQL-client protocol and cross-partition composition are still in development, and production guarantees remain under qualification.
+| Boundary | Current contract |
+|---|---|
+| Atomicity | The same atomic partition and transaction domain (`PartitionRef`); the batch succeeds or rolls back together |
+| Queue reads | Composition does not lease or ACK messages |
+| Files | Blobs remain part of the same database, with separate upload and publication operations |
+| Preview limits | Full declarative SQL, the native SQL-client protocol and cross-partition composition are still in development; production guarantees remain under qualification |
 
-The [composition guide](docs/Features/DatabaseComposition.md) and its [transaction contract](docs/ADR/ADR-067-composable-agent-database.md) cover the details.
+Details: [composition guide](docs/Features/DatabaseComposition.md) · [transaction contract](docs/ADR/ADR-067-composable-agent-database.md).
 
 ## How it works
 
@@ -150,54 +150,19 @@ flowchart LR
     PART --> N3
 ```
 
-1. A caller sends an operation to any node, through the SDK, MCP, SQL or plain HTTP.
-2. KeyLoad gives that request its own [Orleans](https://github.com/dotnet/orleans) grain, which calls only the database grains it needs.
-3. Database grains route the work to the storage owner on each node. Storage stays on its node, even when Orleans moves grains around the cluster.
-4. A write is acknowledged only after a majority of the three replicas has persisted it. If a node fails, the other two keep the acknowledged data.
-
-Here's one agent tool call, end to end:
-
-```mermaid
-sequenceDiagram
-    participant Agent as AI agent
-    participant Node as Any KeyLoad node
-    participant Req as Request grain
-    participant Part as Partition grain
-    participant Reps as Three ZoneTree replicas
-    Agent->>Node: MCP tool call with an API key
-    Note over Node,Req: Key and permissions are checked against the database
-    Node->>Req: A new grain for this request
-    Req->>Part: One atomic command
-    Part->>Reps: Replicate
-    Reps-->>Part: A majority persisted it
-    Part-->>Agent: One result, all or nothing
-```
-
-You'll find the full picture in the [architecture map](docs/Architecture.md).
+Each authenticated call gets its own Orleans request grain. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md).
 
 ## Why .NET, Orleans and ZoneTree
 
-We picked a stack where the database, its cluster and its storage all run in one runtime, inside one process per node, with no glue in between.
+| Foundation | Why we use it |
+|---|---|
+| [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and native SIMD intrinsics; speedups need measurements |
+| [Orleans](https://github.com/dotnet/orleans) | Request isolation, membership, routing and generated binary serialization; experimental directory/repartitioning remain under qualification |
+| [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Embedded ordered storage and a write-ahead log for every model; data stays on its node |
+| [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | Native full-text indexing on the same storage foundation |
+| [Aspire](https://github.com/dotnet/aspire) | Owns Docker cluster startup, readiness and cleanup |
 
-**[.NET 10](https://github.com/dotnet/runtime): a fast, memory-efficient runtime.**
-- `Span<T>`, pooled buffers and hardware intrinsics let hot paths avoid allocations and use SIMD. Vectorized paths are a priority workstream, and we'll publish measurements before claiming any speedup.
-- One language end to end. The server, SDK, CLI, analyzers and tests are all C#.
-- [Aspire](https://github.com/dotnet/aspire) orchestrates the whole three-node cluster, locally and in CI, from one AppHost.
-- Open source, cross-platform and at home in Linux containers.
-
-**[Orleans](https://github.com/dotnet/orleans): a cluster runtime that's proven in production.**
-- Virtual actors (grains) that the cluster places, activates and moves for you. Orleans came out of Microsoft Research and has powered Halo's cloud services, among others.
-- KeyLoad gives each request its own grain, so isolation, cancellation and backpressure work per request.
-- Membership and failure detection are built in. KeyLoad also turns on Orleans' experimental distributed grain directory and activation repartitioning, which we're still qualifying.
-- Fast generated binary serialization between nodes.
-
-**[ZoneTree](https://github.com/ZoneTree/ZoneTree): storage that lives inside the node.**
-- An embedded, persistent, ordered key-value engine written in C#. Data lives in each node's own process, with no extra network hop and no native interop.
-- A write-ahead log on each node, and ordered keys for range scans and indexes.
-- One storage engine under every model: documents, rows, graphs, vectors, queues, events, time series and blobs.
-- [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) adds the full-text index on the same foundation.
-
-Together: **Orleans moves the routing, and ZoneTree keeps the data in place.** Storage never travels with a grain, so the cluster can rebalance work without copying files between nodes.
+**Orleans moves the routing; ZoneTree keeps the data in place.**
 
 ## Quick start
 
@@ -310,7 +275,7 @@ Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFul
 
 ### From an AI agent (MCP)
 
-Every node has a built-in [MCP](https://modelcontextprotocol.io/) server at `/mcp`. Its compact discovery entry lists `gateway_tools_search`, `gateway_tools_route` and `gateway_tool_invoke`. Our ManagedCode.MCPGateway uses the native Markdown-LD graph to find relevant database operations and return their exact schemas and effect hints. Add the server to an MCP client. In Claude Code's `.mcp.json`, for example:
+Every node serves [MCP](https://modelcontextprotocol.io/) at `/mcp`. Its compact catalog offers `gateway_tools_search`, `gateway_tools_route` and `gateway_tool_invoke`; tools are discovered on demand. Connect with an API key, for example in Claude Code's `.mcp.json`:
 
 ```json
 {
@@ -324,150 +289,75 @@ Every node has a built-in [MCP](https://modelcontextprotocol.io/) server at `/mc
 }
 ```
 
-Read the Markdown resource `keyload://guides/agent-quickstart` or request the no-argument prompt `keyload_agent_quickstart` for an introduction and usage instructions. Search with `gateway_tools_search` using `{ "query": "keyload_query_capabilities", "maxResults": 1 }`, inspect the returned tool schema, then call `gateway_tool_invoke` with `{ "toolId": "keyload_query_capabilities", "arguments": {} }`. Use the returned canonical argument shape for other operations; retain the same command identity and payload when retrying an uncertain write.
+| Step | Agent workflow |
+|---|---|
+| **Learn** | Read `keyload://guides/agent-quickstart` or request the no-argument `keyload_agent_quickstart` prompt |
+| **Discover** | Call `gateway_tools_search` with `{ "query": "keyload_query_capabilities", "maxResults": 1 }` |
+| **Inspect** | Use the returned exact schema and effect hints |
+| **Invoke** | Call `gateway_tool_invoke` with `{ "toolId": "keyload_query_capabilities", "arguments": {} }` |
 
-Discovery exposes static operation documentation. Each invocation checks current permissions persisted in the database, so neither a prompt nor caller-supplied roles can escalate them. The [MCP and API guide](docs/Features/ClientApi.md) describes canonical operations and `/v1/` HTTP routes. The [gateway integration contract](docs/Features/ClientApi/ToolDiscovery.md) records the open runtime, RF3 and delivery qualification gates for this discovery revision.
+Every invocation checks current persisted permissions. Retry uncertain writes with the same command identity and payload. Details: [API guide](docs/Features/ClientApi.md) · [discovery and qualification contract](docs/Features/ClientApi/ToolDiscovery.md).
 
 ## Project status
 
-> **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
+> **Development preview.** Ready to explore; production qualification is still open.
 
-The original 104-task plan has **17 accepted, 87 in progress and 0 pending**.
-Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
-document CRUD/CAS, **KL-012** batch/idempotency, **KL-013** document-only filter/query,
-**KL-016** committed projection
-outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
-ranges/aggregates, **KL-022** graph storage, **KL-023** bounded graph traversal
-**KL-020** three-node replicated apply, **KL-026** retention, expiry and rollups,
-**KL-014** server/CLI and typed SDK outcomes, **KL-027** canonical vectors
-and exact search, **KL-008** native storage ownership and joined lifetime, and
-**KL-011** strict scalar/composite indexes and partition-unique constraints, and
-**KL-033** deterministic hybrid rank, literal Explain and candidate-window quality.
-Each closure is bound to its original criteria and Linux
-operation evidence. Complete feature and cluster qualification remains open.
-The [client acceptance record](docs/Features/ClientApi.md) and
-[vector acceptance record](docs/Features/Search.md) bind those original task
-criteria to their accepted source. Later changes require fresh qualification;
-complete solution, coverage, endurance and performance gates remain open.
+| Original plan | Accepted | In progress | Pending |
+|---|---|---|---|
+| 104 tasks | **17** | **87** | **0** |
 
-Current source includes bounded same-partition relational INNER JOIN, multi-lane
-queue receive with independent leaf receipts, and shared SDK, MCP and SQL operations
-across the database models. Complete RF3 fault
-qualification, full SQL and its native client protocol, foreign keys, scaling and
-endurance remain in progress. The [status tracker](docs/implementation/status.json)
-records the actual source, test results and remaining acceptance gates.
+```mermaid
+flowchart TB
+    Core["1 · Core slices<br/>17 original tasks accepted"]
+    Models["2 · Connected workflows<br/>Implementation in progress"]
+    Checks["3 · Qualification<br/>Faults, coverage and performance"]
+    Release["4 · Production release<br/>Gated on qualification"]
+    Core --> Models --> Checks --> Release
+    classDef accepted fill:#eee8f5,stroke:#6e56cf,color:#171717
+    classDef active fill:#f7eef3,stroke:#97718d,color:#171717
+    classDef gated fill:#f2f2f2,stroke:#777,color:#171717
+    class Core accepted
+    class Models,Checks active
+    class Release gated
+```
 
-The current source includes bounded public partition Transfer/Resume/Abort,
-receiver-issued native proofs, persisted cancellation and joined node-local
-storage ownership. It also includes real capture-pointer fault/recovery and
-erased-follower snapshot plus ordered-tail flows. The accepted `556c13a` checkpoint passed the full Release build and
-formatter. Its related bank, HTTP client, hybrid rank/Explain and native text
-process-recovery tests passed all 290 selected cases across normal and scalar
-modes locally. Later source changes require a fresh build and runtime evidence. Fresh source-bound Linux public RF3, complete unit/recovery,
-fault and performance qualification remains open. Original source identities,
-failures and results belong in the [qualification records](docs/implementation/status.json).
+**Accepted slice** means its original task criteria passed for the recorded source. **In source** means implemented with qualification still open. Later changes need fresh checks; these stages are not a release schedule.
 
-Current source also includes an explicit bounded follower document read through
-the .NET SDK and MCP, with a selected replica, lag limit and fresh authorization.
-Its [document contract](docs/Features/DocumentStorage.md) keeps the captured data
-cut distinct from the current authorization cut. Complete current-source RF3
-qualification remains open.
+| Workstream | What it delivers | Why it matters | State | What remains |
+|---|---|---|---|---|
+| **Storage & documents** | ZoneTree, CRUD, revision checks, strict indexes | Keep records consistent | ✓ Accepted slices | [Complete recovery and fault gates](docs/Features/StorageRecovery.md) |
+| **Backup & restore** | Local database backup and restore | Recover a saved database | ✓ Accepted local slice | [RF3 cluster restore drills](docs/Features/BackupRestore.md) |
+| **Atomic batches** | Same-partition writes and persisted retries | Commit related changes together | ✓ Accepted slices | [Cross-partition composition](docs/Features/DatabaseComposition.md) |
+| **Graphs** | Stored edges and bounded traversal | Connect agent knowledge | ✓ Accepted slices | [Cross-partition graph work](docs/Features/GraphTraversal.md) |
+| **Time series** | Ordered samples, ranges, aggregates and retention | Track history and trends | ✓ Accepted slices | [Chunk and scale qualification](docs/Features/TimeSeries.md) |
+| **Search** | Exact vectors, hybrid ranking and Explain | Retrieve useful context | ✓ Accepted slices | [ANN, text rebuild and freshness](docs/Features/Search.md) |
+| **SQL & typed tables** | `SELECT`, model views, `CALL`, bounded INNER JOIN | Use one familiar language | ◐ In source | [Full SQL, foreign keys and native client protocol](docs/Features/QueryExecution.md) |
+| **Queues, events & composition** | Leases, event history and queue ↔ graph flows | Turn knowledge into actions | ◐ In source | [Complete failure, security and recovery flows](docs/Features/Messaging.md) |
+| **SDK, MCP & tools** | .NET SDK, HTTP, MCP discovery, CLI and admin | Connect applications and agents | ◐ In source | [Current gateway and official MCP RF3 checks](docs/Features/ClientApi/ToolDiscovery.md) |
+| **Authorization** | Persisted keys and row/field policies | Keep private context private | ◐ In source | [Complete adversarial and revocation checks](docs/Features/Authorization.md) |
+| **RF3 & Orleans** | Three replicas, follower reads and partition movement | Keep data through node failures | ◐ In source | [Current-source faults, restart and runtime checks](docs/Features/ClusterRouting.md) |
+| **RAM, SIMD & performance** | Bounded caches and vectorized CPU work | Reduce latency and memory use | ◐ In progress | [Comparable Linux measurements](docs/implementation/memory-performance.md) |
+| **Production release** | Qualified database and operator guidance | Trust important data | ○ Gated | Full unit/scalar, recovery, RF3, coverage, endurance and power-loss gates |
 
-Ordinary native TUnit tests default to 20 parallel cases, with measured tuning up
-to 50. Benchmark tests run one at a time inside each isolated Linux job; separate
-jobs may run concurrently. Heavy ingestion and mixed-operation load tests require
-exclusive execution and stay outside coverage. The required million-record
-ingestion cases for 1, 10 and 500 clients, pure CRUD/read scenarios and deterministic mixed
-workloads are implemented in the new document family; original Linux qualification remains open.
-Comparisons use only actual native 1-node and 3-node configurations. The [methodology](docs/Features/BenchmarkComparisons/Methodology.md)
-defines three repetitions, real client ownership, full data verification and timing/resource evidence. Every comparison target must execute the same canonical scenario
-set, datasets, client counts and measurement rules. All benchmark-stage builds, checks,
-tests and workloads execute in GitHub Actions. GitHub runs separate normal/scalar
-acceptance lanes for storage ownership, strict indexes, the server/SDK,
-security/telemetry, strong/session reads, exact vectors and controlled partition
-movement, hybrid search, follower snapshots and native text rebuilds. These ten tasks run in twenty isolated Linux jobs. Focused task
-runs retain their complete declared operation scope; full build, unit, recovery,
-RF3 and coverage gates remain mandatory.
+Complete product functional coverage is **unmeasured**. Performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
-Complete product functional coverage remains **unmeasured**. The
-[coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,
-excludes load and comparison runs, and requires matching source and build reports.
-
-| Ready to try (in source, covered by tests) | Still in progress |
-|---|---|
-| Documents, typed rows, graphs, queues, events, time series, blobs and search behind one permission model | Full SQL (joins, foreign keys) and a native SQL client protocol |
-| SQL `SELECT`, model views and `CALL`, plus the .NET SDK, MCP server and HTTP API | Combining data across partitions in one request |
-| Queue ↔ graph composition within one partition | [Approximate vector search (ANN)](docs/Features/Search/ManagedAnn.md); vector search is exact for now |
-| Three-node Orleans cluster, crash recovery, local backup and restore | Production, endurance and power-loss qualification |
-| Admin console and CLI | |
-| | The full performance comparison with other databases (current runs are on the [website](https://www.keyload.cloud/#benchmarks)) |
-
-Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch). KeyLoad then ranks the results it finds and checks permissions on each one.
-
-Native Orleans [runtime adoption](docs/Features/ClusterRouting/RuntimeAdoption.md)
-and [journal-backed Durable Jobs](docs/Features/ClusterRouting/RuntimeJournal.md)
-are being integrated. The source includes due-work wakeups, bounded telemetry,
-local lifecycle ownership and saga timeout jobs. The current solution build
-passes; complete native runtime qualification remains in progress. Native
-job restart/adoption and real SDK/MCP RF3 fault qualification remain open.
-
-Runtime timeouts, retries and resource limits use centrally validated typed options. The [configuration contract](docs/ADR/ADR-113-centralized-runtime-options.md)
-also covers the SDK, CLI and Aspire host. The full current solution builds;
-complete runtime and original Linux qualification remain pending.
-
-For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
-
-The [TimeProvider contract](docs/Features/ResourceExecution/TimeProvider.md)
-supplies explicit clocks for timestamps, elapsed budgets and managed timers.
-Controlled-time regressions and the remaining runtime qualification gates
-are tracked in the feature specification.
-
-Website publication runs automatically on main pushes that change the site or its tests, build and publication inputs. Documentation and database-only pushes do not trigger it. It uses the newest completed benchmark run with a verified aggregate when available; otherwise it publishes the product site without performance figures. A successful benchmark run triggers a fresh website build after every producer job and aggregation succeeds. [ADR-112](docs/ADR/ADR-112-independent-website-publication.md) records the source, artifact and publication checks; the revised route still needs delivered-source Linux CI and Pages verification.
+[Task-by-task status and original results](docs/implementation/status.json) · [SQL compatibility inventory](docs/implementation/sql-client-conformance.json) · [Coverage requirements](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 
 ## FAQ
 
-### What is an AI-native database?
-
-A database designed around how AI agents work: every kind of agent data in one place, linked by shared references, reachable through MCP and SQL, with permissions an agent can't talk its way around. That's what KeyLoad is built to be.
-
-### Is KeyLoad a vector database for .NET?
-
-It includes vector search, but vectors don't sit in a separate store. They live next to the documents, graph, queues and files they belong to, and one request can use all of them. Vector search is exact today, and [approximate (ANN) search](docs/Features/Search/ManagedAnn.md) is in progress.
-
-### Can KeyLoad be the memory layer for my agents?
-
-That's the main use case. Documents, embeddings, files, a knowledge graph and event history live together, so long-term memory, retrieval (RAG) and the task queue share one store and one permission model.
-
-### Does KeyLoad replace Postgres, Redis, Kafka or S3?
-
-For agent workloads, that's the goal: one database instead of a stack of them. KeyLoad is still a development preview, so check the [project status](#project-status) before you move anything.
-
-### How do AI agents connect?
-
-Every node runs a built-in MCP server at `/mcp`. Point any MCP client at it with an API key, and the agent can use exactly the operations that key allows.
-
-### Why build a database on Orleans?
-
-Orleans already handles cluster membership, failure detection and request routing for .NET. KeyLoad gives every request its own grain, while ZoneTree keeps each node's data on that node. See [Why .NET, Orleans and ZoneTree](#why-net-orleans-and-zonetree).
-
-### Can I use KeyLoad from Python, TypeScript or another language?
-
-Yes, through MCP or the HTTP API under `/v1/`. The typed SDK is .NET for now.
-
-### Is the KeyLoad source available?
-
-Yes. KeyLoad is developed publicly on GitHub under the [Elastic License 2.0](LICENSE). You can use it in your own applications, including commercial production applications. Providing KeyLoad to third parties as a hosted or managed database service with access to a substantial set of its features requires separate authorization from ManagedCode. KeyLoad is source available.
-
-### Can I run it in production?
-
-Not yet. Endurance, fault and power-loss qualification are still in progress.
+| Question | Answer |
+|---|---|
+| **Is this a vector database?** | Vectors share a database with documents, graphs, queues and files. Exact search is available; [ANN is in progress](docs/Features/Search/ManagedAnn.md). |
+| **Can it hold agent memory?** | Yes: linked documents, embeddings, files, graphs and history are the main use case. |
+| **Does it replace a stack of databases?** | That's the goal for agent workloads. Check the [preview limits](#project-status) before moving data. |
+| **How do agents connect?** | MCP at `/mcp`, with an API key and on-demand tool discovery. |
+| **What about Python or TypeScript?** | Use MCP or `/v1/` HTTP. The typed SDK is .NET. |
+| **Can I use it commercially?** | [Elastic License 2.0](LICENSE) permits application use. Offering a substantial set of KeyLoad features as a hosted or managed service requires ManagedCode authorization. KeyLoad is source available. |
+| **Production ready?** | Not yet: endurance, fault and power-loss qualification remain open. |
 
 ## Repository map
 
-C# feature code uses `Features/<SliceName>/<Responsibility>/` throughout the solution,
-including SDK, infrastructure, benchmarks and tests. For example, ClusterRouting keeps
-`Grains`, `Commands`, `Queries`, `Contracts` and `Streaming` inside its own slice.
-Shared primitives and composition entry points remain at project roots.
+Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 
 | Path | What's inside |
 |---|---|
@@ -484,7 +374,7 @@ Shared primitives and composition entry points remain at project roots.
 
 ## Contributing
 
-CI runs native TUnit tests after building, with live Detailed output. TUnit fixtures start and dispose the real Aspire infrastructure. Pick a suite: `unit`, `unit-scalar`, `recovery`, `rf3`, `analyzers`, `comparison` or `site`.
+Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `unit-scalar`, `recovery`, `rf3`, `analyzers` or `site`):
 
 ```bash
 node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
@@ -494,7 +384,7 @@ node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
 dotnet format KeyLoad.slnx --verify-no-changes --no-restore
 ```
 
-Benchmark measurements and their contract tests run exclusively in the separate Benchmarks pipeline, through TUnit and Aspire with real C# clients. The `rf3` suite starts a real three-node cluster in Docker and tests it through the .NET SDK and the official MCP client. Before your first change, read the [architecture map](docs/Architecture.md) and the feature spec in [`docs/Features/`](docs/Features). If you work with AI coding agents, [AGENTS.md](AGENTS.md) holds the repository rules.
+Native TUnit fixtures own Aspire startup and cleanup; `rf3` uses real .NET and official MCP clients against three Docker nodes. Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
 
 ## Credits
 
@@ -511,12 +401,29 @@ KeyLoad is developed by [Managed Code](https://www.managed-code.com/) and stands
 | [ManagedCode.Storage](https://github.com/managedcode/Storage) | File-system storage and backup transfer support |
 | [ManagedCode.TimeSeries](https://github.com/managedcode/TimeSeries) | Time-series aggregation |
 | [ManagedCode.Orleans.Graph](https://github.com/managedcode/Orleans.Graph) | Grain call relationship policies |
+| [ManagedCode.Orleans.Identity](https://github.com/managedcode/Orleans.Identity) | Native Orleans request identity context |
+| [ManagedCode.MCPGateway](https://github.com/managedcode/MCPGateway) | Agent authentication and on-demand tool discovery |
+| [ManagedCode.MarkdownLd.Kb](https://github.com/managedcode/markdown-ld-kb) | Knowledge-graph search over tool metadata |
 | [Cartograph](https://github.com/angelhernandezm/Cartograph) | Segmented backup archives and catalogs |
 | [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) | Logs, metrics and traces |
 
-Development and presentation also use [Aspire](https://github.com/dotnet/aspire) for Docker orchestration, [TUnit](https://github.com/thomhurst/TUnit) for tests, [Roslyn](https://github.com/dotnet/roslyn) for the repository's own code analyzers, [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) for microbenchmarks, and [Three.js](https://github.com/mrdoob/three.js) for the website's cluster illustration. The benchmark suite compares KeyLoad with the free community editions of [PostgreSQL](https://github.com/postgres/postgres) with [pgvector](https://github.com/pgvector/pgvector), [TimescaleDB](https://github.com/timescale/timescaledb), [MongoDB](https://github.com/mongodb/mongo), [Redis](https://github.com/redis/redis), [RabbitMQ](https://github.com/rabbitmq/rabbitmq-server), [KurrentDB](https://github.com/kurrent-io/KurrentDB), [Neo4j](https://github.com/neo4j/neo4j), [Qdrant](https://github.com/qdrant/qdrant), [SurrealDB](https://github.com/surrealdb/surrealdb), [HelixDB](https://github.com/helixdb/helix-db) and [OpenSearch](https://github.com/opensearch-project/OpenSearch), connecting through the official clients [Npgsql](https://github.com/npgsql/npgsql), [MongoDB .NET Driver](https://github.com/mongodb/mongo-csharp-driver), [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis), [RabbitMQ .NET Client](https://github.com/rabbitmq/rabbitmq-dotnet-client) and [KurrentDB .NET Client](https://github.com/kurrent-io/KurrentDB-Client-Dotnet).
+| Development & presentation | Contribution |
+|---|---|
+| [Aspire](https://github.com/dotnet/aspire) · [TUnit](https://github.com/thomhurst/TUnit) | Docker orchestration and real operation tests |
+| [Roslyn](https://github.com/dotnet/roslyn) · [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) | Repository analyzers and microbenchmarks |
+| [Three.js](https://github.com/mrdoob/three.js) | Website cluster illustration |
 
-The active comparison scale is 100,000 and 1,000,000 records for every database. The [vector qualification contract](docs/Features/BenchmarkComparisons/VectorQualification.md) covers exact and native approximate search, filtered queries, concurrent index updates, recall@k, index construction cost, p95/p99 and separately observed database RAM. New adapter and pipeline source is in progress; these additions do not yet have qualified original GitHub measurements.
+The comparison suite uses free community editions and real native clients:
+
+| Workload family | Comparison projects | Client projects |
+|---|---|---|
+| Records & SQL | [PostgreSQL](https://github.com/postgres/postgres), [MongoDB](https://github.com/mongodb/mongo), [Redis](https://github.com/redis/redis) | [Npgsql](https://github.com/npgsql/npgsql), [MongoDB .NET Driver](https://github.com/mongodb/mongo-csharp-driver), [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) |
+| Vectors & text | [pgvector](https://github.com/pgvector/pgvector), [Qdrant](https://github.com/qdrant/qdrant), [OpenSearch](https://github.com/opensearch-project/OpenSearch) | — |
+| Queues & events | [RabbitMQ](https://github.com/rabbitmq/rabbitmq-server), [KurrentDB](https://github.com/kurrent-io/KurrentDB) | [RabbitMQ .NET Client](https://github.com/rabbitmq/rabbitmq-dotnet-client), [KurrentDB .NET Client](https://github.com/kurrent-io/KurrentDB-Client-Dotnet) |
+| Graphs & connected models | [Neo4j](https://github.com/neo4j/neo4j), [SurrealDB](https://github.com/surrealdb/surrealdb), [HelixDB](https://github.com/helixdb/helix-db) | — |
+| Time series | [TimescaleDB](https://github.com/timescale/timescaledb) | — |
+
+Active scale: **100,000 and 1,000,000 records**, at native **1 or 3 nodes** where supported. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
 ## License
 
