@@ -44,6 +44,7 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
             PartitionMovementParentCaptureLimits.RequirePlannedStageCapacity(state, intended, receiver,
                 descriptor.Resources, actualClusterId, Math.Min(limits.Value.MaxBatchBytes, work.MaximumResultBytes));
         }
+        await ObserveFinalInstallAsync(state, intended, work, phaseObservation, cancellationToken).ConfigureAwait(false);
         var cleanupGeneration = intended.Stage == PartitionMovePeerStage.Retire
             ? header.CleanupGeneration : PartitionMoveProtocol.EmptyCount;
         var grantId = PartitionMovementParentPhaseIds.For(request, principalId, grantRole,
@@ -60,6 +61,22 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         return intended.Stage == PartitionMovePeerStage.Capture
             ? await captures.ExecutePromotedAsync(principalId, request, promoted, work, cancellationToken).ConfigureAwait(false)
             : await phases.ExecutePromotedAsync(principalId, request, promoted, work, phaseObservation, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async ValueTask ObserveFinalInstallAsync(PartitionMoveParentState state,
+        PartitionMovePhaseCommand intended, ReadExecutionBudget work,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
+    {
+        if (intended.Stage != PartitionMovePeerStage.Install || phaseObservation is null)
+        { return; }
+        var descriptor = state.Selected?.OriginalDescriptor
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+        var total = descriptor.Families.Sum(static family => family.PageCount);
+        if (intended.PageOrdinal != total)
+        { return; }
+        await phaseObservation(GrainRequestPhase.ParentFinalInstallPreflight, cancellationToken).ConfigureAwait(false);
+        work.Check();
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
     internal Task<PartitionMoveParentState> AcknowledgeAsync(string principalId, PartitionMoveRequest request,

@@ -25,6 +25,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
     internal int? movementMaxBatchBytes;
+    internal int? movementMaxFrameBytes;
     internal RequestCqrsProbeFixture? queryControls;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
@@ -74,6 +75,14 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         new DatabaseLimits { MaxBatchBytes = maxBatchBytes }.Validate();
         return StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
             probe: true, protectedDocument: true, maximumBatchBytes: maxBatchBytes), token);
+    }
+
+    internal static Task<TwoRf3MembershipWave> StartProtectedFramesAsync(int maxFrameBytes, CancellationToken token)
+    {
+        new KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions { MaxFrameBytes = maxFrameBytes }.Validate();
+        var wave = new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
+            probe: true, protectedDocument: true) { movementMaxFrameBytes = maxFrameBytes };
+        return StartOwnedAsync(wave, token);
     }
 
     internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
@@ -201,6 +210,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
         return path;
     }
+    internal Task ReconfigureMovementFrameAsync(int maxFrameBytes, CancellationToken cancellationToken)
+        => capacity.ReconfigureMovementFrameAsync(this, maxFrameBytes, cancellationToken);
+
     internal Task ReconfigureMovementCapacityAsync(int maxBatchBytes, CancellationToken cancellationToken)
         => capacity.ReconfigureMovementCapacityAsync(this, maxBatchBytes, cancellationToken);
 

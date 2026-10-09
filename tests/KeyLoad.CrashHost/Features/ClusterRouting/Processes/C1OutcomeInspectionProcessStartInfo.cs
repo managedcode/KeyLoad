@@ -15,10 +15,12 @@ internal static class C1OutcomeInspectionProcessStartInfo
     private const string MissingHostMessage = "The Release CrashHost assembly is not built.";
     private const string RepositoryMissingMessage = "The KeyLoad repository root is unavailable.";
 
-    internal static ProcessStartInfo Create()
+    internal static ProcessStartInfo Create(string mode = C1OutcomeInspectionProtocol.Mode)
     {
         const string CreateResultText = "bin";
 
+        if (mode is not C1OutcomeInspectionProtocol.Mode and not NativeInstallFrameInspectionProtocol.Mode)
+        { throw new ArgumentException(C1OutcomeInspectionProtocol.InvalidRequest, nameof(mode)); }
         var root = FindRepositoryRoot();
         var assembly = Path.Combine(root, TestsDirectory, CrashHostDirectory, CreateResultText, ReleaseDirectory,
             FrameworkDirectory, AssemblyName);
@@ -33,7 +35,7 @@ internal static class C1OutcomeInspectionProcessStartInfo
             RedirectStandardError = true
         };
         start.ArgumentList.Add(assembly);
-        start.ArgumentList.Add(C1OutcomeInspectionProtocol.Mode);
+        start.ArgumentList.Add(mode);
         return start;
     }
 

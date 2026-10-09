@@ -91,6 +91,7 @@ internal sealed class FrameBudgetTests
             CommitBoundaryMutations(store, valueKey, first, last, tombstoneKey));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(failure.Message).IsEqualTo(ZoneTreePersistenceFormat.EncodedTransactionFrameLimitExceeded);
         await Assert.That(store.Position).IsEqualTo(0);
         await Assert.That(new FileInfo(Path.Combine(directory, JournalFileName)).Length).IsEqualTo(EmptyJournalBytes);
         await Assert.That(store.Read(view => view.ReadOwnedValue(valueKey))).IsNull();

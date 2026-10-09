@@ -210,7 +210,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "stage39_019_035_021_029_native_source_joined_owner50_slots_fresh_linux_compilation_discovery_and_whole_acceptance_pending",
+    "verificationStage": "stage40_whole_036_029_028_native_source_joined_context_compile_failure_repaired_fresh_linux_build_discovery_and_acceptance_pending",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -41070,6 +41070,103 @@
         "KL-036 native final encoded frame and receiver lifecycle",
         "KL-042 two-RF3 capture/restore/full linked event capability state"
       ]
+    },
+    "stageXXXIXDeliveredCommit": "51fbd1c3dd5dd2fad7034a01c2e0275affb33749",
+    "stageXXXIXDeliveredRemoteVerified": true,
+    "stageXLOriginalDevelopment": {
+      "recordedAtUtc": "2026-10-09T13:47:00.498473+00:00",
+      "sourceCheckoutBeforeCommit": "51fbd1c3dd5dd2fad7034a01c2e0275affb33749",
+      "original104TaskCounts": {
+        "done": 17,
+        "inProgress": 87,
+        "pending": 0
+      },
+      "joinedSourcePackets": [
+        {
+          "scope": "KL-029 original maintenance failure category",
+          "path": "/private/tmp/keyload-r896-kl029-native-failure-category-source-joined-20261009.json",
+          "sha256": "1b170fa91f866179d9eb36eeeb050d764c8a7e367a9294bc618e91d167fcb5b8",
+          "joinedPaths": 2
+        },
+        {
+          "scope": "KL-036 whole native final install frame",
+          "path": "/private/tmp/keyload-r897-kl036-native-final-install-frame-source-joined-20261009.json",
+          "sha256": "e54303567ca331cc540eae106e8acef6f19826d247d80fc80c03a31adb8b0a40",
+          "joinedPaths": 45
+        },
+        {
+          "scope": "KL-029 whole same-call maintenance reconciliation",
+          "path": "/private/tmp/keyload-r898-kl029-native-maintenance-whole-reconciliation-source-joined-20261009.json",
+          "sha256": "0bce9fedc4ef74b1069083081f0c491639ef091bfee5fd2a7bd78f546eeecf97",
+          "joinedPaths": 6
+        },
+        {
+          "scope": "KL-028 selected provider whole audit and manifest repair/cold healthy flow",
+          "path": "/private/tmp/keyload-r899-kl028-provider-whole-audit-source-joined-20261009.json",
+          "sha256": "54cecf1fbb7596539c15e254048b72689aa18657023a274b5fe6e1bd645f0e02",
+          "joinedPaths": 5
+        }
+      ],
+      "rootNativeContextRepairReceipt": {
+        "path": "/private/tmp/keyload-root-kl019-context-restore-source-checkpoint-20261009.json",
+        "sha256": "d432ded4c4e7876803adffff164b23a78f3de0520d4fc35a26457ce61e405f56"
+      },
+      "precedingOriginalLinux": {
+        "sourceCommit": "51fbd1c3dd5dd2fad7034a01c2e0275affb33749",
+        "runId": 37934301546,
+        "attempt": 1,
+        "conclusion": "failure",
+        "jobsCompleted": 24,
+        "successfulJobs": 1,
+        "failedJobs": 23,
+        "fullBuildJobId": 113834918857,
+        "fullBuildOriginalLogSha256": "ffb7463aba9dfb7fd9d6b735ccc95cf356ed4ae43e621a1695b57b65cfeed3ea",
+        "uniqueFullBuildCompilerDiagnostic": "CS8604 CommandPartitionGrain previous native hint restoration",
+        "metadataSha256": "d5935421677e32d42bdda83200802334ce865627cb50d1a66060a003d207b20f",
+        "jobsMetadataSha256": "97dc864621636241bca13db8eb9b26936d10f3a0e73ce3a76e0343fd06d1c4de",
+        "freshNative50ExecutionQualified": false
+      },
+      "nativeFunctionalParallelism": {
+        "ordinaryDefaultSlots": 50,
+        "maximumSlots": 50,
+        "comparisonAndHeavyExclusiveSlots": 1,
+        "actual50CaseOverlapMeasured": false,
+        "freshNativeRunQualified": false,
+        "originalLimitsDeadlinesFailuresAndJoinedCleanupPreserved": true
+      },
+      "KL036RemainingExactBoundary": {
+        "sourceStage": "Genuine pre-final hold, original cohort calibration, actual failed native encoded Advance, same MoveId full healthy SDK/MCP/Q1 and cold oracle authored",
+        "actualRejectedCandidatePrefixPlusOneQualification": "OPEN: distinct same-entry receiver/voter/cap observer contract reviewed; implementation and original execution pending",
+        "activeInvalidAdjunctProducerDisposedQualification": "OPEN: claimed cleanup and distinct fixture owner-disposed contract reviewed; implementation and original execution pending",
+        "nativeNewCaseUidAndImageAdmissionPending": true
+      },
+      "KL029OriginalFailureReview": {
+        "sourceCommit": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+        "runId": 37920436876,
+        "unitEachProfile": {
+          "passed": 57,
+          "total": 58
+        },
+        "recoveryEachProfile": {
+          "passed": 18,
+          "total": 18
+        },
+        "rf3EachProfile": {
+          "passed": 3,
+          "total": 9
+        },
+        "wrongOwnerUnknownWriteOutcomeInitiatingCause": "Unproven in retained originals; current bounded closed category and full same-call no-effect reconciliation authored without expectation/clock/token changes"
+      },
+      "sourceQualification": "Guarded exact source joins and source review only. No local compiler, formatter, tests or governance execution; no fresh case UID, image, PASS or memory/performance inference. Mandatory original Linux build/normal/scalar/process/RF3/coverage/fault/endurance and performance gates remain open.",
+      "allOriginal104TaskObjectsPreserved": true,
+      "allCanonicalTaskContractsPreserved": true,
+      "noNewAcceptancePromoted": true,
+      "parallelWholeTasks": [
+        "KL-036",
+        "KL-042",
+        "KL-030"
+      ],
+      "privateAdditionalWholeSource": "KL-042 immutable104+7 packets retain exact RestoreRestore prerequisite; not live joined"
     }
   },
   "TIME-PROVIDER-001": {

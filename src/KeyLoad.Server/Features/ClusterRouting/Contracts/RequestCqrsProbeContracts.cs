@@ -22,7 +22,8 @@ internal enum RequestCqrsProbePhase
     TransferPageReturned,
     ParentTransferCloseFailed,
     ParentReceiverIssueAcknowledged,
-    ParentReceiverIssueObserved
+    ParentReceiverIssueObserved,
+    ParentFinalInstallPreflight
 }
 
 internal enum RequestCqrsProbeAction

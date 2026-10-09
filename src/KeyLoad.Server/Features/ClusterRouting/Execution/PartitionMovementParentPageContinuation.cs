@@ -64,7 +64,7 @@ internal sealed class PartitionMovementParentPageContinuation
                     work, cancellationToken).ConfigureAwait(false);
             }
             return await InstallNextAsync(principalId, request, state, ordinal, work,
-                cancellationToken).ConfigureAwait(false);
+                phaseObservation, cancellationToken).ConfigureAwait(false);
         }
         var total = descriptor.Families.Sum(static family => family.PageCount);
         if (ordinal < total)
@@ -75,7 +75,7 @@ internal sealed class PartitionMovementParentPageContinuation
         if (ordinal != total)
         { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
         return await InstallNextAsync(principalId, request, state, PartitionMoveProtocol.EmptyCount,
-            work, cancellationToken).ConfigureAwait(false);
+            work, phaseObservation, cancellationToken).ConfigureAwait(false);
     }
 
     internal async Task<PartitionMoveParentState> ReadOriginalCaptureAsync(string principalId,
@@ -97,12 +97,13 @@ internal sealed class PartitionMovementParentPageContinuation
     }
 
     private Task<PartitionMoveParentState> InstallNextAsync(string principalId, PartitionMoveRequest request,
-        PartitionMoveParentState state, int ordinal, ReadExecutionBudget work, CancellationToken cancellationToken)
+        PartitionMoveParentState state, int ordinal, ReadExecutionBudget work,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
         => steps.EffectAsync(principalId, request, state, PartitionMovementParentPhaseRole.InstallGrant,
             PartitionMovementParentPhaseRole.Install,
             PartitionMovementParentNativePhases.Install(state.Header!, PartitionMovementParentAuthority.RequireControl(state),
                 state.Selected!.OriginalFence!, state.Selected.OriginalDescriptor!, ordinal),
-            state.Header!.DestinationOwner, work, cancellationToken);
+            state.Header!.DestinationOwner, work, phaseObservation, cancellationToken);
 
     private async Task<PartitionMoveParentState> StageNextAsync(string principalId, PartitionMoveRequest request,
         PartitionMoveParentState state, int ordinal, ReadExecutionBudget work,

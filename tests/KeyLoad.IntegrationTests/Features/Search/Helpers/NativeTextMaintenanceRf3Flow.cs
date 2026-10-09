@@ -6,12 +6,13 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextMaintenanceRf3Flow
 {
     internal static async Task RunAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        NativeTextMaintenancePath path, CancellationToken token)
+        NativeTextMaintenancePath path, List<Exception> failures, CancellationToken token)
     {
         var scenario = new NativeTextMaintenanceRf3Scenario(NativeTextMaintenanceRf3Scenario.CreatePartition());
         await scenario.SeedAsync(sdk, token);
         var request = await scenario.RequestAsync(sdk, mcp, token);
-        await NativeTextMaintenanceRf3Denied.OwnerAsync(sdk, mcp, scenario, request, token);
+        if (!await NativeTextMaintenanceRf3Denied.OwnerAsync(sdk, mcp, scenario, request, failures, token))
+        { return; }
         var built = await NativeTextMaintenanceRf3Call.ExecuteAsync(sdk, mcp, request, path, token);
         await NativeTextMaintenanceRf3Assertions.ResultAsync(built, request);
         await Assert.That(built.IndexedThroughSequence).IsEqualTo(built.Source!.ThroughSequence);

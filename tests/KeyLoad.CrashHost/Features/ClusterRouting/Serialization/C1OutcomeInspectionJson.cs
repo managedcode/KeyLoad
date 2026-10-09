@@ -29,6 +29,7 @@ internal static class C1OutcomeInspectionJson
         nameof(C1OutcomeInspectionReceipt.OutcomePresent)
     ];
     private static readonly C1OutcomeInspectionJsonContext Context = CreateContext();
+    internal static C1OutcomeInspectionJsonContext SharedContext => Context;
 
     internal static C1OutcomeInspectionRequest ReadRequest(ReadOnlySpan<byte> bytes)
     {
@@ -107,7 +108,7 @@ internal static class C1OutcomeInspectionJson
         return line;
     }
 
-    private static void ValidateShape(ReadOnlySpan<byte> bytes, string[] fields, int maximumBytes,
+    internal static void ValidateShape(ReadOnlySpan<byte> bytes, string[] fields, int maximumBytes,
         Func<InvalidDataException> invalid)
     {
         try

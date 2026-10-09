@@ -43,6 +43,7 @@ internal static class ZoneTreePersistenceFormat
     internal const string JournalChecksumInvalid = "The redo journal checksum is invalid.";
     internal const string RecoveryRequired = "The database must recover before accepting another operation.";
     internal const string UnknownWriteOutcome = "The transaction outcome is unknown. Recover and retry the same command ID.";
+    internal const string EncodedTransactionFrameLimitExceeded = "The encoded transaction exceeds the native journal frame limit.";
     internal const string TransactionFrameLimitExceeded = "The compiled transaction exceeds the journal frame limit.";
     internal const string SnapshotCutLost = "The snapshot no longer has the requested committed cut.";
     internal const string CheckpointBudgetExceeded = "The snapshot exceeds its frame or byte budget.";

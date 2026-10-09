@@ -6,6 +6,8 @@ internal static class TwoRf3ProfileProtocol
     internal const string Setting = Section + ":Profile";
     internal const string ProtectedDocumentMovementSetting = Section + ":ProtectedDocumentMovement";
     internal const string MovementMaxBatchBytesSetting = Section + ":MovementMaxBatchBytes";
+    internal const string MovementMaxFrameBytesSetting = Section + ":MovementMaxFrameBytes";
+    internal const string MovementMaxFrameBytesEnvironment = "KeyLoad__StorageExecution__MaxFrameBytes";
     internal const string MovementMaxBatchBytesEnvironment = "KeyLoad__DatabaseLimits__MaxBatchBytes";
     internal const string MovementEnvironment = "KeyLoad__PartitionMovementExecution__Enabled";
     internal const string RemoteQuerySetting = Section + ":RemotePartitionQueries";

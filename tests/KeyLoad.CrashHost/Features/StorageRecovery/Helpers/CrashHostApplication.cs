@@ -25,7 +25,8 @@ internal static class CrashHostApplication
         {
             return;
         }
-        if (await C1OutcomeInspection.TryRunAsync(args) || await ExistingStoreInspector.TryRunAsync(args))
+        if (await NativeInstallFrameInspection.TryRunAsync(args)
+            || await C1OutcomeInspection.TryRunAsync(args) || await ExistingStoreInspector.TryRunAsync(args))
         {
             return;
         }

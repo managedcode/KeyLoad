@@ -16,7 +16,7 @@ internal sealed class ZoneTreeJournalBufferWriter(int maxFrameBytes) : IBufferWr
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         if (count > maxFrameBytes - _buffer.Length)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.TransactionFrameLimitExceeded);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.EncodedTransactionFrameLimitExceeded);
         }
 
         _buffer.Advance(count);

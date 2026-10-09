@@ -31,7 +31,7 @@ internal static class ZoneTreeExistingStore
         }
     }
 
-    private static void Validate(ZoneTreeStoreOptions options, Guid expectedNodeId)
+    internal static void Validate(ZoneTreeStoreOptions options, Guid expectedNodeId)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);

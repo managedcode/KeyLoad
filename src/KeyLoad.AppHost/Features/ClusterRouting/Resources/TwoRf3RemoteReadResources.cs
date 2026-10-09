@@ -39,6 +39,14 @@ internal static class TwoRf3RemoteReadResources
                     maxBatchBytes.ToString(CultureInfo.InvariantCulture));
             }
         }
+        if (control.Value.MovementMaxFrameBytes is { } maxFrameBytes)
+        {
+            foreach (var resource in resources)
+            {
+                resource.WithEnvironment(TwoRf3ProfileProtocol.MovementMaxFrameBytesEnvironment,
+                    maxFrameBytes.ToString(CultureInfo.InvariantCulture));
+            }
+        }
         if (control.Value.RemotePartitionQueries)
         {
             foreach (var resource in resources)

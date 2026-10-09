@@ -18,11 +18,22 @@ internal sealed class TwoRf3MembershipCapacity
     internal async Task ReconfigureMovementCapacityAsync(TwoRf3MembershipWave wave, int maxBatchBytes, CancellationToken cancellationToken)
     {
         new DatabaseLimits { MaxBatchBytes = maxBatchBytes }.Validate();
+        await ReconfigureAsync(wave, () => wave.movementMaxBatchBytes = maxBatchBytes, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal async Task ReconfigureMovementFrameAsync(TwoRf3MembershipWave wave, int maxFrameBytes, CancellationToken cancellationToken)
+    {
+        new KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions { MaxFrameBytes = maxFrameBytes }.Validate();
+        await ReconfigureAsync(wave, () => wave.movementMaxFrameBytes = maxFrameBytes, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task ReconfigureAsync(TwoRf3MembershipWave wave, Action applySelection, CancellationToken cancellationToken)
+    {
         if (!wave.protectedDocuments || originalParameters.Count != CapacityRetainedParameters.Length
             || originalPorts.Count != TwoRf3MembershipProtocol.NodeCount)
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
         _ = await wave.StopForDirectoryReadAsync().ConfigureAwait(false);
-        wave.movementMaxBatchBytes = maxBatchBytes;
+        applySelection();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => TwoRf3MembershipWaveStartup.StartCoreAsync(wave, cancellationToken), failures).ConfigureAwait(false);
         if (failures.Count > 0)

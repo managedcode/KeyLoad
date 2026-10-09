@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.Security.Cryptography;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -50,26 +49,14 @@ internal static class ZoneTreeJournalRecovery
     private static bool ReplayFrame(ZoneTreeStoreRuntime runtime, byte[] header, ref long validLength)
     {
         var journal = runtime.Journal;
-        if (journal.Length - journal.Position < HeaderLength)
+        var frame = ZoneTreeJournalFrameReader.ReadComplete(journal, header, runtime.Position,
+            runtime.Options.MaxFrameBytes, runtime.Identity.FormatVersion);
+        if (frame is null)
         {
             journal.SetLength(validLength);
             return false;
         }
-
-        journal.ReadExactly(header);
-        var (length, sequence) = ValidateHeader(header, runtime.Position, runtime.Options.MaxFrameBytes, runtime.Identity.FormatVersion);
-        if (journal.Length - journal.Position < length)
-        {
-            journal.SetLength(validLength);
-            return false;
-        }
-
-        var payload = new byte[length];
-        journal.ReadExactly(payload);
-        if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(payload), header.AsSpan(ChecksumOffset, ChecksumLength)))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, JournalChecksumInvalid);
-        }
+        var (payload, sequence, _) = frame.Value;
 
         foreach (var mutation in ZoneTreeJournalCodec.Deserialize(payload))
         {

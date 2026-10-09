@@ -439,3 +439,74 @@ and original normal/scalar Linux reports plus full required recovery/RF3 gates.
 No source packet, timer source audit or privacy derivation qualifies runtime.
 Root owns live integration/build/discovery/Git; rollback removes only these
 test-oracle changes. No public contract, data format or provider migration.
+
+
+## TASK-KL029-NATIVE-MAINTENANCE-FAILURE-CATEGORY-003
+
+REQ/AC-FTS-INCREMENTAL-005 and REQ/AC-FTS-005 preserve the real wrong-owner
+maintenance rejection, exact OwnershipLost/InvalidRequest, null result, canonical
+no-effect and complete original SDK/official MCP/Q1 Build/Restore/replay/release
+continuation. Only the existing initial direct SDK ErrorCode assertion in
+NativeTextMaintenanceRf3Denied.OwnerAsync gains failure-only Because context.
+
+Derive from its actual bounded native Problem.ErrorCode and Problem.Detail only.
+Output the actual canonical defined ErrorCode name or fixed Absent/Other, plus
+one fixed detail category: InvalidRequest, ServerResponseUnavailable,
+WriteResponseUnavailable, OrleansCommandInterrupted, TextMaintenanceInterrupted,
+Absent or Other. Match only the existing exact static native messages. Never
+output arbitrary code/detail/text, payloads, bodies, credentials, principal,
+headers, endpoints, tool inventories or inferred native phase. The categories
+identify boundary candidates, not the cause or an accepted unknown outcome.
+
+All original operation/assertions/grants/cancellation/deadlines remain. No retry,
+fallback, mutation, protocol/validator change or success from diagnostics.
+Original9c/run37920436876 failure remains; fresh exact-source normal/scalar Linux
+originals and native stage evidence are required. Root owns append-only canonical
+Search/ADR integration before source join, build/discovery/test/Git.
+
+
+## TASK-KL029-NATIVE-MAINTENANCE-RECONCILIATION-004
+
+REQ/AC-FTS-INCREMENTAL-005 and REQ/AC-FTS-005 preserve exact wrong-owner
+OwnershipLost/null/InvalidRequest before the complete existing SDK/official MCP/
+Q1 Build, update/delete, old-prefix rejection, explicit Restore, original receipt
+and same Restore replay, Release and literal healthy continuation. Four existing
+ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths
+instances retain every original request, original cancellation and deadline.
+
+Capture actual deterministic persisted OutboxStatus.Head(Tail, FirstAvailable,
+StoredRecords, StoredBytes) and all Consumers: exact consumer reference, original
+definition IndexGeneration/Resources/MutationKinds, Checkpoint, Released and
+LastProgressReservationCut.
+Native key scan ordering remains exact. Fresh scenario initially has no consumers.
+Compare complete serialized native SDK and official MCP outbox status and the
+original before/after bytes. Independently require both full literal Ukrainian
+and English DocumentResult references, revisions, original JSON, redaction flag
+and redacted-field list through SDK and official MCP. No regenerated projection
+token/expiry/clock or whole applied-position equality is an oracle. Genuine failed
+command journal/outcome metadata is outside this business/outbox comparison,
+never erased or misrepresented as unchanged journal state.
+
+NativeTextMaintenanceRf3Reconciliation owns only those original deterministic
+values; existing Denied.OwnerAsync owns exact SDK then official rejection. Case
+NativeTextMaintenanceRf3Tests owns one ordered failure ledger shared through
+Flow and Denied with all actual client/deadline cleanup. After either rejection
+assertion failure, observe each bounded original SDK/MCP reconciliation read
+under the SAME original cancellation, retain every primary/read/cleanup failure,
+then stop before another wrong-owner call or any maintenance mutation. No
+unknown-as-rollback, wrong command resend, renewed token/deadline or ignored
+failure. Only exact definitive rejection and genuine no-effect proof permit
+unchanged existing healthy operations. Existing canonical search checks stay.
+
+Root owns fresh build/native metadata/source-image binding and Linux normal/
+scalar/full gates; four existing source instances are not new UID/runtime proof.
+Original9c/run37920436876 failed cohorts remain authentic and their initiating
+uncertainty stage is still unproven. No production/provider/public contract
+changes; rollback removes only additive reconciliation and shared-ledger wiring.
+
+
+## TASK-KL028-MANIFEST-REPAIR-HEALTHY-001
+
+REQ/AC-FTS-AUDIT-001 and REQ/AC-FTS-004 require a complete real selected-provider format failure→exact fixture repair→cold healthy operation. Existing `NativeTextProjectionRestartTests.CorruptManifestIsRejectedAndPreservedForDiagnosis` retains its genuine corruption, preserved damaged bytes and generation checks. It additionally captures the original manifest and full canonical logical bytes/cut before damage; after rejected native owner construction unwinds, the feature-owned assertion component restores only that exact fixture-owned disposable manifest. Two separately disposed/reopened actual native projection owners must return the independent complete literal needle document (reference/revision1/JSON/redaction/score1/61/null explanation), with canonical bytes/cut unchanged before repair and after each search. This is fixture repair of recognized derived metadata, never automatic production repair or canonical recovery.
+
+Ownership: Search/Cases/NativeTextProjectionRestartTests.cs and Search/Assertions/NativeTextProviderManifestRecovery.cs in UnitTests. Ordered stages are original native generation→captured original/canonical cut→actual corruption/rejection/preservation→exact closed-owner fixture restoration→native search→dispose→native reopen/search→complete canonical no-effect. Same original cancellation and options, no retry/limit/token renewal/new public API. Existing provider, bilingual/delete/replay, privacy, resource, process and public RF3 gates remain mandatory. Fresh native case UID/location/outcome and delivered-source normal/scalar/Linux qualification are pending; historical passing original corruption case did not exercise this continuation. Rollback removes only this additional fixture oracle and audit docs; canonical bytes, package versions, provider formats and runtime behavior are unchanged.

@@ -1,6 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server.Features.Search;
+using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -60,7 +61,10 @@ internal sealed class NativeTextProjectionRestartTests
         var generation = Directory.EnumerateDirectories(indexDirectory)
             .Single(path => Path.GetFileName(path).StartsWith(GenerationPrefix, StringComparison.Ordinal));
         var manifest = Path.Combine(generation, NativeTextProtocol.ManifestFile);
-        var damaged = await File.ReadAllBytesAsync(manifest, cancellationToken);
+        var original = await File.ReadAllBytesAsync(manifest, cancellationToken);
+        var canonical = QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var damaged = original.ToArray();
         damaged[^1] ^= 1;
         await File.WriteAllBytesAsync(manifest, damaged, cancellationToken);
         var damagedReceipt = await File.ReadAllBytesAsync(manifest, cancellationToken);
@@ -71,6 +75,8 @@ internal sealed class NativeTextProjectionRestartTests
         await Assert.That(await File.ReadAllBytesAsync(manifest, cancellationToken)).IsEquivalentTo(damagedReceipt,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(Directory.Exists(generation)).IsTrue();
+        await NativeTextProviderManifestRecovery.VerifyAsync(database, indexDirectory, manifest, original,
+            canonical, position, cancellationToken);
     }
 
     [Test]

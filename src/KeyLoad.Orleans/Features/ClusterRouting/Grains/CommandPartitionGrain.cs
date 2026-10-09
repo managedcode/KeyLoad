@@ -63,8 +63,8 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     private void MigrateTo(SiloAddress target, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var present = RequestContext.Keys.Contains(IPlacementDirector.PlacementHintKey, StringComparer.Ordinal);
-        var previous = RequestContext.Get(IPlacementDirector.PlacementHintKey);
+        var previous = RequestContext.Entries.FirstOrDefault(
+            static entry => entry.Key == IPlacementDirector.PlacementHintKey);
         try
         {
             RequestContext.Set(IPlacementDirector.PlacementHintKey, target);
@@ -72,8 +72,8 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
         }
         finally
         {
-            if (present)
-            { RequestContext.Set(IPlacementDirector.PlacementHintKey, previous); }
+            if (previous.Key is not null)
+            { RequestContext.Set(IPlacementDirector.PlacementHintKey, previous.Value); }
             else
             { RequestContext.Remove(IPlacementDirector.PlacementHintKey); }
         }

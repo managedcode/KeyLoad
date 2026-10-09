@@ -48,7 +48,7 @@ internal static class C1OutcomeInspection
         return true;
     }
 
-    private static async Task<byte[]> ReadRequestBytesAsync()
+    internal static async Task<byte[]> ReadRequestBytesAsync()
     {
         var failures = new List<Exception>();
         Stream? input = null;
@@ -94,7 +94,7 @@ internal static class C1OutcomeInspection
         return retained.AsSpan(StartEmptyCount, length).ToArray();
     }
 
-    private static async Task WriteBytesAsync(byte[] receiptBytes, bool standardError)
+    internal static async Task WriteBytesAsync(byte[] receiptBytes, bool standardError)
     {
         var failures = new List<Exception>();
         Stream? output = null;

@@ -43,7 +43,8 @@ internal sealed class RequestCqrsProbeJson
                 && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.PartitionMovementTransferData
                     || value.Action != RequestCqrsProbeAction.Hold)
             || value.Phase is (RequestCqrsProbePhase.ParentTransferCloseFailed
-                or RequestCqrsProbePhase.ParentReceiverIssueAcknowledged or RequestCqrsProbePhase.ParentReceiverIssueObserved)
+                or RequestCqrsProbePhase.ParentReceiverIssueAcknowledged or RequestCqrsProbePhase.ParentReceiverIssueObserved
+                or RequestCqrsProbePhase.ParentFinalInstallPreflight)
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes

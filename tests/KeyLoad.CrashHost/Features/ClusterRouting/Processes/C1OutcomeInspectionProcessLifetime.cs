@@ -13,6 +13,7 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private const string OwnerReleaseMessage = "The outer owner lock remained open after child settlement.";
     private readonly ReadOnlyMemory<byte> input;
     private readonly string ownerPath;
+    private readonly string mode;
     private readonly List<Exception> failures;
     private readonly C1OutcomeInspectionCapture stdout;
     private readonly C1OutcomeInspectionCapture stderr;
@@ -36,9 +37,10 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private bool ownerReleaseReported;
 
     internal C1OutcomeInspectionProcessLifetime(ReadOnlyMemory<byte> input, string ownerPath,
-        List<Exception> failures, IOptions<CrashHostExecutionOptions> executionOptions)
+        List<Exception> failures, IOptions<CrashHostExecutionOptions> executionOptions, string mode = C1OutcomeInspectionProtocol.Mode)
     {
         this.input = input;
+        this.mode = mode;
         this.ownerPath = ownerPath;
         this.failures = failures;
         this.executionOptions = executionOptions;
@@ -64,7 +66,7 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     {
         owner = OfflineRegularFile.Open(ownerPath, FileAccess.ReadWrite, FileShare.None,
             settings.InspectionReadBufferBytes);
-        process.StartInfo = C1OutcomeInspectionProcessStartInfo.Create();
+        process.StartInfo = C1OutcomeInspectionProcessStartInfo.Create(mode);
         if (!process.Start())
         { throw new InvalidOperationException(StartFailureMessage); }
         started = true;

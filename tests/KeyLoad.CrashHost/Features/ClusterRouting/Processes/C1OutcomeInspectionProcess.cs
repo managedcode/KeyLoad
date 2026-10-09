@@ -20,8 +20,16 @@ internal static class C1OutcomeInspectionProcess
 {
     private const int MaximumInputBytes = 8193;
 
-    internal static async Task<C1OutcomeInspectionProcessResult> RunAsync(
+    internal static Task<C1OutcomeInspectionProcessResult> RunAsync(
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken = default)
+        => RunOwnedAsync(input, outerOwnerLockPath, C1OutcomeInspectionProtocol.Mode, cancellationToken);
+
+    internal static Task<C1OutcomeInspectionProcessResult> RunFrameAsync(
+        ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
+        => RunOwnedAsync(input, outerOwnerLockPath, NativeInstallFrameInspectionProtocol.Mode, cancellationToken);
+
+    private static async Task<C1OutcomeInspectionProcessResult> RunOwnedAsync(
+        ReadOnlyMemory<byte> input, string outerOwnerLockPath, string mode, CancellationToken cancellationToken)
     {
         const int InputLengthEmptyCount = 0;
 
@@ -33,7 +41,7 @@ internal static class C1OutcomeInspectionProcess
         C1OutcomeInspectionProcessResult? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var lifetime = new C1OutcomeInspectionProcessLifetime(input, outerOwnerLockPath, failures, CrashExecutionOptions.Child());
+            await using var lifetime = new C1OutcomeInspectionProcessLifetime(input, outerOwnerLockPath, failures, CrashExecutionOptions.Child(), mode);
             await ServerFailureObserver.ObserveAsync(() => lifetime.RunAsync(cancellationToken), failures).ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(() => lifetime.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
             if (!lifetime.DisposalAttemptCompleted)

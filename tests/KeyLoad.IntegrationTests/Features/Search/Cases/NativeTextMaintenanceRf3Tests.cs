@@ -31,7 +31,7 @@ internal sealed class NativeTextMaintenanceRf3Tests(ClusterFixture fixture)
                 var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
                 mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
                     fixture.AdminKey, deadline.Token);
-                await NativeTextMaintenanceRf3Flow.RunAsync(sdk, mcp, path, deadline.Token);
+                await NativeTextMaintenanceRf3Flow.RunAsync(sdk, mcp, path, failures, deadline.Token);
             }, failures);
         }
         finally
