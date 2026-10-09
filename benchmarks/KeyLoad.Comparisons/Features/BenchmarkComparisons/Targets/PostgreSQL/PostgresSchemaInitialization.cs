@@ -15,18 +15,33 @@ internal static class PostgresSchemaInitialization
 
     internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset, PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile, Action<TargetProfile> updateProfile, Action markCommitAttempted, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
         var nativeTopology = new PostgresTopology(lifecycleOptions, provider: timeProvider);
         await nativeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
-        await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
-            markCommitAttempted, cancellationToken);
+        // Empty native schema/index creation is separate from COPY, whose intrinsic index maintenance stays in load.
+        using (documentTiming?.MeasureIndex())
+        {
+            await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
+                markCommitAttempted, cancellationToken);
+        }
+
         var profile = await VerifySettingsAsync(connection, initialProfile, updateProfile, cancellationToken);
-        await PostgresDocumentOperations.SeedAsync(connection, dataset, cancellationToken);
+        using (documentTiming?.MeasureLoad())
+        {
+            await PostgresDocumentOperations.SeedAsync(connection, dataset, cancellationToken);
+        }
+
         if (dataset is BenchmarkDataset control)
         {
             await PostgresStreamOperations.SeedAsync(connection, control, cancellationToken);
             await CopyEdgesAsync(connection, dataset, cancellationToken);
         }
-        await AnalyzeAsync(connection, cancellationToken);
+        // Native planner/index statistics readiness follows the actual corpus load.
+        using (documentTiming?.MeasureIndex())
+        {
+            await AnalyzeAsync(connection, cancellationToken);
+        }
+
         updateProfile(await nativeTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
     }
 

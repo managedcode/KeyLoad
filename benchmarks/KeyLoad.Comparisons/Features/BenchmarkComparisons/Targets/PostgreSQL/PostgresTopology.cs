@@ -9,7 +9,6 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
 
     private const string ConfigureQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")'";
-    private const string ConfigureTwoNodeQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\")'";
     private const string ReloadConfiguration = "SELECT pg_reload_conf()";
     private const string ReplicationStatus = "SELECT application_name,state,sync_state,client_addr::text FROM pg_stat_replication ORDER BY application_name";
     private const string CurrentWal = "SELECT pg_current_wal_lsn()::text";
@@ -18,7 +17,6 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private const string SingleStatus = "SELECT pg_is_in_recovery(), (SELECT count(*) FROM pg_stat_replication)";
     private const string QuorumConfiguration = "SHOW synchronous_standby_names";
     private const string ExpectedQuorumConfiguration = "ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")";
-    private const string ExpectedTwoNodeQuorumConfiguration = "ANY 1 (\"benchmark_standby1\")";
     private const string StandbyOne = "benchmark_standby1";
     private const string StandbyTwo = "benchmark_standby2";
     private const string Streaming = "streaming";
@@ -26,8 +24,6 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private const string SingleState = "single primary, no replicas";
     private const string ReplicatedState = "primary plus two streaming physical standbys; RF3 one shard; synchronous ANY 1 quorum";
     private const string ReplicaFailure = "PostgresReplicationReceiptMissing";
-    private const string TwoNodeState = "primary plus one streaming physical standby; synchronous ANY 1 quorum";
-    private const string TwoNodeAcknowledgement = "fsync=on; synchronous_commit=on; primary and sole standby WAL flush";
     private const string ReplicatedAcknowledgement = "fsync=on; synchronous_commit=on; primary WAL flush plus one of two standby WAL flushes";
     private const string CopyObservation = "Named standbys flushed and replayed seeded corpus through WAL ";
     private const string QuorumObservation = "Native ANY 1 waits for one standby WAL flush; untimed copy receipt covers every configured standby";
@@ -47,7 +43,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         await WaitForMembersAsync(connection, topology, false, deadline.Token);
-        await ConfigureQuorumAsync(connection, topology, deadline.Token);
+        await ConfigureQuorumAsync(connection, deadline.Token);
         await ReloadAsync(connection, deadline.Token);
         await WaitForMembersAsync(connection, topology, true, deadline.Token);
     }
@@ -66,11 +62,9 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         return await ObserveReplicatedCopiesAsync(connection, topology, profile, cancellationToken);
     }
 
-    private static async Task ConfigureQuorumAsync(NpgsqlConnection connection, ComparisonTopology topology, CancellationToken cancellationToken)
+    private static async Task ConfigureQuorumAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
     {
-        await using var command = topology == ComparisonTopology.TwoNode
-            ? new NpgsqlCommand(ConfigureTwoNodeQuorum, connection)
-            : new NpgsqlCommand(ConfigureQuorum, connection);
+        await using var command = new NpgsqlCommand(ConfigureQuorum, connection);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -139,7 +133,6 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
     internal static string QuorumSettings(ComparisonTopology topology) => topology switch
     {
-        ComparisonTopology.TwoNode => ExpectedTwoNodeQuorumConfiguration,
         ComparisonTopology.Replicated => ExpectedQuorumConfiguration,
         _ => throw new ArgumentOutOfRangeException(nameof(topology)),
     };
@@ -149,7 +142,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         const int SingleNodeTopology = 1;
 
         var count = ComparisonTopologies.NodeCount(topology) - SingleNodeTopology;
-        var names = count == SingleNodeTopology ? new[] { StandbyOne } : new[] { StandbyOne, StandbyTwo };
+        var names = topology == ComparisonTopology.Standalone ? Array.Empty<string>() : new[] { StandbyOne, StandbyTwo };
         return members.Length == count && members.Select(member => member.Name).Order(StringComparer.Ordinal).SequenceEqual(names, StringComparer.Ordinal)
             && members.All(member => !string.IsNullOrWhiteSpace(member.Address))
             && members.Select(member => member.Address).Distinct(StringComparer.Ordinal).Count() == count;
@@ -182,11 +175,11 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         var members = await WaitForMembersAsync(connection, topology, true, deadline.Token);
         await VerifyQuorumConfigurationAsync(connection, topology, deadline.Token);
         var nodes = ComparisonTopologies.NodeCount(topology);
-        var state = topology == ComparisonTopology.TwoNode ? TwoNodeState : ReplicatedState;
+        var state = ReplicatedState;
         return profile with
         {
             Topology = state,
-            WriteAcknowledgement = topology == ComparisonTopology.TwoNode ? TwoNodeAcknowledgement : ReplicatedAcknowledgement,
+            WriteAcknowledgement = ReplicatedAcknowledgement,
             Cluster = new(nodes, nodes, state, [CopyObservation + wal, QuorumObservation,
                 MemberObservation + string.Join(MemberSeparator, members.Members.Select(member => member.Name + IdentitySeparator + member.Address))])
         };

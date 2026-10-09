@@ -64,11 +64,12 @@ internal sealed record ComparisonExecutionIdentity(
     /// <param name="topology">The selected native topology.</param>
     /// <param name="scaledProfileId">The exact scaled profile identity, or null for the existing control.</param>
     /// <param name="vectorProfileId">The exact native vector profile identity, or null.</param>
+    /// <param name="documentProfileId">The exact document family profile admitted by its canonical selection.</param>
     /// <returns>The validated native image and GitHub provenance.</returns>
     internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
-        ComparisonTopology topology, string? scaledProfileId = null, string? vectorProfileId = null)
+        ComparisonTopology topology, string? scaledProfileId = null, string? vectorProfileId = null, string? documentProfileId = null)
         => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true,
-            isolatedScaleProfileId: scaledProfileId, isolatedVectorProfileId: vectorProfileId);
+            isolatedScaleProfileId: scaledProfileId, isolatedVectorProfileId: vectorProfileId, isolatedDocumentProfileId: documentProfileId);
 
     /// <summary>Requires the separate intensive TimeSeries family identity.</summary>
     internal static ComparisonExecutionIdentity ReadTimeSeriesIntensive(IConfiguration configuration, string sourceRevision)
@@ -77,7 +78,7 @@ internal sealed record ComparisonExecutionIdentity(
 
     private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
         ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false,
-        string? isolatedScaleProfileId = null, string? isolatedVectorProfileId = null)
+        string? isolatedScaleProfileId = null, string? isolatedVectorProfileId = null, string? isolatedDocumentProfileId = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
@@ -111,7 +112,7 @@ internal sealed record ComparisonExecutionIdentity(
                 && !string.Equals(configuration[ComparisonWorkerSelection.VectorProfileSetting], isolatedVectorProfileId,
                     StringComparison.Ordinal))
             || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries,
-                isolatedScaleProfileId, isolatedVectorProfileId))
+                isolatedScaleProfileId, isolatedVectorProfileId, isolatedDocumentProfileId))
         {
             throw InvalidIdentity();
         }
@@ -122,7 +123,7 @@ internal sealed record ComparisonExecutionIdentity(
 
     private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
         bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId,
-        string? isolatedVectorProfileId)
+        string? isolatedVectorProfileId, string? isolatedDocumentProfileId)
     {
         if (isIntensiveTimeSeries)
         {
@@ -136,6 +137,10 @@ internal sealed record ComparisonExecutionIdentity(
             || (isolatedScaleProfileId is not null && isolatedVectorProfileId is not null))
         {
             return false;
+        }
+        if (isolatedDocumentProfileId is not null)
+        {
+            return isolatedScaleProfileId is null && isolatedVectorProfileId is null && profile == isolatedDocumentProfileId;
         }
         if (isolatedScaleProfileId is not null)
         {

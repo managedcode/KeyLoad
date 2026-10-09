@@ -21,7 +21,6 @@ internal sealed class MongoReadinessResourceTests
     /// <summary>AC-MR-031-001/003: the actual same-image bootstrap receives the same source read-only.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task EveryNativeTopologyMountsReadinessSourceReadOnly(int nodes)
     {
@@ -63,7 +62,6 @@ internal sealed class MongoReadinessResourceTests
     /// <summary>AC-MR-031-004: explicit native identity stays separate from the unchanged selected DNS membership.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task NativeNodesHaveUniqueExplicitNamesWithinOnePrivateGroup(int count)
     {

@@ -18,8 +18,8 @@ internal sealed class KeyLoadTimeSeriesIntensiveContext
         ArgumentException.ThrowIfNullOrWhiteSpace(partition.PartitionKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(seriesSet);
         if (incarnation == Guid.Empty || peers.IsDefaultOrEmpty
-            || peers.Length is < KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
-                or > KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount)
+            || peers.Length is not (KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
+                or KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount))
         {
             throw new ArgumentException(KeyLoadTimeSeriesIntensiveProtocol.InvalidContext, nameof(peers));
         }

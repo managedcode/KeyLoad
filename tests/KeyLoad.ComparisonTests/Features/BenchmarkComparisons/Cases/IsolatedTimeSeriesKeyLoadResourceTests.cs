@@ -32,7 +32,6 @@ internal sealed class IsolatedTimeSeriesKeyLoadResourceTests
     /// <summary>AC-TSI-001/006: the new route retains exactly the selected real fixed-voter composition.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task NewTimeSeriesCompositionRetainsExactVotersPrivateStoresAndPersistedAuthority(int count)
     {

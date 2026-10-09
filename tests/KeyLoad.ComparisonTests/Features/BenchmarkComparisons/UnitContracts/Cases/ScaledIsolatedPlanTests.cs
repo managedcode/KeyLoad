@@ -20,7 +20,7 @@ internal sealed class ScaledIsolatedPlanTests
         {
             var plan = plans[index]!.AsObject();
             await Assert.That(plan[IsolatedPlanFields.Profile]!.GetValue<string>()).IsEqualTo(ProfileIds[index]);
-            await Assert.That(plan[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(132);
+            await Assert.That(plan[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(88);
             var settings = plan[IsolatedPlanFields.ProfileSettings]!.AsObject();
             await Assert.That(settings[IsolatedPlanFields.Documents]!.GetValue<int>()).IsEqualTo(RecordCounts[index]);
             await Assert.That(settings[IsolatedPlanFields.OperationsPerCell]!.GetValue<int>()).IsEqualTo(100_000);
@@ -39,11 +39,11 @@ internal sealed class ScaledIsolatedPlanTests
             await Assert.That(cells.All(cell => cell![IsolatedPlanFields.Profile]!.GetValue<string>() == ProfileIds[index]
                 && cell[IsolatedPlanFields.Family]!.GetValue<string>() == IsolatedPlanFields.CrudFamily
                 && Scenarios.Contains(cell[IsolatedPlanFields.Scenario]!.GetValue<string>(), StringComparer.Ordinal))).IsTrue();
-            await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(132);
+            await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(88);
             foreach (var scenario in Scenarios)
             {
                 await Assert.That(cells.Count(cell => cell![IsolatedPlanFields.Scenario]!.GetValue<string>() == scenario))
-                    .IsEqualTo(33);
+                    .IsEqualTo(22);
             }
         }
 
@@ -61,7 +61,7 @@ internal sealed class ScaledIsolatedPlanTests
         var composite = (await IsolatedPlanNodeProcess.ProbeAsync("create-composite"))[IsolatedPlanFields.Value]!.AsObject();
         await Assert.That(composite[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(3);
         await Assert.That(JsonNode.DeepEquals(composite[IsolatedPlanFields.Control], control)).IsTrue();
-        await Assert.That(control[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(330);
+        await Assert.That(control[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(220);
         var scales = composite[IsolatedPlanFields.ScaledProfiles]!.AsArray();
         await Assert.That(scales.Count).IsEqualTo(2);
         var vectors = composite[IsolatedPlanFields.VectorProfiles]!.AsArray();
@@ -70,7 +70,7 @@ internal sealed class ScaledIsolatedPlanTests
             .Concat(scales.SelectMany(profile => profile![IsolatedPlanFields.Cells]!.AsArray()))
             .Concat(vectors.SelectMany(profile => profile![IsolatedPlanFields.Cells]!.AsArray()))
             .Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).ToArray();
-        await Assert.That(ids.Length).IsEqualTo(330 + 264 + 792);
+        await Assert.That(ids.Length).IsEqualTo(220 + 176 + 528);
         await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(ids.Length);
         await Assert.That(ids.Contains("keyload-n1-point-read-scaled-100k-c16", StringComparer.Ordinal)).IsTrue();
     }

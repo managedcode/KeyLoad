@@ -7,14 +7,14 @@ Related: REQ/AC-BC-CURRENT-001..004, REQ/AC-BC-WEB-001..007, ADR-040, ADR-056, A
 ## Decision and authority
 
 The canonical producer is the current `Benchmarks` workflow and its source-bound
-composite plan. The plan contains 330 control cells, two 132-cell CRUD profiles
-(100,000 and 1,000,000 records), and 24 vector profiles with 33 target/node
-cells each: 1,386 workers total. Applicable scaled workloads retain at least
+composite plan. The plan contains 220 control cells, two 88-cell CRUD profiles
+(100,000 and 1,000,000 records), and 24 vector profiles with 22 target/node
+cells each: 924 website workers total. Applicable scaled workloads retain at least
 100,000 measured operations; vector profiles retain at least 100,000 measured
 queries.
 
 The current composite evidence inventory is derived from the canonical plan:
-2,470 suite files and 60 provider files (2,530 total), including every planned
+1,656 suite files and 60 provider files (1,716 total), including every planned
 worker and required resource/proof/receipt input. The source contract computes
 this inventory from the plans; validators require the exact expected paths,
 unique regular files, sizes, hashes, source/run/attempt/job/artifact identities,
@@ -30,7 +30,7 @@ browser, freshness and provider failures remain failures of their owning gates.
 Benchmarks owns database preparation, isolated Linux workloads and one
 source-bound aggregate. It does not build or qualify the website. Its final
 bounded `Trigger Website` job dispatches the separate Website workflow after
-aggregate dependencies settle, including when a workload or aggregate fails.
+aggregate dependencies settle, only after every required preparation, build, database and aggregate gate succeeds (owner correction2026-10-08).
 Website also runs independently on trusted own-main push or manual dispatch.
 The Website workflow selects the newest ready completed own-main producer with a
 successful authenticated aggregate and valid current evidence. Failed, canceled,
@@ -116,3 +116,7 @@ flowchart LR
     Content --> Fresh
     Fresh --> Pages[Needs-gated Pages publication]
 ```
+
+## Current native1/3 methodology extension, 2026-10-09
+
+ADR-122 removes every active two-node measurement and adds a separate418-cell common document family with original pure/mixed/ingestion records. That new family is authenticated and aggregated independently inside the same final producer aggregation job; it cannot silently enter the existing website profile renderer. The source closure expands with actual transitive execution inputs; strict source and coverage thresholds remain mandatory. Historical original archive bytes remain immutable and cannot qualify the new current inventory.

@@ -20,9 +20,10 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
     private const string AppHostDirectory = "src/KeyLoad.AppHost";
     private DistributedApplication? application;
 
-    internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null)
+    internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null, DocumentComparisonSelection? documents = null)
     {
-        var root = Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString("N"));
+        var temporary = IsolatedResourceTopologyApplication.ResolveTemporaryDirectory(new DirectoryInfo(Path.GetTempPath()));
+        var root = Path.Combine(temporary, TemporaryPrefix + Guid.NewGuid().ToString("N"));
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
             DisableDashboard = true,
@@ -30,7 +31,8 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
             Args = [$"--KeyLoad:ContainerUser={User}", $"--KeyLoad:ContainerImages:Server={ServerImage}"]
         });
         var selection = new ComparisonWorkerSelection(target, nodes, Scenario.PointRead,
-            IsolatedComparisonContract.Current.Profile);
+            documents is null ? IsolatedComparisonContract.Current.Profile : DocumentWorkerSelection.ProfileId(documents))
+        { DocumentWorkload = documents };
         var runner = builder.AddContainer(RunnerName, "model-runner", "model");
         Context = new(builder, selection, runner, root);
     }

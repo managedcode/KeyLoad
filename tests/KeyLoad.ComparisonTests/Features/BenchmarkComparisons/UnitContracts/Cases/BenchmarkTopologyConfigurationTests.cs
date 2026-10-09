@@ -29,7 +29,6 @@ internal sealed class BenchmarkTopologyConfigurationTests
 
     [Test]
     [Arguments(1, 1)]
-    [Arguments(2, 2)]
     [Arguments(3, 2)]
     public async Task AcIso004ExplicitBenchmarkUsesTheSameComputedMajority(int nodes, int majority)
     {
@@ -60,6 +59,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
 
     [Test]
     [Arguments(0)]
+    [Arguments(2)]
     [Arguments(4)]
     [Arguments(5)]
     public void AcIso004BenchmarkOptInDoesNotAdmitOtherCounts(int nodes)
@@ -73,7 +73,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Test]
     public void AcIso004BenchmarkOptInDoesNotAdmitMalformedAuthorities()
     {
-        var configuration = BenchmarkTopologyConfigurationFixture.Replica(2) with { BenchmarkTopology = true };
+        var configuration = BenchmarkTopologyConfigurationFixture.Replica(3) with { BenchmarkTopology = true };
         ReplicaConfiguration[] invalid =
         [
             configuration with { VoterIds = default },
@@ -93,7 +93,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
     [Test]
     public void AcIso004BenchmarkOptInPreservesTransportAndCredentialValidation()
     {
-        var options = BenchmarkTopologyConfigurationFixture.Node(2) with { BenchmarkTopology = true };
+        var options = BenchmarkTopologyConfigurationFixture.Node(3) with { BenchmarkTopology = true };
         NodeOptions[] invalid =
         [
             options with { Peers = [options.PublicEndpoint, options.PublicEndpoint] },

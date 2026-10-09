@@ -49,7 +49,6 @@ internal sealed class IsolatedResourceTopologyNeo4jTests
 
     /// <summary>AC-ISO-003/006: unsupported Community replication cannot allocate a false native topology.</summary>
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task CommunityReplicationRejectsBeforeNativeAllocation(int count)
     {

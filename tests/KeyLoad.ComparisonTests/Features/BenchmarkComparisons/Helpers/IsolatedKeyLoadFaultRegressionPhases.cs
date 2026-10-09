@@ -3,7 +3,7 @@ using KeyLoad.Client;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-005: actual RF1 loss, each RF2 voter loss, and RF3 follower loss use the same public oracle.</summary>
+/// <summary>AC-ISO-005: actual RF1 loss and RF3 follower loss use the same public oracle.</summary>
 internal static class IsolatedKeyLoadFaultRegressionPhases
 {
     internal static async Task RunAsync(DistributedApplication app, int nodes, string admin,
@@ -57,7 +57,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
         if (nodes < 3)
         {
             var rejected = await IsolatedKeyLoadFaultRegressionQuorum.RejectAsync(
-                app, live, admin, seed, command, nodes == 2, token);
+                app, live, admin, seed, command, false, token);
             receipt.NativeMcpAuthentication503 = rejected.NativeMcpAuthentication503;
             receipt.WriteRejection = rejected.WriteCode;
             return null;

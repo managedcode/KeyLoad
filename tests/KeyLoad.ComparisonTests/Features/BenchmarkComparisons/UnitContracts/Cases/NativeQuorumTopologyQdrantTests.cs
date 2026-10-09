@@ -11,7 +11,6 @@ internal sealed class NativeQuorumTopologyQdrantTests
 {
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003EnabledNativeGroupsRequireEveryDistinctEndpoint(int nodes)
     {
@@ -34,11 +33,11 @@ internal sealed class NativeQuorumTopologyQdrantTests
     [Arguments("extra-copy")]
     [Arguments("missing-copy")]
     [Arguments("different-shard")]
-    public async Task AcIso003TwoNodeCannotPassIncompleteOrInconsistentNativeProof(string corruption)
+    public async Task AcIso003ThreeNodeCannotPassIncompleteOrInconsistentNativeProof(string corruption)
     {
-        var proofs = NativeQuorumTopologyResponses.QdrantProofs(2);
+        var proofs = NativeQuorumTopologyResponses.QdrantProofs(3);
         CorruptProof(proofs, corruption);
-        await Assert.That(QdrantNodeProof.Ready(proofs, ComparisonTopology.TwoNode, 2)).IsFalse();
+        await Assert.That(QdrantNodeProof.Ready(proofs, ComparisonTopology.Replicated, 3)).IsFalse();
     }
 
     [Test]
@@ -48,7 +47,7 @@ internal sealed class NativeQuorumTopologyQdrantTests
     [Arguments("partial-seed")]
     [Arguments("foreign-local-peer")]
     [Arguments("extra-shard-count")]
-    public async Task AcIso003TwoNodeRequiresExactlyOneActiveFullLocalSeededShard(string corruption)
+    public async Task AcIso003ThreeNodeRequiresExactlyOneActiveFullLocalSeededShard(string corruption)
     {
         var local = NativeQuorumTopologyResponses.Local(1);
         var result = local[T.Result]!;
@@ -64,15 +63,13 @@ internal sealed class NativeQuorumTopologyQdrantTests
             _ => throw new ArgumentOutOfRangeException(nameof(corruption))
         };
         mutation();
-        var proof = NativeQuorumTopologyResponses.ReadQdrant(2, 1, local: local);
+        var proof = NativeQuorumTopologyResponses.ReadQdrant(3, 1, local: local);
         await Assert.That(proof.Copies).IsEqualTo(0);
     }
 
     [Test]
     [Arguments(1, T.Replication)]
     [Arguments(1, T.Consistency)]
-    [Arguments(2, T.Replication)]
-    [Arguments(2, T.Consistency)]
     [Arguments(3, T.Replication)]
     [Arguments(3, T.Consistency)]
     public async Task AcIso003CollectionPolicyDriftIsAFailure(int nodes, string field)
@@ -105,7 +102,6 @@ internal sealed class NativeQuorumTopologyQdrantTests
     }
 
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003DistributedGroupsRejectDisabledNativeCluster(int nodes)
     {
@@ -119,7 +115,7 @@ internal sealed class NativeQuorumTopologyQdrantTests
     [Test]
     public async Task AcIso003NativePeerPropertyOrderDoesNotChangeSetIdentity()
     {
-        var cluster = NativeQuorumTopologyResponses.Cluster(2, 1);
+        var cluster = NativeQuorumTopologyResponses.Cluster(3, 1);
         var peers = cluster[T.Result]![T.Peers]!.AsObject();
         var reversed = peers.Reverse().Select(pair => (pair.Key, Value: pair.Value!.DeepClone())).ToArray();
         peers.Clear();
@@ -127,9 +123,9 @@ internal sealed class NativeQuorumTopologyQdrantTests
         {
             peers.Add(key, value);
         }
-        var proofs = NativeQuorumTopologyResponses.QdrantProofs(2);
-        proofs[0] = NativeQuorumTopologyResponses.ReadQdrant(2, 1, cluster: cluster);
-        await Assert.That(QdrantNodeProof.Ready(proofs, ComparisonTopology.TwoNode, 2)).IsTrue();
+        var proofs = NativeQuorumTopologyResponses.QdrantProofs(3);
+        proofs[0] = NativeQuorumTopologyResponses.ReadQdrant(3, 1, cluster: cluster);
+        await Assert.That(QdrantNodeProof.Ready(proofs, ComparisonTopology.Replicated, 3)).IsTrue();
     }
 
     private static void CorruptProof(List<(string Version, string Peer, string[] Peers, int Copies, int Shard)> proofs,

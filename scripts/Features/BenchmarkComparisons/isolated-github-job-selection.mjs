@@ -1,3 +1,4 @@
+import { documentMatrixRow } from './document-isolated-plan.mjs';
 import { contextForProfile } from './isolated-github-context.mjs';
 import { createDatabaseMatrices } from './isolated-preflight.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
@@ -26,15 +27,23 @@ const workloadSelectors = Object.freeze([
   vectorEvidenceProfileSelector,
   targetSelector,
   matrixKindSelector,
+  'Benchmarks__DocumentScenario',
+  'Benchmarks__DocumentRecords',
+  'Benchmarks__DocumentClients',
 ]);
 
 function selectedKind(row) {
+  if (row.family === 'document-v1') return 'documents';
   if (row.preflight) return 'preflight';
   if (row.openLoopCancellationProof) return 'proof';
   return row.openLoopRate === undefined ? 'worker' : 'open-loop';
 }
 
 function validateOptionalRowSelectors(environment, row) {
+  const document = [['Benchmarks__DocumentScenario', row.documentScenario ?? ''],
+    ['Benchmarks__DocumentRecords', row.documentRecords === undefined ? '' : String(row.documentRecords)],
+    ['Benchmarks__DocumentClients', row.documentClients === undefined ? '' : String(row.documentClients)]];
+  requireGitHub(document.every(([key, value]) => (environment[key] ?? '') === value));
   const expected = new Map([
     [scaleProfileSelector, row.scaleProfile ?? ''],
     [vectorProfileSelector, row.vectorProfile ?? ''],
@@ -73,7 +82,7 @@ export function selectCurrentJob(environment, context) {
     && typeof profile === 'string' && profile.length > 0 && profile.trim() === profile);
 
   const rows = Object.values(createDatabaseMatrices(context.plan, context.scaledPlans,
-    context.vectorPlans, context.openLoopPlan)).flatMap(matrix => matrix.include);
+    context.vectorPlans, context.openLoopPlan, context.documentPlan?.cells.map(documentMatrixRow))).flatMap(matrix => matrix.include);
   const matches = rows.filter(row => row.id === cellId && row.jobName === name && row.profile === profile);
   requireGitHub(matches.length === 1);
   validateOptionalRowSelectors(environment, matches[0]);

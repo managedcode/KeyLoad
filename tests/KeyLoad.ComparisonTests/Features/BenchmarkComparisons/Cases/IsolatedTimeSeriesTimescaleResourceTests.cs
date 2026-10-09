@@ -13,7 +13,6 @@ internal sealed class IsolatedTimeSeriesTimescaleResourceTests
     /// <summary>AC-TSI-001/003: each requested count is represented by one real Timescale primary and physical standbys.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task ModelContainsPinnedPhysicalTimescaleNodes(int count)
     {

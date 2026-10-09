@@ -18,7 +18,6 @@ internal sealed class IsolatedResourceTopologyRedisTests
     /// <summary>AC-ISO-003/005 and AC-BC-FAIL-009: native authenticated TCP resources with explicit certificate opt-out.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task SelectedRedisHasExactAuthenticatedNativeGroupWithoutSecretArguments(int count)
     {

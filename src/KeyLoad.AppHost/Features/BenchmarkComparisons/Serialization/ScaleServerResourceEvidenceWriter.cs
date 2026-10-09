@@ -8,6 +8,7 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 internal static class ScaleServerResourceEvidenceWriter
 {
     private const string WorkerFileName = "worker.json";
+    private const string DocumentWorkerFileName = "document-worker.json";
     private const string SidecarFileName = "server-resource-evidence.json";
     private const string Schema = "server-resource-evidence.v2";
     private const string ExceededSidecar = "Server resource evidence exceeded its bound.";
@@ -21,7 +22,7 @@ internal static class ScaleServerResourceEvidenceWriter
     {
         var settings = resourceOptions.Value;
         var provenance = provenanceOptions.Value;
-        var workerPath = Path.Combine(output, WorkerFileName);
+        var workerPath = Path.Combine(output, selection.DocumentWorkload is null ? WorkerFileName : DocumentWorkerFileName);
         if (!File.Exists(workerPath) || new FileInfo(workerPath).Length > settings.MaxWorkerBytes)
         {
             return;

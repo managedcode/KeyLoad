@@ -9,7 +9,6 @@ internal sealed class IsolatedQuorumResourceQdrantTests
 {
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003QdrantModelBindsActualMembersStorageAndImmutableImage(int count)
     {
@@ -34,7 +33,6 @@ internal sealed class IsolatedQuorumResourceQdrantTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003QdrantBootstrapPreservesDisabledSingletonAndAdvertisesNativePeerUris(int count)
     {

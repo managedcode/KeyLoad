@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using KeyLoad.Client;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,43 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal static class ClusterFixtureComposition
 {
     private const string InvalidContainerModel = "The Aspire model must expose exactly the three named RF3 container resources.";
+    private const int MinimumSnapshotThreshold = 1;
+    private const string SnapshotProfileConflict = "Heavy load snapshot settings cannot mix qualification profiles.";
+
+    internal static KeyLoadClient CreateClient(DistributedApplication application, string node, string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(node);
+        HttpClient? pending = null;
+        try
+        {
+            pending = application.CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
+            pending.Timeout = ClusterFixtureProtocol.ClientTimeout;
+            var client = new KeyLoadClient(pending, key, IntegrationClientOptions.Execution());
+            pending = null;
+            return client;
+        }
+        finally { pending?.Dispose(); }
+    }
+
+    internal static int ValidateSnapshotThreshold(int threshold)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(threshold, MinimumSnapshotThreshold);
+        return threshold;
+    }
+
+    internal static string[] ApplySnapshotThreshold(string[] arguments, int? snapshotThreshold, bool conflictingProfile)
+    {
+        if (snapshotThreshold is not { } threshold)
+        {
+            return arguments;
+        }
+        if (conflictingProfile)
+        {
+            throw new InvalidOperationException(SnapshotProfileConflict);
+        }
+        return [.. arguments.Where(value => value != ClusterFixtureProtocol.SnapshotThresholdArgument),
+            ClusterFixtureProtocol.SnapshotThresholdArgumentPrefix + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture)];
+    }
 
     internal static void ConfigureCommandAdmission(IDistributedApplicationTestingBuilder builder, long? commandBytes)
     {

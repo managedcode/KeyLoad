@@ -13,7 +13,7 @@ Status: Accepted implementation contract; source, current full cohort and CI ori
 
 Keep the existing intensive 4,096-document/10,000-operation closed-loop comparison as a separate control. Add a new 100K/1M real-record profile with 100K caller operations per applicable cell using the existing targets, comparison runner ownership, native topology implementations and isolated per-database GitHub workflow. Do not represent profile expansion alone as a valid implementation: the existing corpus and measurer materialize per-record documents/vectors and all operation arrays, so the scaled path must use bounded random-access generation and finite result/statistical retention. This stage measures existing common CRUD plus point lookup; it does not claim open-loop, SQL complex queries, skew stress, recovery, movement, endurance, or power-loss durability.
 
-The profile IDs are `scaled-100k-c16` and `scaled-1m-c16`, mapping exactly to 100,000/1,000,000 target records; every cell performs exactly100,000 measured calls, payload1,024 bytes, seed1729, warmup256, one repetition and concurrency16. Scenarios are PointRead, DocumentWrite, DocumentUpdate and DocumentDelete. Matrix is 11 target names × actual member counts1/2/3 × two profiles × four applicable scenarios, preserving native unsupported dispositions (264 cell identities). Each cell runs alone on a Linux GitHub runner and seeds/verifies the entire actual dataset before timing.
+The profile IDs are `scaled-100k-c16` and `scaled-1m-c16`, mapping exactly to 100,000/1,000,000 target records; every cell performs exactly100,000 measured calls, payload1,024 bytes, seed1729, warmup256, one repetition and concurrency16. Scenarios are PointRead, DocumentWrite, DocumentUpdate and DocumentDelete. Matrix is 11 target names × actual member counts1/3 × two profiles × four applicable scenarios, preserving native unsupported dispositions (176 cell identities). Each cell runs alone on a Linux GitHub runner and seeds/verifies the entire actual dataset before timing.
 
 ## Ordered implementation and code ownership
 
@@ -116,8 +116,8 @@ regression map remain in the [ScalingQualification specification](../Features/Be
 
 The current source route is joined in `benchmarks.yml`: the plan CLI creates the
 canonical isolated, scaled, vector, composite and open-loop plan artifacts. The
-main closed-loop work comprises 1,386 identities (330 control, 264 scaled CRUD,
-792 vector); three preflight identities per database remain separate. The
+main closed-loop work comprises 924 identities (220 control, 176 scaled CRUD,
+528 vector); three preflight identities per database remain separate. The
 open-loop plan is also separate: it contains 792 measurements (72 per target) and
 six KeyLoad cancellation proofs. The per-database matrix combines those sources:
 129 original rows (three preflights plus 30 control, 24 scaled and 72 vector rows),
@@ -125,7 +125,7 @@ then 72 open-loop measurement rows per target and six additional KeyLoad proofs.
 That yields 201 rows for each of ten comparator groups and 207 for KeyLoad, 2,217
 rows total across the eleven groups. These matrix rows are not 2,217 comparable
 measurements and do not change the canonical main cohort or its separate
-2,530-file evidence inventory.
+1,716-file evidence inventory.
 
 For matrix-size control, each workflow row transports only its `id`, `jobName`,
 `target` and `kind`. Before native resource preparation, the same-run artifact
@@ -156,4 +156,4 @@ stages under [ADR-106](ADR-106-partition-owner-movement.md), or skew/fanout and
 recovery qualification. Native comparison topologies remain one, two and three
 actual members; the owner-movement topology has its own six-silo contract.
 Preserve the separate 30-logical-cell TimeSeries family and its 60 scale-specific jobs plus six preflights under ADR-050
-and ADR-059; neither family is folded into the 1,386/2,530 main cohort.
+and ADR-059; neither family is folded into the 924/1,716 main cohort.

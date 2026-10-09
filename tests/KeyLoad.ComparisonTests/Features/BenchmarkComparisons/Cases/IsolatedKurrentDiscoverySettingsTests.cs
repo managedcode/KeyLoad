@@ -18,7 +18,6 @@ internal sealed class IsolatedKurrentDiscoverySettingsTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task ActualNativeConnectionBindsEverySeedAndLeaderPreference(int count)
     {

@@ -28,7 +28,6 @@ internal sealed class IsolatedSurrealDbResourceTests
     }
 
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task SurrealDbDoesNotInventCommunityClusterMembers(int count)
     {

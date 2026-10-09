@@ -28,7 +28,7 @@ internal static class KurrentTargetProfile
             : KurrentConstants.TlsClientCertificateAbsent;
         var profile = new TargetProfile(KurrentConstants.Name, KurrentConstants.ExpectedServerVersion,
             ComparisonTopologies.NodeCount(topology) == SingleItemCount ? KurrentConstants.SingleTopology :
-                topology == ComparisonTopology.TwoNode ? KurrentConstants.TwoNodeTopology : KurrentConstants.ReplicatedTopology,
+                KurrentConstants.ReplicatedTopology,
             ComparisonTopologies.NodeCount(topology) > SingleItemCount ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
             KurrentConstants.ReadContract + KurrentConstants.WriterPreferenceLabel,
             transport, authorization + KurrentConstants.AuthorizationSeparator + certificateMetadata + KurrentConstants.AuthorizationSeparator + KurrentConstants.CommunityAuthorization, image);

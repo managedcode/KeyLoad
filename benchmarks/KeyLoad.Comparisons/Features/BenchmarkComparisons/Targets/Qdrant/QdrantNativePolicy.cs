@@ -49,8 +49,6 @@ internal static class QdrantNativePolicy
 
         const int SingleItemCount = 1;
         const string NoReplicaFaultToleranceToken = "; no replica fault tolerance";
-        const int TwoNodeReplicaCount = 2;
-        const string NoSingleNodeLossAvailabilityToken = "; no single-node-loss availability";
         const int SingleNodeTopology = 1;
         const int MajorityDivisor = 2;
         const int MajorityVoteOffset = 1;
@@ -59,7 +57,6 @@ internal static class QdrantNativePolicy
         var availability = nodes switch
         {
             SingleItemCount => NoReplicaFaultToleranceToken,
-            TwoNodeReplicaCount => NoSingleNodeLossAvailabilityToken,
             _ => string.Empty
         };
         var native = nodes == SingleNodeTopology ? NativeNodeToken : NativePeersToken;

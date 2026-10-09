@@ -34,6 +34,9 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     /// <summary>Gets the exact vector profile selected by the isolated worker.</summary>
     public VectorComparisonProfile? VectorProfile { get; init; }
 
+    /// <summary>Gets the canonical document workload selected on this isolated native topology.</summary>
+    public DocumentComparisonSelection? DocumentWorkload { get; init; }
+
     /// <summary>Gets the exact offered rate for an independently selected open-loop workload.</summary>
     public int? OpenLoopRate { get; init; }
 
@@ -67,7 +70,10 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
             || (ScaledProfile is not null && Scenario is not (Scenario.PointRead or Scenario.DocumentWrite
                 or Scenario.DocumentUpdate or Scenario.DocumentDelete))
             || (VectorProfile is not null && (Scenario != Scenario.VectorExact || Profile != VectorProfile.Id))
-            || (ScaledProfile is null && VectorProfile is null && Profile != contract.Profile)
+            || (DocumentWorkload is not null && (ScaledProfile is not null || VectorProfile is not null
+                || OpenLoopRate is not null || Scenario != Scenario.PointRead
+                || Profile != DocumentWorkerSelection.ProfileId(DocumentWorkload)))
+            || (ScaledProfile is null && VectorProfile is null && DocumentWorkload is null && Profile != contract.Profile)
             || (OpenLoopRate is { } rate && (ScaledProfile is null || !OpenLoopRateSelection.IsSupported(rate)))
             || (ScaledProfile is not null && Profile != ScaledProfile.Id))
         {
@@ -92,6 +98,13 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         {
             throw new InvalidOperationException(InvalidSelection);
         }
+        var documents = DocumentWorkerSelection.Read(selection);
+        if (documents is not null && (selection.ScaleProfile is not null || selection.VectorProfile is not null
+            || selection.OpenLoopRate is not null || HasWorkloadOverride(selection)
+            || selection.Profile is not null && !string.Equals(selection.Profile, GeneralAppHostProfile, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(InvalidSelection);
+        }
         var scaleText = selection.ScaleProfile;
         var scaledProfile = scaleText is null ? null : ParseScaledProfile(scaleText);
         var vectorText = selection.VectorProfile;
@@ -107,6 +120,7 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         var result = new ComparisonWorkerSelection(selection.Target ?? string.Empty, nodes, scenario,
             selection.EvidenceProfile ?? string.Empty)
         {
+            DocumentWorkload = documents,
             ScaledProfile = scaledProfile,
             VectorProfile = vectorProfile,
             OpenLoopRate = OpenLoopRateSelection.Read(selection.OpenLoopRate)

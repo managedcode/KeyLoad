@@ -109,7 +109,7 @@ internal static class IsolatedNativeCase
     {
         var selection = plan.Selection;
         await IsolatedNativeReportAssertions.VerifyModelAsync(containers, selection, token);
-        if (selection.ScaledProfile is not null || selection.VectorProfile is not null)
+        if (selection.ScaledProfile is not null || selection.VectorProfile is not null || selection.DocumentWorkload is not null)
         {
             work.Collector = app.Services.GetService<ScaleServerResourceEvidenceCollector>();
             work.Observation = work.Collector?.StartAsync(containers,
@@ -124,6 +124,10 @@ internal static class IsolatedNativeCase
             await VerifyResourceEvidenceAsync(app, output, plan, provenance, token);
         }
         await VerifyResultAsync(output, plan, work.CancellationControl, provenance, token);
+        if (selection.DocumentWorkload is not null)
+        {
+            return;
+        }
         await ScaleServerCancellationProbe.VerifyAsync(app, containers, selection, root, token);
         await IsolatedNativeRegressions.VerifyAsync(app, selection, token);
     }
@@ -135,7 +139,11 @@ internal static class IsolatedNativeCase
         var selection = plan.Selection;
         var unavailable = IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
             item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount));
-        if (!plan.OpenLoop || unavailable)
+        if (selection.DocumentWorkload is not null)
+        {
+            await DocumentNativeReportAssertions.VerifyAsync(output, selection, token);
+        }
+        else if (!plan.OpenLoop || unavailable)
         {
             await IsolatedNativeReportAssertions.VerifyReportAsync(output, selection, token);
         }

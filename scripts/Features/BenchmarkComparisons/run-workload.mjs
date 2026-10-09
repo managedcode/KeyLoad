@@ -1,3 +1,4 @@
+import { selectedDocumentCell } from './document-isolated-plan.mjs';
 import { nativeSelection } from '../TestInfrastructure/run-tests.mjs';
 import { spawn } from 'node:child_process';
 import { constants } from 'node:fs';
@@ -188,6 +189,13 @@ export async function runWorkload() {
   const cell = process.env.KEYLOAD_COMPARISON_CELL_ID;
   if (typeof cell !== 'string' || cell.length > 256 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cell)) {
     throw new Error('The native comparison cell identity is invalid.');
+  }
+  if (process.env.KEYLOAD_MATRIX_KIND === 'documents') {
+    const document = selectedDocumentCell(process.env);
+    const selected = nativeSelection(['--KeyLoadTests:Suite=comparison',
+      '--KeyLoadTests:Filter=/*/*/DocumentNativeComparisonTests/*', '--KeyLoadTests:TimeoutMinutes=140']);
+    const progress = path.join(root, 'artifacts/comparisons/isolated/failures', document.id, 'progress.log');
+    return await runProgressProcess('dotnet', selected.args, root, progress, intervalMilliseconds, selected.environment);
   }
   const vectorProfile = selectedVectorProfile(process.env);
   const scaleProfile = selectedScaleProfile(process.env, vectorProfile);

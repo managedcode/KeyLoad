@@ -20,6 +20,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     private readonly long? commandBytes;
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
+    private readonly int? snapshotThreshold;
     private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
     private ContainerRuntimeControl? containerRuntime;
@@ -59,6 +60,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <param name="databaseLimits">The validated limits applied to every Aspire RF3 node.</param>
     internal ClusterFixture(DatabaseLimits databaseLimits)
         => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
+
+    /// <summary>Creates an exclusive load fixture with an explicit positive snapshot cadence.</summary>
+    internal ClusterFixture(DatabaseLimits databaseLimits, int snapshotThreshold) : this(databaseLimits)
+        => this.snapshotThreshold = ClusterFixtureComposition.ValidateSnapshotThreshold(snapshotThreshold);
 
     /// <summary>Creates an RF3 fixture with explicit database and additional query result bounds.</summary>
     internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
@@ -106,6 +111,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             }
             if (isolateReplicaNamespace && (localImageSession is not null || coverage is not null))
             { throw new InvalidOperationException("The native namespace fault cohort cannot mix local-image or covered selection."); }
+            arguments = ClusterFixtureComposition.ApplySnapshotThreshold(arguments, snapshotThreshold,
+                coverage is not null || localImageSession is not null || isolateReplicaNamespace);
             ObserveColdStart();
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
@@ -155,19 +162,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <param name="key">An optional database credential; null selects the fixture administrator.</param>
     /// <returns>A client backed by Aspire's actual allocated HTTP endpoint.</returns>
     public KeyLoadClient Client(string node, string? key = null)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(node);
-        HttpClient? pending = null;
-        try
-        {
-            pending = RequireApp().CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
-            pending.Timeout = ClusterFixtureProtocol.ClientTimeout;
-            var client = new KeyLoadClient(pending, key ?? AdminKey, IntegrationClientOptions.Execution());
-            pending = null;
-            return client;
-        }
-        finally { pending?.Dispose(); }
-    }
+        => ClusterFixtureComposition.CreateClient(RequireApp(), node, key ?? AdminKey);
 
     /// <summary>Writes bounded RF3 state, signed discovery and recent node-log diagnostics.</summary>
     /// <returns>A task that completes after the diagnostic artifact is written.</returns>

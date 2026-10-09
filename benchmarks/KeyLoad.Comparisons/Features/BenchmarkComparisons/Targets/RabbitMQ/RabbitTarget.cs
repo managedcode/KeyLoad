@@ -10,7 +10,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Guid-formatted run identifier used to isolate the queue name.</param>
 /// <param name="image">Broker image reference recorded in the verified profile.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="topology">The expected one-, two- or three-member quorum queue topology.</param>
+/// <param name="topology">The expected one- or three-member quorum queue topology.</param>
 /// <param name="management">Optional management API client for broker membership verification; initialization requires it, and the target disposes it.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class RabbitTarget(string connectionString, string runId, string image,

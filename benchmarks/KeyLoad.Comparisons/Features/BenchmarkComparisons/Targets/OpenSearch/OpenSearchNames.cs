@@ -30,10 +30,8 @@ internal static class OpenSearchNames
     internal const string Unsupported = "OpenSearch supports point reads, strict document create/update/delete and exact vector search in this comparison contract.";
     internal const string SingleTopology = "1 connected data/manager node; 1 primary shard, 0 replicas";
     internal const string ReplicatedTopology = "3 connected data/manager nodes; 1 primary shard, 2 replicas";
-    internal const string TwoNodeTopology = "2 connected data/manager nodes; 1 primary shard, 1 replica";
     internal const string SingleAcknowledgement = "index.translog.durability=request; wait_for_active_shards=all; checked write shard results (1 copy)";
     internal const string ReplicatedAcknowledgement = "index.translog.durability=request; wait_for_active_shards=all; checked write shard results (3 copies)";
-    internal const string TwoNodeAcknowledgement = "index.translog.durability=request; wait_for_active_shards=all; checked write shard results (2 copies)";
     internal const string RealtimeReadContract = "real-time document GET; native scripted_metric exact float32-input/double-cosine scan; bounded shard TopK and native merge; cosine descending then ordinal ID ascending";
     internal const string TcpTransport = "OpenSearch REST/HTTP JSON";
     internal const string TlsTransport = "OpenSearch REST/HTTPS JSON";

@@ -8,13 +8,13 @@ internal static class OpenLoopPlanExpectedInventory
     internal const string ProofFamily = "open-loop-proof";
     internal const string MeasurementSuffix = "-openloop-r";
     internal const string ProofSuffix = "-openloop-proof-r";
-    internal const int ExpectedMeasurementCount = 792;
+    internal const int ExpectedMeasurementCount = 528;
     internal const int ExpectedProofCount = 6;
-    internal const int ExpectedPerTarget = 72;
-    internal const int ExpectedUnsupportedCount = 144;
+    internal const int ExpectedPerTarget = 48;
+    internal const int ExpectedUnsupportedCount = 72;
     internal const int MaximumIdLength = 120;
     internal const int ExpectedTargetCount = 11;
-    internal const int ExpectedNodeCount = 3;
+    internal const int ExpectedNodeCount = 2;
     internal const int ExpectedScenarioCount = 4;
     internal const int ExpectedProfileCount = 2;
     internal const int ExpectedRateCount = 3;

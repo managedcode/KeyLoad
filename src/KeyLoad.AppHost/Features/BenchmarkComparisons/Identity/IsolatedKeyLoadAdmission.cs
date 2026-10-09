@@ -29,6 +29,8 @@ internal static class IsolatedKeyLoadAdmission
         var limits = options.Value;
         SetSelection(runner, nameof(limits.RequestsPerScope), limits.RequestsPerScope);
         SetSelection(runner, nameof(limits.ReservedBytes), limits.ReservedBytes);
+        if (limits.DocumentWorkload)
+        { runner.WithEnvironment(SelectionPrefix + nameof(limits.DocumentWorkload), bool.TrueString); }
     }
 
     private static void SetSelection(IResourceBuilder<ContainerResource> runner, string name, long value)

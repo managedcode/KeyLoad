@@ -35,9 +35,9 @@ internal sealed class VectorAggregateAdmissionTests
         const helixEnvelope={...envelope,worker:{...envelope.worker,target:'HelixDB'},
           reason:'HelixDB does not implement Exact/Plain natively.'};
         const acceptsHelixUnsupported=(()=>{try{validateWorkerEnvelope(helixEnvelope,helix,cohort,contract);return true;}catch{return false;}})();
-        const surreal=plan.cells.find(cell=>cell.target==='SurrealDB'&&cell.nodeCount===2);
+        const surreal=plan.cells.find(cell=>cell.target==='SurrealDB'&&cell.nodeCount===3);
         const topology=contract.unsupportedTopologies.find(item=>item.target==='SurrealDB');
-        const surrealEnvelope={...envelope,worker:{...envelope.worker,target:'SurrealDB',nodeCount:2},
+        const surrealEnvelope={...envelope,worker:{...envelope.worker,target:'SurrealDB',nodeCount:3},
           disposition:'unsupportedTopology',reason:topology.reason};
         const acceptsSurrealTopology=(()=>{try{validateWorkerEnvelope(surrealEnvelope,surreal,cohort,contract);return true;}catch{return false;}})();
         const rejectsHelixSynthetic=(()=>{try{validateWorkerEnvelope({...helixEnvelope,disposition:'measured',reason:null,report:{recall:1}},helix,cohort,contract);return false;}catch{return true;}})();

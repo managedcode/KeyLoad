@@ -11,9 +11,9 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected topology used by replication setup and copy observation.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class PostgresTarget(string connectionString, string runId, string image,
+public sealed partial class PostgresTarget(string connectionString, string runId, string image,
     IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-    ComparisonTopology topology = ComparisonTopology.Standalone, TimeProvider? provider = null) : IComparisonTarget
+    ComparisonTopology topology = ComparisonTopology.Standalone, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string PostgreSQLPgvectorToken = "PostgreSQL + pgvector";
@@ -55,7 +55,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
         ArgumentNullException.ThrowIfNull(dataset);
         topK = dataset.Settings.TopK;
         graphDepth = dataset.Settings.GraphDepth;
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             Profile = Profile with { ReadContract = DocumentOnlyReadCommittedContract };
         }
@@ -65,7 +65,8 @@ public sealed class PostgresTarget(string connectionString, string runId, string
         {
             MaxAutoPrepare = execution.PostgresMaxAutoPrepare,
             AutoPrepareMinUsages = execution.PostgresAutoPrepareMinUsages,
-            MaxPoolSize = Math.Max(execution.PostgresMinimumPoolSize, dataset.Settings.Concurrency),
+            MaxPoolSize = Math.Max(execution.PostgresMinimumPoolSize, dataset is DocumentComparisonCorpus
+                ? checked(dataset.Settings.Concurrency + execution.DocumentVerificationConnectionReserve) : dataset.Settings.Concurrency),
             SearchPath = schema + PublicToken
         };
         source = NpgsqlDataSource.Create(settings.ConnectionString);

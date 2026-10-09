@@ -6,7 +6,6 @@ namespace KeyLoad.Comparisons;
 internal static class ComparisonTopologyNames
 {
     internal const string Single = "Single";
-    internal const string TwoNode = "TwoNode";
 }
 
 /// <summary>Preserves the comparison topology's established configuration names for external type-descriptor callers.</summary>
@@ -27,7 +26,7 @@ public sealed class ComparisonTopologyConverter : EnumConverter
             return base.ConvertFrom(context, culture, value);
         }
 
-        var mapped = string.Join(ListSeparator, text.Split(ListSeparator).Select(MapLegacyName));
+        var mapped = string.Join(ListSeparator, text.Split(ListSeparator).Select(MapCanonicalName));
         return base.ConvertFrom(context, culture, mapped);
     }
 
@@ -42,7 +41,7 @@ public sealed class ComparisonTopologyConverter : EnumConverter
         return base.ConvertTo(context, culture, value, destinationType);
     }
 
-    private static string MapLegacyName(string token)
+    private static string MapCanonicalName(string token)
     {
         var name = token.Trim();
         if (!name.Equals(ComparisonTopologyNames.Single, StringComparison.OrdinalIgnoreCase))

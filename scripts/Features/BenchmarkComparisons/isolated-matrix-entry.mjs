@@ -1,3 +1,4 @@
+import { createDocumentPlan, validateDocumentPlan, documentMatrixRow } from './document-isolated-plan.mjs';
 import { constants } from 'node:fs';
 import { open, readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -15,26 +16,27 @@ import { readJson } from './isolated-github-files.mjs';
 const MATRIX = Object.freeze({
   directory: 'KEYLOAD_MATRIX_PLAN_DIRECTORY', id: 'KEYLOAD_COMPARISON_CELL_ID',
   jobName: 'KEYLOAD_COMPARISON_JOB_NAME', target: 'Benchmarks__Target', kind: 'KEYLOAD_MATRIX_KIND',
-  files: ['isolated-plan.json', 'scaled-plan.json', 'vector-plan.json', 'composite-plan.json', 'open-loop-plan.json'],
+  files: ['isolated-plan.json', 'scaled-plan.json', 'vector-plan.json', 'composite-plan.json', 'open-loop-plan.json', 'document-plan.json'],
   output: 'GITHUB_ENV', selectors: ['KEYLOAD_SCALE_PROFILE', 'KEYLOAD_VECTOR_PROFILE', 'KEYLOAD_OPEN_LOOP_RATE',
     'KEYLOAD_OPEN_LOOP_CANCELLATION_PROOF', 'Benchmarks__NodeCount', 'Benchmarks__Scenario',
-    'Benchmarks__EvidenceProfile', 'Benchmarks__VectorProfile'],
+    'Benchmarks__EvidenceProfile', 'Benchmarks__VectorProfile', 'Benchmarks__DocumentScenario', 'Benchmarks__DocumentRecords', 'Benchmarks__DocumentClients'],
 });
 
 async function readCanonicalPlans(directory) {
   const names = (await readdir(directory)).sort();
   requireGitHub(isDeepStrictEqual(names, [...MATRIX.files].sort()));
   const values = await Promise.all(MATRIX.files.map(name => readJson(path.join(directory, name), GH.metadataBytes)));
-  const [plan, scales, vectors, composite, openLoop] = values;
+  const [plan, scales, vectors, composite, openLoop, documents] = values;
   const canonicalPlan = validateIsolatedPlan(plan);
   const canonicalScales = validateScaledPlans(scales);
   const canonicalVectors = validateVectorPlans(vectors);
   const canonicalOpenLoop = validateOpenLoopPlan(openLoop);
   requireGitHub(isDeepStrictEqual(composite, createCompositePlan(canonicalPlan, canonicalScales, canonicalVectors)));
-  return { plan: canonicalPlan, scales: canonicalScales, vectors: canonicalVectors, openLoop: canonicalOpenLoop };
+  return { plan: canonicalPlan, scales: canonicalScales, vectors: canonicalVectors, openLoop: canonicalOpenLoop, documents: validateDocumentPlan(documents) };
 }
 
 function selectedKind(row) {
+  if (row.family === 'document-v1') return 'documents';
   if (row.preflight) return 'preflight';
   if (row.openLoopCancellationProof) return 'proof';
   return row.openLoopRate === undefined ? 'worker' : 'open-loop';
@@ -53,7 +55,8 @@ function selectorValues(row) {
   const vector = row.vectorProfile ?? '';
   return [scale, vector, row.openLoopRate === undefined ? '' : String(row.openLoopRate),
     row.openLoopCancellationProof === undefined ? '' : String(row.openLoopCancellationProof),
-    String(row.nodeCount), row.scenario, row.profile, vector];
+    String(row.nodeCount), row.scenario, row.profile, vector, row.documentScenario ?? '',
+    row.documentRecords === undefined ? '' : String(row.documentRecords), row.documentClients === undefined ? '' : String(row.documentClients)];
 }
 
 async function appendEnvironment(pathname, values) {
@@ -75,7 +78,7 @@ export async function resolveMatrixEntry(environment = process.env) {
   requireGitHub(typeof directory === 'string' && path.isAbsolute(directory));
   await existingPath(directory, true);
   const source = await readCanonicalPlans(directory);
-  const matrices = createDatabaseMatrices(source.plan, source.scales, source.vectors, source.openLoop);
+  const matrices = createDatabaseMatrices(source.plan, source.scales, source.vectors, source.openLoop, source.documents.cells.map(documentMatrixRow));
   const row = findSelectedRow(matrices, environment);
   await appendEnvironment(environment[MATRIX.output], selectorValues(row));
 }

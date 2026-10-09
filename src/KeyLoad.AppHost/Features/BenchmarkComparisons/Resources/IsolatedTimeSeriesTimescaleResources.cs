@@ -32,7 +32,7 @@ internal static class IsolatedTimeSeriesTimescaleResources
     internal static void Add(IsolatedTimeSeriesResourceContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        if (context.NodeCount is < MinimumNodes or > MaximumNodes)
+        if (context.NodeCount is not (MinimumNodes or MaximumNodes))
         {
             throw new InvalidOperationException(InvalidCount);
         }

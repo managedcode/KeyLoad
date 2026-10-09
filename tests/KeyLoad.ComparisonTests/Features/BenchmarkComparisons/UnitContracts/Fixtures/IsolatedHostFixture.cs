@@ -23,7 +23,7 @@ internal sealed class IsolatedHostFixture : IDisposable
     internal const string Password = "Benchmarks__Native__Password";
     internal readonly string DirectoryPath = Path.Combine(Path.GetTempPath(), "keyload-isolated-host-" + Guid.NewGuid().ToString("N"));
 
-    internal Dictionary<string, string> Settings(string target = "Neo4j", int nodes = 2)
+    internal Dictionary<string, string> Settings(string target = "Neo4j", int nodes = 3)
         => new(StringComparer.OrdinalIgnoreCase)
         {
             [Target] = target,

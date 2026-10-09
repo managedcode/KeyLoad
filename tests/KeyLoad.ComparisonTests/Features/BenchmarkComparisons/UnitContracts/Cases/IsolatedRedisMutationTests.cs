@@ -25,7 +25,6 @@ internal sealed class IsolatedRedisMutationTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     public async Task AcIso003RedisEvidenceRecordsActualDirectReplicaCount(int replicas)
     {
         var primary = new RedisNodeIdentity(PrimaryIdentity, Version);

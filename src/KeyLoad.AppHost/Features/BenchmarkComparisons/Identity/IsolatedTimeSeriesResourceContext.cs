@@ -19,7 +19,7 @@ internal sealed class IsolatedTimeSeriesResourceContext
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(runner);
-        if (nodeCount is < MinimumNodes or > MaximumNodes || string.IsNullOrWhiteSpace(root))
+        if (nodeCount is not (MinimumNodes or MaximumNodes) || string.IsNullOrWhiteSpace(root))
         {
             throw new InvalidOperationException(Invalid);
         }

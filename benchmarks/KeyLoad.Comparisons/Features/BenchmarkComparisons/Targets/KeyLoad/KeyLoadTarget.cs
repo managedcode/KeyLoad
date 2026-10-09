@@ -23,7 +23,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
-    HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault, TimeProvider? provider = null) : IComparisonTarget
+    HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const int ExpectedNodesDefault = 3;
@@ -83,10 +83,16 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
             throw new ComparisonFailureException(expectedNodeCount == ExpectedNodesDefault ? Rf3Required : BenchmarkTopologyMismatch);
         }
 
-        var scaled = dataset.Settings is ScaledComparisonProfile;
+        var scaled = dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus;
         ConfigureCorpus(dataset, scaled);
         await ConfigureResourcesAsync(scaled, cancellationToken);
-        await SeedDocumentsAsync(dataset, scaled, cancellationToken);
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        documentTiming?.IndexNotApplicable();
+        using (documentTiming?.MeasureLoad())
+        {
+            await SeedDocumentsAsync(dataset, scaled, cancellationToken);
+        }
+
         await SeedGraphAsync(dataset, scaled, cancellationToken);
         if (!scaled && dataset is BenchmarkDataset control)
         {
@@ -157,14 +163,17 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
             graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, nativeExecutionOptions, translationOptions, provider: timeProvider));
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        foreach (var peer in peerClients.Distinct())
+        try
+        { await CleanupDocumentNamespaceAsync().ConfigureAwait(false); }
+        finally
         {
-            peer.Dispose();
+            foreach (var peer in peerClients.Distinct())
+            {
+                peer.Dispose();
+            }
         }
-
-        return ValueTask.CompletedTask;
     }
 
 }

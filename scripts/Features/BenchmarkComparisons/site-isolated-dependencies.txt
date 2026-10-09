@@ -1,3 +1,4 @@
+benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/document-contract.json
 benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json
 scripts/Features/BenchmarkComparisons/aggregate-contracts.mjs
 scripts/Features/BenchmarkComparisons/aggregate-files.mjs
@@ -8,6 +9,9 @@ scripts/Features/BenchmarkComparisons/aggregate-validation.mjs
 scripts/Features/BenchmarkComparisons/composite-site-contract.mjs
 scripts/Features/BenchmarkComparisons/composite-site-evidence.mjs
 scripts/Features/BenchmarkComparisons/contracts.mjs
+scripts/Features/BenchmarkComparisons/document-evidence.mjs
+scripts/Features/BenchmarkComparisons/document-isolated-plan.mjs
+scripts/Features/BenchmarkComparisons/document-worker-finalize.mjs
 scripts/Features/BenchmarkComparisons/finalize-resource.mjs
 scripts/Features/BenchmarkComparisons/finalize-worker.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-contract.mjs

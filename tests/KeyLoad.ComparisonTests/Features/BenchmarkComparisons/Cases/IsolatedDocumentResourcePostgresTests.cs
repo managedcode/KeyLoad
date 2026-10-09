@@ -20,7 +20,6 @@ internal sealed class IsolatedDocumentResourcePostgresTests
     /// <summary>AC-ISO-002/003/006: authentic PG18 bootstrap, private native copies and secret-only authentication.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task NativeGroupHasExactPrimaryAndNamedPhysicalStandbys(int count)
     {

@@ -26,7 +26,7 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
             foreach (var stored in cursor.Current)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (seen >= corpusCount)
+                if (corpusCount >= NoObservedItems && seen >= corpusCount)
                 {
                     throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
                 }
@@ -35,7 +35,7 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
                 seen++;
             }
         }
-        if (seen != corpusCount)
+        if (corpusCount >= NoObservedItems && seen != corpusCount)
         {
             throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }

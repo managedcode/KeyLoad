@@ -17,7 +17,7 @@ internal static class KeyLoadDocumentOperations
     };
 
     internal static async Task<OperationResult> ExecuteAsync(KeyLoadClient client, PartitionRef partition,
-        Scenario scenario, BenchmarkDocument document, CancellationToken token)
+        Scenario scenario, BenchmarkDocument document, CancellationToken token, bool classifyMissingUpdate = true)
     {
         var result = await client.CommitAsync(new(Guid.NewGuid(), partition, [CreateMutation(scenario, document)]), token);
         if (!result.IsSuccess)
@@ -27,7 +27,7 @@ internal static class KeyLoadDocumentOperations
             {
                 throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
             }
-            if (scenario == Scenario.DocumentUpdate && code == nameof(ErrorCode.RevisionConflict))
+            if (classifyMissingUpdate && scenario == Scenario.DocumentUpdate && code == nameof(ErrorCode.RevisionConflict))
             {
                 var observed = await client.GetAsync(
                     new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), token);

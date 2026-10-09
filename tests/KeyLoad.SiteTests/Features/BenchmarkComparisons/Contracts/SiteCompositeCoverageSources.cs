@@ -11,6 +11,9 @@ internal static class SiteCompositeCoverageSources
         $"{SitePublicationTokens.EvidenceToolsPrefix}vector-isolated-plan.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}scaled-cohort-receipt.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}server-resource-evidence.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}document-isolated-plan.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}document-evidence.mjs",
+        $"{SitePublicationTokens.EvidenceToolsPrefix}document-worker-finalize.mjs",
         $"{SiteAssetTokens.FeatureRelativePath}/composite-render.mjs",
     ];
 }

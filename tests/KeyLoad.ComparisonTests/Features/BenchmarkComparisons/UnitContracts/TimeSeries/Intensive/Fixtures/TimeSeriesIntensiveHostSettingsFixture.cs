@@ -40,7 +40,7 @@ internal static class TimeSeriesIntensiveHostSettingsFixture
     internal const string OutputValue = "/private/tmp/keyload-th009-reports";
     internal const string Revision = "0123456789abcdef0123456789abcdef01234567";
     internal const string OtherRevision = "1123456789abcdef0123456789abcdef01234567";
-    internal const string ContractHash = "5d5fca799172272e1495b62c6f7b104785b394a64926082eef1030b0011e1831";
+    internal const string ContractHash = "9b13ab99e8acb25ad11d08e394fd5af758553ae00bef0a52a858975ea58a5fbb";
     internal const string ServerImage = "localhost:5000/keyload/server:test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     internal const string RunnerImage = "localhost:5000/keyload/runner:test@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
     internal const string TimescaleImage = "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
@@ -87,7 +87,7 @@ internal static class TimeSeriesIntensiveHostSettingsFixture
     internal const int AttemptNumber = 2;
 
     internal static Dictionary<string, string?> Values(TimeSeriesIntensiveTargetKind target,
-        int count = TwoNodes, TimeSeriesIntensiveScenario? scenario = null)
+        int count = ThreeNodes, TimeSeriesIntensiveScenario? scenario = null)
     {
         var values = new Dictionary<string, string?>(StringComparer.Ordinal)
         {

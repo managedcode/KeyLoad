@@ -22,33 +22,32 @@ internal sealed class NativeDocumentTopologyMongoTests
     private const string Self = "self";
 
     [Test]
-    public async Task AC_ISO_003_RequiresHealthyDistinctSameSetMembersForBothTwoAndThreeNodes()
+    public async Task AC_ISO_003_RequiresHealthyDistinctSameSetThreeMembers()
     {
-        var two = Status(2);
+        var corrupt = Status(3);
         var three = Status(3);
-        await Assert.That(MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName).Length).IsEqualTo(2);
         await Assert.That(MongoReplicaVerifier.ValidateMembers(three, ComparisonTopology.Replicated, SetName).Length).IsEqualTo(3);
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(three, ComparisonTopology.TwoNode, SetName));
-        two[Set] = ForeignSet;
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName));
-        two = Status(2);
-        two[MongoSchema.MembersField][1][MongoSchema.MemberHostField] = two[MongoSchema.MembersField][0][MongoSchema.MemberHostField];
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName));
-        two = Status(2);
-        two[WriteMajority] = 1;
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName));
-        two = Status(2);
-        two[MongoSchema.MembersField][1][Identity] = two[MongoSchema.MembersField][0][Identity];
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName));
-        two = Status(2);
-        two[MongoSchema.MembersField][1][MongoSchema.MemberHostField] = string.Empty;
-        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(two, ComparisonTopology.TwoNode, SetName));
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(Status(2), ComparisonTopology.Replicated, SetName));
+        corrupt[Set] = ForeignSet;
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(corrupt, ComparisonTopology.Replicated, SetName));
+        corrupt = Status(3);
+        corrupt[MongoSchema.MembersField][1][MongoSchema.MemberHostField] = corrupt[MongoSchema.MembersField][0][MongoSchema.MemberHostField];
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(corrupt, ComparisonTopology.Replicated, SetName));
+        corrupt = Status(3);
+        corrupt[WriteMajority] = 1;
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(corrupt, ComparisonTopology.Replicated, SetName));
+        corrupt = Status(3);
+        corrupt[MongoSchema.MembersField][1][Identity] = corrupt[MongoSchema.MembersField][0][Identity];
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(corrupt, ComparisonTopology.Replicated, SetName));
+        corrupt = Status(3);
+        corrupt[MongoSchema.MembersField][1][MongoSchema.MemberHostField] = string.Empty;
+        Assert.ThrowsExactly<ComparisonFailureException>(() => MongoReplicaVerifier.ValidateMembers(corrupt, ComparisonTopology.Replicated, SetName));
     }
 
     [Test]
     public void AC_ISO_003_DirectSecondaryReceiptMustIdentifyTheExpectedNativeSelf()
     {
-        var status = Status(2);
+        var status = Status(3);
         var expected = status[MongoSchema.MembersField][1].AsBsonDocument;
         expected[Self] = true;
         MongoReplicaMembers.ValidateDirectMember(status, expected);

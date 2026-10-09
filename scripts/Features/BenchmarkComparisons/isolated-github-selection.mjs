@@ -1,3 +1,4 @@
+import { createDocumentPlan, documentJobName, DOCUMENT } from './document-isolated-plan.mjs';
 import { validateAggregateProof } from './aggregate-proof.mjs';
 import { GH, isolatedEvidenceJobName, requireGitHub, timestamp } from './isolated-github-contract.mjs';
 import { uniqueNamed, validateArtifact, validateSuccessfulJob, validateWorkerJob } from './isolated-github-validation.mjs';
@@ -21,8 +22,10 @@ export function selectCompletedEvidence(capture, context, plan, scaledPlans = []
       .flatMap(matrix => matrix.include).filter(row => row.openLoopRate !== undefined);
   const openLoopJobNames = new Set(openLoopRows.map(row => row.jobName));
   const openLoopArtifactNames = new Set(openLoopRows.map(row => row.artifactPrefix + row.id));
-  const regularJobs = jobs.filter(job => !openLoopJobNames.has(job.name));
-  const regularArtifacts = artifacts.filter(item => !openLoopArtifactNames.has(item.name));
+  const documentCells = createDocumentPlan().cells;
+  const documentJobs = new Set(documentCells.map(documentJobName));
+  const regularJobs = jobs.filter(job => !openLoopJobNames.has(job.name) && !documentJobs.has(job.name));
+  const regularArtifacts = artifacts.filter(item => !openLoopArtifactNames.has(item.name) && !item.name.startsWith(DOCUMENT.artifactPrefix));
   const groupedNames = new Set(cells.map(cell => isolatedEvidenceJobName(cell)));
   const grouped = jobs.some(job => groupedNames.has(job.name));
   const jobName = cell => grouped ? isolatedEvidenceJobName(cell) : GH.casePrefix + cell.id;

@@ -15,6 +15,7 @@ internal static partial class IsolatedNativeReportAssertions
     private const string CellEnvironment = "KEYLOAD_COMPARISON_CELL_ID";
     private const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
     private const string WorkerFile = "worker.json";
+    private const string DocumentWorkerFile = "document-worker.json";
     private const string ServerResourceFile = "server-resource-evidence.json";
     private const string ServerResourceSchema = "server-resource-evidence.v2";
     private const string Runner = "comparisons";
@@ -164,7 +165,8 @@ internal static partial class IsolatedNativeReportAssertions
         await Assert.That(evidence.WorkflowRunId).IsEqualTo(Environment.GetEnvironmentVariable("GITHUB_RUN_ID"));
         await Assert.That(evidence.RunAttempt).IsEqualTo(Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT"));
         await Assert.That(evidence.JobId).IsEqualTo(Environment.GetEnvironmentVariable(JobEnvironment));
-        await using var workerStream = File.OpenRead(Path.Combine(output, WorkerFile));
+        await using var workerStream = File.OpenRead(Path.Combine(output,
+            selection.DocumentWorkload is null ? WorkerFile : DocumentWorkerFile));
         var hash = Convert.ToHexStringLower(await SHA256.HashDataAsync(workerStream, cancellationToken));
         await Assert.That(evidence.WorkerSha256).IsEqualTo(hash);
         var unsupported = IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
@@ -180,7 +182,7 @@ internal static partial class IsolatedNativeReportAssertions
 
     internal static void CopyRawIfPresent(string output, string evidence)
     {
-        foreach (var name in new[] { WorkerFile, ServerResourceFile, OpenLoopEvidenceContract.OpenLoopEvidenceFileName,
+        foreach (var name in new[] { WorkerFile, DocumentWorkerFile, ServerResourceFile, OpenLoopEvidenceContract.OpenLoopEvidenceFileName,
             OpenLoopCancellationProofContract.ProofFileName, OpenLoopResourceEvidenceContract.SidecarFileName })
         {
             var file = Path.Combine(output, name);

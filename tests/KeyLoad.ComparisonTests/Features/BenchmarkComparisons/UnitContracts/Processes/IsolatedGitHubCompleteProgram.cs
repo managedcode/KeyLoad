@@ -53,7 +53,7 @@ internal static class IsolatedGitHubCompleteProgram
           const selected = api.selectCompletedEvidence({run, jobs, artifacts}, {cohort}, plan);
           const cells = selected.cells.map(item => validation.projectWorkerProof(item.job, item.artifact, item.cell, cohort, 'c'.repeat(64)));
           const proof = api.requireCompleteProof({schemaVersion:1,cohort,cells}, plan);
-          if (proof.cells.length !== 330 || proof.cells.some(cell => cell.job.steps.length !== 2)) throw new Error('projection');
+          if (proof.cells.length !== 220 || proof.cells.some(cell => cell.job.steps.length !== 2)) throw new Error('projection');
           if (modern && proof.cells.some(item => item.job.name.includes(' / Check / '))) throw new Error('preflight leakage');
           if (corruption === 'modern-failed' && (proof.cells[0].job.conclusion !== 'failure'
             || proof.cells[0].job.steps[0].conclusion !== 'failure'

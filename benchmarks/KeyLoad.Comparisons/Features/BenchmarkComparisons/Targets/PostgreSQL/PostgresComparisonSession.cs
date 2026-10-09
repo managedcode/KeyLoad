@@ -25,14 +25,14 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
         while (await reader.ReadAsync(cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (seen >= corpusCount)
+            if (corpusCount >= NoObservedItems && seen >= corpusCount)
             {
                 throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
             }
             yield return new(reader.GetString(FirstColumnIndex), reader.GetString(SecondColumnIndex));
             seen++;
         }
-        if (seen != corpusCount)
+        if (corpusCount >= NoObservedItems && seen != corpusCount)
         {
             throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }

@@ -20,8 +20,6 @@ internal static class RabbitNativePolicy
     {
         const int SingleItemCount = 1;
         const string NoReplicaFaultToleranceToken = "; no replica fault tolerance";
-        const int TwoNodeReplicaCount = 2;
-        const string NoSingleNodeLossAvailabilityToken = "; no single-node-loss availability";
         const int MajorityDivisor = 2;
         const int MajorityVoteOffset = 1;
 
@@ -29,7 +27,6 @@ internal static class RabbitNativePolicy
         var availability = nodes switch
         {
             SingleItemCount => NoReplicaFaultToleranceToken,
-            TwoNodeReplicaCount => NoSingleNodeLossAvailabilityToken,
             _ => string.Empty
         };
         return $"{nodes}{TopologyLabelConnectedNativeBrokerNodesText}{nodes}{TopologyLabelMemberQuorumQueueQuorumText}{nodes / MajorityDivisor + MajorityVoteOffset}{TopologyLabelOfText}{nodes}{availability}";

@@ -1,4 +1,42 @@
 {
+  "BENCHMARK-METHODOLOGY-001": {
+    "title": "Primary-source native benchmark methodology and shared actual-scale workloads",
+    "status": "implementation_checkpoint_github_verification_pending",
+    "feature": "docs/Features/BenchmarkComparisons/Methodology.md",
+    "decision": "docs/ADR/ADR-122-native-benchmark-methodology.md",
+    "activeNodeCounts": [
+      1,
+      3
+    ],
+    "activeRecordCounts": [
+      100000,
+      1000000
+    ],
+    "documentCells": 418,
+    "ingestionRecords": 1000000,
+    "ingestionClients": [
+      1,
+      10,
+      500
+    ],
+    "ordinaryMeasuredOperations": 100000,
+    "repetitions": 3,
+    "websiteBaselineWorkers": 924,
+    "websiteBaselineInputs": 1716,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "sourceStage": "Shared native runner/adapters, exclusive RF3 load and authenticated qualification implemented; mapped regression repairs frozen for a scoped GitHub checkpoint. Owner correction requires all further builds, checks and tests in GitHub Actions.",
+    "verification": {
+      "canonicalBuild": "github_checkpoint_pending; earlier local tenth build compiled ComparisonTests but failed on heavy lifecycle and concurrent recovery sources; mapped owning repairs authored",
+      "format": "github_canonical_verification_pending; earlier scoped whitespace and braces applied",
+      "governance": "github_checkpoint_pending; earlier development check passed before final repairs",
+      "nativeRegressions": "github_checkpoint_pending; earlier local original TUnit 136/152 passed, 16 failed, zero skipped; mapped fixture/configuration/cleanup repairs authored",
+      "actualLinuxScale": "pending_original_exact_source_workflow",
+      "workflowSyntax": "github_checkpoint_pending; earlier actionlint passed after functional gate join",
+      "canonicalPlanner": "418_documents_and_1898_total_named_database_cells_generated"
+    },
+    "qualification": "No fabricated measurements, no performance winner, no full coverage or production claim; authentic complete current-source Linux workloads and required recovery/RF3 gates remain open."
+  },
   "TEST-ISOLATED-MEASUREMENTS-013": {
     "title": "Ordinary functional concurrency and exclusive benchmark/load execution",
     "status": "in_progress",
@@ -7,10 +45,14 @@
     "ordinaryDefaultParallelTests": 20,
     "ordinaryMaximumParallelTests": 50,
     "comparisonParallelTests": 1,
-    "requiredIngestionClients": [1, 10, 500],
+    "requiredIngestionClients": [
+      1,
+      10,
+      500
+    ],
     "recordsPerIngestionCase": 1000000,
-    "ingestionCasesImplemented": false,
-    "heavyMixedLoadCasesImplemented": false,
+    "ingestionCasesImplemented": true,
+    "heavyMixedLoadCasesImplemented": true,
     "runtimeQualified": false,
     "localCanonicalBuildPassed": true,
     "localCanonicalFormatterPassed": true,
@@ -21,7 +63,7 @@
     "localVerification": "2026-10-09 macOS ARM64 development evidence: final full Release build zero warnings/errors; canonical formatter passed; native TUnit 11/11 unit and 16/16 comparison/model/process-entry cases passed with no skips. Original TRX intervals show peak11 for the focused functional selection and peak1 for comparison. Retain the earlier 7/11 and 15/16 failed arrangements separately. No actual ingestion, heavy mixed load, Linux/RF3 or coverage qualification follows.",
     "remaining": [
       "Qualify delivered-source isolated Linux native selector and typed AppHost serial comparison admission",
-      "Implement one shared comparison scenario inventory with isolated real-client million-record ingestion at1/10/500 clients across targets, plus separate exclusive mixed-operation functional load cases",
+      "Compile and verify the authored shared native million-record 1/10/500-client and exclusive RF3 SDK/MCP heavy-load cases; authentic exact-source Linux scale qualification remains pending",
       "Qualify isolated Linux complete load flows with original reports and no coverage contribution"
     ]
   },

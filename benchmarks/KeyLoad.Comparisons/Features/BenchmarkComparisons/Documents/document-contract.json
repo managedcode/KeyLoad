@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "family": "document-v1",
+  "nodeCounts": [
+    1,
+    3
+  ],
+  "datasetSizes": [
+    100000,
+    1000000
+  ],
+  "scenarios": [
+    "SequentialRead",
+    "RandomRead",
+    "Create",
+    "Update",
+    "Delete",
+    "ReadUpdate50",
+    "ReadUpdate95",
+    "MixedCrud"
+  ],
+  "ingestion": {
+    "scenario": "Ingest",
+    "records": 1000000,
+    "clients": [
+      1,
+      10,
+      500
+    ]
+  },
+  "operations": 100000,
+  "repetitions": 3,
+  "clients": 16,
+  "warmup": 256,
+  "seed": 1729,
+  "payloadBytes": 1024,
+  "maximumOutstandingPerClient": 1,
+  "latencyHistogram": {
+    "resolutionMicroseconds": 10,
+    "maximumMilliseconds": 30000,
+    "overflow": "fail-qualification"
+  },
+  "timeoutSeconds": 30
+}

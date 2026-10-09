@@ -25,6 +25,15 @@ public sealed class ComparisonWorkerSelectionOptions
     /// <summary>Gets or sets the optional immutable vector profile.</summary>
     public string? VectorProfile { get; set; }
 
+    /// <summary>Gets or sets the actual pure or mixed document scenario.</summary>
+    public string? DocumentScenario { get; set; }
+
+    /// <summary>Gets or sets the canonical document corpus/ingestion size.</summary>
+    public string? DocumentRecords { get; set; }
+
+    /// <summary>Gets or sets the real independently owned native-client count.</summary>
+    public string? DocumentClients { get; set; }
+
     /// <summary>Gets or sets the optional offered-rate cohort.</summary>
     public string? OpenLoopRate { get; set; }
 

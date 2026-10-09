@@ -21,7 +21,7 @@ internal sealed record TimeSeriesIntensiveSelection(TimeSeriesIntensiveTargetKin
 
     internal void Validate()
     {
-        if (!Enum.IsDefined(Target) || NodeCount is < MinimumNodes or > MaximumNodes || !Enum.IsDefined(Phase)
+        if (!Enum.IsDefined(Target) || NodeCount is not (MinimumNodes or MaximumNodes) || !Enum.IsDefined(Phase)
             || EvidenceProfile != TimeSeriesIntensiveProfile.Name
             || (Phase == TimeSeriesIntensiveCellPhase.Preflight ? Scenario is not null : Scenario is null)
             || (Scenario is { } scenario && !Enum.IsDefined(scenario)))

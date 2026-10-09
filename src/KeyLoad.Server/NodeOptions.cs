@@ -90,7 +90,7 @@ internal sealed record NodeOptions
         const int EmptyPeersCount = 0;
 
         if (Peers is null || (BenchmarkTopology
-                ? Peers.Count is < NodeDefaults.MinimumBenchmarkVoters or > NodeDefaults.MaximumBenchmarkVoters
+                ? Peers.Count is not (NodeDefaults.MinimumBenchmarkVoters or NodeDefaults.MaximumBenchmarkVoters)
                 : Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % PeersCountValidationBoundary == EmptyPeersCount)
             || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
             || !Peers.Contains(PublicEndpoint, StringComparer.Ordinal)

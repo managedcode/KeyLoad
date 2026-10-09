@@ -10,8 +10,8 @@ internal sealed class IsolatedTimeSeriesBenchmarkResourceTests
     private const string EnabledKey = "Benchmarks:Enabled";
     private const string RootKey = "Benchmarks:DataRoot";
     private const string OutputKey = "Benchmarks:Output";
-    private const int ExpectedPreflightCells = 6;
-    private const int ExpectedIntensiveCells = 30;
+    private const int ExpectedPreflightCells = 4;
+    private const int ExpectedIntensiveCells = 20;
     private const string UnixPermissionsRequired = "This resource-model permission assertion requires Unix.";
     private const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     private const UnixFileMode SharedDirectoryMode = PrivateDirectoryMode | UnixFileMode.GroupRead | UnixFileMode.GroupExecute
@@ -214,7 +214,7 @@ internal static class IsolatedTimeSeriesBenchmarkResourceAssertions
     private const string AdminExpression = "{admin-key.value}";
     private const string NodePeerPrefix = "KeyLoad__Peers__";
     private const string ExpectedServerDigest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string ExpectedContractSha = "5d5fca799172272e1495b62c6f7b104785b394a64926082eef1030b0011e1831";
+    private const string ExpectedContractSha = "9b13ab99e8acb25ad11d08e394fd5af758553ae00bef0a52a858975ea58a5fbb";
     private const string ExpectedStorage = "Fresh TimeSeries cell-owned native directories; no shared database";
     private const string RunnerName = "comparisons";
     private const string KeyLoadNodePrefix = "node";

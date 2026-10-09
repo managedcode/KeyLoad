@@ -7,10 +7,10 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubArchiveTests
 {
     private const int ProviderInputFiles = 60;
-    private const int SuiteInputFiles = 2470;
+    private const int SuiteInputFiles = 1656;
 
     [Test]
-    public async Task AC_ISO_007_CurrentArchivesContainExact2530SelectedFilesWithOriginalHashes()
+    public async Task AC_ISO_007_CurrentArchivesContainExact1716SelectedFilesWithOriginalHashes()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);

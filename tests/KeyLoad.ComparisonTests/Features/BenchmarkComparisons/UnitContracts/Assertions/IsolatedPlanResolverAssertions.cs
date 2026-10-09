@@ -14,24 +14,25 @@ internal static class IsolatedPlanResolverAssertions
     private const string WorkerKind = "worker";
     private const string PreflightEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=\nKEYLOAD_VECTOR_PROFILE=\n"
         + "KEYLOAD_OPEN_LOOP_RATE=\nKEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=\nBenchmarks__NodeCount=1\n"
-        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=intensive-1k-c16\nBenchmarks__VectorProfile=\n";
+        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=intensive-1k-c16\nBenchmarks__VectorProfile=\n" + DocumentEmptyEnvironment;
     private const string ControlEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=\nKEYLOAD_VECTOR_PROFILE=\n"
         + "KEYLOAD_OPEN_LOOP_RATE=\nKEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=\nBenchmarks__NodeCount=3\n"
-        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=intensive-1k-c16\nBenchmarks__VectorProfile=\n";
+        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=intensive-1k-c16\nBenchmarks__VectorProfile=\n" + DocumentEmptyEnvironment;
     private const string ScaledEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=scaled-100k-c16\nKEYLOAD_VECTOR_PROFILE=\n"
         + "KEYLOAD_OPEN_LOOP_RATE=\nKEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=\nBenchmarks__NodeCount=3\n"
-        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n";
+        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n" + DocumentEmptyEnvironment;
     private const string VectorEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=\n"
         + "KEYLOAD_VECTOR_PROFILE=vector-100k-exact-plain-c16\nKEYLOAD_OPEN_LOOP_RATE=\n"
         + "KEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=\nBenchmarks__NodeCount=3\nBenchmarks__Scenario=VectorExact\n"
         + "Benchmarks__EvidenceProfile=vector-100k-exact-plain-c16\n"
-        + "Benchmarks__VectorProfile=vector-100k-exact-plain-c16\n";
+        + "Benchmarks__VectorProfile=vector-100k-exact-plain-c16\n" + DocumentEmptyEnvironment;
     private const string OpenLoopEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=scaled-100k-c16\nKEYLOAD_VECTOR_PROFILE=\n"
         + "KEYLOAD_OPEN_LOOP_RATE=250\nKEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=false\nBenchmarks__NodeCount=3\n"
-        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n";
+        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n" + DocumentEmptyEnvironment;
     private const string ProofEnvironment = Sentinel + "KEYLOAD_SCALE_PROFILE=scaled-100k-c16\nKEYLOAD_VECTOR_PROFILE=\n"
         + "KEYLOAD_OPEN_LOOP_RATE=250\nKEYLOAD_OPEN_LOOP_CANCELLATION_PROOF=true\nBenchmarks__NodeCount=3\n"
-        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n";
+        + "Benchmarks__Scenario=PointRead\nBenchmarks__EvidenceProfile=scaled-100k-c16\nBenchmarks__VectorProfile=\n" + DocumentEmptyEnvironment;
+    private const string DocumentEmptyEnvironment = "Benchmarks__DocumentScenario=\nBenchmarks__DocumentRecords=\nBenchmarks__DocumentClients=\n";
     private static readonly string[] ResolverNames = ["isolated-plan.json", "scaled-plan.json", "vector-plan.json",
         "composite-plan.json", "open-loop-plan.json"];
 
@@ -67,6 +68,10 @@ internal static class IsolatedPlanResolverAssertions
             await File.WriteAllBytesAsync(destination, originals[index], token);
             await AssertBytesEqualAsync(originals[index], await File.ReadAllBytesAsync(destination, token));
         }
+        var document = await IsolatedAggregateNodeProcess.RunAsync(["--input-type=module", "-e",
+            "import { createDocumentPlan } from './scripts/Features/BenchmarkComparisons/document-isolated-plan.mjs'; process.stdout.write(JSON.stringify(createDocumentPlan()));"], token);
+        await Assert.That(document.ExitCode).IsEqualTo(0).Because(document.Error);
+        await File.WriteAllTextAsync(Path.Combine(directory, "document-plan.json"), document.Output, token);
         return originals;
     }
 
@@ -83,11 +88,11 @@ internal static class IsolatedPlanResolverAssertions
         var resolved = JsonNode.Parse(result.Output)!.AsObject();
         await Assert.That(resolved[IsolatedPlanFields.Rejected]!.GetValue<bool>()).IsFalse();
         var rows = resolved[IsolatedPlanFields.Include]!.AsArray();
-        await Assert.That(rows.Count).IsEqualTo(207);
-        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(3);
+        await Assert.That(rows.Count).IsEqualTo(140);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(2);
         await Assert.That(rows.Count(static row => !row![IsolatedPlanFields.Preflight]!.GetValue<bool>()
-            && row[IsolatedPlanFields.Profile]!.GetValue<string>() == "intensive-1k-c16")).IsEqualTo(30);
-        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.OpenLoopRate] is not null)).IsEqualTo(78);
+            && row[IsolatedPlanFields.Profile]!.GetValue<string>() == "intensive-1k-c16")).IsEqualTo(20);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.OpenLoopRate] is not null)).IsEqualTo(54);
         return rows;
     }
 

@@ -45,7 +45,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
             foreach (var row in rows.EnumerateArray())
             {
                 var number = row.GetProperty(SurrealDbNativeTokens.TokenNumber).GetInt32();
-                if (number <= after || seen >= count)
+                if (number <= after || (count >= EmptyResultCount && seen >= count))
                 {
                     throw new ComparisonFailureException(SurrealDbNativeTokens.TokenSurrealDbCorpusOrderMismatch);
                 }
@@ -56,7 +56,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
             }
         }
 
-        if (seen != count)
+        if (count >= EmptyResultCount && seen != count)
         {
             throw new ComparisonFailureException(SurrealDbNativeTokens.TokenScaledCorpusReadbackCountMismatch);
         }

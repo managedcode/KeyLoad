@@ -13,7 +13,7 @@ internal sealed class NativeDocumentTopologyKurrentTests
     [Test]
     public async Task AC_ISO_003_AcceptsOneLeaderAndExactNativeFollowersAtEachCount()
     {
-        foreach (var count in new[] { 1, 2, 3 })
+        foreach (var count in new[] { 1, 3 })
         {
             var topology = ComparisonTopologies.FromNodeCount(count);
             var views = Views(count);
@@ -27,15 +27,15 @@ internal sealed class NativeDocumentTopologyKurrentTests
     [Test]
     public async Task AC_ISO_003_RejectsExtraMembersForeignLocalIdsAndDisagreeingNativeEndpoints()
     {
-        await Assert.That(KurrentClusterMembers.IsReady(Views(3), ComparisonTopology.TwoNode)).IsFalse();
-        var views = Views(2);
+        await Assert.That(KurrentClusterMembers.IsReady(Views(2), ComparisonTopology.Replicated)).IsFalse();
+        var views = Views(3);
         views[1] = views[1] with { LocalMember = views[0].LocalMember };
-        await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.TwoNode)).IsFalse();
-        views = Views(2);
+        await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.Replicated)).IsFalse();
+        views = Views(3);
         var members = views[1].Members.ToArray();
         members[1] = members[1] with { HttpEndpointIp = HostPrefix + 9 };
         views[1] = views[1] with { Members = members };
-        await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.TwoNode)).IsFalse();
+        await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopology.Replicated)).IsFalse();
     }
 
     private static KurrentGossipView[] Views(int count) => Views(count, KurrentConstants.ExpectedGossipVersion);

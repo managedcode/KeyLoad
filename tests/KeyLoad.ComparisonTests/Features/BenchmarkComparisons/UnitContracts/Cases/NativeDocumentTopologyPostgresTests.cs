@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-ISO-003/005 native SQL, member and affected-row contracts without a database double.</summary>
 internal sealed class NativeDocumentTopologyPostgresTests
 {
-    private const string TwoNodeQuorum = "ANY 1 (\"benchmark_standby1\")";
     private const string ThreeNodeQuorum = "ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")";
     private const string StandbyOne = "benchmark_standby1";
     private const string StandbyTwo = "benchmark_standby2";
@@ -23,10 +22,9 @@ internal sealed class NativeDocumentTopologyPostgresTests
     [Test]
     public async Task AC_ISO_003_RequiresExactDistinctCountDerivedStandbysAndQuorum()
     {
-        await Assert.That(PostgresTopology.QuorumSettings(ComparisonTopology.TwoNode)).IsEqualTo(TwoNodeQuorum);
         await Assert.That(PostgresTopology.QuorumSettings(ComparisonTopology.Replicated)).IsEqualTo(ThreeNodeQuorum);
-        await Assert.That(PostgresTopology.HasExpectedMembers(ComparisonTopology.TwoNode, [(StandbyOne, AddressOne)])).IsTrue();
-        await Assert.That(PostgresTopology.HasExpectedMembers(ComparisonTopology.TwoNode,
+        await Assert.That(PostgresTopology.HasExpectedMembers(ComparisonTopology.Replicated, [(StandbyOne, AddressOne)])).IsFalse();
+        await Assert.That(PostgresTopology.HasExpectedMembers(ComparisonTopology.Standalone,
             [(StandbyOne, AddressOne), (StandbyTwo, AddressTwo)])).IsFalse();
         await Assert.That(PostgresTopology.HasExpectedMembers(ComparisonTopology.Replicated,
             [(StandbyOne, AddressOne), (StandbyTwo, AddressOne)])).IsFalse();

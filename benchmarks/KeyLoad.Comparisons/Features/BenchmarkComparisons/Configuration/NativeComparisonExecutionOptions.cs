@@ -74,6 +74,7 @@ public sealed partial class NativeComparisonExecutionOptions
         ValidateMongoPolicy();
         ValidateReportPolicy();
         ValidateVectorPolicy();
+        NativeDocumentPolicy.Validate(this);
         NativeComparisonSeedExecutionOptionsValidator.ValidateRequired(this);
         return this;
     }
@@ -84,6 +85,7 @@ public sealed partial class NativeComparisonExecutionOptions
     {
         ArgumentNullException.ThrowIfNull(parameters);
         parameters[nameof(OperationTimeout)] = OperationTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
+        NativeDocumentPolicy.Record(this, parameters);
         parameters[nameof(PostgresMinimumPoolSize)] = PostgresMinimumPoolSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(PostgresMaxPoolSize)] = PostgresMaxPoolSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(PostgresMaxAutoPrepare)] = PostgresMaxAutoPrepare.ToString(CultureInfo.InvariantCulture);

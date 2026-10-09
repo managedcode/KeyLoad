@@ -12,8 +12,8 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
+public sealed partial class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
@@ -49,7 +49,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
 
         ArgumentNullException.ThrowIfNull(dataset);
         graphDepth = dataset.Settings.GraphDepth;
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             Profile = Profile with { ReadContract = DocumentOnlyMajorityReadContract };
         }
@@ -62,9 +62,18 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         edges = database.GetCollection<BsonDocument>(MongoSchema.EdgesCollection);
         events = database.GetCollection<BsonDocument>(MongoSchema.EventsCollection);
 
-        await CreateIndexesAsync(cancellationToken);
-        await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, executionOptions, cancellationToken);
-        if (dataset.Settings is not ScaledComparisonProfile)
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        using (documentTiming?.MeasureIndex())
+        {
+            await CreateIndexesAsync(cancellationToken);
+        }
+
+        using (documentTiming?.MeasureLoad())
+        {
+            await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, executionOptions, cancellationToken);
+        }
+
+        if (dataset.Settings is not ScaledComparisonProfile && dataset is not DocumentComparisonCorpus)
         {
             await VerifyUniqueStreamInsertionAsync(cancellationToken);
         }
@@ -138,19 +147,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
 
     internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
         IOptions<NativeComparisonExecutionOptions> executionOptions)
-    {
-        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(concurrency);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(concurrency, int.MaxValue - execution.MongoPoolSessionMargin);
-        var settings = MongoClientSettings.FromConnectionString(connectionString);
-        settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;
-        settings.ReadConcern = ReadConcern.Majority;
-        settings.ReadPreference = ReadPreference.Primary;
-        settings.RetryWrites = false;
-        settings.RetryReads = false;
-        settings.MaxConnectionPoolSize = Math.Max(concurrency + execution.MongoPoolSessionMargin, execution.MongoPoolMinimumSize);
-        return settings;
-    }
+        => MongoProfileFactory.CreateSettings(connectionString, concurrency, executionOptions);
 
     private async Task CreateIndexesAsync(CancellationToken cancellationToken)
     {

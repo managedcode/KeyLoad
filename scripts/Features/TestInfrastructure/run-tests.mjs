@@ -6,6 +6,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const defaultMaximumParallelTests = 20;
 const maximumParallelTests = 50;
 const comparisonParallelTests = 1;
+const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
+const heavyLoadFilter = '/*/*/HeavyDocumentLoadRf3Tests/*';
+const ordinaryRf3Filter = '/*/*/*/*[Category!=HeavyLoad]';
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['unit-scalar', 'KeyLoad.UnitTests'], ['recovery', 'KeyLoad.RecoveryTests'],
@@ -39,11 +42,17 @@ export function nativeSelection(input, inherited = process.env) {
   const suite = values.get('Suite');
   const project = projects.get(suite);
   if (!project) throw new Error('Unsupported native TUnit suite.');
+  const heavyLoad = values.has(heavyLoadEnabledOption);
+  if (heavyLoad && (values.get(heavyLoadEnabledOption) !== 'true' || suite !== 'rf3'
+    || values.get('Filter') !== heavyLoadFilter || values.has('CoverageSettings')
+    || [...values.keys()].some(key => key.startsWith('NativeCoverage:')))) {
+    throw new Error('Heavy RF3 load requires its exact exclusive functional selection.');
+  }
   const parallel = Number(values.get('Execution:MaximumParallelTests')
-    ?? (suite === 'comparison' ? comparisonParallelTests : defaultMaximumParallelTests));
+    ?? (suite === 'comparison' || heavyLoad ? comparisonParallelTests : defaultMaximumParallelTests));
   if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid native parallelism.');
-  if (suite === 'comparison' && parallel !== comparisonParallelTests) {
-    throw new Error('Comparison measurements require exactly one native test at a time.');
+  if ((suite === 'comparison' || heavyLoad) && parallel !== comparisonParallelTests) {
+    throw new Error('Comparison measurements and heavy load require exactly one native test at a time.');
   }
   const localImageEnabled = values.get('LocalRf3Image:Enabled');
   const localImageSelected = values.has('LocalRf3Image:Enabled');
@@ -55,9 +64,10 @@ export function nativeSelection(input, inherited = process.env) {
     || localImageInheritedIdentity.some(key => inherited[key] !== undefined && inherited[key] !== ''))) {
     throw new Error('Invalid native local RF3 image selection.');
   }
+  if (suite === 'rf3' && !values.has('Filter')) values.set('Filter', ordinaryRf3Filter);
   const environment = { ...inherited };
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__ScaleProfile', 'KeyLoadTests__VectorProfile',
-    'KeyLoadTests__OpenLoopRate', 'KeyLoadTests__LocalRf3Image__Enabled',
+    'KeyLoadTests__OpenLoopRate', 'KeyLoadTests__LocalRf3Image__Enabled', 'KeyLoadTests__HeavyLoad__Enabled',
     'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS',
     localImageArgumentsEnvironment]) delete environment[key];
   if (localImageSelected) {
@@ -86,6 +96,8 @@ export function nativeSelection(input, inherited = process.env) {
     } else if (['ScaleProfile', 'VectorProfile', 'OpenLoopRate'].includes(key)) {
       if (suite !== 'comparison') throw new Error('Benchmark selection requires ComparisonTests.');
       environment[key === 'OpenLoopRate' ? 'Benchmarks__OpenLoopRate' : `Benchmarks__${key}`] = value;
+    } else if (key === heavyLoadEnabledOption) {
+      environment.KeyLoadTests__HeavyLoad__Enabled = value;
     } else if (key === 'LocalRf3Image:Enabled') {
       continue;
     } else if (key.startsWith('NativeCoverage:')) {

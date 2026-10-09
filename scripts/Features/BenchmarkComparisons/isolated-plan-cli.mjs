@@ -1,3 +1,4 @@
+import { createDocumentPlan, documentMatrixRow } from './document-isolated-plan.mjs';
 import { constants } from 'node:fs';
 import { lstat, open, writeFile } from 'node:fs/promises';
 import { dirname, parse, resolve } from 'node:path';
@@ -7,7 +8,7 @@ import { createCompositePlan, createScaledPlans } from './scaled-isolated-plan.m
 import { createVectorPlans } from './vector-isolated-plan.mjs';
 import { createOpenLoopPlan } from './open-loop-isolated-plan.mjs';
 
-const options = new Set(['--output', '--scale-output', '--vector-output', '--composite-output', '--open-loop-output', '--github-output']);
+const options = new Set(['--output', '--scale-output', '--vector-output', '--composite-output', '--open-loop-output', '--github-output', '--document-output']);
 const maximumPathLength = 4096;
 
 function parseArguments(arguments_) {
@@ -55,6 +56,9 @@ export async function runIsolatedPlanCli(arguments_, plan, scaledPlans = createS
   const vectorOutput = parsed['--vector-output'];
   const compositeOutput = parsed['--composite-output'];
   const openLoopOutput = parsed['--open-loop-output'];
+  const documentOutput = parsed['--document-output'];
+  const documentPlan = documentOutput === undefined ? undefined : createDocumentPlan();
+  if (documentOutput !== undefined) await requirePlainParents(documentOutput);
   if (output !== undefined) await requirePlainParents(output);
   if (scaleOutput !== undefined) await requirePlainParents(scaleOutput);
   if (vectorOutput !== undefined) await requirePlainParents(vectorOutput);
@@ -75,9 +79,10 @@ export async function runIsolatedPlanCli(arguments_, plan, scaledPlans = createS
     if (openLoopOutput !== undefined) {
       await writeFile(openLoopOutput, JSON.stringify(openLoopPlan, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
     }
+    if (documentOutput !== undefined) await writeFile(documentOutput, JSON.stringify(documentPlan, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
     if (github !== null) {
       await github.writeFile('database_matrices=' + JSON.stringify(createWorkflowDatabaseMatrices(
-        plan, scaledPlans, vectorPlans, openLoopPlan)) + '\n', 'utf8');
+        plan, scaledPlans, vectorPlans, openLoopPlan, documentPlan?.cells.map(documentMatrixRow))) + '\n', 'utf8');
     }
     process.stdout.write(text);
   } finally {

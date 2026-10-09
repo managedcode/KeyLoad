@@ -35,7 +35,7 @@ export const SITE_GH = Object.freeze({
   metadataState: 'metadata_verified', archiveState: 'archive_verified', publish: 'publish', validate: 'validate',
   suiteBytes: 19_327_352_832, providerBytes: 134_217_728, jsonBytes: 4_194_304,
   metadataBytes: 16_777_216, rawBytes: 67_108_864, totalRawBytes: 17_179_869_184,
-  pairs: 2000, items: 2000, files: compositeSuiteFiles().length + compositeProviderFiles().length, workers: 1386, version: 1,
+  pairs: 2000, items: 2000, files: compositeSuiteFiles().length + compositeProviderFiles().length, workers: 924, version: 1,
   failure: 'Isolated Pages GitHub evidence rejected.',
   steps: Object.freeze(['Verify benchmark plan',
     'Download benchmark results', 'Check control and complete scale accounting',

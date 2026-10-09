@@ -8,7 +8,6 @@ internal sealed class NativeQuorumTopologyRabbitTests
 {
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003ExactNativeQuorumQueueIsAccepted(int nodes)
     {
@@ -36,27 +35,27 @@ internal sealed class NativeQuorumTopologyRabbitTests
     [Arguments("classic-queue")]
     [Arguments("transient-queue")]
     [Arguments("foreign-queue")]
-    public async Task AcIso003TwoNodeRequiresExactNativeMembershipWithoutHiddenOfflineBrokers(string corruption)
+    public async Task AcIso003ThreeNodeRequiresExactNativeMembershipWithoutHiddenOfflineBrokers(string corruption)
     {
-        var brokers = NativeQuorumTopologyResponses.Brokers(2);
-        var queue = NativeQuorumTopologyResponses.Queue(2);
+        var brokers = NativeQuorumTopologyResponses.Brokers(3);
+        var queue = NativeQuorumTopologyResponses.Queue(3);
         Corrupt(brokers, queue, corruption);
-        await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(2, brokers, queue).HasValue).IsFalse();
+        await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(3, brokers, queue).HasValue).IsFalse();
     }
 
     [Test]
     public async Task AcIso003NativeVersionMustBeObserved()
-        => await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(2, version: string.Empty).HasValue).IsFalse();
+        => await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(3, version: string.Empty).HasValue).IsFalse();
 
     [Test]
     public async Task AcIso003NativeBrokerAndMemberOrderDoesNotChangeSetIdentity()
     {
-        var brokers = NativeQuorumTopologyResponses.Brokers(2);
-        var queue = NativeQuorumTopologyResponses.Queue(2);
+        var brokers = NativeQuorumTopologyResponses.Brokers(3);
+        var queue = NativeQuorumTopologyResponses.Queue(3);
         var reversed = new JsonArray(brokers.Reverse().Select(node => node!.DeepClone()).ToArray());
         queue[T.Online] = new JsonArray(queue[T.Online]!.AsArray().Reverse()
             .Select(node => node!.DeepClone()).ToArray());
-        await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(2, reversed, queue).HasValue).IsTrue();
+        await Assert.That(NativeQuorumTopologyResponses.ReadRabbit(3, reversed, queue).HasValue).IsTrue();
     }
 
     private static void Corrupt(JsonArray brokers, JsonObject queue, string corruption)

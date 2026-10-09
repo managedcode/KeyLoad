@@ -25,7 +25,6 @@ internal sealed class BenchmarkTopologyTargetTests
 
     [Test]
     [Arguments(1, "RF1", "quorum 1 of 1", "no replica fault tolerance")]
-    [Arguments(2, "RF2", "quorum 2 of 2", "no single-voter-loss availability")]
     public async Task AcIso004BenchmarkTargetDeclaresActualQuorumAndNoFaultAvailability(int nodes,
         string replication, string quorum, string availability)
     {
@@ -42,6 +41,7 @@ internal sealed class BenchmarkTopologyTargetTests
 
     [Test]
     [Arguments(0)]
+    [Arguments(2)]
     [Arguments(4)]
     public async Task AcIso003InvalidExpectedNodeCountFailsBeforeAnyDatabaseWork(int nodes)
     {

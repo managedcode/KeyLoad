@@ -10,7 +10,6 @@ internal sealed class NativeQuorumTopologyConfigurationTests
 {
     [Test]
     [Arguments(1, 1)]
-    [Arguments(2, 2)]
     [Arguments(3, 2)]
     public async Task AcIso003NativeConfigurationUsesExactCountAndQuorum(int nodes, int quorum)
     {
@@ -27,16 +26,17 @@ internal sealed class NativeQuorumTopologyConfigurationTests
     }
 
     [Test]
-    public async Task AcIso003TwoNodeLabelsRequireBothMembersAndNeverClaimFailureAvailability()
+    public async Task AcIso003ThreeNodeLabelsPreserveTwoAcknowledgementMajority()
     {
-        await Assert.That(QdrantNativePolicy.TopologyLabel(ComparisonTopology.TwoNode)).Contains("quorum 2 of 2");
-        await Assert.That(RabbitNativePolicy.TopologyLabel(ComparisonTopology.TwoNode)).Contains("quorum 2 of 2");
-        await Assert.That(QdrantNativePolicy.TopologyLabel(ComparisonTopology.TwoNode)).Contains("no single-node-loss availability");
-        await Assert.That(RabbitNativePolicy.TopologyLabel(ComparisonTopology.TwoNode)).Contains("no single-node-loss availability");
+        await Assert.That(QdrantNativePolicy.TopologyLabel(ComparisonTopology.Replicated)).Contains("quorum 2 of 3");
+        await Assert.That(RabbitNativePolicy.TopologyLabel(ComparisonTopology.Replicated)).Contains("quorum 2 of 3");
+        await Assert.That(QdrantNativePolicy.TopologyLabel(ComparisonTopology.Replicated)).DoesNotContain("no single-node-loss availability");
+        await Assert.That(RabbitNativePolicy.TopologyLabel(ComparisonTopology.Replicated)).DoesNotContain("no single-node-loss availability");
     }
 
     [Test]
     [Arguments(-1)]
+    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003UnknownTopologyFailsBeforeClientsMakeRequests(int value)
     {
@@ -54,7 +54,6 @@ internal sealed class NativeQuorumTopologyConfigurationTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public void AcIso003EndpointConfigurationAcceptsExactlyTheSelectedDistinctCount(int nodes)
     {
@@ -70,16 +69,17 @@ internal sealed class NativeQuorumTopologyConfigurationTests
     [Arguments("same-client")]
     [Arguments("same-endpoint")]
     [Arguments("missing-address")]
-    public async Task AcIso003TwoNodeEndpointMismatchFailsBeforeCollectionCreation(string corruption)
+    public async Task AcIso003ThreeNodeEndpointMismatchFailsBeforeCollectionCreation(string corruption)
     {
         using var one = new HttpClient { BaseAddress = new Uri(T.EndpointOne) };
         using var two = new HttpClient { BaseAddress = new Uri(T.EndpointTwo) };
+        using var three = new HttpClient { BaseAddress = new Uri(T.EndpointThree) };
         var clients = corruption switch
         {
             "missing" => new[] { one },
-            "same-client" => [one, one],
-            "same-endpoint" => [one, two],
-            "missing-address" => [one, two],
+            "same-client" => [one, one, three],
+            "same-endpoint" => [one, two, three],
+            "missing-address" => [one, two, three],
             _ => throw new ArgumentOutOfRangeException(nameof(corruption))
         };
         if (corruption == "same-endpoint")
@@ -91,7 +91,7 @@ internal sealed class NativeQuorumTopologyConfigurationTests
             two.BaseAddress = null;
         }
         var error = Assert.ThrowsExactly<ComparisonFailureException>(() =>
-            QdrantReplicaProof.ValidateClients(clients, ComparisonTopology.TwoNode));
+            QdrantReplicaProof.ValidateClients(clients, ComparisonTopology.Replicated));
         await Assert.That(error!.Message).IsEqualTo(T.InvalidClients);
     }
 }

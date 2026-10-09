@@ -5,7 +5,7 @@ import { AGGREGATE, requireValue } from './aggregate-contracts.mjs';
 import { SERVER_RESOURCE_MISSING_KINDS } from './server-resource-evidence.mjs';
 
 // Failed preparation/execution has no publishable resource measurements. Preserve any original sidecar in diagnostics.
-export async function finalizeFailedResource({ directory, retained, cell, cohort, jobId }) {
+export async function finalizeFailedResource({ directory, retained, cell, cohort, jobId, workerFile = 'worker.json' }) {
   if (cell.profile === 'intensive-1k-c16') return;
   const file = path.join(directory, 'server-resource-evidence.json');
   const original = await lstat(file).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
@@ -16,7 +16,7 @@ export async function finalizeFailedResource({ directory, retained, cell, cohort
       AGGREGATE.errors.output);
     await rename(file, backup);
   }
-  const worker = await hashRegularFile(path.join(directory, 'worker.json'), AGGREGATE.workerBytes);
+  const worker = await hashRegularFile(path.join(directory, workerFile), AGGREGATE.workerBytes);
   await writeJson(file, { schema: 'server-resource-evidence.v1', sourceRevision: cohort.sourceRevision,
     workflowRunId: String(cohort.runId), runAttempt: String(cohort.attempt), jobId: String(jobId), target: cell.target,
     nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, workerSha256: worker.sha256,

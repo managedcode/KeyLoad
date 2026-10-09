@@ -49,7 +49,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
             foreach (var hit in hits.EnumerateArray())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (seen >= corpusCount)
+                if (corpusCount >= NoObservedItems && seen >= corpusCount)
                 {
                     throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
                 }
@@ -59,7 +59,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
             var lastSort = hits[hits.GetArrayLength() - SingleItemCount].GetProperty(SortProperty);
             searchAfter = lastSort.EnumerateArray().Select(ReadSortValue).ToArray();
         }
-        if (seen != corpusCount)
+        if (corpusCount >= NoObservedItems && seen != corpusCount)
         {
             throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }

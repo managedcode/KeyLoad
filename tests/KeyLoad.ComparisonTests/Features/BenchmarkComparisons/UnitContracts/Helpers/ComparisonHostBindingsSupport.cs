@@ -3,6 +3,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>Supplies real child-process settings for the caller-binding boundary.</summary>
 internal static class ComparisonHostBindingsSupport
 {
+    private const string NativeWorkloadCase = "NativeClientWorkloadProducesSuccessfulOriginalReports";
     internal const string InvalidEndpointsCode = "KeyLoadComparisonEndpointsInvalid";
     internal const string InvalidRabbitEndpointCode = "RabbitManagementEndpointInvalid";
     internal const string InvalidRabbitCredentialsCode = "RabbitManagementCredentialsInvalid";
@@ -93,7 +94,8 @@ internal static class ComparisonHostBindingsSupport
     {
         var output = result.Stdout + result.Stderr;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
-        await Assert.That(result.Stderr.Contains(expectedDetail, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(output.Contains(expectedDetail, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(output.Contains(NativeWorkloadCase, StringComparison.Ordinal)).IsTrue();
         foreach (var secret in new[]
                  {
                      QdrantApiKeyValue, AdminKeyValue, RabbitPasswordValue,

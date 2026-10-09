@@ -30,7 +30,7 @@ function createPlan(contract, profile) {
     id: `${target.toLowerCase().replace(/[^a-z0-9]+/gu, '-').replace(/^-|-$/gu, '')}-n${nodeCount}-vector-exact-${profile.id}`,
     target, nodeCount, scenario: 'VectorExact', profile: profile.id, family: 'vector',
   })));
-  requireIsolatedPlan(cells.length === contract.targets.length * 3 && cells.every(cell => cell.id.length <= isolatedPlanLimits.idLength));
+  requireIsolatedPlan(cells.length === contract.targets.length * contract.nodeCounts.length && cells.every(cell => cell.id.length <= isolatedPlanLimits.idLength));
   return { schemaVersion: 1, workerSchemaVersion: contract.workerSchemaVersion, profile: profile.id,
     profileSettings: profileSettings(profile), cells, matrices: { vector: { include: cells } } };
 }

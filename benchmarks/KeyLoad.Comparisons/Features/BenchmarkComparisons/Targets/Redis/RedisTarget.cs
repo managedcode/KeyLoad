@@ -14,10 +14,10 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class RedisTarget(string connectionString, string runId, string image,
+public sealed partial class RedisTarget(string connectionString, string runId, string image,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
-    ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null, TimeProvider? provider = null) : IComparisonTarget
+    ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
@@ -35,7 +35,6 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     private const string TlsTransport = "RESP/TLS multiplexed";
     private const string Authorization = "Aspire password; no row/field policy";
     private const string ReplicatedTopology = "single primary plus two native direct replicas; no cluster sharding or automatic failover claim";
-    private const string TwoNodeTopology = "single primary plus one native direct replica; no sharding or automatic failover claim";
     private const string SingleTopology = "single primary, no replicas";
     private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
     private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
@@ -66,8 +65,10 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         const int FirstElementIndex = 0;
 
         ArgumentNullException.ThrowIfNull(dataset);
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        documentTiming?.IndexNotApplicable(); // Redis document keys have no separate native index build.
         corpusCount = dataset.Documents.Count;
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             Profile = Profile with { ReadContract = PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken };
         }
@@ -82,9 +83,12 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
         var primaryIdentity = await RedisReplicaProof.ReadIdentityAsync(connection, primaryEndpoint, cancellationToken);
         var database = connection.GetDatabase();
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
-            await RedisScaledCorpusSeeder.SeedAsync(database, prefix, dataset.Documents, executionOptions, cancellationToken).ConfigureAwait(false);
+            using (documentTiming?.MeasureLoad())
+            {
+                await RedisScaledCorpusSeeder.SeedAsync(database, prefix, dataset.Documents, executionOptions, cancellationToken).ConfigureAwait(false);
+            }
         }
         else
         {
@@ -97,14 +101,13 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
         var evidence = await RedisReplicaProof.VerifyAsync(primary: connection, replicaStrings: replicaEndpoints,
             topology: configuredTopology, primaryIdentity: primaryIdentity, probeKey: probeKey,
-            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics, timeProvider: timeProvider);
+            payload: dataset.CreateDocument(FirstElementIndex).Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics, timeProvider: timeProvider);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,
             Topology = configuredTopology switch
             {
                 ComparisonTopology.Replicated => ReplicatedTopology,
-                ComparisonTopology.TwoNode => TwoNodeTopology,
                 _ => SingleTopology
             },
             WriteAcknowledgement = ComparisonTopologies.NodeCount(configuredTopology) > SingleItemCount ? ReplicatedAcknowledgement : AofAcknowledgement,
@@ -137,8 +140,13 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     /// <returns>A value task that completes after the connection is closed.</returns>
     public async ValueTask DisposeAsync()
     {
-        if (connection is not null)
-        { await connection.CloseAsync(); connection.Dispose(); }
+        try
+        { await CleanupDocumentNamespaceAsync().ConfigureAwait(false); }
+        finally
+        {
+            if (connection is not null)
+            { await connection.CloseAsync().ConfigureAwait(false); connection.Dispose(); }
+        }
     }
 
 }

@@ -16,7 +16,7 @@ internal static class MongoSeededCopies
             foreach (var client in clients)
             {
                 await WaitForCopyAsync(collection: client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
-                    expected: dataset.Documents[FirstElementIndex], count: dataset.Documents.Count, cancellationToken: deadline.Token,
+                    expected: dataset.CreateDocument(FirstElementIndex), count: dataset.Documents.Count, cancellationToken: deadline.Token,
                     pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval, timeProvider: timeProvider);
             }
         }
@@ -28,10 +28,16 @@ internal static class MongoSeededCopies
 
     private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected, long count, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
+        const long EmptyCorpusCount = 0;
         while (true)
         {
             var found = await collection.Find(new BsonDocument(MongoSchema.IdField, expected.Id)).FirstOrDefaultAsync(cancellationToken);
             var observedCount = await collection.CountDocumentsAsync(FilterDefinition<BsonDocument>.Empty, cancellationToken: cancellationToken);
+            if (count == EmptyCorpusCount && observedCount == EmptyCorpusCount)
+            {
+                return;
+            }
+
             if (found is not null && observedCount == count)
             {
                 if (found[MongoSchema.BodyField].AsString != expected.Json)

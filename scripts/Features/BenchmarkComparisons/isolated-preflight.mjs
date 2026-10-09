@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'node:util';
+import { createDocumentPlan, documentMatrixRow } from './document-isolated-plan.mjs';
 import { validateIsolatedPlan } from './isolated-plan.mjs';
 import { isolatedPlanLimits, requireIsolatedPlan } from './isolated-plan-contract.mjs';
 import { createScaledPlans, validateScaledPlans } from './scaled-isolated-plan.mjs';
@@ -13,7 +15,7 @@ const databaseKeys = Object.freeze({ KeyLoad: 'keyload', 'PostgreSQL + pgvector'
 export function createPreflightMatrix(plan) {
   const canonical = validateIsolatedPlan(plan);
   const include = canonical.cells.filter(cell => cell.scenario === (representatives[cell.target] ?? 'PointRead'));
-  requireIsolatedPlan(include.length === 33 && new Set(include.map(cell => cell.id)).size === 33);
+  requireIsolatedPlan(include.length === 22 && new Set(include.map(cell => cell.id)).size === 22);
   return { include };
 }
 
@@ -40,7 +42,9 @@ function openLoopDatabaseRow(cell) {
     qualificationPrefix: cell.cancellationProof ? 'comparison-open-loop-proof-qualification-' : 'comparison-open-loop-case-qualification-' };
 }
 
-export function createDatabaseMatrices(plan, scaledPlans = createScaledPlans(), vectorPlans = createVectorPlans(), openLoopPlan) {
+export function createDatabaseMatrices(plan, scaledPlans = createScaledPlans(), vectorPlans = createVectorPlans(), openLoopPlan, documentRows = []) {
+  requireIsolatedPlan(Array.isArray(documentRows) && (documentRows.length === 0
+    || isDeepStrictEqual(documentRows, createDocumentPlan().cells.map(documentMatrixRow))));
   const canonical = validateIsolatedPlan(plan);
   const scales = validateScaledPlans(scaledPlans);
   const vectors = validateVectorPlans(vectorPlans);
@@ -54,23 +58,24 @@ export function createDatabaseMatrices(plan, scaledPlans = createScaledPlans(), 
       ...vectors.flatMap(profile => profile.cells.filter(cell => cell.target === target).map(cell => databaseRow(cell, false)))];
     const measurements = openLoop?.measurementCells.filter(cell => cell.target === target) ?? [];
     const proofs = openLoop?.cancellationProofCells.filter(cell => cell.target === target) ?? [];
-    const include = [...original, ...measurements.map(openLoopDatabaseRow), ...proofs.map(openLoopDatabaseRow)];
-    const expectedCount = openLoop === null ? 129 : target === 'KeyLoad' ? 207 : 201;
-    requireIsolatedPlan(original.length === 129 && include.length === expectedCount && include.length <= isolatedPlanLimits.matrix
+    const include = [...original, ...measurements.map(openLoopDatabaseRow), ...proofs.map(openLoopDatabaseRow), ...documentRows.filter(row => row.target === target)];
+    const expectedCount = (openLoop === null ? 86 : target === 'KeyLoad' ? 140 : 134) + documentRows.filter(row => row.target === target).length;
+    requireIsolatedPlan(original.length === 86 && include.length === expectedCount && include.length <= isolatedPlanLimits.matrix
       && new Set(include.map(cell => cell.jobName)).size === include.length
       && include.every(row => row.vectorProfile === null || row.scaleProfile === null));
     return [key, { include }];
   }));
 }
 
-export function createWorkflowDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan) {
-  const matrices = createDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan);
+export function createWorkflowDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan, documentRows = []) {
+  const matrices = createDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan, documentRows);
   return Object.fromEntries(Object.entries(matrices).map(([key, matrix]) => [key, {
     include: matrix.include.map(row => ({ id: row.id, jobName: row.jobName, target: row.target, kind: matrixKind(row) }))
   }]));
 }
 
 function matrixKind(row) {
+  if (row.family === 'document-v1') return 'documents';
   if (row.preflight) return 'preflight';
   if (row.openLoopCancellationProof) return 'proof';
   return row.openLoopRate === undefined ? 'worker' : 'open-loop';

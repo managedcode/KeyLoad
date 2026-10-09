@@ -37,10 +37,7 @@ public enum ComparisonTopology
     [JsonStringEnumMemberName(ComparisonTopologyNames.Single)]
     Standalone,
     /// <summary>Uses a replicated target topology and records its cluster evidence.</summary>
-    Replicated,
-    /// <summary>Uses two native nodes; quorum based engines require both nodes.</summary>
-    [JsonStringEnumMemberName(ComparisonTopologyNames.TwoNode)]
-    TwoNode
+    Replicated
 }
 
 /// <summary>A generated corpus document and its exact-search vector.</summary>

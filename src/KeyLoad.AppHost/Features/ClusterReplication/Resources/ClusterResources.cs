@@ -186,8 +186,10 @@ internal static class ClusterResources
         {
             return NodeNames;
         }
-        ArgumentOutOfRangeException.ThrowIfLessThan(benchmarkNodeCount.Value, MinimumBenchmarkNodes, nameof(benchmarkNodeCount));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(benchmarkNodeCount.Value, NodeNames.Length, nameof(benchmarkNodeCount));
+        if (benchmarkNodeCount.Value != MinimumBenchmarkNodes && benchmarkNodeCount.Value != NodeNames.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(benchmarkNodeCount));
+        }
         return [.. NodeNames.Take(benchmarkNodeCount.Value)];
     }
 

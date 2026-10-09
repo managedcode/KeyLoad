@@ -3,7 +3,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubProofTests
 {
     [Test]
-    public async Task AC_ISO_007_Current2530FilesBindFresh1386JobsAndCommonNativeImages()
+    public async Task AC_ISO_007_Current1716FilesBindFresh924JobsAndCommonNativeImages()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);

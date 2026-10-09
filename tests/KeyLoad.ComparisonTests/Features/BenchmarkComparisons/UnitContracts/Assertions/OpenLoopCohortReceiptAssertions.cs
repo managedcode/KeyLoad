@@ -8,7 +8,7 @@ internal static class OpenLoopCohortReceiptAssertions
     private const string FailedDisposition = "failed";
     private const string FailureReason = "Benchmark failed; no measurement data is available.";
     private const string ReceiptKind = "open-loop-cohort-receipt.v1";
-    private const int MeasurementCount = 792;
+    private const int MeasurementCount = 528;
     private const int ProofCount = 6;
     private const string PlanFile = "open-loop-isolated-plan.v1.json";
     private const string MeasurementPrefix = "comparison-open-loop-worker-";

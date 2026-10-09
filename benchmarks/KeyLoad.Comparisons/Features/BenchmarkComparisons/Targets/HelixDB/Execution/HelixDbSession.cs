@@ -39,7 +39,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             foreach (var row in rows.EnumerateArray())
             {
                 var number = row.GetProperty(HelixDbNativeTokens.TokenNumber).GetInt32();
-                if (number <= after || seen >= count)
+                if (number <= after || (count >= EmptyResultCount && seen >= count))
                 {
                     throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbCorpusOrderMismatch);
                 }
@@ -50,7 +50,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             }
         }
 
-        if (seen != count)
+        if (count >= EmptyResultCount && seen != count)
         {
             throw new ComparisonFailureException(HelixDbNativeTokens.TokenScaledCorpusReadbackCountMismatch);
         }

@@ -76,8 +76,8 @@ internal static class SiteIsolatedGitHubTokens
     public const string SourceRevision = "sourceRevision";
     public const string Extra = "controlledExtra";
     public const string WrongSha = "0000000000000000000000000000000000000000";
-    public const int WorkerCount = 1386;
-    public const int FileCount = 2530;
+    public const int WorkerCount = 924;
+    public const int FileCount = 1716;
     public const int Zero = 0;
     public const int One = 1;
     public const int BufferBytes = 65_536;

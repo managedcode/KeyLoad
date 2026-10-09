@@ -16,11 +16,19 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
     private const string ProductionDirectory = "production";
     private const string ReportsDirectory = "reports";
     private DistributedApplication? application;
-    internal string Root { get; } = Directory.CreateTempSubdirectory(TemporaryPrefix).FullName;
+    internal string Root { get; } = ResolveTemporaryDirectory(Directory.CreateTempSubdirectory(TemporaryPrefix));
     internal string ProductionRoot => Path.Combine(Root, ProductionDirectory);
     internal string Output => Path.Combine(Root, ReportsDirectory);
     internal static string Source => Environment.GetEnvironmentVariable(SourceEnvironment)
         ?? throw new InvalidOperationException("This model test requires the actual GitHub source revision.");
+
+    internal static string ResolveTemporaryDirectory(DirectoryInfo directory)
+    {
+        if (directory.Parent is null)
+        { return directory.FullName; }
+        var entry = new DirectoryInfo(Path.Combine(ResolveTemporaryDirectory(directory.Parent), directory.Name));
+        return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
+    }
 
     internal async Task<ContainerResource[]> BuildAsync(string? target, int count,
         string? invalidSetting = null, string? invalidValue = null, string? scaleProfile = null,

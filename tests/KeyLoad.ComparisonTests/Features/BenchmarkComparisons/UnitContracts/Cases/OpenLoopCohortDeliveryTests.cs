@@ -28,7 +28,7 @@ internal sealed class OpenLoopCohortDeliveryTests
         var seed = await OpenLoopCohortNodeProcess.SeedFailedCohortAsync(evidence, input, cancellationToken)
             .ConfigureAwait(false);
         await Assert.That(seed.ExitCode).IsEqualTo(0).Because(seed.Error);
-        await Assert.That(seed.Output).IsEqualTo("{\"seeded\":798}\n");
+        await Assert.That(seed.Output).IsEqualTo("{\"seeded\":534}\n");
         var intakePath = Path.Combine(input, "open-loop-cohort-intake.v1.json");
         var originalIntake = await File.ReadAllBytesAsync(intakePath, cancellationToken).ConfigureAwait(false);
         await RejectCorruptIntakeAsync(evidence, input, output, intakePath, originalIntake, cancellationToken)
@@ -64,7 +64,7 @@ internal sealed class OpenLoopCohortDeliveryTests
             .ConfigureAwait(false);
         await Assert.That(accepted.ExitCode).IsEqualTo(0).Because(accepted.Error);
         await Assert.That(accepted.Error).IsEqualTo(string.Empty);
-        await Assert.That(accepted.Output).IsEqualTo("{\"schemaVersion\":1,\"qualified\":false,\"cells\":798}\n");
+        await Assert.That(accepted.Output).IsEqualTo("{\"schemaVersion\":1,\"qualified\":false,\"cells\":534}\n");
         await VerifyReceiptAsync(Path.Combine(output, ReceiptFile), input, cancellationToken).ConfigureAwait(false);
         await OpenLoopCohortReceiptAssertions.VerifyRetainedEvidenceAsync(input, output, cancellationToken)
             .ConfigureAwait(false);

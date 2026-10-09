@@ -33,3 +33,9 @@
 
 ## Native TUnit entry, owner correction 2026-10-07
 - ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.
+
+
+## Current native comparison topology, owner direction 2026-10-09
+
+- ADR-122 supersedes every active two-node comparison inventory: current benchmark planning, admission, original-file provenance and site projection accept only native one-node or three-node cells. Reject two-node current inputs before acquisition; RF3 majority remains two acknowledgements. Preserve immutable historical original bytes/hashes without a legacy reader or current qualification fallback.
+- The existing control/scale/vector family now has 924 workers and 1,716 original inputs (1,656 suite files and 60 provider files), with the 84-path executed source closure. This current topology contract supersedes earlier active 1,386-worker/2,530-input clauses; new document-family evidence must receive its own exact inventory before publication. All source, authorization, native operation, complete cohort, provenance and coverage gates remain mandatory.

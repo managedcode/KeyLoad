@@ -41,13 +41,13 @@ internal static class IsolatedDatabaseMatrixAssertions
             rows.AddRange(include.Select(static row => row!));
         }
 
-        await Assert.That(rows.Count).IsEqualTo(1419);
-        await Assert.That(rows.Count(static row => row[IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(33);
-        await Assert.That(rows.Count(static row => !row[IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(1386);
+        await Assert.That(rows.Count).IsEqualTo(946);
+        await Assert.That(rows.Count(static row => row[IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(22);
+        await Assert.That(rows.Count(static row => !row[IsolatedPlanFields.Preflight]!.GetValue<bool>())).IsEqualTo(924);
         await Assert.That(rows.Select(static row => row[IsolatedPlanFields.JobName]!.GetValue<string>())
-            .Distinct(StringComparer.Ordinal).Count()).IsEqualTo(1419);
+            .Distinct(StringComparer.Ordinal).Count()).IsEqualTo(946);
         await Assert.That(rows.Select(static row => (row[IsolatedPlanFields.Id]!.GetValue<string>(), row[IsolatedPlanFields.Preflight]!.GetValue<bool>()))
-            .Distinct().Count()).IsEqualTo(1419);
+            .Distinct().Count()).IsEqualTo(946);
     }
 
     internal static async Task VerifyWorkflowProjectionAsync(JsonObject actual, JsonObject expected, bool includeOpenLoop)
@@ -55,10 +55,10 @@ internal static class IsolatedDatabaseMatrixAssertions
         await Assert.That(JsonNode.DeepEquals(actual, expected)).IsTrue();
         await Assert.That(actual.Count).IsEqualTo(WorkflowDatabaseGroups.Entries.Length);
         var rows = actual.SelectMany(static entry => entry.Value![IsolatedPlanFields.Include]!.AsArray()).ToArray();
-        await Assert.That(rows.Length).IsEqualTo(includeOpenLoop ? 2217 : 1419);
-        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "preflight")).IsEqualTo(33);
-        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "worker")).IsEqualTo(1386);
-        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "open-loop")).IsEqualTo(includeOpenLoop ? 792 : 0);
+        await Assert.That(rows.Length).IsEqualTo(includeOpenLoop ? 1480 : 946);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "preflight")).IsEqualTo(22);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "worker")).IsEqualTo(924);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "open-loop")).IsEqualTo(includeOpenLoop ? 528 : 0);
         await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "proof")).IsEqualTo(includeOpenLoop ? 6 : 0);
         await Assert.That(rows.Select(static row => row![IsolatedPlanFields.JobName]!.GetValue<string>())
             .Distinct(StringComparer.Ordinal).Count()).IsEqualTo(rows.Length);
@@ -72,10 +72,10 @@ internal static class IsolatedDatabaseMatrixAssertions
         foreach (var (key, target) in WorkflowDatabaseGroups.Entries)
         {
             var rows = matrices[key]![IsolatedPlanFields.Include]!.AsArray();
-            var expectedCount = includeOpenLoop ? 201 : 129;
+            var expectedCount = includeOpenLoop ? 134 : 86;
             if (includeOpenLoop && key == "keyload")
             {
-                expectedCount = 207;
+                expectedCount = 140;
             }
             await Assert.That(rows.Count).IsEqualTo(expectedCount);
             await Assert.That(rows.Count <= 256).IsTrue();
@@ -86,32 +86,32 @@ internal static class IsolatedDatabaseMatrixAssertions
 
     private static async Task VerifyDatabaseAsync(JsonArray rows, string target, JsonArray cells)
     {
-        await Assert.That(rows.Count).IsEqualTo(129);
+        await Assert.That(rows.Count).IsEqualTo(86);
         await Assert.That(rows.Count <= 256).IsTrue();
         var checks = rows.Where(static row => row![IsolatedPlanFields.Preflight]!.GetValue<bool>()).ToArray();
         var workloads = rows.Where(static row => !row![IsolatedPlanFields.Preflight]!.GetValue<bool>()).ToArray();
         var control = workloads.Where(row => row![IsolatedPlanFields.Profile]!.GetValue<string>() == ControlProfile).ToArray();
-        await Assert.That(checks.Length).IsEqualTo(3);
-        await Assert.That(workloads.Length).IsEqualTo(126);
-        await Assert.That(control.Length).IsEqualTo(30);
+        await Assert.That(checks.Length).IsEqualTo(2);
+        await Assert.That(workloads.Length).IsEqualTo(84);
+        await Assert.That(control.Length).IsEqualTo(20);
         foreach (var profile in ScaleProfiles)
         {
             var scale = workloads.Where(row => row![IsolatedPlanFields.Profile]!.GetValue<string>() == profile).ToArray();
-            await Assert.That(scale.Length).IsEqualTo(12);
-            foreach (var nodes in new[] { 1, 2, 3 })
+            await Assert.That(scale.Length).IsEqualTo(8);
+            foreach (var nodes in new[] { 1, 3 })
             {
                 await Assert.That(scale.Count(row => row![IsolatedPlanFields.NodeCount]!.GetValue<int>() == nodes)).IsEqualTo(4);
             }
         }
         var vectors = workloads.Where(row => row![IsolatedPlanFields.Profile]!.GetValue<string>().StartsWith("vector-", StringComparison.Ordinal)).ToArray();
-        await Assert.That(vectors.Length).IsEqualTo(72);
+        await Assert.That(vectors.Length).IsEqualTo(48);
         await Assert.That(vectors.Select(row => row![IsolatedPlanFields.Profile]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(24);
         await Assert.That(vectors.All(row => row![IsolatedPlanFields.Scenario]!.GetValue<string>() == "VectorExact")).IsTrue();
         var expected = cells.Where(cell => cell![IsolatedPlanFields.Target]!.GetValue<string>() == target).ToArray();
         await Assert.That(workloads.Select(static row => row![IsolatedPlanFields.Id]!.GetValue<string>()).Order(StringComparer.Ordinal))
             .IsEquivalentTo(expected.Select(static cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Order(StringComparer.Ordinal),
                 TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        foreach (var nodes in new[] { 1, 2, 3 })
+        foreach (var nodes in new[] { 1, 3 })
         {
             await Assert.That(checks.Count(row => row![IsolatedPlanFields.NodeCount]!.GetValue<int>() == nodes)).IsEqualTo(1);
             await Assert.That(workloads.Count(row => row![IsolatedPlanFields.NodeCount]!.GetValue<int>() == nodes)).IsEqualTo(42);

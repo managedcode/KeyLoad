@@ -72,7 +72,7 @@ internal sealed class ScaledCohortReceiptTests
         catch { rejectsTamper=true; }
         const allScaleCellsMissingResources=result.scaledProfiles.every(profile=>profile.cells.every(cell=>cell.resourceEquivalence===null));
         result.control.cells=[];
-        result.scaledProfiles=result.scaledProfiles.map(profile=>({...profile,cells:profile.cells.filter(cell=>cell.target==='Neo4j'&&cell.nodeCount===2)}));
+        result.scaledProfiles=result.scaledProfiles.map(profile=>({...profile,cells:profile.cells.filter(cell=>cell.target==='Neo4j'&&cell.nodeCount===3)}));
         result.vectorProfiles=result.vectorProfiles.map(({cells,...profile})=>profile);
         process.stdout.write(JSON.stringify({result,allScaleCellsMissingResources,rejectsTamper,rejectsDuplicateGlobalIdentity}));
         """;
@@ -89,16 +89,16 @@ internal sealed class ScaledCohortReceiptTests
         using var result = JsonDocument.Parse(response.Output);
         var receipt = result.RootElement.GetProperty(IsolatedPlanFields.Result);
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.SchemaVersion).GetInt32()).IsEqualTo(1);
-        await Assert.That(receipt.GetProperty(IsolatedPlanFields.Control).GetProperty(IsolatedPlanFields.CellCount).GetInt32()).IsEqualTo(330);
+        await Assert.That(receipt.GetProperty(IsolatedPlanFields.Control).GetProperty(IsolatedPlanFields.CellCount).GetInt32()).IsEqualTo(220);
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.ScaledProfiles).GetArrayLength()).IsEqualTo(2);
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.ScaledProfiles).EnumerateArray()
-            .All(item => item.GetProperty(IsolatedPlanFields.CellCount).GetInt32() == 132)).IsTrue();
+            .All(item => item.GetProperty(IsolatedPlanFields.CellCount).GetInt32() == 88)).IsTrue();
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.ScaledProfiles).EnumerateArray()
             .SelectMany(item => item.GetProperty(IsolatedPlanFields.Cells).EnumerateArray())
             .All(item => item.GetProperty(IsolatedPlanFields.ResourceEquivalence).ValueKind == JsonValueKind.Null)).IsTrue();
         var unsupported = receipt.GetProperty(IsolatedPlanFields.ScaledProfiles)[0].GetProperty(IsolatedPlanFields.Cells).EnumerateArray()
             .Where(item => item.GetProperty(IsolatedPlanFields.Target).GetString() == "Neo4j"
-                && item.GetProperty(IsolatedPlanFields.NodeCount).GetInt32() == 2).ToArray();
+                && item.GetProperty(IsolatedPlanFields.NodeCount).GetInt32() == 3).ToArray();
         await Assert.That(unsupported.Length).IsEqualTo(4);
         string?[] expectedScenarios = ["PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete"];
         await Assert.That(unsupported.Select(item => item.GetProperty(IsolatedPlanFields.Scenario).GetString()))
@@ -110,7 +110,7 @@ internal sealed class ScaledCohortReceiptTests
         }
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.Qualified).GetBoolean()).IsFalse();
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.VectorProfiles).GetArrayLength()).IsEqualTo(24);
-        await Assert.That(receipt.GetProperty(IsolatedPlanFields.VectorProfiles).EnumerateArray().All(profile => profile.GetProperty(IsolatedPlanFields.CellCount).GetInt32() == 33)).IsTrue();
+        await Assert.That(receipt.GetProperty(IsolatedPlanFields.VectorProfiles).EnumerateArray().All(profile => profile.GetProperty(IsolatedPlanFields.CellCount).GetInt32() == 22)).IsTrue();
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.FailedIds).EnumerateArray().Select(item => item.GetString())).Contains("keyload-n1-point-read-scaled-100k-c16");
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.MissingEvidence).EnumerateArray().Select(item => item.GetString())
             .SequenceEqual(["effectiveServerResources", "hardwareClass", "serverCpuRss", "storageEnvelope"], StringComparer.Ordinal)).IsTrue();

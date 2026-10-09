@@ -98,6 +98,34 @@ internal static class AppHostOptionsRegistration
         Bind<NativeCoverageExecutionOptions>(configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
             options => options.IsValid(), NativeCoverageExecutionOptions.ValidationMessage);
 
+    internal static IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> BindDocumentAdmission(
+        IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> admission,
+        IOptions<BenchmarkDeploymentOptions> deployment)
+    {
+        ArgumentNullException.ThrowIfNull(admission);
+        ArgumentNullException.ThrowIfNull(deployment);
+        var policy = admission.Value;
+        policy.Validate();
+        var resourcePolicy = deployment.Value;
+        if (!resourcePolicy.IsValid())
+        {
+            throw new OptionsValidationException(BenchmarkDeploymentOptions.SectionName, typeof(BenchmarkDeploymentOptions),
+                [BenchmarkDeploymentOptions.ValidationMessage]);
+        }
+        var factory = new OptionsFactory<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
+            [new ConfigureOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(options =>
+            {
+                options.DocumentWorkload = true;
+                options.RequestsPerScope = resourcePolicy.DocumentKeyLoadRequestsPerScope;
+                options.ReservedBytes = policy.ReservedBytes;
+            })], [],
+            [new ValidateOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(Options.DefaultName,
+                options => options.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage)]);
+        var bound = new OptionsManager<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(factory);
+        _ = bound.Value;
+        return bound;
+    }
+
     private static bool Validate(Action validate)
     {
         try

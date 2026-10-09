@@ -67,8 +67,8 @@ internal static class TimeSeriesIntensiveFamilyContractFacts
     internal const int TeardownTimeoutSeconds = 30;
     internal const int ClientDecodedResponseLimit = 16;
     internal const int RawAttemptCount = 50000;
-    internal const int ExpectedPreflightCells = 6;
-    internal const int ExpectedIntensiveCells = 30;
+    internal const int ExpectedPreflightCells = 4;
+    internal const int ExpectedIntensiveCells = 20;
     internal const int MeasuredRetries = 0;
     internal const string Family = "timeseries-intensive";
     internal const string EvidenceProfile = "intensive-timeseries-4096-c16";
@@ -78,14 +78,14 @@ internal static class TimeSeriesIntensiveFamilyContractFacts
 
     internal static readonly ImmutableArray<TimeSeriesIntensiveTargetKind> Targets =
         [TimeSeriesIntensiveTargetKind.KeyLoad, TimeSeriesIntensiveTargetKind.TimescaleDB];
-    internal static readonly ImmutableArray<int> NodeCounts = [SingleItemCount, PairMemberCount, ThirdContractOrdinal];
+    internal static readonly ImmutableArray<int> NodeCounts = [SingleItemCount, ThirdContractOrdinal];
     internal static readonly ImmutableArray<TimeSeriesIntensiveScenario> Scenarios =
     [
         TimeSeriesIntensiveScenario.Append, TimeSeriesIntensiveScenario.RawRangeRead,
         TimeSeriesIntensiveScenario.Latest, TimeSeriesIntensiveScenario.Aggregate, TimeSeriesIntensiveScenario.Windows,
     ];
-    internal static readonly ImmutableArray<int> QuorumAcknowledgements = [SingleItemCount, PairMemberCount, PairMemberCount];
-    internal static readonly ImmutableArray<int> DataCopies = [SingleNodeTopology, PairMemberCount, ThirdContractOrdinal];
+    internal static readonly ImmutableArray<int> QuorumAcknowledgements = [SingleItemCount, PairMemberCount];
+    internal static readonly ImmutableArray<int> DataCopies = [SingleNodeTopology, ThirdContractOrdinal];
 }
 
 internal static class TimeSeriesIntensiveFamilyContractValidation

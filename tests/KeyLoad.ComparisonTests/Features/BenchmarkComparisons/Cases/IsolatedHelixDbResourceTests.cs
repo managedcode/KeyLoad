@@ -35,7 +35,6 @@ internal sealed class IsolatedHelixDbResourceTests
     }
 
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task HelixLocalImageDoesNotInventClusterMembers(int count)
     {

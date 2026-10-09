@@ -9,7 +9,6 @@ internal sealed class IsolatedQuorumResourceRabbitTests
 {
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003RabbitModelBindsActualMembersAndSharedNativeCredentials(int count)
     {
@@ -41,7 +40,6 @@ internal sealed class IsolatedQuorumResourceRabbitTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso003RabbitBootstrapDeclaresExactDiscPeersWithRoutableNodeNamesAndNoSecrets(int count)
     {

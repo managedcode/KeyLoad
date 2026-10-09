@@ -22,7 +22,6 @@ internal sealed class MongoReadinessIdentityTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     public async Task PinnedDcpResourceMultiplicityAndExactNativeAliasesAreAccepted(int count)
     {
         var aliases = Enumerable.Repeat(Node, count).Concat([NativeAlias, Name, Id, ShortId]).ToArray();

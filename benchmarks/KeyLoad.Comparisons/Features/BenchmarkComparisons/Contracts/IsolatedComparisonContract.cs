@@ -37,7 +37,6 @@ public sealed record IsolatedComparisonContract
         const int ComparisonSchemaVersion = 1;
         const int AcceptedWorkerSchemaVersion = 5;
         const int SingleNodeTopology = 1;
-        const int TwoNodeReplicaCount = 2;
         const int ThreeNodeTopology = 3;
 
         using var resource = typeof(IsolatedComparisonContract).Assembly.GetManifestResourceStream(ResourceName)
@@ -47,7 +46,7 @@ public sealed record IsolatedComparisonContract
         result.Options.Validate();
         if (result.SchemaVersion != ComparisonSchemaVersion || result.WorkerSchemaVersion != AcceptedWorkerSchemaVersion || string.IsNullOrWhiteSpace(result.Profile)
             || result.Targets.IsDefaultOrEmpty || result.Targets.Distinct(StringComparer.Ordinal).Count() != result.Targets.Length
-            || !result.NodeCounts.SequenceEqual([SingleNodeTopology, TwoNodeReplicaCount, ThreeNodeTopology])
+            || !result.NodeCounts.SequenceEqual([SingleNodeTopology, ThreeNodeTopology])
             || !result.CrudScenarios.Concat(result.SpecializedScenarios).Order().SequenceEqual(Enum.GetValues<Scenario>().Order()))
         {
             throw new InvalidOperationException(InvalidContract);

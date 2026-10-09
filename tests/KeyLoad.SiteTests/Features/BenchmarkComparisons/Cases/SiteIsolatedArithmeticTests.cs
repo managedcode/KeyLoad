@@ -44,7 +44,7 @@ internal sealed class SiteIsolatedArithmeticTests
         var scenarios = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
             .Select(worker => worker.GetProperty(SiteIsolatedFields.Scenario).GetString()!).Distinct(StringComparer.Ordinal).ToArray();
         return (from scenario in scenarios
-                from nodes in new[] { 1, 2, 3 }
+                from nodes in new[] { 1, 3 }
                 from repetition in new object[] { "all", 0, 1, 2, 3, 4 }
                 from metric in Metrics
                 from target in new[] { "all", "KeyLoad", "Neo4j" }

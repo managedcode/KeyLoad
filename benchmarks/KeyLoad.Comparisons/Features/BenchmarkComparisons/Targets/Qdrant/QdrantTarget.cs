@@ -67,7 +67,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <param name="image">Qdrant image reference recorded after replica verification.</param>
     /// <param name="executionOptions">Centrally registered native execution limits.</param>
     /// <param name="lifecycleOptions">Centrally registered native lifecycle policy.</param>
-    /// <param name="topology">The one-, two- or three-node native topology to configure and verify.</param>
+    /// <param name="topology">The one- or three-node native topology to configure and verify.</param>
     /// <param name="nodeClients">Optional clients for each Qdrant node used by replica verification; the target disposes distinct clients.</param>
     /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     public QdrantTarget(HttpClient http, string runId, string image,

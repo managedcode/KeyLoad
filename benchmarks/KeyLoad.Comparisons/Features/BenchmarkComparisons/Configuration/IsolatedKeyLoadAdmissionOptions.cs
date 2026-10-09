@@ -9,6 +9,7 @@ public sealed class IsolatedKeyLoadAdmissionOptions
     private const int MinimumRequests = 1;
     private const long MinimumReservedBytes = 1;
     private const int DefaultRequestsPerScope = 32;
+    private const int DocumentRequestsPerScope = 512;
     private const long DefaultReservedBytes = 2_147_483_648;
     /// <summary>The isolated scenario configuration section.</summary>
     public const string SectionName = "IsolatedKeyLoadAdmission";
@@ -16,12 +17,15 @@ public sealed class IsolatedKeyLoadAdmissionOptions
     public const string ValidationMessage = "Isolated KeyLoad admission settings are invalid.";
     /// <summary>The request slots for each node, tenant, principal and reserved control scope.</summary>
     public int RequestsPerScope { get; set; } = DefaultRequestsPerScope;
+    /// <summary>Enables only the declared document-family request capacity.</summary>
+    public bool DocumentWorkload { get; set; }
     /// <summary>The total bytes reserved by data requests on one node.</summary>
     public long ReservedBytes { get; set; } = DefaultReservedBytes;
 
     /// <summary>Checks the existing qualified scenario ceilings.</summary>
     /// <returns>Whether the complete settings are supported.</returns>
-    public bool IsValid() => RequestsPerScope is >= MinimumRequests and <= DefaultRequestsPerScope
+    public bool IsValid() => (DocumentWorkload ? RequestsPerScope == DocumentRequestsPerScope
+        : RequestsPerScope is >= MinimumRequests and <= DefaultRequestsPerScope)
         && ReservedBytes is >= MinimumReservedBytes and <= DefaultReservedBytes;
 
     /// <summary>Rejects invalid settings before a node or observer is started.</summary>

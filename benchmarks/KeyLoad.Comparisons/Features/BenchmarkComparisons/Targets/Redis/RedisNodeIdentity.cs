@@ -66,14 +66,14 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
 
     public static ClusterEvidence ReplicatedEvidence(RedisNodeIdentity primary, RedisNodeIdentity[] replicas, string state)
     {
-        const int TwoNodeReplicaCount = 2;
+        const int TwoReplicaCount = 2;
         const int FirstElementIndex = 0;
         const int AdjacentElementOffset = 1;
         const int SingleItemCount = 1;
 
         var observations = new List<string>
         {
-            replicas.Length == TwoNodeReplicaCount ? TwoReplicaObservation : OneReplicaObservation,
+            replicas.Length == TwoReplicaCount ? TwoReplicaObservation : OneReplicaObservation,
             primary.Observation(PrimaryRoleObservation),
             ReplicaProtocolObservation,
             ReplicaPayloadObservation,

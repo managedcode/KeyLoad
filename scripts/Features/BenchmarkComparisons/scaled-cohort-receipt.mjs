@@ -44,12 +44,12 @@ function validateGlobalIdentities(proofs) {
   requireValue(proofs.every(proof => Array.isArray(proof?.cells)), RECEIPT_ERROR);
   for (const project of ['job', 'artifact']) {
     const ids = proofs.flatMap(proof => proof.cells.map(item => item[project].id));
-    requireValue(ids.length === 1_386 && new Set(ids).size === ids.length, RECEIPT_ERROR);
+    requireValue(ids.length === 924 && new Set(ids).size === ids.length, RECEIPT_ERROR);
   }
 }
 
 function controlReceipt(control, controlProof, controlHash) {
-  validateManifest(control, 'intensive-1k-c16', 330);
+  validateManifest(control, 'intensive-1k-c16', 220);
   const rows = proofRows(controlProof, control).map(({ worker, proof }) => ({ id: worker.id, ...artifactRow(worker.id, proof) }));
   requireValue(rows.every(row => exactKeys(row, CONTROL_ROW_FIELDS)) && /^[a-f0-9]{64}$/u.test(controlHash), RECEIPT_ERROR);
   return { profile: control.profile, cellCount: rows.length, aggregateSha256: controlHash, cells: rows };
@@ -66,11 +66,11 @@ function validateDisposition(worker, unsupportedTopologies) {
 }
 
 function scaledReceipt(plan, manifest, proof, contract, failedIds) {
-  validateManifest(manifest, plan.profile, 132);
+  validateManifest(manifest, plan.profile, 88);
   const byId = new Map(manifest.workers.map(worker => [worker.id, worker]));
-  requireValue(byId.size === 132, RECEIPT_ERROR);
+  requireValue(byId.size === 88, RECEIPT_ERROR);
   const proofs = new Map(proof.cells.map(item => [item.id, item]));
-  requireValue(proofs.size === 132, RECEIPT_ERROR);
+  requireValue(proofs.size === 88, RECEIPT_ERROR);
   const rows = plan.cells.map(cell => {
     const worker = byId.get(cell.id);
     const item = proofs.get(cell.id);
@@ -98,10 +98,10 @@ function scaledReceipt(plan, manifest, proof, contract, failedIds) {
 }
 
 function vectorReceipt(plan, manifest, proof, contract, failedIds) {
-  validateManifest(manifest, plan.profile, 33);
+  validateManifest(manifest, plan.profile, 22);
   const byId = new Map(manifest.workers.map(worker => [worker.id, worker]));
   const proofs = new Map(proof.cells.map(item => [item.id, item]));
-  requireValue(byId.size === 33 && proofs.size === 33, RECEIPT_ERROR);
+  requireValue(byId.size === 22 && proofs.size === 22, RECEIPT_ERROR);
   const rows = plan.cells.map(cell => {
     const worker = byId.get(cell.id);
     const item = proofs.get(cell.id);

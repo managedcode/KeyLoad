@@ -9,7 +9,7 @@ const optionFields = ['seed', 'documents', 'operations', 'warmup', 'repetitions'
 const canonical = JSON.parse(readFileSync(contractUrl, 'utf8'));
 
 export const isolatedPlanLimits = Object.freeze({
-  cells: 330, crud: 132, specialized: 198, matrix: 256, idLength: 120,
+  cells: 220, crud: 88, specialized: 132, matrix: 256, idLength: 120,
 });
 
 export function requireIsolatedPlan(condition) {
@@ -58,7 +58,7 @@ function validateCanonicalSource(contract) {
   requireIsolatedPlan(contract.schemaVersion === 1 && contract.workerSchemaVersion === 5);
   requireIsolatedPlan(hasText(contract.profile) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(contract.profile));
   requireIsolatedPlan(uniqueArray(contract.targets, 11, hasText));
-  requireIsolatedPlan(isDeepStrictEqual(contract.nodeCounts, [1, 2, 3]));
+  requireIsolatedPlan(isDeepStrictEqual(contract.nodeCounts, [1, 3]));
   requireIsolatedPlan(uniqueArray(contract.crudScenarios, 4, hasText));
   requireIsolatedPlan(uniqueArray(contract.specializedScenarios, 6, hasText));
   const scenarios = [...contract.crudScenarios, ...contract.specializedScenarios];

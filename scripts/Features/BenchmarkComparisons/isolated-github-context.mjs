@@ -1,3 +1,4 @@
+import { createDocumentPlan, documentMatrixRow } from './document-isolated-plan.mjs';
 import { createRunContext } from './image-inputs.mjs';
 import { createIsolatedPlan, validateIsolatedPlan } from './isolated-plan.mjs';
 import { validateCohort } from './aggregate-contracts.mjs';
@@ -15,11 +16,12 @@ export function createGitHubContext(environment, platform) {
   const scaledPlans = createScaledPlans();
   const vectorPlans = createVectorPlans();
   const openLoopPlan = createOpenLoopPlan();
+  const documentPlan = createDocumentPlan();
   const cohort = { sourceRevision: native.sourceSha, runId: Number(native.runId), attempt: Number(native.runAttempt),
     repository: native.repository, ref: native.ref, workflow: GH.workflow, profile: plan.profile };
   requireGitHub(positive(cohort.runId) && positive(cohort.attempt));
   validateCohort(cohort, plan.profile);
-  return { native, cohort, plan, scaledPlans, vectorPlans, openLoopPlan };
+  return { native, cohort, plan, scaledPlans, vectorPlans, openLoopPlan, documentPlan };
 }
 
 export function requireCurrentJobName(name, context) {
@@ -28,9 +30,9 @@ export function requireCurrentJobName(name, context) {
   const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells),
     ...context.vectorPlans.flatMap(profile => profile.cells)];
   const matrices = createDatabaseMatrices(context.plan, context.scaledPlans, context.vectorPlans,
-    context.openLoopPlan);
+    context.openLoopPlan, context.documentPlan?.cells.map(documentMatrixRow));
   const openLoopRows = Object.values(matrices).flatMap(matrix => matrix.include)
-    .filter(row => row.openLoopRate !== undefined);
+    .filter(row => row.openLoopRate !== undefined || row.family === 'document-v1');
   requireGitHub(cells.some(cell => isolatedEvidenceJobName(cell) === name || isolatedJobName(cell, true) === name)
     || openLoopRows.some(row => row.jobName === name));
   return name;

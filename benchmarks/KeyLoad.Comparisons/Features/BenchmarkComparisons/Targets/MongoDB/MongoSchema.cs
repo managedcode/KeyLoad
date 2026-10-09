@@ -22,7 +22,6 @@ internal static class MongoSchema
     public const string ProfileVersion = "unverified";
     public const string SingleTopology = "one server; no replica copies";
     public const string ReplicatedTopology = "one primary plus two data-bearing secondaries";
-    public const string TwoNodeTopology = "one primary plus one data-bearing secondary; both members required for majority";
     public const string WriteAcknowledgement = "one-event-per-stream unique-document emulation; w=majority, journal=true; not full event-store equivalence";
     public const string ReadContract = "primary reads with majority read concern; event identity, revision and payload returned for outer untimed oracle validation";
     public const string NetworkTls = "MongoDB transport settings from connection string";

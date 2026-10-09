@@ -12,7 +12,6 @@ internal sealed class BenchmarkTopologyMembershipTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AcIso004FreshBenchmarkPersistsMembershipWithHardStateInOneCommit(int nodes)
     {
@@ -45,7 +44,7 @@ internal sealed class BenchmarkTopologyMembershipTests
     public async Task AcIso004FlushedInitialWalReplaysBothAuthorityRecordsAfterInterruption()
     {
         using var fixture = new BenchmarkTopologyMembershipFixture();
-        var configuration = fixture.Configuration(2);
+        var configuration = fixture.Configuration(3);
         using (var store = fixture.Open((stage, _, _) =>
         {
             if (stage == CommitStage.JournalFlushed)

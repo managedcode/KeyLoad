@@ -19,7 +19,7 @@ internal sealed class SiteIsolatedBrowserTests
         foreach (var scenario in workers.Select(worker => worker.GetProperty(SiteIsolatedFields.Scenario).GetString()!).Distinct(StringComparer.Ordinal))
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "scenario", scenario, token);
-            foreach (var nodes in new[] { 1, 2, 3 })
+            foreach (var nodes in new[] { 1, 3 })
             {
                 await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "node-count", nodes, token);
                 await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,

@@ -49,7 +49,7 @@ internal sealed class IsolatedMutationCorpusTests
         var actual = data.Input(Scenario.DocumentWrite, 0, 0, false);
         await Assert.That(BenchmarkDataset.SameDocument(new(actual.Id, actual.Json), expected)).IsTrue();
         await Assert.That(actual.Vector.SequenceEqual(expected.Vector)).IsTrue();
-        var two = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(data.Options with { Topology = ComparisonTopology.TwoNode }));
-        await Assert.That(two.Sha256).IsEqualTo(data.Sha256);
+        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(data.Options with { Topology = ComparisonTopology.Replicated }));
+        await Assert.That(replicated.Sha256).IsEqualTo(data.Sha256);
     }
 }

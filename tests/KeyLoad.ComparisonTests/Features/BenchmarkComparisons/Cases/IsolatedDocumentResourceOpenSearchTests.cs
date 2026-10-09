@@ -14,7 +14,6 @@ internal sealed class IsolatedDocumentResourceOpenSearchTests
     /// <summary>AC-ISO-002/003/006: genuine native discovery, official entrypoint and fresh private volumes.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task SelectedGroupUsesExactNativeDiscoveryAndExplicitUnauthenticatedProfile(int count)
     {

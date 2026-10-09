@@ -11,6 +11,7 @@ internal sealed class IsolatedPlanRejectionTests
     [Arguments("duplicate")]
     [Arguments("unknown-target")]
     [Arguments("zero-nodes")]
+    [Arguments("two-nodes")]
     [Arguments("four-nodes")]
     [Arguments("text-nodes")]
     [Arguments("unknown-scenario")]
@@ -38,6 +39,7 @@ internal sealed class IsolatedPlanRejectionTests
     [Arguments("unknown-target")]
     [Arguments("duplicate-target")]
     [Arguments("missing-nodes")]
+    [Arguments("two-nodes")]
     [Arguments("fake-nodes")]
     [Arguments("duplicate-scenario")]
     [Arguments("unknown-scenario")]
@@ -68,6 +70,7 @@ internal sealed class IsolatedPlanRejectionTests
             "duplicate" => () => cells[1] = first.DeepClone(),
             "unknown-target" => () => first[IsolatedPlanFields.Target] = "Unowned engine",
             "zero-nodes" => () => first[IsolatedPlanFields.NodeCount] = 0,
+            "two-nodes" => () => first[IsolatedPlanFields.NodeCount] = 2,
             "four-nodes" => () => first[IsolatedPlanFields.NodeCount] = 4,
             "text-nodes" => () => first[IsolatedPlanFields.NodeCount] = "3",
             "unknown-scenario" => () => first[IsolatedPlanFields.Scenario] = "PretendMeasured",
@@ -93,8 +96,9 @@ internal sealed class IsolatedPlanRejectionTests
             "empty-targets" => () => contract[IsolatedPlanFields.Targets]!.AsArray().Clear(),
             "unknown-target" => () => contract[IsolatedPlanFields.Targets]![0] = "Unowned engine",
             "duplicate-target" => () => contract[IsolatedPlanFields.Targets]![1] = contract[IsolatedPlanFields.Targets]![0]!.DeepClone(),
-            "missing-nodes" => () => contract[IsolatedPlanFields.NodeCounts]!.AsArray().RemoveAt(2),
-            "fake-nodes" => () => contract[IsolatedPlanFields.NodeCounts]![2] = 30,
+            "missing-nodes" => () => contract[IsolatedPlanFields.NodeCounts]!.AsArray().RemoveAt(1),
+            "fake-nodes" => () => contract[IsolatedPlanFields.NodeCounts]![1] = 30,
+            "two-nodes" => () => contract[IsolatedPlanFields.NodeCounts]!.AsArray().Insert(1, JsonValue.Create(2)),
             "duplicate-scenario" => () => contract[IsolatedPlanFields.SpecializedScenarios]![0] = contract[IsolatedPlanFields.CrudScenarios]![0]!.DeepClone(),
             "unknown-scenario" => () => contract[IsolatedPlanFields.CrudScenarios]![0] = "PretendMeasured",
             "missing-options" => () => contract[IsolatedPlanFields.Options]!.AsObject().Remove(IsolatedPlanFields.Operations),

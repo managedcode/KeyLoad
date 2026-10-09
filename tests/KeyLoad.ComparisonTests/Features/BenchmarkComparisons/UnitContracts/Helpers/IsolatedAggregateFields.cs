@@ -52,8 +52,8 @@ internal static class IsolatedAggregateFields
     internal const string Crud = "crud";
     internal const string Neo4j = "Neo4j";
     internal const string Qdrant = "Qdrant";
-    internal const string NeoCell = "neo4j-n2-point-read";
-    internal const string QdrantCell = "qdrant-n2-point-read";
+    internal const string NeoCell = "neo4j-n3-point-read";
+    internal const string QdrantCell = "qdrant-n3-point-read";
     internal const string StartupFailure = "startup failed";
     internal const string UnsupportedCapability = "Outside the supported shared workload.";
     internal const string InputError = "E_AGGREGATE_INPUT";

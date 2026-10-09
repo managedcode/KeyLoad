@@ -24,8 +24,8 @@ internal sealed class IsolatedPreflightTests
         var response = await IsolatedPlanNodeProcess.ProbeAsync(Preflight, plan);
         await Assert.That(response[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsTrue();
         var cells = response[IsolatedPlanFields.Value]![IsolatedPlanFields.Include]!.AsArray();
-        await Assert.That(cells.Count).IsEqualTo(33);
-        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct().Count()).IsEqualTo(33);
+        await Assert.That(cells.Count).IsEqualTo(22);
+        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct().Count()).IsEqualTo(22);
         foreach (var cell in cells)
         {
             var target = cell![IsolatedPlanFields.Target]!.GetValue<string>();
@@ -34,7 +34,7 @@ internal sealed class IsolatedPreflightTests
             await Assert.That(plan[IsolatedPlanFields.Cells]!.AsArray().Count(original => JsonNode.DeepEquals(original, cell))).IsEqualTo(1);
         }
         await Assert.That(cells.GroupBy(cell => cell![IsolatedPlanFields.Target]!.GetValue<string>())
-            .All(group => group.Select(cell => cell![IsolatedPlanFields.NodeCount]!.GetValue<int>()).Order().SequenceEqual([1, 2, 3]))).IsTrue();
+            .All(group => group.Select(cell => cell![IsolatedPlanFields.NodeCount]!.GetValue<int>()).Order().SequenceEqual([1, 3]))).IsTrue();
     }
 
     [Test]

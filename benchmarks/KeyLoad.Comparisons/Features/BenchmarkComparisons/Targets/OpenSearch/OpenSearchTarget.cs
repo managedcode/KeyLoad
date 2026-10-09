@@ -10,8 +10,8 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
+public sealed partial class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
@@ -24,8 +24,8 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
 
     /// <summary>Gets the observed server, transport, index-copy, and acknowledgement evidence collected during initialization.</summary>
     public TargetProfile Profile { get; private set; } = new(OpenSearchNames.TargetName, OpenSearchNames.Unverified,
-        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleTopology : topology == ComparisonTopology.TwoNode ? OpenSearchNames.TwoNodeTopology : OpenSearchNames.ReplicatedTopology,
-        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleAcknowledgement : topology == ComparisonTopology.TwoNode ? OpenSearchNames.TwoNodeAcknowledgement : OpenSearchNames.ReplicatedAcknowledgement,
+        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleTopology : OpenSearchNames.ReplicatedTopology,
+        topology == ComparisonTopology.Standalone ? OpenSearchNames.SingleAcknowledgement : OpenSearchNames.ReplicatedAcknowledgement,
         OpenSearchNames.RealtimeReadContract, OpenSearchNames.HttpJson, OpenSearchNames.AspireAuthorization, image);
 
     /// <summary>Gets the limitation text for scenarios that this target does not implement.</summary>
@@ -51,8 +51,9 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             throw new ComparisonFailureException(OpenSearchNames.PinnedImageMismatch);
         }
 
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
         topK = dataset.Settings.TopK;
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             Profile = Profile with { ReadContract = RealTimeDocumentGETS1SourceContainsNoVectorValuesToken };
         }
@@ -64,21 +65,35 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             throw new ComparisonFailureException(OpenSearchNames.ServerVersionMismatch);
         }
 
-        await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);
-        indexCreated = true;
-        var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
-        await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, executionOptions, cancellationToken);
-        if (dataset.Settings is not ScaledComparisonProfile)
+        OpenSearchClusterObservation beforeSeed;
+        // Explicit native index creation/readiness is distinct; insertion-time index maintenance remains in load.
+        using (documentTiming?.MeasureIndex())
+        {
+            await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);
+            indexCreated = true;
+            beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
+        }
+        using (documentTiming?.MeasureLoad())
+        {
+            await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, executionOptions, cancellationToken);
+        }
+
+        if (dataset.Settings is not ScaledComparisonProfile && dataset is not DocumentComparisonCorpus)
         {
             await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[FirstElementIndex].Vector, expectedCopies, cancellationToken);
         }
-        using (var refresh = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
-            OpenSearchNames.PathSeparator + index + OpenSearchNames.RefreshSuffix, null, cancellationToken))
+        string settings;
+        OpenSearchClusterObservation afterSeed;
+        using (documentTiming?.MeasureIndex())
         {
-            _ = refresh.RootElement;
+            using (var refresh = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
+                OpenSearchNames.PathSeparator + index + OpenSearchNames.RefreshSuffix, null, cancellationToken))
+            {
+                _ = refresh.RootElement;
+            }
+            settings = await OpenSearchIndex.VerifySettingsAsync(client, index, expectedCopies - AdjacentElementOffset, cancellationToken);
+            afterSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
         }
-        var settings = await OpenSearchIndex.VerifySettingsAsync(client, index, expectedCopies - AdjacentElementOffset, cancellationToken);
-        var afterSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
         Profile = Profile with
         {
             Version = version,

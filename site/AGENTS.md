@@ -64,7 +64,7 @@
 ## Current first-release Website contract, owner corrections 2026-10-06
 
 - The current four workflows are Build and Tests (`build-and-tests.yml`), Benchmarks (`benchmarks.yml`), Website (`website.yml`) and prepared manual Release (`release.yml`). Only Website builds, qualifies and publishes the site on trusted main push/manual; Benchmarks ends with a bounded Website dispatch and Website has no `workflow_run` executor subscription. These explicit owner corrections supersede every earlier three-workflow, filename, executor, placement and completion-subscription clause; every unrelated suite, permission and qualification rule remains mandatory.
-- The sole measured producer contract is the current 1,386-worker/2,530-input cohort in ADR-076. Its executed dependency manifest contains exactly 80 current source paths. Remove old-plan readers, schemas, event-file parsers and their exclusive fixtures or inventory entries under the root owner-only migration/legacy super rule. This supersedes earlier 270/277 and old-reader requirements only; retain bounded authenticated REST producer/artifact provenance, exact current source and input hashes, failed/null accounting, strict selected-evidence rejection, freshness and unchanged 80/70/90 coverage thresholds.
+- The sole measured producer contract is the current 924-worker/1,716-input website cohort plus separately authenticated 418-cell document family in ADR-076. Its executed dependency manifest contains exactly 84 current source paths. Remove old-plan readers, schemas, event-file parsers and their exclusive fixtures or inventory entries under the root owner-only migration/legacy super rule. This supersedes earlier 270/277 and old-reader requirements only; retain bounded authenticated REST producer/artifact provenance, exact current source and input hashes, failed/null accounting, strict selected-evidence rejection, freshness and unchanged 80/70/90 coverage thresholds.
 - When no current authenticated producer is ready, qualify the complete content-only site without figures. Real native TUnit/Node/Chrome operations, no skips in each applicable suite, source/coverage inventories and needs-gated least-privilege Pages remain required. Local tests enter the same Aspire-owned AppHost and are development evidence; genuine exact-source Linux/provider proof closes delivery. Controlled rejection inputs cannot become published measurements.
 
 ## Owner correction: screenshot-identified animation, 2026-10-06
@@ -78,3 +78,13 @@
 ## Owner correction: clients and SQL in the cluster illustration, 2026-10-07
 
 - Show generic external clients connected to different silos in the hero cluster illustration. SQL belongs inside the database alongside its connected models; do not depict SQL or SDK as external client objects in this illustration.
+
+
+## Current native comparison topology, owner direction 2026-10-09
+
+- ADR-122 supersedes every active two-node comparison inventory: current benchmark planning, admission, original-file provenance and site projection accept only native one-node or three-node cells. Reject two-node current inputs before acquisition; RF3 majority remains two acknowledgements. Preserve immutable historical original bytes/hashes without a legacy reader or current qualification fallback.
+- The existing control/scale/vector family now has 924 workers and 1,716 original inputs (1,656 suite files and 60 provider files), with the 84-path executed source closure. This current topology contract supersedes earlier active 1,386-worker/2,530-input clauses; new document-family evidence must receive its own exact inventory before publication. All source, authorization, native operation, complete cohort, provenance and coverage gates remain mandatory.
+
+## Native benchmark methodology, owner direction 2026-10-09
+
+- ADR-122 and Methodology require only actual native1/3 topology, one shared pure/mixed/ingestion inventory and exclusive measurements. Active two-node dispatch/admission is removed; RF3 majority remains2. Preserve authenticated original failure/null and resource/source/provenance gates; new document-family originals are separately admitted before any numerical website rendering. Executed source closure reflects every new transitive input, with unchanged80/70/90 coverage thresholds.

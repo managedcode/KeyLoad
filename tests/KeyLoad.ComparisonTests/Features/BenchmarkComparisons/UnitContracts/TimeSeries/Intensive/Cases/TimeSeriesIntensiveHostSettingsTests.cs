@@ -6,13 +6,11 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensiveHostSettingsTests
 {
-    /// <summary>TH009002/003/004: all36 source-plan selections retain their actual typed input facts.</summary>
+    /// <summary>TH009002/003/004: all24 source-plan selections retain their actual typed input facts.</summary>
     [Test]
     [Arguments(TimeSeriesIntensiveTargetKind.KeyLoad, OneNode)]
-    [Arguments(TimeSeriesIntensiveTargetKind.KeyLoad, TwoNodes)]
     [Arguments(TimeSeriesIntensiveTargetKind.KeyLoad, ThreeNodes)]
     [Arguments(TimeSeriesIntensiveTargetKind.TimescaleDB, OneNode)]
-    [Arguments(TimeSeriesIntensiveTargetKind.TimescaleDB, TwoNodes)]
     [Arguments(TimeSeriesIntensiveTargetKind.TimescaleDB, ThreeNodes)]
     public async Task AllNativeSelectionsAndEveryPhaseScenarioRetainOriginalSettings(TimeSeriesIntensiveTargetKind target, int count)
     {
@@ -106,7 +104,7 @@ internal sealed class TimeSeriesIntensiveHostSettingsTests
             values[key.ToUpperInvariant()] = value;
         }
         using var configuration = Configuration(values);
-        await Assert.That(TimeSeriesIntensiveHostSettings.Read(configuration).Native.Endpoints.Length).IsEqualTo(TwoNodes);
+        await Assert.That(TimeSeriesIntensiveHostSettings.Read(configuration).Native.Endpoints.Length).IsEqualTo(ThreeNodes);
     }
 
     private static async Task VerifySelectionAsync(TimeSeriesIntensiveTargetKind target, int count, TimeSeriesIntensiveScenario? scenario)

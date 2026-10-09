@@ -11,8 +11,8 @@ internal static class KeyLoadTimeSeriesIntensiveTopology
 
         if (statuses.IsDefaultOrEmpty || expectedVoters.IsDefaultOrEmpty
             || statuses.Length != expectedVoters.Length
-            || statuses.Length is < KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
-                or > KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount)
+            || statuses.Length is not (KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
+                or KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount))
         {
             throw Invalid();
         }
@@ -48,8 +48,8 @@ internal static class KeyLoadTimeSeriesIntensiveTopology
         ImmutableArray<string> expectedVoters, Guid expectedIncarnation)
     {
         if (snapshot is null || expectedVoters.IsDefaultOrEmpty
-            || expectedVoters.Length is < KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
-                or > KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount
+            || expectedVoters.Length is not (KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
+                or KeyLoadTimeSeriesIntensiveProtocol.MaximumNodeCount)
             || expectedVoters.Distinct(StringComparer.Ordinal).Count() != expectedVoters.Length
             || !expectedVoters.Contains(expectedLocalVoter, StringComparer.Ordinal)
             || snapshot.LocalVoter != expectedLocalVoter

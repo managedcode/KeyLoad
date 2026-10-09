@@ -17,7 +17,6 @@ internal sealed class IsolatedDocumentResourceKurrentTests
     /// <summary>AC-ISO-002/003/005/006: native gossip/replication matches actual direct endpoints for every member.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task SelectedGroupHasExactNativeSizeAndReplicationAdvertisedEndpoints(int count)
     {

@@ -7,7 +7,7 @@ export const AGGREGATE = Object.freeze({
   sha: /^[a-f0-9]{40}$/, digest: /^[a-f0-9]{64}$/, image: /@sha256:[a-f0-9]{64}$/,
   zipDigest: /^sha256:[a-f0-9]{64}$/, guid: /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i,
   safeId: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, linux: /(?:^|\s|\/)(?:Linux|Ubuntu)(?:\s|$)/i,
-  topology: Object.freeze({ 1: 'Single', 2: 'TwoNode', 3: 'Replicated' }),
+  topology: Object.freeze({ 1: 'Single', 3: 'Replicated' }),
   workerBytes: 67_108_864, metadataBytes: 4_194_304, totalBytes: 17_179_869_184,
   steps: Object.freeze(['Run database workload', 'Save benchmark results']),
   errors: Object.freeze({ input: 'E_AGGREGATE_INPUT', proof: 'E_AGGREGATE_PROOF', envelope: 'E_AGGREGATE_ENVELOPE',

@@ -12,7 +12,7 @@ internal static class IsolatedOpenLoopHostTestSettings
 
     internal static Dictionary<string, string> Create(IsolatedHostFixture fixture)
     {
-        var settings = fixture.Settings("Neo4j", 2);
+        var settings = fixture.Settings("Neo4j", 3);
         settings[ScaleProfileKey] = ProfileId;
         settings[ComparisonExecutionIdentitySupport.EvidenceProfile] = ProfileId;
         settings[RateKey] = OfferedRate;

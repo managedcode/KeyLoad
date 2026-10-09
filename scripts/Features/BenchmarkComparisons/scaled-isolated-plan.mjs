@@ -22,7 +22,7 @@ function createCells(contract, profile) {
       requireIsolatedPlan(id.length <= isolatedPlanLimits.idLength && idPattern.test(id));
       return { id, target, nodeCount, scenario, profile: profile.id, family: 'crud' };
     })));
-  requireIsolatedPlan(cells.length === 132 && new Set(cells.map(cell => cell.id)).size === cells.length);
+  requireIsolatedPlan(cells.length === 88 && new Set(cells.map(cell => cell.id)).size === cells.length);
   return cells;
 }
 
@@ -70,4 +70,4 @@ export function scaleProfileSettings(profileId) {
   return { ...profile, ...settings };
 }
 
-export const scaledCellCount = SCALED_PROFILES.length * 132;
+export const scaledCellCount = SCALED_PROFILES.length * 88;

@@ -11,14 +11,14 @@ AC-HOST-001–007 and AC-KLEVENT-001–003 in
 
 The canonical comparison targets are KeyLoad, PostgreSQL + pgvector, Qdrant,
 RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB.
-The current plan derives 1,386 workers from its checked-in contracts:
-330 controls, 264 scaled cells and 792 vector cells. These are planned workers,
+The current plan derives 924 workers from its checked-in contracts:
+220 controls, 176 scaled cells and 528 vector cells. These are planned workers,
 not passing tests or completed measurements. Active scale profiles contain
 exactly 100,000 or 1,000,000 actual records, and applicable workload cells measure
 at least 100,000 operations. A small control fixture cannot qualify either scale.
 
 [ADR-056](ADR-056-isolated-linux-comparison-cells.md) owns physical
-one/two/three-node isolated cells; [ADR-103](ADR-103-scaled-fair-comparisons.md)
+one/three-node isolated cells; [ADR-103](ADR-103-scaled-fair-comparisons.md)
 owns the scaled/vector cohort. Derive source inventories, schema versions,
 profile parameters and supported dispositions from their canonical contracts.
 Single/Replicated library values describe comparison profiles; they do not

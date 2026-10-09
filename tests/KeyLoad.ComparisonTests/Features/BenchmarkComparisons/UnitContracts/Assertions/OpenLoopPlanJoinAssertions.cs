@@ -78,7 +78,7 @@ internal static class OpenLoopPlanJoinAssertions
             var counts = document.RootElement.GetProperty(IsolatedPlanFields.Counts);
             foreach (var group in WorkflowDatabaseGroups.Entries)
             {
-                var expectedCount = group.Name == OpenLoopPlanExpectedInventory.KeyLoadTarget ? 207 : 201;
+                var expectedCount = group.Name == OpenLoopPlanExpectedInventory.KeyLoadTarget ? 140 : 134;
                 await Assert.That(counts.GetProperty(group.Key).GetInt32()).IsEqualTo(expectedCount);
             }
         }
@@ -132,8 +132,8 @@ internal static class OpenLoopPlanJoinAssertions
         var rows = expanded.Matrices[groupKey]![IsolatedPlanFields.Include]!.AsArray();
         var targetMeasurements = measurements.Where(cell => cell.Target == target).ToArray();
         var targetProofs = proofs.Where(cell => cell.Target == target).ToArray();
-        var expectedTotal = target == OpenLoopPlanExpectedInventory.KeyLoadTarget ? 207 : 201;
-        await Assert.That(prior.Count).IsEqualTo(129);
+        var expectedTotal = target == OpenLoopPlanExpectedInventory.KeyLoadTarget ? 140 : 134;
+        await Assert.That(prior.Count).IsEqualTo(86);
         await Assert.That(rows.Count).IsEqualTo(expectedTotal);
         for (var index = 0; index < prior.Count; index++)
         {

@@ -26,6 +26,7 @@ internal static class IsolatedPostgresBootstrap
     private const string Commit = "synchronous_commit=on";
     private const string SlotRetentionFormat = "max_slot_wal_keep_size={0}MB";
     private static readonly CompositeFormat SlotRetentionCompositeFormat = CompositeFormat.Parse(SlotRetentionFormat);
+    private const string MaximumConnectionsPrefix = "max_connections=";
     private const string MissingBootstrap = "IsolatedPostgresBootstrapMissing";
 
     internal static (string Entry, string Init) FindScripts(IsolatedResourceContext context) => FindScripts(context.Builder);
@@ -43,7 +44,7 @@ internal static class IsolatedPostgresBootstrap
     }
 
     internal static void Configure<T>(IResourceBuilder<T> node, string directory, (string Entry, string Init) scripts,
-        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, IOptions<BenchmarkDeploymentOptions> deploymentOptions, string primaryName = Primary) where T : ContainerResource
+        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, IOptions<BenchmarkDeploymentOptions> deploymentOptions, string primaryName = Primary, bool documentWorkload = false) where T : ContainerResource
     {
         var slotRetention = string.Format(CultureInfo.InvariantCulture, SlotRetentionCompositeFormat, deploymentOptions.Value.PostgresSlotWalRetentionMegabytes);
         node.WithBindMount(directory, Data).WithBindMount(scripts.Entry, EntryTarget, isReadOnly: true)
@@ -55,6 +56,12 @@ internal static class IsolatedPostgresBootstrap
                     Configuration, slotRetention })
                 {
                     arguments.Args.Add(argument);
+                }
+                if (documentWorkload)
+                {
+                    arguments.Args.Add(Configuration);
+                    arguments.Args.Add(MaximumConnectionsPrefix + deploymentOptions.Value.DocumentPostgresMaximumConnections
+                        .ToString(CultureInfo.InvariantCulture));
                 }
             });
         if (standby is null)

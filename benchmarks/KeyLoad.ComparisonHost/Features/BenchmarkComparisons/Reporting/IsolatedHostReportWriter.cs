@@ -7,9 +7,9 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <summary>Publishes one streamed envelope using a same-directory atomic no-overwrite move.</summary>
 internal static class IsolatedHostReportWriter
 {
-    internal static void ValidateDestination(string directory)
+    internal static void ValidateDestination(string directory, string fileName = IsolatedHostConstants.WorkerFile)
     {
-        var final = Path.Combine(directory, IsolatedHostConstants.WorkerFile);
+        var final = Path.Combine(directory, fileName);
         if (File.Exists(final) || Directory.Exists(final))
         {
             throw new IOException(IsolatedHostConstants.Failure);
@@ -19,10 +19,18 @@ internal static class IsolatedHostReportWriter
     internal static async Task WriteAsync(IsolatedComparisonReport report, string directory,
         IOptions<ComparisonHostExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
+        var value = new IsolatedHostStreamedEnvelope(report.SchemaVersion, report.Worker, report.Disposition, report.Reason,
+            report.Report is { } measured ? StreamedComparisonReport.Create(measured) : null);
+        await WriteEnvelopeAsync(value, directory, IsolatedHostConstants.WorkerFile, executionOptions, cancellationToken);
+    }
+
+    internal static async Task WriteEnvelopeAsync<T>(T report, string directory, string fileName,
+        IOptions<ComparisonHostExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         if (!executionOptions.Value.IsValid())
         { throw new OptionsValidationException(Options.DefaultName, typeof(ComparisonHostExecutionOptions), [ComparisonHostExecutionOptions.InvalidSettings]); }
-        ValidateDestination(directory);
+        ValidateDestination(directory, fileName);
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, IsolatedHostConstants.PendingPrefix + Guid.NewGuid().ToString(ComparisonHostConstants.GuidFormat)
             + IsolatedHostConstants.PendingSuffix);
@@ -35,7 +43,7 @@ internal static class IsolatedHostReportWriter
                 await WritePendingAsync(report, stream, cancellationToken);
             }
             cancellationToken.ThrowIfCancellationRequested();
-            File.Move(pending, Path.Combine(directory, IsolatedHostConstants.WorkerFile), overwrite: false);
+            File.Move(pending, Path.Combine(directory, fileName), overwrite: false);
         }
         finally
         {
@@ -56,11 +64,9 @@ internal static class IsolatedHostReportWriter
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
 
-    private static async Task WritePendingAsync(IsolatedComparisonReport report, Stream stream, CancellationToken cancellationToken)
+    private static async Task WritePendingAsync<T>(T report, Stream stream, CancellationToken cancellationToken)
     {
-        var value = new IsolatedHostStreamedEnvelope(report.SchemaVersion, report.Worker, report.Disposition, report.Reason,
-            report.Report is { } measured ? StreamedComparisonReport.Create(measured) : null);
-        await JsonSerializer.SerializeAsync(stream, value, ReportWriter.JsonOptions, cancellationToken).ConfigureAwait(false);
+        await JsonSerializer.SerializeAsync(stream, report, ReportWriter.JsonOptions, cancellationToken).ConfigureAwait(false);
         await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
     }
 

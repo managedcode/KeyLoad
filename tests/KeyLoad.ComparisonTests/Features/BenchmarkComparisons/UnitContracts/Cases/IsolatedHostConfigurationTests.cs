@@ -61,17 +61,18 @@ internal sealed class IsolatedHostConfigurationTests
     public async Task KeyLoadEndpointsMustProveExactDistinctNativeCount(string defect)
     {
         using var fixture = new IsolatedHostFixture();
-        var settings = fixture.Settings("KeyLoad", 2);
+        var settings = fixture.Settings("KeyLoad", 3);
         settings[IsolatedHostFixture.AdminKey] = IsolatedHostFixture.Canary;
         settings[IsolatedHostFixture.EndpointPrefix + "0"] = "http://127.0.0.1:1/";
         settings[IsolatedHostFixture.EndpointPrefix + "1"] = "http://127.0.0.1:2/";
+        settings[IsolatedHostFixture.EndpointPrefix + "2"] = "http://127.0.0.1:3/";
         if (defect == "missing")
         {
             settings.Remove(IsolatedHostFixture.EndpointPrefix + "1");
         }
         if (defect == "extra")
         {
-            settings[IsolatedHostFixture.EndpointPrefix + "2"] = "http://127.0.0.1:3/";
+            settings[IsolatedHostFixture.EndpointPrefix + "3"] = "http://127.0.0.1:4/";
         }
         if (defect == "duplicate")
         {

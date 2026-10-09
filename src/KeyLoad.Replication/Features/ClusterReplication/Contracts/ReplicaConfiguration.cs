@@ -55,7 +55,7 @@ public sealed record ReplicaConfiguration(string LocalId, ImmutableArray<string>
     public void Validate()
     {
         if (Incarnation == Guid.Empty || VoterIds.IsDefault
-            || (BenchmarkTopology ? VoterIds.Length is < MinimumBenchmarkVoters or > MaximumBenchmarkVoters
+            || (BenchmarkTopology ? VoterIds.Length is not (MinimumBenchmarkVoters or MaximumBenchmarkVoters)
                 : VoterIds.Length < MinimumProductionVoters || VoterIds.Length % MajorityDivisor == EvenVoterRemainder)
             || VoterIds.Distinct(StringComparer.Ordinal).Count() != VoterIds.Length
             || VoterIds.Any(string.IsNullOrWhiteSpace) || !VoterIds.Contains(LocalId, StringComparer.Ordinal))

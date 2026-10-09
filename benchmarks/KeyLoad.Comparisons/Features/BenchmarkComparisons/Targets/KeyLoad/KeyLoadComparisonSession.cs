@@ -35,6 +35,9 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
             document, cancellationToken).ConfigureAwait(false);
     }
 
+    internal Task<OperationResult> ExecuteDocumentOperationAsync(Scenario operation, BenchmarkDocument document, CancellationToken token)
+        => operation == Scenario.PointRead ? ExecuteAsync(operation, document, token)
+            : KeyLoadDocumentOperations.ExecuteAsync(client, partition, operation, document, token, classifyMissingUpdate: false);
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
@@ -80,7 +83,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
             foreach (var row in page.Rows)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (++observedCount > corpusCount)
+                if (corpusCount >= FirstElementIndex && ++observedCount > corpusCount)
                 {
                     throw new ComparisonFailureException(ScaledCorpusReadbackFailureCodes.ExtraRecord);
                 }
@@ -94,7 +97,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
             cursor = page.Cursor;
         } while (cursor is not null);
 
-        if (observedCount != corpusCount)
+        if (corpusCount >= FirstElementIndex && observedCount != corpusCount)
         {
             throw new ComparisonFailureException(ScaledCorpusReadbackFailureCodes.CountMismatch);
         }

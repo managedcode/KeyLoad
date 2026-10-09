@@ -39,9 +39,15 @@ internal static class IsolatedBenchmarkResources
         {
             Bind(runner, ComparisonWorkerSelection.VectorProfileSetting, vectorProfile.Id);
         }
+        if (selection.DocumentWorkload is { } documents)
+        {
+            Bind(runner, DocumentWorkerSelection.ScenarioSetting, documents.Scenario.ToString());
+            Bind(runner, DocumentWorkerSelection.RecordsSetting, documents.DatasetRecords.ToString(CultureInfo.InvariantCulture));
+            Bind(runner, DocumentWorkerSelection.ClientsSetting, documents.Clients.ToString(CultureInfo.InvariantCulture));
+        }
         runner.WithEnvironment(StorageSetting, Storage);
         var context = new IsolatedResourceContext(builder, selection, runner, root);
-        if (selection.ScaledProfile is not null || selection.VectorProfile is not null)
+        if (selection.ScaledProfile is not null || selection.VectorProfile is not null || selection.DocumentWorkload is not null)
         {
             builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
                 AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectory),

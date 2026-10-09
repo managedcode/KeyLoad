@@ -10,9 +10,9 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     private const string PartitionKey = "partition";
 
     [Test]
-    public async Task AcTsi003OneTwoAndThreeNodeStatusInputsPreserveQuorumContract()
+    public async Task AcTsi003OneAndThreeNodeStatusInputsPreserveQuorumContract()
     {
-        foreach (var count in new[] { 1, 2, 3 })
+        foreach (var count in new[] { 1, 3 })
         {
             var voters = Voters(count);
             var statuses = Statuses(voters, voters[0]).Select((status, index) =>
@@ -57,7 +57,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     [Test]
     public async Task AcTsi003DashboardMustProveExpectedLocalVoterAndOrderedMembership()
     {
-        var voters = Voters(2);
+        var voters = Voters(3);
         var status = Statuses(voters, voters[0])[0];
         var snapshot = Snapshot(status, voters[0], voters);
         KeyLoadTimeSeriesIntensiveTopology.ValidateDashboard(snapshot, voters[0], voters, Incarnation);
@@ -68,7 +68,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
                 Snapshot(status, voters[1], voters), voters[0], voters, Incarnation));
         Assert.ThrowsExactly<KeyLoadTimeSeriesIntensiveReplyException>(() =>
             KeyLoadTimeSeriesIntensiveTopology.ValidateDashboard(
-                Snapshot(status, voters[0], [voters[1], voters[0]]), voters[0], voters, Incarnation));
+                Snapshot(status, voters[0], [voters[1], voters[0], voters[2]]), voters[0], voters, Incarnation));
     }
 
     [Test]
@@ -76,27 +76,30 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     {
         using var firstHttp = new HttpClient();
         using var secondHttp = new HttpClient();
+        using var thirdHttp = new HttpClient();
         var firstClient = new KeyLoadClient(firstHttp, string.Empty, UnitClientOptions.Execution());
         var secondClient = new KeyLoadClient(secondHttp, string.Empty, UnitClientOptions.Execution());
+        var thirdClient = new KeyLoadClient(thirdHttp, string.Empty, UnitClientOptions.Execution());
         var first = new KeyLoadTimeSeriesIntensivePeer(1, "voter-1", new("http://127.0.0.1:7101"), firstClient);
         var second = new KeyLoadTimeSeriesIntensivePeer(2, "voter-2", new("http://127.0.0.1:7102"), secondClient);
+        var third = new KeyLoadTimeSeriesIntensivePeer(3, "voter-3", new("http://127.0.0.1:7103"), thirdClient);
         var partition = new PartitionRef("tenant", "database", "domain", PartitionKey);
-        var valid = new KeyLoadTimeSeriesIntensiveContext("run", partition, "metrics", Incarnation, [first, second]);
-        await Assert.That(valid.Peers.Length).IsEqualTo(2);
+        var valid = new KeyLoadTimeSeriesIntensiveContext("run", partition, "metrics", Incarnation, [first, second, third]);
+        await Assert.That(valid.Peers.Length).IsEqualTo(3);
         await Assert.That(valid.ExpectedAtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
 
         Assert.ThrowsExactly<ArgumentException>(() =>
             _ = new KeyLoadTimeSeriesIntensiveContext(
-                "run", partition, "metrics", Incarnation, [first, second with { Index = 1 }]));
+                "run", partition, "metrics", Incarnation, [first, second with { Index = 1 }, third]));
         Assert.ThrowsExactly<ArgumentException>(() =>
             _ = new KeyLoadTimeSeriesIntensiveContext(
-                "run", partition, "metrics", Incarnation, [first, second with { VoterId = "voter-1" }]));
+                "run", partition, "metrics", Incarnation, [first, second with { VoterId = "voter-1" }, third]));
         Assert.ThrowsExactly<ArgumentException>(() =>
             _ = new KeyLoadTimeSeriesIntensiveContext(
-                "run", partition, "metrics", Incarnation, [first, second with { Endpoint = first.Endpoint }]));
+                "run", partition, "metrics", Incarnation, [first, second with { Endpoint = first.Endpoint }, third]));
         Assert.ThrowsExactly<ArgumentException>(() =>
             _ = new KeyLoadTimeSeriesIntensiveContext(
-                "run", partition, "metrics", Incarnation, [first, second with { Client = firstClient }]));
+                "run", partition, "metrics", Incarnation, [first, second with { Client = firstClient }, third]));
     }
 
     private static ImmutableArray<string> Voters(int count) =>

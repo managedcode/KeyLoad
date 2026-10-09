@@ -20,7 +20,7 @@ internal static class IsolatedAggregateData
     internal const string Profile = "intensive-1k-c16";
     internal const string Target = "KeyLoad";
     internal const string ScenarioName = "PointRead";
-    internal const string CellId = "keyload-n2-point-read";
+    internal const string CellId = "keyload-n3-point-read";
     internal const string ContractFile = "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json";
     internal const string Observation = "Controlled contract observation; no native runtime qualification.";
     private const string ControlledVersion = "controlled";
@@ -50,7 +50,7 @@ internal static class IsolatedAggregateData
     {
         id = CellId,
         target = Target,
-        nodeCount = 2,
+        nodeCount = 3,
         scenario = ScenarioName,
         profile = Profile,
         family = F.Crud,
@@ -59,7 +59,7 @@ internal static class IsolatedAggregateData
     internal static JsonObject Envelope()
     {
         var contract = Contract();
-        var options = contract[F.Options]!.Deserialize<ComparisonOptions>(JsonOptions)! with { Topology = ComparisonTopology.TwoNode };
+        var options = contract[F.Options]!.Deserialize<ComparisonOptions>(JsonOptions)! with { Topology = ComparisonTopology.Replicated };
         var samples = Enumerable.Range(0, options.Operations).Select(index => new OperationSample(
             index, index % options.Concurrency, index, index + 1, true, null, options.PayloadBytes, null, null)).ToImmutableArray();
         var measurement = new Measurement(options.Operations, options.Operations, 0, options.Operations / 1000d,
@@ -68,7 +68,7 @@ internal static class IsolatedAggregateData
             Target, Scenario.PointRead, repetition, F.Measured, null, measurement, samples)).ToImmutableArray();
         var target = new TargetProfile(Target, ControlledVersion, Observation, Observation, Observation, Observation, Observation, Image)
         {
-            Cluster = new(2, 2, Observation, [Observation]),
+            Cluster = new(3, 3, Observation, [Observation]),
         };
         var report = new ComparisonReport(3, Guid.NewGuid(), TimeProvider.System.GetUtcNow(), options, DatasetHash,
             ControlledLoad, F.Ubuntu, Architecture, 4, Runtime, Observation, SourceRevision, [target], cases)
@@ -82,7 +82,7 @@ internal static class IsolatedAggregateData
             worker = new
             {
                 target = Target,
-                nodeCount = 2,
+                nodeCount = 3,
                 scenario = ScenarioName,
                 profile = Profile,
                 sourceRevision = SourceRevision,

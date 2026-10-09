@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Plan all benchmark scenarios
         id: plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json" --github-output="$GITHUB_OUTPUT"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json" --document-output="$RUNNER_TEMP/document-plan.json" --github-output="$GITHUB_OUTPUT"
       - name: Save benchmark plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -72,6 +72,7 @@ jobs:
             ${{ runner.temp }}/vector-plan.json
             ${{ runner.temp }}/composite-plan.json
             ${{ runner.temp }}/open-loop-plan.json
+            ${{ runner.temp }}/document-plan.json
           if-no-files-found: error
           retention-days: 90
   comparison-images:
@@ -157,6 +158,10 @@ jobs:
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
       - name: Test benchmark phase and attempt counters
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
+      - name: Test document resource budgets and current native topology
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(DocumentResourceBudgetTests)|(NativeTopologyAdmissionTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/document-admission --KeyLoadTests:ReportTrx=true
+      - name: Test actual native document schedules and cancellation
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/DocumentComparisonNativeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/document-native --KeyLoadTests:ReportTrx=true
       - name: Test KeyLoad replay admission
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
       - name: Test Redis replica error reporting
@@ -264,7 +269,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: ${{ matrix.kind == 'preflight' && 'comparison-preflight-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-' || matrix.kind == 'open-loop' && 'comparison-open-loop-worker-' || 'comparison-worker-' }}${{ matrix.id }}
+          name: ${{ matrix.kind == 'documents' && 'comparison-document-worker-' || matrix.kind == 'preflight' && 'comparison-preflight-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-' || matrix.kind == 'open-loop' && 'comparison-open-loop-worker-' || 'comparison-worker-' }}${{ matrix.id }}
           path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
           if-no-files-found: error
           retention-days: 90
@@ -273,7 +278,7 @@ jobs:
         uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
         with:
           setup-outcome: ${{ steps.images.outcome }}
-          artifact-name: ${{ matrix.kind == 'preflight' && 'comparison-preflight-qualification-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-qualification-' || matrix.kind == 'open-loop' && 'comparison-open-loop-case-qualification-' || 'comparison-case-qualification-' }}${{ matrix.id }}
+          artifact-name: ${{ matrix.kind == 'documents' && 'comparison-document-qualification-' || matrix.kind == 'preflight' && 'comparison-preflight-qualification-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-qualification-' || matrix.kind == 'open-loop' && 'comparison-open-loop-case-qualification-' || 'comparison-case-qualification-' }}${{ matrix.id }}
   comparison-postgresql:
     name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
@@ -384,9 +389,57 @@ jobs:
       matrix: ${{ fromJSON(needs.comparison-plan.outputs.databases).helixdb }}
     env: *database-environment
     steps: *database-steps
+  keyload-functional-heavy-load:
+    name: KeyLoad functional RF3 million-record ingestion
+    needs: [comparison-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          global-json-file: global.json
+      - name: Check Docker
+        run: docker version
+      - name: Download exact source Docker images
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          artifact-ids: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
+          path: ${{ runner.temp }}/keyload-image-bundle
+      - name: Load and verify Docker images
+        id: images
+        run: node scripts/Features/BenchmarkComparisons/import-images.mjs --bundle="$RUNNER_TEMP/keyload-image-bundle"
+      - name: Configure exact source KeyLoad image
+        env:
+          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
+        run: |
+          test -n "$KEYLOAD_SERVER_IMAGE"
+          printf 'KeyLoad__ContainerImages__Server=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+      - name: Restore .NET packages
+        run: dotnet restore KeyLoad.slnx
+      - name: Build functional RF3 tests
+        run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
+      - name: Test ingestion while SDK and MCP reads are active
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*' --KeyLoadTests:HeavyLoad:Enabled=true --KeyLoadTests:TimeoutMinutes=140 --KeyLoadTests:ResultsDirectory=TestResults/rf3-heavy-load --KeyLoadTests:ReportTrx=true
+      - name: Clean up this job's Docker registry
+        if: always()
+        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
+      - name: Save original functional load results and image receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: keyload-functional-heavy-load
+          path: |
+            TestResults/rf3-heavy-load/**
+            ${{ runner.temp }}/keyload-images/**
+            artifacts/code-quality/**
+          if-no-files-found: error
+          retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb]
+    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load]
     if: ${{ always() && !cancelled() && needs.comparison-plan.result == 'success' && needs.comparison-images.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -398,7 +451,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Verify benchmark plan
         id: plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json" --document-output="$RUNNER_TEMP/document-plan.json"
       - name: Download benchmark results
         run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --vector-plan="$RUNNER_TEMP/vector-plan.json" --input="$RUNNER_TEMP/isolated-capture"
       - name: Check control and complete scale accounting
@@ -452,9 +505,33 @@ jobs:
           path: ${{ runner.temp }}/open-loop-aggregate/**
           if-no-files-found: warn
           retention-days: 90
+      - name: Download authenticated document workload results
+        id: document-intake
+        if: ${{ always() && !cancelled() && steps.plan.outcome == 'success' }}
+        run: node scripts/Features/BenchmarkComparisons/document-github-collect.mjs --capture="$RUNNER_TEMP/isolated-capture/github" --plan="$RUNNER_TEMP/document-plan.json" --output="$RUNNER_TEMP/document-intake"
+      - name: Aggregate complete pure mixed and ingestion results
+        id: document-aggregate
+        if: ${{ always() && !cancelled() && steps.document-intake.outcome == 'success' }}
+        run: node scripts/Features/BenchmarkComparisons/document-aggregate-cli.mjs --input="$RUNNER_TEMP/document-intake" --output="$RUNNER_TEMP/document-aggregate"
+      - name: Save original document workload evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-document-intake
+          path: ${{ runner.temp }}/document-intake/**
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Save complete document workload cohort
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-document-cohort
+          path: ${{ runner.temp }}/document-aggregate/**
+          if-no-files-found: warn
+          retention-days: 90
   website-trigger:
     name: Trigger Website
-    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-aggregate]
+    needs: [comparison-build, comparison-plan, comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load, comparison-aggregate]
     if: >-
       always() && !cancelled() &&
       needs.comparison-aggregate.result == 'success' &&

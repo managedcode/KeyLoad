@@ -11,6 +11,6 @@ internal sealed record IsolatedNativeCasePlan(ComparisonWorkerSelection Selectio
     internal bool OpenLoop => Intent != IsolatedNativeCaseIntent.ClosedLoop;
     internal TimeSpan Timeout => Selection.VectorProfile is not null
         ? ExecutionOptions.Value.NativeVectorTimeout
-        : Selection.ScaledProfile is not null ? ExecutionOptions.Value.NativeScaledTimeout
+        : Selection.ScaledProfile is not null || Selection.DocumentWorkload is not null ? ExecutionOptions.Value.NativeScaledTimeout
         : ExecutionOptions.Value.NativeControlTimeout;
 }

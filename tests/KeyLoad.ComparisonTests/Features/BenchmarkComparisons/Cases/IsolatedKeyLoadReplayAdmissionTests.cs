@@ -17,7 +17,6 @@ internal sealed class IsolatedKeyLoadReplayAdmissionTests
     /// <summary>AC-ISO-003/005 and AC-REP-006: every actual benchmark resource receives the fixed bounded profile.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task BenchmarkReplayPoolsAreExplicitAndFitEveryActualVoterGroup(int count)
     {

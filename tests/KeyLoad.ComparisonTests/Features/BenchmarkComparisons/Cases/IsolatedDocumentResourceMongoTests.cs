@@ -17,7 +17,6 @@ internal sealed class IsolatedDocumentResourceMongoTests
     /// <summary>AC-ISO-002/003/005/006: exact native nodes and a bounded authenticated bootstrap completion barrier.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task NativeGroupUsesSameImageSecretKeyAndBoundedBootstrapBarrier(int count)
     {

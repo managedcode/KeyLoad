@@ -41,6 +41,7 @@ internal sealed class TimeSeriesIntensiveHostSettingsNegativeTests
     [Arguments(RouteKey, Canary)]
     [Arguments(TargetKey, Canary)]
     [Arguments(NodesKey, Noncanonical)]
+    [Arguments(NodesKey, "2")]
     [Arguments(PhaseKey, Canary)]
     [Arguments(ProfileKey, Canary)]
     [Arguments(ScenarioKey, nameof(TimeSeriesIntensiveScenario.Latest))]
@@ -242,7 +243,7 @@ internal sealed class TimeSeriesIntensiveHostNativeSettingsNegativeTests
                 values.Remove(second);
                 break;
             case InvalidArrayShape.Extra:
-                values[IndexKey(section, TwoNodes)] = Canary;
+                values[IndexKey(section, ThreeNodes)] = Canary;
                 break;
             case InvalidArrayShape.Nested:
                 values[first + NestedSuffix] = Canary;

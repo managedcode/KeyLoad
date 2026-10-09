@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name = "executionOptions">The required validated operational limits.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 /// <param name = "image">Immutable native server image.</param>
-public sealed class SurrealDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonTarget
+public sealed partial class SurrealDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string OnePersistentRocksDBNativeNode = "one persistent RocksDB native node";
@@ -55,13 +55,21 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         topK = dataset.Settings.TopK;
         ownsData = true;
         await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-        await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-        foreach (var batch in dataset.Documents.Chunk(Policy.WriteBatchCapacity))
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        using (documentTiming?.MeasureIndex())
         {
-            var sql = string.Join(SqlStatementSeparator, batch.Select(document => SurrealDbDocumentSql.Create(table, document)));
-            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+            await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
+        using (documentTiming?.MeasureLoad())
+        {
+            foreach (var batch in dataset.Documents.Chunk(Policy.WriteBatchCapacity))
+            {
+                var sql = string.Join(SqlStatementSeparator, batch.Select(document => SurrealDbDocumentSql.Create(table, document)));
+                await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+            }
+
+        }
         foreach (var batch in dataset.Edges.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(link => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeRELATEFormat, table, SurrealDbDocumentSql.Key(link.From), edge, SurrealDbDocumentSql.Key(link.Id), table, SurrealDbDocumentSql.Key(link.To))));

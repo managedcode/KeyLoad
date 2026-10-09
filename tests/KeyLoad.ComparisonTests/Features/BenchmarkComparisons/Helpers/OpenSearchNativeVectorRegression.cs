@@ -11,7 +11,7 @@ internal static class OpenSearchNativeVectorRegression
     private const int QueryNumber = 170, HigherNeighbor = 2289, LowerNeighbor = 1272;
     private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchRequestTimeout;
 
-    /// <summary>AC-BC-FAIL-010: real post-start native1/2/3 resources retain exact double rank, projection and caller cancellation.</summary>
+    /// <summary>AC-BC-FAIL-010: real post-start native1/3 resources retain exact double rank, projection and caller cancellation.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
         var endpoint = app.GetEndpoint(FirstNode, Http);
@@ -45,7 +45,6 @@ internal static class OpenSearchNativeVectorRegression
     internal static ComparisonTopology Topology(int nodeCount) => nodeCount switch
     {
         1 => ComparisonTopology.Standalone,
-        2 => ComparisonTopology.TwoNode,
         3 => ComparisonTopology.Replicated,
         _ => throw new ArgumentOutOfRangeException(nameof(nodeCount))
     };

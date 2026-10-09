@@ -32,9 +32,14 @@ internal static class IsolatedHostApplication
             cancellationToken.ThrowIfCancellationRequested();
             var settings = IsolatedHostSettings.ReadOptions(configuration).Value;
             var openLoop = IsolatedOpenLoopSettings.ReadOptions(configuration, settings.Selection).Value.Selected;
-            IsolatedHostReportWriter.ValidateDestination(settings.OutputDirectory);
+            IsolatedHostReportWriter.ValidateDestination(settings.OutputDirectory,
+                settings.Selection.DocumentWorkload is null ? IsolatedHostConstants.WorkerFile : DocumentHostApplication.WorkerFile);
             if (settings.UnsupportedReason is { } reason)
             {
+                if (settings.Selection.DocumentWorkload is not null)
+                {
+                    return await DocumentHostApplication.WriteUnavailableAsync(settings, reason, cancellationToken);
+                }
                 var report = new IsolatedComparisonReport(IsolatedComparisonContract.Current.WorkerSchemaVersion, settings.Worker,
                     IsolatedHostConstants.UnsupportedTopology, reason, null);
                 await IsolatedHostReportWriter.WriteAsync(report, settings.OutputDirectory, settings.HostExecution, cancellationToken);
@@ -73,6 +78,16 @@ internal static class IsolatedHostApplication
         Microsoft.Extensions.Options.IOptions<KeyLoad.Client.QueryTranslationOptions> translationOptions,
         IsolatedOpenLoopSettings? openLoop, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
+        if (settings.Selection.Target == IsolatedHostConstants.KeyLoad
+            && admissionOptions.Value.DocumentWorkload != (settings.Selection.DocumentWorkload is not null))
+        {
+            throw new ComparisonFailureException(IsolatedHostConstants.Failure);
+        }
+        if (settings.Selection.DocumentWorkload is not null)
+        {
+            return await DocumentHostApplication.RunAsync(settings, policy, diagnosticOptions, serializationOptions,
+                admissionOptions, lifecycleOptions, clientOptions, translationOptions, timeProvider, cancellationToken);
+        }
         await using var owner = new IsolatedHostTargetOwner(policy, diagnosticOptions, serializationOptions, admissionOptions, lifecycleOptions, clientOptions, translationOptions, timeProvider);
         if (openLoop is not null)
         {

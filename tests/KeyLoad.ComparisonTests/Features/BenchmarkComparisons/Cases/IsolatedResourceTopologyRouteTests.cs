@@ -46,11 +46,11 @@ internal sealed class IsolatedResourceTopologyRouteTests
     public async Task ScaledSelectionPreservesUnsupportedNativeTopologyDisposition()
     {
         await using var model = new IsolatedResourceTopologyApplication();
-        var resources = await model.BuildAsync(Neo4j, 2, scaleProfile: "scaled-100k-c16");
+        var resources = await model.BuildAsync(Neo4j, 3, scaleProfile: "scaled-100k-c16");
         var runner = resources.Single();
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
         await Assert.That(environment[TargetSetting]).IsEqualTo(Neo4j);
-        await Assert.That(int.Parse(environment[CountSetting], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(2);
+        await Assert.That(int.Parse(environment[CountSetting], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(3);
         await Assert.That(environment[ScaleProfileEnvironment]).IsEqualTo("scaled-100k-c16");
         await Assert.That(resources.Length).IsEqualTo(1);
         await Assert.That(runner.Annotations.OfType<WaitAnnotation>().Any()).IsFalse();
@@ -60,10 +60,8 @@ internal sealed class IsolatedResourceTopologyRouteTests
     /// <summary>AC-ISO-001/003: actual AppHost entry selects exact native KRN nodes before legacy RF3/TimeSeries.</summary>
     [Test]
     [Arguments(KeyLoad, 1)]
-    [Arguments(KeyLoad, 2)]
     [Arguments(KeyLoad, 3)]
     [Arguments(Redis, 1)]
-    [Arguments(Redis, 2)]
     [Arguments(Redis, 3)]
     [Arguments(Neo4j, 1)]
     public async Task SelectedEntryBuildsOnlyTheRequestedNativeGroupAndSourceBoundRunner(string target, int count)
@@ -87,7 +85,6 @@ internal sealed class IsolatedResourceTopologyRouteTests
 
     /// <summary>AC-ISO-003/006: actual unsupported route creates one reason worker and no database or credential.</summary>
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task UnsupportedCommunityReplicationEntryBuildsOnlyTheReasonWorker(int count)
     {
@@ -110,6 +107,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
     [Test]
     [Arguments(ComparisonWorkerSelection.TargetSetting, "Unknown")]
     [Arguments(ComparisonWorkerSelection.NodeCountSetting, "0")]
+    [Arguments(ComparisonWorkerSelection.NodeCountSetting, "2")]
     [Arguments(ComparisonWorkerSelection.NodeCountSetting, "4")]
     [Arguments(ComparisonWorkerSelection.ScenarioSetting, "0")]
     [Arguments(ComparisonWorkerSelection.ProfileSetting, "legacy")]

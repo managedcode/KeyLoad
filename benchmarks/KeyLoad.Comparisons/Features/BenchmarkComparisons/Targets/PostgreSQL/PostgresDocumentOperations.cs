@@ -87,7 +87,7 @@ internal static class PostgresDocumentOperations
     internal static async Task SeedAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         CancellationToken cancellationToken)
     {
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             await SeedScaledAsync(connection, dataset.Documents, cancellationToken);
             return;

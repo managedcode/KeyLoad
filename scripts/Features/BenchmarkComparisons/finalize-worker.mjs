@@ -1,3 +1,4 @@
+import { finalizeDocumentWorker } from './document-worker-finalize.mjs';
 import { createVectorPlans, validateVectorPlan } from './vector-isolated-plan.mjs';
 import { finalizeFailedResource } from './finalize-resource.mjs';
 import { lstat, rename } from 'node:fs/promises';
@@ -70,6 +71,14 @@ export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }
 export async function finalizeCurrentWorker(environment = process.env, argv = process.argv.slice(2)) {
   requireGitHub(argv.length === 0);
   const context = createGitHubContext(environment, process.platform);
+  if (environment.KEYLOAD_MATRIX_KIND === 'documents') {
+    const job = await captureCurrentJob(environment, [], true);
+    const suppliedJobId = Number(environment[FINAL.identity]);
+    requireGitHub(!positive(suppliedJobId) || suppliedJobId === job.id);
+    const profileContext = contextForProfile(context, environment.Benchmarks__EvidenceProfile);
+    return await finalizeDocumentWorker({ workspace: context.native.workspace, environment, cohort: profileContext.cohort,
+      jobId: job.id, outcome: environment[FINAL.outcome] });
+  }
   const openLoopPlan = context.openLoopPlan ?? createOpenLoopPlan();
   const openLoopCell = [...openLoopPlan.measurementCells, ...openLoopPlan.cancellationProofCells]
     .find(item => item.id === environment[FINAL.cell]);

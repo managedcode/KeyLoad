@@ -119,17 +119,18 @@ internal sealed class TimeSeriesIntensiveFamilyContractTests
 internal static class TimeSeriesIntensiveFamilyContractTestAssertions
 {
     private const string ResourceName = "KeyLoad.Comparisons.TimeSeriesIntensiveContract";
-    private const string ExpectedHash = "5d5fca799172272e1495b62c6f7b104785b394a64926082eef1030b0011e1831";
+    private const string ExpectedHash = "9b13ab99e8acb25ad11d08e394fd5af758553ae00bef0a52a858975ea58a5fbb";
     private const int MaximumBytes = 16384;
 
     internal static async Task VerifyFrozenContractAsync(TimeSeriesIntensiveFamilyContract value)
     {
+        using var canonical = JsonDocument.Parse(EmbeddedBytes());
         await Assert.That(value.ContractSha256).IsEqualTo(ExpectedHash);
         await Assert.That(value.SchemaVersion).IsEqualTo(1);
         await Assert.That(value.Family).IsEqualTo("timeseries-intensive");
         await Assert.That(value.EvidenceProfile).IsEqualTo("intensive-timeseries-4096-c16");
         await Assert.That(value.Targets.SequenceEqual([TimeSeriesIntensiveTargetKind.KeyLoad, TimeSeriesIntensiveTargetKind.TimescaleDB])).IsTrue();
-        await Assert.That(value.NodeCounts.SequenceEqual([1, 2, 3])).IsTrue();
+        await Assert.That(value.NodeCounts.SequenceEqual([1, 3])).IsTrue();
         await Assert.That(value.Scenarios.SequenceEqual([TimeSeriesIntensiveScenario.Append, TimeSeriesIntensiveScenario.RawRangeRead,
             TimeSeriesIntensiveScenario.Latest, TimeSeriesIntensiveScenario.Aggregate, TimeSeriesIntensiveScenario.Windows])).IsTrue();
         await Assert.That(value.SampleCount).IsEqualTo(4096);
@@ -137,32 +138,32 @@ internal static class TimeSeriesIntensiveFamilyContractTestAssertions
         await Assert.That(value.WarmupCount).IsEqualTo(256);
         await Assert.That(value.Repetitions).IsEqualTo(5);
         await Assert.That(value.Concurrency).IsEqualTo(16);
-        await Assert.That(value.OperationTimeoutSeconds).IsEqualTo(30);
+        await Assert.That(value.OperationTimeoutSeconds).IsEqualTo(canonical.RootElement.GetProperty(TimeSeriesIntensiveFamilyContractTestKeys.OperationTimeoutSeconds).GetInt32());
         await Assert.That(value.CellTimeoutMinutes).IsEqualTo(90);
-        await Assert.That(value.PreflightTimeoutMinutes).IsEqualTo(30);
-        await Assert.That(value.TeardownTimeoutSeconds).IsEqualTo(30);
+        await Assert.That(value.PreflightTimeoutMinutes).IsEqualTo(canonical.RootElement.GetProperty(TimeSeriesIntensiveFamilyContractTestKeys.PreflightTimeoutMinutes).GetInt32());
+        await Assert.That(value.TeardownTimeoutSeconds).IsEqualTo(canonical.RootElement.GetProperty(TimeSeriesIntensiveFamilyContractTestKeys.TeardownTimeoutSeconds).GetInt32());
         await Assert.That(value.ClientDecodedResponseLimit).IsEqualTo(16);
         await Assert.That(value.RawAttemptCount).IsEqualTo(50000);
-        await Assert.That(value.ExpectedPreflightCells).IsEqualTo(6);
-        await Assert.That(value.ExpectedIntensiveCells).IsEqualTo(30);
+        await Assert.That(value.ExpectedPreflightCells).IsEqualTo(4);
+        await Assert.That(value.ExpectedIntensiveCells).IsEqualTo(20);
         await Assert.That(value.TimestampUnit).IsEqualTo("stopwatch-ticks");
         await Assert.That(value.ThroughputDenominator).IsEqualTo("validation-inclusive-wall");
         await Assert.That(value.PercentileMethod).IsEqualTo("nearest-rank-per-repetition");
         await Assert.That(value.MeasuredRetries).IsEqualTo(0);
-        await Assert.That(value.QuorumAcknowledgements.SequenceEqual([1, 2, 2])).IsTrue();
-        await Assert.That(value.DataCopies.SequenceEqual([1, 2, 3])).IsTrue();
+        await Assert.That(value.QuorumAcknowledgements.SequenceEqual([1, 2])).IsTrue();
+        await Assert.That(value.DataCopies.SequenceEqual([1, 3])).IsTrue();
     }
 
     internal static async Task VerifyPlanAsync(TimeSeriesIntensiveFamilyCells cells,
         TimeSeriesIntensiveFamilyContract contract)
     {
-        string[] preflightIds = ["ts-keyload-n1-preflight", "ts-keyload-n2-preflight", "ts-keyload-n3-preflight",
-            "ts-timescaledb-n1-preflight", "ts-timescaledb-n2-preflight", "ts-timescaledb-n3-preflight"];
+        string[] preflightIds = ["ts-keyload-n1-preflight", "ts-keyload-n3-preflight",
+            "ts-timescaledb-n1-preflight", "ts-timescaledb-n3-preflight"];
         var intensiveIds = ExpectedIntensiveIds();
         await Assert.That(cells.Preflight.Select(cell => cell.Id).SequenceEqual(preflightIds)).IsTrue();
         await Assert.That(cells.Intensive.Select(cell => cell.Id).SequenceEqual(intensiveIds)).IsTrue();
-        await Assert.That(cells.Preflight.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(6);
-        await Assert.That(cells.Intensive.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(30);
+        await Assert.That(cells.Preflight.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(4);
+        await Assert.That(cells.Intensive.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(20);
         await VerifySelectionsAsync(cells.Preflight, contract, intensive: false);
         await VerifySelectionsAsync(cells.Intensive, contract, intensive: true);
     }
@@ -175,11 +176,11 @@ internal static class TimeSeriesIntensiveFamilyContractTestAssertions
             TimeSeriesIntensiveScenario.Latest, TimeSeriesIntensiveScenario.Aggregate, TimeSeriesIntensiveScenario.Windows };
         for (var index = 0; index < cells.Length; index++)
         {
-            var targetIndex = intensive ? index / 15 : index / 3;
-            var nodeIndex = intensive ? index % 15 / 5 : index % 3;
+            var targetIndex = intensive ? index / 10 : index / 2;
+            var nodeIndex = intensive ? index % 10 / 5 : index % 2;
             var selection = cells[index].Selection;
             await Assert.That(selection.Target).IsEqualTo(targets[targetIndex]);
-            await Assert.That(selection.NodeCount).IsEqualTo(nodeIndex + 1);
+            await Assert.That(selection.NodeCount).IsEqualTo(nodeIndex == 0 ? 1 : 3);
             await Assert.That(selection.Phase).IsEqualTo(intensive ? TimeSeriesIntensiveCellPhase.Intensive : TimeSeriesIntensiveCellPhase.Preflight);
             await Assert.That(selection.Scenario).IsEqualTo(intensive ? scenarios[index % 5] : null);
             await Assert.That(selection.EvidenceProfile).IsEqualTo(contract.EvidenceProfile);
@@ -191,10 +192,8 @@ internal static class TimeSeriesIntensiveFamilyContractTestAssertions
         =>
         [
             "ts-keyload-n1-Append", "ts-keyload-n1-RawRangeRead", "ts-keyload-n1-Latest", "ts-keyload-n1-Aggregate", "ts-keyload-n1-Windows",
-            "ts-keyload-n2-Append", "ts-keyload-n2-RawRangeRead", "ts-keyload-n2-Latest", "ts-keyload-n2-Aggregate", "ts-keyload-n2-Windows",
             "ts-keyload-n3-Append", "ts-keyload-n3-RawRangeRead", "ts-keyload-n3-Latest", "ts-keyload-n3-Aggregate", "ts-keyload-n3-Windows",
             "ts-timescaledb-n1-Append", "ts-timescaledb-n1-RawRangeRead", "ts-timescaledb-n1-Latest", "ts-timescaledb-n1-Aggregate", "ts-timescaledb-n1-Windows",
-            "ts-timescaledb-n2-Append", "ts-timescaledb-n2-RawRangeRead", "ts-timescaledb-n2-Latest", "ts-timescaledb-n2-Aggregate", "ts-timescaledb-n2-Windows",
             "ts-timescaledb-n3-Append", "ts-timescaledb-n3-RawRangeRead", "ts-timescaledb-n3-Latest", "ts-timescaledb-n3-Aggregate", "ts-timescaledb-n3-Windows",
         ];
 
@@ -294,14 +293,14 @@ internal static class TimeSeriesIntensiveFamilyContractTestCases
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.TeardownTimeoutSeconds, "30", "29"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ClientDecodedResponseLimit, "16", "15"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.RawAttemptCount, "50000", "49999"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ExpectedPreflightCells, "6", "5"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ExpectedIntensiveCells, "30", "29"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ExpectedPreflightCells, "4", "5"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ExpectedIntensiveCells, "20", "29"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.TimestampUnit, "\"stopwatch-ticks\"", "\"ticks\""),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.ThroughputDenominator, "\"validation-inclusive-wall\"", "\"wall\""),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.PercentileMethod, "\"nearest-rank-per-repetition\"", "\"nearest-rank\""),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.MeasuredRetries, "0", "1"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2, 2]", "[1, 1, 2]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 2, 3]", "[1, 2, 2]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2]", "[1, 1, 2]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 3]", "[1, 2]"),
     ];
 
     internal static readonly (string Before, string After)[] ArrayMutations =
@@ -310,18 +309,18 @@ internal static class TimeSeriesIntensiveFamilyContractTestCases
             "[\"KeyLoad\", \"TimescaleDB\"]", "[\"TimescaleDB\", \"KeyLoad\"]"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.Targets,
             "[\"KeyLoad\", \"TimescaleDB\"]", "[\"KeyLoad\", \"KeyLoad\"]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.NodeCounts, "[1, 2, 3]", "[3, 2, 1]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.NodeCounts, "[1, 2, 3]", "[1, 2, 2]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.NodeCounts, "[1, 3]", "[3, 2, 1]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.NodeCounts, "[1, 3]", "[1, 2]"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.Scenarios,
             "[\"Append\", \"RawRangeRead\", \"Latest\", \"Aggregate\", \"Windows\"]",
             "[\"RawRangeRead\", \"Append\", \"Latest\", \"Aggregate\", \"Windows\"]"),
         TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.Scenarios,
             "[\"Append\", \"RawRangeRead\", \"Latest\", \"Aggregate\", \"Windows\"]",
             "[\"Append\", \"RawRangeRead\", \"Latest\", \"Aggregate\", \"Aggregate\"]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2, 2]", "[2, 1, 2]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2, 2]", "[1, 2, 1]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 2, 3]", "[3, 2, 1]"),
-        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 2, 3]", "[1, 2, 2]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2]", "[2, 1, 2]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.QuorumAcknowledgements, "[1, 2]", "[1, 2, 1]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 3]", "[3, 2, 1]"),
+        TimeSeriesIntensiveFamilyContractTestAssertions.JsonMutation(TimeSeriesIntensiveFamilyContractTestKeys.DataCopies, "[1, 3]", "[1, 2]"),
     ];
 
     internal static readonly string[] PropertyNames =

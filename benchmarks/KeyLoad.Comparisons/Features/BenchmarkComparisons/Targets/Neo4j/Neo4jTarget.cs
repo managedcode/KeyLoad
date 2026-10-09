@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -14,8 +13,8 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class Neo4jTarget(HttpClient http, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
+public sealed partial class Neo4jTarget(HttpClient http, string runId, string image,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string InitializeAsyncCREATECONSTRAINTText = "CREATE CONSTRAINT ";
@@ -44,8 +43,6 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
 
     private const string RunIdentityFormat = "N";
 
-    private const string DataProperty = "data";
-    private const string ValuesProperty = "values";
     private const string CommunityEdition = "community";
     private const string CommunityRequired = "Neo4jCommunityEditionRequired";
     private const string SingleCommunityState = "single native Community node";
@@ -77,13 +74,13 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
 
         ArgumentNullException.ThrowIfNull(dataset);
         depth = dataset.Settings.GraphDepth;
-        if (dataset.Settings is ScaledComparisonProfile)
+        if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
             Profile = Profile with { ReadContract = IndexedPrimaryDocumentReadsS1SeedsNodesOnlyWithNoGraphRelationshipsContractText };
         }
         corpusCount = dataset.Documents.Count;
         using var version = await QueryAsync(ServerComponentsStatement, null, cancellationToken);
-        var row = Rows(version).EnumerateArray().Single();
+        var row = DocumentNeo4jProtocol.Rows(version).EnumerateArray().Single();
         var edition = row[SingleItemCount].GetString();
         if (!string.Equals(edition, CommunityEdition, StringComparison.OrdinalIgnoreCase))
         {
@@ -94,18 +91,23 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
             Version = row[FirstElementIndex].GetString() + VersionEditionSeparator + edition,
             Cluster = new(SingleItemCount, SingleItemCount, SingleCommunityState, [CommunityEdition])
         };
+        var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
+        using (documentTiming?.MeasureIndex())
         using (var constraint = await QueryAsync($"{InitializeAsyncCREATECONSTRAINTText}{label}{InitializeAsyncIdFORNText}{label}{InitializeAsyncREQUIRENIdISUNIQUEText}", null, cancellationToken))
         {
             Neo4jQueryProtocol.ValidateConstraintCreation(constraint.RootElement);
             ownsConstraint = true;
         }
 
-        foreach (var batch in dataset.Documents.Chunk(execution.Neo4jSeedBatchSize))
+        using (documentTiming?.MeasureLoad())
         {
-            await ExecuteAsync($"{InitializeAsyncUNWINDDocumentsASDCREATENText}{label}{InitializeAsyncIdDIdJsonDJsonText}",
-                new { documents = batch.Select(document => new { id = document.Id, json = document.Json }).ToArray() }, cancellationToken);
-        }
+            foreach (var batch in dataset.Documents.Chunk(execution.Neo4jSeedBatchSize))
+            {
+                await ExecuteAsync($"{InitializeAsyncUNWINDDocumentsASDCREATENText}{label}{InitializeAsyncIdDIdJsonDJsonText}",
+                    new { documents = batch.Select(document => new { id = document.Id, json = document.Json }).ToArray() }, cancellationToken);
+            }
 
+        }
         foreach (var batch in dataset.Edges.Chunk(execution.Neo4jSeedBatchSize))
         {
             await ExecuteAsync($"{InitializeAsyncUNWINDEdgesASEMATCHAText}{label}{InitializeAsyncIdEFromBText}{label}{InitializeAsyncIdEToCREATEALINKSBText}",
@@ -113,34 +115,17 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
         }
 
         const string AwaitIndexesStatement = "CALL db.awaitIndexes({0})";
-        await ExecuteAsync(string.Format(CultureInfo.InvariantCulture, AwaitIndexesStatement, execution.Neo4jMaximumExecutionTimeSeconds), null, cancellationToken);
-    }
-
-    private static JsonElement Rows(JsonDocument response) => response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty);
-    private async Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken cancellationToken)
-    {
-        const string DbNeo4jQueryV2Token = "db/neo4j/query/v2";
-
-        using var response = await http.PostAsJsonAsync(DbNeo4jQueryV2Token, new { statement, parameters = parameters ?? new { }, maxExecutionTime = execution.Neo4jMaximumExecutionTimeSeconds }, cancellationToken);
-        Neo4jQueryProtocol.RequireQueryStatus((int)response.StatusCode);
-        JsonDocument? json = null;
-        try
+        using (documentTiming?.MeasureIndex())
         {
-            json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
-            Neo4jQueryProtocol.ValidateResponse((int)response.StatusCode, json.RootElement);
-            return json;
-        }
-        catch (JsonException)
-        {
-            json?.Dispose();
-            throw Neo4jQueryProtocol.Invalid();
-        }
-        catch (Exception)
-        {
-            json?.Dispose();
-            throw;
+            await ExecuteAsync(string.Format(CultureInfo.InvariantCulture, AwaitIndexesStatement, execution.Neo4jMaximumExecutionTimeSeconds), null, cancellationToken);
         }
     }
+
+    private Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken cancellationToken)
+        => QueryWithClientAsync(http, statement, parameters, cancellationToken);
+    private HttpClient NativeHttp => http;
+    private Task<JsonDocument> QueryWithClientAsync(HttpClient operationClient, string statement, object? parameters, CancellationToken cancellationToken)
+        => DocumentNeo4jProtocol.QueryAsync(operationClient, statement, parameters, execution, cancellationToken);
     private async Task ExecuteAsync(string statement, object? parameters, CancellationToken cancellationToken)
     { using var response = await QueryAsync(statement, parameters, cancellationToken); }
     /// <summary>Opens a session that runs queries through this target’s Neo4j client.</summary>
@@ -164,7 +149,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     }
 
     /// <summary>Executes one comparison session’s document and directed graph queries.</summary>
-    private sealed class Session(Neo4jTarget target) : IComparisonSession
+    private sealed class Session(Neo4jTarget target, HttpClient? operationClient = null, int? actualCount = null) : IComparisonSession
     {
         private const string ReadCorpusAsyncMATCHNText = "MATCH (n:";
         private const string ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
@@ -186,9 +171,9 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
             var seen = NoObservedItems;
             while (true)
             {
-                using var response = await target.QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText}{target.execution.ReadbackBatchCapacity}",
+                using var response = await QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText}{target.execution.ReadbackBatchCapacity}",
                     new { after }, cancellationToken);
-                var rows = Rows(response);
+                var rows = DocumentNeo4jProtocol.Rows(response);
                 if (rows.GetArrayLength() == NoItems)
                 {
                     break;
@@ -201,7 +186,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
                     yield return new(after!, row[SingleItemCount].GetString()!);
                 }
             }
-            if (seen != target.corpusCount)
+            if ((actualCount ?? target.corpusCount) >= NoObservedItems && seen != (actualCount ?? target.corpusCount))
             {
                 throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
             }
@@ -212,8 +197,8 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
             const int NoItems = 0;
             const int FirstElementIndex = 0;
 
-            using var response = await target.QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadAsyncIdIdRETURNNJsonText}", new { id = document.Id }, cancellationToken);
-            var rows = Rows(response);
+            using var response = await QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadAsyncIdIdRETURNNJsonText}", new { id = document.Id }, cancellationToken);
+            var rows = DocumentNeo4jProtocol.Rows(response);
             return rows.GetArrayLength() == NoItems ? null : new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!);
         }
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
@@ -228,13 +213,13 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
                 case Scenario.DocumentWrite:
                 case Scenario.DocumentUpdate:
                 case Scenario.DocumentDelete:
-                    return await Neo4jMutationOperations.ExecuteAsync(target.QueryAsync, target.label, scenario, document, cancellationToken);
+                    return await Neo4jMutationOperations.ExecuteAsync(QueryAsync, target.label, scenario, document, cancellationToken);
                 case Scenario.GraphNeighbors:
                 case Scenario.GraphTraverse:
                     var hops = scenario == Scenario.GraphNeighbors ? SingleItemCount : target.depth;
-                    using (var response = await target.QueryAsync($"{ExecuteAsyncMATCHAText}{target.label}{ExecuteAsyncIdIdLINKSText}{hops}{ExecuteAsyncBText}{target.label}{ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText}", new { id = document.Id }, cancellationToken))
+                    using (var response = await QueryAsync($"{ExecuteAsyncMATCHAText}{target.label}{ExecuteAsyncIdIdLINKSText}{hops}{ExecuteAsyncBText}{target.label}{ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText}", new { id = document.Id }, cancellationToken))
                     {
-                        return new(Vertices: ImmutableCollectionsMarshal.AsImmutableArray(Rows(response).EnumerateArray()
+                        return new(Vertices: ImmutableCollectionsMarshal.AsImmutableArray(DocumentNeo4jProtocol.Rows(response).EnumerateArray()
                             .Select(row => row[FirstElementIndex].GetString()!).ToArray()));
                     }
 
@@ -242,6 +227,8 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
                     throw new NotSupportedException();
             }
         }
+        private Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken token)
+            => target.QueryWithClientAsync(operationClient ?? target.NativeHttp, statement, parameters, token);
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

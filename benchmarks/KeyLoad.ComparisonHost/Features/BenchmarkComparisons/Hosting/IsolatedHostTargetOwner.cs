@@ -53,6 +53,13 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         return target;
     }
 
+    internal IComparisonTarget TransferTarget()
+    {
+        var owned = target ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
+        target = null;
+        return owned;
+    }
+
     internal IVectorComparisonTarget CreateVector(IsolatedHostSettings settings)
     {
         const int PrimaryEndpointIndex = 0;

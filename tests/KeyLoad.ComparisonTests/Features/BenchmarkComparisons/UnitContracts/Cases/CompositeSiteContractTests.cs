@@ -43,13 +43,13 @@ internal sealed class CompositeSiteContractTests
         using var document = JsonDocument.Parse(response.Output);
         var result = document.RootElement;
         await Assert.That(result.GetProperty(PlansKey).GetInt32()).IsEqualTo(27);
-        await Assert.That(result.GetProperty(CellsKey).GetInt32()).IsEqualTo(1386);
-        await Assert.That(result.GetProperty(SuiteKey).GetInt32()).IsEqualTo(2470);
+        await Assert.That(result.GetProperty(CellsKey).GetInt32()).IsEqualTo(924);
+        await Assert.That(result.GetProperty(SuiteKey).GetInt32()).IsEqualTo(1656);
         await Assert.That(result.GetProperty(ProviderKey).GetInt32()).IsEqualTo(60);
-        await Assert.That(result.GetProperty(UniqueSuiteKey).GetInt32()).IsEqualTo(2470);
+        await Assert.That(result.GetProperty(UniqueSuiteKey).GetInt32()).IsEqualTo(1656);
         await Assert.That(result.GetProperty(UniqueProviderKey).GetInt32()).IsEqualTo(60);
-        await Assert.That(result.GetProperty(SidecarsKey).GetInt32()).IsEqualTo(1056);
-        await Assert.That(result.GetProperty(RawKey).GetInt32()).IsEqualTo(1386);
+        await Assert.That(result.GetProperty(SidecarsKey).GetInt32()).IsEqualTo(704);
+        await Assert.That(result.GetProperty(RawKey).GetInt32()).IsEqualTo(924);
         await Assert.That(result.GetProperty(VectorProfilesKey).GetInt32()).IsEqualTo(24);
         await Assert.That(result.GetProperty(ScalesKey).EnumerateArray().Select(item => item.GetInt32()))
             .IsEquivalentTo(new[] { 100_000, 1_000_000 }, TUnit.Assertions.Enums.CollectionOrdering.Matching);

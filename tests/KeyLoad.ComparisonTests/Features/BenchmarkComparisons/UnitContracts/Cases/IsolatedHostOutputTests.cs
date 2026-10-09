@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class IsolatedHostOutputTests
 {
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task UnsupportedCommunityTopologyNeedsNoNativeClientsAndPreservesIdentity(int nodes)
     {

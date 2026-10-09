@@ -15,13 +15,11 @@ internal sealed class TimeSeriesIntensiveSelectionTests
     private const string ExpectedRoute = "timeseries-intensive";
     private const string ExpectedProfile = "intensive-timeseries-4096-c16";
 
-    /// <summary>AC-TSI-001: six preflights and thirty intensive cells have distinct closed selections.</summary>
+    /// <summary>AC-TSI-001: four preflights and twenty intensive cells have distinct closed selections.</summary>
     [Test]
     [Arguments("KeyLoad", "1")]
-    [Arguments("KeyLoad", "2")]
     [Arguments("KeyLoad", "3")]
     [Arguments("TimescaleDB", "1")]
-    [Arguments("TimescaleDB", "2")]
     [Arguments("TimescaleDB", "3")]
     public async Task AllPhysicalSelectionsRetainOnlyTheirSelectedScenario(string target, string nodes)
     {
@@ -56,6 +54,7 @@ internal sealed class TimeSeriesIntensiveSelectionTests
     [Arguments(Nodes, null)]
     [Arguments(Nodes, "")]
     [Arguments(Nodes, "0")]
+    [Arguments(Nodes, "2")]
     [Arguments(Nodes, "4")]
     [Arguments(Nodes, "01")]
     [Arguments(Nodes, "+1")]

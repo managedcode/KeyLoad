@@ -19,7 +19,6 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     /// <summary>AC-ISO-003/004: actual fixed voters share authority and retain independent native data.</summary>
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task SelectedKeyLoadBuildsOnlyExactNativeVotersAndOneRunner(int count)
     {

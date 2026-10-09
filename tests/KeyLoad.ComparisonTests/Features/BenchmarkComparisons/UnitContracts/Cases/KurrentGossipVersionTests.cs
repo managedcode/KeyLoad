@@ -19,7 +19,6 @@ internal sealed class KurrentGossipVersionTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task ExactNativeBuildIsAcceptedAndRetainedSeparatelyFromImageProfile(int count)
     {
@@ -40,7 +39,6 @@ internal sealed class KurrentGossipVersionTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task ImageTagsNeighboringBuildsAndNormalizedVariantsFailExactNativeIdentity(int count)
     {
@@ -52,7 +50,6 @@ internal sealed class KurrentGossipVersionTests
     }
 
     [Test]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task AForeignBuildOnOneOtherwiseMatchingMemberRejectsTheWholeGroup(int count)
     {
@@ -63,7 +60,6 @@ internal sealed class KurrentGossipVersionTests
 
     [Test]
     [Arguments(1)]
-    [Arguments(2)]
     [Arguments(3)]
     public async Task ExactBuildDoesNotOverrideUnhealthyMembersOrEndpointAndRoleRequirements(int count)
     {

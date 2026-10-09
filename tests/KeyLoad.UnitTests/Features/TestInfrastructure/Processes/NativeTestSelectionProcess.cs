@@ -17,6 +17,21 @@ internal static class NativeTestSelectionProcess
               let rejected = false; try { nativeSelection(bad, {}); } catch { rejected = true; }
               if (!rejected) throw new Error('Invalid native test selection was accepted.');
             }
+            const heavyArgs = ['--KeyLoadTests:Suite=rf3', '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*', '--KeyLoadTests:HeavyLoad:Enabled=true'];
+            const heavy = nativeSelection(heavyArgs, {});
+            if (heavy.args[heavy.args.indexOf('--maximum-parallel-tests') + 1] !== '1'
+              || !nativeSelection(['--KeyLoadTests:Suite=rf3'], {}).args.includes('/*/*/*/*[Category!=HeavyLoad]')) {
+              throw new Error('Exclusive heavy load selection was not preserved.');
+            }
+            for (const extra of [['--KeyLoadTests:Execution:MaximumParallelTests=20'], ['--KeyLoadTests:CoverageSettings=settings.xml'], ['--KeyLoadTests:NativeCoverage:ServerMode=all']]) {
+              let rejected = false; try { nativeSelection([...heavyArgs, ...extra], {}); } catch { rejected = true; }
+              if (!rejected) throw new Error('Heavy load was accepted as an ordinary or coverage run.');
+            }
+            const ordinaryCovered = nativeSelection(['--KeyLoadTests:Suite=rf3', '--KeyLoadTests:NativeCoverage:ServerMode=all'], {});
+            if (!JSON.parse(ordinaryCovered.environment.KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS)
+              .includes('--KeyLoadTests:Filter=/*/*/*/*[Category!=HeavyLoad]')) {
+              throw new Error('Native preparation lost the ordinary heavy-load exclusion.');
+            }
             const selected = nativeSelection(['--KeyLoadTests:Suite='+suite, '--KeyLoadTests:Filter=/*/*/ActualCase/*',
               '--KeyLoadTests:ReportTrx=true', '--KeyLoadTests:CoverageSettings=settings.xml',
               '--KeyLoadTests:CoverageOutput=coverage.xml'], { GITHUB_SHA: 'original-revision' });
