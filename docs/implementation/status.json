@@ -25,9 +25,9 @@
     "websiteBaselineInputs": 1716,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "sourceStage": "Shared native runner/adapters and exclusive RF3 load implemented. Original 0388aec6 full solution build passed with zero warnings/errors, confirming native options repair; formatter then rejected23 switch-arm whitespace locations in the14 admission controls, manually repaired from original GitHub diagnostics without changing behavior. Original22 native startup failures are separately repaired by canonical isolated target/profile AppHost composition and joined cleanup. Website qualification406 tests passed; publication correctly rejected the changed main SHA. Cgroup envelope diagnosis and exact-current-source native/scale qualification remain open; all verification is GitHub-only.",
+    "sourceStage": "Shared native runner/adapters and exclusive RF3 load implemented. Original 0388aec6 full solution build passed with zero warnings/errors. Its 23 admission switch-arm formatter diagnostics are repaired in 938a4a0b. Fresh ccf610df Docker compilation found exactly one IDE0005 unused import left after canonical isolated AppHost fixture composition; that import alone is removed. Native operations, heavy RF3 and scale have not executed on the repaired source. Website qualification passed all 406 tests; publication correctly rejected the changed main SHA. Cgroup envelope diagnosis and exact-current-source native/scale qualification remain open; all verification is GitHub-only.",
     "verification": {
-      "canonicalBuild": "original_linux_0388aec6_full_solution_passed_0_warnings_0_errors; latest_native_fixture_and_whitespace_source_pending",
+      "canonicalBuild": "original_linux_0388aec6_full_solution_passed_0_warnings_0_errors; ccf610df_image_compilation_failed_0_warnings_1_IDE0005_error_NativeDatabaseFlowFixture_line8; exact_unused_import_repair_pending",
       "format": "original_linux_0388aec6_failed_23_whitespace_diagnostics_only_HeavyDocumentLoadAdmissionTests; exact_manual_whitespace_source_repair_pending",
       "governance": "original_linux_852aef07_repository_rules_passed; latest_guard_source_pending",
       "nativeRegressions": "original_linux_0c0378e6_resource_models_107_passed_and_request_admission_3_passed_and_document_admission_15_passed_all_zero_failed_skipped; actual_native_step_22_total_22_failed_0_passed_0_skipped_at_fixture_startup_before_operations; isolated_AppHost_fixture_source_repair_authored; original_852_contracts_interrupted_without_terminal_summary_or_qualification_752_passed_case_lines_and_19_failed_case_lines_observed; controlled_repairs_authored; native_cgroup_envelope_cause_open; heavy_gates_skipped; earlier_local_failure_history_retained",
@@ -94,7 +94,20 @@
       "contractsExecuted": false,
       "scalarContractsExecuted": false
     },
-    "qualification": "No fabricated measurements, no performance winner, no full coverage or production claim; authentic complete current-source Linux workloads and required recovery/RF3 gates remain open."
+    "qualification": "No fabricated measurements, no performance winner, no full coverage or production claim; authentic complete current-source Linux workloads and required recovery/RF3 gates remain open.",
+    "newestOriginalImageBuild": {
+      "sourceCommit": "ccf610df53f66b7a0e4d957c4457ac42925667dd",
+      "runId": 37925988005,
+      "jobId": 113807774150,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37925988005/job/113807774150",
+      "conclusion": "failure",
+      "buildWarnings": 0,
+      "buildErrors": 1,
+      "diagnostic": "IDE0005 NativeDatabaseFlowFixture.cs:8 unused KeyLoad.AppHost.Features.BenchmarkComparisons import; exact source repair authored",
+      "documentNativeExecuted": false,
+      "heavyRf3Executed": false,
+      "scaleExecuted": false
+    }
   },
   "TEST-ISOLATED-MEASUREMENTS-013": {
     "title": "Ordinary functional concurrency and exclusive benchmark/load execution",

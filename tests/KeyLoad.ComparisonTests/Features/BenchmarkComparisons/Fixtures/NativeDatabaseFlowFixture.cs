@@ -5,7 +5,6 @@ using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
