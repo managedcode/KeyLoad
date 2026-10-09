@@ -221,7 +221,11 @@ Current stage: native implementation and the exact original-artwork fallback are
 present. The 2026-10-09 owner-requested Website build repair aligns the existing
 asset and browser assertions with this composition while preserving motion,
 fallback, accessibility, coverage and publication gates. Manual browser evidence
-and successful scoped compilation/static building are recorded in the Feature;
-exact-source Linux qualification, owner visual approval and delivery remain
-pending. Earlier local results do not qualify this composition or current database
-source.
+and successful scoped compilation/static building are recorded in the Feature.
+Content-only Linux qualification and Pages publication passed for revision
+`1963cd255c538a2577bb9e582c761c1ade9d6f33` in
+[Website run 37987385285](https://github.com/managedcode/KeyLoad/actions/runs/37987385285),
+with all five native site cases passing and the same revision in the live
+publication receipt. Owner visual approval remains separate. Neither this
+content-only publication nor earlier local results qualify database behavior or
+benchmark measurements.

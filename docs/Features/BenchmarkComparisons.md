@@ -70,9 +70,17 @@ the removed projected mark, and renderer limits use the approved 120,000-triangl
 bound. Motion, fallback, accessibility, coverage and publication gates remain
 mandatory. The static content-only build and SiteTests Release compilation pass
 locally with zero compiler warnings/errors; no local tests were run for this
-repair. Exact-source Linux Website/Pages qualification and owner visual approval
-remain pending. The earlier five-case/4,731-triangle result below qualifies only
-that previous iteration, not this composition or the current database source.
+repair. The mobile browser case now opens a fresh document through `about:blank`
+before the mobile navigation, retaining real request-origin assertions with the
+shared PNG fallback. Content-only Linux Website qualification and Pages publication
+passed for `1963cd255c538a2577bb9e582c761c1ade9d6f33` in
+[Website run 37987385285](https://github.com/managedcode/KeyLoad/actions/runs/37987385285).
+Its native site suite passed all five cases with zero skips. The live
+`https://www.keyload.cloud/data/publication.json` receipt reports that exact website
+and control revision, `measured: null` and `benchmarks: null`. Owner visual approval
+remains separate; this content-only result does not qualify database behavior or
+benchmark measurements. The earlier five-case/4,731-triangle result below qualifies
+only that previous iteration.
 
 Earlier TASK-BC-PRESENTATION-001..003 mapped respectively to the same-numbered REQ/AC:
 establish the current content-only build/browser baseline; update HTML/CSS,
