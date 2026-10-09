@@ -332,10 +332,10 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **13 accepted, 91 in progress and 0 pending**.
+The original 104-task plan has **12 accepted, 92 in progress and 0 pending**.
 Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
 document CRUD/CAS, **KL-012** batch/idempotency, **KL-013** document-only filter/query,
-**KL-014** standalone server, CLI and typed SDK outcomes, **KL-016** committed projection
+**KL-016** committed projection
 outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates, **KL-022** graph storage, **KL-023** bounded graph traversal
 **KL-020** three-node replicated apply and **KL-026** retention, expiry and rollups.
@@ -343,6 +343,9 @@ Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
 KL-014 passed all 12 declared cases in each of the normal and scalar Linux
 task lanes in [run 37861333290](https://github.com/managedcode/KeyLoad/actions/runs/37861333290).
+Its current-source acceptance is reopened after one RF3 readiness failure in
+[run 37868406144](https://github.com/managedcode/KeyLoad/actions/runs/37868406144);
+that original failure remains retained.
 
 Current source includes bounded same-partition relational INNER JOIN, multi-lane
 queue receive with independent leaf receipts, and shared SDK, MCP and SQL operations

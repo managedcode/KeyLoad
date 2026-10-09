@@ -818,3 +818,14 @@ images, original process/reader joins, source verification and owned registry
 removal were authenticated. The status tracker retains the per-profile receipts.
 This closure covers the original task criteria; current complete normal/scalar,
 full RF3, coverage, endurance, power-loss and performance gates remain open.
+
+Current-source requalification is reopened: [run 37868406144, normal job
+113620545601](https://github.com/managedcode/KeyLoad/actions/runs/37868406144/job/113620545601)
+at source `47c40e325ead186c27586fb5fa6c89f136a8b594` passed seven Kestrel and four
+of five RF3 cases. The original SdkSubmitReturnedCancellationReusesCommittedReceipt
+failed its post-continuation `RoutingReady` assertion. Artifact `11589298518`
+has authenticated SHA256
+`35d4bffaeed1db10fcc365af728b60c1515fec33ada040a5f4cdf069ced5b688`;
+source verification and owned image cleanup passed. Preserve both the earlier
+passing originals and this failed original; current whole-task closure requires
+the resolved flow and fresh exact normal/scalar qualification.

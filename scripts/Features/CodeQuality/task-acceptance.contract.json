@@ -3,6 +3,256 @@
   "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
   "tasks": [
     {
+      "taskId": "KL-008",
+      "selections": [
+        {
+          "selectionId": "unit",
+          "suite": "unit",
+          "filter": "/*/*/(KeyCodecEnvelopeOwnershipTests)|(NativeMaintenanceLifetimeTests)|(NativeReadCutBudgetTests)|(NativeReadCutCancellationTests)|(NativeReadCutClockTests)|(NativeReadCutConsistencyTests)|(NativeReadCutLifetimeTests)|(NativeReadCutReplacementTests)|(StorageOwnerProcessTests)|(StoreLifetimeTests)|(NativeMaintenancePeriodicLifetimeTests)|(ZoneTreeMaintenancePolicyTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecEnvelopeOwnershipTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecEnvelopeOwnershipTests",
+              "methodName": "NativeStageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes",
+              "instanceName": "NativeStageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecEnvelopeOwnershipTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenanceLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenanceLifetimeTests",
+              "methodName": "AcStorageMaintenanceJoin001ObservedNativeDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen",
+              "instanceName": "AcStorageMaintenanceJoin001ObservedNativeDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMaintenanceLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+              "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+              "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMaintenancePeriodicLifetimeTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+              "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+              "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMaintenancePeriodicLifetimeTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "methodName": "AcCut002ExactRecordAndByteLimitsSucceedAndOneOverFailsBeforeCopy",
+              "instanceName": "AcCut002ExactRecordAndByteLimitsSucceedAndOneOverFailsBeforeCopy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "methodName": "AcCut002InvalidLimitsAndForeignViewDoNotReserveTheNativeSlot",
+              "instanceName": "AcCut002InvalidLimitsAndForeignViewDoNotReserveTheNativeSlot",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutBudgetTests",
+              "methodName": "AcCut002SequentialVisitsShareOneCumulativeRecordBudget",
+              "instanceName": "AcCut002SequentialVisitsShareOneCumulativeRecordBudget",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCancellationTests",
+              "methodName": "AcCut002CancellationBeforeAndDuringTraversalIsJoinedAndReusable",
+              "instanceName": "AcCut002CancellationBeforeAndDuringTraversalIsJoinedAndReusable",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCancellationTests",
+              "methodName": "AcCut002IdleLeaseExpiryFailsBeforeAnotherNativeAdvanceAndStillReleasesSlot",
+              "instanceName": "AcCut002IdleLeaseExpiryFailsBeforeAnotherNativeAdvanceAndStillReleasesSlot",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutClockTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutClockTests",
+              "methodName": "ExpiredNativeLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
+              "instanceName": "ExpiredNativeLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutClockTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutConsistencyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutConsistencyTests",
+              "methodName": "AcCut001SnapshotKeepsExactOldCutAcrossCanonicalChanges",
+              "instanceName": "AcCut001SnapshotKeepsExactOldCutAcrossCanonicalChanges",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutConsistencyTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "methodName": "AcCut003ConcurrentTraversalFailsWithoutAdvancingTheSharedIterator",
+              "instanceName": "AcCut003ConcurrentTraversalFailsWithoutAdvancingTheSharedIterator",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "methodName": "AcCut003ReentrantStoreDisposalFailsWithoutClosingTheRuntime",
+              "instanceName": "AcCut003ReentrantStoreDisposalFailsWithoutClosingTheRuntime",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "methodName": "AcCut003RejectsConcurrentAndReentrantUseButAllowsFollowingLease",
+              "instanceName": "AcCut003RejectsConcurrentAndReentrantUseButAllowsFollowingLease",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "methodName": "AcCut003ShutdownCancelsAndJoinsTraversalBeforeReopen",
+              "instanceName": "AcCut003ShutdownCancelsAndJoinsTraversalBeforeReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutLifetimeTests",
+              "methodName": "AcCut003StoreDisposeInsideReadGateLeavesLeaseAdmissionOpen",
+              "instanceName": "AcCut003StoreDisposeInsideReadGateLeavesLeaseAdmissionOpen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutReplacementTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutReplacementTests",
+              "methodName": "AcCut003InstallRejectsActiveLeaseWithoutTouchingTheOldTree",
+              "instanceName": "AcCut003InstallRejectsActiveLeaseWithoutTouchingTheOldTree",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutReplacementTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.StorageOwnerProcessTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.StorageOwnerProcessTests",
+              "methodName": "AcStorageOwner001SeparateProcessCannotOpenLiveOwnerAndHealthyReopenPreservesUpdatedState",
+              "instanceName": "AcStorageOwner001SeparateProcessCannotOpenLiveOwnerAndHealthyReopenPreservesUpdatedState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StorageOwnerProcessTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "methodName": "AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade",
+              "instanceName": "AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StoreLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "methodName": "AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen",
+              "instanceName": "AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StoreLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.StoreLifetimeTests",
+              "methodName": "AcSq002ExclusiveOwnerLockAndDoubleDisposeAllowIdentityPreservingReopen",
+              "instanceName": "AcSq002ExclusiveOwnerLockAndDoubleDisposeAllowIdentityPreservingReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/StoreLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+              "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+              "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64",
+                "System.Int64"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "taskId": "KL-011",
       "selections": [
         {
@@ -1775,6 +2025,322 @@
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/FollowerDocumentRf3Tests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.IntegrationTests.Features.DocumentStorage.FollowerDocumentCaller"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-027",
+      "selections": [
+        {
+          "selectionId": "unit",
+          "suite": "unit",
+          "filter": "/*/*/(CanonicalVectorAtomicRevisionTests)|(CanonicalVectorPublicMetricTests)|(ConfiguredVectorProfileTests)|(ConfiguredVectorProfileSchemaTests)|(ConfiguredVectorProfileNullArrayTests)|(ImmutableVectorInputTests)|(VectorMetricGoldenTests)|(VectorMetricValidationTests)|(SearchTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.CanonicalVectorAtomicRevisionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.CanonicalVectorAtomicRevisionTests",
+              "methodName": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether",
+              "instanceName": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/CanonicalVectorAtomicRevisionTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.CanonicalVectorAtomicRevisionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.CanonicalVectorAtomicRevisionTests",
+              "methodName": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether",
+              "instanceName": "Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/CanonicalVectorAtomicRevisionTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "methodName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument",
+              "instanceName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Cosine)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/CanonicalVectorPublicMetricTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DistanceMetric"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "methodName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument",
+              "instanceName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(DotProduct)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/CanonicalVectorPublicMetricTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DistanceMetric"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.CanonicalVectorPublicMetricTests",
+              "methodName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument",
+              "instanceName": "Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Euclidean)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/CanonicalVectorPublicMetricTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.DistanceMetric"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileNullArrayTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileNullArrayTests",
+              "methodName": "NullProfileArrayKeepsFailedOutcomeAndMcpRejectsBeforeHealthyResourceConfiguration",
+              "instanceName": "NullProfileArrayKeepsFailedOutcomeAndMcpRejectsBeforeHealthyResourceConfiguration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileNullArrayTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(budget, ResourceExhausted)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(dimension, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(duplicate, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(incompatible-kind, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(metric, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(missing, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(model, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(noncanonical, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileSchemaTests",
+              "methodName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows",
+              "instanceName": "InvalidAuthoritativeProfileCannotCreateResourceAndHealthyDefinitionFollows(null-profile, Validation)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileSchemaTests.cs",
+              "parameterTypeFullNames": [
+                "System.String",
+                "KeyLoad.ErrorCode"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "methodName": "ConfiguredModelMismatchRollsBackDirectAndLineageEffectsThenReplaysAndReopensHealthy",
+              "instanceName": "ConfiguredModelMismatchRollsBackDirectAndLineageEffectsThenReplaysAndReopensHealthy(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "methodName": "ConfiguredModelMismatchRollsBackDirectAndLineageEffectsThenReplaysAndReopensHealthy",
+              "instanceName": "ConfiguredModelMismatchRollsBackDirectAndLineageEffectsThenReplaysAndReopensHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "methodName": "CurrentDeniedPrincipalCannotProbeConfiguredModelAndHealthyAuthorizedWriteFollows",
+              "instanceName": "CurrentDeniedPrincipalCannotProbeConfiguredModelAndHealthyAuthorizedWriteFollows",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ConfiguredVectorProfileTests",
+              "methodName": "PersistedProfileCannotBeChangedByAdministratorAndOriginalModelRemainsUsable",
+              "instanceName": "PersistedProfileCannotBeChangedByAdministratorAndOriginalModelRemainsUsable",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ConfiguredVectorProfileTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ImmutableVectorInputTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ImmutableVectorInputTests",
+              "methodName": "AcRoc003_DefaultQueryVectorRejectsAndOwnedVectorInputKeepsItsRank",
+              "instanceName": "AcRoc003_DefaultQueryVectorRejectsAndOwnedVectorInputKeepsItsRank",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ImmutableVectorInputTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "methodName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "instanceName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "methodName": "LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow",
+              "instanceName": "LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "methodName": "AcSearch001PersistedWideTailSearchRanksByPublicSimilarityAndKeepsFusionScores",
+              "instanceName": "AcSearch001PersistedWideTailSearchRanksByPublicSimilarityAndKeepsFusionScores",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "methodName": "AcSearch001SelectedMetricGoldensHoldAtRuntimeWidthsBlocksTailsAndMaximumDimension",
+              "instanceName": "AcSearch001SelectedMetricGoldensHoldAtRuntimeWidthsBlocksTailsAndMaximumDimension",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.VectorMetricGoldenTests",
+              "methodName": "AcSearch001ZeroSignedZeroAndFiniteExtremesKeepTheirMetricResults",
+              "instanceName": "AcSearch001ZeroSignedZeroAndFiniteExtremesKeepTheirMetricResults",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricGoldenTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.VectorMetricValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.VectorMetricValidationTests",
+              "methodName": "AcSearch001SimilarityPreservesLengthMetricAndValidationOrderDetails",
+              "instanceName": "AcSearch001SimilarityPreservesLengthMetricAndValidationOrderDetails",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.VectorMetricValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.VectorMetricValidationTests",
+              "methodName": "AcSearch001SimilarityRejectsNonfiniteQueryAndCandidateAtEveryBlockLaneAndTail",
+              "instanceName": "AcSearch001SimilarityRejectsNonfiniteQueryAndCandidateAtEveryBlockLaneAndTail",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/VectorMetricValidationTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3",
+          "suite": "rf3",
+          "filter": "/*/*/ConfiguredVectorProfileRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests(ClusterFixture)",
+              "methodName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy",
+              "instanceName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy(mcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ConfiguredVectorProfileRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests(ClusterFixture)",
+              "methodName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy",
+              "instanceName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy(mcp-sql)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ConfiguredVectorProfileRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests(ClusterFixture)",
+              "methodName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy",
+              "instanceName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy(sdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ConfiguredVectorProfileRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ConfiguredVectorProfileRf3Tests(ClusterFixture)",
+              "methodName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy",
+              "instanceName": "ConfiguredModelRejectsAtomicWriteOnEveryPublicPathAndCorrectRevisionSearchRemainsHealthy(sdk-sql)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ConfiguredVectorProfileRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
               ]
             }
           ]

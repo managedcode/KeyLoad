@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-011','KL-014','KL-015','KL-021')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
 )
 Set-StrictMode -Version Latest

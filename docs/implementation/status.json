@@ -36903,6 +36903,420 @@
         "Public whole KL036 parent remains a private unsealed source/test packet; no public source or runtime closure claim.",
         "Full product coverage, endurance, power-loss and comparable GitHub performance remain unqualified."
       ]
+    },
+    "stageXXXIIOriginalDevelopment": {
+      "stage": "TASK-KL008-EXACT-NATIVE-ACCEPTANCE-003 and TASK-KL027-EXACT-NATIVE-ACCEPTANCE-001",
+      "baseCommit": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+      "state": "additive six-task/twelve-cell implementation joined; exact-source Linux delivery pending",
+      "runtimeQualified": false,
+      "contract": {
+        "schemaVersion": 1,
+        "baseContractSha256": "4cf02bbb45ad3cc799e3912a31f6879a5e3ec2d88e2f9eb7e2110178f1675013",
+        "newContractSha256": "279fa91267f9db9a5b6ceb3e5fec7cf612c834657caed433eaa95e84f356e8f0",
+        "preservedExistingTasks": [
+          "KL-011",
+          "KL-014",
+          "KL-015",
+          "KL-021"
+        ],
+        "tasks": [
+          {
+            "task": "KL-008",
+            "selections": [
+              {
+                "suite": "unit",
+                "filter": "/*/*/(KeyCodecEnvelopeOwnershipTests)|(NativeMaintenanceLifetimeTests)|(NativeReadCutBudgetTests)|(NativeReadCutCancellationTests)|(NativeReadCutClockTests)|(NativeReadCutConsistencyTests)|(NativeReadCutLifetimeTests)|(NativeReadCutReplacementTests)|(StorageOwnerProcessTests)|(StoreLifetimeTests)|(NativeMaintenancePeriodicLifetimeTests)|(ZoneTreeMaintenancePolicyTests)/*",
+                "caseCount": 27
+              }
+            ]
+          },
+          {
+            "task": "KL-027",
+            "selections": [
+              {
+                "suite": "unit",
+                "filter": "/*/*/(CanonicalVectorAtomicRevisionTests)|(CanonicalVectorPublicMetricTests)|(ConfiguredVectorProfileTests)|(ConfiguredVectorProfileSchemaTests)|(ConfiguredVectorProfileNullArrayTests)|(ImmutableVectorInputTests)|(VectorMetricGoldenTests)|(VectorMetricValidationTests)|(SearchTests)/*",
+                "caseCount": 27
+              },
+              {
+                "suite": "rf3",
+                "filter": "/*/*/ConfiguredVectorProfileRf3Tests/*",
+                "caseCount": 4
+              }
+            ]
+          }
+        ],
+        "nativeOriginals": [
+          {
+            "suite": "unit",
+            "path": "/private/tmp/keyload-current-r832-unfiltered-native-unit-census-20261009-list-tests.stdout.txt",
+            "sha256": "df86a1b8b2419e59b3033b5cabbb0cee4a7a6d5f6c5ef7e8000f7faf6a8eac81"
+          },
+          {
+            "suite": "rf3",
+            "path": "/private/tmp/keyload-current-r832-unfiltered-native-rf3-census-20261009-list-tests.stdout.txt",
+            "sha256": "19ec51dfb0f1885cf43fd500ab39772d399405cafd1feed49d49f7d3d8f87ee8"
+          }
+        ],
+        "runtimeQualification": "pending; exact current native metadata only"
+      },
+      "localKl008ActualAdapter": [
+        {
+          "profile": "normal",
+          "caseCount": 27,
+          "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+          "receiptPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/task-acceptance-r833-20261009/kl-008-normal/acceptance-receipt.json",
+          "sha256": "980b2ce1f0c3e1c8b6d60f2b3ef4930b901d31c4626e9955bc15871835f0bd90",
+          "originalFiles": 16
+        },
+        {
+          "profile": "scalar",
+          "caseCount": 27,
+          "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+          "receiptPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/task-acceptance-r833-20261009/kl-008-scalar/acceptance-receipt.json",
+          "sha256": "c98cf5245215d6b48bd1ab8388363851f8a91492da0b2e3d3b1a1cdc1ca0637b",
+          "originalFiles": 16
+        }
+      ],
+      "localKl027NativeOperations": {
+        "normal": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-normal-20261009-receipt.json",
+          "receiptSha256": "7da23322ade671d8abc1d7beaafa2ea52bb61cd6ef1df3fcf684e143bfae0fe1",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 3.283,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 2.855985,
+            "systemCpuSeconds": 0.730724,
+            "childMaximumResidentBytesDarwin": 210862080,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20
+        },
+        "scalar": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-scalar-20261009-receipt.json",
+          "receiptSha256": "ab0e5cacae82a9759c8e1320c9b73d0aef84c3ef28a22c25ba6e8c90462372d3",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 4.947,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 4.928637,
+            "systemCpuSeconds": 0.787917,
+            "childMaximumResidentBytesDarwin": 216186880,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20
+        },
+        "parallel50": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-parallel50-20261009-receipt.json",
+          "receiptSha256": "a8448ce56c41618d517a66afff3a676b66654f0d14ec4d131a82c1c39bd53d64",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 3.267,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 2.950278,
+            "systemCpuSeconds": 0.727376,
+            "childMaximumResidentBytesDarwin": 211091456,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 50
+        }
+      },
+      "actualKl027Rf3FilteredDiscovery": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 0.659,
+        "caseCount": 4,
+        "commandArgs": [
+          "dotnet",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/bin/Release/net10.0/KeyLoad.IntegrationTests.dll",
+          "--list-tests",
+          "json",
+          "--disable-logo",
+          "--ansi",
+          "off",
+          "--progress",
+          "off",
+          "--output",
+          "Detailed",
+          "--results-directory",
+          "/private/tmp/keyload-r833-six-native-task-contract-20261009/kl027-rf3-native-discovery",
+          "--treenode-filter",
+          "/*/*/ConfiguredVectorProfileRf3Tests/*"
+        ],
+        "originalDiscoveryPath": "/private/tmp/keyload-r833-six-native-task-contract-20261009/kl027-rf3-native-filter.stdout.json",
+        "originalDiscoverySha256": "7cf907183037b5921674061437f8654aaaee530cc775f322932d5c79374d4110",
+        "imageSha256": "2828d680ac767407d0adfd0947d1b825ab31bc3935f32fd779fa91e58025ce0a",
+        "scope": "actual native filtered discovery only; no RF3 operation or acceptance claim"
+      },
+      "nativeConcurrencyControl": {
+        "scope": "single local development batch; no statistical performance or Linux RF3 qualification",
+        "cases": [
+          {
+            "profile": "normal",
+            "originalTrx": "/private/tmp/keyload-r833-kl027-native-normal-20261009-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "trxSha256": "f48970010301cf7dcb0305e76869c773d1824aec2e0a7240d0faa1705dd517b1",
+            "originalCaseCount": 27,
+            "peakOverlappingNativeCaseIntervals": 14,
+            "counts": {
+              "total": "27",
+              "executed": "27",
+              "passed": "27",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          },
+          {
+            "profile": "scalar",
+            "originalTrx": "/private/tmp/keyload-r833-kl027-native-scalar-20261009-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "trxSha256": "1544b0681f76c4ff323dc73977de6cd5f4af5fc7f7dab398b88e8a14c91c8175",
+            "originalCaseCount": 27,
+            "peakOverlappingNativeCaseIntervals": 14,
+            "counts": {
+              "total": "27",
+              "executed": "27",
+              "passed": "27",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          },
+          {
+            "profile": "parallel50",
+            "originalTrx": "/private/tmp/keyload-r833-kl027-native-parallel50-20261009-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "trxSha256": "622bae49c166ad420569b68b009000c9976fcd684021203344e536a57465ddbf",
+            "originalCaseCount": 27,
+            "peakOverlappingNativeCaseIntervals": 14,
+            "counts": {
+              "total": "27",
+              "executed": "27",
+              "passed": "27",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          }
+        ],
+        "decision": "retain task default20; one 50-slot control showed no material elapsed gain (3.283s vs3.267s) and does not justify a global increase"
+      },
+      "staticVerification": {
+        "powerShellAst": true,
+        "actualYamlParsed": true,
+        "everyExistingFullJobUnchanged": true,
+        "existingFourTaskContractsUnchanged": true,
+        "governance": true,
+        "diffCheck": true
+      },
+      "latestKl014OriginalFailure": {
+        "schemaVersion": 1,
+        "runId": 37868406144,
+        "attempt": 1,
+        "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+        "jobId": 113620545601,
+        "jobConclusion": "failure",
+        "artifactId": 11589298518,
+        "apiArchiveSha256": "35d4bffaeed1db10fcc365af728b60c1515fec33ada040a5f4cdf069ced5b688",
+        "reports": [
+          {
+            "path": "/private/tmp/keyload-47-kl014-normal-original-20261009/original/KeyLoad/KeyLoad/TestResults/task-acceptance/kl-014-normal/rf3/results/KeyLoad.IntegrationTests_net10.0_x64.trx",
+            "sha256": "fb0bf69a63e1921b79ca45bf5afe33e932462c96c7f72d667b711cfc63bb02df",
+            "counts": {
+              "total": "5",
+              "executed": "5",
+              "passed": "4",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "failures": [
+              {
+                "case": "SdkSubmitReturnedCancellationReusesCommittedReceipt",
+                "outcome": "Failed",
+                "message": "\n          AggregateException: C1_LIFECYCLE v=1 phase=Scenario first{s=FaultReceiptRetry;c1=WaitingForActivation;c2=WaitingForActivation;c3=WaitingForActivation;a=RanToCompletion;i=NotAdmitted;caller=1;parent=0;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=n:-:-/n:-:-/n:-:-;dw=0:-:-/-/-:-:-/-/-:-:0:-:-:-/-/-:-} terminal{s=FaultReceiptRetry;c1=RanToCompletion;c2=RanToCompletion;c3=RanToCompletion;a=RanToCompletion;i=NotAdmitted;caller=1;parent=0;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=r:wa:wa/r:wa:wa/r:ok:ok;dw=1:0:wa/wa/ok:-:-/-/-:1:0:-:1:ok/ok/ok:0} (Expected to be true\nbut found False\n\nat Assert.That(after.RoutingReady).IsTrue())\n ---> TUnit.Assertions.Exceptions.AssertionException: Expected to be true\nbut found False\n\nat Assert.That(after.RoutingReady).IsTrue()\n             at KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers.RequestCqrsLifecycleEvidence.ThrowWithContext(List`1 failures) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsLifecycleEvidence.cs:line 128\n   at KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultScenario.RunAsync(Boolean useMcp, RequestCqrsProbePhase phase, CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsPhaseFaultScenario.cs:line 56\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (TUnit.Assertions.Exceptions.AssertionException) ---\n   at KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsFaultReplayContinuation.HealthyContinuationAsync(RequestCqrsRf3Callers callers, KeyLoadClient administrator, EntityRef reference, CommandRequest original, CommitReceipt originalReceipt, CommandRequest changed, Int64 committedRevision, String healthyJson, CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/RequestCqrsFaultReplayContinuation.cs:line 75\n   at KeyLoad.IntegrationTests.Features.Clu"
+              }
+            ]
+          },
+          {
+            "path": "/private/tmp/keyload-47-kl014-normal-original-20261009/original/KeyLoad/KeyLoad/TestResults/task-acceptance/kl-014-normal/unit/results/KeyLoad.UnitTests_net10.0_x64.trx",
+            "sha256": "b01724544d6682e12a83da673adcf63ca6e4b9c4f175a2df776d7e492fbbc19c",
+            "counts": {
+              "total": "7",
+              "executed": "7",
+              "passed": "7",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "failures": []
+          }
+        ],
+        "jobSteps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Download source code",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up .NET",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check Docker",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build this task's KeyLoad server image",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Configure this task's Docker image",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Restore .NET packages",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build the complete current solution",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare original task source and test-image receipts",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Discover and execute this task's complete acceptance flows",
+            "status": "completed",
+            "conclusion": "failure"
+          },
+          {
+            "name": "Verify unchanged task source and test images",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Clean up this task's Docker registry",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Save this task's original acceptance results",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up .NET",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Download source code",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ],
+        "qualification": "original failed task diagnostic; no acceptance promotion",
+        "receiptPath": "/private/tmp/keyload-47-kl014-normal-original-20261009/authenticity-and-original-failures.json",
+        "receiptSha256": "6313568de6d5992ddf553bfd2f9704600b7b7827bdab580921537ff2cab153d4"
+      },
+      "fullProductCoverage": null,
+      "remaining": [
+        "Authentic current Linux KL-008 normal/scalar task receipts plus mandatory full recovery/RF3",
+        "Authentic current Linux KL-027 normal/scalar 27 unit and four whole RF3 caller cases plus mandatory complete suites",
+        "KL-014 current-source original RoutingReady=false failure must be resolved and receive fresh exact task receipts; prior f80 originals remain immutable",
+        "Complete product coverage/endurance/power-loss/performance remain open"
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -38790,6 +39204,37 @@
         ],
         "runtimeQualified": false,
         "remaining": "Current-source Linux normal/scalar, full recovery and RF3 gates mandatory; no power-loss/endurance inference."
+      },
+      "parallelLinuxTaskLane": {
+        "task": "TASK-KL008-EXACT-NATIVE-ACCEPTANCE-003",
+        "criterion": "AC-KL008-NATIVE-001",
+        "state": "implemented; current Linux acceptance pending",
+        "exactCases": 27,
+        "profiles": [
+          "normal",
+          "scalar"
+        ],
+        "nativeMaximumParallelTests": 20,
+        "dockerTopology": "N/A to unit-only selector; full RF3 remains mandatory",
+        "localActualAdapter": [
+          {
+            "profile": "normal",
+            "caseCount": 27,
+            "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+            "receiptPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/task-acceptance-r833-20261009/kl-008-normal/acceptance-receipt.json",
+            "sha256": "980b2ce1f0c3e1c8b6d60f2b3ef4930b901d31c4626e9955bc15871835f0bd90",
+            "originalFiles": 16
+          },
+          {
+            "profile": "scalar",
+            "caseCount": 27,
+            "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+            "receiptPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/task-acceptance-r833-20261009/kl-008-scalar/acceptance-receipt.json",
+            "sha256": "c98cf5245215d6b48bd1ab8388363851f8a91492da0b2e3d3b1a1cdc1ca0637b",
+            "originalFiles": 16
+          }
+        ],
+        "runtimeQualified": false
       }
     }
   },
@@ -39394,7 +39839,7 @@
   },
   "KL-014": {
     "title": "Standalone server і C# SDK",
-    "status": "done",
+    "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs",
       "src/KeyLoad.Client/KeyLoadClient.cs"
@@ -39414,8 +39859,8 @@
     },
     "parallelLinuxAcceptance": {
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
-      "state": "Original exact-source task/profile reports authenticated; all declared operation cases pass in normal and scalar.",
-      "qualified": true,
+      "state": "Prior f80 exact passing originals retained; current47 normal11/12 with one genuine RF3 RoutingReady=false failure. Scalar job reports success; latest exact qualification open.",
+      "qualified": false,
       "nativeMaximumParallelTests": 20,
       "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment",
       "sourceCommit": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
@@ -39519,10 +39964,10 @@
       ],
       "fullProductQualification": false
     },
-    "runtimeQualified": true,
-    "allAcceptanceClosed": true,
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
     "qualification": {
-      "runtimeQualified": true,
+      "runtimeQualified": false,
       "scope": "Original KL-014 standalone server, CLI/config/data directory and typed SDK unknown-write/same-command retry acceptance. Future SQL/client/model work and shared complete product gates remain separate.",
       "taskAcceptance": {
         "completedAt": "2026-10-09",
@@ -39653,6 +40098,159 @@
           "power_loss",
           "performance"
         ]
+      },
+      "currentSourceRequalification": {
+        "state": "reopened after original current-source RF3 failure; historical f80 acceptance retained",
+        "originalFailure": {
+          "schemaVersion": 1,
+          "runId": 37868406144,
+          "attempt": 1,
+          "sourceRevision": "47c40e325ead186c27586fb5fa6c89f136a8b594",
+          "jobId": 113620545601,
+          "jobConclusion": "failure",
+          "artifactId": 11589298518,
+          "apiArchiveSha256": "35d4bffaeed1db10fcc365af728b60c1515fec33ada040a5f4cdf069ced5b688",
+          "reports": [
+            {
+              "path": "/private/tmp/keyload-47-kl014-normal-original-20261009/original/KeyLoad/KeyLoad/TestResults/task-acceptance/kl-014-normal/rf3/results/KeyLoad.IntegrationTests_net10.0_x64.trx",
+              "sha256": "fb0bf69a63e1921b79ca45bf5afe33e932462c96c7f72d667b711cfc63bb02df",
+              "counts": {
+                "total": "5",
+                "executed": "5",
+                "passed": "4",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": [
+                {
+                  "case": "SdkSubmitReturnedCancellationReusesCommittedReceipt",
+                  "outcome": "Failed",
+                  "message": "\n          AggregateException: C1_LIFECYCLE v=1 phase=Scenario first{s=FaultReceiptRetry;c1=WaitingForActivation;c2=WaitingForActivation;c3=WaitingForActivation;a=RanToCompletion;i=NotAdmitted;caller=1;parent=0;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=n:-:-/n:-:-/n:-:-;dw=0:-:-/-/-:-:-/-/-:-:0:-:-:-/-/-:-} terminal{s=FaultReceiptRetry;c1=RanToCompletion;c2=RanToCompletion;c3=RanToCompletion;a=RanToCompletion;i=NotAdmitted;caller=1;parent=0;wave=0;capture=0;drain=0;fallback=0;observer=1;consumer=0;r1=Ready;r2=Ready;r3=Ready;held=0;revoke=0;sx=n:-:-/n:-:-/n:-:-;sb=n:-:-/n:-:-/n:-:-;cc=r:wa:wa/r:wa:wa/r:ok:ok;dw=1:0:wa/wa/ok:-:-/-/-:1:0:-:1:ok/ok/ok:0} (Expected to be true\nbut found False\n\nat Assert.That(after.RoutingReady).IsTrue())\n ---> TUnit.Assertions.Exceptions.AssertionException: Expected to be true\nbut found False\n\nat Assert.That(after.RoutingReady).IsTrue()\n             at KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers.RequestCqrsLifecycleEvidence.ThrowWithContext(List`1 failures) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsLifecycleEvidence.cs:line 128\n   at KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsPhaseFaultScenario.RunAsync(Boolean useMcp, RequestCqrsProbePhase phase, CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsPhaseFaultScenario.cs:line 56\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---\n--- Inner exception stack trace (TUnit.Assertions.Exceptions.AssertionException) ---\n   at KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsFaultReplayContinuation.HealthyContinuationAsync(RequestCqrsRf3Callers callers, KeyLoadClient administrator, EntityRef reference, CommandRequest original, CommitReceipt originalReceipt, CommandRequest changed, Int64 committedRevision, String healthyJson, CancellationToken cancellationToken) in /_/tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/RequestCqrsFaultReplayContinuation.cs:line 75\n   at KeyLoad.IntegrationTests.Features.Clu"
+                }
+              ]
+            },
+            {
+              "path": "/private/tmp/keyload-47-kl014-normal-original-20261009/original/KeyLoad/KeyLoad/TestResults/task-acceptance/kl-014-normal/unit/results/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "b01724544d6682e12a83da673adcf63ca6e4b9c4f175a2df776d7e492fbbc19c",
+              "counts": {
+                "total": "7",
+                "executed": "7",
+                "passed": "7",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "failures": []
+            }
+          ],
+          "jobSteps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Download source code",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Set up .NET",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check Docker",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build this task's KeyLoad server image",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Configure this task's Docker image",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Restore .NET packages",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build the complete current solution",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Prepare original task source and test-image receipts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Discover and execute this task's complete acceptance flows",
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Verify unchanged task source and test images",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Clean up this task's Docker registry",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Save this task's original acceptance results",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Set up .NET",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Download source code",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ],
+          "qualification": "original failed task diagnostic; no acceptance promotion",
+          "receiptPath": "/private/tmp/keyload-47-kl014-normal-original-20261009/authenticity-and-original-failures.json",
+          "receiptSha256": "6313568de6d5992ddf553bfd2f9704600b7b7827bdab580921537ff2cab153d4"
+        },
+        "remaining": "Investigate native RoutingReady false observation after healthy committed continuation; fresh exact-source normal/scalar flows required."
       }
     }
   },
@@ -41675,7 +42273,120 @@
       "src/KeyLoad.Core/Features/Search/Queries/DatabaseEngine.VectorReads.cs",
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs"
-    ]
+    ],
+    "qualification": {
+      "task": "TASK-KL027-EXACT-NATIVE-ACCEPTANCE-001",
+      "criteria": [
+        "AC-KL027-NATIVE-001",
+        "AC-KL027-NATIVE-002"
+      ],
+      "state": "implemented; current Linux task/full-suite acceptance pending",
+      "nativeUnitCases": 27,
+      "nativeRf3Cases": 4,
+      "profiles": [
+        "normal",
+        "scalar"
+      ],
+      "localWholeNativeOperations": {
+        "normal": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-normal-20261009-receipt.json",
+          "receiptSha256": "7da23322ade671d8abc1d7beaafa2ea52bb61cd6ef1df3fcf684e143bfae0fe1",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 3.283,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 2.855985,
+            "systemCpuSeconds": 0.730724,
+            "childMaximumResidentBytesDarwin": 210862080,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20
+        },
+        "scalar": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-scalar-20261009-receipt.json",
+          "receiptSha256": "ab0e5cacae82a9759c8e1320c9b73d0aef84c3ef28a22c25ba6e8c90462372d3",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 4.947,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 4.928637,
+            "systemCpuSeconds": 0.787917,
+            "childMaximumResidentBytesDarwin": 216186880,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20
+        },
+        "parallel50": {
+          "receiptPath": "/private/tmp/keyload-r833-kl027-native-parallel50-20261009-receipt.json",
+          "receiptSha256": "a8448ce56c41618d517a66afff3a676b66654f0d14ec4d131a82c1c39bd53d64",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 3.267,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 2.950278,
+            "systemCpuSeconds": 0.727376,
+            "childMaximumResidentBytesDarwin": 211091456,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 50
+        }
+      },
+      "nativeRf3Discovery": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 0.659,
+        "caseCount": 4,
+        "commandArgs": [
+          "dotnet",
+          "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/bin/Release/net10.0/KeyLoad.IntegrationTests.dll",
+          "--list-tests",
+          "json",
+          "--disable-logo",
+          "--ansi",
+          "off",
+          "--progress",
+          "off",
+          "--output",
+          "Detailed",
+          "--results-directory",
+          "/private/tmp/keyload-r833-six-native-task-contract-20261009/kl027-rf3-native-discovery",
+          "--treenode-filter",
+          "/*/*/ConfiguredVectorProfileRf3Tests/*"
+        ],
+        "originalDiscoveryPath": "/private/tmp/keyload-r833-six-native-task-contract-20261009/kl027-rf3-native-filter.stdout.json",
+        "originalDiscoverySha256": "7cf907183037b5921674061437f8654aaaee530cc775f322932d5c79374d4110",
+        "imageSha256": "2828d680ac767407d0adfd0947d1b825ab31bc3935f32fd779fa91e58025ce0a",
+        "scope": "actual native filtered discovery only; no RF3 operation or acceptance claim"
+      },
+      "runtimeQualified": false,
+      "remaining": [
+        "Current-source Linux exact normal/scalar complete task flows",
+        "Mandatory complete current normal/scalar/recovery/RF3 qualification"
+      ]
+    }
   },
   "KL-028": {
     "title": "Text index provider audit",

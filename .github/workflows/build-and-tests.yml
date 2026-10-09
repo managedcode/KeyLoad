@@ -9,7 +9,7 @@ on:
         description: 'Acceptance task; all runs complete qualification and all task lanes'
         type: choice
         default: all
-        options: [all, KL-011, KL-014, KL-015, KL-021]
+        options: [all, KL-008, KL-011, KL-014, KL-015, KL-021, KL-027]
 permissions:
   contents: read
 concurrency:
@@ -225,7 +225,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: ${{ fromJSON(inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || '["KL-011","KL-014","KL-015","KL-021"]') }}
+        task: ${{ fromJSON(inputs.task == 'KL-008' && '["KL-008"]' || inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || inputs.task == 'KL-027' && '["KL-027"]' || '["KL-008","KL-011","KL-014","KL-015","KL-021","KL-027"]') }}
         profile: [normal, scalar]
     steps:
       - name: Download source code
@@ -235,11 +235,14 @@ jobs:
         with:
           global-json-file: global.json
       - name: Check Docker
+        if: ${{ matrix.task != 'KL-008' }}
         run: docker version
       - name: Build this task's KeyLoad server image
+        if: ${{ matrix.task != 'KL-008' }}
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs --server-only
       - name: Configure this task's Docker image
+        if: ${{ matrix.task != 'KL-008' }}
         shell: bash
         env:
           KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
