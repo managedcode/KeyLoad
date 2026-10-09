@@ -371,7 +371,13 @@ Its [document contract](docs/Features/DocumentStorage.md) keeps the captured dat
 cut distinct from the current authorization cut. Complete current-source RF3
 qualification remains open.
 
-Native TUnit defaults to 20 parallel tests. GitHub runs separate normal/scalar
+Ordinary native TUnit tests default to 20 parallel cases, with measured tuning up
+to 50. Benchmark tests run one at a time inside each isolated Linux job; separate
+jobs may run concurrently. Heavy ingestion and mixed-operation load tests require
+exclusive execution and stay outside coverage. The required million-record
+ingestion cases for 1, 10 and 500 clients are specified but remain unimplemented
+and unqualified. Every comparison target must execute the same canonical scenario
+set, datasets, client counts and measurement rules. GitHub runs separate normal/scalar
 acceptance lanes for storage ownership, strict indexes, the server/SDK,
 security/telemetry, strong/session reads, exact vectors and controlled partition
 movement. These seven tasks run in fourteen isolated Linux jobs. Focused task

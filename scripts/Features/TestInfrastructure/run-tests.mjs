@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const defaultMaximumParallelTests = 20;
+const maximumParallelTests = 50;
+const comparisonParallelTests = 1;
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['unit-scalar', 'KeyLoad.UnitTests'], ['recovery', 'KeyLoad.RecoveryTests'],
@@ -37,6 +39,12 @@ export function nativeSelection(input, inherited = process.env) {
   const suite = values.get('Suite');
   const project = projects.get(suite);
   if (!project) throw new Error('Unsupported native TUnit suite.');
+  const parallel = Number(values.get('Execution:MaximumParallelTests')
+    ?? (suite === 'comparison' ? comparisonParallelTests : defaultMaximumParallelTests));
+  if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid native parallelism.');
+  if (suite === 'comparison' && parallel !== comparisonParallelTests) {
+    throw new Error('Comparison measurements require exactly one native test at a time.');
+  }
   const localImageEnabled = values.get('LocalRf3Image:Enabled');
   const localImageSelected = values.has('LocalRf3Image:Enabled');
   if (localImageSelected && (localImageEnabled !== 'true' || suite !== 'rf3'
@@ -59,10 +67,8 @@ export function nativeSelection(input, inherited = process.env) {
     ]);
   }
   const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore', '--configuration', 'Release',
-    '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', values.get('Execution:MaximumParallelTests') ?? String(defaultMaximumParallelTests),
+    '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
-  const parallel = Number(values.get('Execution:MaximumParallelTests') ?? defaultMaximumParallelTests);
-  if (!Number.isInteger(parallel) || parallel < 1 || parallel > 64) throw new Error('Invalid native parallelism.');
   if (suite === 'unit-scalar') environment.DOTNET_EnableHWIntrinsic = '0';
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['rf3', 'comparison'].includes(suite) ? 60 : 30)}m`);
   const preparation = [];

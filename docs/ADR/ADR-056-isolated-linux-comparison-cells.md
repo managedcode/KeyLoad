@@ -65,3 +65,61 @@ Local Aspire builds and test runs are permitted development evidence only. They 
 This decision changes benchmark execution and evidence accounting, not database format or public operation contracts. Deploy producer, aggregate, Website consumer and workflow joins as one source-reviewed checkpoint. Publish metrics only from the complete eligible current cohort after all applicable gates and provider evidence pass. A source rollback restores the last qualified Website artifact and does not rewrite or relabel immutable historical measurements. Historical receipts keep their original source and settings outside the active plan; they are never fallback evidence for current metrics.
 
 The ADR remains Accepted until the required implementation and exact-source Linux evidence are complete. The canonical feature documents and status records remain the authority for which gates have actually passed.
+
+## Measurement scheduling and ingestion contract, 2026-10-09
+
+Related requirements: REQ/AC-SCALE-024..028 and TASK-SCALE-MEASUREMENT-SCHEDULING-001,
+TASK-SCALE-INGESTION-001, TASK-SCALE-MIXED-LOAD-001 in
+[ScalingQualification](../Features/BenchmarkComparisons/ScalingQualification.md#functional-scheduling-and-ingestion-clarification-2026-10-09).
+[NativeTUnitEntry](../Features/TestInfrastructure/NativeTUnitEntry.md)
+REQ/AC-TUNIT-ENTRY-013/014 govern serial benchmark execution and exclusive heavy
+functional selection while preserving original outcomes and joined resource cleanup; [ADR-117](ADR-117-native-tunit-ci-entry.md)
+retains direct native TUnit invocation and fixture-owned Aspire lifetimes.
+
+Independent functional tests use the ordinary 20-slot default, with a measured
+increase up to 50. Measurements execute one native test/scenario at a time inside
+each benchmark job. The measurement case may itself execute the declared number
+of workload clients concurrently: client concurrency never represents native
+TUnit scheduling. Independent benchmark jobs may execute concurrently only on
+separate Linux runners with their own native topology, clients, containers,
+volumes and joined cleanup. No arbitrary cross-job serialization is introduced.
+Heavy functional mixed-ingestion cases execute exclusively on owned RF3 resources,
+separately from ordinary cases and other heavy cases in the runner; they qualify
+correctness and contribute neither timing metrics nor coverage totals.
+
+The new ingestion contract contains a one-client baseline and separate 10-client
+and 500-client cases. Each creates exactly 1,000,000 distinct total records, using
+real clients, deterministic disjoint identity allocation, bounded admission,
+original cancellation/drain/disposal and complete untimed independent stored-data
+validation. Retain genuine SDK receipts, official MCP interoperability, persisted
+authorization and RF3. Freeze actual startup/per-call/drain bounds and original
+failure handling in the typed policy before implementation; no million-task
+materialization, sampled final validation or unjoined shutdown is accepted.
+
+Owner reiteration2026-10-09 requires one canonical shared scenario inventory for
+all comparison databases under REQ/AC-SCALE-029. Target adapters preserve identical
+datasets, seed/payload, operation schedules/counts, client concurrency, measured
+boundaries and correctness oracles with equivalent effective resources and
+acknowledgement/durability. Planner/aggregate joins reject missing, substituted or
+incomparable cells; unsupported native capabilities remain explicitly unavailable.
+The new ingestion inventory is shared across targets rather than a KeyLoad-only
+performance workload. It remains unimplemented/unqualified in this checkpoint.
+
+Implementation order and ownership are the three task rows in ScalingQualification:
+root joins the native selector and existing typed execution options first;
+BenchmarkComparisons owners then freeze and implement feature-local ingestion
+contracts/execution/reporting with real ComparisonTests flows; DocumentStorage
+integration ownership specifies and implements bounded mixed-load cases through
+the existing ClusterFixture and SDK/MCP owners. Root integrates exclusive heavy
+selection, coverage exclusion and isolated Linux acceptance. No new resource
+harness, public API, dependency or database format is introduced.
+
+Rollout changes scheduling only in this checkpoint. New load cases are **not
+implemented or qualified**; they enter dispatch only after their selector,
+report, inventory, correctness and provenance contracts are implemented and
+verified together. Preserve existing c16 profiles, 100K/1M inventory, native
+matrix identities and original immutable reports. Rollback of this scoped work
+may remove its scheduling/doc change or unqualified future routes; it never
+rewrites historical results or presents overlapping measurements as qualified.
+This ADR remains Accepted and adds no successful ingestion, load or publication
+evidence.

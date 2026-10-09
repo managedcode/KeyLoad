@@ -561,10 +561,13 @@ packet and its source docs; coverage and full goal remain unqualified.
 REQ-TEST-016 / AC-TEST-016 (TASK-GENERAL-OPTIONS-TEST-ADMISSION-001) requires
 every Aspire-owned TUnit runner to receive its native `--maximum-parallel-tests`
 argument from centrally bound and validated `IOptions<TestExecutionOptions>`.
-`KeyLoadTests:Execution:MaximumParallelTests` defaults to8 and accepts only1–64;
+`KeyLoadTests:Execution:MaximumParallelTests` defaults to20 for ordinary functional
+tests and accepts only1–50. Comparison selections require1 and reject a larger
+explicit value before startup under the owner clarification2026-10-09 in
+[NativeTUnitEntry](TestInfrastructure/NativeTUnitEntry.md#functional-concurrency-and-exclusive-measurements-2026-10-09).
 zero/unlimited, negative and above-ceiling values fail before resources are added.
-The eight-test default is a bounded test-runner admission policy: the original
-full unit v34 run completed4061/4133 passing, with four readiness deadline failures
+The admission history includes the original
+full unit v34 run, which completed4061/4133 passing, with four readiness deadline failures
 and native cluster startup cancellation while other compiled workloads were
 active. Those observations do not establish a defect in production locks or prove
 that this admission policy resolves every failure. Preserve each test's own worker
@@ -572,7 +575,9 @@ count, workload, deadline and assertions, all required suites and original exit
 reports. The setting must flow to the actual runner command, including configured
 non-default values; inherited TUnit environment variables cannot override that
 validated command argument. This does not cap GitHub benchmark matrices or change
-measurement workloads.
+measurement workloads. Heavy functional load/mixed-ingestion cases require a
+separate exclusive selection and stay outside coverage; their real complete-flow
+qualification remains open under REQ/AC-TUNIT-ENTRY-014.
 
 Native Aspire model tests map default/configured forwarding, boundary and malformed
 configuration rejection to AC-TEST-016. Full native unit/scalar/recovery/RF3 and

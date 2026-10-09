@@ -26,7 +26,7 @@ internal sealed class TestExecutionOptions
     private const int MaximumOutputCharacters = 65_536;
     private const int DefaultMaximumParallelTests = 20;
     private const int MinimumMaximumParallelTests = 1;
-    private const int MaximumMaximumParallelTests = 64;
+    private const int MaximumMaximumParallelTests = 50;
 
     public TimeSpan OrdinaryTimeout { get; set; } = TimeSpan.FromMinutes(OrdinaryMinutes);
     public TimeSpan ClusterTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);

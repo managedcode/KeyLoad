@@ -1,4 +1,30 @@
 {
+  "TEST-ISOLATED-MEASUREMENTS-013": {
+    "title": "Ordinary functional concurrency and exclusive benchmark/load execution",
+    "status": "in_progress",
+    "feature": "docs/Features/TestInfrastructure/NativeTUnitEntry.md",
+    "decision": "docs/ADR/ADR-117-native-tunit-ci-entry.md",
+    "ordinaryDefaultParallelTests": 20,
+    "ordinaryMaximumParallelTests": 50,
+    "comparisonParallelTests": 1,
+    "requiredIngestionClients": [1, 10, 500],
+    "recordsPerIngestionCase": 1000000,
+    "ingestionCasesImplemented": false,
+    "heavyMixedLoadCasesImplemented": false,
+    "runtimeQualified": false,
+    "localCanonicalBuildPassed": true,
+    "localCanonicalFormatterPassed": true,
+    "localUnitCasesPassed": 11,
+    "localComparisonCasesPassed": 16,
+    "localUnitNativeIntervalPeak": 11,
+    "localComparisonNativeIntervalPeak": 1,
+    "localVerification": "2026-10-09 macOS ARM64 development evidence: final full Release build zero warnings/errors; canonical formatter passed; native TUnit 11/11 unit and 16/16 comparison/model/process-entry cases passed with no skips. Original TRX intervals show peak11 for the focused functional selection and peak1 for comparison. Retain the earlier 7/11 and 15/16 failed arrangements separately. No actual ingestion, heavy mixed load, Linux/RF3 or coverage qualification follows.",
+    "remaining": [
+      "Qualify delivered-source isolated Linux native selector and typed AppHost serial comparison admission",
+      "Implement one shared comparison scenario inventory with isolated real-client million-record ingestion at1/10/500 clients across targets, plus separate exclusive mixed-operation functional load cases",
+      "Qualify isolated Linux complete load flows with original reports and no coverage contribution"
+    ]
+  },
   "TEST-PIPELINE-001": {
     "title": "Separate functional database tests from benchmark contracts",
     "status": "in_progress",

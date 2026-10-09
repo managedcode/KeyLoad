@@ -26,6 +26,9 @@ internal sealed class NativeTUnitSelectionTests
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
     private const string ParallelismArgument = "--maximum-parallel-tests";
     private const string ExpectedDefaultParallelism = "20";
+    private const string Explicit20Property = "explicit20";
+    private const string Tuned50Property = "tuned50";
+    private const string ExpectedTunedParallelism = "50";
 
     [Test]
     [Arguments("unit", "KeyLoad.UnitTests")]
@@ -43,6 +46,10 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(args[2]).IsEqualTo("tests/" + project);
         await Assert.That(args[Array.IndexOf(args, "--output") + 1]).IsEqualTo("Detailed");
         await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
+        await AssertParallelismAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedDefaultParallelism)
+            .ConfigureAwait(false);
+        await AssertParallelismAsync(selection.RootElement.GetProperty(Tuned50Property), ExpectedTunedParallelism)
+            .ConfigureAwait(false);
         await Assert.That(args[Array.IndexOf(args, "--treenode-filter") + 1]).IsEqualTo("/*/*/ActualCase/*");
         await Assert.That(args).Contains("--report-trx");
         await Assert.That(args).Contains("--coverage");
@@ -60,6 +67,12 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RejectionProperty), RejectionFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);
         }
+    }
+
+    private static async Task AssertParallelismAsync(JsonElement selection, string expected)
+    {
+        var arguments = selection.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
+        await Assert.That(arguments[Array.IndexOf(arguments, ParallelismArgument) + 1]).IsEqualTo(expected);
     }
 
     private static async Task AssertLocalSelectorAsync(JsonElement local, string expectedFilter)

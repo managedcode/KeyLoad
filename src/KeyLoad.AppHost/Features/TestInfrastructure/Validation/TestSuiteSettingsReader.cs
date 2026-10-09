@@ -125,7 +125,8 @@ internal static class TestSuiteSettingsReader
             throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
         }
         var timeout = ReadTimeout(configuration, execution, suite, scaleProfile, vectorProfile);
-        return new(suite, project, filter, timeout, execution.MaximumParallelTests, resultsDirectory,
+        var parallelTests = TestSuiteParallelism.Read(configuration, execution, suite);
+        return new(suite, project, filter, timeout, parallelTests, resultsDirectory,
             configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
             localRf3ImageEnabled, scaleProfile)
         {

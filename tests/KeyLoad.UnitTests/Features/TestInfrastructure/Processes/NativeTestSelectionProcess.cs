@@ -9,7 +9,10 @@ internal static class NativeTestSelectionProcess
             const { nativeSelection } = await import(pathToFileURL(process.argv[1]));
             const suite = process.argv[2];
             for (const bad of [[], ['--KeyLoadTests:Suite=unknown'], ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Suite=rf3'],
-              ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=65'],
+              ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=51'],
+              ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=0'],
+              ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=1.5'],
+              ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=invalid'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:NativeCoverage:ServerMode=wrong']]) {
               let rejected = false; try { nativeSelection(bad, {}); } catch { rejected = true; }
               if (!rejected) throw new Error('Invalid native test selection was accepted.');
@@ -17,6 +20,10 @@ internal static class NativeTestSelectionProcess
             const selected = nativeSelection(['--KeyLoadTests:Suite='+suite, '--KeyLoadTests:Filter=/*/*/ActualCase/*',
               '--KeyLoadTests:ReportTrx=true', '--KeyLoadTests:CoverageSettings=settings.xml',
               '--KeyLoadTests:CoverageOutput=coverage.xml'], { GITHUB_SHA: 'original-revision' });
+            const explicit20 = nativeSelection(['--KeyLoadTests:Suite='+suite,
+              '--KeyLoadTests:Execution:MaximumParallelTests=20'], {});
+            const tuned50 = nativeSelection(['--KeyLoadTests:Suite='+suite,
+              '--KeyLoadTests:Execution:MaximumParallelTests=50'], {});
             const localArgs = ['--KeyLoadTests:Suite=rf3',
               '--KeyLoadTests:Filter=/*/*/TwoRf3MembershipProfileTests/*',
               '--KeyLoadTests:LocalRf3Image:Enabled=true'];
@@ -60,7 +67,7 @@ internal static class NativeTestSelectionProcess
               }
               throw new Error('Unsupported public12 filter was accepted.');
             }
-            console.log(JSON.stringify({ selected, local, standard, rejection, rejectionUnsupportedCount }));
+            console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection, rejectionUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

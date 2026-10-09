@@ -786,3 +786,64 @@ tooling fixtures are not database or GitHub qualification or product functional
 coverage. Retain full unit/scalar/recovery/RF3/comparison and exact-source Linux
 logs/TRX/archives/job URLs before closing AC-SCALE-022. This contract enables no
 new website open-loop metric projection.
+
+## Functional scheduling and ingestion clarification, 2026-10-09
+
+Status: accepted implementation contract. The native scheduling repair is scoped
+by [NativeTUnitEntry](../TestInfrastructure/NativeTUnitEntry.md) and [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md).
+The ingestion and heavy mixed-load cases below are **not implemented or qualified**.
+This clarification launches no new cohort and changes no existing c16 profile,
+cell identity, workload count, matrix, artifact schema or publication eligibility.
+[ADR-056](../../ADR/ADR-056-isolated-linux-comparison-cells.md#measurement-scheduling-and-ingestion-contract-2026-10-09)
+owns the isolation and ordered implementation joins.
+
+Native TUnit scheduling and workload client concurrency are independent settings.
+Ordinary independent functional cases start with 20 native slots; a measured,
+resource-supported increase to 50 follows the existing functional policy.
+Benchmark measurements execute exactly one TUnit case/scenario at a time per job.
+Parallel benchmark jobs require separate Linux runners and separate native
+servers, clients, containers, volumes and cleanup. The existing c16 workload
+still has 16 concurrent operation sessions inside its one measurement case.
+
+```mermaid
+flowchart TD
+    Selection[Native case selection] --> Ordinary[Ordinary functional cases: 20 slots, measured up to 50]
+    Selection --> Measurement[Benchmark job: one measurement case at a time]
+    Selection --> Heavy[Heavy functional job: one owned load case at a time]
+    Measurement --> Clients[Ingestion case: 1, 10 or 500 real clients]
+    Clients --> Records[Exactly 1M distinct total records]
+    Records --> Readback[Untimed complete independent readback]
+    Readback --> Original[Original results and isolated Linux provenance]
+    Heavy --> Correctness[Concurrent ingestion and other operations; correctness only]
+```
+
+| Requirement | Acceptance and automated evidence required before closure |
+| --- | --- |
+| REQ-SCALE-024: separate test scheduling from measured client concurrency | AC-SCALE-024: native selection starts comparison execution with exactly one slot and rejects explicit conflicting overrides before resource startup; inherited state cannot override the admitted native command. Ordinary cases retain the functional default. Original native reports demonstrate no overlapping measurement cases in a job; actual client/session observations separately identify workload concurrency. Selector regressions execute the real native selection operation; authenticated Linux reports establish runtime isolation. |
+| REQ-SCALE-025: million-record ingestion baseline and concurrent clients | AC-SCALE-025: three separately selected cases use exactly 1, 10 and 500 actual clients. Each inserts exactly 1,000,000 distinct total records, divided deterministically across those clients, rather than one million per client. Preserve native RF3 membership, persisted authorization, separate request grains and genuine .NET SDK operations; official MCP SDK interoperability remains required. A start barrier admits the selected clients together, with at most one original in-flight write per client and no unbounded task/record materialization. Record planned, admitted, peak observed and completed client concurrency separately from TUnit slots; reject unknown counts, duplicate identities and inconsistent accounting. Real Aspire-owned Linux ingestion cases are required; c16 steady-state reports do not satisfy this criterion. |
+| REQ-SCALE-026: complete correctness outside ingestion timing | AC-SCALE-026: every acknowledged write has its genuine native receipt validated. Timing excludes setup, warmup and full readback. After writes settle, an independent real-client readback validates every expected identity and complete value plus actual stored cardinality, rejects extras/missing/duplicate records and mismatched acknowledgements, and compares a deterministic full-content digest. Sampled reads or generated expected counts alone cannot establish a million stored records. Retain real SDK and official MCP success/negative flows; a failed write or readback stays failed. |
+| REQ-SCALE-027: bounded ingestion admission and original settlement | AC-SCALE-027: validate centrally owned typed operational limits before acquiring clients; bound startup, admission, per-call cancellation and drain. On cancellation or failure, stop admitting work, cancel through the original owners, await all original started calls, dispose each original client, settle collector/AppHost shutdown, then remove only owned resources. Preserve original failure objects, native exit codes and unacknowledged/unfinished accounting. A cancellation during actual writes followed by a healthy persisted read and disposal-failure flows must prove settlement; detached continuations, retries or timeout-only success are forbidden. This extends REQ/AC-TUNIT-ENTRY-013/014 in [NativeTUnitEntry](../TestInfrastructure/NativeTUnitEntry.md) without changing their completion and cleanup guarantees. |
+| REQ-SCALE-028: exclusive heavy functional mixed load | AC-SCALE-028: separately selected KeyLoad functional cases concurrently ingest distinct records while other real SDK/official MCP database operations run under bounded load on their own Aspire-owned RF3 resources. Verify acknowledged writes, exact final stored data, operation-specific read-cut/result oracles and healthy follow-up. These cases overlap neither ordinary cases nor another heavy case on the same runner; independent isolated jobs may run concurrently. Original native discovery/reports must prove selection completeness and cleanup. These correctness cases contribute neither performance measurements nor functional coverage totals. Existing six-transition read-cut coverage does not establish sustained mixed load. |
+| REQ-SCALE-029: one canonical scenario set for every comparison database | AC-SCALE-029: every native target adapter executes the same versioned scenario inventory, including the new 1/10/500-client ingestion cases, with identical actual record counts, corpus/seed/payload, operation schedule/count, concurrency, timing boundaries and correctness oracles, plus equivalent effective resource/acknowledgement/durability contracts. The planner and aggregate validate each target against that common inventory and reject missing, substituted or incomparable cells before publishing measurements. Native unsupported capability/topology is an explicit unavailable cell with no invented result. Real isolated Linux execution of the complete shared inventory is required; a target-specific easier workload cannot qualify performance comparison. |
+
+### Ordered task map and current limits
+
+| Task | Requirements / acceptance | Canonical source ownership and integration point | Current status |
+| --- | --- | --- | --- |
+| TASK-SCALE-MEASUREMENT-SCHEDULING-001 | REQ/AC-SCALE-024; NativeTUnitEntry REQ/AC-TUNIT-ENTRY-013/014 | `scripts/Features/TestInfrastructure/run-tests.mjs`, `src/KeyLoad.AppHost/Features/TestInfrastructure/{Configuration,Hosting,Validation}/`, and real selection cases under `tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/Cases/`; root owns workflow joins. | Scheduling repair in this checkpoint; runtime qualification must be reported from actual results. |
+| TASK-SCALE-INGESTION-001 | REQ/AC-SCALE-025..027/029 | New feature-local `Contracts/`, `Configuration/`, `Execution/`, `Validation/` and `Reporting/` under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/`; real ingestion `Cases/`, `Helpers/` and `Assertions/` under `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/`. Reuse native target/session and existing isolated Aspire owner; root owns the shared inventory, AppHost, selection, workflow, complete target matrix and provenance joins. | Not implemented or qualified; exact shared selector/report/inventory contract must be frozen before code or dispatch. |
+| TASK-SCALE-MIXED-LOAD-001 | REQ/AC-SCALE-028; NativeTUnitEntry REQ/AC-TUNIT-ENTRY-013/014 | New `Cases/`, `Helpers/` and `Assertions/` under `tests/KeyLoad.IntegrationTests/Features/DocumentStorage/` with operation assertions in their existing owning slices; root joins native heavy-case selection, exclusive job ownership and coverage exclusion. Reuse `ClusterFixture`, SDK and official MCP client owners. | Not implemented or qualified; exact bounded operation mix, case inventory and final oracles must be specified before code. |
+
+First repair scheduling and retain its actual selection regressions. Next freeze
+the new typed ingestion selectors, bounded execution policy, independent report
+and three-case inventory; then implement full positive, negative and actual-write
+cancellation flows. Specify and implement heavy mixed-load correctness separately.
+Finally qualify each complete mapped scope on exact-source isolated Linux jobs,
+retaining original native reports and resource receipts. Only then may a reviewed
+new cohort/provenance contract join benchmark dispatch and aggregation.
+
+The active dataset inventory remains exactly 100,000 and 1,000,000 records;
+`scaled-100k-c16` and `scaled-1m-c16` retain every existing setting and identity.
+The new ingestion requirement is three cases at the 1,000,000-record size, not a
+replacement for the existing full comparison matrix. No new published figure,
+performance claim or qualification result follows from this document.

@@ -2,6 +2,34 @@
 
 The owner correction on 2026-10-07 requires CI to run native TUnit tests after compilation. TUnit owns test outcomes and native Detailed progress. Existing TUnit fixtures start real Aspire applications and exercise discovered endpoints with the actual C# clients; benchmark workload containers also execute TUnit. Benchmarks remain exclusive to their separate pipeline.
 
+## Functional concurrency and exclusive measurements (2026-10-09)
+
+REQ-TUNIT-ENTRY-013: ordinary independent functional selections default to 20 native TUnit slots, with measured tuning up to 50; comparison selections execute exactly one test at a time. AC-TUNIT-ENTRY-013: execute the actual Node selector and typed AppHost selection with ordinary defaults/20/50 and comparison defaults/1; comparison overrides greater than one fail before resource startup. Direct ComparisonHost container/process entries also pass the native one-test limit. Client concurrency remains a separate workload parameter and is forwarded unchanged. Native Detailed output, original outcomes, deadlines and joined cleanup remain unchanged.
+
+REQ-TUNIT-ENTRY-014: heavy functional ingestion/mixed-operation load cases execute exclusively, separately selected from ordinary parallel suites and coverage contributors. AC-TUNIT-ENTRY-014: native case discovery and original execution reports show no ordinary or second heavy case overlapping the selected load scenario; Aspire owns each genuine RF3 fixture and its cleanup. Independent Linux Actions jobs may overlap only with independent database/client processes, containers and volumes. Heavy correctness tests remain functional acceptance; comparative measurements remain in Benchmarks.
+
+TASK-TUNIT-ISOLATED-MEASUREMENTS-013 has three ordered scopes: root freezes this contract and ADR-117; the scheduling worker owns `scripts/Features/TestInfrastructure/run-tests.mjs`, typed AppHost selection and complete selector regressions; root reviews/joins, runs formatting, the canonical solution build and focused native TUnit regressions. Benchmark inventory review owns read-only inspection of native worker/session serialization and workflow isolation. No packages, database APIs, persisted formats or topology changes are in scope. Rollback removes only the scheduling delta; the owner's isolation requirements remain mandatory. AC-014 and 1/10/500-client million-record ingestion qualification remain open until real complete-flow evidence exists; documentation is not execution evidence.
+
+```mermaid
+flowchart LR
+  Functional[Independent functional tests] --> Parallel[20 slots tuned up to 50]
+  Measurements[Benchmark selection] --> Exclusive[One test per isolated runner]
+  Heavy[Heavy functional load] --> Exclusive
+  Exclusive --> Clients[Scenario owns its concurrent clients]
+  Clients --> Cleanup[Aspire readiness and joined cleanup]
+```
+
+Local scheduling-stage verification2026-10-09: the final complete Release build
+passed with zero warnings/errors; canonical formatter and governance passed.
+Native TUnit executed11/11 functional selector cases and16/16 comparison/model/
+direct-process entry cases with no skips. Original final TRX intervals show11
+overlapping focused functional cases and one comparison case at a time. The
+earlier7/11 and15/16 arrangement failures remain separate originals; their repair
+omits an absent configuration key rather than binding an explicit null as zero.
+This is macOS ARM64 development evidence. Current-source Linux, real heavy load,
+million-record ingestion and full product coverage/CRAP qualification remain open;
+no dataset/client-execution or performance claim follows from selector regressions.
+
 REQ-TUNIT-ENTRY-001: select each functional, scalar, recovery, RF3, site or benchmark project without an outer Aspire CLI invocation. AC-TUNIT-ENTRY-001: native argument regressions verify project/filter/TRX/coverage, bounded parallelism/timeout, scalar environment and rejection of unknown/duplicate options. Actual C# TUnit client operations and measured workload timings remain unchanged.
 
 REQ-TUNIT-ENTRY-002: native RF3 server coverage retains the original source/manifest/collector contract. AC-TUNIT-ENTRY-002: the TUnit session starts only the existing Aspire image prerequisite, propagates the original validated runner environment, removes the recursive runner, observes its original exit and joins output/application/image cleanup. Existing native coverage fixture tests and Linux RF3 coverage receipts qualify this lifecycle.

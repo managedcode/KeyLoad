@@ -13,4 +13,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f9
 WORKDIR /app
 COPY --from=build /app/publish/ ./
 USER $APP_UID
-ENTRYPOINT ["dotnet", "KeyLoad.ComparisonHost.dll", "--output", "Detailed", "--report-trx", "--results-directory", "/reports/TestResults"]
+ENTRYPOINT ["dotnet", "KeyLoad.ComparisonHost.dll", "--output", "Detailed", "--maximum-parallel-tests", "1", "--report-trx", "--results-directory", "/reports/TestResults"]

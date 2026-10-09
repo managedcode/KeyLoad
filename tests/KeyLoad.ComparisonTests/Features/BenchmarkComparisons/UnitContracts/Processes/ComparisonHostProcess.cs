@@ -179,6 +179,8 @@ internal static class ComparisonHostLaunchSettings
     private const string ConnectionColonEnvironmentPrefix = "ConnectionStrings:";
     private const string MissingRepositoryMessage = "The KeyLoad repository root is unavailable.";
     private const string MissingHostMessage = "The Release comparison host is not built.";
+    private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
+    private const string ExclusiveMeasurementParallelism = "1";
 
     internal static ProcessStartInfo Create(string[] arguments, IReadOnlyDictionary<string, string>? environment)
     {
@@ -200,6 +202,8 @@ internal static class ComparisonHostLaunchSettings
         startInfo.ArgumentList.Add(assembly);
         startInfo.ArgumentList.Add("--output");
         startInfo.ArgumentList.Add("Detailed");
+        startInfo.ArgumentList.Add(MaximumParallelTestsArgument);
+        startInfo.ArgumentList.Add(ExclusiveMeasurementParallelism);
         foreach (var key in startInfo.Environment.Keys.Where(IsBenchmarkSetting).ToArray())
         {
             startInfo.Environment.Remove(key);
