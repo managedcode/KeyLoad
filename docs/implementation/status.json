@@ -25,17 +25,18 @@
     "websiteBaselineInputs": 1716,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "sourceStage": "Shared native runner/adapters and exclusive RF3 load implemented. Original e0678227 full solution build, formatter and repository rules passed. All 22 native document cases then failed strict fixture profile selection before acquisition: Benchmarks:Profile was supplied instead of canonical Benchmarks:EvidenceProfile. The fixture now uses existing ComparisonWorkerSelection keys. Native resource pipe deadlock repair with two real PID-bound overflow/healthy follow-up cases is delivered in 50d2a505; original exact-source normal/scalar verification remains pending. Cgroup envelope diagnosis, actual native workloads, heavy RF3 and complete scale qualification remain open; all verification is GitHub Actions only.",
+    "sourceStage": "Shared native workloads and exclusive RF3 load are implemented. Original e0678227 full solution build passed with zero warnings/errors; formatter and repository rules passed. Its interrupted contracts printed 771 passed cases and one CPU-envelope failure without terminal qualification, and old yes was killed by job cleanup. CPU and memory file boundaries now normalize kernel line endings while retaining strict quota/counter grammar, root/minimum/identity contracts and bounds; 23 normative positive/negative/healthy format cases supplement required actual Linux evidence. Native pipe settlement is delivered in 50d2a505 and canonical fixture evidence-profile keys in 6c99f16a. Exact-source normal/scalar, actual native document operations, exclusive 1M RF3 and complete scale remain unqualified. All verification is GitHub Actions only.",
     "verification": {
-      "canonicalBuild": "original_linux_e0678227_full_solution_build_step_passed; completed_original_log_counts_pending; latest_profile_key_and_native_pipe_source_pending",
-      "format": "original_linux_e0678227_canonical_formatter_step_passed; latest_profile_key_and_native_pipe_source_pending",
-      "governance": "original_linux_e0678227_repository_rules_step_passed; latest_profile_key_and_native_pipe_source_pending",
+      "canonicalBuild": "original_linux_e0678227_full_solution_passed_0_warnings_0_errors; latest_native_kernel_text_source_pending",
+      "format": "original_linux_e0678227_canonical_formatter_passed; latest_native_kernel_text_source_pending",
+      "governance": "original_linux_e0678227_repository_rules_passed; latest_native_kernel_text_source_pending",
       "nativeRegressions": "original_linux_0c0378e6_resource_models_107_passed_and_request_admission_3_passed_and_document_admission_15_passed_all_zero_failed_skipped; actual_native_step_22_total_22_failed_0_passed_0_skipped_at_fixture_startup_before_operations; isolated_AppHost_fixture_source_repair_authored; original_852_contracts_interrupted_without_terminal_summary_or_qualification_752_passed_case_lines_and_19_failed_case_lines_observed; controlled_repairs_authored; native_cgroup_envelope_cause_open; heavy_gates_skipped; earlier_local_failure_history_retained",
       "actualLinuxScale": "pending_original_exact_source_workflow",
       "workflowSyntax": "original_linux_0c0378e6_workflow_started_and_plan_passed; latest_repair_source_pending",
       "canonicalPlanner": "original_linux_0c0378e6_plan_passed_418_documents_and_1898_total_named_database_cells",
       "websiteSourceClosure": "original_linux_0388aec6_website_37924688317_qualification_job_113800692024_passed_source_gate_and_406_tests_0_failed_0_skipped; publish_job_113805231381_correctly_rejected_changed_main_SHA_before_deployment",
-      "nativeProbeSettlement": "original_linux_852aef07_contract_suite_interrupted_without_terminal_bounds_case_and_cleanup_killed_yes_pid9158; six_reviewed_individual_pipe_PID_oracle_source_paths_delivered_in_50d2a505; exact_source_normal_scalar_GitHub_qualification_pending"
+      "nativeProbeSettlement": "original_linux_852aef07_contract_suite_interrupted_without_terminal_bounds_case_and_cleanup_killed_yes_pid9158; six_reviewed_individual_pipe_PID_oracle_source_paths_delivered_in_50d2a505; exact_source_normal_scalar_GitHub_qualification_pending",
+      "nativeKernelText": "original_linux_e0678227_CPU_envelope_failure_visible; CPU_period_and_memory_current_newline_formats_verified_from_primary_Linux_source; boundary_only_repairs_and_11_CPU_plus_12_memory_normative_cases_authored; genuine_Linux_envelope_and_server_resource_qualification_pending"
     },
     "latestOriginalLinux": {
       "sourceCommit": "852aef0796e8455e155e1769af9e137d861b2a56",
@@ -81,19 +82,24 @@
       "scaleExecuted": false
     },
     "newestOriginalBuild": {
-      "sourceCommit": "0388aec6868b31239db2e918898b8d121d60d393",
-      "runId": 37924688342,
-      "jobId": 113802654137,
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37924688342/job/113802654137",
-      "conclusion": "failure",
+      "sourceCommit": "e0678227e4f51d15a1c9c924ea06cfab14ab19ed",
+      "runId": 37927497154,
+      "jobId": 113810281715,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37927497154/job/113810281715",
+      "conclusion": "cancelled_after_failed_image_gate_and_known_native_probe_deadlock_to_release_corrected_workflow_queue",
       "buildPassed": true,
       "buildWarnings": 0,
       "buildErrors": 0,
-      "formatterPassed": false,
-      "formatterDiagnosticCount": 23,
-      "formatterFailure": "HeavyDocumentLoadAdmissionTests switch-arm newlines; exact manual source repair authored",
-      "contractsExecuted": false,
-      "scalarContractsExecuted": false
+      "formatterPassed": true,
+      "repositoryRulesPassed": true,
+      "contractSuiteCompleted": false,
+      "contractPassedCaseLinesObserved": 771,
+      "contractFailedCaseLinesObserved": 1,
+      "contractFailure": "Supported Linux host evidence was unavailable.; Native cgroup CPU limit was malformed.",
+      "orphanNativeProcessKilledByJobCleanup": "yes pid9867",
+      "scalarContractsExecuted": false,
+      "artifactId": 11615382803,
+      "artifactDigest": "sha256:8af74567443e190c829f4b05203a9612b9ec8205460a4a65cdb045800ecf98b0"
     },
     "qualification": "No fabricated measurements, no performance winner, no full coverage or production claim; authentic complete current-source Linux workloads and required recovery/RF3 gates remain open.",
     "newestOriginalImageBuild": {

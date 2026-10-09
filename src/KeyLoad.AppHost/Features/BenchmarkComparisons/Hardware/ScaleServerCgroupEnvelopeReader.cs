@@ -83,9 +83,9 @@ internal static class ScaleServerCgroupEnvelopeReader
             ? null : (cpuText, memoryText, setText);
     }
 
-    private static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)
+    internal static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)
     {
-        var parts = cpuText.Split(WhitespaceSeparator, StringSplitOptions.RemoveEmptyEntries);
+        var parts = cpuText.Trim().Split(WhitespaceSeparator, StringSplitOptions.RemoveEmptyEntries);
         if (isRoot && parts.Length == PeriodFieldIndex && parts[NoLimit] == Unlimited)
         {
             return true;

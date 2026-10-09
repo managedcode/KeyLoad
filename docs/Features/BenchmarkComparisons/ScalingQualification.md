@@ -99,6 +99,33 @@ the production parser. A supported Linux envelope test must assert its actual
 value instead of conditionally omitting a null result. This source correction
 changes no sidecar schema, workload, bounds or qualification requirements.
 
+TASK-SCALE-NATIVE-TEXT-026 repairs the existing REQ/AC-SCALE-016 CPU
+file-format boundary. Normalize only leading/trailing file whitespace before
+the existing two-space-separated-field grammar and positive quota/period
+validation; native newline-terminated `cpu.max` must retain its real limit.
+Keep unlimited/root handling, ancestor minima and bounded reads unchanged.
+The independent actual-Linux oracle performs its own boundary normalization,
+without calling the production parser. Focused native-format parser controls
+cover newline/outer whitespace, unlimited/root and minima, malformed interior
+fields and healthy follow-up after rejection. They do not manufacture cgroup
+proof: the existing actual Linux hardware/envelope test must still pass from
+original exact-source GitHub Actions normal/scalar execution. The interrupted
+e0678227 run 37927497154 supplies the original diagnostic "Native cgroup CPU
+limit was malformed"; its partial cases are not complete qualification.
+
+The same stage normalizes leading/trailing native `memory.current` file
+whitespace at ScaleServerProcessMetrics before the sampler consumes its actual
+counter. Preserve nonnegative Int64 bytes, including zero, without scaling,
+clamping or invented values. Reject signs, overflow, interior whitespace and
+malformed numbers; retain existing sample invalidation, original cgroup/PID
+identity, byte bounds, cadence and schema. Normative native-format controls
+assert newline/outer whitespace, zero, Int64 maximum, malformed rejection and
+healthy follow-up. Linux's [cgroup read_u64 output](https://github.com/torvalds/linux/blob/master/kernel/cgroup/cgroup.c)
+emits a newline for the [memory current counter](https://github.com/torvalds/linux/blob/master/mm/memcontrol.c);
+the [CPU quota/period output](https://github.com/torvalds/linux/blob/master/kernel/sched/core.c)
+also ends with a newline. These parser controls supplement the real Linux
+envelope and complete genuine server-resource evidence gates.
+
 ### Native probe cancellation regression repair
 
 TASK-SCALE-NATIVE-PIPE-025 extends the existing REQ/AC-SCALE-016 settlement

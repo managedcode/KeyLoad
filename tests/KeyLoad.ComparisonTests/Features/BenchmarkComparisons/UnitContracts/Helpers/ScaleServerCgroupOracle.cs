@@ -66,7 +66,7 @@ internal static class ScaleServerCgroupOracle
     {
         var path = Path.Combine(directory, CpuFile);
         var text = isRoot ? ReadRootLimit(path) : ReadBounded(path);
-        var fields = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var fields = text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (isRoot && fields.Length == 1 && fields[0] == Unlimited)
         {
             return decimal.MaxValue;

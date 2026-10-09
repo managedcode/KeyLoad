@@ -91,6 +91,13 @@ internal static class ScaleServerProcessMetrics
         return long.TryParse(row?[UsagePrefix.Length..], NumberStyles.None, CultureInfo.InvariantCulture, out usage);
     }
 
+    internal static bool TryMemoryCurrent(string text, out long bytes)
+    {
+        const long MinimumMemoryBytes = 0;
+        return long.TryParse(text.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out bytes)
+            && bytes >= MinimumMemoryBytes;
+    }
+
 }
 
 internal static class ProcessIdentity

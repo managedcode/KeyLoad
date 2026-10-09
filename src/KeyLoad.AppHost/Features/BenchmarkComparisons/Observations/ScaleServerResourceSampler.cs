@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
@@ -155,7 +153,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         }
 
         if (!ScaleServerProcessMetrics.TryUsage(cpuStats, out var usage)
-            || !long.TryParse(memoryCurrent, NumberStyles.None, CultureInfo.InvariantCulture, out var currentMemory)
+            || !ScaleServerProcessMetrics.TryMemoryCurrent(memoryCurrent, out var currentMemory)
             || _samples > BoundaryValue && usage < _lastCpuUsec)
         {
             return InvalidateAfterStart();
