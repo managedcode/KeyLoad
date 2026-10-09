@@ -17,20 +17,24 @@ internal static class ControlledPartitionMovementTargetStageFlow
         PartitionMovementPeerAdmission targetAdmission, ControlledPartitionMovementLoopbackCorpus corpus,
         PartitionMovePhaseResult captured, PartitionMoveSourceFenceRecord originalFence,
         PartitionMovementCaptureHandle originalHandle, PartitionMovementPageResult[] originalPages,
-        string originalCallerAddress, DateTimeOffset originalExpiry, CancellationToken cancellationToken)
+        string originalCallerAddress, DateTimeOffset wholeExpiresAt, CancellationToken cancellationToken)
     {
         var originalModel = ControlledPartitionMovementTargetModelImage.Read(target);
         foreach (var page in originalPages)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var phaseExpiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime,
+                wholeExpiresAt, cancellationToken);
             var authorization = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source,
                 sourceRuntime, sourceAdmission, ControlledPartitionMovementTargetStageRequest.Authorize(
                     captured, originalFence, originalHandle, page, corpus, originalCallerAddress,
-                    originalExpiry), cancellationToken);
+                    phaseExpiry), cancellationToken);
             await Assert.That(authorization.Error).IsNull();
+            var issued = authorization.Get<PartitionMovePhaseResult>();
+            await Assert.That(issued.Grant!.ExpiresAt).IsEqualTo(phaseExpiry);
             var request = ControlledPartitionMovementTargetStageRequest.Stage(captured, originalFence,
-                originalHandle, page, authorization.Get<PartitionMovePhaseResult>(), corpus,
-                originalCallerAddress, originalExpiry);
+                originalHandle, page, issued, corpus,
+                originalCallerAddress, issued.Grant!.ExpiresAt);
             var staged = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(target, targetRuntime,
                 targetAdmission, request, cancellationToken);
             await Assert.That(staged.Error).IsNull();
@@ -56,17 +60,19 @@ internal static class ControlledPartitionMovementTargetStageFlow
             await Assert.That(ControlledPartitionMovementRawImage.Bytes(target.Store)
                 .SequenceEqual(originalImage, StringComparer.Ordinal)).IsTrue();
             await AcknowledgeAsync(source, sourceRuntime, sourceAdmission, corpus, captured,
-                actual, page.Ordinal, originalCallerAddress, originalExpiry, cancellationToken);
+                actual, page.Ordinal, originalCallerAddress, wholeExpiresAt, cancellationToken);
         }
     }
 
     private static async Task AcknowledgeAsync(ControlledPartitionMovementNode source,
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         ControlledPartitionMovementLoopbackCorpus corpus, PartitionMovePhaseResult captured,
-        PartitionMovePhaseResult staged, int ordinal, string callerAddress, DateTimeOffset expiry,
+        PartitionMovePhaseResult staged, int ordinal, string callerAddress, DateTimeOffset wholeExpiresAt,
         CancellationToken cancellationToken)
     {
         var control = captured.Control ?? throw new InvalidOperationException("Actual Captured control is absent.");
+        var expiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, runtime,
+            wholeExpiresAt, cancellationToken);
         var body = NativeSerialization.Serialize(new PartitionMoveAcknowledgeBody(
             ControlledPartitionMovementTargetPhaseIds.Grant(ordinal), staged.Journal));
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,

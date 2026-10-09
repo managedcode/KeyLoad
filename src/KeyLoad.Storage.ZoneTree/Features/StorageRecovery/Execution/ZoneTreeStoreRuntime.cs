@@ -61,7 +61,8 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     internal FileStream Ownership { get; set; } = null!;
     internal FileStream Journal { get; set; } = null!;
     internal IZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
-    internal IMaintainer Maintainer { get; set; } = null!;
+    internal ZoneTreeMaintenanceLifetime? Maintenance { get; set; }
+    internal IMaintainer Maintainer => Maintenance!.Maintainer;
     internal StoreIdentity Identity { get; set; } = null!;
     internal ZoneTreeReadCounters ReadCounters { get; } = new();
     internal ZoneTreePointCache? EmbeddedPointCache { get; }

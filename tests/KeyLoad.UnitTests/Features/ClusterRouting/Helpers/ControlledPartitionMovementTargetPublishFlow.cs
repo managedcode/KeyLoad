@@ -16,15 +16,19 @@ internal static class ControlledPartitionMovementTargetPublishFlow
         ServerRuntimeOptions targetRuntime, PartitionMovementPeerAdmission sourceAdmission,
         PartitionMovementPeerAdmission targetAdmission, ControlledPartitionMovementLoopbackCorpus corpus,
         PartitionMovePhaseResult finalized, ImmutableArray<ResourceDefinition> originalResources,
-        string callerAddress, DateTimeOffset expiry, CancellationToken cancellationToken)
+        string callerAddress, DateTimeOffset wholeExpiresAt, CancellationToken cancellationToken)
     {
         var publication = await ControlledPartitionMovementPublicationRead.ReadAsync(source, corpus, finalized);
+        var expiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime,
+            wholeExpiresAt, cancellationToken);
         var authorization = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, sourceRuntime,
             sourceAdmission, ControlledPartitionMovementTargetPublishRequest.Authorize(finalized,
                 publication, originalResources, corpus, callerAddress, expiry), cancellationToken);
         await Assert.That(authorization.Error).IsNull();
+        var issued = authorization.Get<PartitionMovePhaseResult>();
+        await Assert.That(issued.Grant!.ExpiresAt).IsEqualTo(expiry);
         var request = ControlledPartitionMovementTargetPublishRequest.Publish(finalized, publication,
-            originalResources, authorization.Get<PartitionMovePhaseResult>(), corpus, callerAddress, expiry);
+            originalResources, issued, corpus, callerAddress, issued.Grant!.ExpiresAt);
         var outcome = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(target, targetRuntime,
             targetAdmission, request, cancellationToken);
         await Assert.That(outcome.Error).IsNull();
@@ -36,17 +40,19 @@ internal static class ControlledPartitionMovementTargetPublishFlow
             .SequenceEqual(JsonDefaults.Serialize(publication.Placement))).IsTrue();
         await Assert.That(actual.InstalledReceipt).IsNull();
         await AcknowledgeAsync(source, sourceRuntime, sourceAdmission, corpus, finalized,
-            actual, callerAddress, expiry, cancellationToken);
+            actual, callerAddress, wholeExpiresAt, cancellationToken);
         return actual;
     }
 
     private static async Task AcknowledgeAsync(ControlledPartitionMovementNode source,
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         ControlledPartitionMovementLoopbackCorpus corpus, PartitionMovePhaseResult captured,
-        PartitionMovePhaseResult staged, string callerAddress, DateTimeOffset expiry,
+        PartitionMovePhaseResult staged, string callerAddress, DateTimeOffset wholeExpiresAt,
         CancellationToken cancellationToken)
     {
         var control = captured.Control ?? throw new InvalidOperationException("Actual Captured control is absent.");
+        var expiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, runtime,
+            wholeExpiresAt, cancellationToken);
         var body = NativeSerialization.Serialize(new PartitionMoveAcknowledgeBody(
             ControlledPartitionMovementTargetPhaseIds.PublishGrant(), staged.Journal));
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,

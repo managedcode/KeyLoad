@@ -400,3 +400,7 @@ Read-only discovery is not a scalar operation rerun, coverage measurement or
 complete acceptance. Original R733 eleven read-budget/owner whole flows pass
 locally with unchanged exact budgets; full normal/recovery, original Linux
 RF3 and admitted merged product coverage remain separately required.
+
+## Native unit-image producer/consumer join
+
+TASK-CQ-UNIT-IMAGE-PRODUCER-044 implements REQ-CQ-009/AC-CQ-044. Root freezes the exact existing unit sidecar contract, emits it via Get-FcTestIdentitySnapshot, then exercises the actual strict Read-FcTestIdentityManifest through the existing owned bounded native-process runner. The complete prepare/read/tamper/reject/restore/read/create-only flow preserves original bytes, errors, joined exit/readers/disposal and every current source/PE/PDB binding. Root updates the exact normal/scalar contributor identity oracle alongside the eight genuine maintenance flows, builds/formats, runs focused native normal/scalar operations and publishes one coherent checkpoint for Linux qualification. No permissive reader, historical label fallback, database format, dependency, topology or numeric coverage claim belongs to this repair; rollback restores the coherent producer/consumer pair and retains the original reports.

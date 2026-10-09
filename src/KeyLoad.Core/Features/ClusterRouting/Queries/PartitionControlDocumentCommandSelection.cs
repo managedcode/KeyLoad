@@ -43,6 +43,8 @@ public sealed partial class DatabaseEngine
         if (record is not null && record.Fingerprint != CommandFingerprint(original))
         { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
         var previous = CommandOutcomeKeyResolver.Select(view, original.PrincipalId, original.Id, scope).Outcome;
+        if (record is null && previous is null && command.OwnershipEpoch != placement.PlacementEpoch)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage); }
         var outcome = previous is null ? null : ResolveControlledDocumentOutcomeView(view, original, command);
         return new(control, placement, controlPrincipal.Id, identity, record, outcome);
     }

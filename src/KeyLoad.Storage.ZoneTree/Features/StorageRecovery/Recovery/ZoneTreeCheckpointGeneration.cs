@@ -66,7 +66,7 @@ internal static class ZoneTreeCheckpointGeneration
             runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             runtime.SetPosition(InitialJournalPosition);
             ZoneTreeJournalRecovery.Recover(runtime);
-            runtime.Maintainer = runtime.Tree.CreateMaintainer();
+            runtime.Maintenance = new(runtime.Tree, runtime.Options.MaintenanceExecution, TimeProvider.System);
             return;
         }
 

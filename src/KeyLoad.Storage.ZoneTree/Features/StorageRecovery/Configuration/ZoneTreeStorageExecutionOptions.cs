@@ -7,7 +7,7 @@ public sealed record ZoneTreeStorageExecutionOptions
     /// <summary>The storage execution configuration section.</summary>
     public const string SectionName = "KeyLoad:StorageExecution";
     /// <summary>The rejection for invalid storage execution policy.</summary>
-    public const string ValidationMessage = "Storage execution budgets must be positive and native read-cut deadlines must fit the native timer range.";
+    public const string ValidationMessage = "Storage execution budgets must be positive; native timer durations must fit their range and maintenance intervals must be at least one millisecond.";
     /// <summary>The unchanged default journal frame budget, also exposed by standalone store descriptors.</summary>
     public const int DefaultMaxFrameBytes = 33_554_432;
     /// <summary>The unchanged default complete snapshot budget.</summary>
@@ -24,6 +24,8 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const int DefaultStreamBufferBytes = 4_096;
     private const int DefaultMaximumBackupManifestBytes = 16_384;
     private const int DefaultMaximumIdentityFileBytes = 4_096;
+    private const int DefaultNativeMaintenanceIntervalSeconds = 30;
+    private const int DefaultNativeBlockCacheLifetimeSeconds = 60;
     private const int MinimumPositiveBudget = 1;
     private const long MaximumTimerMilliseconds = 4_294_967_294;
     private static readonly TimeSpan MaximumNativeTimerDuration = TimeSpan.FromMilliseconds(MaximumTimerMilliseconds);
@@ -47,6 +49,11 @@ public sealed record ZoneTreeStorageExecutionOptions
     /// <summary>The maximum admitted duration of a captured native read cut.</summary>
     public TimeSpan MaximumReadCutElapsed { get; init; } = TimeSpan.FromMinutes(DefaultMaximumReadCutElapsedMinutes);
 
+    /// <summary>The interval of the physically owned native cache-cleanup task.</summary>
+    public TimeSpan NativeMaintenanceInterval { get; init; } = TimeSpan.FromSeconds(DefaultNativeMaintenanceIntervalSeconds);
+    /// <summary>The inactive native block-buffer lifetime before cleanup.</summary>
+    public TimeSpan NativeBlockCacheLifetime { get; init; } = TimeSpan.FromSeconds(DefaultNativeBlockCacheLifetimeSeconds);
+
     /// <summary>Maximum bytes used for FileBufferBytes during storage and offline operations.</summary>
     public int FileBufferBytes { get; init; } = DefaultFileBufferBytes;
     /// <summary>Maximum bytes used for IdentityBufferBytes during storage and offline operations.</summary>
@@ -65,6 +72,8 @@ public sealed record ZoneTreeStorageExecutionOptions
         && MaximumRangeRecords >= MinimumPositiveBudget && MaximumRangeWorkBytes >= MinimumPositiveBudget
         && MaximumReadCutRecords >= MinimumPositiveBudget && MaximumReadCutExaminedBytes >= MinimumPositiveBudget
         && MaximumReadCutElapsed > TimeSpan.Zero && MaximumReadCutElapsed <= MaximumNativeTimerDuration
+        && NativeMaintenanceInterval.TotalMilliseconds >= MinimumPositiveBudget && NativeMaintenanceInterval <= MaximumNativeTimerDuration
+        && NativeBlockCacheLifetime >= TimeSpan.Zero && NativeBlockCacheLifetime <= MaximumNativeTimerDuration
         && FileBufferBytes is >= MinimumPositiveBudget and <= DefaultFileBufferBytes
         && IdentityBufferBytes is >= MinimumPositiveBudget and <= DefaultIdentityBufferBytes
         && StreamBufferBytes is >= MinimumPositiveBudget and <= DefaultStreamBufferBytes
@@ -79,4 +88,5 @@ public sealed record ZoneTreeStorageExecutionOptions
             throw new InvalidOperationException(ValidationMessage);
         }
     }
+
 }

@@ -17,7 +17,7 @@ internal static class ControlledPartitionMovementInstallationScenario
         ControlledPartitionMovementLoopbackCorpus corpus, ServerRuntimeOptions sourceRuntime,
         ServerRuntimeOptions targetRuntime, PartitionMovementPeerAdmission sourceAdmission,
         PartitionMovementPeerAdmission targetAdmission, string callerAddress, byte[] originalReceipt,
-        long initialPosition, CancellationToken cancellationToken)
+        long initialPosition, DateTimeOffset wholeExpiresAt, CancellationToken cancellationToken)
     {
         var capture = await ControlledPartitionMovementCaptureScenario.ExecuteAsync(source, target, corpus,
             sourceRuntime, sourceAdmission, callerAddress, originalReceipt, initialPosition, cancellationToken);
@@ -27,14 +27,16 @@ internal static class ControlledPartitionMovementInstallationScenario
             ?? throw new InvalidOperationException("Actual original source fence is absent.");
         await ControlledPartitionMovementTargetStageFlow.ExecuteAsync(source, target, sourceRuntime,
             targetRuntime, sourceAdmission, targetAdmission, corpus, capture.Captured, fence,
-            capture.Handle, capture.Pages, callerAddress, capture.Handle.ExpiresAt, cancellationToken);
+            capture.Handle, capture.Pages, callerAddress, wholeExpiresAt, cancellationToken);
         var terminal = await ControlledPartitionMovementTargetInstallFlow.ExecuteAsync(source, target,
             sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, corpus, capture.Captured,
-            fence, capture.Handle, callerAddress, capture.Handle.ExpiresAt, cancellationToken);
+            fence, capture.Handle, callerAddress, wholeExpiresAt, cancellationToken);
         await ControlledPartitionMovementInstalledModelImage.AssertAsync(target, corpus, capture.Pages);
         var installed = await ControlledPartitionMovementInstalledAdvance.ExecuteAsync(source, sourceRuntime,
             sourceAdmission, corpus, capture.Captured, capture.Handle.Descriptor, terminal,
-            capture.Handle.PageCount, callerAddress, capture.Handle.ExpiresAt, cancellationToken);
+            capture.Handle.PageCount, callerAddress,
+            ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime, wholeExpiresAt, cancellationToken),
+            cancellationToken);
         return (installed, terminal, fence, capture.Handle, capture.Pages);
     }
 }

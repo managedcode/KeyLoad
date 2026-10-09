@@ -54,6 +54,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         var prepared = await ProductionSourceManifestProcess.RunAsync(executionOptions, Prepare, evidenceRoot, cancellationToken);
         await AssertSuccessfulProcessAsync(prepared);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
+        await NativeUnitImageAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
         await NativeCoverageRf3ContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
         await VerifyTamperRejectedAsync(ManifestFile, cancellationToken);
         await VerifyTamperRejectedAsync("functional-coverage.test-image.recovery.json", cancellationToken);

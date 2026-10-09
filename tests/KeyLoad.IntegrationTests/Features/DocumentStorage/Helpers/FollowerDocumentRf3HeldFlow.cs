@@ -21,7 +21,7 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
         state.Request = new(FollowerDocumentRf3Protocol.Version, reference, state.ReplicaId,
             state.Change == FollowerDocumentChange.Lag ? FollowerDocumentRf3Protocol.ZeroLag : FollowerDocumentRf3Protocol.UnlimitedLag, minimum);
         state.ArmId = state.Controls!.WriteArm(state.Identity.PrincipalId, Guid.Empty, GrainReadKind.FollowerDocument,
-            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold, targetVoter: state.ReplicaId);
+            RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         state.CallLifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
         state.Pending = FollowerDocumentPublicObservation.InvokeAsync(state.Mode, state.Caller!.Sdk, state.Caller.Mcp, state.Request, state.CallLifetime.Token);
         state.Observed = await state.Controls.WaitForMarkerAsync(state.ArmId, RequestCqrsProbePhase.AuthorizationReload,

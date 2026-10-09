@@ -194,6 +194,7 @@ function Get-PsmProductRows([string] $Root) {
 }
 
 function Get-PsmTestImage([string] $Root, [string] $ProjectName) {
+    if ($ProjectName -ceq 'KeyLoad.UnitTests') { return Get-FcTestIdentitySnapshot $Root }
     $identity = Get-PsmProjectIdentity $Root $ProjectName $true
     [ordered]@{
         schemaVersion = 1

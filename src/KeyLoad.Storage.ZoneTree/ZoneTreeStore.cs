@@ -44,7 +44,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         cacheExecutionPolicy = cacheExecutionOptions.Value;
         ArgumentNullException.ThrowIfNull(cacheExecutionPolicy);
         cacheExecutionPolicy.Validate();
-        var resolved = options.WithExecutionSnapshot(executionPolicy);
+        var resolved = options.ResolveExecutionOptions(executionOptions);
         if (resolved.EmbeddedPointCache is { } embedded)
         {
             resolved = resolved with { EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy) };

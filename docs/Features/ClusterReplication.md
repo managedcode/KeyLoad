@@ -505,3 +505,12 @@ credential/grant/field-policy changes, lag/cancel/no-quorum and full restoration
 all runtime gates remain pending. This point-document stage does not close the
 broader KL021 model/read-mode inventory. No offline authorization, silent
 fallback, remote owner substitution, latency or production claim is made.
+
+
+## TASK-KL021-NATIVE-CAPABILITY-OBSERVATION-004
+
+REQ/AC-MTOKEN-ISOLATION-003 retains exact single-capability admission, every native network/name/image/user/source/incarnation guard and the original failure/cleanup order. Current f80/run37861333290 normal and scalar former-leader originals first reject Capability after network-mode equality to the attached native network ID passed. Their schema2 row does not retain the capability literal; it cannot establish which alternative spelling was supplied. Docker 28.0.4 daemon validation discards the normalized capability return, stores the supplied HostConfig and returns that HostConfig in inspect. Do not infer a returned spelling merely from NormalizeLegacyCapabilities.
+
+Ordered additive evidence contract: emit schema3 with the existing closed mismatch/network booleans and only three capability booleans: exact single value, sole exact NET_ADMIN, sole exact CAP_NET_ADMIN. Never emit a native literal, identifier, address, image, payload or credential. Neither capability predicate changes admission: the sole exact NET_ADMIN remains required. No alias fallback, deadline change, policy change, privilege or topology change. The complete Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm native SDK/official MCP/Q1 refusal/restoration flow remains required on current Linux; diagnostics and supporting controls cannot qualify it.
+
+Ownership: IntegrationTests ClusterReplication Diagnostics owns the bounded row; Cases owns a supporting complete strict-admission rejection→healthy control, with independently literal full diagnostic rows. Root joins/compiles and binds its ordinary classification to actual native metadata. ADR-017 remains the owning namespace/session contract. Verify wrong, prefixed, absent and multiple capabilities remain rejected, then the unchanged exact sole capability and exact network are admitted. Preserve all original failed reports; fresh authentic Linux originals must identify the actual producer before any producer/schema correction.

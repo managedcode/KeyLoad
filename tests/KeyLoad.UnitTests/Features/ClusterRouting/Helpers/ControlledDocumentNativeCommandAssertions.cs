@@ -12,6 +12,7 @@ internal static class ControlledDocumentNativeCommandAssertions
     private const long NativeApplyStep = 1;
     private const long InitialRevision = 1;
     private const long UpdatedRevision = 2;
+    private const long PublishedOwnershipEpoch = 2;
     private const string UpdatedJson = "{\"state\":\"derived\",\"text\":\"Київ knowledge\"}";
     private const string Collection = "movement-documents";
     private const string DocumentId = "knowledge-1";
@@ -32,7 +33,7 @@ internal static class ControlledDocumentNativeCommandAssertions
         await Assert.That(original.PrincipalId).IsEqualTo(Principal);
         await Assert.That(original.Kind).IsEqualTo(OperationKind.Batch);
         var expectedRequest = new CommandRequest(OriginalId, Partition,
-            [new PutDocument(Collection, DocumentId, UpdatedJson, InitialRevision, ExplicitReplacement: true)]);
+            [new PutDocument(Collection, DocumentId, UpdatedJson, InitialRevision, ExplicitReplacement: true)], PublishedOwnershipEpoch);
         var expectedOriginal = source.Database.CreateNativeOperation(OperationKind.Batch, OriginalId, Principal,
             original.EvaluatedAt, NativeSerialization.Serialize(expectedRequest));
         await Assert.That(original.NativePayload.Span.SequenceEqual(expectedOriginal.NativePayload.Span)).IsTrue();
@@ -81,7 +82,7 @@ internal static class ControlledDocumentNativeCommandAssertions
     {
         var changed = new CommandRequest(original.Id, Partition,
             [new PutDocument(Collection, DocumentId,
-                ChangedJson, UpdatedRevision, ExplicitReplacement: true)]);
+                ChangedJson, UpdatedRevision, ExplicitReplacement: true)], PublishedOwnershipEpoch);
         var issued = source.Database.CreateNativeOperation(OperationKind.Batch, original.Id, original.PrincipalId,
             source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(changed));
         var work = new ReadExecutionBudget(Options.Create(source.Database.Limits), source.Database.EvaluationClock, token);

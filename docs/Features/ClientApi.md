@@ -793,3 +793,28 @@ Q1 SELECT/AST and broader model stale modes are explicitly unsupported.
 REQ/AC-CLIENT-004/005 and ADR039/117 retain the original real cold-root, built CLI, persisted nonadministrator, exact command replay/conflict and owned-root removal flow. Both original and healthy complete CommitReceipt values must independently equal the literal command ID/partition/mutation/durability model with incarnation and placement epoch obtained from the actual administrator-authorized native placement operation after the original commit. The observed positive original position is validated by an actual SDK MinimumToken read; the healthy position must strictly exceed it and is likewise validated by the real MinimumToken document read. Position is observed, never reserved as previous+1 or borrowed from a potentially stale Status snapshot. Full literal documents, both native-byte original receipt replay comparisons and every existing negative assertion remain intact. After the healthy replacement, another original-ID replay retains the full original receipt and the later document remains unchanged.
 
 Ownership: existing IntegrationTests ClientApi ColdBootstrapSdkAssertions and ColdBootstrapSdkFlow; no product, route, schema, topology, deadline or fixture-lifetime change. Existing ADR039 owns public client outcomes and ADR117 native fixture execution, so an additional ADR is N/A. The same current native ColdBootstrapSdkTests case qualifies this delta only after a fresh root build and authenticated Linux normal/scalar task RF3 originals; earlier images remain historical evidence. Broader SQL/model requirements and unrelated task gates are unchanged.
+
+### KL-014 original task acceptance, 2026-10-09
+
+REQ/AC-CLIENT-004/005, REQ-CLIENT-002 and AC-MP-009 close the original KL-014
+standalone server, CLI/config/data directory and typed SDK outcome criteria at
+source `f80ba2ba36a968858467eb33ad8abc45cd090e74`.
+[Normal job 113597517490](https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517490)
+and [scalar job 113597517434](https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517434)
+each passed the exact declared twelve-case union: seven real Kestrel transport
+controls and five complete Aspire RF3 SDK/official MCP flows, with no skipped
+cases. The cold bootstrap uses actual fresh roots, built CLI configuration and
+persisted nonadministrator authorization. Interrupted submit retains the same
+command identity and content on retry; changed content conflicts, original
+receipt replay remains exact after healthy continuation, and actual minimum-token
+reads validate the complete literal state and independently checked native
+receipts.
+
+Original artifact IDs `11587300185` and `11586618347` have SHA256
+`de6ed3ab025e00bfe34dfb2ed6311bb7833e08e21dec6f2b48ab3a1d435ccd49`
+and `538fd1dceb776b6124e63e8b21d82d099902414a0eef2bf1284bce474553c18f`.
+Native UID/TRX unions, source/PDB bindings, unchanged prepared/before/after
+images, original process/reader joins, source verification and owned registry
+removal were authenticated. The status tracker retains the per-profile receipts.
+This closure covers the original task criteria; current complete normal/scalar,
+full RF3, coverage, endurance, power-loss and performance gates remain open.

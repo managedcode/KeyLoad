@@ -600,3 +600,10 @@ owning contract and qualification. Administration/authentication/placement and
 policy reads retain fresh authority; no stale credential/policy mode is planned.
 The exact private supported/unsupported read inventory is preserved alongside
 the packet and must not be replaced by a whole-task done claim.
+
+
+### TASK-KL021-FOLLOWER-ARM-SCHEMA-002
+
+REQ/AC-FOLLOWERREAD-001..005 and ADR-117 retain the original authenticated f80 source/run37861333290 attempt1 normal/scalar task failures: each original native union executed113 cases,84 passed and29 failed. All28 follower cases rejected the fixture-created AuthorizationReload arm before the held database flow because it included TargetVoter, a field the unchanged canonical probe contract permits only for CanonicalJournalFlushed. The fixture must submit the ordinary AuthorizationReload arm with its canonical extra fields null. Actual follower selection remains the independently chosen SDK/MCP endpoint and native request placement; the observed actual voter must still exactly equal the selected ReplicaId, and every full held-cut, credential/grant/field-policy/lag/cancellation/quorum refusal, producer settlement and healthy native-minimum continuation remains unchanged. No probe decoder, authority, route, error oracle, deadline or resource ownership change is allowed. This caller repair requires fresh complete current-source Linux task cells; original failures remain failures. The separate reachable former-leader namespace admission failure is not repaired or qualified by this change.
+
+Ownership: DocumentStorage FollowerDocumentRf3HeldFlow and this feature qualification contract. Existing ADR-017 and ADR-117 cover unchanged follower/read and native fixture boundaries; ADR: N/A for this exact fixture argument correction.

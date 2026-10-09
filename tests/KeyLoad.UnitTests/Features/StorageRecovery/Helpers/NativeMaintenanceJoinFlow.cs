@@ -74,7 +74,7 @@ internal static class NativeMaintenanceJoinFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task VerifyReopenAsync(string root, string[] image, long position, Guid identity)
+    internal static async Task VerifyReopenAsync(string root, string[] image, long position, Guid identity)
     {
         NativeMaintenanceState.ExclusiveFiles(root);
         await VerifyOpeningAsync(root, image, position, identity, healthy: false);
@@ -110,7 +110,7 @@ internal static class NativeMaintenanceJoinFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static void Seed(ZoneTreeStore store)
+    internal static void Seed(ZoneTreeStore store)
     {
         store.Commit((tx, _) =>
         {
@@ -126,7 +126,7 @@ internal static class NativeMaintenanceJoinFlow
         });
     }
 
-    private static async Task ObserveAcquiredWriterAsync(ZoneTreeStoreRuntime runtime, Task disposal, CancellationToken token)
+    internal static async Task ObserveAcquiredWriterAsync(ZoneTreeStoreRuntime runtime, Task disposal, CancellationToken token)
     {
         while (true)
         {

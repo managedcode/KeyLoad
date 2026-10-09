@@ -28,13 +28,19 @@ internal static class ZoneTreeStoreHandleDisposal
 
     internal static void RetireMaintainer(ZoneTreeStoreRuntime runtime)
     {
-        if (runtime.Maintainer is not { } maintainer)
+        if (runtime.Maintenance is not { } maintenance)
         {
             return;
         }
 
-        maintainer.Dispose();
-        runtime.Maintainer = null!;
+        try
+        {
+            maintenance.Dispose();
+        }
+        finally
+        {
+            runtime.Maintenance = null;
+        }
     }
 
     internal static void RetireTree(ZoneTreeStoreRuntime runtime)

@@ -16,7 +16,7 @@ internal static class ZoneTreeStoreInitializer
             ZoneTreeJournalPreflight.Validate(runtime.Journal, runtime.Options, runtime.Identity.FormatVersion);
             runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
             ZoneTreeJournalRecovery.Recover(runtime);
-            runtime.Maintainer = runtime.Tree.CreateMaintainer();
+            runtime.Maintenance = new(runtime.Tree, runtime.Options.MaintenanceExecution, TimeProvider.System);
             ZoneTreeCheckpointReclaimer.Reclaim(runtime.Options.Directory);
         }
         catch (Exception)

@@ -1811,6 +1811,262 @@
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy Q1 metadata read"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-003"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-003"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     }
   ]
 }

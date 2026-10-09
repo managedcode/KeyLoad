@@ -5,8 +5,8 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
 internal static class ProductionSourceManifestContributorAssertions
 {
     private const int RegistrySchemaVersion = 1;
-    private const int ExpectedUnitRows = 41;
-    private const int ExpectedScalarRows = 41;
+    private const int ExpectedUnitRows = 49;
+    private const int ExpectedScalarRows = 49;
     private const int ExpectedRecoveryRows = 1;
     private const int ExpectedRf3Rows = 11;
     private const int MaximumIdentityFieldCharacters = 512;

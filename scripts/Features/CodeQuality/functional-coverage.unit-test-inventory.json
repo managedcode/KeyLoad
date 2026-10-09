@@ -52533,6 +52533,150 @@
         "AC-FOLLOWERREAD-003",
         "AC-FOLLOWERREAD-004"
       ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMaintenancePeriodicLifetimeTests.cs",
+      "sourceSha256": "38e161af6676b43c3bc039a3548686cd985793a5e738bea4f114883c12b8179b",
+      "lineNumber": 5,
+      "endLineNumber": 9,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-002"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMaintenancePeriodicLifetimeTests.cs",
+      "sourceSha256": "38e161af6676b43c3bc039a3548686cd985793a5e738bea4f114883c12b8179b",
+      "lineNumber": 5,
+      "endLineNumber": 9,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
+      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/ZoneTreeMaintenancePolicyTests.cs",
+      "sourceSha256": "73e0ff78e200d10235b8512574cc8cc5970487bb9064660f69cd6c11cc28ff36",
+      "lineNumber": 12,
+      "endLineNumber": 71,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MAINTENANCE-JOIN-004"
+      ]
     }
   ],
   "requiredNonContributorCases": [
@@ -63395,7 +63539,7 @@
     },
     {
       "groupId": "unit-functional-04",
-      "selector": "/*/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnnProjectionPinB*)|(AnnSeedM*)|(Ar*)|(AtomicPartitionPlacementQ*)|(AtomicPartitionRosterP*)|(BlobAgentD*)|(BlobCo*)|(BlobG*)|(BlobQ*)|(BlobRa*)|(BlobStorageL*)|(CacheControlWireC*)|(CacheControlWireD*)|(CacheControlWireG*)|(CacheControlWireR*)|(CacheM*)|(CacheReadPermitA*)|(ClusterPrincipalP*)|(CommandA*)|(CommandOutcomeA*)|(CoreN*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(DocumentF*)|(DocumentI*)|(Ep*)|(EventA*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionM*)|(GraphCrossPartitionRep*)|(GraphSearchA*)|(GraphShortestPathA*)|(Ht*)|(HybridQualityR*)|(JsonP*)|(JsonTextP*)|(KeyCodecT*)|(McpGatewayC*)|(McpI*)|(McpNativeAuthenticationM*)|(MetadataI*)|(NativeCqrsG*)|(NativeG*)|(NativeMa*)|(NativeOperationC*)|(NativeOperationS*)|(NativePublicC*)|(NativeQ*)|(NativeReadCutCl*)|(NativeReade*)|(NativeReq*)|(NativeSagaTimeoutF*)|(NativeTextProjectionF*)|(NativeUnknownWellKnownHeaderT*)|(OrleansWalC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionRecordP*)|(PhysicalShardCatalogA*)|(PhysicalShardCatalogV*)|(QueryAdapterT*)|(QueryR*)|(RecurringO*)|(RelationalS*)|(RemoteTransferD*)|(RemoteTransferI*)|(ReplicaC*)|(ReplicaG*)|(ReplicaMembershipN*)|(ReplicaNativeA*)|(ReplicaNativeC*)|(ReplicaReplayC*)|(ReplicaT*)|(RequestCqrsCohortC*)|(Rev*)|(RuntimeJournalN*)|(RuntimeJournalR*)|(SampleAggregateW*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRollupR*)|(Seri*)|(SqlBetweenRa*)|(SqlInnerJoinB*)|(SqlInnerJoinO*)|(SqlTriviaE*)|(StreamC*)|(TopicRetentionBa*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeCoordinatedPointCacheF*)|(ZoneTreePointCacheC*)|(ZoneTreePointCacheD*)|(ZoneTreePointCacheF*)|(ZoneTreePointCacheOwnerI*)/(*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!AppendedMethodsPreserveExistingWireOrdinals*)&(!GrammarAtomsRetainPositiveBoundedProgressAndOriginalOffsets*)&(!InvalidNativeClientCadenceFailsStartupBeforeInspection*)&(!LegacyJsonWrongTypeAndTrailingNativeSnapshotAreCorruptionWithoutFallback*)&(!NativeConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload*)&(!NativeFunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes*)&(!OmittedNativeSettingsRetainTheIndependentOriginalDefault*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
+      "selector": "/*/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnnProjectionPinB*)|(AnnSeedM*)|(Ar*)|(AtomicPartitionPlacementQ*)|(AtomicPartitionRosterP*)|(BlobAgentD*)|(BlobCo*)|(BlobG*)|(BlobQ*)|(BlobRa*)|(BlobStorageL*)|(CacheControlWireC*)|(CacheControlWireD*)|(CacheControlWireG*)|(CacheControlWireR*)|(CacheM*)|(CacheReadPermitA*)|(ClusterPrincipalP*)|(CommandA*)|(CommandOutcomeA*)|(CoreN*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(DocumentF*)|(DocumentI*)|(Ep*)|(EventA*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionM*)|(GraphCrossPartitionRep*)|(GraphSearchA*)|(GraphShortestPathA*)|(Ht*)|(HybridQualityR*)|(JsonP*)|(JsonTextP*)|(KeyCodecT*)|(McpGatewayC*)|(McpI*)|(McpNativeAuthenticationM*)|(MetadataI*)|(NativeCqrsG*)|(NativeG*)|(NativeMa*)|(NativeOperationC*)|(NativeOperationS*)|(NativePublicC*)|(NativeQ*)|(NativeReadCutCl*)|(NativeReade*)|(NativeReq*)|(NativeSagaTimeoutF*)|(NativeTextProjectionF*)|(NativeUnknownWellKnownHeaderT*)|(OrleansWalC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionRecordP*)|(PhysicalShardCatalogA*)|(PhysicalShardCatalogV*)|(QueryAdapterT*)|(QueryR*)|(RecurringO*)|(RelationalS*)|(RemoteTransferD*)|(RemoteTransferI*)|(ReplicaC*)|(ReplicaG*)|(ReplicaMembershipN*)|(ReplicaNativeA*)|(ReplicaNativeC*)|(ReplicaReplayC*)|(ReplicaT*)|(RequestCqrsCohortC*)|(Rev*)|(RuntimeJournalN*)|(RuntimeJournalR*)|(SampleAggregateW*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRollupR*)|(Seri*)|(SqlBetweenRa*)|(SqlInnerJoinB*)|(SqlInnerJoinO*)|(SqlTriviaE*)|(StreamC*)|(TopicRetentionBa*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeCoordinatedPointCacheF*)|(ZoneTreeM*)|(ZoneTreePointCacheC*)|(ZoneTreePointCacheD*)|(ZoneTreePointCacheF*)|(ZoneTreePointCacheOwnerI*)/(*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!AppendedMethodsPreserveExistingWireOrdinals*)&(!GrammarAtomsRetainPositiveBoundedProgressAndOriginalOffsets*)&(!InvalidNativeClientCadenceFailsStartupBeforeInspection*)&(!LegacyJsonWrongTypeAndTrailingNativeSnapshotAreCorruptionWithoutFallback*)&(!NativeConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload*)&(!NativeFunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes*)&(!OmittedNativeSettingsRetainTheIndependentOriginalDefault*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
       "classNames": [
         "KeyLoad.UnitTests.Features.AdminDashboard.AdminCatalogTests",
         "KeyLoad.UnitTests.Features.Authorization.ClusterPrincipalPolicyTests",
@@ -63513,6 +63657,7 @@
         "KeyLoad.UnitTests.Features.StorageRecovery.DocumentIndexCommittedScanTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenanceLifetimeTests",
+        "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCleanupTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutClockTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.OrleansWalCorruptionTests",
@@ -63521,6 +63666,7 @@
         "KeyLoad.UnitTests.Features.StorageRecovery.ReverseTransactionRangeTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.RuntimeJournalReaderFenceTests",
         "KeyLoad.UnitTests.Features.StorageRecovery.RuntimeJournalReaderLifecycleTests",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkStoreReopenTests",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleChunkWireTests",
@@ -63962,6 +64108,8 @@
         "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests|StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide|StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide",
         "KeyLoad.UnitTests.Features.StorageRecovery.KeyCodecTests|TenThousandSeededDecimalKeysRoundTripAndSortNumerically|TenThousandSeededDecimalKeysRoundTripAndSortNumerically",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenanceLifetimeTests|AcStorageMaintenanceJoin001ObservedNativeDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen|AcStorageMaintenanceJoin001ObservedNativeDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen",
+        "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests|AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen|AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests|AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen|AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutCleanupTests|AcCut003CleanupRetainsEmptyAndNestedAggregateFailures|AcCut003CleanupRetainsEmptyAndNestedAggregateFailures",
         "KeyLoad.UnitTests.Features.StorageRecovery.NativeReadCutClockTests|ExpiredNativeLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes|ExpiredNativeLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
         "KeyLoad.UnitTests.Features.StorageRecovery.OrleansWalCorruptionTests|AcWal003ChecksummedInvalidBinaryFrameFailsWithoutApplyingAnyMutation|AcWal003ChecksummedInvalidBinaryFrameFailsWithoutApplyingAnyMutation(DefaultRecord)",
@@ -63997,6 +64145,12 @@
         "KeyLoad.UnitTests.Features.StorageRecovery.RuntimeJournalReaderFenceTests|AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation|AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(2)",
         "KeyLoad.UnitTests.Features.StorageRecovery.RuntimeJournalReaderLifecycleTests|AcNative001BornCurrentStoreReplaysCompactsBacksUpRestoresAndContinues|AcNative001BornCurrentStoreReplaysCompactsBacksUpRestoresAndContinues",
         "KeyLoad.UnitTests.Features.StorageRecovery.RuntimeJournalReaderLifecycleTests|AcNative001CurrentSnapshotInstallPreservesCurrentCapabilityAndExactState|AcNative001CurrentSnapshotInstallPreservesCurrentCapabilityAndExactState",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
+        "KeyLoad.UnitTests.Features.StorageRecovery.ZoneTreeMaintenancePolicyTests|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen|InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests|AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation|AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests|AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation|AcSeries010EmptyRangesRemainDenseAndInvalidWidthOrInvertedRangesFailValidation",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleAggregateWindowTests|AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange|AcSeries010MaximumTickUsesNullEndAndWidthMayExceedRange",

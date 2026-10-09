@@ -1202,6 +1202,8 @@ does not qualify a build or contributor.
   candidate HEAD, contractSha256 binds the original frozen production contract,
   and settingsSha256 binds the original captured collector settings. No guessed
   exit, synthetic TUnit report or mutable late compilation snapshot is admitted.
+TASK-CQ-UNIT-IMAGE-PRODUCER-044 freezes the native unit-image producer/consumer join under REQ-CQ-009 and AC-CQ-044 before repair. The production manifest must produce the unit/scalar sidecar through the existing canonical Get-FcTestIdentitySnapshot API so its exact qualification, source, compile receipt and DLL/PDB fields are accepted unchanged by Read-FcTestIdentityManifest. Do not add a fallback label, weaken the reader or rewrite an emitted sidecar. The existing complete ProductionSourceManifestOperationTests flow must run the actual unit reader against the freshly prepared sidecar, reject a changed qualification without replacing the original, restore it and admit a healthy follow-up. Root owns the producer, native-process helper, reviewed contributor identity/count oracle and coherent source/inventory join; exact-source Linux and numeric coverage gates remain mandatory. The eight new StorageRecovery complete operations are explicit contributor identities in both normal/scalar registries, never tooling contributors.
+
 - AC-CQ-045: MTP reports and RF3 fixtures are separate explicit groups. Unit and
   scalar runs do not acquire a fictitious server roster. Each actual contributing
   RF3 fixture supplies exactly three original node context/terminal/report records.

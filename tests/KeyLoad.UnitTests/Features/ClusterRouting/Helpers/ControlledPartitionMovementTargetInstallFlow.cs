@@ -17,20 +17,24 @@ internal static class ControlledPartitionMovementTargetInstallFlow
         PartitionMovementPeerAdmission targetAdmission, ControlledPartitionMovementLoopbackCorpus corpus,
         PartitionMovePhaseResult captured, PartitionMoveSourceFenceRecord originalFence,
         PartitionMovementCaptureHandle originalHandle,
-        string originalCallerAddress, DateTimeOffset originalExpiry, CancellationToken cancellationToken)
+        string originalCallerAddress, DateTimeOffset wholeExpiresAt, CancellationToken cancellationToken)
     {
         PartitionMovePhaseResult? terminal = null;
         for (var ordinal = 0; ordinal <= originalHandle.PageCount; ordinal++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var phaseExpiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime,
+                wholeExpiresAt, cancellationToken);
             var authorization = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source,
                 sourceRuntime, sourceAdmission, ControlledPartitionMovementTargetInstallRequest.Authorize(
                     captured, originalFence, originalHandle, ordinal, corpus, originalCallerAddress,
-                    originalExpiry), cancellationToken);
+                    phaseExpiry), cancellationToken);
             await Assert.That(authorization.Error).IsNull();
+            var issued = authorization.Get<PartitionMovePhaseResult>();
+            await Assert.That(issued.Grant!.ExpiresAt).IsEqualTo(phaseExpiry);
             var request = ControlledPartitionMovementTargetInstallRequest.Install(captured, originalFence,
-                originalHandle, ordinal, authorization.Get<PartitionMovePhaseResult>(), corpus,
-                originalCallerAddress, originalExpiry);
+                originalHandle, ordinal, issued, corpus,
+                originalCallerAddress, issued.Grant!.ExpiresAt);
             var staged = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(target, targetRuntime,
                 targetAdmission, request, cancellationToken);
             await Assert.That(staged.Error).IsNull();
@@ -50,7 +54,7 @@ internal static class ControlledPartitionMovementTargetInstallFlow
             await Assert.That(JsonDefaults.Serialize(actual.Journal.PhysicalOwner)
                 .SequenceEqual(JsonDefaults.Serialize(corpus.Destination.Owner))).IsTrue();
             await AcknowledgeAsync(source, sourceRuntime, sourceAdmission, corpus, captured,
-                actual, ordinal, originalCallerAddress, originalExpiry, cancellationToken);
+                actual, ordinal, originalCallerAddress, wholeExpiresAt, cancellationToken);
         }
         return terminal ?? throw new InvalidOperationException("The actual terminal Install receipt is absent.");
     }
@@ -58,10 +62,12 @@ internal static class ControlledPartitionMovementTargetInstallFlow
     private static async Task AcknowledgeAsync(ControlledPartitionMovementNode source,
         ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
         ControlledPartitionMovementLoopbackCorpus corpus, PartitionMovePhaseResult captured,
-        PartitionMovePhaseResult staged, int ordinal, string callerAddress, DateTimeOffset expiry,
+        PartitionMovePhaseResult staged, int ordinal, string callerAddress, DateTimeOffset wholeExpiresAt,
         CancellationToken cancellationToken)
     {
         var control = captured.Control ?? throw new InvalidOperationException("Actual Captured control is absent.");
+        var expiry = ControlledPartitionMovementFirstPhaseExpiry.Create(source, runtime,
+            wholeExpiresAt, cancellationToken);
         var body = NativeSerialization.Serialize(new PartitionMoveAcknowledgeBody(
             ControlledPartitionMovementTargetPhaseIds.InstallGrant(ordinal), staged.Journal));
         var envelope = new PartitionMovePeerEnvelope(Version, control.MoveId, control.Partition,

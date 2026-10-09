@@ -225,20 +225,35 @@
       "qualification": "Authenticated original failed/partial Linux source cohort. New R812 source repairs and follower implementation require fresh committed-source original Linux qualification."
     },
     "currentBuild": {
-      "state": "PASS: complete native Release solution,0warnings/errors,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-build-20261009-diagnostics.json",
-      "elapsedSeconds": 106.501,
-      "logSha256": "96c9b8e4b94ed21633cba67858c16aab44e7d6cd53da6a5b56e964ac86bcfd92",
-      "inputCount": 5328,
-      "qualification": "Source-bound local development; current-source Linux runtime qualification remains open."
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+      "msbuildDebugDirectory": "/private/tmp/keyload-current-r832-kl008-native-unit-image-oracle-full-build-20261009-msbuild-debug",
+      "nativeExitCode": 0,
+      "buildCompletedSuccessfully": true,
+      "elapsedSeconds": 121.766,
+      "log": "/private/tmp/keyload-current-r832-kl008-native-unit-image-oracle-full-build-20261009.log",
+      "logSha256": "23ff2653090a47c96f151957349404aede7a9e98dda0a529bfa3de3f8a369d58",
+      "inputCount": 5337,
+      "inputDrift": [],
+      "uniqueErrors": [],
+      "qualification": "local development; source drift invalidates exact-current-source qualification"
     },
     "currentFormatter": {
-      "state": "PASS: complete native readonly formatter,0source drift.",
-      "evidence": "/private/tmp/keyload-current-r823-admission-c1-retired-bridge-full-native-format-20261009-receipt.json",
-      "elapsedSeconds": 92.578,
+      "commandArgs": [
+        "dotnet",
+        "format",
+        "KeyLoad.slnx",
+        "--no-restore",
+        "--verify-no-changes",
+        "--verbosity",
+        "minimal"
+      ],
+      "nativeExitCode": 0,
+      "elapsedSeconds": 99.497,
+      "log": "/private/tmp/keyload-current-r832-final-native-format-20261009.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 5328,
-      "qualification": "Native source-bound local formatter; no runtime or Linux qualification."
+      "inputCount": 5337,
+      "inputDrift": [],
+      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -36540,6 +36555,354 @@
         "taskProfileCells": 8,
         "nativeMaximumParallelTests": 20
       }
+    },
+    "stageXXXIOriginalDevelopment": {
+      "state": "Joined actual periodic maintenance lifetime, r8 movement admission/fixture repairs, strict follower arm caller repair, closed privacy-bounded capability diagnostics and canonical unit-image producer/consumer regression. KL014 accepted from original f80 Linux task artifacts. Final local build/format/native operations/source identities passed; new source Linux whole-task/product gates remain open.",
+      "recordedAtUtc": "2026-10-09T01:07:57.164502+00:00",
+      "candidateBaseRevision": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
+      "build": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+        "msbuildDebugDirectory": "/private/tmp/keyload-current-r832-kl008-native-unit-image-oracle-full-build-20261009-msbuild-debug",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "elapsedSeconds": 121.766,
+        "log": "/private/tmp/keyload-current-r832-kl008-native-unit-image-oracle-full-build-20261009.log",
+        "logSha256": "23ff2653090a47c96f151957349404aede7a9e98dda0a529bfa3de3f8a369d58",
+        "inputCount": 5337,
+        "inputDrift": [],
+        "uniqueErrors": [],
+        "qualification": "local development; source drift invalidates exact-current-source qualification"
+      },
+      "formatter": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--no-restore",
+          "--verify-no-changes",
+          "--verbosity",
+          "minimal"
+        ],
+        "nativeExitCode": 0,
+        "elapsedSeconds": 99.497,
+        "log": "/private/tmp/keyload-current-r832-final-native-format-20261009.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 5337,
+        "inputDrift": [],
+        "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      },
+      "storageNormal": {
+        "receipt": "/private/tmp/keyload-r832-kl008-actual-native-normal-20261009-receipt.json",
+        "receiptSha256": "5004209e210233dfe28e4db9fe882794ae1a06572f4e42c693d19b6291839b99",
+        "nativeExitCode": 0,
+        "total": 27,
+        "passed": 27,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 5.391,
+        "logSha256": "6da9139a23093da6f79ef3e891ebe783e7248432e5ed593efbcabd1ea1326b66",
+        "originalTrxSha256": "7afb269689582e9493d1b4f0cf336a5be8f92f746a7ae8c573fa0a31ae072d9d",
+        "sourceInputs": 5338,
+        "assemblyInputs": 553,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "maximumParallelTests": 20,
+        "actualChildResourceUsage": {
+          "userCpuSeconds": 2.961502,
+          "systemCpuSeconds": 1.140074,
+          "childMaximumResidentBytesDarwin": 206258176,
+          "logicalCpuCount": 12,
+          "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+        },
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "storageScalar": {
+        "receipt": "/private/tmp/keyload-r832-kl008-actual-native-scalar-20261009-receipt.json",
+        "receiptSha256": "e4b4bcd5cfb713be495fbbf5b56036ff45acf23e3012d0ae89028656dd009e98",
+        "nativeExitCode": 0,
+        "total": 27,
+        "passed": 27,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 6.828,
+        "logSha256": "aaefc3f69c42c63078d0b71e21e677481bfe67034a5cdb222e7b06b2fee75475",
+        "originalTrxSha256": "c44f277933a641ae982776a29b07667f071187cb4b3303cfadc04c6b8f73c789",
+        "sourceInputs": 5338,
+        "assemblyInputs": 553,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "maximumParallelTests": 20,
+        "actualChildResourceUsage": {
+          "userCpuSeconds": 5.502441,
+          "systemCpuSeconds": 1.187633,
+          "childMaximumResidentBytesDarwin": 226017280,
+          "logicalCpuCount": 12,
+          "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+        },
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "canonicalSourceManifestOperation": {
+        "receipt": "/private/tmp/keyload-r832-final-source-manifest-native-normal-20261009-receipt.json",
+        "receiptSha256": "e29903b4aca7bf75cc02d97616eff75cfd7d20194b1071bec330e7723ca395a8",
+        "nativeExitCode": 0,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 76.245,
+        "logSha256": "a3716700bd4b6898a38ebb8aafe7cea45207bd920bcd749331183f7971a76173",
+        "originalTrxSha256": "94dd02a820775f75f2f45ac00c2005e70ddada2fa12b8c0ecf21b904cfa19e46",
+        "sourceInputs": 5338,
+        "assemblyInputs": 553,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "maximumParallelTests": 20,
+        "actualChildResourceUsage": {
+          "userCpuSeconds": 73.24171,
+          "systemCpuSeconds": 20.556675,
+          "childMaximumResidentBytesDarwin": 300433408,
+          "logicalCpuCount": 12,
+          "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+        },
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "nativeUnfilteredDiscovery": {
+        "unit": {
+          "suite": "unit",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-frzck9jm/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 1.836,
+          "temporaryRoot": "/private/tmp/kl-list-frzck9jm",
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r832-unfiltered-native-unit-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 3037520,
+          "stdoutSha256": "df86a1b8b2419e59b3033b5cabbb0cee4a7a6d5f6c5ef7e8000f7faf6a8eac81",
+          "stderr": "/private/tmp/keyload-current-r832-unfiltered-native-unit-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 3122
+        },
+        "recovery": {
+          "suite": "recovery",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-ffoq5k68/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 0.993,
+          "temporaryRoot": "/private/tmp/kl-list-ffoq5k68",
+          "sourceInputs": 5338,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r832-unfiltered-native-recovery-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 277795,
+          "stdoutSha256": "2913be5b6ebddc3cf7c557636c6698115c4fe2e57a1d5bec871b11c839c2b53b",
+          "stderr": "/private/tmp/keyload-current-r832-unfiltered-native-recovery-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 275
+        },
+        "rf3": {
+          "suite": "rf3",
+          "command": [
+            "/opt/homebrew/bin/dotnet",
+            "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.IntegrationTests/bin/Release/net10.0/KeyLoad.IntegrationTests.dll",
+            "--list-tests",
+            "json",
+            "--disable-logo",
+            "--ansi",
+            "off",
+            "--progress",
+            "off",
+            "--output",
+            "Detailed",
+            "--results-directory",
+            "/private/tmp/kl-list-x1gait7f/native"
+          ],
+          "nativeExitCode": 0,
+          "timedOut": false,
+          "elapsedSeconds": 1.147,
+          "temporaryRoot": "/private/tmp/kl-list-x1gait7f",
+          "sourceInputs": 5338,
+          "assemblyInputs": 912,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "stdout": "/private/tmp/keyload-current-r832-unfiltered-native-rf3-census-20261009-list-tests.stdout.txt",
+          "stdoutBytes": 263942,
+          "stdoutSha256": "19ec51dfb0f1885cf43fd500ab39772d399405cafd1feed49d49f7d3d8f87ee8",
+          "stderr": "/private/tmp/keyload-current-r832-unfiltered-native-rf3-census-20261009-list-tests.stderr.txt",
+          "stderrBytes": 0,
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualification": "original native discovery only, not operation outcomes, coverage or Linux RF3 qualification",
+          "nativeCases": 248
+        }
+      },
+      "nativeSourceBinding": {
+        "canonicalInventoryShape": "PASS",
+        "nativeDllPdbSourceBinding": "PASS",
+        "canonicalContributorSubset": "PASS",
+        "functionalCases": 2714,
+        "requiredOrdinaryNonContributors": 408,
+        "coverageGroupCases": [
+          548,
+          530,
+          528,
+          536,
+          572
+        ],
+        "productContributorRegistryCases": 110,
+        "compiledProductProjects": 16,
+        "scriptInventoryCount": 56,
+        "inventorySha256": "e4d34c8947284cf82558345f48613823b140347e3a95a4def372c882a5b2175b",
+        "registrySha256": "ef1c5a8b199aa49610a290dc3cf88a02ae2db62c9c9be451d571f2fa9c33d580",
+        "sourceManifestSha256": "47032509fd6e5336c5d2244b3ee1a73680359655aeda5340b126f9a08bfe3a86",
+        "unitImageSha256": "4c04e084b74d59f88fdcd5a446643e9ec7a548f8197a031e451ec1429a765363",
+        "qualification": "Current compiled source, original PDB and native inventory binding only; coverage and Linux execution remain separate."
+      },
+      "sourceManifestEvidenceRoot": "/private/tmp/keyload-r832-native-source-image-final-20261009",
+      "periodicMaintenanceTrace": {
+        "task": "TASK-KL008-NATIVE-MAINTENANCE-JOIN-002",
+        "requirement": "REQ-STORAGE-MAINTENANCE-JOIN-002",
+        "acceptance": [
+          "AC-STORAGE-MAINTENANCE-JOIN-002",
+          "AC-STORAGE-MAINTENANCE-JOIN-003",
+          "AC-STORAGE-MAINTENANCE-JOIN-004"
+        ],
+        "decision": "docs/ADR/ADR-046-storage-private-owners.md",
+        "newCompleteFunctionalCases": 8,
+        "originalRequiredCasesRetained": 19,
+        "nativeProviderAlgorithmsUnchanged": true
+      },
+      "nativeUnitImageRepair": {
+        "task": "TASK-CQ-UNIT-IMAGE-PRODUCER-044",
+        "requirement": "REQ-CQ-009",
+        "acceptance": "AC-CQ-044",
+        "decision": "docs/ADR/ADR-033-code-quality.md",
+        "actualStrictConsumerUnchanged": true,
+        "regression": "ProductionSourceManifestOperationTests.NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence",
+        "newRegistryRows": 16,
+        "normalRows": 49,
+        "scalarRows": 49,
+        "registryTotal": 110
+      },
+      "r8Packet": {
+        "path": "/private/tmp/keyload-kl036-foundation-r8-20261009/foundation-r8-packet.json",
+        "sha256": "97a452789ff5cfc67df212c6f9ca3601fd26589df226d255955e342125460dc1",
+        "guardedSourcePaths": 10,
+        "qualification": "Current complete source build only; fresh Linux normal/scalar movement execution pending."
+      },
+      "strictCapabilityOrdinaryControl": {
+        "receipt": "/private/tmp/keyload-r831-kl021-strict-admission-ordinary-native-20261009-receipt.json",
+        "receiptSha256": "f29f63eebfc218449edd38b02d12c9c92fa25f875dfce770b5531ec7d3ea5a4a",
+        "nativeExitCode": 0,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "elapsedSeconds": 3.586,
+        "logSha256": "f667a1b4069b086b4881a10573168b1db40a5755e092f025de583a778d28445d",
+        "originalTrxSha256": "7384ec469d54d3cdc7d753d30ae2db647368081cccbd3243e5ca4336f17a87ca",
+        "sourceInputs": 5336,
+        "assemblyInputs": 912,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "maximumParallelTests": 20,
+        "actualChildResourceUsage": {
+          "userCpuSeconds": 1.236852,
+          "systemCpuSeconds": 0.291471,
+          "childMaximumResidentBytesDarwin": 138428416,
+          "logicalCpuCount": 12,
+          "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+        },
+        "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+      },
+      "ordinaryControlImageContinuity": {
+        "sha256OfOriginalBeforeSnapshot": "4ef3a23022c53e1d5f0636dfe4be545a7ea8a86a122792a7bcc3157d893e5dc3",
+        "images": 912,
+        "changed": [],
+        "qualification": "Existing r831 ordinary model operation only; no Docker namespace qualification."
+      },
+      "originalFullLinux": {
+        "sourceRevision": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
+        "runId": 37861333290,
+        "attempt": 1,
+        "jobId": 113597565485,
+        "artifactId": 11586748497,
+        "artifactName": "test-results-ubuntu-latest",
+        "apiDigest": "sha256:1978f919e8ba62fcbea7a5b15ce05f0e3971f6bf9bcc7248f7b94a149fcf67b3",
+        "zipSha256": "1978f919e8ba62fcbea7a5b15ce05f0e3971f6bf9bcc7248f7b94a149fcf67b3",
+        "jobConclusion": "failure",
+        "jobOriginalLogSha256": "cf076e4afff185ede4b01238d067b7027249ebaa6cc538f3d9148eb7c4c2fe0d",
+        "normal": {
+          "passed": 3103,
+          "total": 3114,
+          "failed": 11
+        },
+        "scalar": {
+          "passed": 3103,
+          "total": 3114,
+          "failed": 11
+        },
+        "recovery": {
+          "passed": 275,
+          "total": 275,
+          "failed": 0
+        },
+        "analyzers": {
+          "passed": 388,
+          "total": 388,
+          "failed": 0
+        },
+        "remainingUnitFailures": "Original eleven movement cases in each profile; r8 repair is source-joined/build-verified and awaits fresh Linux original outcomes. Scalar peer-proof expiry remains an inference until fresh execution.",
+        "fullRf3": "Original mandatory full job113597517356 remains in progress; no successful outcome invented."
+      },
+      "retainedFailedDevelopment": {
+        "r829": "Constructor lost typed maintenance configuration; negative test composed validating options before operation assertion. Original normal/scalar TRX failures retained, repaired in final r832.",
+        "r830": "Original read-only formatter rejected eight whitespace positions in two new files; repaired and final formatter passes.",
+        "r831": "Original source-manifest flow rejected stale41-row oracle; strict unit-image reader also rejected producer qualification. Both are repaired through exact current identities and the unchanged native reader, with real complete flow PASS."
+      },
+      "runtimeQualified": false,
+      "allAcceptanceClosed": false,
+      "coveragePercent": null,
+      "remaining": [
+        "Fresh exact-source Linux complete unit/scalar/recovery/RF3 and task normal/scalar original receipts; no local promotion.",
+        "Actual strict Docker namespace diagnostic from fresh KL021 run before any capability producer/schema repair; existing native predicates unchanged.",
+        "Public whole KL036 parent remains a private unsealed source/test packet; no public source or runtime closure claim.",
+        "Full product coverage, endurance, power-loss and comparable GitHub performance remain unqualified."
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -38365,6 +38728,68 @@
         },
         "observedFlow": "actual callback overlap and shutdown cancellation; original traversal/disposal joined; exact bytes/position/all identity fields after reopen; healthy second record write/read and second reopen preserves both records and identity",
         "qualification": "actual local native normal/scalar five-case class; current-source Linux recovery and whole KL-008 criteria remain open"
+      },
+      "currentPeriodicMaintenanceDevelopment": {
+        "stage": "TEST-PIPELINE-001.stageXXXIOriginalDevelopment",
+        "normal": {
+          "receipt": "/private/tmp/keyload-r832-kl008-actual-native-normal-20261009-receipt.json",
+          "receiptSha256": "5004209e210233dfe28e4db9fe882794ae1a06572f4e42c693d19b6291839b99",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 5.391,
+          "logSha256": "6da9139a23093da6f79ef3e891ebe783e7248432e5ed593efbcabd1ea1326b66",
+          "originalTrxSha256": "7afb269689582e9493d1b4f0cf336a5be8f92f746a7ae8c573fa0a31ae072d9d",
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 2.961502,
+            "systemCpuSeconds": 1.140074,
+            "childMaximumResidentBytesDarwin": 206258176,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "scalar": {
+          "receipt": "/private/tmp/keyload-r832-kl008-actual-native-scalar-20261009-receipt.json",
+          "receiptSha256": "e4b4bcd5cfb713be495fbbf5b56036ff45acf23e3012d0ae89028656dd009e98",
+          "nativeExitCode": 0,
+          "total": 27,
+          "passed": 27,
+          "failed": 0,
+          "skipped": 0,
+          "elapsedSeconds": 6.828,
+          "logSha256": "aaefc3f69c42c63078d0b71e21e677481bfe67034a5cdb222e7b06b2fee75475",
+          "originalTrxSha256": "c44f277933a641ae982776a29b07667f071187cb4b3303cfadc04c6b8f73c789",
+          "sourceInputs": 5338,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "maximumParallelTests": 20,
+          "actualChildResourceUsage": {
+            "userCpuSeconds": 5.502441,
+            "systemCpuSeconds": 1.187633,
+            "childMaximumResidentBytesDarwin": 226017280,
+            "logicalCpuCount": 12,
+            "qualification": "actual operating-system child usage; no RF3 or benchmark inference"
+          },
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof"
+        },
+        "task": "TASK-KL008-NATIVE-MAINTENANCE-JOIN-002",
+        "requirement": "REQ-STORAGE-MAINTENANCE-JOIN-002",
+        "acceptance": [
+          "AC-STORAGE-MAINTENANCE-JOIN-002",
+          "AC-STORAGE-MAINTENANCE-JOIN-003",
+          "AC-STORAGE-MAINTENANCE-JOIN-004"
+        ],
+        "runtimeQualified": false,
+        "remaining": "Current-source Linux normal/scalar, full recovery and RF3 gates mandatory; no power-loss/endurance inference."
       }
     }
   },
@@ -38583,10 +39008,189 @@
     },
     "parallelLinuxAcceptance": {
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
-      "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
+      "state": "Original exact-source task/profile reports authenticated; all declared operation cases pass in normal and scalar.",
       "qualified": false,
       "nativeMaximumParallelTests": 20,
-      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
+      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment",
+      "sourceCommit": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
+      "runId": 37861333290,
+      "attempt": 1,
+      "originalProfiles": [
+        {
+          "profile": "normal",
+          "jobId": 113597517452,
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517452",
+          "jobConclusion": "success",
+          "artifactId": 11586289951,
+          "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11586289951",
+          "artifactSha256": "4a89647cec0b3310488a4c33ab33c02e3ab99fa7e184982bf349949cc4df79f1",
+          "authenticityReceiptSha256": "ba42e51201a35b7fa7faaadafe08edfe9403cc60a5cc11ad5a875f4c49dbca5d",
+          "caseCount": 16,
+          "selections": [
+            {
+              "selectionId": "unit",
+              "suite": "unit",
+              "caseCount": 11,
+              "originalTrx": [
+                {
+                  "sha256": "30492c9488096d8013d2da697e53bdc046fea2cb04c968e9db3943fad2eaac68",
+                  "passed": 11,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "unit-conflict",
+              "suite": "unit",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "d2096e40c77963aaf10b293ebac66630493f121429ec2fc3fbf49ec83f7ae28b",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "unit-mcp-control",
+              "suite": "unit",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "bbc1565e226b25b0b4a871daa041ec58fe82fc57c79d922bbaaebe929d3fff08",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "process",
+              "suite": "recovery",
+              "caseCount": 2,
+              "originalTrx": [
+                {
+                  "sha256": "afeb17c3523ea59752ea15417e5e298029920ca18ab0d433c59c2399ee364f76",
+                  "passed": 2,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "rf3",
+              "suite": "rf3",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "1c50eaac8d47e0c6991c01ae1a4d0a04789689dd01efe1e39c07ec6e3685ecdb",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            }
+          ],
+          "nativeMaximumParallelTests": 20,
+          "callerIntrinsics": null,
+          "serverManifestDigest": "sha256:d628b116f2d5b2b6a7783e28c2204f3def96c7a05d069fc67ef375ab4c7c9ce9",
+          "sameJobSourceVerificationPassed": true,
+          "sourcePdbBindingComplete": true,
+          "preparedImageEqualsBeforeAfter": true,
+          "originalReadersExitJoinedAndDisposed": true,
+          "ownedRegistryRemoved": true
+        },
+        {
+          "profile": "scalar",
+          "jobId": 113597517531,
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517531",
+          "jobConclusion": "success",
+          "artifactId": 11586641520,
+          "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11586641520",
+          "artifactSha256": "bb13c968ffcd84067c11f6d3299b84613d136880d980b6a10327cbb933b1033a",
+          "authenticityReceiptSha256": "1065f5264cb2436308e8d4bf31ae4e5592a96d2eaa733c00611f21e8a61717b5",
+          "caseCount": 16,
+          "selections": [
+            {
+              "selectionId": "unit",
+              "suite": "unit",
+              "caseCount": 11,
+              "originalTrx": [
+                {
+                  "sha256": "8b4e7452c01a5259192c1b6b9431fcfab656f0bff6559bb37180903099c13dab",
+                  "passed": 11,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "unit-conflict",
+              "suite": "unit",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "9b1ad0b08d05f7bb331a9c2cf91edc3d6cc1147c7b8864e60362d1a8792f5e51",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "unit-mcp-control",
+              "suite": "unit",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "f5ffb4cdf066d57bb225643544e1a0e8dc4f697c2cfa840bebe3fd21f19f5113",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "process",
+              "suite": "recovery",
+              "caseCount": 2,
+              "originalTrx": [
+                {
+                  "sha256": "b299071f023cbde7c493f50f30e1c5acd7a1ee2f383eb8f1213b1bffbbe84304",
+                  "passed": 2,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "rf3",
+              "suite": "rf3",
+              "caseCount": 1,
+              "originalTrx": [
+                {
+                  "sha256": "7839e57ae39c15ed0f427ea321a424d9dbb8ac55eeb078d25514fe1841067178",
+                  "passed": 1,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            }
+          ],
+          "nativeMaximumParallelTests": 20,
+          "callerIntrinsics": "0",
+          "serverManifestDigest": "sha256:ab4f1f83b9d2912b2f0ea8260d28fd7230de013d557fb49ddc0d78714a15317f",
+          "sameJobSourceVerificationPassed": true,
+          "sourcePdbBindingComplete": true,
+          "preparedImageEqualsBeforeAfter": true,
+          "originalReadersExitJoinedAndDisposed": true,
+          "ownedRegistryRemoved": true
+        }
+      ],
+      "fullProductQualification": false,
+      "qualification": "Exact sixteen-case index acceptance scope passes both profiles; DocumentStorage current complete normal/scalar/recovery/full RF3 prerequisite remains mandatory before KL-011 closure."
     }
   },
   "KL-012": {
@@ -38790,7 +39394,7 @@
   },
   "KL-014": {
     "title": "Standalone server і C# SDK",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs",
       "src/KeyLoad.Client/KeyLoadClient.cs"
@@ -38810,10 +39414,246 @@
     },
     "parallelLinuxAcceptance": {
       "requirement": "REQ/AC-TUNIT-ENTRY-010",
-      "state": "Complete guarded task/profile CI tooling joined; actual native discovery binds the full declared case union; main delivery and fresh original Linux qualification pending.",
-      "qualified": false,
+      "state": "Original exact-source task/profile reports authenticated; all declared operation cases pass in normal and scalar.",
+      "qualified": true,
       "nativeMaximumParallelTests": 20,
-      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
+      "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment",
+      "sourceCommit": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
+      "runId": 37861333290,
+      "attempt": 1,
+      "originalProfiles": [
+        {
+          "profile": "normal",
+          "jobId": 113597517490,
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517490",
+          "jobConclusion": "success",
+          "artifactId": 11587300185,
+          "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11587300185",
+          "artifactSha256": "de6ed3ab025e00bfe34dfb2ed6311bb7833e08e21dec6f2b48ab3a1d435ccd49",
+          "authenticityReceiptSha256": "6fa512514a18d90fbaa77bf0eedbff5133239a8dd8812757b3d9c001c50d6f29",
+          "caseCount": 12,
+          "selections": [
+            {
+              "selectionId": "unit",
+              "suite": "unit",
+              "caseCount": 7,
+              "originalTrx": [
+                {
+                  "sha256": "f2b1f73edcbd12f90dadb68898163d98491336529c991c30b5d089e275f2be7a",
+                  "passed": 7,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "rf3",
+              "suite": "rf3",
+              "caseCount": 5,
+              "originalTrx": [
+                {
+                  "sha256": "42a630f8f4db199f9c8adf1c2cee48282d82d197042a0deae7d43b31268e14ea",
+                  "passed": 5,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            }
+          ],
+          "nativeMaximumParallelTests": 20,
+          "callerIntrinsics": null,
+          "serverManifestDigest": "sha256:f84dcdc3113ce0610263a74569638af4a65f48351b43fe846586eca3f7d9ea69",
+          "sameJobSourceVerificationPassed": true,
+          "sourcePdbBindingComplete": true,
+          "preparedImageEqualsBeforeAfter": true,
+          "originalReadersExitJoinedAndDisposed": true,
+          "ownedRegistryRemoved": true
+        },
+        {
+          "profile": "scalar",
+          "jobId": 113597517434,
+          "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517434",
+          "jobConclusion": "success",
+          "artifactId": 11586618347,
+          "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11586618347",
+          "artifactSha256": "538fd1dceb776b6124e63e8b21d82d099902414a0eef2bf1284bce474553c18f",
+          "authenticityReceiptSha256": "8828aef4561da280b4ca8faccab72df7472897638f4e6fd9ef2c59fd369b64fb",
+          "caseCount": 12,
+          "selections": [
+            {
+              "selectionId": "unit",
+              "suite": "unit",
+              "caseCount": 7,
+              "originalTrx": [
+                {
+                  "sha256": "b70d8dba85b79cf26185f2ff557d8e5ebb51fb908a758897de6ab4d0f0070938",
+                  "passed": 7,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            },
+            {
+              "selectionId": "rf3",
+              "suite": "rf3",
+              "caseCount": 5,
+              "originalTrx": [
+                {
+                  "sha256": "b952e7c2ed9058b157454be73bcc61a66aa025e61627f6e2a588355ab905f93e",
+                  "passed": 5,
+                  "failed": 0,
+                  "skipped": 0
+                }
+              ]
+            }
+          ],
+          "nativeMaximumParallelTests": 20,
+          "callerIntrinsics": "0",
+          "serverManifestDigest": "sha256:80201712575fcff5c3c22428d8165e05f4b703f114acf4fddf039ca8d08f2d60",
+          "sameJobSourceVerificationPassed": true,
+          "sourcePdbBindingComplete": true,
+          "preparedImageEqualsBeforeAfter": true,
+          "originalReadersExitJoinedAndDisposed": true,
+          "ownedRegistryRemoved": true
+        }
+      ],
+      "fullProductQualification": false
+    },
+    "runtimeQualified": true,
+    "allAcceptanceClosed": true,
+    "qualification": {
+      "runtimeQualified": true,
+      "scope": "Original KL-014 standalone server, CLI/config/data directory and typed SDK unknown-write/same-command retry acceptance. Future SQL/client/model work and shared complete product gates remain separate.",
+      "taskAcceptance": {
+        "completedAt": "2026-10-09",
+        "sourceCommit": "f80ba2ba36a968858467eb33ad8abc45cd090e74",
+        "runId": 37861333290,
+        "attempt": 1,
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "requirements": [
+          "REQ-CLIENT-002",
+          "REQ-CLIENT-004",
+          "REQ-CLIENT-005"
+        ],
+        "criteria": [
+          "AC-MP-009",
+          "AC-CLIENT-004",
+          "AC-CLIENT-005"
+        ],
+        "adrs": [
+          "docs/ADR/ADR-039-official-mcp-agent-api.md",
+          "docs/ADR/ADR-117-native-tunit-ci-entry.md"
+        ],
+        "canonicalCaseContractSha256": "4cf02bbb45ad3cc799e3912a31f6879a5e3ec2d88e2f9eb7e2110178f1675013",
+        "exactDeclaredUnionPerProfile": 12,
+        "originalProfiles": [
+          {
+            "profile": "normal",
+            "jobId": 113597517490,
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517490",
+            "jobConclusion": "success",
+            "artifactId": 11587300185,
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11587300185",
+            "artifactSha256": "de6ed3ab025e00bfe34dfb2ed6311bb7833e08e21dec6f2b48ab3a1d435ccd49",
+            "authenticityReceiptSha256": "6fa512514a18d90fbaa77bf0eedbff5133239a8dd8812757b3d9c001c50d6f29",
+            "caseCount": 12,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 7,
+                "originalTrx": [
+                  {
+                    "sha256": "f2b1f73edcbd12f90dadb68898163d98491336529c991c30b5d089e275f2be7a",
+                    "passed": 7,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ]
+              },
+              {
+                "selectionId": "rf3",
+                "suite": "rf3",
+                "caseCount": 5,
+                "originalTrx": [
+                  {
+                    "sha256": "42a630f8f4db199f9c8adf1c2cee48282d82d197042a0deae7d43b31268e14ea",
+                    "passed": 5,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ]
+              }
+            ],
+            "nativeMaximumParallelTests": 20,
+            "callerIntrinsics": null,
+            "serverManifestDigest": "sha256:f84dcdc3113ce0610263a74569638af4a65f48351b43fe846586eca3f7d9ea69",
+            "sameJobSourceVerificationPassed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "originalReadersExitJoinedAndDisposed": true,
+            "ownedRegistryRemoved": true
+          },
+          {
+            "profile": "scalar",
+            "jobId": 113597517434,
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/job/113597517434",
+            "jobConclusion": "success",
+            "artifactId": 11586618347,
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37861333290/artifacts/11586618347",
+            "artifactSha256": "538fd1dceb776b6124e63e8b21d82d099902414a0eef2bf1284bce474553c18f",
+            "authenticityReceiptSha256": "8828aef4561da280b4ca8faccab72df7472897638f4e6fd9ef2c59fd369b64fb",
+            "caseCount": 12,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 7,
+                "originalTrx": [
+                  {
+                    "sha256": "b70d8dba85b79cf26185f2ff557d8e5ebb51fb908a758897de6ab4d0f0070938",
+                    "passed": 7,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ]
+              },
+              {
+                "selectionId": "rf3",
+                "suite": "rf3",
+                "caseCount": 5,
+                "originalTrx": [
+                  {
+                    "sha256": "b952e7c2ed9058b157454be73bcc61a66aa025e61627f6e2a588355ab905f93e",
+                    "passed": 5,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ]
+              }
+            ],
+            "nativeMaximumParallelTests": 20,
+            "callerIntrinsics": "0",
+            "serverManifestDigest": "sha256:80201712575fcff5c3c22428d8165e05f4b703f114acf4fddf039ca8d08f2d60",
+            "sameJobSourceVerificationPassed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "originalReadersExitJoinedAndDisposed": true,
+            "ownedRegistryRemoved": true
+          }
+        ],
+        "scopeOracle": "Actual cold-root built CLI/config/persisted nonadministrator operations; actual SDK/official MCP interrupted submit and same-ID-body retry/conflict; complete independent native receipt, minimum-token full literal read and original replay after healthy continuation.",
+        "fullRf3Qualified": false,
+        "separateProductGates": [
+          "complete_current_linux_unit_normal_scalar",
+          "complete_current_linux_rf3",
+          "full_product_functional_coverage",
+          "endurance",
+          "power_loss",
+          "performance"
+        ]
+      }
     }
   },
   "KL-015": {
@@ -38838,6 +39678,38 @@
       "qualified": false,
       "nativeMaximumParallelTests": 20,
       "currentSourceRepairStage": "TEST-PIPELINE-001.stageXXXOriginalDevelopment"
+    },
+    "canonicalZoneTreeRepairDelivery": {
+      "officialPinnedVersion": "1.9.8",
+      "officialAuditedCommit": "46864afa36eed46e0cfe16828ff8f40cac85e369",
+      "owningSibling": "/Users/ksemenenko/Developer/ZoneTree",
+      "siblingIsOfficialNuGetOwner": false,
+      "sealedPatchSha256": "68c65aa2efc5ec5866d489726eebc04b38b68bf9a146b791639bfefed119a388",
+      "manifestSha256": "1ec78451bc021d0d1fe6bd048dcfba7f7b921e61f8c71ad0c4e1ed61f5ab25a7",
+      "originalNativeLedgerSha256": "087cb5d3c045747bc72f44f0766b3790cd5ff9c96534cfba641c30e71d6167e6",
+      "baselineNativeRegressions": {
+        "total": 2,
+        "failed": 2
+      },
+      "repairedNativeRegressions": {
+        "total": 2,
+        "passed": 2
+      },
+      "canonicalOwningNativeNUnit": {
+        "total": 317,
+        "passed": 317,
+        "failed": 0,
+        "skipped": 0,
+        "nativeExitCode": 0,
+        "originalTrxSha256": "0f2ae5461ecbe18c4d9e8fbf207d1fb11c80d239f15a9d4c9b47a7e9fadad57c"
+      },
+      "sourceImageWindow": "642 source/DLL/PDB inputs unchanged from observed DURING required run to terminal; no pre-invocation snapshot claim.",
+      "platformQualification": "Original local ARM native owning-source development only; no Linux x64, RF3, package publication or consumer delivery claim.",
+      "publicationBlocked": true,
+      "blocker": "Official ZoneTree push/admin/maintain authority is absent; sibling personal fork cannot publish the canonical official feed. Upstream maintainer acceptance of cross-profile portable WAL checksum contract and official NUGET_TOKEN release authority are required.",
+      "packageReferenceChanged": false,
+      "consumerFallbackIntroduced": false,
+      "runtimeQualified": false
     }
   },
   "KL-016": {
@@ -40179,6 +41051,20 @@
       "rf3Cases": 30,
       "runtimeQualified": false,
       "remaining": "Strict current-source normal/scalar original outcomes/source-image/owned cleanup; broader Q1 SELECT/AST and other-model stale reads remain unqualified."
+    },
+    "currentF80RepairDevelopment": {
+      "stage": "TEST-PIPELINE-001.stageXXXIOriginalDevelopment",
+      "originalPerProfile": {
+        "total": 113,
+        "passed": 84,
+        "failed": 29,
+        "skipped": 0
+      },
+      "ledgerSha256": "fcb741c3f6b681c35f8da75a3a05b0add6691e5e132a218dbfc01ab9761a50f3",
+      "followerRepair": "Remove only inadmissible targetVoter extra from actual AuthorizationReload arm call; preserve target observations, schema, exact owner route and complete cleanup/healthy flow.",
+      "capabilityDiagnostic": "Closed schema3 preserves strict exact NET_ADMIN admission; only single/matches NET_ADMIN/matches prefixed NET_ADMIN booleans. No raw capability/network/identity/payload output, no guessed prefix acceptance.",
+      "runtimeQualified": false,
+      "remaining": "New Linux original113-case normal/scalar outcomes and actual native capability diagnostic remain pending."
     }
   },
   "KL-022": {
@@ -41304,6 +42190,16 @@
       },
       "runtimeQualified": false,
       "wholePublicParentComplete": false
+    },
+    "currentR8Development": {
+      "stage": "TEST-PIPELINE-001.stageXXXIOriginalDevelopment",
+      "runtimeQualified": false,
+      "sourceJoined": true,
+      "publicParentJoined": false,
+      "actualCaptureAdmission": "Only previously-unissued commands require the actual placement epoch; original stored command outcomes/records retain original body and replay.",
+      "fixture": "Fresh command uses independently checked actual published destination/epoch2; stale distinct command denies with complete source/target cuts unchanged before fresh healthy command/cold original receipt continuation.",
+      "grantLifetimes": "Previously-unissued phase grants derive actual first admission time under one original unchanged whole90-second bound; issued envelopes are never renewed.",
+      "remaining": "Fresh Linux original normal/scalar movement outcomes and complete public parent integration/whole qualification."
     }
   },
   "KL-037": {

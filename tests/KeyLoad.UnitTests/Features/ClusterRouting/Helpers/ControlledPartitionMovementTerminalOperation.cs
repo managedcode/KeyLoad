@@ -20,12 +20,14 @@ internal static class ControlledPartitionMovementTerminalOperation
     {
         var installed = await ControlledPartitionMovementInstallationScenario.ExecuteAsync(source, target,
             corpus, sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, callerAddress,
-            originalReceipt, initialPosition, cancellationToken);
+            originalReceipt, initialPosition, wholeExpiresAt, cancellationToken);
         var finalized = await ControlledPartitionMovementFinalizeFlow.ExecuteAsync(source, sourceRuntime,
-            sourceAdmission, corpus, installed.Installed, callerAddress, installed.Handle.ExpiresAt, cancellationToken);
+            sourceAdmission, corpus, installed.Installed, callerAddress,
+            ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime, wholeExpiresAt, cancellationToken),
+            cancellationToken);
         await ControlledPartitionMovementTargetPublishFlow.ExecuteAsync(source, target, sourceRuntime,
             targetRuntime, sourceAdmission, targetAdmission, corpus, finalized,
-            installed.Handle.Descriptor.Resources, callerAddress, installed.Handle.ExpiresAt, cancellationToken);
+            installed.Handle.Descriptor.Resources, callerAddress, wholeExpiresAt, cancellationToken);
         var targetImage = ControlledPartitionMovementRawImage.Bytes(target.Store);
         var targetPosition = target.Store.Position;
         var retired = await ControlledPartitionMovementRetireFlow.ExecuteAsync(source, target, sourceRuntime,

@@ -46,6 +46,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     private int? streamBufferBytes;
     private int? maximumBackupManifestBytes;
     private int? maximumIdentityFileBytes;
+    private IOptions<ZoneTreeStorageExecutionOptions>? maintenanceExecution;
     /// <summary>Optional stable node incarnation required when reopening an existing store.</summary>
     public Guid? Incarnation { get; init; }
     /// <summary>Optional private signing key; caller bytes are copied before becoming store identity.</summary>
@@ -80,6 +81,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     internal int StreamBufferBytes => streamBufferBytes ?? throw UnresolvedExecution();
     internal int MaximumBackupManifestBytes => maximumBackupManifestBytes ?? throw UnresolvedExecution();
     internal int MaximumIdentityFileBytes => maximumIdentityFileBytes ?? throw UnresolvedExecution();
+    internal IOptions<ZoneTreeStorageExecutionOptions> MaintenanceExecution => maintenanceExecution ?? throw UnresolvedExecution();
     private static InvalidOperationException UnresolvedExecution() => new(ExecutionOptionsRequired);
     private const string ExecutionOptionsRequired = "Store execution policy must be resolved before opening native storage.";
 
@@ -92,7 +94,9 @@ public sealed record ZoneTreeStoreOptions(string Directory)
         var configured = options.Value;
         ArgumentNullException.ThrowIfNull(configured);
         configured.Validate();
-        return WithExecutionSnapshot(configured);
+        var resolved = WithExecutionSnapshot(configured);
+        resolved.maintenanceExecution = options;
+        return resolved;
     }
 
     internal ZoneTreeStoreOptions WithExecutionSnapshot(ZoneTreeStorageExecutionOptions configured)
