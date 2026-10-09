@@ -65,6 +65,20 @@ family keeps the full SQL gate false. PostgreSQL wire3.0 is the first native
 client target, with explicit3.2 negotiation fixtures before advertising that
 version. Current HTTP/JSON plus official MCP remain their actual transports.
 
+Owner clarification 2026-10-09 requires a separate Orleans connection/session
+grain for each accepted persistent logical client connection. Its bounded
+disposable session state is distinct from a fresh state-free operation grain;
+request/read activations request DeactivateOnIdle after their original work and
+cleanup settle. [ClientApi connection requirements](../Features/ClientApi.md#persistent-connection-ownership)
+own REQ/AC-CLIENT-CONNECTION-001/002 and TASK-CLIENT-CONNECTION;
+[ClusterRouting lifetime requirements](../Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
+own REQ/AC-ORL-013 and TASK-ORL-REQUEST-LIFETIME. Freeze actual connection identity,
+transport callbacks, typed quotas, scheduling, cancellation and joined teardown
+before integration. A session must reload current persisted authorization for
+each operation and cannot retain storage views, trusted roles or completed
+request history. Native-client/MCP interoperability and activation/RAM recovery
+remain unqualified; this decision does not advertise a delivered session layer.
+
 [Command inventory](../implementation/sql-client-commands-postgresql18.json)
 enumerates all183 entries from the official version18 command index. Family
 mapping is research inference;75 entries need explicit named coverage beyond

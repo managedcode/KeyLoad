@@ -61,6 +61,32 @@ CALL/unknown roots with genuine Kestrel tests; TASK-SQLC-FULL owns native client
 interoperability. [Inventory](../implementation/sql-client-conformance.json)
 keeps both native and full SQL qualification false until actual evidence exists.
 
+## Persistent connection ownership
+
+Owner clarification 2026-10-09 requires one Orleans connection/session grain
+for each accepted persistent logical client connection, separately from each
+short-lived request grain. Current HTTP operations and the official MCP transport
+do not establish that this session layer exists. Native SQL and persistent MCP
+session integration remain implementation targets under
+[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md); request cleanup is owned
+by [ClusterRouting](ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
+
+| Requirement | Measurable acceptance | Automated proof / current state |
+|---|---|---|
+| REQ-CLIENT-CONNECTION-001: an accepted persistent logical connection has one server-authenticated Orleans session identity and bounded disposable state; each operation retains its separate signed request identity and fresh persisted authorization. | AC-CLIENT-CONNECTION-001: real native SQL clients and official MCP clients where persistent sessions apply perform multiple operations through the same connection owner, while concurrent connections and requests have distinct isolated identities. Credential/policy revocation rejects the next operation and preserves stored state; reconnect obtains a fresh connection identity without recovering stale roles, payloads or results. | TASK-CLIENT-CONNECTION / planned ClientApi connection whole-flow tests and Aspire RF3 native-client/official MCP cases. No current implementation or passing evidence is claimed. |
+| REQ-CLIENT-CONNECTION-002: bound connection admission, retained state, in-flight work, disconnect/idle expiry and joined cleanup through validated typed options. | AC-CLIENT-CONNECTION-002: saturation has a fixed typed rejection without unbounded admission or buffers; disconnect/idle expiry cancels and joins original operations, releases session resources and requests native deactivation. Abrupt transport/silo loss, slow consumption and cancellation during cleanup preserve committed-write uncertainty and recover capacity within the frozen observation deadlines; native session activations return to baseline. | Same task and real transport/fault/lifecycle tests; exact numeric limits, protocol state, scheduling and teardown ownership must be frozen before implementation. Source/configuration alone is not acceptance. |
+
+ClientApi owns transport/session registration and lifetime; QueryExecution owns
+actual SQL statement/portal/transaction semantics. The connection grain owns no
+ZoneTree handles, quorum receipt or persisted credential authority. Root owns
+shared contracts and the integration join. Implement in order: freeze logical
+identity, transport ownership, quotas and audited per-method scheduling; author
+real client success/revocation/overload/disconnect/fault tests; implement session
+routing plus original cancellation/cleanup joins; then qualify the complete
+mapped Linux Aspire RF3 scope. Session routing must not serialize unrelated
+operations accidentally or introduce blanket reentrancy. Rollback is scoped
+source rollback before protocol qualification, with no data migration or fallback.
+
 REQ-CLIENT-010 / AC-CLIENT-010 / AC-DIAG-001..004 add bounded internal RF3
 dispatch evidence under [ADR-036](../ADR/ADR-036-orleans-foundation.md).
 Closed credential/read/command phases and failure categories correlate the

@@ -141,6 +141,14 @@ The [documentation index](README.md) is the complete entry point for 25 canonica
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
+Request/read grains are short-lived operation owners with no persisted request
+state; current settlement asks for native deactivation after original work and
+cleanup. Persistent connections require a separate bounded connection/session
+grain, still unimplemented. [Connection ownership](Features/ClientApi.md#persistent-connection-ownership)
+and [request lifetimes](Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
+distinguish these contracts and retain the open real-client, activation-count,
+backlog and RAM qualification gates.
+
 Native Orleans execution/scheduling choices are mapped per grain and method in
 [ClusterRouting ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md)
 and [ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md). Bounded

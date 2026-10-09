@@ -157,14 +157,16 @@ Details: [composition guide](docs/Features/DatabaseComposition.md) · [transacti
 
 ```mermaid
 flowchart LR
-    Callers["SDK · MCP · SQL · HTTP"] --> Request["One Orleans grain<br/>per request"]
+    Callers["SDK · MCP · SQL · HTTP"] --> Request["Short-lived Orleans<br/>request grain"]
     Request --> Partition["Partition grains"]
     Partition --> N1[("Node 1<br/>ZoneTree")]
     Partition --> N2[("Node 2<br/>ZoneTree")]
     Partition --> N3[("Node 3<br/>ZoneTree")]
 ```
 
-Each authenticated call gets its own Orleans request grain. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md).
+Each authenticated call gets its own request grain, with bounded call-local data and no persisted request state. After the operation and its stream cleanup settle, it requests deactivation immediately instead of waiting for ordinary idle collection. Completed requests are not kept as a history of active grains. Actual activation and memory recovery under load still require qualification.
+
+Persistent connections will have a separate, bounded connection/session grain; that connection layer is still in development. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
 
 ## Why .NET, Orleans and ZoneTree
 
