@@ -202,8 +202,8 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": false,
-    "canonicalFormatterPassed": false,
+    "canonicalBuildPassed": true,
+    "canonicalFormatterPassed": true,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
@@ -290,54 +290,35 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009-msbuild-debug",
-      "nativeExitCode": 1,
-      "buildCompletedSuccessfully": false,
-      "elapsedSeconds": 147.429,
-      "log": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009.log",
-      "logSha256": "610ac0e901c11cac354d3d5236b09764edf361da4cdf59e4934bcee8492f5a2e",
-      "inputCount": 5675,
-      "inputDrift": [
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Adapters/KeyLoadDocumentTarget.cs",
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs",
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentComparisonPhases.cs",
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentMeasurementState.cs",
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Lifetimes/DocumentRepetitionOwner.cs",
-        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Validation/DocumentComparisonOracle.cs",
-        "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/DocumentPlanEvidenceTests.cs",
-        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs"
-      ],
-      "uniqueErrors": [
-        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(38,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'DocumentIdentityPrefix' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(39,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'PaddingCharacter' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(34,48): error KLD0001: Machine key 'cells' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(35,48): error KLD0001: Machine key 'selected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(36,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(40,48): error KLD0001: Machine key 'supported' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(41,48): error KLD0001: Machine key 'unavailable' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(42,48): error KLD0001: Machine key 'envelopeRejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
-        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(43,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]"
-      ],
-      "qualification": "local development; source drift invalidates exact-current-source qualification"
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity quiet",
+      "nativeExitCode": 0,
+      "buildCompletedSuccessfully": true,
+      "errors": 0,
+      "warnings": 0,
+      "elapsed": "00:02:28.68",
+      "log": "/private/tmp/keyload-stage44-canonical-release-build-r2-original-20261009.log",
+      "logSha256": "7e618d8bd2f828ccbab754048dff7b0140760be9f7cdb3f29957bae14b5a3c11",
+      "qualification": "Canonical whole-solution local development build after the approved native source repairs and complete formatter; exact delivered-source Linux runtime and coverage remain open."
     },
     "currentFormatter": {
       "commandArgs": [
         "dotnet",
         "format",
         "KeyLoad.slnx",
-        "--no-restore",
         "--verify-no-changes",
+        "--no-restore",
         "--verbosity",
-        "minimal"
+        "quiet",
+        "--report",
+        "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json"
       ],
       "nativeExitCode": 0,
-      "elapsedSeconds": 96.988,
-      "log": "/private/tmp/keyload-r863-stage36-native-full-formatter-verify-20261009.log",
+      "diagnosticCount": 0,
+      "report": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json",
+      "reportSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "log": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 5587,
-      "inputDrift": [],
-      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      "qualification": "Actual complete SDK formatter verification after the seven source-format corrections; local development only."
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -41469,6 +41450,13 @@
           "paths": 7,
           "joinReceiptSha256": "88738e18546b8a1c7d9f131333b322bbe49712aece856006fea1503ddce69068",
           "sourceOnly": true
+        },
+        {
+          "scope": "Actual original normal/scalar034042 discovery promotes only strict test admission, with unchanged ten raw task objects,036 strict37 and additional8/14 census",
+          "manifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4",
+          "paths": 3,
+          "joinReceiptSha256": "8157b87ebb568842640afa2263ce4ffeec28918deb6b20cbdb5393a0d5a96ba6",
+          "sourceOnly": true
         }
       ],
       "lastOriginalNativeDiagnostics": {
@@ -41557,15 +41545,18 @@
       "taskAdmission": {
         "existingStrictTasksPreserved": 10,
         "currentTasks": 12,
-        "newCensusOnlyTasks": [
-          "KL-034",
-          "KL-042"
-        ],
-        "nativeExecutionAndAcceptanceBlockedUntilAuthenticatedBinding": true,
+        "newCensusOnlyTasks": [],
+        "nativeExecutionAndAcceptanceBlockedUntilAuthenticatedBinding": false,
         "kl036StrictNativeInstances": 37,
         "kl036SourceCandidateInstances": 51,
         "sourceCountsAreNativeEvidence": false,
-        "kl036AdditionalCensusSourcePresent": true
+        "kl036AdditionalCensusSourcePresent": true,
+        "newStrictNativeTasks": [
+          "KL-034",
+          "KL-042"
+        ],
+        "executionRequiresFreshSourceImageBinding": true,
+        "acceptanceRequiresCompleteExecutedFlows": true
       },
       "alwaysUploadOriginalQualificationArtifacts": true,
       "zoneTreePublicIssue": {
@@ -41589,7 +41580,7 @@
         "pending": 0
       },
       "runtimeQualified": false,
-      "qualification": "Current complete operation source joined; fresh default native compiler/analyzer has zero errors/warnings. Original failed Release build and earlier whitespace pass retained. Final canonical full formatter/build and exact pushed-source Linux discovery, normal/scalar, recovery, required RF3 and functional coverage remain open. No task promoted.",
+      "qualification": "Complete operation source, full canonical local Release build and full formatter are ready. Native31case local run retained16pass/15fail; canonical-temp ANN14 retained13pass/1fail. Strict034/042 native26/50 source admission is now bound to authenticated originals. Exact pushed-source Linux normal/scalar, recovery, RF3, resource/performance and functional coverage remain open. No task promoted.",
       "lastOriginalNativeDiagnosticsBeforeFinalFormatting": {
         "errors": 43,
         "warnings": 0,
@@ -41664,10 +41655,158 @@
         "sha256": "fdf7f340a2fb08579424fb1a1d81db86293b45edca6cad772e6b8603fd09a869",
         "qualification": "Original failed local development build before the approved079 semantic successor. Two original Revision arguments and actual typed query DTO construction repaired in subsequent source; repeat full build remains mandatory."
       },
-      "canonicalFormatterPassed": false,
-      "canonicalBuildPassed": false
+      "canonicalFormatterPassed": true,
+      "canonicalBuildPassed": true,
+      "canonicalReleaseBuild": {
+        "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity quiet",
+        "nativeExitCode": 0,
+        "buildCompletedSuccessfully": true,
+        "errors": 0,
+        "warnings": 0,
+        "elapsed": "00:02:28.68",
+        "log": "/private/tmp/keyload-stage44-canonical-release-build-r2-original-20261009.log",
+        "logSha256": "7e618d8bd2f828ccbab754048dff7b0140760be9f7cdb3f29957bae14b5a3c11",
+        "qualification": "Canonical whole-solution local development build after the approved native source repairs and complete formatter; exact delivered-source Linux runtime and coverage remain open."
+      },
+      "canonicalFullFormatter": {
+        "commandArgs": [
+          "dotnet",
+          "format",
+          "KeyLoad.slnx",
+          "--verify-no-changes",
+          "--no-restore",
+          "--verbosity",
+          "quiet",
+          "--report",
+          "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json"
+        ],
+        "nativeExitCode": 0,
+        "diagnosticCount": 0,
+        "report": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json",
+        "reportSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "log": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "Actual complete SDK formatter verification after the seven source-format corrections; local development only."
+      },
+      "deliveredCheckpoint": {
+        "sourceCommit": "d2323ed056153ae8bd2ec833fc316ac5863903a4",
+        "pushToMainExitCode": 0,
+        "filesChanged": 344,
+        "qualification": "All then-current authorized source, owner website changes and docs committed and pushed on main; original Linux run37977314792 is independent of subsequent formatter and strict-binding changes."
+      },
+      "originalNative034042Binding": {
+        "sourceCommit": "d2323ed056153ae8bd2ec833fc316ac5863903a4",
+        "runId": 37977314792,
+        "runAttempt": 1,
+        "artifactSourceBindingVerified": true,
+        "normalAndScalarStrictArraysEqual": true,
+        "tasks": {
+          "KL-034": {
+            "nativeCases": 26,
+            "unit": 24,
+            "rf3": 2,
+            "selectors": 11
+          },
+          "KL-042": {
+            "nativeCases": 50,
+            "unit": 39,
+            "rf3": 11,
+            "selectors": 15
+          }
+        },
+        "strictSourceJoinReceiptSha256": "8157b87ebb568842640afa2263ce4ffeec28918deb6b20cbdb5393a0d5a96ba6",
+        "manifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4",
+        "originalApiProofSha256": "59792de3f6ba7c76c14df5bca544d46a211b0b0a922982db967bbc12bd49f304",
+        "runtimeQualified": false,
+        "qualification": "Original authenticated GitHub artifacts and native discovery/source/DLL/PDB metadata bound both profiles before strict operation admission. Original census jobs deliberately refused execution. No executed case or acceptance pass is inferred; archives contain image metadata, not independently rehashed DLL/PDB binary bytes."
+      },
+      "focusedOriginalLocalUnit": {
+        "nativeExitCode": 2,
+        "total": 31,
+        "passed": 16,
+        "failed": 15,
+        "skipped": 0,
+        "trx": "/private/tmp/keyload-stage44-focused-unit-r1-20261009/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "20c38edfe29a564d5d29dafe049a1523f74762e72cafd8a5ca7153057feb4c64",
+        "nativeReport": "/private/tmp/keyload-stage44-focused-unit-r1-20261009/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "nativeReportSha256": "1221de0c28209cf24fab4e8849afd5953032a6fee147de144cf77e66ec63472d",
+        "runtimeQualified": false,
+        "coverageMeasured": false,
+        "entry": "Local Aspire-owned AppHost forwarding original native TUnit execution with50configured slots",
+        "originalFailureGroups": {
+          "snapshotAncestorLinkRejection": 14,
+          "actualConfiguredPhysicalOwnerRequired": 1
+        },
+        "qualification": "Original31case local run:16pass/15fail, not an infrastructure-only failure. No failed case excluded or converted to PASS."
+      },
+      "focusedOriginalLocalAnnCanonicalTemp": {
+        "nativeExitCode": 2,
+        "total": 14,
+        "passed": 13,
+        "failed": 1,
+        "skipped": 0,
+        "trx": "/private/tmp/keyload-stage44-focused-ann-canonical-temp-r2-20261009/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "068e8f07f96d00388f5991b9a2103c801f2f960ccfb5af537b98e5e233cc1fa0",
+        "nativeReport": "/private/tmp/keyload-stage44-focused-ann-canonical-temp-r2-20261009/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "nativeReportSha256": "ea4ab003f344e71598b5bdfa96ff81bed55d8cbdad5873a9f8b192244eecdf13",
+        "runtimeQualified": false,
+        "coverageMeasured": false,
+        "entry": "TMPDIR=/private/tmp node scripts/Features/TestInfrastructure/run-tests.mjs with existing native TUnit ANN selection",
+        "remainingFailure": "NativeAnnWaitGenerationTests.ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow: full native serialized result differs from independent expected result.",
+        "qualification": "Actual14case ANN diagnostic run on canonical temporary path:13pass/1fail. Existing path rejection, full-result equality, time and operation contracts are unchanged. Local development only; the original first failures remain retained."
+      }
     },
-    "currentStageNativeTaskSlots": 50
+    "currentStageNativeTaskSlots": 50,
+    "previousCurrentBuildBeforeStageXLIV": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+      "msbuildDebugDirectory": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009-msbuild-debug",
+      "nativeExitCode": 1,
+      "buildCompletedSuccessfully": false,
+      "elapsedSeconds": 147.429,
+      "log": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009.log",
+      "logSha256": "610ac0e901c11cac354d3d5236b09764edf361da4cdf59e4934bcee8492f5a2e",
+      "inputCount": 5675,
+      "inputDrift": [
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Adapters/KeyLoadDocumentTarget.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentComparisonPhases.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentMeasurementState.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Lifetimes/DocumentRepetitionOwner.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Validation/DocumentComparisonOracle.cs",
+        "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/DocumentPlanEvidenceTests.cs",
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs"
+      ],
+      "uniqueErrors": [
+        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(38,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'DocumentIdentityPrefix' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(39,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'PaddingCharacter' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(34,48): error KLD0001: Machine key 'cells' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(35,48): error KLD0001: Machine key 'selected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(36,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(40,48): error KLD0001: Machine key 'supported' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(41,48): error KLD0001: Machine key 'unavailable' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(42,48): error KLD0001: Machine key 'envelopeRejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(43,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]"
+      ],
+      "qualification": "local development; source drift invalidates exact-current-source qualification"
+    },
+    "previousCurrentFormatterBeforeStageXLIV": {
+      "commandArgs": [
+        "dotnet",
+        "format",
+        "KeyLoad.slnx",
+        "--no-restore",
+        "--verify-no-changes",
+        "--verbosity",
+        "minimal"
+      ],
+      "nativeExitCode": 0,
+      "elapsedSeconds": 96.988,
+      "log": "/private/tmp/keyload-r863-stage36-native-full-formatter-verify-20261009.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputCount": 5587,
+      "inputDrift": [],
+      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+    }
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -49568,7 +49707,7 @@
       "sourcePresent": true,
       "sourceUnitCandidateInstances": 24,
       "sourceRf3CandidateInstances": 2,
-      "nativeUidsBound": false,
+      "nativeUidsBound": true,
       "runtimeQualified": false,
       "sourceFlows": [
         "Native FTS and ANN exact minimum-prefix waits through SDK/official MCP/Q1 SDK/Q1 MCP",
@@ -49576,12 +49715,20 @@
         "Actual cold generation/read-cut boundary and exact original receipt replay; native privacy/redactions",
         "Real missing/negative native Applied row, exact fixture repair and complete healthy wait/search"
       ],
-      "nativeAdmission": "Additive census-only lanes capture original native identities; they intentionally cannot publish acceptance until exact authenticated binding.",
+      "nativeAdmission": "Both authenticated original normal/scalar censuses now bind the strict mapped cases; fresh-source image validation and actual whole-flow execution remain mandatory.",
       "remaining": [
-        "Current coherent build and native source/PDB/image discovery",
-        "Exact-source normal/scalar native24+2 union rather than guessed source/UID proof",
-        "Required RF3/recovery/resource/performance gates"
-      ]
+        "Actual strict26 native normal/scalar flows on the next exact pushed source",
+        "Required RF3/recovery/resource/performance and coverage gates"
+      ],
+      "originalNativeCases": {
+        "nativeCases": 26,
+        "unit": 24,
+        "rf3": 2,
+        "selectors": 11
+      },
+      "originalNativeSourceCommit": "d2323ed056153ae8bd2ec833fc316ac5863903a4",
+      "originalNativeRunId": 37977314792,
+      "originalNativeBindingManifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4"
     }
   },
   "KL-035": {
@@ -50249,7 +50396,7 @@
       "sourcePresent": true,
       "sourceUnitCandidateInstances": 39,
       "sourceIntegrationCandidateInstances": 11,
-      "nativeUidsBound": false,
+      "nativeUidsBound": true,
       "runtimeQualified": false,
       "sourceFlows": [
         "Full native catalog/authorization/placement/owner cut and verified original archive admission",
@@ -50259,7 +50406,17 @@
         "Strict exact-cut terminal replay and later-write refusal; missing/corrupt/foreign completed authority refuses without publication",
         "Current-source all-model SDK/official MCP/Q1 cold restore, queue/event fences, secondary partitions and paused dispatch"
       ],
-      "formatMigrationOrLegacyReaderAdded": false
+      "formatMigrationOrLegacyReaderAdded": false,
+      "originalNativeCases": {
+        "nativeCases": 50,
+        "unit": 39,
+        "rf3": 11,
+        "selectors": 15
+      },
+      "nativeAdmission": "Both authenticated original normal/scalar censuses now bind the strict mapped cases; fresh-source image validation and actual whole-flow execution remain mandatory.",
+      "originalNativeSourceCommit": "d2323ed056153ae8bd2ec833fc316ac5863903a4",
+      "originalNativeRunId": 37977314792,
+      "originalNativeBindingManifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4"
     }
   },
   "KL-043": {
@@ -50929,9 +51086,16 @@
       "nativeUidAndOriginalLinuxQualificationPending": true,
       "runtimeQualified": false,
       "allAcceptanceClosed": false,
-      "qualification": "Complete source flows and approved original Revision/full live page/real opaque continuation oracles joined. Fresh default native compiler/analyzer zero errors/warnings. Canonical build/format, original raw/recovery/snapshot suites, exact-source native normal/scalar RF3, privacy, bounds and functional coverage remain mandatory and open.",
+      "qualification": "Complete approved Revision/full-page/real opaque-continuation source, canonical local Release build/full formatter and15actual selected local feed/live cases pass. Original raw/recovery/snapshot suites, exact-source native normal/scalar RF3, privacy, bounds and functional coverage remain open.",
       "semanticSuccessorManifestSha256": "b0c0fe1b1e3e78e19635c62630a1713da858f568f734676dc034b2b0fb802640",
-      "fullPageAndOpaqueContinuationAllFourCallersSourcePresent": true
+      "fullPageAndOpaqueContinuationAllFourCallersSourcePresent": true,
+      "canonicalLocalBuildPassed": true,
+      "canonicalFullFormatterPassed": true,
+      "focusedLocalFeedLiveCases": {
+        "total": 15,
+        "passed": 15,
+        "qualification": "Actual selected local feeds/live cases only; no whole-task or RF3/coverage acceptance inference."
+      }
     }
   },
   "KL-080": {

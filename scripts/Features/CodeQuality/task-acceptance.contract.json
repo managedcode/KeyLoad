@@ -4444,25 +4444,31 @@
     },
     {
       "taskId": "KL-034",
-      "selections": [],
-      "censusSelections": [
+      "selections": [
         {
           "selectionId": "unit-native-text-wait-for-index-tests",
           "suite": "unit",
           "filter": "/*/*/NativeTextWaitForIndexTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
               "methodName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy",
+              "instanceName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitForIndexTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "methodName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy",
+              "instanceName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitForIndexTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4470,19 +4476,26 @@
           "selectionId": "unit-native-text-wait-observed-work-tests",
           "suite": "unit",
           "filter": "/*/*/NativeTextWaitObservedWorkTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
               "methodName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy",
+              "instanceName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitObservedWorkTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "methodName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy",
+              "instanceName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4490,51 +4503,58 @@
           "selectionId": "unit-search-wait-authority-tests",
           "suite": "unit",
           "filter": "/*/*/SearchWaitAuthorityTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
               "methodName": "WrongAtomicPartitionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "instanceName": "WrongAtomicPartitionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
               "methodName": "ChangedPlacementEpochCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "instanceName": "ChangedPlacementEpochCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
               "methodName": "ZeroMinimumPositionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "instanceName": "ZeroMinimumPositionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
               "methodName": "MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy",
+              "instanceName": "MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
-              "methodName": "AbsentNativeProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy",
+              "instanceName": "MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy(True)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "AbsentNativeProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy",
+              "instanceName": "AbsentNativeProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4542,35 +4562,76 @@
           "selectionId": "unit-native-ann-wait-authority-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitAuthorityTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
               "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "instanceName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(0)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
               "parameterTypeFullNames": [
                 "System.Int32"
-              ],
-              "sourceArgumentDeclarations": [
-                "WrongIncarnationCase",
-                "WrongAtomicCase",
-                "FutureCase",
-                "ZeroCase",
-                "WrongEpochCase"
-              ],
-              "sourceInstances": 5
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "instanceName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "instanceName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(2)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "instanceName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(3)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "instanceName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy(4)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
               "methodName": "MissingOrNegativeAppliedRowRefusesWithoutPartialThenExactRepairReturnsFullHealthyWaitAndSearch",
+              "instanceName": "MissingOrNegativeAppliedRowRefusesWithoutPartialThenExactRepairReturnsFullHealthyWaitAndSearch(True)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "true",
-                "false"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "MissingOrNegativeAppliedRowRefusesWithoutPartialThenExactRepairReturnsFullHealthyWaitAndSearch",
+              "instanceName": "MissingOrNegativeAppliedRowRefusesWithoutPartialThenExactRepairReturnsFullHealthyWaitAndSearch(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4578,14 +4639,14 @@
           "selectionId": "unit-native-ann-wait-generation-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitGenerationTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitGenerationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitGenerationTests",
               "methodName": "ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow",
+              "instanceName": "ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitGenerationTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4593,19 +4654,26 @@
           "selectionId": "unit-native-ann-wait-observed-work-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitObservedWorkTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
               "methodName": "ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy",
+              "instanceName": "ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitObservedWorkTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
+              "methodName": "ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy",
+              "instanceName": "ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4613,14 +4681,14 @@
           "selectionId": "unit-native-ann-wait-pinned-lease-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitPinnedLeaseTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitPinnedLeaseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitPinnedLeaseTests",
               "methodName": "ActualPinnedResidentFrameRejectsWaitThenJoinedReaderReleaseAllowsSameLiteralIndexedPrefix",
+              "instanceName": "ActualPinnedResidentFrameRejectsWaitThenJoinedReaderReleaseAllowsSameLiteralIndexedPrefix",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitPinnedLeaseTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4628,19 +4696,26 @@
           "selectionId": "unit-native-ann-wait-provider-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitProviderTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitProviderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitProviderTests",
               "methodName": "ActualMissingGenerationOrDisabledCapabilityRejectsNoPartialThenProvisionedPrefixIsHealthy",
+              "instanceName": "ActualMissingGenerationOrDisabledCapabilityRejectsNoPartialThenProvisionedPrefixIsHealthy(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitProviderTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitProviderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitProviderTests",
+              "methodName": "ActualMissingGenerationOrDisabledCapabilityRejectsNoPartialThenProvisionedPrefixIsHealthy",
+              "instanceName": "ActualMissingGenerationOrDisabledCapabilityRejectsNoPartialThenProvisionedPrefixIsHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitProviderTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4648,14 +4723,14 @@
           "selectionId": "unit-native-ann-wait-retirement-tests",
           "suite": "unit",
           "filter": "/*/*/NativeAnnWaitRetirementTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitRetirementTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitRetirementTests",
               "methodName": "ReleasedGenerationKeepsActualPinnedIndexUntilReaderJoinsThenNewNativeGenerationReturnsHealthyPrefix",
+              "instanceName": "ReleasedGenerationKeepsActualPinnedIndexUntilReaderJoinsThenNewNativeGenerationReturnsHealthyPrefix",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitRetirementTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4663,14 +4738,14 @@
           "selectionId": "rf3-native-text-wait-rf3-tests",
           "suite": "rf3",
           "filter": "/*/*/NativeTextWaitRf3Tests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests(ClusterFixture)",
               "methodName": "AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted",
+              "instanceName": "AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextWaitRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4678,14 +4753,14 @@
           "selectionId": "rf3-native-ann-wait-rf3-tests",
           "suite": "rf3",
           "filter": "/*/*/NativeAnnWaitRf3Tests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.IntegrationTests.Features.Search.NativeAnnWaitRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeAnnWaitRf3Tests",
               "methodName": "RealSdkOfficialMcpAndBothQ1MinimumWaitRejectDeniedStaleThenRestoreDeletedExclusionAndColdHealthy",
+              "instanceName": "RealSdkOfficialMcpAndBothQ1MinimumWaitRejectDeniedStaleThenRestoreDeletedExclusionAndColdHealthy",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeAnnWaitRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         }
@@ -4693,28 +4768,27 @@
     },
     {
       "taskId": "KL-042",
-      "selections": [],
-      "censusSelections": [
+      "selections": [
         {
           "selectionId": "unit-cluster-backup-admission-whole-flow-tests",
           "suite": "unit",
           "filter": "/*/*/ClusterBackupAdmissionWholeFlowTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
               "methodName": "ActualNativeCaptureOverloadRejectsWithoutEffectsThenSettledFailuresPermitHealthyBackup",
+              "instanceName": "ActualNativeCaptureOverloadRejectsWithoutEffectsThenSettledFailuresPermitHealthyBackup",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ClusterBackupAdmissionWholeFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
               "methodName": "ActualNativeShutdownJoinsEveryAcceptedCaptureAndRejectsNewDirectAdmission",
+              "instanceName": "ActualNativeShutdownJoinsEveryAcceptedCaptureAndRejectsNewDirectAdmission",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ClusterBackupAdmissionWholeFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4722,51 +4796,58 @@
           "selectionId": "unit-atomic-partition-roster-restore-tests",
           "suite": "unit",
           "filter": "/*/*/AtomicPartitionRosterRestoreTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore",
+              "instanceName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore(0)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
-              ],
-              "sourceArgumentDeclarations": [
-                "NoApplied",
-                "FirstNewApplied"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore",
+              "instanceName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002ForgedHistoricalOriginRefusesWithoutEffectsThenOriginalIsHealthy",
+              "instanceName": "AcBackupRoster002ForgedHistoricalOriginRefusesWithoutEffectsThenOriginalIsHealthy",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002MissingOriginAndChangedHistoricalRowRefuseThenExactRepairIsHealthy",
+              "instanceName": "AcBackupRoster002MissingOriginAndChangedHistoricalRowRefuseThenExactRepairIsHealthy",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002CorruptPriorOriginCannotPublishRestoreAndExactRepairContinuesCold",
+              "instanceName": "AcBackupRoster002CorruptPriorOriginCannotPublishRestoreAndExactRepairContinuesCold",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
               "methodName": "AcBackupRoster002OwningRestoreIdentityCannotBeMissingOrForgedBeforeHealthyContinuation",
+              "instanceName": "AcBackupRoster002OwningRestoreIdentityCannotBeMissingOrForgedBeforeHealthyContinuation",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4774,14 +4855,14 @@
           "selectionId": "unit-atomic-partition-roster-frame-budget-tests",
           "suite": "unit",
           "filter": "/*/*/AtomicPartitionRosterFrameBudgetTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterFrameBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterFrameBudgetTests",
               "methodName": "AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect",
+              "instanceName": "AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterFrameBudgetTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4789,30 +4870,30 @@
           "selectionId": "unit-cli-backup-restore-flow-tests",
           "suite": "unit",
           "filter": "/*/*/CliBackupRestoreFlowTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
+              "instanceName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
+              "instanceName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
               "methodName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
+              "instanceName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4820,14 +4901,14 @@
           "selectionId": "unit-cli-backup-restore-missing-input-tests",
           "suite": "unit",
           "filter": "/*/*/CliBackupRestoreMissingInputTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreMissingInputTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreMissingInputTests",
               "methodName": "AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair",
+              "instanceName": "AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreMissingInputTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4835,14 +4916,14 @@
           "selectionId": "unit-cli-backup-restore-invalid-catalog-tests",
           "suite": "unit",
           "filter": "/*/*/CliBackupRestoreInvalidCatalogTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests",
               "methodName": "AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
+              "instanceName": "AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreInvalidCatalogTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4850,14 +4931,14 @@
           "selectionId": "unit-cli-backup-restore-length-mismatch-tests",
           "suite": "unit",
           "filter": "/*/*/CliBackupRestoreLengthMismatchTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests",
               "methodName": "AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
+              "instanceName": "AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreLengthMismatchTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -4865,122 +4946,150 @@
           "selectionId": "unit-native-backup-cut-tests",
           "suite": "unit",
           "filter": "/*/*/NativeBackupCutTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+              "instanceName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
-              "methodName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+              "instanceName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(True)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+              "instanceName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004CompleteJournalRequiresExactManifestCut",
+              "instanceName": "AcIs004CompleteJournalRequiresExactManifestCut(-1)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Int64"
-              ],
-              "sourceArgumentDeclarations": [
-                "-1L",
-                "1L"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004CompleteJournalRequiresExactManifestCut",
+              "instanceName": "AcIs004CompleteJournalRequiresExactManifestCut(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+              "instanceName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+              "instanceName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+              "instanceName": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+              "instanceName": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+              "instanceName": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+              "instanceName": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+              "instanceName": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+              "instanceName": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+              "instanceName": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
               "methodName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+              "instanceName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+              "instanceName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -4988,32 +5097,46 @@
           "selectionId": "unit-backup-restore-staging-join-tests",
           "suite": "unit",
           "filter": "/*/*/BackupRestoreStagingJoinTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
               "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+              "instanceName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(False)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
-              "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+              "instanceName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(True)",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
               "parameterTypeFullNames": [
                 "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+              "instanceName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+              "instanceName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
             }
           ]
         },
@@ -5021,22 +5144,22 @@
           "selectionId": "unit-missing-backup-manifest-tests",
           "suite": "unit",
           "filter": "/*/*/MissingBackupManifestTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
               "methodName": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+              "instanceName": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/MissingBackupManifestTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
               "methodName": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+              "instanceName": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/MissingBackupManifestTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -5044,14 +5167,14 @@
           "selectionId": "unit-cli-backup-execution-policy-tests",
           "suite": "unit",
           "filter": "/*/*/CliBackupExecutionPolicyTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
               "methodName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
+              "instanceName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupExecutionPolicyTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -5059,14 +5182,14 @@
           "selectionId": "unit-artifact-transfer-rejected-input-flow-tests",
           "suite": "unit",
           "filter": "/*/*/ArtifactTransferRejectedInputFlowTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests",
               "methodName": "AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
+              "instanceName": "AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTransferRejectedInputFlowTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -5074,30 +5197,30 @@
           "selectionId": "rf3-cluster-restore-rf3-tests",
           "suite": "rf3",
           "filter": "/*/*/ClusterRestoreRf3Tests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation",
+              "instanceName": "ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation",
+              "instanceName": "ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
               "methodName": "ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold",
+              "instanceName": "ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -5105,24 +5228,76 @@
           "selectionId": "rf3-cluster-restore-rf3-resume-tests",
           "suite": "rf3",
           "filter": "/*/*/ClusterRestoreRf3ResumeTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
               "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(PlanPublished)",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
               "parameterTypeFullNames": [
                 "KeyLoad.NativeClusterRestoreStage"
-              ],
-              "sourceArgumentDeclarations": [
-                "NativeClusterRestoreStage.PlanPublished",
-                "NativeClusterRestoreStage.SourcePrefixPersisted",
-                "NativeClusterRestoreStage.Reconciled",
-                "NativeClusterRestoreStage.IdentityPublished",
-                "NativeClusterRestoreStage.AuthorityReset",
-                "NativeClusterRestoreStage.ReadyPublished",
-                "NativeClusterRestoreStage.NodesPublished"
-              ],
-              "sourceInstances": 7
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(SourcePrefixPersisted)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(Reconciled)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(IdentityPublished)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(AuthorityReset)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(ReadyPublished)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "instanceName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold(NodesPublished)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ]
             }
           ]
         },
@@ -5130,14 +5305,14 @@
           "selectionId": "rf3-admin-backup-client-parity-tests",
           "suite": "rf3",
           "filter": "/*/*/AdminBackupClientParityTests/*",
-          "candidates": [
+          "cases": [
             {
               "className": "KeyLoad.IntegrationTests.Features.BackupRestore.AdminBackupClientParityTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.BackupRestore.AdminBackupClientParityTests(ClusterFixture)",
               "methodName": "AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups",
+              "instanceName": "AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/AdminBackupClientParityTests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
+              "parameterTypeFullNames": []
             }
           ]
         }

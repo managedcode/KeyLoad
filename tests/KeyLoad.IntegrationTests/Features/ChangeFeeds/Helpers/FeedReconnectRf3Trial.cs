@@ -54,8 +54,11 @@ internal static class FeedReconnectRf3Trial
         RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadChangeFeedRequest original,
         CancellationToken token)
     {
-        var revoked = scenario.Identity.Principal with { Grants = [],
-            PolicyEpoch = scenario.Identity.Principal.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
+        var revoked = scenario.Identity.Principal with
+        {
+            Grants = [],
+            PolicyEpoch = scenario.Identity.Principal.PolicyEpoch + FeedLiveRf3Protocol.EpochStep
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             () => FeedLiveRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);

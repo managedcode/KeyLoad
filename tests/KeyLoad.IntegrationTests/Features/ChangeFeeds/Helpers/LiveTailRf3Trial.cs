@@ -47,8 +47,11 @@ internal static class LiveTailRf3Trial
     private static async Task RevokeAndRestoreAsync(RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest original, CancellationToken token)
     {
-        var revoked = scenario.Identity.Principal with { Grants = [],
-            PolicyEpoch = scenario.Identity.Principal.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
+        var revoked = scenario.Identity.Principal with
+        {
+            Grants = [],
+            PolicyEpoch = scenario.Identity.Principal.PolicyEpoch + FeedLiveRf3Protocol.EpochStep
+        };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             () => LiveTailRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);

@@ -2,7 +2,7 @@ export const SCENE = Object.freeze({
   limits: Object.freeze({ maxDevicePixelRatio: 1.5, maxBufferPixels: 1_000_000, maxDrawCalls: 30, maxTriangles: 120_000,
     settleMilliseconds: 500, settleRenderMilliseconds: 450, maxSpinStepMilliseconds: 50 }),
   world: Object.freeze({ coreSize: 0.8, coreY: 2.0, cameraFov: 32, cameraNear: 0.1, cameraFar: 60,
-    cameraX: 0, cameraY: 6, cameraZ: 11.5, cameraLookY: 0.15, cameraAspect: 1,
+    cameraX: 0, cameraY: 4.5, cameraZ: 11.5, cameraLookY: 0.15, cameraAspect: 1,
     pointerYaw: 0.065, pointerPitch: 0.025, smoothingDivisor: 115, millisecondsPerSecond: 1000 }),
   colors: Object.freeze({ sky: 0xf7f3ed }),
   math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
@@ -41,8 +41,8 @@ export const SCENE_TEXT = Object.freeze({
 
 // Positions and proportions measured from the selected original product artwork.
 const PLATFORMS = Object.freeze([
-  [-2.55, -0.79, -1.75], [2.65, -0.79, -1.65], [-4, -0.79, 0.45], [4.05, -0.79, 0.5],
-  [-3.25, -0.79, 2.15], [3.4, -0.79, 2.25], [-1.75, -0.79, 3.3], [1.85, -0.79, 3.35],
+  [-2.55, -0.79, -2.19], [2.65, -0.79, -2.06], [-4, -0.79, 0.56], [4.05, -0.79, 0.63],
+  [-3.25, -0.79, 2.69], [3.4, -0.79, 2.81], [-1.75, -0.79, 4.13], [1.85, -0.79, 4.19],
 ]);
 const PALETTE = Object.freeze({ silver: 0xe4deda, edge: 0xc1b8b5, paper: 0xf5efe6,
   glass: 0xe7dfe9, lilac: 0xb4a3e4, peach: 0xf3bf9d, ink: 0xc0b4b1, white: 0xfff9f0 });
@@ -190,16 +190,18 @@ function createAgent(piece) {
   piece('metal', 'body', AGENT_ANCHOR, [0, -0.04, 0], [0.98, 0.98, 0.75], PALETTE.silver);
   piece('metal', 'sphere', AGENT_ANCHOR, [0, 0.6, 0], [0.19, 0.19, 0.19], PALETTE.silver);
   piece('detail', 'ring', AGENT_ANCHOR, [0, 0.34, -0.04], [0.58, 0.58, 0.58], PALETTE.peach);
+  piece('glass', 'ring', AGENT_ANCHOR, [0, 0.34, -0.05], [0.59, 0.59, 0.59], PALETTE.peach);
+  piece('glass', 'ring', AGENT_ANCHOR, [0, 0.34, -0.06], [0.60, 0.60, 0.60], PALETTE.white);
 }
 
 function createTable(piece) {
   piece('metal', 'panel', 0, [0, 0.55, 0], [1.35, 1, 0.11], PALETTE.silver);
   piece('glass', 'panel', 0, [0, 0.55, 0.075], [1.27, 0.92, 0.014], PALETTE.glass);
-  for (let row = 0; row < 6; row++) for (let column = 0; column < 6; column++) {
-    const color = column === 0 ? [0xb8b4e9, 0xc5b8e8, 0xd2bfe8, 0xe4c6e4, 0xd0c2ec, PALETTE.paper][row]
+  for (let row = 0; row < 7; row++) for (let column = 0; column < 6; column++) {
+    const color = column === 0 ? [0xb8b4e9, 0xc5b8e8, 0xd2bfe8, 0xe4c6e4, 0xd0c2ec, 0xded5e8, PALETTE.paper][row]
       : column > 2 && row > 2 ? 0xf1d4c0 : PALETTE.paper;
-    piece('paper', 'box', 0, [(column - 2.5) * 0.205, 0.92 - row * 0.146, 0.095],
-      [0.195, 0.136, 0.008], color);
+    piece('paper', 'box', 0, [(column - 2.5) * 0.205, 0.935 - row * 0.128, 0.095],
+      [0.195, 0.118, 0.008], color);
   }
 }
 
@@ -300,6 +302,7 @@ function createSurface(THREE, own, root, anchors, pieces, material) {
   const positions = new Float32Array(count * 3), normals = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3), modelAnchors = new Float32Array(count);
   const point = new THREE.Vector3(), normal = new THREE.Vector3(), color = new THREE.Color();
+  const peach = new THREE.Color(PALETTE.peach);
   let cursor = 0;
   for (const piece of pieces) {
     const geometry = piece.geometry, vertices = geometry.getAttribute('position'), sourceNormals = geometry.getAttribute('normal');
@@ -307,7 +310,7 @@ function createSurface(THREE, own, root, anchors, pieces, material) {
     color.setHex(piece.color);
     for (let index = 0; index < vertexCount; index++) {
       const vertex = geometry.index ? geometry.index.getX(index) : index;
-      if (piece.gradient) color.setHex(PALETTE.lilac).lerp(new THREE.Color(PALETTE.peach),
+      if (piece.gradient) color.setHex(PALETTE.lilac).lerp(peach,
         vertices.getX(vertex) / 1.64 + 0.5);
       point.fromBufferAttribute(vertices, vertex).multiply(piece.size).applyQuaternion(piece.rotation).add(piece.offset);
       normal.fromBufferAttribute(sourceNormals, vertex).divide(piece.size).applyQuaternion(piece.rotation).normalize();
@@ -388,7 +391,7 @@ function createContactShade(THREE, own, root) {
   const width = 256, height = 192, pixels = new Uint8Array(width * height * 4);
   const anchors = [...PLATFORMS, [0, -0.88, 0]];
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-    const worldX = (x / width - 0.5) * 11.2, worldZ = (0.5 - y / height) * 7.8 + 0.7;
+    const worldX = (x / width - 0.5) * 11.2, worldZ = (0.5 - y / height) * 9.8 + 0.7;
     const intensity = anchors.reduce((sum, anchor) => sum + Math.exp(-((worldX - anchor[0]) ** 2
       + (worldZ - anchor[2]) ** 2) * 3.1), 0);
     const offset = (y * width + x) * 4;
@@ -397,7 +400,7 @@ function createContactShade(THREE, own, root) {
   }
   const texture = own(new THREE.DataTexture(pixels, width, height));
   texture.needsUpdate = true;
-  const shade = new THREE.Mesh(own(new THREE.PlaneGeometry(11.2, 7.8)),
+  const shade = new THREE.Mesh(own(new THREE.PlaneGeometry(11.2, 9.8)),
     own(new THREE.MeshBasicNodeMaterial({ map: texture, transparent: true, depthWrite: false })));
   shade.rotation.x = -Math.PI / 2;
   shade.position.set(0, -0.91, 0.7);
