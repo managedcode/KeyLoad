@@ -15,6 +15,7 @@ internal sealed class ComparisonParallelismSelectionTests
     private const string KeyLoadTargetName = "KeyLoad";
     private const string SelectedFilter = "/*/*/ActualComparison/*";
     private const string IsolationMessage = "Comparison measurements require exactly one native test at a time.";
+    private const string NodeIsolationMessage = "Comparison measurements and heavy load require exactly one native test at a time.";
     private const string ModuleArgument = "--input-type=module";
     private const string EvaluationArgument = "-e";
     private const string ScriptsDirectory = "scripts";
@@ -64,7 +65,7 @@ internal sealed class ComparisonParallelismSelectionTests
         await Assert.That(rejected.GetArrayLength()).IsEqualTo(RejectedSelections);
         foreach (var rejection in rejected.EnumerateArray().Take(3))
         {
-            await Assert.That(rejection.GetProperty(MessageProperty).GetString()).IsEqualTo(IsolationMessage);
+            await Assert.That(rejection.GetProperty(MessageProperty).GetString()).IsEqualTo(NodeIsolationMessage);
         }
     }
 

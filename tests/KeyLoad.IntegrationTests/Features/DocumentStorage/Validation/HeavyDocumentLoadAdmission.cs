@@ -28,12 +28,7 @@ internal static class HeavyDocumentLoadAdmission
     {
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(arguments);
-        var factory = new OptionsFactory<HeavyDocumentLoadExecutionOptions>(
-            [new ConfigureFromConfigurationOptions<HeavyDocumentLoadExecutionOptions>(
-                configuration.GetSection(HeavyDocumentLoadExecutionOptions.SectionName))], [],
-            [new ValidateOptions<HeavyDocumentLoadExecutionOptions>(Options.DefaultName,
-                options => options.Enabled, HeavyDocumentLoadExecutionOptions.ValidationMessage)]);
-        var options = new OptionsManager<HeavyDocumentLoadExecutionOptions>(factory);
+        var options = new OptionsManager<HeavyDocumentLoadExecutionOptions>(new AdmissionFactory(configuration));
         _ = options.Value;
         if (!ExactlyOne(arguments, FilterArgument, ExactFilter)
             || !ExactlyOne(arguments, ParallelismArgument, ExclusiveParallelism)
@@ -50,5 +45,15 @@ internal static class HeavyDocumentLoadAdmission
             .Where(item => item.argument == name || item.argument.StartsWith(name + ArgumentEquals, StringComparison.Ordinal)).ToArray();
         return matches.Length == 1 && matches[0].argument == name
             && matches[0].index + 1 < arguments.Count && arguments[matches[0].index + 1] == expected;
+    }
+
+    [ConfigurationBinding]
+    private sealed class AdmissionFactory(ConfigurationManager configuration) : OptionsFactory<HeavyDocumentLoadExecutionOptions>(
+        [new ConfigureFromConfigurationOptions<HeavyDocumentLoadExecutionOptions>(
+            configuration.GetSection(HeavyDocumentLoadExecutionOptions.SectionName))], [],
+        [new ValidateOptions<HeavyDocumentLoadExecutionOptions>(Options.DefaultName,
+            value => value.Enabled, HeavyDocumentLoadExecutionOptions.ValidationMessage)])
+    {
+        protected override HeavyDocumentLoadExecutionOptions CreateInstance(string name) => new();
     }
 }

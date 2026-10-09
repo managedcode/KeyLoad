@@ -22,7 +22,8 @@ internal sealed class ScaleServerHostEvidenceTests
             var failures = new List<Exception>
             { new InvalidOperationException("Supported Linux host evidence was unavailable.") };
             ServerFailureObserver.Observe(() => _ = ScaleServerCgroupOracle.ReadCurrent(), failures);
-            throw new AggregateException(failures);
+            var diagnostic = string.Join("; ", failures.Select(failure => failure.Message));
+            throw new InvalidOperationException(diagnostic, new AggregateException(failures));
         }
 
         await Assert.That(hardware.LogicalCpuCount > 0 && hardware.PhysicalCoreCount > 0

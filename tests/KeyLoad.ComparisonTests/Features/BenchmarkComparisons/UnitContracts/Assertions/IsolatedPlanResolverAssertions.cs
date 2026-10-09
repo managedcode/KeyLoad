@@ -69,9 +69,11 @@ internal static class IsolatedPlanResolverAssertions
             await AssertBytesEqualAsync(originals[index], await File.ReadAllBytesAsync(destination, token));
         }
         var document = await IsolatedAggregateNodeProcess.RunAsync(["--input-type=module", "-e",
-            "import { createDocumentPlan } from './scripts/Features/BenchmarkComparisons/document-isolated-plan.mjs'; process.stdout.write(JSON.stringify(createDocumentPlan()));"], token);
+            "import { writeFileSync } from 'node:fs'; import { createDocumentPlan } from './scripts/Features/BenchmarkComparisons/document-isolated-plan.mjs'; writeFileSync(process.argv[1], JSON.stringify(createDocumentPlan()));",
+            Path.Combine(directory, "document-plan.json")], token);
         await Assert.That(document.ExitCode).IsEqualTo(0).Because(document.Error);
-        await File.WriteAllTextAsync(Path.Combine(directory, "document-plan.json"), document.Output, token);
+        await Assert.That(document.Output).IsEqualTo(string.Empty);
+        await Assert.That(document.Error).IsEqualTo(string.Empty);
         return originals;
     }
 

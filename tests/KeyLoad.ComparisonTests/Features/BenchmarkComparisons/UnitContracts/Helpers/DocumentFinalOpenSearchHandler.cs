@@ -115,5 +115,5 @@ internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule 
         return new { _id = document.Id, _source = OpenSearchDocument.CreateWithoutVector(document.Id, json), sort = new[] { document.Id } };
     }
     private static HttpResponseMessage Response(object value)
-        => new(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json") };
+        => new(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(value, OpenSearchHttp.JsonOptions), Encoding.UTF8, "application/json") };
 }

@@ -34,7 +34,7 @@ internal static class IsolatedOpenLoopHostAssertions
     }
 
     private static IsolatedComparisonWorker ExpectedWorker()
-        => new("Neo4j", 2, Scenario.PointRead, IsolatedOpenLoopHostTestSettings.ProfileId,
+        => new("Neo4j", 3, Scenario.PointRead, IsolatedOpenLoopHostTestSettings.ProfileId,
             ComparisonExecutionIdentitySupport.Revision, 37070000000, 2, "managedcode/KeyLoad",
             "refs/heads/main", "CI", 111047630080);
 
