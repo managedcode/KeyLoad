@@ -50,6 +50,7 @@ internal static class RequestCqrsFaultReplayContinuation
         await Assert.That(placement.Partition).IsEqualTo(reference.Partition);
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
+        await callers.AssertFreshRoutingReadyAsync(cancellationToken).ConfigureAwait(false);
         await Assert.That(before.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(originalReceipt.Token.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(originalReceipt.Token.AtomicPartitionId).IsEqualTo(reference.Partition.AtomicPartitionId);
@@ -69,10 +70,9 @@ internal static class RequestCqrsFaultReplayContinuation
             .SequenceEqual(JsonDefaults.Serialize(mutation))).IsTrue();
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
+        await callers.AssertFreshRoutingReadyAsync(cancellationToken).ConfigureAwait(false);
         await Assert.That(after.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
-        await Assert.That(before.RoutingReady).IsTrue();
-        await Assert.That(after.RoutingReady).IsTrue();
         var currentPlacement = await McpCallerAssertions.SdkSuccessAsync(await administrator.ReadAtomicPartitionPlacementAsync(
             new(PlacementVersion, reference.Partition), cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(JsonDefaults.Serialize(currentPlacement).SequenceEqual(JsonDefaults.Serialize(placement))).IsTrue();

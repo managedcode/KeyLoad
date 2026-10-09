@@ -18,6 +18,11 @@ internal static class RequestCqrsRf3Protocol
     internal const string FollowerLossScenario = "cluster-routing-c1-compatible-follower-loss";
     internal const string ReadyPath = "health/ready";
     internal static readonly Uri ReadyUri = new(ReadyPath, UriKind.Relative);
+    internal const int ReadyReplyMaximumBytes = 128;
+    internal const int ReadyReplyPropertyCount = 2;
+    internal const string ReadyReplyStatusProperty = "status";
+    internal const string ReadyReplyVotersProperty = "voters";
+    internal const string ReadyReplyExpectedStatus = "ready";
     internal const int NodeCount = 3;
     internal const int CurrentMajority = 2;
     internal const int ApplicationProtocolVersion = 4;
