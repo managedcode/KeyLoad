@@ -276,7 +276,7 @@ internal static class TimeSeriesIntensiveHostSettingsInvalidValues
     internal const string Overflow = "9223372036854775808";
     internal const string RelativeOutput = "relative/PrivateTimeSeriesInputCanary";
     internal const string InvalidOutput = "/private/tmp/PrivateTimeSeriesInputCanary\0";
-    internal const string WrongCell = "ts-keyload-n3-preflight";
+    internal const string WrongCell = "ts-keyload-n1-preflight";
     internal const string AliasSuffix = ":00";
     internal const string NestedSuffix = ":child";
     internal const string InvalidHttpScheme = "tcp://node1:8080";

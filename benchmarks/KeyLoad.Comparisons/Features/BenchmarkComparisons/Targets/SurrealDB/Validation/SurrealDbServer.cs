@@ -2,7 +2,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class SurrealDbServer
 {
-    private const string ExpectedVersion = "surrealdb-3.2.4";
+    private const string ExpectedVersion = "surrealdb-3.2.4+20260803.93ab219";
     internal static async Task<string> VerifyAsync(HttpClient http, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         using var operationDeadline = new ComparisonCancellationSource(timeProvider, token);

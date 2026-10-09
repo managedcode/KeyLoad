@@ -24,6 +24,8 @@ internal sealed class DocumentComparisonNativeTests
     private const string MeasuredStatus = "measured";
     private const string FailedStatus = "failed";
     private const string SurrealTarget = "SurrealDB";
+    private const string SurrealVersionPath = "version";
+    private const string SurrealBuildVersion = "surrealdb-3.2.4+20260803.93ab219";
 
     [Test]
     [Arguments("SurrealDB", DocumentComparisonScenario.SequentialRead)]
@@ -115,6 +117,17 @@ internal sealed class DocumentComparisonNativeTests
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
+        if (name == SurrealTarget)
+        {
+            using var deadline = new CancellationTokenSource(NativeDatabaseFlowFixture.ExecutionOptions.Value.OperationTimeout, TimeProvider.System);
+            using var operation = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
+            using var http = await fixture.ClientAsync(operation.Token);
+            using var response = await http.GetAsync(new Uri(SurrealVersionPath, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, operation.Token);
+            response.EnsureSuccessStatusCode();
+            var version = await NativeComparisonResponse.ReadTextAsync(response.Content, NativeDatabaseFlowFixture.ExecutionOptions.Value, operation.Token);
+            await Assert.That(version).IsEqualTo(SurrealBuildVersion);
+        }
+
         await using var target = await OpenTargetAsync(fixture, name, token);
         var native = (IDocumentComparisonTarget)target;
         var corpus = new DocumentComparisonCorpus(SmallCorpusRecords, SingleClient);
