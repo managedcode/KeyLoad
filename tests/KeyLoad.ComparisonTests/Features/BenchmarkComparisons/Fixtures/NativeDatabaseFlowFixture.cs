@@ -44,9 +44,9 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private static async Task<DistributedApplication> BuildNativeApplicationAsync(string target, string root, CancellationToken token)
     {
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-            ["--Benchmarks:Enabled=true", "--Benchmarks:Target=" + target,
-                "--Benchmarks:NodeCount=1", "--Benchmarks:Scenario=" + Scenario.PointRead,
-                "--Benchmarks:Profile=" + IsolatedComparisonContract.Current.Profile,
+            ["--Benchmarks:Enabled=true", "--" + ComparisonWorkerSelection.TargetSetting + "=" + target,
+                "--" + ComparisonWorkerSelection.NodeCountSetting + "=1", "--" + ComparisonWorkerSelection.ScenarioSetting + "=" + Scenario.PointRead,
+                "--" + ComparisonWorkerSelection.ProfileSetting + "=" + IsolatedComparisonContract.Current.Profile,
                 "--Benchmarks:DataRoot=" + root, "--Benchmarks:Output=" + Path.Combine(root, "reports")], token);
         try
         {

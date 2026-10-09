@@ -25,16 +25,17 @@
     "websiteBaselineInputs": 1716,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "sourceStage": "Shared native runner/adapters and exclusive RF3 load implemented. Original 0388aec6 full solution build passed with zero warnings/errors. Its 23 admission switch-arm formatter diagnostics are repaired in 938a4a0b. Fresh ccf610df Docker compilation found exactly one IDE0005 unused import left after canonical isolated AppHost fixture composition; that import alone is removed. Native operations, heavy RF3 and scale have not executed on the repaired source. Website qualification passed all 406 tests; publication correctly rejected the changed main SHA. Cgroup envelope diagnosis and exact-current-source native/scale qualification remain open; all verification is GitHub-only.",
+    "sourceStage": "Shared native runner/adapters and exclusive RF3 load implemented. Original e0678227 full solution build, formatter and repository rules passed. All 22 native document cases then failed strict fixture profile selection before acquisition: Benchmarks:Profile was supplied instead of canonical Benchmarks:EvidenceProfile. The fixture now uses existing ComparisonWorkerSelection keys. Native resource pipe deadlock repair with two real PID-bound overflow/healthy follow-up cases is delivered in 50d2a505; original exact-source normal/scalar verification remains pending. Cgroup envelope diagnosis, actual native workloads, heavy RF3 and complete scale qualification remain open; all verification is GitHub Actions only.",
     "verification": {
-      "canonicalBuild": "original_linux_0388aec6_full_solution_passed_0_warnings_0_errors; ccf610df_image_compilation_failed_0_warnings_1_IDE0005_error_NativeDatabaseFlowFixture_line8; exact_unused_import_repair_pending",
-      "format": "original_linux_0388aec6_failed_23_whitespace_diagnostics_only_HeavyDocumentLoadAdmissionTests; exact_manual_whitespace_source_repair_pending",
-      "governance": "original_linux_852aef07_repository_rules_passed; latest_guard_source_pending",
+      "canonicalBuild": "original_linux_e0678227_full_solution_build_step_passed; completed_original_log_counts_pending; latest_profile_key_and_native_pipe_source_pending",
+      "format": "original_linux_e0678227_canonical_formatter_step_passed; latest_profile_key_and_native_pipe_source_pending",
+      "governance": "original_linux_e0678227_repository_rules_step_passed; latest_profile_key_and_native_pipe_source_pending",
       "nativeRegressions": "original_linux_0c0378e6_resource_models_107_passed_and_request_admission_3_passed_and_document_admission_15_passed_all_zero_failed_skipped; actual_native_step_22_total_22_failed_0_passed_0_skipped_at_fixture_startup_before_operations; isolated_AppHost_fixture_source_repair_authored; original_852_contracts_interrupted_without_terminal_summary_or_qualification_752_passed_case_lines_and_19_failed_case_lines_observed; controlled_repairs_authored; native_cgroup_envelope_cause_open; heavy_gates_skipped; earlier_local_failure_history_retained",
       "actualLinuxScale": "pending_original_exact_source_workflow",
       "workflowSyntax": "original_linux_0c0378e6_workflow_started_and_plan_passed; latest_repair_source_pending",
       "canonicalPlanner": "original_linux_0c0378e6_plan_passed_418_documents_and_1898_total_named_database_cells",
-      "websiteSourceClosure": "original_linux_0388aec6_website_37924688317_qualification_job_113800692024_passed_source_gate_and_406_tests_0_failed_0_skipped; publish_job_113805231381_correctly_rejected_changed_main_SHA_before_deployment"
+      "websiteSourceClosure": "original_linux_0388aec6_website_37924688317_qualification_job_113800692024_passed_source_gate_and_406_tests_0_failed_0_skipped; publish_job_113805231381_correctly_rejected_changed_main_SHA_before_deployment",
+      "nativeProbeSettlement": "original_linux_852aef07_contract_suite_interrupted_without_terminal_bounds_case_and_cleanup_killed_yes_pid9158; six_reviewed_individual_pipe_PID_oracle_source_paths_delivered_in_50d2a505; exact_source_normal_scalar_GitHub_qualification_pending"
     },
     "latestOriginalLinux": {
       "sourceCommit": "852aef0796e8455e155e1769af9e137d861b2a56",
@@ -105,6 +106,34 @@
       "buildErrors": 1,
       "diagnostic": "IDE0005 NativeDatabaseFlowFixture.cs:8 unused KeyLoad.AppHost.Features.BenchmarkComparisons import; exact source repair authored",
       "documentNativeExecuted": false,
+      "heavyRf3Executed": false,
+      "scaleExecuted": false
+    },
+    "latestOriginalPrerequisites": {
+      "sourceCommit": "e0678227e4f51d15a1c9c924ea06cfab14ab19ed",
+      "runId": 37927497154,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37927497154",
+      "fullSolutionBuildStepPassed": true,
+      "benchmarkTestCompilationStepPassed": true,
+      "formatterCompleted": true,
+      "contractSuiteCompleted": false,
+      "runtimeQualified": false,
+      "newNativePipeStageQualified": false,
+      "formatterPassed": true,
+      "repositoryRulesPassed": true
+    },
+    "newestOriginalNative": {
+      "sourceCommit": "e0678227e4f51d15a1c9c924ea06cfab14ab19ed",
+      "runId": 37927497154,
+      "jobId": 113810281902,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37927497154/job/113810281902",
+      "conclusion": "failure",
+      "documentNativeCaseTotal": 22,
+      "documentNativeCasePassed": 0,
+      "documentNativeCaseFailed": 22,
+      "documentNativeCaseSkipped": 0,
+      "failure": "ComparisonWorkerSelection.Validate before acquisition; fixture Profile key corrected to canonical EvidenceProfile constant",
+      "documentNativeOperationsExecuted": false,
       "heavyRf3Executed": false,
       "scaleExecuted": false
     }
