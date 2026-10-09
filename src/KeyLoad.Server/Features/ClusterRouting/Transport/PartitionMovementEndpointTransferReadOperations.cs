@@ -76,6 +76,9 @@ internal static class PartitionMovementEndpointTransferReadOperations
         { terminal = await owner.Receiver.ExecuteTransferDataAsync(request, cancellationToken).ConfigureAwait(false); }
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
         { terminal = new() { Error = error.Code, SafeDetail = PartitionMovementProtocol.Unavailable }; }
+        if (terminal.Error is not null)
+        { terminal = terminal with { SafeDetail = PartitionMovementProtocol.Unavailable }; }
+        PartitionMovementTransportReplyValidation.RequireValue(terminal);
         var reply = new PartitionMovementTransferDataReply(request.RequestId, request.Nonce,
             owner.Receiver.LocalOwner(), owner.Receiver.Discovery(), terminal);
         if (NativeSerialization.Measure(reply) > owner.Limits.Value.MaxBatchBytes)

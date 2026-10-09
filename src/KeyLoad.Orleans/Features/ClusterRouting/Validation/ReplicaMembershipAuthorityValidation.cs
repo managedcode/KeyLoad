@@ -39,7 +39,12 @@ internal static class ReplicaMembershipAuthorityValidation
         var operation = (ReplicaMembershipAuthorityOperation)call.Operation;
         ValidateOperation(operation, call);
         if (call.CandidateEntry is { } entry)
-        { Entry(entry: entry, membershipOptions: membershipOptions); }
+        {
+            if (operation == ReplicaMembershipAuthorityOperation.UpdateIAmAlive)
+            { ReplicaMembershipAuthorityHeartbeat.Validate(entry, membershipOptions); }
+            else
+            { Entry(entry: entry, membershipOptions: membershipOptions); }
+        }
         if (call.TargetSiloAddress is { } target && !CanonicalAddress(value: target, membershipOptions: membershipOptions))
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
     }

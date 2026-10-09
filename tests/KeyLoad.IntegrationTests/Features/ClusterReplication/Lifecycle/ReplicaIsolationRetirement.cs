@@ -65,9 +65,14 @@ internal static class ReplicaIsolationRetirement
     }
 
     internal static void AssertLocks(string root, List<ReplicaIsolationRetirementObservation> evidence)
+        => AssertNamedLocks(root, [ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.First),
+            ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.Second), ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.Voters)], evidence);
+
+    internal static void AssertNamedLocks(string root, IEnumerable<string> names,
+        List<ReplicaIsolationRetirementObservation> evidence)
     {
         var failures = new List<Exception>();
-        foreach (var name in new[] { ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.First), ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.Second), ClusterFixtureProtocol.NodeName(ReplicaIsolationFlowProtocol.Voters) })
+        foreach (var name in names)
         {
             ServerFailureObserver.Observe(() => AcquireLock(Path.Combine(root, name, NodeLock), evidence), failures);
             ServerFailureObserver.Observe(() => AcquireLock(Path.Combine(root, name, DatabaseDirectory, StoreLock), evidence), failures);

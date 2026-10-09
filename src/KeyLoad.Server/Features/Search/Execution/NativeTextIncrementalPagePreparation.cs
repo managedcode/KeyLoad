@@ -36,6 +36,7 @@ internal static class NativeTextIncrementalPagePreparation
         NativeTextIncrementalMetadata.PersistIntent(RequireOwner(session).Path, intent,
             options.Value.MaximumDiskBytes, budget, options);
         session.Intent = intent;
+        RequireOwner(session).Observe(NativeTextFaultStage.IncrementalIntentFlushed);
         return target;
     }
 

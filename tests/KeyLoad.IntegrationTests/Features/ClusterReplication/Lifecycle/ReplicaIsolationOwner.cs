@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using Aspire.Hosting;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -17,18 +16,26 @@ internal sealed class ReplicaIsolationOwner
     private readonly Dictionary<string, ReplicaIsolationNode> nodes = new(StringComparer.Ordinal);
     private readonly ReplicaIsolationExecution execution = new();
     private DistributedApplication? application;
-    private ReplicaIsolationRules? rules;
+    private IReplicaIsolationRulePlan? rules;
+    private readonly ReplicaIsolationNodeReader reader;
+    private readonly bool six;
     private string? isolated;
     private bool restored;
     private const string SourceRevision = "GITHUB_SHA";
-    private const int SiloPort = 11111;
     private const string ListRules = "-S";
     private const string NativeChain = "-N ";
     private const string RulePrefix = "-A ";
 
     internal ReplicaIsolationOwner(ReplicaIsolationBuildPlan plan, ClusterFixtureSourceImage source, string root,
-        IReadOnlyDictionary<string, string> names)
-    { this.plan = plan; this.source = source; this.root = root; this.names = names; }
+        IReadOnlyDictionary<string, string> names, TwoRf3MembershipWave? wave = null)
+    {
+        this.plan = plan;
+        this.source = source;
+        this.root = root;
+        this.names = names;
+        reader = new(plan, names, root, wave);
+        six = wave is not null;
+    }
 
     internal static async Task<ReplicaIsolationOwner> PrepareAsync(IDistributedApplicationBuilder builder,
         string root, string repository, IReadOnlyDictionary<string, string> names, CancellationToken cancellationToken)
@@ -41,6 +48,20 @@ internal sealed class ReplicaIsolationOwner
             profile.Incarnation, cancellationToken).ConfigureAwait(false);
         return new(plan, source, root, names);
     }
+
+    internal static async Task<ReplicaIsolationOwner> PrepareSixAsync(IDistributedApplicationBuilder builder,
+        string root, string repository, IReadOnlyDictionary<string, string> names, TwoRf3MembershipWave wave,
+        CancellationToken cancellationToken)
+    {
+        if (!OperatingSystem.IsLinux() || wave.localImageSelection is not null)
+        { throw new PlatformNotSupportedException(TwoRf3MembershipProtocol.ImageMismatch); }
+        var source = await ClusterFixtureImageIdentity.ReadVerifiedImageAsync(cancellationToken);
+        var plan = await KeyLoad.AppHost.Features.ClusterRouting.NativeActivationIsolationComposition.ApplyAsync(
+            builder, repository, source.Reference, wave.Profile.Incarnation, cancellationToken);
+        return new(plan, source, root, names, wave);
+    }
+    internal Task VerifyBeforeStartAsync(DistributedApplication app, CancellationToken cancellationToken)
+        => ReplicaIsolationModelAssertions.VerifyAsync(app, plan, cancellationToken);
 
     internal async Task StartAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
@@ -97,8 +118,8 @@ internal sealed class ReplicaIsolationOwner
         if (isolated is not null || !nodes.ContainsKey(resource))
         { throw new InvalidOperationException("One inspected owned former-leader namespace may be isolated once."); }
         isolated = resource;
-        rules = new(Guid.NewGuid(), nodes.Values.Where(node => node.Resource != resource)
-            .Select(node => node.Container.IpAddress).ToArray());
+        var peers = nodes.Values.Where(node => node.Resource != resource).Select(node => node.Container.IpAddress).ToArray();
+        rules = six ? new NativeActivationIsolationRules(Guid.NewGuid(), peers) : new ReplicaIsolationRules(Guid.NewGuid(), peers);
         foreach (var rule in rules.Installation())
         { await MutateAsync(resource, rule, cancellationToken); }
         await VerifyInstalledAsync(cancellationToken);
@@ -127,7 +148,7 @@ internal sealed class ReplicaIsolationOwner
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.VerifyNodesStoppedAsync(
             names, nodes.Values.ToArray(), evidence, cancellationToken), failures);
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
-        { ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertLocks(root, evidence), failures); }
+        { ServerFailureObserver.Observe(() => ReplicaIsolationRetirement.AssertNamedLocks(root, plan.Targets.Select(target => target.ResourceName), evidence), failures); }
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
         { await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationRetirement.RemoveImagesAsync(plan, evidence, cancellationToken), failures); }
         await ServerFailureObserver.ObserveAsync(() => ReplicaIsolationEvidence.WriteRetirementAsync(root, evidence,
@@ -163,15 +184,8 @@ internal sealed class ReplicaIsolationOwner
 
     private async Task<ReplicaIsolationNode> ReadNodeAsync(ReplicaIsolationBuildTarget target, CancellationToken cancellationToken)
     {
-        var container = await ReplicaIsolationInspectionReader.ContainerAsync(names[target.ResourceName], plan, target, cancellationToken);
-        _ = ReplicaIsolationRules.RequireIpv4(container.IpAddress);
-        var discovery = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(application
-            ?? throw new InvalidOperationException("The native fault application is not started."), target.ResourceName,
-            new NodeEpochRf3Profile(ClusterFixturePhysicalShardIdentity.ReadProfile(root)), cancellationToken);
-        var endpoint = SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint;
-        if (!discovery.TransportReady || endpoint.Port != SiloPort || endpoint.Address.ToString() != container.IpAddress)
-        { throw new InvalidOperationException("The signed actual voter silo endpoint does not match its owned namespace."); }
-        return new(target.ResourceName, container, discovery.SiloAddress);
+        return await reader.ReadAsync(application
+            ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState), target, cancellationToken);
     }
 
     private async Task VerifyInstalledAsync(CancellationToken cancellationToken)

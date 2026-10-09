@@ -22,7 +22,7 @@ internal sealed class PartitionMovementParentTransferPageReader
 
     internal async Task<PartitionMoveImagePage> ReadOriginalPageAsync(string principalId,
         PartitionMoveRequest request, PartitionMoveParentState state, int ordinal, ReadExecutionBudget work,
-        CancellationToken cancellationToken)
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         var capture = state.Selected!;
         var expiry = PartitionMovementParentDeadline.Expiry(work, clock, routing);
@@ -56,19 +56,30 @@ internal sealed class PartitionMovementParentTransferPageReader
             if (page.MoveId != request.MoveId || page.Partition != request.Partition || page.Ordinal != ordinal)
             { throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof); }
         }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(async () =>
+        var beforeCloseFailures = failures.Count;
+        await ServerFailureObserver.ObserveAsync(() => CloseOriginalAsync(principalId, authority,
+            handle, expiry, work, cancellationToken), failures).ConfigureAwait(false);
+        if (failures.Count > beforeCloseFailures && phaseObservation is not null)
         {
-            var closed = await client.ReadTransferDataAsync(principalId, authority,
-                PartitionMovementTransferDataAction.Close, handle.HandleId, PartitionMoveProtocol.EmptyCount,
-                expiry, work, cancellationToken).ConfigureAwait(false);
-            var actual = ReadTransferResult(closed).Closed;
-            if (actual?.HandleId != handle.HandleId
-                || actual.Disposition != PartitionMovementTransferCloseDisposition.Joined)
-            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
-        }, failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => phaseObservation(
+                GrainRequestPhase.ParentTransferCloseFailed, cancellationToken).AsTask(), failures).ConfigureAwait(false);
+        }
         // Failed close retains its actual charged owner; only real Abort/SourceBeginAbort or shutdown joins it.
         ServerFailureObserver.ThrowIfAny(failures);
         return page ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMovementProtocol.InvalidProof);
+    }
+
+    private async Task CloseOriginalAsync(string principalId, PartitionMovementAuthenticatedAuthority authority,
+        PartitionMovementTransferHandle handle, DateTimeOffset expiry, ReadExecutionBudget work,
+        CancellationToken cancellationToken)
+    {
+        var closed = await client.ReadTransferDataAsync(principalId, authority,
+            PartitionMovementTransferDataAction.Close, handle.HandleId, PartitionMoveProtocol.EmptyCount,
+            expiry, work, cancellationToken).ConfigureAwait(false);
+        var actual = ReadTransferResult(closed).Closed;
+        if (actual?.HandleId != handle.HandleId
+            || actual.Disposition != PartitionMovementTransferCloseDisposition.Joined)
+        { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
     }
 
     private static PartitionMovementTransferDataResult ReadTransferResult(GrainOperationReply reply)

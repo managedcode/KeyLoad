@@ -469,3 +469,29 @@ Original run37744013727 retains a PerformInitializeHandshake failure and the gen
 REQ-CLIENT-006 / AC-CLIENT-006 and AC-MCP-003/007 preserve the owned native `Conflict` detail `The command ID was already used with different content.` only for that exact ordinal code/literal pair. Arbitrary text, suffixes and wrong-code pairs retain existing generic safe mapping. Persisted authorization still precedes fingerprint disclosure; no caller roles or private payload enter the diagnostic.
 
 `McpCommandConflictDiagnosticWholeFlowTests.NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand` runs real ZoneTree commit, exact same-ID native receipt replay, changed-content conflict, full retained storage/position invariance, actual MCP reply encoding/privacy negatives, then an independently literal revision2 healthy operation. Existing official SDK/MCP `Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable` retains its complete conflict/no-disclosure and healthy read oracle. Original run37744013727/source59e85625 failure remains historical; this source repair is not execution or KL015 closure.
+
+
+### TASK-MCP-CATALOG-COMPLETE-76-001 implementation contract
+
+AC-MCP-001/003/006/007 and AC-BLOB-006 preserve all ten blob tools and the
+independent complete public catalog. [ClientApi](../Features/ClientApi.md) owns the exact76
+tuple/schema/effect and negative→healthy decode contract. Original55f normal/scalar
+failures remain immutable; initial gateway discovery remains three tools. Root
+joins docs-first ClientApi Contracts literal inventory and Helpers executable
+assertions, then existing six McpCatalogTests/four BlobAgentCatalogTests identities
+with native normal/scalar metadata and full current-source qualification gates.
+No product API, dependency or authorization change; rollback is fixture/docs only.
+No source-only count or schema review establishes runtime or RF3 acceptance.
+
+
+### TASK-MCP-CATALOG-COMPLETE-76-DERIVED-001 — exact native computed partition projection
+
+REQ-CLIENT-006 / AC-MCP-001/003/006/007 retain every76 independent name/route/effect capability, all closed nested fields/required sets, receipt/owner scalar constraints and missing/null/unknown/empty-identity negative→complete healthy native decode flows. The actual R878 native observer confirms movement input and output PartitionRef each expose exactly four required nonnullable constructor strings plus optional getter-only atomicPartitionId with exact string/null type set. This is the same native exporter contract previously frozen for computed partition metadata; it is not caller authority or a nullable actual computed result. CommitToken.atomicPartitionId remains a separate required nonnullable string.
+
+The NEW independent movement assertion incorrectly applied the constructor nonnull rule to the derived field. Repair that test oracle only: preserve exact five properties/four required names; retain nonnull assertions for all four constructor strings; require derived exact string/null set, no duplicate/extra types. Actual movement descriptor.Decode must accept omitted, null or forged string metadata but produce the complete original typed native payload with getter recomputed from the four original constructor identities. This cannot forge partition scope, native command identity or authority. All previous outer/nested unknown/null/empty rejections and complete healthy decode assertions remain.
+
+Ownership/ordered stages: freeze ClientApi/ADR039 trace first; change only Unit ClientApi Helpers McpMovementCatalogSchema.PartitionAsync and McpMovementCatalogDecode supporting real descriptor flow; root alone joins/formats/builds and reruns the original normal/scalar catalog identity plus mandatory current-source Linux gates. No product, exporter, SDK, protocol, alias/Id, endpoint, persisted authorization, limit or retry change. Original R877 normal/scalar44PASS1FAIL and original R878 metadata remain immutable; test source repair alone is not acceptance. Rollback is confined to these oracle/docs changes; no storage migration. Native RF3 operation remains separately required.
+
+### TASK-MCP-CATALOG-COMPLETE-76-ENUM-001 implementation contract
+
+REQ-CLIENT-006 / AC-MCP-001/003/007 map to the independently frozen movement enum branches in [ClientApi](../Features/ClientApi.md). Retain exactly two native branches: input mode string/examples with four literal names, output phase enum-only with ten literal names, and int32 numeric minimum/maximum in each. Preserve nonnull semantics, every complete operation/schema/decode assertion, and the unchanged native exporter/parser. Root first freezes this contract, then repairs only Unit ClientApi Contracts/McpMovementCatalogProtocol and Helpers/McpMovementCatalogScalarSchema, compiles and reruns the same normal/scalar native tests and required Linux gates. The original R88044PASS1FAIL remains immutable. No dependency, transport, persisted format, authorization, rollout or migration change; rollback is test/docs only. All current-source runtime qualification remains open until original results exist.

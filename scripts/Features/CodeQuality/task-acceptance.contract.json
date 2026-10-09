@@ -2620,6 +2620,14 @@
               "instanceName": "ActualCapturedStageShapeBoundAndConfiguredGrantDenialRetainAuthorityThenRestoreHealthyMove",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementParentCapacityRf3Tests.cs",
               "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+              "methodName": "ActualStagePreAdmissionLegalBoundaryRejectsOneByteLessWithoutEffectsThenSameMoveColdHealthyContinuation",
+              "instanceName": "ActualStagePreAdmissionLegalBoundaryRejectsOneByteLessWithoutEffectsThenSameMoveColdHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementParentCapacityRf3Tests.cs",
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -2650,6 +2658,1784 @@
               "methodName": "ActualNonCaptureRowPointerRefusesThenExactOriginalColdResumeIsHealthy",
               "instanceName": "ActualNonCaptureRowPointerRefusesThenExactOriginalColdResumeIsHealthy",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCapturePointerRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "native-owner-late-retire-support",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementLateNativeOwnerTests/SameFactorySealedExpiredRetireColdRecordsMissingAuthorityThenSameMoveAndOriginalReceiptAreHealthy",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementLateNativeOwnerTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementLateNativeOwnerTests",
+              "methodName": "SameFactorySealedExpiredRetireColdRecordsMissingAuthorityThenSameMoveAndOriginalReceiptAreHealthy",
+              "instanceName": "SameFactorySealedExpiredRetireColdRecordsMissingAuthorityThenSameMoveAndOriginalReceiptAreHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementLateNativeOwnerTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-signed-heartbeat-support",
+          "suite": "unit",
+          "filter": "/*/*/ReplicaMembershipAuthorityHeartbeatFlowTests/NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAuthorityHeartbeatFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAuthorityHeartbeatFlowTests",
+              "methodName": "NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
+              "instanceName": "NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipAuthorityHeartbeatFlowTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-current-retained-page",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementRetainedPageCapacityRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementRetainedPageCapacityRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementRetainedPageCapacityRf3Tests",
+              "methodName": "ActualOriginalRetainedPageExceedsCurrentCapWithoutEffectsThenSameMoveColdSdkMcpQ1IsHealthy",
+              "instanceName": "ActualOriginalRetainedPageExceedsCurrentCapWithoutEffectsThenSameMoveColdSdkMcpQ1IsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementRetainedPageCapacityRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-original-close-source-join",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementTransferCloseRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementTransferCloseRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementTransferCloseRf3Tests",
+              "methodName": "ActualOpenThenOriginalCallerCancellationRecordsCloseFailureBeforeFreshAbortJoinsSourceAndColdSdkMcpQ1IsHealthy",
+              "instanceName": "ActualOpenThenOriginalCallerCancellationRecordsCloseFailureBeforeFreshAbortJoinsSourceAndColdSdkMcpQ1IsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementTransferCloseRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-033",
+      "selections": [
+        {
+          "selectionId": "hybrid-whole-and-quality",
+          "suite": "unit",
+          "filter": "/*/*/(ThreeWayHybridFusionTests)|(HybridExplainWholeFlowTests)|(HybridExplainPrivacyWholeFlowTests)|(HybridQualityRealStoreTests)|(HybridQualityMetricOracleTests)|(GlobalBranchWindowMergeLayoutTests)|(GlobalBranchWindowMergeBudgetTests)|(GlobalBranchWindowMergeValidationTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests",
+              "methodName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+              "instanceName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests",
+              "methodName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+              "instanceName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "methodName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+              "instanceName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "methodName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+              "instanceName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "methodName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+              "instanceName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests",
+              "methodName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+              "instanceName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridExplainPrivacyWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridExplainPrivacyWholeFlowTests",
+              "methodName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+              "instanceName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainPrivacyWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "methodName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+              "instanceName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "methodName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+              "instanceName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests",
+              "methodName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+              "instanceName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+              "instanceName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+              "instanceName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+              "instanceName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+              "instanceName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+              "instanceName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+              "instanceName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+              "instanceName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests",
+              "methodName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+              "instanceName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridQualityRealStoreTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridQualityRealStoreTests",
+              "methodName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+              "instanceName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityRealStoreTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "methodName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+              "instanceName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "methodName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+              "instanceName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "methodName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+              "instanceName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "methodName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+              "instanceName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests",
+              "methodName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+              "instanceName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+              "instanceName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+              "instanceName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "methodName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+              "instanceName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests",
+              "methodName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+              "instanceName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-canonical-revision",
+          "suite": "unit",
+          "filter": "/*/*/SearchTests/HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.SearchTests",
+              "methodName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "instanceName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "native-text-branch-process-recovery",
+          "suite": "recovery",
+          "filter": "/*/*/NativeTextProjectionProcessRecoveryTests/AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-sdk-mcp-rf3",
+          "suite": "rf3",
+          "filter": "/*/*/ThreeWayHybridRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+              "instanceName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+              "instanceName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+              "instanceName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+              "instanceName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+              "instanceName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(ClusterFixture)",
+              "methodName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+              "instanceName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-035",
+      "selections": [
+        {
+          "selectionId": "native-snapshot-contract",
+          "suite": "unit",
+          "filter": "/*/*/ReplicaNativeSnapshotTests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.ReplicaNativeSnapshotTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.ReplicaNativeSnapshotTests",
+              "methodName": "NativeIncomingDescriptorResumesAndUnsupportedDescriptorRefusesWithoutDeletingPartialImage",
+              "instanceName": "NativeIncomingDescriptorResumesAndUnsupportedDescriptorRefusesWithoutDeletingPartialImage",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/ReplicaNativeSnapshotTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "snapshot-install-recovery-and-gc",
+          "suite": "recovery",
+          "filter": "/*/*/(ReplicaPersistenceTests)|(ReplicaSnapshotMetadataRecoveryTests)|(ReplicaTermMetadataSnapshotTests)|(ReplicaCheckpointProtocolGateTests)|(ReplicaTransferProcessRecoveryTests)|(ReplicaProcessRecoveryTests)|(ReplicaSnapshotRecoveryTests)|(ReplicaSnapshotProcessRecoveryTests)|(ReplicaPrefixGcProcessRecoveryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "AcknowledgedVoteAndCommittedPrefixSurviveReopenAndRejectReplacement",
+              "instanceName": "AcknowledgedVoteAndCommittedPrefixSurviveReopenAndRejectReplacement",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "SameTermCannotForgetItsVoteOrVoteForAnUnknownVoter",
+              "instanceName": "SameTermCannotForgetItsVoteOrVoteForAnUnknownVoter",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "ReplacingUncommittedSuffixHidesOldKeysAndRejectsGaps",
+              "instanceName": "ReplacingUncommittedSuffixHidesOldKeysAndRejectsGaps",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry",
+              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(\\\")",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry",
+              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(\u0416)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "ReopenRejectsChecksummedButSemanticallyCorruptVisibleEntry",
+              "instanceName": "ReopenRejectsChecksummedButSemanticallyCorruptVisibleEntry",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
+              "methodName": "ContiguousChunksResumeAndVerifiedSnapshotInstallsAtExactCut",
+              "instanceName": "ContiguousChunksResumeAndVerifiedSnapshotInstallsAtExactCut",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "methodName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut",
+              "instanceName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut(SnapshotTransferBegun)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "methodName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut",
+              "instanceName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut(SnapshotChunkAcknowledged)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "methodName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut",
+              "instanceName": "KilledPrivateTransferResumesOrReclaimsWithoutChangingCanonicalCut(SnapshotRejected)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTransferProcessRecoveryTests",
+              "methodName": "KillAfterSnapshotPublicationReopensAcknowledgedCutBeforeApplyingRetainedTail",
+              "instanceName": "KillAfterSnapshotPublicationReopensAcknowledgedCutBeforeApplyingRetainedTail",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaCheckpointProtocolGateTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaCheckpointProtocolGateTests",
+              "methodName": "CreateWaitsForSharedPlanningGateAfterNativeImageFlush",
+              "instanceName": "CreateWaitsForSharedPlanningGateAfterNativeImageFlush",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaCheckpointProtocolGateTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaCheckpointProtocolGateTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaCheckpointProtocolGateTests",
+              "methodName": "IncomingCompleteWaitsForSharedPlanningGateAfterNativeImageFlush",
+              "instanceName": "IncomingCompleteWaitsForSharedPlanningGateAfterNativeImageFlush",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaCheckpointProtocolGateTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "methodName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix",
+              "instanceName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix(TermSaved)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "methodName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix",
+              "instanceName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix(EntryAcknowledged)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "methodName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix",
+              "instanceName": "KillAfterDurableAcknowledgementRecoversOnlyCommittedCanonicalPrefix(CommitAcknowledged)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaProcessRecoveryTests",
+              "methodName": "CompleteReplicaJournalCorruptionAfterAcknowledgedAppendFailsClosed",
+              "instanceName": "CompleteReplicaJournalCorruptionAfterAcknowledgedAppendFailsClosed",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "methodName": "SamePositionValidSnapshotReplacementInvalidatesTheOldEntryObservation",
+              "instanceName": "SamePositionValidSnapshotReplacementInvalidatesTheOldEntryObservation",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "methodName": "SameCutCompactionPreservesTheWarmEntryObservation",
+              "instanceName": "SameCutCompactionPreservesTheWarmEntryObservation",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaTermMetadataSnapshotTests",
+              "methodName": "WrongAppliedPositionRejectsVerifiedSnapshotWithoutChangingTheWarmCut",
+              "instanceName": "WrongAppliedPositionRejectsVerifiedSnapshotWithoutChangingTheWarmCut",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(HeaderWritten, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(PayloadWritten, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(JournalFlushed, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(MutationApplied, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(MutationApplied, 3)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(ApplyCompleted, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(SnapshotWritten, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(SnapshotFlushed, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(InstallPrepared, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.ClusterReplication.ReplicaPrefixGcProcessRecoveryTests",
+              "methodName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery",
+              "instanceName": "AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery(JournalSwapped, 0)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPrefixGcProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotMetadataRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotMetadataRecoveryTests",
+              "methodName": "ForeignIncarnationSnapshotIsRejectedWithoutEffectsAndValidDescriptorCanRetry",
+              "instanceName": "ForeignIncarnationSnapshotIsRejectedWithoutEffectsAndValidDescriptorCanRetry",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaSnapshotMetadataRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotMetadataRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotMetadataRecoveryTests",
+              "methodName": "TruncatedPrivateManifestIsDiscardedAndVerifiedTransferCanRetry",
+              "instanceName": "TruncatedPrivateManifestIsDiscardedAndVerifiedTransferCanRetry",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaSnapshotMetadataRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "CorruptPublishedImageFailsClosedAndUnsafeTransferBasenameIsRejected",
+              "instanceName": "CorruptPublishedImageFailsClosedAndUnsafeTransferBasenameIsRejected",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "ResetFinishesVerifiedIncomingImageAndDoesNotReinstallAfterPointerPublication",
+              "instanceName": "ResetFinishesVerifiedIncomingImageAndDoesNotReinstallAfterPointerPublication(SnapshotVerified)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "ResetFinishesVerifiedIncomingImageAndDoesNotReinstallAfterPointerPublication",
+              "instanceName": "ResetFinishesVerifiedIncomingImageAndDoesNotReinstallAfterPointerPublication(SnapshotInstalled)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "CorruptCompleteImagePreservesLiveStateAndAllowsSameDescriptorRetry",
+              "instanceName": "CorruptCompleteImagePreservesLiveStateAndAllowsSameDescriptorRetry",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "ChunkReplayMustMatchAndDifferentActiveTransferCannotReplaceAcknowledgedUpload",
+              "instanceName": "ChunkReplayMustMatchAndDifferentActiveTransferCannotReplaceAcknowledgedUpload",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "StalePendingSnapshotCannotEraseNewerCanonicalCommittedState",
+              "instanceName": "StalePendingSnapshotCannotEraseNewerCanonicalCommittedState",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotRecoveryTests",
+              "methodName": "ResetAbandonsOldLeaderPrefixAndAllowsDifferentUploadWithoutDiscardingPublishedImage",
+              "instanceName": "ResetAbandonsOldLeaderPrefixAndAllowsDifferentUploadWithoutDiscardingPublishedImage",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "EmptyReplicaImportsPersistedSnapshotAndReopensWithOrderedCommittedTail",
+              "instanceName": "EmptyReplicaImportsPersistedSnapshotAndReopensWithOrderedCommittedTail",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail",
+              "instanceName": "KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail(SnapshotVerified)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail",
+              "instanceName": "KillAtVerifiedSnapshotBoundaryRecoversExactCutAndOrderedTail(SnapshotInstalled)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState",
+              "instanceName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState(SnapshotVerified, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState",
+              "instanceName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState(SnapshotVerified, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState",
+              "instanceName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState(SnapshotInstalled, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaSnapshotProcessRecoveryTests",
+              "methodName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState",
+              "instanceName": "PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState(SnapshotInstalled, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Replication.ReplicaCrashBoundary",
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "empty-follower-sdk-mcp",
+          "suite": "rf3",
+          "filter": "/*/*/EmptyReplicaSnapshotRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.EmptyReplicaSnapshotRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterReplication.EmptyReplicaSnapshotRf3Tests(ClusterFixture)",
+              "methodName": "ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
+              "instanceName": "ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/EmptyReplicaSnapshotRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "retained-follower-sdk",
+          "suite": "rf3",
+          "filter": "/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.ClusterTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.ClusterTests(ClusterFixture)",
+              "methodName": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+              "instanceName": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-029",
+      "selections": [
+        {
+          "selectionId": "unit",
+          "suite": "unit",
+          "filter": "/*/*/(NativeTextAsyncAdmissionTests)|(NativeTextAsyncProjectionTests)|(NativeTextBilingualLifecycleTests)|(NativeTextFileStreamBufferPolicyTests)|(NativeTextFileStreamProviderTests)|(NativeTextGenerationCapacityTests)|(NativeTextGenerationLifetimeTests)|(NativeTextIncrementalCorruptionTests)|(NativeTextIncrementalExpiryTests)|(NativeTextIncrementalIntentCorruptionTests)|(NativeTextIncrementalLifecycleTests)|(NativeTextOrderedStageCancellationTests)|(NativeTextProjectionAuthorityTests)|(NativeTextProjectionBoundsTests)|(NativeTextProjectionDisposalTests)|(NativeTextProjectionFilesystemBoundsTests)|(NativeTextProjectionLeaseTests)|(NativeTextProjectionOwnershipTests)|(NativeTextProjectionParityTests)|(NativeTextProjectionRemovalTests)|(NativeTextProjectionRestartTests)|(NativeTextProjectionScopeTests)|(NativeTextProjectionSettlementTests)|(NativeTextSelectedCancellationTests)|(NativeTextSelectedGenerationTests)|(NativeTextSelectedShutdownTests)|(NativeTextWaitForIndexTests)|(NativeTextWaitObservedWorkTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests",
+              "methodName": "AcFts007PreCancelledAsyncSearchCreatesNoReservationOrNativeGeneration",
+              "instanceName": "AcFts007PreCancelledAsyncSearchCreatesNoReservationOrNativeGeneration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextAsyncAdmissionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests",
+              "methodName": "AcFts007NativePostingPauseKeepsAdmissionUntilCancellationCleanupJoins",
+              "instanceName": "AcFts007NativePostingPauseKeepsAdmissionUntilCancellationCleanupJoins",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextAsyncAdmissionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncProjectionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextAsyncProjectionTests",
+              "methodName": "AcFts007AsyncNativeSearchPublishesReusesAndReplacesFromCanonicalCuts",
+              "instanceName": "AcFts007AsyncNativeSearchPublishesReusesAndReplacesFromCanonicalCuts",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextAsyncProjectionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextBilingualLifecycleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextBilingualLifecycleTests",
+              "methodName": "Kl028LiteralUkrainianEnglishDeleteReplayAndNativeReopenPreserveAuthorizedResults",
+              "instanceName": "Kl028LiteralUkrainianEnglishDeleteReplayAndNativeReopenPreserveAuthorizedResults",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextBilingualLifecycleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests",
+              "instanceName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(1, null, 1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Nullable`1<System.Int32>",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests",
+              "instanceName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(4, null, 0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Nullable`1<System.Int32>",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests",
+              "instanceName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(4, 0, 1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Nullable`1<System.Int32>",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests",
+              "instanceName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(4, 1, 1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Nullable`1<System.Int32>",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests",
+              "instanceName": "ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(4, 4096, 0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32",
+                "System.Nullable`1<System.Int32>",
+                "System.Int64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership",
+              "instanceName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
+              "methodName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership",
+              "instanceName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(4097)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamBufferPolicyTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "methodName": "ReplaceWithoutBackupPreservesNativeReplaceSemantics",
+              "instanceName": "ReplaceWithoutBackupPreservesNativeReplaceSemantics",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamProviderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "methodName": "ReplaceWithOwnedBackupPreservesPreviousDestination",
+              "instanceName": "ReplaceWithOwnedBackupPreservesPreviousDestination",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamProviderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
+              "methodName": "OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger",
+              "instanceName": "OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextFileStreamProviderTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests",
+              "methodName": "ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem",
+              "instanceName": "ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationCapacityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests",
+              "methodName": "RestartPreflightsAllThreeLeavesBeforeAnyRetirement",
+              "instanceName": "RestartPreflightsAllThreeLeavesBeforeAnyRetirement",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationCapacityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "methodName": "PublishedReplacementKeepsOldNativeReaderUntilItsLastLeaseSettles",
+              "instanceName": "PublishedReplacementKeepsOldNativeReaderUntilItsLastLeaseSettles",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "methodName": "FailedRetirementKeepsItsOwnerAndAllowsJoinedShutdownRetry",
+              "instanceName": "FailedRetirementKeepsItsOwnerAndAllowsJoinedShutdownRetry",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "methodName": "LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration",
+              "instanceName": "LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "methodName": "AggregateCensusCanRunWhileASecondNativeGenerationIsPausedBetweenPostings",
+              "instanceName": "AggregateCensusCanRunWhileASecondNativeGenerationIsPausedBetweenPostings",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests",
+              "methodName": "InvalidatedCurrentCanRebuildWhileItsRetiredNativeLeaseRemainsBorrowed",
+              "instanceName": "InvalidatedCurrentCanRebuildWhileItsRetiredNativeLeaseRemainsBorrowed",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextGenerationLifetimeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalCorruptionTests",
+              "methodName": "DamagedNativeManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy",
+              "instanceName": "DamagedNativeManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextIncrementalCorruptionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalExpiryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalExpiryTests",
+              "methodName": "OriginalUnacknowledgedPageNaturallyExpiresWithoutRenewalThenFreshConsumerBuildReturnsLiteralHealthy",
+              "instanceName": "OriginalUnacknowledgedPageNaturallyExpiresWithoutRenewalThenFreshConsumerBuildReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextIncrementalExpiryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalIntentCorruptionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalIntentCorruptionTests",
+              "methodName": "DamagedDurableOriginalIntentRejectsThenExactRepairReplaysOriginalCheckpointAndLiteralColdPages",
+              "instanceName": "DamagedDurableOriginalIntentRejectsThenExactRepairReplaysOriginalCheckpointAndLiteralColdPages",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextIncrementalIntentCorruptionTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalLifecycleTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalLifecycleTests",
+              "methodName": "ActualJournalSeedThenNativeUpdateDeleteAndColdRestoreRetainExactCheckpoint",
+              "instanceName": "ActualJournalSeedThenNativeUpdateDeleteAndColdRestoreRetainExactCheckpoint",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextIncrementalLifecycleTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextOrderedStageCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextOrderedStageCancellationTests",
+              "methodName": "SuccessfulNativeBeginThenCanceledLaterReadRetainsStoreAndHealthyBilingualResult",
+              "instanceName": "SuccessfulNativeBeginThenCanceledLaterReadRetainsStoreAndHealthyBilingualResult",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextOrderedStageCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionAuthorityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionAuthorityTests",
+              "methodName": "PersistedFieldAndRowPolicyRemainAuthoritativeAcrossNativeReuseAndMutation",
+              "instanceName": "PersistedFieldAndRowPolicyRemainAuthoritativeAcrossNativeReuseAndMutation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionAuthorityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "methodName": "NativeFileCountAcceptsExactBoundAndRejectsExcessWithoutRemovingFiles",
+              "instanceName": "NativeFileCountAcceptsExactBoundAndRejectsExcessWithoutRemovingFiles",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "methodName": "NativeDiskLimitAcceptsExactSparseLengthAndRejectsOneByteExcess",
+              "instanceName": "NativeDiskLimitAcceptsExactSparseLengthAndRejectsOneByteExcess",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "methodName": "ManifestMetadataAcceptsExactByteLimitAndRejectsOneByteLess",
+              "instanceName": "ManifestMetadataAcceptsExactByteLimitAndRejectsOneByteLess",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "methodName": "PostingReadBudgetAcceptsExactPostingWorkAndRejectsOneByteLess",
+              "instanceName": "PostingReadBudgetAcceptsExactPostingWorkAndRejectsOneByteLess",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests",
+              "methodName": "RecordMetadataReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+              "instanceName": "RecordMetadataReadBudgetAcceptsExactBytesAndRejectsOneByteLess",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionDisposalTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionDisposalTests",
+              "methodName": "ConcurrentDisposeDrainsBorrowedNativeLeaseAndPreservesSearchAfterReopen",
+              "instanceName": "ConcurrentDisposeDrainsBorrowedNativeLeaseAndPreservesSearchAfterReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionDisposalTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "methodName": "ExactDirectoryCountPassesAndExcessPreservesManifestAndCanonicalCut",
+              "instanceName": "ExactDirectoryCountPassesAndExcessPreservesManifestAndCanonicalCut",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionFilesystemBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "methodName": "ExactDirectoryDepthPassesAndNextLevelIsRejectedWithoutDeletion",
+              "instanceName": "ExactDirectoryDepthPassesAndNextLevelIsRejectedWithoutDeletion",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionFilesystemBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests",
+              "methodName": "LinkedAncestorIsRejectedBeforeCreatingMissingRootOrTouchingItsTarget",
+              "instanceName": "LinkedAncestorIsRejectedBeforeCreatingMissingRootOrTouchingItsTarget",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionFilesystemBoundsTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests",
+              "methodName": "SaturationAndCancellationReleaseNativeLeaseForHealthySearch",
+              "instanceName": "SaturationAndCancellationReleaseNativeLeaseForHealthySearch",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionLeaseTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests",
+              "methodName": "RecordAndTokenBudgetFailuresPreservePositionAndReleaseLease",
+              "instanceName": "RecordAndTokenBudgetFailuresPreservePositionAndReleaseLease",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionLeaseTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "methodName": "UntrackedPlausibleNativeEntryFailsAndPreservesGenerationAndBytes",
+              "instanceName": "UntrackedPlausibleNativeEntryFailsAndPreservesGenerationAndBytes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionOwnershipTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "methodName": "MalformedPendingManifestFailsClosedAndPreservesEveryGenerationEntry",
+              "instanceName": "MalformedPendingManifestFailsClosedAndPreservesEveryGenerationEntry",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionOwnershipTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests",
+              "methodName": "UnknownRootEntryPreflightPreservesRecognizedGenerationBeforeAnyRetirement",
+              "instanceName": "UnknownRootEntryPreflightPreservesRecognizedGenerationBeforeAnyRetirement",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionOwnershipTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "methodName": "NativeGenerationPreservesUnicodeCorpusScoresTiesAndHybridRanks",
+              "instanceName": "NativeGenerationPreservesUnicodeCorpusScoresTiesAndHybridRanks",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionParityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "methodName": "DeliberateTokenHashCollisionsCannotChangeCanonicalResults",
+              "instanceName": "DeliberateTokenHashCollisionsCannotChangeCanonicalResults(0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionParityTests.cs",
+              "parameterTypeFullNames": [
+                "System.UInt64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests",
+              "methodName": "DeliberateTokenHashCollisionsCannotChangeCanonicalResults",
+              "instanceName": "DeliberateTokenHashCollisionsCannotChangeCanonicalResults(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionParityTests.cs",
+              "parameterTypeFullNames": [
+                "System.UInt64"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRemovalTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRemovalTests",
+              "methodName": "RemovedNativeProjectionRebuildsOnlyCurrentLiteralRowsAndHealthyWritesRemainVisible",
+              "instanceName": "RemovedNativeProjectionRebuildsOnlyCurrentLiteralRowsAndHealthyWritesRemainVisible",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRemovalTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "methodName": "RestartRebuildsFromCanonicalStoreUsingRecognizedNativeZoneTreeFiles",
+              "instanceName": "RestartRebuildsFromCanonicalStoreUsingRecognizedNativeZoneTreeFiles",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRestartTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "methodName": "CorruptManifestIsRejectedAndPreservedForDiagnosis",
+              "instanceName": "CorruptManifestIsRejectedAndPreservedForDiagnosis",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRestartTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "methodName": "UnknownProjectionEntryIsRejectedAndPreserved",
+              "instanceName": "UnknownProjectionEntryIsRejectedAndPreserved",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRestartTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests",
+              "methodName": "LinkedNativeEntryIsRejectedWithoutFollowingOrRemovingIt",
+              "instanceName": "LinkedNativeEntryIsRejectedWithoutFollowingOrRemovingIt",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionRestartTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionScopeTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionScopeTests",
+              "methodName": "TrustedInternalSchemaScopeMismatchCannotReuseTheCurrentGeneration",
+              "instanceName": "TrustedInternalSchemaScopeMismatchCannotReuseTheCurrentGeneration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionScopeTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionSettlementTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextProjectionSettlementTests",
+              "methodName": "CancellationAndUntrackedNativeFileAreBothRetainedDuringSettlement",
+              "instanceName": "CancellationAndUntrackedNativeFileAreBothRetainedDuringSettlement",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextProjectionSettlementTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedCancellationTests",
+              "methodName": "CancellationAfterActualMaintainedPostingReadJoinsOriginalLeaseWithoutPartialThenReadsLiteralHealthy",
+              "instanceName": "CancellationAfterActualMaintainedPostingReadJoinsOriginalLeaseWithoutPartialThenReadsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextSelectedCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedGenerationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedGenerationTests",
+              "methodName": "MaintainedBilingualGenerationRejectsRealUpdateDeleteUntilExplicitRestoreThenReturnsLiteralRows",
+              "instanceName": "MaintainedBilingualGenerationRejectsRealUpdateDeleteUntilExplicitRestoreThenReturnsLiteralRows",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextSelectedGenerationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedShutdownTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextSelectedShutdownTests",
+              "methodName": "ShutdownClosesNewAdmissionAndJoinsActualNativeReaderBeforeColdOwnerReturnsSameLiteralPage",
+              "instanceName": "ShutdownClosesNewAdmissionAndJoinsActualNativeReaderBeforeColdOwnerReturnsSameLiteralPage",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextSelectedShutdownTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "methodName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy",
+              "instanceName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitForIndexTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "methodName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy",
+              "instanceName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitForIndexTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "methodName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy",
+              "instanceName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(False)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "methodName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy",
+              "instanceName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(True)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "recovery",
+          "suite": "recovery",
+          "filter": "/*/*/(NativeTextIncrementalProcessRecoveryTests)|(NativeTextProjectionProcessRecoveryTests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(NativePostingWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(NativeInventoryFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(ManifestPublished)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(IncrementalIntentFlushed)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(NativeDeletionWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(NativeAdditionWritten)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(CanonicalCheckpointAcknowledged)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests",
+              "methodName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts",
+              "instanceName": "AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(PendingIntentRetired)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextIncrementalProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, False)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests",
+              "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+              "instanceName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, True)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3",
+          "suite": "rf3",
+          "filter": "/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextAsyncRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextAsyncRf3Tests(ClusterFixture)",
+              "methodName": "AcFts007AwaitedNativeSearchPreservesRf3ResultsPolicyAndHealth",
+              "instanceName": "AcFts007AwaitedNativeSearchPreservesRf3ResultsPolicyAndHealth",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextAsyncRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(ClusterFixture)",
+              "methodName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths",
+              "instanceName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(Sdk)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextMaintenanceRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(ClusterFixture)",
+              "methodName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths",
+              "instanceName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(Mcp)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextMaintenanceRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(ClusterFixture)",
+              "methodName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths",
+              "instanceName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(SdkSql)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextMaintenanceRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(ClusterFixture)",
+              "methodName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths",
+              "instanceName": "ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(McpSql)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextMaintenanceRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3LeaderLossTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3LeaderLossTests(ClusterFixture)",
+              "methodName": "AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart",
+              "instanceName": "AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextRf3LeaderLossTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests(ClusterFixture)",
+              "methodName": "AcFts001ActualSdkAndOfficialMcpMatchIndependentTextAndHybridOracle",
+              "instanceName": "AcFts001ActualSdkAndOfficialMcpMatchIndependentTextAndHybridOracle",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests(ClusterFixture)",
+              "methodName": "AcFts002PersistedRowFieldRedactionFreshnessAndRevocationMatchBothClients",
+              "instanceName": "AcFts002PersistedRowFieldRedactionFreshnessAndRevocationMatchBothClients",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests(ClusterFixture)",
+              "methodName": "AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted",
+              "instanceName": "AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextWaitRf3Tests.cs",
               "parameterTypeFullNames": []
             }
           ]

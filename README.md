@@ -332,15 +332,16 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **14 accepted, 90 in progress and 0 pending**.
+The original 104-task plan has **16 accepted, 88 in progress and 0 pending**.
 Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
 document CRUD/CAS, **KL-012** batch/idempotency, **KL-013** document-only filter/query,
 **KL-016** committed projection
 outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates, **KL-022** graph storage, **KL-023** bounded graph traversal
 **KL-020** three-node replicated apply, **KL-026** retention, expiry and rollups,
-**KL-014** server/CLI and typed SDK outcomes, and **KL-027** canonical vectors
-and exact search.
+**KL-014** server/CLI and typed SDK outcomes, **KL-027** canonical vectors
+and exact search, **KL-008** native storage ownership and joined lifetime, and
+**KL-011** strict scalar/composite indexes and partition-unique constraints.
 Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
 The [client acceptance record](docs/Features/ClientApi.md) and
@@ -358,10 +359,10 @@ records the actual source, test results and remaining acceptance gates.
 The current source includes bounded public partition Transfer/Resume/Abort,
 receiver-issued native proofs, persisted cancellation and joined node-local
 storage ownership. It also includes real capture-pointer fault/recovery and
-erased-follower snapshot plus ordered-tail flows. The full Release build and
-formatter pass. Related bank, HTTP client, hybrid rank/Explain and native text
-process-recovery tests pass all 290 selected cases across normal and scalar
-modes locally. Fresh source-bound Linux public RF3, complete unit/recovery,
+erased-follower snapshot plus ordered-tail flows. The accepted `556c13a` checkpoint passed the full Release build and
+formatter. Its related bank, HTTP client, hybrid rank/Explain and native text
+process-recovery tests passed all 290 selected cases across normal and scalar
+modes locally. Later source changes require a fresh build and runtime evidence. Fresh source-bound Linux public RF3, complete unit/recovery,
 fault and performance qualification remains open. Original source identities,
 failures and results belong in the [qualification records](docs/implementation/status.json).
 
@@ -383,7 +384,7 @@ set, datasets, client counts and measurement rules. All benchmark-stage builds, 
 tests and workloads execute in GitHub Actions. GitHub runs separate normal/scalar
 acceptance lanes for storage ownership, strict indexes, the server/SDK,
 security/telemetry, strong/session reads, exact vectors and controlled partition
-movement. These seven tasks run in fourteen isolated Linux jobs. Focused task
+movement, hybrid search, follower snapshots and native text rebuilds. These ten tasks run in twenty isolated Linux jobs. Focused task
 runs retain their complete declared operation scope; full build, unit, recovery,
 RF3 and coverage gates remain mandatory.
 

@@ -5,7 +5,12 @@ internal static class RequestCqrsCanonicalArmValidation
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
         if (arm.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed)
-        { return arm.Partition is null && arm.SourceRequestId is null && arm.TargetVoter is null && arm.SourceArmId is null; }
+        {
+            return arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null
+            && (arm.TargetVoter is null || arm.Phase == RequestCqrsProbePhase.BeforeSubmit
+                && arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null && arm.CommandId != Guid.Empty
+                && RequestCqrsProbeActivationTargetValidation.Valid(arm.TargetVoter));
+        }
         return arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null
             && arm.CommandId != Guid.Empty && arm.SourceRequestId is { } request && request != Guid.Empty
             && arm.SourceArmId is { } source && source != Guid.Empty && source != arm.ArmId

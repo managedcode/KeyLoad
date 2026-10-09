@@ -15,6 +15,10 @@ internal static class NativeTextIncrementalCrashProtocol
     internal const string RecoveredFile = "text-incremental-recovered.bin";
     internal const string HealthyFile = "text-incremental-healthy.bin";
     internal const string VerifiedFile = "text-incremental-verified.bin";
+    internal const string CheckpointCommandPrefix = "text-incremental-checkpoint-command-";
+    internal const string CheckpointReceiptPrefix = "text-incremental-checkpoint-receipt-";
+    internal const string EvidenceSuffix = ".bin";
+    internal const string EvidenceIdFormat = "N";
     internal const string Collection = "text-incremental";
     internal const string Consumer = "text-incremental-consumer";
     internal const string Field = "/text";

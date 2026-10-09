@@ -48,6 +48,9 @@ export function nativeSelection(input, inherited = process.env) {
     || [...values.keys()].some(key => key.startsWith('NativeCoverage:')))) {
     throw new Error('Heavy RF3 load requires its exact exclusive functional selection.');
   }
+  if (!heavyLoad && suite === 'rf3' && values.get('Filter') === heavyLoadFilter) {
+    throw new Error('Heavy RF3 load requires explicit enabled admission.');
+  }
   const parallel = Number(values.get('Execution:MaximumParallelTests')
     ?? (suite === 'comparison' || heavyLoad ? comparisonParallelTests : defaultMaximumParallelTests));
   if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid native parallelism.');

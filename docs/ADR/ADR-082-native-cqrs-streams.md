@@ -381,3 +381,39 @@ The Integration oracle validates the exact closed record before including that s
 ### TASK-CRS-C1-FRESH-READINESS-ORACLE-002
 
 REQ/AC-CRS-005, REQ/AC-CLIENT-004/005 and AC-CRS-FRESH-READINESS-002 retain full interrupted-submit/replay/conflict/healthy effect and original native RF3 receipt contracts. Root freezes the linked NativeCqrsRequestV2 source-backed advisory-cache distinction, joins the existing owned HTTP caller plus128-byte fixture bound and two actual one-shot readiness call sites, builds/formats and delivers for exact Linux SDK/official-MCP flows. The unchanged native readiness endpoint checks authenticated compatible-cohort and catalog admission; no cached status assertion becomes authority. Preserve before/after identity/applied/placement and every literal document/full receipt assertion. No poll, retry, timeout, product/cache/discovery, public data, package or topology change. Original source47 failed artifact remains immutable. Accepted test-oracle implementation contract; runtime qualification pending; rollback removes the coherent three-source amendment only. Root owns compilation/source join/Git; the three parallel feature agents continue independent parent implementation.
+
+
+### TASK-CRS-C1-NATIVE-WAL-KIND-001: original native store-open failure classification
+
+REQ-CRS-DIAG-005 / AC-CRS-DIAG-005 extends the existing closed C1 failure-kind
+classification with exactly `WalCorruption` and `WalFullLogCorruption`, selected
+only by the pinned public ZoneTree `WriteAheadLogCorruptionException` and
+`WriteAheadLogFullLogCorruptionException` CLR types. These are fixed categories,
+not arbitrary exception type names or messages. No path, segment identity, nested
+exception text, WAL bytes, caller data or checksum values may enter the record.
+The original first failure phase, 256-byte strict canonical parser, native failure
+exit2, unchanged input/success receipt, empty success stderr, fatal precedence,
+primary/cleanup failures and all process/readers/lock joins remain mandatory.
+
+Original source556c13ab78c839df68b09dce1e9fc92bef576bfe run37891957916 attempt1
+KL015 normal32/32 passed; scalar30/32 passed, with the two genuine SDK/official MCP
+held-write/revocation flows failing at offline `OpenStore/Other` after owned wave
+shutdown. This original observation does not establish a checksum cause. The
+fixed categories make a future original native class observable without changing
+storage, exception propagation or any operation/assertion/deadline. Existing
+`SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects` and
+`OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects` retain
+the complete denied-write, unchanged business state, restored caller, positive
+outcome and joined offline no-original-outcome checks. Existing genuine negative
+child inspection followed by healthy reopen controls remain unchanged; no
+property-only category test replaces those whole flows.
+
+ADR-082 owns this diagnostic-only source contract. Freeze docs first, append the
+two enum categories without changing existing values, add the two actual type
+patterns in CrashHost ClusterRouting failure evidence, then root builds and
+executes existing full C1 controls and fresh exact-source Linux KL015 normal/scalar
+lanes. A new category is still a failed original child, never an accepted receipt.
+The canonical official ZoneTree repair/publication gate remains independent; no
+consumer checksum fallback, format migration, fork package or local reference is
+authorized. Rollback removes only these two diagnostic categories and matching
+patterns; original failed records remain immutable.

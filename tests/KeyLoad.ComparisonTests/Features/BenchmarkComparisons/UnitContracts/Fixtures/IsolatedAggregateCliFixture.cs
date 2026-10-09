@@ -15,13 +15,15 @@ internal sealed class IsolatedAggregateCliFixture : IDisposable
     private const string EvalMode = "-e";
     private const string PrepareSource = """
         import { writeFileSync } from 'node:fs';
+        import path from 'node:path';
         import { pathToFileURL } from 'node:url';
         const planner = await import(pathToFileURL(process.argv[3]).href);
+        const names = await import(pathToFileURL(path.join(path.dirname(process.argv[3]), 'isolated-github-contract.mjs')).href);
         const plan = planner.createIsolatedPlan(planner.readIsolatedContract());
         const cohort = {sourceRevision:'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',runId:37070000000,attempt:1,
           repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'Benchmarks',profile:plan.profile};
         const cells = plan.cells.map((cell,index)=>({id:cell.id,
-          job:{id:1000+index,name:'Benchmark / '+cell.id,url:'https://github.com/managedcode/KeyLoad/actions/runs/'+cohort.runId+'/job/'+(1000+index),
+          job:{id:1000+index,name:names.isolatedJobName(cell),url:'https://github.com/managedcode/KeyLoad/actions/runs/'+cohort.runId+'/job/'+(1000+index),
             conclusion:'success',steps:[{name:'Run database workload',conclusion:'success'},{name:'Save benchmark results',conclusion:'success'}]},
           artifact:{id:2000+index,name:'comparison-worker-'+cell.id,sizeInBytes:1,digest:'sha256:'+'d'.repeat(64),expired:false},
           workerSha256:'c'.repeat(64)}));

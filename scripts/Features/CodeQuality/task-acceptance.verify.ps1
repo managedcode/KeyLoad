@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile,
     [Parameter(Mandatory)][string] $ContractPath,
     [Parameter(Mandatory)][string] $ExecutionManifestPath

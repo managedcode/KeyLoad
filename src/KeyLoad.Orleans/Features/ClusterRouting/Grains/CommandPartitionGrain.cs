@@ -20,7 +20,8 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     IOptions<GrainRoutingOptions> options, IServiceProvider services)
     : Grain, ICommandPartitionGrain
 {
-    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, options, codec, workOwner, services.GetService<IPhysicalRequestPlacement>());
+    private readonly GrainCommandExecutor commands = new(database, coordinator, clock, options, codec, workOwner, services.GetService<IPhysicalRequestPlacement>(),
+        services.GetService<IGrainPartitionMovementSealedOperationObserver>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>

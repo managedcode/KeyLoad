@@ -90,3 +90,16 @@ TASK-BLOB-CURRENT-FORMAT-007 maps REQ-BLOB-007/AC-BLOB-007 and existing ADR-038 
 REQ-BLOB-001/002/005/007 and AC-BLOB-001/002/005/007 also map to native default BlobStore configuration → oversized declared length rejects Validation and leaves target metadata/upload absent (first logged rejection may retain outcome/clock once under ADR-002) → exact same-ID failure bytes plus stable full post-failure image/position → small real upload/write/publish with complete independent metadata and partial bytes → same command-ID publication replay/no extra effect → joined native store close/reopen with full canonical image/position and identical complete metadata/range → healthy full read.
 
 Remove exactly obsolete ordinary identities BlobStorageCompatibilityTests.AcBlob007AppendsBlobEnumsAndCapabilitiesWithoutRenumberingExistingValues and BlobStorageCompatibilityTests.AcBlob007ResourceWithoutBlobPolicyRetainsItsCanonicalJsonBytes. New cases are functional complete native operations; root must reconcile genuine post-build census UID/source ranges/classifications. Do not fabricate IDs/counts/PASS. Existing integrity golden controls remain separate. No production behavior, limits, format decoder, dependencies or authorization changes.
+
+
+### TASK-MCP-CATALOG-COMPLETE-76-001 implementation contract
+
+AC-MCP-001/003/006/007 and AC-BLOB-006 preserve all ten blob tools and the
+independent complete public catalog. [ClientApi](ClientApi.md) owns the exact76
+tuple/schema/effect and negative→healthy decode contract. Original55f normal/scalar
+failures remain immutable; initial gateway discovery remains three tools. Root
+joins docs-first ClientApi Contracts literal inventory and Helpers executable
+assertions, then existing six McpCatalogTests/four BlobAgentCatalogTests identities
+with native normal/scalar metadata and full current-source qualification gates.
+No product API, dependency or authorization change; rollback is fixture/docs only.
+No source-only count or schema review establishes runtime or RF3 acceptance.

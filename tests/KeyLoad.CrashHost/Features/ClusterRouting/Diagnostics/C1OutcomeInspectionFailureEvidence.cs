@@ -116,6 +116,8 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     private static C1OutcomeInspectionFailureKind Kind(Exception error) => error switch
     {
         KeyLoadException => C1OutcomeInspectionFailureKind.KeyLoad,
+        global::ZoneTree.Exceptions.WriteAheadLogCorruptionException => C1OutcomeInspectionFailureKind.WalCorruption,
+        global::ZoneTree.Exceptions.WriteAheadLogFullLogCorruptionException => C1OutcomeInspectionFailureKind.WalFullLogCorruption,
         InvalidDataException => C1OutcomeInspectionFailureKind.InvalidData,
         FileNotFoundException => C1OutcomeInspectionFailureKind.MissingFile,
         DirectoryNotFoundException => C1OutcomeInspectionFailureKind.MissingDirectory,

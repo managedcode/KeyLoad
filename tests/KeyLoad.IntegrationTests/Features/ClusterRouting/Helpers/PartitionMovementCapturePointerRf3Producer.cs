@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Joins the existing signed SubmitReturned hold after the genuine AdvanceCaptured native ACK.</summary>
 internal static class PartitionMovementCapturePointerRf3Producer
 {
-    internal const string Administrator = "root";
+    internal const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
 
     internal static async Task<Guid> HoldAndJoinAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)

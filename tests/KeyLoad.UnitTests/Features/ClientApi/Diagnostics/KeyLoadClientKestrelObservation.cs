@@ -25,6 +25,7 @@ internal sealed class KeyLoadClientKestrelObservation
     private readonly long started;
     private readonly List<object> records = [];
     private bool saturated;
+    private bool nativeServerEventsObserved;
 
     internal KeyLoadClientKestrelObservation()
     { started = clock.GetTimestamp(); }
@@ -59,6 +60,23 @@ internal sealed class KeyLoadClientKestrelObservation
         }
     }
 
+    internal void RecordNativeServerEvent(string category, int eventId, string level)
+    {
+        lock (gate)
+        {
+            nativeServerEventsObserved = true;
+            if (records.Count == MaximumRecords)
+            { saturated = true; return; }
+            records.Add(new
+            {
+                nativeCategory = category,
+                nativeEventId = eventId,
+                nativeLogLevel = level,
+                elapsedMilliseconds = clock.GetElapsedTime(started).TotalMilliseconds
+            });
+        }
+    }
+
     internal void WriteAndThrow(Exception original)
     {
         Record(KestrelObservationStage.FlowFailed, error: original);
@@ -66,7 +84,14 @@ internal sealed class KeyLoadClientKestrelObservation
         lock (gate)
         {
             ServerFailureObserver.Observe(() => Console.Error.WriteLine(JsonSerializer.Serialize(new
-            { schemaVersion = SchemaVersion, kind = Kind, saturated, records })), failures);
+            {
+                schemaVersion = SchemaVersion,
+                kind = Kind,
+                saturated,
+                nativeServerEventsObserved,
+                nativeServerLogLevelOverride = false,
+                records
+            })), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

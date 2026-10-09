@@ -16,7 +16,11 @@ internal enum RequestCqrsProbePhase
     CanonicalOutboundObserved,
     CanonicalIndependentAppendCompleted,
     CanonicalOwnerDisposed,
-    RetireOperationSealed
+    RetireOperationSealed,
+    ParentStagePreflight,
+    TransferPageRetainedBudgetExceeded,
+    TransferPageReturned,
+    ParentTransferCloseFailed
 }
 
 internal enum RequestCqrsProbeAction

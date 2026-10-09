@@ -117,3 +117,37 @@ Dependencies, public API, storage format and deployment unchanged; no migration.
 
 
 KL014 receipt-owner follow-on freezes native administrator placement/status witnesses around the healthy fresh-ID command, complete independent expected receipt and bounded monotone same-owner position under REQ-CLIENT-005 / AC-CLIENT-005. Existing scenario passes its already owned administrator into the receipt oracle; no new credentials, resources, requests bypassing native clients or lifecycle owners. DocumentSession SDK Get and official GetDocumentRequest validate the actual healthy token against complete literal document after commit. Ordered guards apply only after the sealed R1 fullflow packet, then root build and actual current Linux fourcase execution; source-only, rollback assertion delta only.
+
+
+### TASK-CLIENT-NATIVE-KESTREL-OBSERVATION-002
+
+REQ-CLIENT-002/005 / AC-MP-009 / AC-CLIENT-005 and ADR-035 retain the
+original five failed normal Kestrel cases at source556c/run37891957916. Each
+started its real host and SDK send, but no handler entry or response was observed
+before the original caller/first-chunk bound expired. The same-ID write retry
+then received the already-cancelled original token; its failure is consequential,
+not evidence that the intended null/malformed200 response was delivered. The
+concurrent large chunked native Kestrel case passed after10.143s. These are actual
+observations, not evidence of a CPU, proxy, transport or timeout cause.
+
+Ordered source contract: attach an ILoggerProvider only to the existing observed
+fixture-owned Kestrel application, retain its existing native category/level
+filters, and record only exact closed native Kestrel category, actual EventId,
+LogLevel and monotonic elapsed facts. The existing combined observation bound64
+and explicit saturation remain unchanged. The provider does not call the native
+state formatter or inspect state, exception message, scope, URI, headers, bodies,
+credentials or user payload. The host's original LoggerFactory lifetime owns the
+provider; it has no separate process, worker, timer or disposable transport.
+Existing output/cleanup failures remain combined with the initiating failure.
+
+Output states whether any admitted native server events were observed and that
+no native log-level override was applied. An empty native event set cannot prove
+no socket/HTTP activity: original native filters may suppress those events. No
+connection callback, diagnostic liveness request, retry, fallback, proxy change,
+transport/default, bound/deadline increase, skipped case or global native20
+reduction is introduced. All five existing full null/read/retry/cancellation and
+healthy-flow assertions remain unchanged. The existing required ordinary
+transport controls must run on the fresh source in normal/scalar; authentic
+original complete-suite failures remain failures until fresh originals prove the
+complete flows. This passive diagnostic does not qualify database/RF3/coverage,
+CPU pressure or an unobserved causal branch. Root alone joins/builds/executes.

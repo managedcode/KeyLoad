@@ -39,6 +39,11 @@ internal sealed class RequestCqrsProbeJson
             || !ValidPrincipal(value.PrincipalId)
             || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
             || value.Phase is RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
+            || value.Phase == RequestCqrsProbePhase.TransferPageReturned
+                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.PartitionMovementTransferData
+                    || value.Action != RequestCqrsProbeAction.Hold)
+            || value.Phase == RequestCqrsProbePhase.ParentTransferCloseFailed
+                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))
@@ -70,6 +75,37 @@ internal sealed class RequestCqrsProbeJson
     internal byte[] WriteMarker(RequestCqrsProbeMarkerRecord value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeMarkerRecord);
+        if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
+        { throw Invalid(); }
+        return bytes;
+    }
+
+    internal RequestCqrsProbeActivationRecord ReadActivation(ReadOnlySpan<byte> bytes)
+    {
+        var value = Read(bytes, RequestCqrsProbeRecordFields.Activation, Context.RequestCqrsProbeActivationRecord);
+        RequestCqrsProbeActivationValidation.Require(value);
+        return value;
+    }
+
+    internal byte[] WriteActivation(RequestCqrsProbeActivationRecord value)
+    {
+        RequestCqrsProbeActivationValidation.Require(value);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeActivationRecord);
+        if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
+        { throw Invalid(); }
+        return bytes;
+    }
+
+    internal RequestCqrsProbeLiveRecord ReadLive(ReadOnlySpan<byte> bytes)
+    {
+        var value = Read(bytes, RequestCqrsProbeRecordFields.Live, Context.RequestCqrsProbeLiveRecord);
+        RequestCqrsProbeLiveValidation.Require(value);
+        return value;
+    }
+    internal byte[] WriteLive(RequestCqrsProbeLiveRecord value)
+    {
+        RequestCqrsProbeLiveValidation.Require(value);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeLiveRecord);
         if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
         { throw Invalid(); }
         return bytes;

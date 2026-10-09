@@ -14,6 +14,7 @@ internal sealed class RequestCqrsProbeFixture
     private readonly Dictionary<string, int> activeGates = new(StringComparer.Ordinal);
     private bool admissionStopped;
     private bool cleaned;
+    private bool retainEvidence;
 
     internal RequestCqrsProbeFixture(string root, string sessionId,
         Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json)
@@ -148,6 +149,12 @@ internal sealed class RequestCqrsProbeFixture
         return Task.CompletedTask;
     }
 
+    internal void RetainEvidence()
+    {
+        lock (sync)
+        { retainEvidence = true; }
+    }
+
     internal Task DisposeAfterResourcesJoinedAsync()
     {
         lock (sync)
@@ -157,7 +164,7 @@ internal sealed class RequestCqrsProbeFixture
                     && arm.RequestId is not null && !arm.Settled && !arm.Retired)
                 || (arm.RequestId is not null && !arm.OwnerDisposedSeen)))
             { throw new InvalidOperationException(UnsettledGates); }
-            if (cleaned)
+            if (cleaned || retainEvidence)
             { return Task.CompletedTask; }
         }
         RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true);

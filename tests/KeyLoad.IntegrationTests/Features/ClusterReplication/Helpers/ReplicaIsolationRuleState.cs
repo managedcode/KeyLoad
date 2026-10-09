@@ -16,7 +16,7 @@ internal static class ReplicaIsolationRuleState
     private const int PortIndex = 6;
     private const int DropArgumentCount = 10;
 
-    internal static void RequireInstalled(string native, ReplicaIsolationRules plan)
+    internal static void RequireInstalled(string native, IReplicaIsolationRulePlan plan)
     {
         var expected = plan.Installation().Select(Canonical).ToHashSet(StringComparer.Ordinal);
         var lines = Lines(native);
@@ -30,7 +30,7 @@ internal static class ReplicaIsolationRuleState
         { throw new InvalidOperationException("The actual native filter table does not contain the exact owned isolation rules first."); }
     }
 
-    internal static IEnumerable<string[]> Removal(string native, ReplicaIsolationRules plan)
+    internal static IEnumerable<string[]> Removal(string native, IReplicaIsolationRulePlan plan)
     {
         var lines = Lines(native);
         var expected = plan.Installation().Select(Canonical).ToHashSet(StringComparer.Ordinal);
@@ -62,7 +62,7 @@ internal static class ReplicaIsolationRuleState
             + " " + MatchTcp + " " + rule[PortIndex] + " " + ReplicaIsolationProtocol.SiloPort + " -j " + ReplicaIsolationProtocol.Drop;
     }
 
-    private static bool Owned(string line, ReplicaIsolationRules plan)
+    private static bool Owned(string line, IReplicaIsolationRulePlan plan)
         => line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Any(word => word == plan.InputChain || word == plan.OutputChain);
     private static string[] Lines(string native) => native.Split('\n', StringSplitOptions.RemoveEmptyEntries)
         .Select(line => line.Trim()).ToArray();

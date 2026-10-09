@@ -20,7 +20,7 @@ internal static class ReplicaIsolationFlowAssertions
             NativeSerialization.Serialize(new MutationReceipt(ReplicaIsolationFlowProtocol.Mutation, Collection, DocumentId, revision)))).IsTrue();
     }
 
-    internal static async Task StatusAsync(NodeStatus status, string node, string leader, Guid incarnation, long minimumTerm)
+    internal static async Task StatusAsync(NodeStatus status, string node, string leader, Guid incarnation, long readGeneration, long minimumTerm)
     {
         await Assert.That(Guid.TryParse(status.NodeId, out var identity) && identity != Guid.Empty).IsTrue();
         await Assert.That(status.NodeId).IsEqualTo(node);
@@ -29,7 +29,8 @@ internal static class ReplicaIsolationFlowAssertions
         await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await Assert.That(status.RoutingReady).IsTrue();
         await Assert.That(status.ProcessId > ReplicaIsolationFlowProtocol.Zero).IsTrue();
-        await Assert.That(status.ReadGeneration > ReplicaIsolationFlowProtocol.Zero).IsTrue();
+        await Assert.That(readGeneration >= ReplicaIsolationFlowProtocol.Zero).IsTrue();
+        await Assert.That(status.ReadGeneration).IsEqualTo(readGeneration);
         await Assert.That(new Uri(status.Leader!).Host).IsEqualTo(leader);
         await Assert.That(status.ConsensusTerm >= minimumTerm).IsTrue();
     }

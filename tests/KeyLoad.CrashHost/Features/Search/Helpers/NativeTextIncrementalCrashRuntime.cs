@@ -20,11 +20,13 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     internal DatabaseEngine Database => Node.Database;
     internal ServerRuntimeOptions Options => services.GetRequiredService<ServerRuntimeOptions>();
     internal string ProjectionRoot { get; }
+    internal string EvidenceRoot { get; }
     internal ReplicaCrashNode Node { get; }
 
     internal NativeTextIncrementalCrashRuntime(string root, Guid incarnation,
         Action<NativeTextFaultStage>? observer = null)
     {
+        EvidenceRoot = root;
         Node = ReplicaCrashNode.OpenTarget(root, incarnation);
         ReplicaMaterializer? openedMaterializer = null;
         ServiceProvider? openedServices = null;

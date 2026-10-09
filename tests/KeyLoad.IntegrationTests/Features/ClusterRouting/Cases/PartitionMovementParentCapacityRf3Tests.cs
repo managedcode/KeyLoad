@@ -6,4 +6,8 @@ internal sealed class PartitionMovementParentCapacityRf3Tests
     [Test]
     public Task ActualCapturedStageShapeBoundAndConfiguredGrantDenialRetainAuthorityThenRestoreHealthyMove()
         => PartitionMovementParentCapacityRf3Trial.RunAsync(TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task ActualStagePreAdmissionLegalBoundaryRejectsOneByteLessWithoutEffectsThenSameMoveColdHealthyContinuation()
+        => PartitionMovementParentOperationalCapacityRf3Trial.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

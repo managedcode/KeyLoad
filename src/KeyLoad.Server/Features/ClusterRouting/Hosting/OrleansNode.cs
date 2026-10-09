@@ -14,9 +14,11 @@ namespace KeyLoad.Server;
 /// <param name="runtimeOptions">Shared validated options snapshots borrowed by the native silo.</param>
 /// <param name="clock">Borrowed runtime clock for the silo and its shutdown deadlines.</param>
 /// <param name="physicalOwnerWork">Borrowed configured proof work owner, joined before native silo shutdown.</param>
+/// <param name="sealedObserver">Optional explicitly borrowed in-process observation, never execution authority.</param>
 internal sealed partial class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
-    ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null) : IAsyncDisposable
+    ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
+    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null) : IAsyncDisposable
 {
     private NodeOptions Options => nodeOptions.Value;
     private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
@@ -114,7 +116,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, sealedObserver, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);

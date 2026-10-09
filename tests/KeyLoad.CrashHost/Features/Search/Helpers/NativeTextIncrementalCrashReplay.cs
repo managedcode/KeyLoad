@@ -11,7 +11,10 @@ internal static class NativeTextIncrementalCrashReplay
         var state = await runtime.PhaseAsync(request, TextMaintenanceCapabilityKind.Begin, token: token);
         ProjectionBatchResult? receipt = null;
         if (state.OriginalCheckpointIntent is { } original)
-        { (state, receipt) = await CompleteIntentAsync(runtime, request, original, token); }
+        {
+            await NativeTextIncrementalCheckpointEvidence.RecordCommandAsync(runtime, request, original, token);
+            (state, receipt) = await CompleteIntentAsync(runtime, request, original, token);
+        }
         for (var number = FirstPage; number < NativeTextIncrementalCrashProtocol.MaximumPages; number++)
         {
             var page = runtime.Database.ReadProjectionBatch(CrashFixtureValues.Principal,
@@ -25,6 +28,7 @@ internal static class NativeTextIncrementalCrashReplay
                 return (complete, receipt);
             }
             var intent = new CommitProjectionBatchRequest(Guid.NewGuid(), request.Consumer, page.Token, []);
+            await NativeTextIncrementalCheckpointEvidence.RecordCommandAsync(runtime, request, intent, token);
             _ = await runtime.PhaseAsync(request, TextMaintenanceCapabilityKind.PreparePage, page, intent, token: token);
             (state, receipt) = await CompleteIntentAsync(runtime, request, intent, token);
             if (state.ThroughSequence == state.ReplayUpperSequence)
@@ -44,6 +48,7 @@ internal static class NativeTextIncrementalCrashReplay
         _ = await runtime.PhaseAsync(request, TextMaintenanceCapabilityKind.ApplyIntent, token: token);
         var actual = await runtime.CommitAsync<ProjectionBatchResult>(OperationKind.CommitProjectionBatch,
             original, original.CommandId, token);
+        await NativeTextIncrementalCheckpointEvidence.RecordReceiptAsync(runtime, request, actual, token);
         var state = await runtime.PhaseAsync(request, TextMaintenanceCapabilityKind.SettleCheckpoint,
             acknowledged: actual, token: token);
         return (state, actual);

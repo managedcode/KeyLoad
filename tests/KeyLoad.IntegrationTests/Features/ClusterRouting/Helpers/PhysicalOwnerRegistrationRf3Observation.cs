@@ -12,28 +12,38 @@ internal static class PhysicalOwnerRegistrationRf3Observation
     private const string Failed = "Physical owner registration stopped with ";
     private static readonly Uri Health = new("/health/physical-owner-registration", UriKind.Relative);
 
-    internal static async Task WaitAsync(DistributedApplication app, CancellationToken token)
+    internal static Task WaitAsync(DistributedApplication app, CancellationToken token)
+        => WaitAsync(app, null, token);
+
+    internal static async Task WaitAsync(DistributedApplication app, PhysicalOwnerRegistrationRf3Evidence? evidence,
+        CancellationToken token)
     {
+        evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.LogService);
         var logs = app.Services.GetRequiredService<ResourceLoggerService>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes.Take(TwoRf3MembershipProtocol.MembersPerGroup))
         {
-            await WaitForCompletionAsync(logs, node, token).ConfigureAwait(false);
+            evidence?.BeginNode(node);
+            await WaitForCompletionAsync(logs, node, evidence, token).ConfigureAwait(false);
             using var http = app.CreateHttpClient(node);
+            evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.HealthSend);
             using var response = await http.GetAsync(Health, token).ConfigureAwait(false);
+            evidence?.HealthReceived(response.StatusCode);
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         }
     }
 
-    private static async Task WaitForCompletionAsync(ResourceLoggerService logs, string node, CancellationToken token)
+    private static async Task WaitForCompletionAsync(ResourceLoggerService logs, string node, PhysicalOwnerRegistrationRf3Evidence? evidence,
+        CancellationToken token)
     {
+        evidence?.Enter(PhysicalOwnerRegistrationRf3Phase.LogWatch);
         await foreach (var batch in logs.WatchAsync(node).WithCancellation(token).ConfigureAwait(false))
         {
             foreach (var line in batch)
             {
                 if (line.Content.Contains(Failed, StringComparison.Ordinal))
-                { throw new InvalidOperationException("The native owner registration failed."); }
+                { evidence?.MarkFailed(); throw new InvalidOperationException("The native owner registration failed."); }
                 if (line.Content.Contains(Completed, StringComparison.Ordinal))
-                { return; }
+                { evidence?.MarkCompleted(); return; }
             }
         }
         throw new InvalidOperationException("The native owner registration stream ended before completion.");

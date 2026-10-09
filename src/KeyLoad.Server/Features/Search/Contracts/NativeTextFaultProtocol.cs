@@ -12,5 +12,15 @@ internal enum NativeTextFaultStage
     /// <summary>The complete source-bound manifest has been atomically published.</summary>
     ManifestPublished,
     /// <summary>The verified generation became current before obsolete generation cleanup.</summary>
-    GenerationActivated
+    GenerationActivated,
+    /// <summary>The complete original incremental intent has been durably persisted.</summary>
+    IncrementalIntentFlushed,
+    /// <summary>The first actual incremental native deletion has completed.</summary>
+    NativeDeletionWritten,
+    /// <summary>The first actual incremental native addition has completed.</summary>
+    NativeAdditionWritten,
+    /// <summary>The original canonical journal ACK passed complete current checkpoint validation.</summary>
+    CanonicalCheckpointAcknowledged,
+    /// <summary>The actual original pending intent file has been removed after its validated ACK.</summary>
+    PendingIntentRetired
 }

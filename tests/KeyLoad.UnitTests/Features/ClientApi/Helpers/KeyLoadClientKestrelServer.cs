@@ -31,6 +31,8 @@ internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
     {
         var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
+        if (observation is not null)
+        { builder.Services.AddSingleton<ILoggerProvider>(_ => new KeyLoadClientKestrelLogObservationProvider(observation)); }
         builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, 0));
         var app = builder.Build();
         var authorizationHeaders = new ConcurrentQueue<string>();

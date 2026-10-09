@@ -151,3 +151,46 @@ The native removed-grant case also first commits a real writer document, removes
 REQ-DSTORE-002 / AC-DSTORE-002 and new AC-DSTORE-COMPOSITE-PROCESS-001: preserve original KL011 equality/range/composite/partition-unique scope. A real four-process CrashHost matrix verifies inserted, replaced, patched, deleted and tombstoned documents, complete composite/ordered-score/unique native index images in two atomic partitions, literal membership and native exclusive-after-key ranges. Composite equality must report the genuine declared composite index; native range Scan proof is distinct from KL013 query-planner inequality seeks. A mixed document/event/enqueue unique conflict must roll back every effect; its original persisted failure and successful acknowledged receipt replay unchanged after crash with complete store-byte and position invariance. A fresh command follows recovery and a fourth reopen preserves it.
 
 Reuse original JournalFlushed cut, acknowledged first kill, original child stdout/stderr and joined cleanup/deadlines. Parent literal tuples are independent of observed index values; native public KeySpace encodes the specified literal keys, never calls the index mutation implementation. No provider doubles, fallback, retry-until-pass, power-loss or closure claim. Existing scalar scenario is untouched. Ownership: CrashHost DocumentStorage Contracts/Scenarios owns new current-format private modes; Recovery DocumentStorage Cases/Helpers/Assertions owns actual process orchestration and independent oracle; only existing CrashHost application adds closed dispatch. Source-only packet requires full strict build, native discovery, focused process matrix and original full Linux recovery plus unchanged normal/scalar/RF3 gates. ADR002 owns command replay; ADR011 owns atomic journal/recovery.
+
+
+### Original bounded task scope qualified at556c — 2026-10-09
+
+This scoped closeout accepts the original architecture task predicates at exact
+[source556c13ab](https://github.com/managedcode/KeyLoad/tree/556c13ab78c839df68b09dce1e9fc92bef576bfe),
+[run37891957916 attempt1](https://github.com/managedcode/KeyLoad/actions/runs/37891957916).
+It does not qualify the subsequently changed source. Every original API/ZIP digest,
+confined extracted file, raw native discovery UID/class/constructor/method/display/
+parameter/source identity, complete no-skip TRX/counters, source/PDB/Git hash and
+prepared/before/after image was authenticated. Original native20 argument, strict
+normal-null/scalar0 caller environment, child exits/readers/disposal and same-job
+source verification passed. No job-status inference or synthetic report is used.
+
+KL011 normal and scalar each executed the exact16-case union without failures
+or skips:11 native Unit, one mixed transaction conflict, one honestly ordinary
+MCP-envelope control, two genuine process scenarios and one complete Aspire RF3
+SDK/official MCP flow. REQ/AC-DSTORE-002, AC-DSTORE-INDEX-PROCESS-001,
+AC-DSTORE-COMPOSITE-PROCESS-001, AC-DSTORE-COMPOSITE-SPARSE-001 and
+AC-DSTORE-COMPOSITE-RF3-001 now bind scalar/composite equality and native ordered
+range images to independent reference models after insert/replacement/patch/
+delete/tombstone/crash. All four null/missing inclusion combinations retain exact
+unique scope; conflict atomically rolls back document/index/event/enqueue effects.
+The real RF3 flow preserves full literal membership/cuts and original receipts,
+delete/key reuse across different IDs, equal keys in distinct atomic partitions,
+persisted grant denial/no value and restoration with healthy stable retry.
+Declared native range scans do not claim unsupported inequality planner seeks.
+
+Normal job113694642562 artifact11599100919 ZIP SHA
+`62156129bd5a1371059aa8e740871e44ba133b2b025e75b5ca52d2fe2d813ec6`;
+scalar job113694642694 artifact11599665304 ZIP SHA
+`30d7d2a573f48cd102f9d6db44880c823ca00c81895cac4cad3e4c776814c408`.
+Each genuine server image is exact-source/run/attempt bound; original fixture
+cleanup and owned registry removal passed. The envelope control remains ordinary
+and contributes no product coverage. Original canonical receipts/source images
+are retained unchanged; later dirty source is not promoted by these results.
+
+All existing mandatory full-feature/source-suite/coverage/RF3 and separate
+endurance/performance/power-loss gates remain OPEN or retain their own authentic
+status; this closes only the stated original bounded task predicates. It neither
+waives their contracts nor claims broad StorageRecovery/DocumentStorage/product
+readiness. Current source repairs and additional feature requirements require
+fresh exact-source evidence. Root alone joins durable status/README provenance.

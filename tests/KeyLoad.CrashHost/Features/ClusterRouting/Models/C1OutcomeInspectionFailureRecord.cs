@@ -21,7 +21,9 @@ internal enum C1OutcomeInspectionFailureKind
     Argument,
     InvalidOperation,
     Json,
-    Other
+    Other,
+    WalCorruption,
+    WalFullLogCorruption
 }
 
 internal sealed record C1OutcomeInspectionFailureRecord(

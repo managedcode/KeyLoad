@@ -155,3 +155,5 @@ flowchart LR
 | [ADR-117: native TUnit CI entry](ADR-117-native-tunit-ci-entry.md) | Accepted |
 | [ADR-118: bounded typed-row INNER JOIN](ADR-118-bounded-relational-inner-join.md) | Accepted |
 | [ADR-119: TUnit-owned local membership image](ADR-119-tunit-owned-local-membership-image.md) | Accepted |
+
+| [ADR-122: Native comparable benchmark methodology](ADR-122-native-benchmark-methodology.md) | Accepted |

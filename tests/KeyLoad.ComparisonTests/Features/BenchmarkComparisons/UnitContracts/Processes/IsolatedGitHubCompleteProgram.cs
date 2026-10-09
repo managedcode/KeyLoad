@@ -25,7 +25,7 @@ internal static class IsolatedGitHubCompleteProgram
             head_branch: 'main', repository_id: 7, head_repository_id: 7 } });
         const modern = corruption.startsWith('modern');
         const jobs = plan.cells.map((cell, i) => makeJob(1001 + i,
-          modern ? names.isolatedJobName(cell) : 'Benchmark / ' + cell.id,
+          names.isolatedJobName(cell),
           ['Run database workload', 'Save benchmark results']));
         const artifacts = plan.cells.map((cell, i) => makeArtifact(2001 + i, 'comparison-worker-' + cell.id));
         const image = makeJob(5000, 'Build Docker images', ['Check Docker image export and import', 'Save Docker images']);
@@ -40,6 +40,7 @@ internal static class IsolatedGitHubCompleteProgram
         if (corruption === 'modern-foreign-name') jobs[0].name = 'KeyLoad / 1 node / Foreign workload';
         if (corruption === 'modern-preflight-replaces-worker') jobs[0].name = names.isolatedJobName(plan.cells[0], true);
         if (corruption === 'modern-mixed') jobs[0].name = 'Benchmark / ' + plan.cells[0].id;
+        if (corruption === 'legacy') for (const [index, cell] of plan.cells.entries()) jobs[index].name = names.GH.casePrefix + cell.id;
         if (corruption === 'missing-cell-job') jobs.shift();
         if (corruption === 'missing-cell-artifact') artifacts.shift();
         if (corruption === 'duplicate-case-name') jobs[1].name = jobs[0].name;
@@ -49,8 +50,10 @@ internal static class IsolatedGitHubCompleteProgram
         if (corruption === 'image-step-missing') image.steps.pop();
         if (corruption === 'image-artifact-expired') imageArtifact.expired = true;
         if (corruption === 'zip-total') for (const artifact of artifacts.slice(0, -1)) artifact.size_in_bytes = 134217728;
+        let stage = 'selection';
         try {
           const selected = api.selectCompletedEvidence({run, jobs, artifacts}, {cohort}, plan);
+          stage = 'proof';
           const cells = selected.cells.map(item => validation.projectWorkerProof(item.job, item.artifact, item.cell, cohort, 'c'.repeat(64)));
           const proof = api.requireCompleteProof({schemaVersion:1,cohort,cells}, plan);
           if (proof.cells.length !== 220 || proof.cells.some(cell => cell.job.steps.length !== 2)) throw new Error('projection');
@@ -59,6 +62,9 @@ internal static class IsolatedGitHubCompleteProgram
             || proof.cells[0].job.steps[0].conclusion !== 'failure'
             || proof.cells[0].job.steps[1].conclusion !== 'success')) throw new Error('lost failure');
           process.stdout.write('accepted\n');
-        } catch { process.stdout.write('rejected\n'); process.exitCode = 1; }
+        } catch (error) {
+          if (corruption === 'legacy' && (stage !== 'selection' || error.message !== names.GH.failure)) throw error;
+          process.stdout.write('rejected\n'); process.exitCode = 1;
+        }
         """;
 }

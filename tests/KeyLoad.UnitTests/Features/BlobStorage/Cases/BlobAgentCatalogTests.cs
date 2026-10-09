@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal sealed class BlobAgentCatalogTests
 {
     private const int BlobCount = 10;
-    private const int PublicCount = 75;
+    private const int PublicCount = 76;
     private const string AggregateReplayTool = "keyload_streams_replay";
     private const string AggregateReplayRoute = "/v1/streams/replay";
     private const string SampleRetentionTool = "keyload_series_retention";

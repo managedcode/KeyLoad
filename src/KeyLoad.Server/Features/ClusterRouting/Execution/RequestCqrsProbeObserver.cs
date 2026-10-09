@@ -10,25 +10,21 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private readonly RequestCqrsProbeFiles files;
     private readonly RequestCqrsProbeLifecycle lifecycle;
     private readonly ReplicaConfiguration replica;
-    private readonly IHostApplicationLifetime applicationLifetime;
     private readonly string siloAddress;
     private readonly CancellationTokenSource stopping = new();
     private Task? shutdown;
-    private readonly RequestProbeExecutionOptions settings;
-    private readonly TimeProvider clock;
+    private readonly RequestCqrsProbeHeldCallback hold;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
 
     internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
     {
         replica = replicaOptions.Value;
-        this.applicationLifetime = applicationLifetime;
         this.siloAddress = siloAddress;
         this.files = files;
-        settings = executionOptions.Value;
-        this.clock = clock ?? TimeProvider.System;
+        hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
-        Canonical = new(files, lifecycle, CreateMarker, HoldAsync);
+        Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
     }
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
@@ -36,7 +32,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     {
         ArgumentNullException.ThrowIfNull(context);
         lifecycle.EnterCallback();
-        return new ValueTask(ObserveCoreAsync(identity, phase, cancellationToken));
+        return new ValueTask(ObserveCoreAsync(identity, phase, context, cancellationToken));
     }
 
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
@@ -79,7 +75,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         return new ValueTask(completion);
     }
 
-    private async Task ObserveCoreAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+    private async Task ObserveCoreAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext context,
         CancellationToken requestCancellation)
     {
         RequestCqrsProbeClaim? claim = null;
@@ -98,10 +94,12 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
                 gate = true;
             }
             var outcome = gate ? RequestCqrsProbeOutcome.Observed : RequestCqrsProbeOutcome.FaultRequested;
-            files.WriteMarker(CreateMarker(claim, selectedPhase, outcome));
+            var marker = CreateMarker(claim, selectedPhase, outcome);
+            files.WriteMarker(marker);
+            RequestCqrsProbeActivationCapture.Observe(files, marker, context);
             if (!gate)
             { ThrowOrdinary(); }
-            await HoldAsync(claim, selectedPhase, requestCancellation).ConfigureAwait(true);
+            await HoldAsync(claim, selectedPhase, context, requestCancellation).ConfigureAwait(true);
         }
         finally
         {
@@ -123,7 +121,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
             { throw Invalid(); }
             return existing;
         }
-        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot);
+        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot, replica.LocalId);
         if (selected is null)
         { return null; }
         // Retain the first validated request identity so the later disposal callback can join across voters.
@@ -133,47 +131,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private static bool TryGetPhase(GrainRequestPhase phase, out RequestCqrsProbePhase selectedPhase)
         => Enum.TryParse(phase.ToString(), ignoreCase: false, out selectedPhase);
 
-    private async Task HoldAsync(RequestCqrsProbeClaim claim, RequestCqrsProbePhase phase,
-        CancellationToken requestCancellation)
-    {
-        const int ReleasesLengthValidationBoundary = 1;
-        const int EmptyReleasesLength = 1;
-        const int ReleasesFirstIndex = 0;
-
-        var holdTimeout = settings.HoldTimeout;
-        var pollInterval = settings.PollInterval;
-        using var ceiling = new CancellationTokenSource(holdTimeout, clock);
-        using var hostStop = CancellationTokenSource.CreateLinkedTokenSource(applicationLifetime.ApplicationStopping, stopping.Token);
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(requestCancellation, hostStop.Token);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(request.Token, ceiling.Token);
-        try
-        {
-            while (true)
-            {
-                linked.Token.ThrowIfCancellationRequested();
-                var snapshot = files.ReadSnapshot();
-                RequestCqrsProbeFiles.RequireActiveArm(claim.Arm, snapshot);
-                var releases = snapshot.Releases.Where(record => record.ArmId == claim.Arm.Record.ArmId).ToArray();
-                if (releases.Length > ReleasesLengthValidationBoundary || releases.Length == EmptyReleasesLength
-                    && (releases[ReleasesFirstIndex].RequestId != claim.Identity.RequestId || releases[ReleasesFirstIndex].SessionId != claim.Arm.Record.SessionId))
-                { throw Invalid(); }
-                if (releases.Length == EmptyReleasesLength)
-                {
-                    files.WriteMarker(CreateMarker(claim, phase, RequestCqrsProbeOutcome.Released));
-                    return;
-                }
-                await Task.Delay(pollInterval, clock, linked.Token).ConfigureAwait(true);
-            }
-        }
-        catch (OperationCanceledException cancellation) when (linked.IsCancellationRequested)
-        {
-            try
-            { files.WriteMarker(CreateMarker(claim, phase, RequestCqrsProbeOutcome.Cancelled)); }
-            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
-            { throw new AggregateException(cancellation, cleanup); }
-            throw;
-        }
-    }
+    private Task HoldAsync(RequestCqrsProbeClaim claim, RequestCqrsProbePhase phase,
+        IGrainContext? context, CancellationToken cancellationToken)
+        => hold.RunAsync(claim, phase, context, cancellationToken);
 
     private RequestCqrsProbeMarkerRecord CreateMarker(RequestCqrsProbeClaim claim,
         RequestCqrsProbePhase phase, RequestCqrsProbeOutcome outcome)

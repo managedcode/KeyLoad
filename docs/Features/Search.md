@@ -338,3 +338,77 @@ functional coverage, endurance/power-loss/fault and performance gates remain
 open; no production readiness, speed superiority or full-model/full-SQL claim
 follows. Root owns final evidence review and status/doc join. ADR: N/A for this
 evidence-only closeout; no runtime contract changes.
+
+
+## TASK-KL033-NATIVE-TASK-ACCEPTANCE-001: original finite hybrid rank and Explain
+
+Original KL-033 in architecture-v0.3.uk.md requires deterministic BM25/vector candidate merge with weighted RRF/stable ties, actual score contributions and measured candidate-window effects on a relevance corpus. The existing accepted TASK-KL033-AUTHORIZED-HYBRID-EXPLAIN-001 and TASK-SEARCH-QUALITY-CORPUS provide the source implementation; this additive native lane freezes their complete finite task acceptance union before Linux qualification.
+
+| Original criterion | Requirements and acceptance | Existing complete operations |
+|---|---|---|
+| Deterministic weighted rank and ordinal ties | REQ/AC-SEARCH-002; REQ-SR-001/004 and AC-MP-004/005; REQ/AC-GSEARCH-003 | ThreeWayHybridFusionTests complete independent weighted oracle/scope/allowlist/zero-weight authorization; SearchTests.HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors canonical stale revision; ThreeWayHybridRf3Tests real SDK/official MCP/SearchSql and Q1 CALL exact results |
+| Literal Explain, authorized metadata and bounded negative-to-healthy | REQ/AC-SEARCH-EXPLAIN-001/002/003; REQ/AC-SEARCH-003/004 | HybridExplainWholeFlowTests actual ranks/weights/contributions, original observed-work cancellation and byte exhaustion/no partial/full unchanged cut then healthy; HybridExplainPrivacyWholeFlowTests literal hidden-row exclusion; real RF3 opt-in SDK/official MCP/Q1 metadata |
+| Measured relevance-window effects | REQ/AC-SEARCH-007; REQ/AC-RANK-001..004 | HybridQualityRealStoreTests actual native/exact branch observations over approved32 documents/six independent qrels and widths1/4/8/32, emitted Recall/MRR/nDCG/candidate recall/truncation, unchanged canonical cut and repeated ordering; HybridQualityMetricOracleTests hand goldens; GlobalBranchWindowMergeLayout/Budget/Validation supporting production-kernel controls |
+| Derived lexical recovery supporting the finite task | REQ/AC-FTS-003/004/005; ADR-078 | NativeTextProjectionProcessRecoveryTests genuine process cuts through owner/posting/inventory/manifest/activation, original and replacement generations, full canonical cut and healthy rebuild output |
+
+Actual R863 selected native metadata declares29 Unit cases (28 hybrid plus1 canonical revision),10 supporting Recovery cases and6 genuine Aspire RF3 cases:45 per profile. These are discovered native case identities, not a count inferred from source Arguments. The canonical task contract retains exact native class/method/parameterized display/typed parameter/source identities. Supporting window/metric controls do not replace the actual ZoneTree or public RF3 operations. R863 local related Unit and Recovery execution remains development evidence; no fresh Linux RF3 qualification is inferred.
+
+The optional rerank hook is not selected by the accepted current contract; no reranker or public candidate-window knob is introduced. Original KL029/KL032 dependency qualification, incremental seven-cut recovery, managed ANN/recall, distributed/global statistics/window completeness, KL074 external quality gains, performance/endurance/power-loss and complete product gates remain independent and open. A passing finite task lane cannot close them or advertise full Search. ADR018 remains Proposed for its broader global-ranking contract.
+
+Root joins the unchanged native architecture under REQ/AC-TUNIT-ENTRY-010 and ADR117, obtains exact delivered-source Linux normal/scalar original artifacts and retains complete native census/TRX/source-image/cleanup evidence before any task acceptance claim. Scalar RF3 changes only the caller; its server processes are not relabeled scalar. All mandatory complete suites remain required. Frontend N/A: execution orchestration only; data/protocol migration N/A. Rollback removes the additive lane while retaining all original reports and prior lanes.
+
+
+### TASK-KL034-NATIVE-WAIT-AUTHORITY-002
+
+REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 retains the existing exact token/applied
+authority contract. SearchWaitAuthorityTests adds genuine native wrong atomic
+partition, changed placement epoch and zero minimum-position refusals, plus
+missing/negative persisted canonical AppliedBytes. Each actual WaitForIndex call
+returns its existing exact TokenInvalidated or Corruption detail, no partial
+result, and unchanged complete native bytes/cut. The metadata trials save and
+restore only the exact actual original native applied row under joined fixture
+ownership; restoration is test corruption repair, not a migration/production
+recovery or manufactured new read authority. Its intentional repair commit may
+advance the local storage cut; healthy wait must report the original actual
+replica-applied token, never that local Store.Position. Full independently literal
+WaitForIndexResult/schema/policy plus bilingual document/rank pages and complete
+canonical cut/image invariance prove healthy continuation. Original assertion
+and fixture/projection cleanup/restore errors are all retained.
+
+Canonical source ownership: Unit Search Cases/SearchWaitAuthorityTests.cs,
+Helpers/SearchWaitAuthorityTrial.cs and Assertions/SearchWaitAuthorityState.cs;
+existing actual ReplicaAppliedPositionWaitFixture, native projection and public
+SearchEngine own the real operations. No mock/provider/new dispatcher/timer,
+new timeout/default/token/API/alias/format or policy change. Root guarded join,
+coherent build, exact fresh native metadata and normal/scalar native controls and the existing real Linux RF3 scope qualify
+the source; authored case counts are not discovery or pass evidence. Existing
+KL02958/18/9 scope and all mandatory global suites remain unchanged.
+
+Broader KL034 remains explicit: current WaitForIndexRequest selects NativeText
+only. ApproximateSearchRequest has no minimum token or wait selector; existing
+ANN pins/stale-generation/replay/public reads do not by themselves implement an
+ANN minimum-prefix wait. This initial FTS boundary cannot silently close broader
+required projection waiting/generation criteria. Any additive ANN wait interface
+requires its own accepted generated contract, authority/lifecycle/budget and
+real SDK/official MCP/Q1 complete-flow qualification. No new public API is
+invented here and no broader capability is declared complete.
+
+
+### TASK-KL034-NATIVE-PROVIDER-FAILURE-003
+
+REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002 and REQ/AC-SEARCH-005 preserve
+WaitForIndexExecution's existing unavailable-provider failure. The same actual
+replica-applied seed, fresh authorized native canonical view and original
+minimum token are passed to a real SearchEngine with its supported absent
+native text provider. Its actual operation must return the exact existing
+UnsupportedCapability detail, null partial result and unchanged complete
+canonical image/cut. The actual registered native projection then completes
+WaitForIndex with independently literal complete result and bilingual document
+rank pages, preserving the whole native canonical image/cut. No provider fake,
+fallback, configuration/default, timeout, token, public API or production code
+change is introduced. All initiating and native fixture/projection cleanup
+failures remain joined and retained. This adds one source-declared case to
+SearchWaitAuthorityTests; fresh native metadata and normal/scalar execution are
+required, not inferred. Existing KL02958/18/9 remains unchanged. Root owns join,
+compiler, runtime verification and final original-task closure; all mandatory
+Linux full-suite/RF3/product qualification gates remain required.

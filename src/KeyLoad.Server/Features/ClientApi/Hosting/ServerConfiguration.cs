@@ -17,7 +17,7 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerConfiguration
 {
-    internal static WebApplication Build(string[] args)
+    internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
@@ -29,6 +29,8 @@ internal static class ServerConfiguration
             .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
                 ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
         Register(builder.Services);
+        if (sealedObserver is not null)
+        { builder.Services.AddSingleton(sealedObserver); }
         McpServerComposition.Register(builder);
         var app = builder.Build();
         var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();

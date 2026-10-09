@@ -1,4 +1,5 @@
 using KeyLoad.CrashHost;
+using KeyLoad.RecoveryTests.Features.ClusterReplication;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 
@@ -207,20 +208,14 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
             materializer.Commit(5);
             await ReplicaProcessAssertions.WaitAsync(materializer, 5, cancellationToken);
         }
+        var savedImage = path + ReplicaSnapshotDamageRecovery.SavedImageSuffix;
+        File.Copy(path, savedImage);
         if (missing)
         { File.Delete(path); }
         else
         { File.WriteAllBytes(path, [1]); }
-        using var reopened = ReplicaCrashNode.OpenTarget(trial.DirectoryPath, trial.Incarnation);
-        if (missing)
-        { Assert.ThrowsExactly<FileNotFoundException>(reopened.Snapshots.Recover); }
-        else
-        { await Assert.That(Assert.ThrowsExactly<KeyLoadException>(reopened.Snapshots.Recover).Code).IsEqualTo(ErrorCode.Corruption); }
-        await Assert.That(reopened.Snapshots.Current).IsEqualTo(published);
-        await Assert.That(reopened.Log.State.CommittedIndex).IsEqualTo(5);
-        await Assert.That(reopened.Canonical.Identity.NodeId).IsEqualTo(trial.Ready.NodeId);
-        await Assert.That(reopened.Canonical.Identity.ReadGeneration).IsEqualTo(1);
-        await ReplicaProcessAssertions.DocumentAsync(reopened, 5);
-        await ReplicaProcessAssertions.ReceiptAsync(reopened, 5);
+        await ReplicaSnapshotDamageRecovery.RefuseAsync(trial, published, missing);
+        File.Copy(savedImage, path, overwrite: true);
+        await ReplicaSnapshotDamageRecovery.ContinueAsync(trial, published, cancellationToken);
     }
 }

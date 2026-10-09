@@ -177,3 +177,42 @@ flowchart LR
   Merge --> Files[Retire tree journal and owner lock]
   Files --> Reopen[Complete cold state and healthy commit]
 ```
+
+
+### Original bounded task scope qualified at556c — 2026-10-09
+
+This scoped closeout accepts the original architecture task predicates at exact
+[source556c13ab](https://github.com/managedcode/KeyLoad/tree/556c13ab78c839df68b09dce1e9fc92bef576bfe),
+[run37891957916 attempt1](https://github.com/managedcode/KeyLoad/actions/runs/37891957916).
+It does not qualify the subsequently changed source. Every original API/ZIP digest,
+confined extracted file, raw native discovery UID/class/constructor/method/display/
+parameter/source identity, complete no-skip TRX/counters, source/PDB/Git hash and
+prepared/before/after image was authenticated. Original native20 argument, strict
+normal-null/scalar0 caller environment, child exits/readers/disposal and same-job
+source verification passed. No job-status inference or synthetic report is used.
+
+KL008 normal and scalar each executed the exact27-case union without failures
+or skips. The actual separate CrashHost owner rejection/release/reopen meets
+REQ-STORAGE-008 / AC-STORAGE-OWNER-001. Complete held native read traversal and
+shutdown/replacement/reopen meet REQ/AC-CUT-003. Actual native merge completion and
+periodic native cleanup success/fault, joined disposal, exclusive original files,
+literal cold state and healthy continuation meet REQ-STORAGE-MAINTENANCE-JOIN-001/002
+and AC-STORAGE-MAINTENANCE-JOIN-001..004. Real ArrayPool input return/mutation and
+caller-owned output mutation leave exact committed/envelope/cold bytes unchanged
+under REQ/AC-KEYCODEC-004. These are actual complete native operations, not Task
+state/getter assertions. The full architecture owner/leases/jobs/pooled-value
+predicates now have current original task evidence; no duplicate test is needed.
+
+Normal job113694642532 artifact11598737192 ZIP SHA
+`5bd75aca411ea68b2bcbd27e5bbbeadb487018441e6623cb5526b76084688457`;
+scalar job113694642493 artifact11599215356 ZIP SHA
+`aa9537dc048ab811c077a7c14b496e0f1c6e1d4a862dc37fd4f343dbd411b21a`.
+Both task cells correctly own native stores/CrashHost and no fictitious Docker
+resource; genuine full RF3 remains a separate mandatory feature gate.
+
+All existing mandatory full-feature/source-suite/coverage/RF3 and separate
+endurance/performance/power-loss gates remain OPEN or retain their own authentic
+status; this closes only the stated original bounded task predicates. It neither
+waives their contracts nor claims broad StorageRecovery/DocumentStorage/product
+readiness. Current source repairs and additional feature requirements require
+fresh exact-source evidence. Root alone joins durable status/README provenance.

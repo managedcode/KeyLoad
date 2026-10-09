@@ -16,18 +16,21 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal bool applicationDisposed;
     internal bool nodeLocksReleased;
     private bool cleanupFailed;
+    private bool retainRoots;
     internal readonly bool registerPhysicalOwners;
     internal readonly bool remoteDocumentReads;
     internal readonly bool remotePartitionQueries;
     internal readonly bool queryProbe;
     internal readonly bool protectedDocuments;
+    internal readonly bool activationIsolation;
+    internal ReplicaIsolationOwner? IsolationOwner;
     internal int? movementMaxBatchBytes;
     internal RequestCqrsProbeFixture? queryControls;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null)
-    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; movementMaxBatchBytes = maximumBatchBytes; }
+    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false)
+    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; movementMaxBatchBytes = maximumBatchBytes; activationIsolation = isolateActivation; }
 
     internal string OwnedDataRoot => dataRoot
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
@@ -61,6 +64,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
+
+    internal static Task<TwoRf3MembershipWave> StartActivationIsolationAsync(CancellationToken token)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
+            probe: true, protectedDocument: true, isolateActivation: true), token);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(int maxBatchBytes, CancellationToken token)
     {
@@ -107,11 +114,18 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         var failures = new List<Exception>();
         if (queryControls is { } controls)
         { ServerFailureObserver.Observe(controls.StopAdmission, failures); }
+        if (IsolationOwner is { } namespaceOwner)
+        { await ServerFailureObserver.ObserveAsync(() => namespaceOwner.RestoreAsync(CancellationToken.None), failures); }
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
         if (CanCheckLocks)
         { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
         if (applicationDisposed && nodeLocksReleased && queryControls is { } joinedControls)
         { await ServerFailureObserver.ObserveAsync(joinedControls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
+        if (IsolationOwner is { } retiredNamespace)
+        {
+            await ServerFailureObserver.ObserveAsync(() => retiredNamespace.SettleAfterStopAsync(
+            applicationDisposed && nodeLocksReleased, CancellationToken.None), failures);
+        }
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;
@@ -154,8 +168,14 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased
         && !cleanupFailed && dataRoot is not null;
 
+    internal void RetainRoots()
+    {
+        retainRoots = true;
+        queryControls?.RetainEvidence();
+    }
+
     private bool CanDeleteRoot(List<Exception> failures)
-        => dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
+        => !retainRoots && dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
 
     internal void AssertAllNodeLocksReleased()

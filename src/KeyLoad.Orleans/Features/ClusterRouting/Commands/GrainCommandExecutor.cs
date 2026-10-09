@@ -4,7 +4,8 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null)
+    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
+    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -39,7 +40,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 operationToken).ConfigureAwait(true);
             var result = kind == OperationKind.PartitionMovementPhase
                 ? await GrainPartitionMovementCommand.SubmitAsync(database, coordinator, request, principal,
-                    codec, context, operationToken).ConfigureAwait(true)
+                    codec, context, sealedObserver, operationToken).ConfigureAwait(true)
                 : await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
                     request.Payload, operationToken).ConfigureAwait(true);
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)

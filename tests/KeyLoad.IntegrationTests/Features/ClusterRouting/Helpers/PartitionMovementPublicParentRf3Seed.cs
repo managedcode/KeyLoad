@@ -22,12 +22,12 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     private readonly List<(CommandRequest Command, CommitReceipt Receipt)> originals = [];
     private readonly List<Func<CancellationToken, Task>> blobReplays = [];
 
-    private PartitionMovementPublicParentRf3Seed(TwoRf3MembershipWave wave)
+    private PartitionMovementPublicParentRf3Seed(TwoRf3MembershipWave wave, string actualCredential)
     {
         sourceHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);
         targetHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node4);
-        Source = new(sourceHttp, wave.Profile.AdminKey, IntegrationClientOptions.Execution());
-        Target = new(targetHttp, wave.Profile.AdminKey, IntegrationClientOptions.Execution());
+        Source = new(sourceHttp, actualCredential, IntegrationClientOptions.Execution());
+        Target = new(targetHttp, actualCredential, IntegrationClientOptions.Execution());
     }
 
     internal KeyLoadClient Source { get; }
@@ -51,12 +51,13 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     internal static async Task<PartitionMovementPublicParentRf3Seed> CreateAsync(TwoRf3MembershipWave wave,
         CancellationToken cancellationToken)
     {
-        var seed = new PartitionMovementPublicParentRf3Seed(wave);
+        await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, cancellationToken).ConfigureAwait(false);
+        var credential = await PartitionMovementPublicParentRf3Administrator.PersistAsync(wave, cancellationToken).ConfigureAwait(false);
+        var seed = new PartitionMovementPublicParentRf3Seed(wave, credential);
         try
         {
-            await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, cancellationToken).ConfigureAwait(false);
             seed.official = await McpOfficialClient.ConnectAsync(wave.Application, TwoRf3MembershipProtocol.Node1,
-                wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
+                credential, cancellationToken).ConfigureAwait(false);
             seed.Models = await RelationalSqlRf3Scenario.CreateAsync(seed.Source, cancellationToken).ConfigureAwait(false);
             seed.Directory = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application,
                 wave.Profile, cancellationToken).ConfigureAwait(false);

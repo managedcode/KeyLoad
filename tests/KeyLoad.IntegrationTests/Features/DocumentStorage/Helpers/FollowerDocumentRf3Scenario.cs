@@ -27,13 +27,27 @@ internal sealed class FollowerDocumentRf3Scenario(FollowerDocumentCaller mode, F
 
     private async Task RunOwnedAsync(CancellationToken token)
     {
+        try
+        { await ExecuteOwnedAsync(token).ConfigureAwait(false); }
+        catch (Exception original)
+        {
+            FollowerDocumentRf3FailureObservation.Write(original, state, token);
+            throw;
+        }
+    }
+
+    private async Task ExecuteOwnedAsync(CancellationToken token)
+    {
         state.Root = RequestCqrsPhaseFaultProvisioning.NewPrivateRootPath();
         RequestCqrsPhaseFaultProvisioning.CreatePrivateRoot(state.Root, () => state.RootOwned = true);
         using var timeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
         state.WaveLifetime = CancellationTokenSource.CreateLinkedTokenSource(token, timeout.Token);
         await StartAsync(state.WaveLifetime.Token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.CapturingHeldRead;
         await new FollowerDocumentRf3HeldFlow(state).CaptureAndHoldAsync(state.WaveLifetime.Token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.ChangingAndReleasing;
         await new FollowerDocumentRf3HeldFlow(state).ChangeAndReleaseAsync(state.WaveLifetime.Token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.ObservingOriginalAndContinuing;
         await new FollowerDocumentRf3HeldFlow(state).AssertOriginalAndContinueAsync(state.WaveLifetime.Token).ConfigureAwait(false);
     }
 

@@ -23,7 +23,9 @@ internal static class NativeTextIncrementalCrashCapture
             new EntityRef(NativeTextIncrementalCrashProtocol.Partition, NativeTextIncrementalCrashProtocol.Collection,
                 NativeTextIncrementalCrashProtocol.English));
         var inventory = await NativeTextIncrementalCrashInventory.ReadAsync(runtime, original.Request);
-        var result = new NativeTextIncrementalCrashResult(completed.State, replay, completed.Receipt,
+        var checkpoint = await NativeTextIncrementalCheckpointEvidence.ResolveOriginalAsync(runtime,
+            original.Request, completed.Receipt, CancellationToken.None);
+        var result = new NativeTextIncrementalCrashResult(completed.State, replay, checkpoint,
             ukrainian, english, runtime.Database.LastApplied, inventory.Records, inventory.Postings,
             NativeTextCanonicalStateCapture.Capture(runtime.Node.Canonical), runtime.Database.Store.Position,
             await runtime.SelectedQueryAsync(original.Request, ukrainian.Revision == NativeTextIncrementalCrashProtocol.HealthyRevision

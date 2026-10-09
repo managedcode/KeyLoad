@@ -12,7 +12,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>The actual original expiry cancels its sealed hold; it never stands in for an ordered tombstone denial.</summary>
 internal sealed class PartitionMovementExpiredRetireSealedOperationRf3Trial
 {
-    private const string Administrator = "root";
+    private const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
     private readonly List<Exception> failures = [];
     private TwoRf3MembershipWave? wave;
     private PartitionMovementPublicParentRf3Seed? seed;

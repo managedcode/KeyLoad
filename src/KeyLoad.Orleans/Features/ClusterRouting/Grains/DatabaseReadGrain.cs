@@ -149,11 +149,11 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
         if (kind == GrainReadKind.PartitionMovementTransferData)
         {
-            return await PartitionMovementTransferDataExecution.ExecuteAsync(
-                services.GetRequiredService<INativePartitionMovementTransferRead>(), principal,
-                GrainNativePayload.Read<PartitionMovementTransferDataCapability>(request.Payload),
-                services.GetRequiredService<Microsoft.Extensions.Options.IOptions<DatabaseLimits>>(), runtimeClock,
-                request.Envelope.ExpiresAt, cancellationToken).ConfigureAwait(true);
+            var execution = new PartitionMovementTransferDataObservedExecution(
+                services.GetRequiredService<INativePartitionMovementTransferRead>(),
+                services.GetRequiredService<Microsoft.Extensions.Options.IOptions<DatabaseLimits>>(), runtimeClock, codec);
+            return await execution.ExecuteAsync(principal, request, ((IGrainBase)this).GrainContext,
+                cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.PartitionMovementCapture)
         {

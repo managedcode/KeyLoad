@@ -875,3 +875,81 @@ functional coverage, endurance/power-loss/fault and performance gates remain
 open; no production readiness, speed superiority or full-model/full-SQL claim
 follows. Root owns final evidence review and status/doc join. ADR: N/A for this
 evidence-only closeout; no runtime contract changes.
+
+
+### TASK-MCP-CATALOG-COMPLETE-76-001: independent public catalog successor
+
+REQ-CLIENT-006 / AC-MCP-001/003/006/007 and REQ-BLOB-006 / AC-BLOB-006 retain
+all prior independent names/routes/capabilities and all ten blob schemas. The
+authenticated original [Linux run37885964187](https://github.com/managedcode/KeyLoad/actions/runs/37885964187),
+source `55f3e1771c0c4534640218808b44c3f8119437a9`, normal/scalar full Unit reports observed76 entries
+against75. The missing accepted operation is exactly `keyload_admin_partition_move`,
+`/v1/admin/partitions/move`, native `PartitionMoveRequest`→`PartitionMoveResult`,
+command `MovePartition`, body-owned `MoveId`, and hints false/true/true.
+
+Implementation order: freeze this tuple; add it to the independent literal inventory;
+check every76 descriptor and fresh native tool's read-only/idempotent/destructive
+hints from the independent expected capability; inspect the complete closed movement
+request/result and nested partition/owner/nullable receipt/placement schemas; reject
+missing/null request, forged outer/nested authority and empty stable identity, each
+followed by the complete original healthy typed native payload. Retain source JSON
+disposal ownership and every old assertion. Existing McpCatalogTests first case owns
+these supporting transport controls; BlobAgentCatalogTests retains its four cases.
+No new execution dispatcher, operation, gateway catalog expansion or database
+qualification is introduced. Initial gateway discovery remains three tools.
+
+Root joins guarded Unit ClientApi/BlobStorage fixture and helper changes and runs
+fresh native normal/scalar metadata+operations, then mandatory current-source Linux
+full Unit/recovery and genuine SDK/official MCP RF3 gates. Original55f failures
+remain immutable; source repair is not runtime acceptance. ADR-039/038 retain the
+authorization, bounded schemas and chunked storage contracts.
+
+
+### TASK-CLIENT-NATIVE-KESTREL-OBSERVATION-002
+
+REQ-CLIENT-002/005 / AC-MP-009 / AC-CLIENT-005 and ADR-035 retain the
+original five failed normal Kestrel cases at source556c/run37891957916. Each
+started its real host and SDK send, but no handler entry or response was observed
+before the original caller/first-chunk bound expired. The same-ID write retry
+then received the already-cancelled original token; its failure is consequential,
+not evidence that the intended null/malformed200 response was delivered. The
+concurrent large chunked native Kestrel case passed after10.143s. These are actual
+observations, not evidence of a CPU, proxy, transport or timeout cause.
+
+Ordered source contract: attach an ILoggerProvider only to the existing observed
+fixture-owned Kestrel application, retain its existing native category/level
+filters, and record only exact closed native Kestrel category, actual EventId,
+LogLevel and monotonic elapsed facts. The existing combined observation bound64
+and explicit saturation remain unchanged. The provider does not call the native
+state formatter or inspect state, exception message, scope, URI, headers, bodies,
+credentials or user payload. The host's native dependency-injection factory owns
+the provider through the original logging lifetime; it has no separate process,
+worker, timer or disposable transport.
+Existing output/cleanup failures remain combined with the initiating failure.
+
+Output states whether any admitted native server events were observed and that
+no native log-level override was applied. An empty native event set cannot prove
+no socket/HTTP activity: original native filters may suppress those events. No
+connection callback, diagnostic liveness request, retry, fallback, proxy change,
+transport/default, bound/deadline increase, skipped case or global native20
+reduction is introduced. All five existing full null/read/retry/cancellation and
+healthy-flow assertions remain unchanged. The existing required ordinary
+transport controls must run on the fresh source in normal/scalar; authentic
+original complete-suite failures remain failures until fresh originals prove the
+complete flows. This passive diagnostic does not qualify database/RF3/coverage,
+CPU pressure or an unobserved causal branch. Root alone joins/builds/executes.
+
+
+### TASK-MCP-CATALOG-COMPLETE-76-DERIVED-001 — exact native computed partition projection
+
+REQ-CLIENT-006 / AC-MCP-001/003/006/007 retain every76 independent name/route/effect capability, all closed nested fields/required sets, receipt/owner scalar constraints and missing/null/unknown/empty-identity negative→complete healthy native decode flows. The actual R878 native observer confirms movement input and output PartitionRef each expose exactly four required nonnullable constructor strings plus optional getter-only atomicPartitionId with exact string/null type set. This is the same native exporter contract previously frozen for computed partition metadata; it is not caller authority or a nullable actual computed result. CommitToken.atomicPartitionId remains a separate required nonnullable string.
+
+The NEW independent movement assertion incorrectly applied the constructor nonnull rule to the derived field. Repair that test oracle only: preserve exact five properties/four required names; retain nonnull assertions for all four constructor strings; require derived exact string/null set, no duplicate/extra types. Actual movement descriptor.Decode must accept omitted, null or forged string metadata but produce the complete original typed native payload with getter recomputed from the four original constructor identities. This cannot forge partition scope, native command identity or authority. All previous outer/nested unknown/null/empty rejections and complete healthy decode assertions remain.
+
+Ownership/ordered stages: freeze ClientApi/ADR039 trace first; change only Unit ClientApi Helpers McpMovementCatalogSchema.PartitionAsync and McpMovementCatalogDecode supporting real descriptor flow; root alone joins/formats/builds and reruns the original normal/scalar catalog identity plus mandatory current-source Linux gates. No product, exporter, SDK, protocol, alias/Id, endpoint, persisted authorization, limit or retry change. Original R877 normal/scalar44PASS1FAIL and original R878 metadata remain immutable; test source repair alone is not acceptance. Rollback is confined to these oracle/docs changes; no storage migration. Native RF3 operation remains separately required.
+
+### TASK-MCP-CATALOG-COMPLETE-76-ENUM-001 — exact movement enum branches
+
+REQ-CLIENT-006 / AC-MCP-001/003/007 and ADR-039 preserve the unchanged native enum exporter. Original R880 executes all45 related controls with44 passes; its remaining failure is the new movement oracle requiring an explicit string type on output phase. The actual native output instead contains one closed enum branch with exactly None, Prepared, Fenced, Captured, Transferring, Installed, Published, Retired, Aborted, Aborting, followed by the int32 numeric branch. Input mode has one string branch with exactly the independently frozen examples None, Transfer, Resume, Abort, followed by the same int32 branch. Neither form permits null or extra branches; both numeric branches retain exact int32 minimum/maximum.
+
+Freeze those literal inventories before correcting only Unit ClientApi Contracts/McpMovementCatalogProtocol and Helpers/McpMovementCatalogScalarSchema. The existing complete descriptor/schema/negative-to-healthy decode test must retain all76 exact operation tuples, closed nested field sets, computed identity checks and authority exclusions. Root verifies fresh compilation and the same original normal/scalar identity, then required Linux RF3 gates. No production exporter, parser, public contract or broader HasType helper changes; original failure and native metadata remain immutable. Source repair and static inspection are not acceptance.

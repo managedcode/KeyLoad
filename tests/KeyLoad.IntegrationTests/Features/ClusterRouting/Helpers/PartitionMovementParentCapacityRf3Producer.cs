@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Owns the genuine first StageGrant before-submit caller/probe, retaining its actual native admitted original.</summary>
 internal static class PartitionMovementParentCapacityRf3Producer
 {
-    private const string Administrator = "root";
+    private const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
 
     internal static async Task<Guid> HoldAndJoinAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)

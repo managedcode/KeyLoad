@@ -92,15 +92,15 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": true,
-    "canonicalFormatterPassed": true,
+    "canonicalBuildPassed": false,
+    "canonicalFormatterPassed": false,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "current_startup_snapshot_capture_pointer_build_format_and290_related_native_wholeflows_passed_exact_source_linux_qualification_pending",
+    "verificationStage": "stage37_native134_and_current100_controls_pass_019_036_product_build_pass_whole_solution_linux_pending",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -309,15 +309,34 @@
     },
     "currentBuild": {
       "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
-      "msbuildDebugDirectory": "/private/tmp/keyload-r863-complete-startup-snapshot-native-ownership-full-build-20261009-msbuild-debug",
-      "nativeExitCode": 0,
-      "buildCompletedSuccessfully": true,
-      "elapsedSeconds": 112.143,
-      "log": "/private/tmp/keyload-r863-complete-startup-snapshot-native-ownership-full-build-20261009.log",
-      "logSha256": "efd60a7e080172f96229acbdde8478b6dbb952602d39f091d38c44e05d6a0953",
-      "inputCount": 5587,
-      "inputDrift": [],
-      "uniqueErrors": [],
+      "msbuildDebugDirectory": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009-msbuild-debug",
+      "nativeExitCode": 1,
+      "buildCompletedSuccessfully": false,
+      "elapsedSeconds": 147.429,
+      "log": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009.log",
+      "logSha256": "610ac0e901c11cac354d3d5236b09764edf361da4cdf59e4934bcee8492f5a2e",
+      "inputCount": 5675,
+      "inputDrift": [
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Adapters/KeyLoadDocumentTarget.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentComparisonPhases.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Execution/DocumentMeasurementState.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Lifetimes/DocumentRepetitionOwner.cs",
+        "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Validation/DocumentComparisonOracle.cs",
+        "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/DocumentPlanEvidenceTests.cs",
+        "tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs"
+      ],
+      "uniqueErrors": [
+        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(38,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'DocumentIdentityPrefix' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Documents/Contracts/DocumentProtocolText.cs(39,25): error CS0102: The type 'DocumentProtocolText' already contains a definition for 'PaddingCharacter' [/Users/ksemenenko/Developer/KeyLoad/benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(34,48): error KLD0001: Machine key 'cells' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(35,48): error KLD0001: Machine key 'selected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(36,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(40,48): error KLD0001: Machine key 'supported' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(41,48): error KLD0001: Machine key 'unavailable' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(42,48): error KLD0001: Machine key 'envelopeRejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]",
+        "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/Features/BenchmarkComparisons/Cases/SiteDocumentContractCoverageTests.cs(43,48): error KLD0001: Machine key 'rejected' must be referenced through a named const string [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj]"
+      ],
       "qualification": "local development; source drift invalidates exact-current-source qualification"
     },
     "currentFormatter": {
@@ -40281,6 +40300,447 @@
         "pending": 0
       },
       "remaining": "Fresh exact-source Linux normal/scalar complete unit/recovery/RF3 SDK/MCP/Q1 and source-image/owned cleanup, original parent late-native admission, snapshot fault/resource gates, complete functional coverage, endurance, power-loss and comparable performance remain open. Local selected PASS, authored RF3 flows and native metadata do not close these gates."
+    },
+    "currentOriginal104TaskCounts": {
+      "done": 16,
+      "inProgress": 88,
+      "pending": 0
+    },
+    "original556Kl008Kl011AcceptedCriteria": {
+      "sourceCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+      "runId": 37891957916,
+      "attempt": 1,
+      "completeNormalAndScalarPassedCases": 86,
+      "tasks": [
+        "KL-008",
+        "KL-011"
+      ],
+      "candidatePath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/COMPLETE-ORIGINAL-TASK-CRITERIA-CANDIDATE.json",
+      "candidateSha256": "b3eb4fbdbf23c848b28f4b7d32e7754087274173af61fbfd2d84c411f4c57cd2",
+      "currentSourceQualified": false,
+      "scope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open."
+    },
+    "stageXXXVIDeliveredCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+    "stageXXXVIDeliveredRemoteVerified": true,
+    "stageXXXVIIOriginalDevelopment": {
+      "sourceCheckoutBeforeCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+      "original104TaskCounts": {
+        "done": 16,
+        "inProgress": 88,
+        "pending": 0
+      },
+      "authenticatedOriginalTaskClosures": {
+        "sourceCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+        "runId": 37891957916,
+        "attempt": 1,
+        "completeNormalAndScalarPassedCases": 86,
+        "tasks": [
+          "KL-008",
+          "KL-011"
+        ],
+        "candidatePath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/COMPLETE-ORIGINAL-TASK-CRITERIA-CANDIDATE.json",
+        "candidateSha256": "b3eb4fbdbf23c848b28f4b7d32e7754087274173af61fbfd2d84c411f4c57cd2",
+        "currentSourceQualified": false,
+        "scope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open."
+      },
+      "failedDevelopmentBuilds": {
+        "r864": {
+          "receiptPath": "/private/tmp/keyload-r864-complete-three-scopes-native-full-build-20261009-diagnostics.json",
+          "receiptSha256": "530a5f94261b27d34af484189ae0f62e9ecf8f436e5dd35f1ef5835c888e74ab",
+          "nativeExitCode": 1,
+          "elapsedSeconds": 135.125,
+          "sourceInputCount": 5610,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 33,
+          "logSha256": "a4a418ab17d2a74f8395c50918c37360a51b0863a1086e545dcf0aad67f4d3ce"
+        },
+        "r865": {
+          "receiptPath": "/private/tmp/keyload-r865-complete-native-repairs-expiry-owner-full-build-20261009-diagnostics.json",
+          "receiptSha256": "b4f313aad4f6bc69061853f142904a9f70dc75f051ac4e75b132da37ecfc2fbe",
+          "nativeExitCode": 1,
+          "elapsedSeconds": 90.657,
+          "sourceInputCount": 5616,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 2,
+          "logSha256": "622091203c2f0d74df56a5ff635b606239644de5a4085fd6fc62e007e91f6d6d"
+        },
+        "r866": {
+          "receiptPath": "/private/tmp/keyload-r866-complete-native-three-scope-full-build-20261009-diagnostics.json",
+          "receiptSha256": "e234be6adb6e8f7134b3213f4f6aa196378b41c3b559637d0852d42b96d9190d",
+          "nativeExitCode": 1,
+          "elapsedSeconds": 164.029,
+          "sourceInputCount": 5619,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 11,
+          "logSha256": "0d56a0b6a25b184f06bc02f462199dbedadcbbdc0b546c22966d9c2599fd3659"
+        },
+        "r867": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r867-complete-native-owned-join-and-six-authority-full-build-20261009-diagnostics.json",
+            "sha256": "f08365260470c9ebfb93c089203eda242a25d2a4711f3090327b29ab19c04bfb"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 168.013,
+          "sourceInputCount": 5622,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 3,
+          "logSha256": "2b89eb705ef009057c2cc56e7ccf40cd58c291a34346377682e81676b4cbb49c"
+        },
+        "r868": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r868-selected-native-ownership-integration-build-20261009-diagnostics.json",
+            "sha256": "7eb611cd678218310bfebc057f1eea1b8e527ed7c4454b2db0fa107e10bc6ca9"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 31.002,
+          "sourceInputCount": 5622,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 4,
+          "logSha256": "8c7f3935b6ff273e0fa9a0e5ac93802728604386feefc39cd7b32f285ac5b4a3"
+        },
+        "r870": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r870-complete-native-heartbeat-and-contract-full-build-20261009-diagnostics.json",
+            "sha256": "cc8cc112aec33057301d9973e5c1d0fabcc28e085ff5ee87690f59c79a4205e4"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 42.208,
+          "sourceInputCount": 5627,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 2,
+          "logSha256": "74cc765c2ac0ec9b8afbef5d101c389f2c5156c54d06dcd80954b62cbcb5c313"
+        },
+        "r871": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r871-complete-native-heartbeat-and-contract-full-build-20261009-diagnostics.json",
+            "sha256": "ecfffbf730f2c5695b746012a37d81ad7d72a29383ceb5c4a220b9648cd800e3"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 38.426,
+          "sourceInputCount": 5627,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 2,
+          "logSha256": "c09290f11beea9ba1b0356605119175cba4f724c297b6a0f1fee6b15592f2572"
+        },
+        "r872": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r872-complete-native-heartbeat-and-contract-full-build-20261009-diagnostics.json",
+            "sha256": "cae226b446657819bbf535033527f779a9cdd30bbf83eb9547492b986c38dbfc"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 156.018,
+          "sourceInputCount": 5627,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 3,
+          "logSha256": "d3da38a0a5c0788a54245110ca506eb3b438c0f3685a7c6d95291d82545fe3ae"
+        },
+        "r874": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r874-complete-native-principal-heartbeat-contract-full-build-20261009-diagnostics.json",
+            "sha256": "51a98fd84592aeedc34360548a2a3037bab02748bc050d170fdac60a60ca5d38"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 69.408,
+          "sourceInputCount": 5628,
+          "sourceDrift": 3,
+          "distinctDiagnostics": 1,
+          "logSha256": "cd64df89e19ab583e5442b5ef314efbece1a24a0b3044b5bcb931327a3dc684f"
+        },
+        "r876": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r876-current-shared-checkpoint-full-build-20261009-diagnostics.json",
+            "sha256": "cc0e7abd7654e441538eb0ab441e4126a40110b9b647b83115b47a0986edc1dc"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 311.272,
+          "sourceInputCount": 5659,
+          "sourceDrift": 44,
+          "distinctDiagnostics": 0,
+          "logSha256": "6c992a587cdd6b6c781c52f1392a42bc429039debe9bb00b1c147ad790563bc7"
+        },
+        "r877": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009-diagnostics.json",
+            "sha256": "efdff3230186638b614c41fdd394c44c9f2363ecda68e5616c9a95c51e684eb4"
+          },
+          "nativeExitCode": 1,
+          "elapsedSeconds": 147.429,
+          "sourceInputCount": 5675,
+          "sourceDrift": 8,
+          "distinctDiagnostics": 9,
+          "logSha256": "610ac0e901c11cac354d3d5236b09764edf361da4cdf59e4934bcee8492f5a2e"
+        }
+      },
+      "currentFullBuildPending": true,
+      "currentFullFormatterPending": true,
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "remaining": "Fresh coherent full build and formatter verification, native selected metadata and execution, exact-source Linux normal/scalar task and complete RF3/SDK/MCP/Q1, functional coverage, endurance, power-loss and comparable performance remain mandatory.",
+      "successfulDevelopmentBuilds": {
+        "r869": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r869-selected-native-owned-http-holder-integration-build-20261009-diagnostics.json",
+            "sha256": "6ee45f8a045fc5ae54949a5c60b02c8b948f93327170f2e1cc5d8b35e3102ff0"
+          },
+          "nativeExitCode": 0,
+          "elapsedSeconds": 27.579,
+          "sourceInputCount": 5622,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 0,
+          "logSha256": "047d09fb8810058049a06cad52a91581e7c0ab2be09bbe6b966c3a22eb90577d"
+        },
+        "r873": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r873-native-unit-joined-lifetime-support-build-20261009-diagnostics.json",
+            "sha256": "ecfe1952c34f4d72ecbc99d007fb2d2088358236b064b6785902d359ca0761ea"
+          },
+          "nativeExitCode": 0,
+          "elapsedSeconds": 55.298,
+          "sourceInputCount": 5627,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 0,
+          "logSha256": "56d58889d97af5c7a8d73b0254c7fe92e607e108bf002ef55946cb13ace8b1e3"
+        },
+        "r875": {
+          "receipt": {
+            "path": "/private/tmp/keyload-r875-complete-stable-shared-stage-full-build-20261009-diagnostics.json",
+            "sha256": "726b8b7efdaa78baa4106582bfd2396eea137aeae802641077a0a722e050167a"
+          },
+          "nativeExitCode": 0,
+          "elapsedSeconds": 189.539,
+          "sourceInputCount": 5632,
+          "sourceDrift": 0,
+          "distinctDiagnostics": 0,
+          "logSha256": "63d3bbf6d824c21e0bfdfe49cb8f0ff5edbce0dc849210dbf3174b1fbaa118a8"
+        }
+      },
+      "latestSourceBoundSuccessfulFullBuild": {
+        "path": "/private/tmp/keyload-r875-complete-stable-shared-stage-full-build-20261009-diagnostics.json",
+        "sha256": "726b8b7efdaa78baa4106582bfd2396eea137aeae802641077a0a722e050167a"
+      },
+      "latestSourceBoundSuccessfulFormatter": {
+        "path": "/private/tmp/keyload-r875-stable-shared-stage-full-formatter-verify-20261009-receipt.json",
+        "sha256": "3f50cdf1118f1278a0e71c85845530bebbf1845e4269c539bb05f3013e5ff4e6"
+      },
+      "selectedOriginalNativeExecution": {
+        "qualification": "Exact original local R875 development executions only; current shared-checkout, Linux RF3, full suites, functional coverage, endurance and performance remain open.",
+        "nativeMaximumParallelTests": 20,
+        "passedCases": 134,
+        "normalUnit": {
+          "path": "/private/tmp/keyload-r875-kl029-normal-complete58-native20-execution-20261009-receipt.json",
+          "sha256": "1cbe41376d4f65da7165ec0d502aa242afcb104d1f789f7c392d6dbfc516e751"
+        },
+        "scalarUnit": {
+          "path": "/private/tmp/keyload-r875-kl029-scalar-complete58-native20-execution-20261009-receipt.json",
+          "sha256": "3b7e9a77a6c2c83727f1e18a977a3c829cdca70b57aed328d11339bc5fa00db3"
+        },
+        "processRecovery": {
+          "path": "/private/tmp/keyload-r875-kl029-complete18-native20-process-execution-20261009-receipt.json",
+          "sha256": "fad4be6a0457b9e132cec46a0b4fa785b5f73d55dbe3564670eaee0799d5e7af"
+        }
+      },
+      "nativeMetadataDevelopment": {
+        "qualification": "Actual native case metadata, not execution or acceptance. Receipt input-plan digest and emitted binding-plan digest refer to separate original files.",
+        "inputSourcePlan": {
+          "path": "/private/tmp/keyload-r875-complete-related-native-census-source-plan-20261009.json",
+          "sha256": "b131ab16b8d97ac79aead8c3e9fc0a78b0569e2ffb6eb443c867981d3998324c"
+        },
+        "producedBindingPlan": {
+          "path": "/private/tmp/keyload-r875-related-native-metadata-originals-20261009/eleven-task-census-plan.original.json",
+          "sha256": "67372fb2eb5d29855feb9aa26d85265c546079b65144ee9a5c07b116ec1a4e74"
+        },
+        "strictOriginalBinding": {
+          "path": "/private/tmp/keyload-r875-native-eleven-complete-task-metadata-binding-20261009/validation.json",
+          "sha256": "2abc86d1e493fd677cbe9eb2505a3db15fd5325e7fd7006f27948c63da4f1bff"
+        },
+        "kl029CompleteCaseCounts": {
+          "unit": 58,
+          "recovery": 18,
+          "rf3": 9
+        },
+        "kl033CompleteCasesPerProfile": 45,
+        "kl035CompleteCasesPerProfile": 35,
+        "sourceOnlyJoins": [
+          {
+            "path": "/private/tmp/keyload-r875-kl029-complete-native-task-lane-joined-20261009.json",
+            "sha256": "2589a5b5c8015518121e28a8fd4ab490d82337dea6bb0e82110b0bbcef04c6e5"
+          },
+          {
+            "path": "/private/tmp/keyload-r876-kl036-actual-two-supporting-native-lanes-joined-20261009.json",
+            "sha256": "45fed0833db7550c1ab9ef20c2c850a402912b5413f9ffc69c7d673cde858ce2"
+          }
+        ],
+        "currentJoinedLaneMetadataRebindPending": true
+      },
+      "currentSharedCheckoutQualification": {
+        "lastInspectedHead": "883a207aaa34ec9c48f63ce1479c9a0fb642f70b",
+        "lastFullBuild": {
+          "path": "/private/tmp/keyload-r877-current-shared-native-ipc-full-build-20261009-diagnostics.json",
+          "sha256": "efdff3230186638b614c41fdd394c44c9f2363ecda68e5616c9a95c51e684eb4"
+        },
+        "nativeExitCode": 1,
+        "sourceDrift": 8,
+        "distinctDiagnostics": 9,
+        "causeScope": "Concurrent benchmark methodology implementation; original current build contains duplicate benchmark constants and named-key analyzer failures. Local IPC permission failure in R876 is separately retained, not a product regression claim.",
+        "latestFocusedProductBuild": {
+          "path": "/private/tmp/keyload-r884-coherent-native-activation-movement-product-build-20261009-diagnostics.json",
+          "sha256": "cdfa1c3f89fb259837e5395d90160e2dc31fcc57ce23d2fb1240ec98a4483462"
+        },
+        "currentNativeSchemaAndIntegrationCompilationPending": true,
+        "latestObservedWholeBuildLog": {
+          "path": "/private/tmp/keyload-methodology-full-build-ninth.log",
+          "sha256": "debcf46ba3f766da31447b474b187dc2a70bc159a210a8e1586db0d6214fd1fa"
+        },
+        "latestObservedWholeBuildScope": "Original shared canonical ninth contains44 genuine diagnostics spanning new integration/recovery/benchmark code; own scoped repairs are joined and pending recompile. This log alone has no independently captured native exit/source snapshot in root and is not qualification."
+      },
+      "latestFocusedProductBuild": {
+        "path": "/private/tmp/keyload-r884-coherent-native-activation-movement-product-build-20261009-diagnostics.json",
+        "sha256": "cdfa1c3f89fb259837e5395d90160e2dc31fcc57ce23d2fb1240ec98a4483462"
+      },
+      "latestFocusedProductBuildQualification": "Actual Server and all product references built successfully with zero source drift; this is not a complete solution build or test/RF3 acceptance.",
+      "focusedProductFailures": {
+        "881": {
+          "path": "/private/tmp/keyload-r881-coherent-movement-native-product-build-20261009-diagnostics.json",
+          "sha256": "6e4747e32b9cba7d5f83c09655d0e764d7392118fcb205ad57a17ff78fa01d62"
+        },
+        "883": {
+          "path": "/private/tmp/keyload-r883-coherent-native-activation-movement-product-build-20261009-diagnostics.json",
+          "sha256": "ae6606e3b6a2a11d947ad3d17ec8515e2650bc0644b515ff517b58dd1cbe433a"
+        }
+      },
+      "sourceOnlyNativeUnions": {
+        "kl036": {
+          "path": "/private/tmp/keyload-r881-kl036-coherent-native-capacity-retained-union-joined-20261009.json",
+          "sha256": "300e525ac90a40b33abee1da3b669ee6bd10d8531db99673faba7395e43aec1b"
+        },
+        "kl019": {
+          "path": "/private/tmp/keyload-r882-kl019-complete-native-source-union-joined-20261009.json",
+          "sha256": "c00af0e32d288ca613c57efbe3d0e089bc838928f1ffb5966ee3bbb3a1cb7b50"
+        },
+        "qualification": "Guarded source joins; native runtime and whole acceptance remain open.",
+        "KL036OriginalCloseSourceJoin": {
+          "path": "/private/tmp/keyload-r887-kl036-transfer-close-whole-source-joined-20261009.json",
+          "sha256": "ab7963864abcbac144f461d1b44262bf3c32fdf59556999ab43b0103c39eeeee"
+        }
+      },
+      "currentRelatedNativeControls": {
+        "qualification": "Actual100 source/image stable local native20 executions:50normal +50scalar. Original catalog failures retained above. Not full suites, coverage or Linux RF3/task acceptance.",
+        "r877Normal": {
+          "path": "/private/tmp/keyload-r877-current-complete45-controls-unit-native20-20261009-receipt.json",
+          "sha256": "2c9983e391fc1becef343ac90561dbc9e38fa0e37f3aac8d195fd345d0a6cbe9"
+        },
+        "r877Scalar": {
+          "path": "/private/tmp/keyload-r877-current-complete45-controls-unit-scalar-native20-20261009-receipt.json",
+          "sha256": "6ebb9c21b0f2e4795ae4676348687e05906344a0d446c872b539cea44bb972ee"
+        },
+        "r880Normal": {
+          "path": "/private/tmp/keyload-r880-current-complete45-controls-unit-native20-20261009-receipt.json",
+          "sha256": "bdcca1f7042ab0e426db831dbc201cda9e460585c712f5713e209a83c48039fe"
+        },
+        "latestPassed": 100,
+        "latestFailed": 0,
+        "latestTotal": 45,
+        "remainingFailure": null,
+        "previousFailedR880Passed": 44,
+        "previousFailedR880Failed": 1,
+        "normalPassed": 50,
+        "scalarPassed": 50,
+        "latestNormalCatalog45": {
+          "path": "/private/tmp/keyload-r885-current-complete45-controls-unit-native20-20261009-receipt.json",
+          "sha256": "e35c78680552a501a4100e7d9d24cd393b884ab9b46eda1c45fda5a562d6f567"
+        },
+        "latestNormalEpoch5": {
+          "path": "/private/tmp/keyload-r885-native-epoch-wholeflow5-unit-native20-20261009-receipt.json",
+          "sha256": "437869b958d6377133d77e7b1aade7c9bd9189e3cfa2b5ed8969752f9c6a36c4"
+        },
+        "latestScalar50": {
+          "path": "/private/tmp/keyload-r885-current-complete50-controls-unit-scalar-native20-20261009-receipt.json",
+          "sha256": "49aa7b131b0a7a4a23358ded47d076371bfd5e1677d60271bcc81399514857d8"
+        }
+      },
+      "additionalKl035NativeMetadata": {
+        "observedCases": 14,
+        "receipt": {
+          "path": "/private/tmp/keyload-r883-kl035-omitted-snapshot-native-census-20261009-receipt.json",
+          "sha256": "3ec951d2e1a8872a70654d339a0e7ee97f641113f5292ada2f0e1be8a2d96e30"
+        },
+        "qualifiedExecution": false,
+        "canonicalLaneAdditionPending": true
+      },
+      "immutableCheckpoint": {
+        "path": "/private/tmp/keyload-r884-root-originals-development-checkpoint-20261009.json",
+        "sha256": "90ded883db857032978dbba939e7b2a17e97c1dba2adf83b78b6e8a20b08b2e2"
+      },
+      "sourceOnlyNativeConsumerRepairs": {
+        "kl019": {
+          "path": "/private/tmp/keyload-r886-kl019-native-consumer-diagnostics-joined-20261009.json",
+          "sha256": "5470e54750aecc63820019a76858c5b7912b4330bee365038adf4ae1f0e4dcb8"
+        },
+        "kl036": {
+          "path": "/private/tmp/keyload-r886-kl036-native-capacity-consumer-diagnostics-joined-20261009.json",
+          "sha256": "accb7df71afc6447c2d969448a7d73f661d459ca94fee1f29f62fc2f1db84b7c"
+        },
+        "kl035": {
+          "path": "/private/tmp/keyload-r886-kl035-complete-native-admission-and-image-repair-joined-20261009.json",
+          "sha256": "0b82452b193e4174e0aa0f3fc18387d8d74d9b15c7f1370b1c1d1b0ac9ad29a8"
+        },
+        "qualification": "Guarded source changes only; fresh current native compilation/metadata/process/RF3 qualification remains required.",
+        "KL036RetainedProducerImport": {
+          "path": "/private/tmp/keyload-r886-kl036-retained-producer-import-amendment-joined-20261009.json",
+          "sha256": "dbf9137e50e41d39effbf51523b41cf7b11f7e659d1731ae0138463d22889e8a"
+        }
+      },
+      "kl035CompleteNativeAdmission": {
+        "originalCasesPreserved": 35,
+        "addedActualNativeCases": 14,
+        "sourceContractTotalPerProfile": 49,
+        "freshChangedSourceBindingAndExecutionPending": true,
+        "native14Receipt": {
+          "path": "/private/tmp/keyload-r883-kl035-omitted-snapshot-native-census-20261009-receipt.json",
+          "sha256": "3ec951d2e1a8872a70654d339a0e7ee97f641113f5292ada2f0e1be8a2d96e30"
+        }
+      },
+      "kl036CompleteSourceAdmission": {
+        "originalCaseDeclarationsPreserved": 34,
+        "newSourceDeclaredFlows": [
+          {
+            "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+            "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+            "methodName": "ActualStagePreAdmissionLegalBoundaryRejectsOneByteLessWithoutEffectsThenSameMoveColdHealthyContinuation",
+            "instanceName": "ActualStagePreAdmissionLegalBoundaryRejectsOneByteLessWithoutEffectsThenSameMoveColdHealthyContinuation",
+            "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementParentCapacityRf3Tests.cs",
+            "parameterTypeFullNames": []
+          },
+          {
+            "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementRetainedPageCapacityRf3Tests",
+            "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementRetainedPageCapacityRf3Tests",
+            "methodName": "ActualOriginalRetainedPageExceedsCurrentCapWithoutEffectsThenSameMoveColdSdkMcpQ1IsHealthy",
+            "instanceName": "ActualOriginalRetainedPageExceedsCurrentCapWithoutEffectsThenSameMoveColdSdkMcpQ1IsHealthy",
+            "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementRetainedPageCapacityRf3Tests.cs",
+            "parameterTypeFullNames": []
+          },
+          {
+            "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementTransferCloseRf3Tests",
+            "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementTransferCloseRf3Tests",
+            "methodName": "ActualOpenThenOriginalCallerCancellationRecordsCloseFailureBeforeFreshAbortJoinsSourceAndColdSdkMcpQ1IsHealthy",
+            "instanceName": "ActualOpenThenOriginalCallerCancellationRecordsCloseFailureBeforeFreshAbortJoinsSourceAndColdSdkMcpQ1IsHealthy",
+            "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementTransferCloseRf3Tests.cs",
+            "parameterTypeFullNames": []
+          }
+        ],
+        "sourceExpectedCasesPerProfile": 37,
+        "freshNativeUidAndChangedImageBindingPending": true,
+        "originalNativeLinuxExecutionPending": true,
+        "runtimeQualified": false
+      },
+      "latestSourceOnlyCheckpoint": {
+        "baseCommit": "852aef0796e8455e155e1769af9e137d861b2a56",
+        "kl036CloseSourceJoin": {
+          "path": "/private/tmp/keyload-r887-kl036-transfer-close-whole-source-joined-20261009.json",
+          "sha256": "ab7963864abcbac144f461d1b44262bf3c32fdf59556999ab43b0103c39eeeee"
+        },
+        "qualification": "Source joined only; R885 normal50/scalar50 are immutable earlier focused controls, not execution of these new flows. Fresh complete solution build, format, native census, recovery and RF3 Linux gates remain pending."
+      }
     }
   },
   "TIME-PROVIDER-001": {
@@ -42015,7 +42475,7 @@
   },
   "KL-008": {
     "title": "Storage adapter і lifetime",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
@@ -42199,6 +42659,182 @@
           }
         ],
         "runtimeQualified": false
+      },
+      "currentOriginalTaskAcceptance": {
+        "completedAt": "2026-10-09",
+        "sourceCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+        "runId": 37891957916,
+        "attempt": 1,
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "scope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open.",
+        "requirements": [
+          "REQ-CUT-003",
+          "REQ-KEYCODEC-004",
+          "REQ-STORAGE-008",
+          "REQ-STORAGE-MAINTENANCE-JOIN-001",
+          "REQ-STORAGE-MAINTENANCE-JOIN-002"
+        ],
+        "criteria": [
+          "AC-CUT-003",
+          "AC-KEYCODEC-004",
+          "AC-STORAGE-MAINTENANCE-JOIN-001",
+          "AC-STORAGE-MAINTENANCE-JOIN-002",
+          "AC-STORAGE-MAINTENANCE-JOIN-003",
+          "AC-STORAGE-MAINTENANCE-JOIN-004",
+          "AC-STORAGE-OWNER-001"
+        ],
+        "criterionMap": [
+          {
+            "predicate": "Separate process owner refuses a live physical owner",
+            "req": [
+              "REQ-STORAGE-008"
+            ],
+            "ac": [
+              "AC-STORAGE-OWNER-001"
+            ],
+            "nativeMethods": [
+              "AcStorageOwner001SeparateProcessCannotOpenLiveOwnerAndHealthyReopenPreservesUpdatedState"
+            ]
+          },
+          {
+            "predicate": "Dispose joins actual leases and iterator work",
+            "req": [
+              "REQ-CUT-003"
+            ],
+            "ac": [
+              "AC-CUT-003"
+            ],
+            "nativeClasses": [
+              "NativeReadCutLifetimeTests",
+              "NativeReadCutReplacementTests"
+            ]
+          },
+          {
+            "predicate": "Dispose joins genuine tracked native merge and periodic cleanup jobs, retaining fault/cleanup",
+            "req": [
+              "REQ-STORAGE-MAINTENANCE-JOIN-001",
+              "REQ-STORAGE-MAINTENANCE-JOIN-002"
+            ],
+            "ac": [
+              "AC-STORAGE-MAINTENANCE-JOIN-001",
+              "AC-STORAGE-MAINTENANCE-JOIN-002",
+              "AC-STORAGE-MAINTENANCE-JOIN-003",
+              "AC-STORAGE-MAINTENANCE-JOIN-004"
+            ],
+            "nativeClasses": [
+              "NativeMaintenanceLifetimeTests",
+              "NativeMaintenancePeriodicLifetimeTests",
+              "ZoneTreeMaintenancePolicyTests"
+            ]
+          },
+          {
+            "predicate": "Returned pooled input/owned output buffers cannot mutate committed canonical values; true cold reopen retains exact content",
+            "req": [
+              "REQ-KEYCODEC-004"
+            ],
+            "ac": [
+              "AC-KEYCODEC-004"
+            ],
+            "nativeMethods": [
+              "NativeStageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes"
+            ]
+          }
+        ],
+        "exactDeclaredUnionPerProfile": 27,
+        "canonicalCaseContractSha256": "a09881e8ee1ec7210c32b4c992e41dc8f81f61c02a3b270ba52e14d745f55605",
+        "originalProfiles": [
+          {
+            "schemaVersion": 1,
+            "task": "KL-008",
+            "profile": "normal",
+            "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+            "runId": 37891957916,
+            "attempt": 1,
+            "jobId": 113694642532,
+            "jobConclusion": "success",
+            "artifactId": 11598737192,
+            "artifactSha256": "5bd75aca411ea68b2bcbd27e5bbbeadb487018441e6623cb5526b76084688457",
+            "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+            "caseCount": 27,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 27,
+                "originalTrx": [
+                  {
+                    "sha256": "9ef5aa2863655b58a86d001dbed4860114dc3c59358c084e5b9c32b203ac112c",
+                    "passed": 27,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              }
+            ],
+            "verifiedOriginalCount": 16,
+            "gitSourceAndBuildInputCount": 1429,
+            "originalNativeProcessReadersExitJoinedDisposed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "sourceVerificationPassed": true,
+            "serverImage": null,
+            "cleanup": null,
+            "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion",
+            "authenticityReceiptPath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/kl-008-normal/authenticity-and-original-reports.json",
+            "authenticityReceiptSha256": "e407b350fe4aa389c2889de5141a6973676b5e11121fdfa0caefb1e8dd491096",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/job/113694642532",
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/artifacts/11598737192"
+          },
+          {
+            "schemaVersion": 1,
+            "task": "KL-008",
+            "profile": "scalar",
+            "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+            "runId": 37891957916,
+            "attempt": 1,
+            "jobId": 113694642493,
+            "jobConclusion": "success",
+            "artifactId": 11599215356,
+            "artifactSha256": "aa9537dc048ab811c077a7c14b496e0f1c6e1d4a862dc37fd4f343dbd411b21a",
+            "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+            "caseCount": 27,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 27,
+                "originalTrx": [
+                  {
+                    "sha256": "4434da44e0def02e20be344b974d0b073fc0e9cfbb0da2ead9e68e494585a86b",
+                    "passed": 27,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              }
+            ],
+            "verifiedOriginalCount": 16,
+            "gitSourceAndBuildInputCount": 1429,
+            "originalNativeProcessReadersExitJoinedDisposed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "sourceVerificationPassed": true,
+            "serverImage": null,
+            "cleanup": null,
+            "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion",
+            "authenticityReceiptPath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/kl-008-scalar/authenticity-and-original-reports.json",
+            "authenticityReceiptSha256": "dac97922dca3140d9f806b1eba08d6c1c27e5c2a3945bfe31e4b5fdf28960d93",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/job/113694642493",
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/artifacts/11599215356"
+          }
+        ],
+        "candidatePath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/COMPLETE-ORIGINAL-TASK-CRITERIA-CANDIDATE.json",
+        "candidateSha256": "b3eb4fbdbf23c848b28f4b7d32e7754087274173af61fbfd2d84c411f4c57cd2",
+        "currentSourceQualified": false,
+        "broaderFeatureMandatoryGates": "Full current-source suites/coverage/RF3 remain independently mandatory; endurance/performance/power-loss still OPEN. Original task predicates are all covered; this does not waive existing full-feature clauses."
       }
     },
     "authenticatedOriginalLinuxTaskCohorts20261009": {
@@ -42392,7 +43028,9 @@
         }
       ],
       "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
-    }
+    },
+    "allAcceptanceClosed": true,
+    "acceptanceScope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open."
   },
   "KL-009": {
     "title": "Partition writer і command envelope",
@@ -42596,7 +43234,7 @@
   },
   "KL-011": {
     "title": "Strict indexes і unique scope",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
@@ -43351,6 +43989,363 @@
         }
       ],
       "qualification": "Actual complete selected task flows in both modes; shared mandatory gates and broader task criteria remain open."
+    },
+    "allAcceptanceClosed": true,
+    "acceptanceScope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open.",
+    "qualification": {
+      "currentOriginalTaskAcceptance": {
+        "completedAt": "2026-10-09",
+        "sourceCommit": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+        "runId": 37891957916,
+        "attempt": 1,
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "scope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open.",
+        "requirements": [
+          "REQ-DSTORE-002"
+        ],
+        "criteria": [
+          "AC-DSTORE-002",
+          "AC-DSTORE-COMPOSITE-PROCESS-001",
+          "AC-DSTORE-COMPOSITE-RF3-001",
+          "AC-DSTORE-COMPOSITE-SPARSE-001",
+          "AC-DSTORE-INDEX-PROCESS-001"
+        ],
+        "criterionMap": [
+          {
+            "predicate": "Scalar/composite old/new deltas and exact equality/native ranges match independent model after insert/update/delete/real crash",
+            "req": [
+              "REQ-DSTORE-002"
+            ],
+            "ac": [
+              "AC-DSTORE-002",
+              "AC-DSTORE-INDEX-PROCESS-001",
+              "AC-DSTORE-COMPOSITE-PROCESS-001"
+            ],
+            "nativeClasses": [
+              "DocumentScalarIndexMutationTests",
+              "DocumentIndexCommittedScanTests",
+              "ScalarIndexProcessRecoveryTests",
+              "CompositeIndexProcessRecoveryTests"
+            ]
+          },
+          {
+            "predicate": "Two live documents never own one partition-unique key; conflict atomically rolls back doc/index/event/queue; equal keys across atomic partitions remain legal",
+            "req": [
+              "REQ-DSTORE-002"
+            ],
+            "ac": [
+              "AC-DSTORE-002",
+              "AC-DSTORE-COMPOSITE-RF3-001"
+            ],
+            "nativeClasses": [
+              "TransactionTests",
+              "CompositeUniqueRf3Tests"
+            ]
+          },
+          {
+            "predicate": "All four null/missing inclusion combinations preserve exact document/index/unique deltas, delete/reuse and healthy authorized reads",
+            "req": [
+              "REQ-DSTORE-002"
+            ],
+            "ac": [
+              "AC-DSTORE-COMPOSITE-SPARSE-001"
+            ],
+            "nativeClasses": [
+              "CompositeSparseUniqueTests"
+            ]
+          },
+          {
+            "predicate": "Actual SDK/official MCP complete receipts/literal rows/index membership/reuse and persisted deny then restoration; no value on failure",
+            "req": [
+              "REQ-DSTORE-002"
+            ],
+            "ac": [
+              "AC-DSTORE-COMPOSITE-RF3-001"
+            ],
+            "nativeClasses": [
+              "CompositeUniqueRf3Tests"
+            ],
+            "supportingOrdinaryOnly": [
+              "McpReplyOwnerTests"
+            ]
+          }
+        ],
+        "exactDeclaredUnionPerProfile": 16,
+        "canonicalCaseContractSha256": "a09881e8ee1ec7210c32b4c992e41dc8f81f61c02a3b270ba52e14d745f55605",
+        "originalProfiles": [
+          {
+            "schemaVersion": 1,
+            "task": "KL-011",
+            "profile": "normal",
+            "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+            "runId": 37891957916,
+            "attempt": 1,
+            "jobId": 113694642562,
+            "jobConclusion": "success",
+            "artifactId": 11599100919,
+            "artifactSha256": "62156129bd5a1371059aa8e740871e44ba133b2b025e75b5ca52d2fe2d813ec6",
+            "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+            "caseCount": 16,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 11,
+                "originalTrx": [
+                  {
+                    "sha256": "14c6a71b8329525e95b6910d05a8a505f207d788a0914e31f0e09abecf50934e",
+                    "passed": 11,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "unit-conflict",
+                "suite": "unit",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "c24bdd5ed56759cd7039b83f2c58afdf8b54f7f1c1bcd04200ca957a1e4b79b0",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "unit-mcp-control",
+                "suite": "unit",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "d4d46dadceebeeeef63334b80d5687592587e71aa743354e60f6e3828952e7a1",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "process",
+                "suite": "recovery",
+                "caseCount": 2,
+                "originalTrx": [
+                  {
+                    "sha256": "5398ce6cdbd1fd17d6626f5c54211dd3f74936870c08ecca920b90c374f0ecbb",
+                    "passed": 2,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "1c686f45b8b7babf23c8963f2c9d7704df8586ad833d14e9f97db1022e24bf34"
+              },
+              {
+                "selectionId": "rf3",
+                "suite": "rf3",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "3abf4eb482e9a3a561b89971ad8f2b8a0ae10587379b0f068cd878e6a5f3302b",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "7e1ec1f6bd7af3dfa5fd230a00b57c1be6d1b63abd5596cada2b7cc6dc3dd353"
+              }
+            ],
+            "verifiedOriginalCount": 54,
+            "gitSourceAndBuildInputCount": 2170,
+            "originalNativeProcessReadersExitJoinedDisposed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "sourceVerificationPassed": true,
+            "serverImage": {
+              "schemaVersion": 1,
+              "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+              "github": {
+                "runId": "37891957916",
+                "attempt": "1",
+                "repository": "managedcode/KeyLoad",
+                "ref": "refs/heads/main"
+              },
+              "bases": {
+                "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+              },
+              "images": {
+                "server": {
+                  "reference": "127.0.0.1:5000/keyload/server:556c13ab78c839df68b09dce1e9fc92bef576bfe-37891957916-1@sha256:a7eeb48b30f33dc34ae4612f4bd84f10f31faca7f69205a8ea55a8fc5272b4c8",
+                  "manifestDigest": "sha256:a7eeb48b30f33dc34ae4612f4bd84f10f31faca7f69205a8ea55a8fc5272b4c8",
+                  "registryDigest": "sha256:a7eeb48b30f33dc34ae4612f4bd84f10f31faca7f69205a8ea55a8fc5272b4c8",
+                  "manifestFile": "server-manifest.json",
+                  "revisionLabel": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+                  "configId": "sha256:13f1f5403cb9be0d5c05691f52f7f8f0cd4253da282ee170e6c2b5d8420ae011"
+                }
+              }
+            },
+            "cleanup": {
+              "cleanup": {
+                "containerName": "keyload-images-37891957916-1",
+                "owned": true,
+                "found": true,
+                "removed": true,
+                "exitCode": null,
+                "result": "success",
+                "outputTruncated": true
+              }
+            },
+            "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion",
+            "authenticityReceiptPath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/kl-011-normal/authenticity-and-original-reports.json",
+            "authenticityReceiptSha256": "9fb4456ed28fb73d0ed33e5fcb4fdff4314d812ee4d79739d6c5ed3eababdda1",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/job/113694642562",
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/artifacts/11599100919"
+          },
+          {
+            "schemaVersion": 1,
+            "task": "KL-011",
+            "profile": "scalar",
+            "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+            "runId": 37891957916,
+            "attempt": 1,
+            "jobId": 113694642694,
+            "jobConclusion": "success",
+            "artifactId": 11599665304,
+            "artifactSha256": "30d7d2a573f48cd102f9d6db44880c823ca00c81895cac4cad3e4c776814c408",
+            "qualifiedScope": "task-scoped; no product/fullsuite/coverage promotion",
+            "caseCount": 16,
+            "selections": [
+              {
+                "selectionId": "unit",
+                "suite": "unit",
+                "caseCount": 11,
+                "originalTrx": [
+                  {
+                    "sha256": "ebd78c76ec66c1d53a841777a90ef443e9ef9e78568c51793785da1fd3e3986b",
+                    "passed": 11,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "unit-conflict",
+                "suite": "unit",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "e37f5ba46858ace6451ef56d58a82bda3b56dfcf7e9afcc96ca7c109acbb8d96",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "unit-mcp-control",
+                "suite": "unit",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "59f48fd832dc54fd35e735309a68c5ead5d54ee0bca61a4b03bf7db7d61f881c",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "dceea772dffbcb0ba1343536765a78cbebb19bd31ae38d68fc13022944abe008"
+              },
+              {
+                "selectionId": "process",
+                "suite": "recovery",
+                "caseCount": 2,
+                "originalTrx": [
+                  {
+                    "sha256": "645885b1f13aa3769188dfafacd152cfe200e334bd4eb3a2922f1defc9cf3ddc",
+                    "passed": 2,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "1c686f45b8b7babf23c8963f2c9d7704df8586ad833d14e9f97db1022e24bf34"
+              },
+              {
+                "selectionId": "rf3",
+                "suite": "rf3",
+                "caseCount": 1,
+                "originalTrx": [
+                  {
+                    "sha256": "ffe61713cd54454d41f83088e2311415a55cfa8a8184e2a17b8daa592dcc8b5e",
+                    "passed": 1,
+                    "failed": 0,
+                    "skipped": 0
+                  }
+                ],
+                "nativeImageManifestSha256": "7e1ec1f6bd7af3dfa5fd230a00b57c1be6d1b63abd5596cada2b7cc6dc3dd353"
+              }
+            ],
+            "verifiedOriginalCount": 54,
+            "gitSourceAndBuildInputCount": 2170,
+            "originalNativeProcessReadersExitJoinedDisposed": true,
+            "sourcePdbBindingComplete": true,
+            "preparedImageEqualsBeforeAfter": true,
+            "sourceVerificationPassed": true,
+            "serverImage": {
+              "schemaVersion": 1,
+              "sourceRevision": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+              "github": {
+                "runId": "37891957916",
+                "attempt": "1",
+                "repository": "managedcode/KeyLoad",
+                "ref": "refs/heads/main"
+              },
+              "bases": {
+                "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+                "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+                "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+              },
+              "images": {
+                "server": {
+                  "reference": "127.0.0.1:5000/keyload/server:556c13ab78c839df68b09dce1e9fc92bef576bfe-37891957916-1@sha256:7737750bf368dc7b92bf09f0b9ae25ce13471e65907776298cd3520ebdddec83",
+                  "manifestDigest": "sha256:7737750bf368dc7b92bf09f0b9ae25ce13471e65907776298cd3520ebdddec83",
+                  "registryDigest": "sha256:7737750bf368dc7b92bf09f0b9ae25ce13471e65907776298cd3520ebdddec83",
+                  "manifestFile": "server-manifest.json",
+                  "revisionLabel": "556c13ab78c839df68b09dce1e9fc92bef576bfe",
+                  "configId": "sha256:f783fc2c8cbc8d71c4d35767e1f8e93fbf707e754720c161a8a0f02046fc7736"
+                }
+              }
+            },
+            "cleanup": {
+              "cleanup": {
+                "containerName": "keyload-images-37891957916-1",
+                "owned": true,
+                "found": true,
+                "removed": true,
+                "exitCode": null,
+                "result": "success",
+                "outputTruncated": true
+              }
+            },
+            "sharedMandatoryGates": "current complete suites and functional coverage remain open; no task status promotion",
+            "authenticityReceiptPath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/kl-011-scalar/authenticity-and-original-reports.json",
+            "authenticityReceiptSha256": "328a5a440e2c73ba47b6383fd41059cf4a0c57fe8036c31eda230db76f284f0f",
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/job/113694642694",
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37891957916/artifacts/11599665304"
+          }
+        ],
+        "candidatePath": "/private/tmp/keyload-556c-kl008-kl011-authentic-closeout-review-r1-20261009/COMPLETE-ORIGINAL-TASK-CRITERIA-CANDIDATE.json",
+        "candidateSha256": "b3eb4fbdbf23c848b28f4b7d32e7754087274173af61fbfd2d84c411f4c57cd2",
+        "currentSourceQualified": false,
+        "broaderFeatureMandatoryGates": "Full current-source suites/coverage/RF3 remain independently mandatory; endurance/performance/power-loss still OPEN. Original task predicates are all covered; this does not waive existing full-feature clauses."
+      }
     }
   },
   "KL-012": {
@@ -45850,6 +46845,22 @@
         "nativeDiagnosticsRF3": "pending",
         "allAcceptanceClosed": false
       }
+    },
+    "currentNativeEpochWholeFlowDevelopment": {
+      "normalPassed": 5,
+      "scalarPassed": 5,
+      "qualifiedWholeTask": false,
+      "receipts": [
+        {
+          "path": "/private/tmp/keyload-r885-native-epoch-wholeflow5-unit-native20-20261009-receipt.json",
+          "sha256": "437869b958d6377133d77e7b1aade7c9bd9189e3cfa2b5ed8969752f9c6a36c4"
+        },
+        {
+          "path": "/private/tmp/keyload-r885-current-complete50-controls-unit-scalar-native20-20261009-receipt.json",
+          "sha256": "49aa7b131b0a7a4a23358ded47d076371bfd5e1677d60271bcc81399514857d8"
+        }
+      ],
+      "linuxActualNativeActivationAndMembershipPending": true
     }
   },
   "KL-020": {
@@ -47220,6 +48231,31 @@
       "allAcceptanceClosed": false,
       "productCoveragePercent": null,
       "remaining": "Required actual native build/format/normal/scalar/process/publicRF3/source-image/Linux/fault/resource gates remain open; no local source proof promoted."
+    },
+    "stageXXXVIIOriginalDevelopment": {
+      "wholeTaskAccepted": false,
+      "unitNormalPassed": 58,
+      "unitScalarPassed": 58,
+      "processRecoveryPassed": 18,
+      "fullSelectedCasesPerProfile": 85,
+      "evidence": {
+        "qualification": "Exact original local R875 development executions only; current shared-checkout, Linux RF3, full suites, functional coverage, endurance and performance remain open.",
+        "nativeMaximumParallelTests": 20,
+        "passedCases": 134,
+        "normalUnit": {
+          "path": "/private/tmp/keyload-r875-kl029-normal-complete58-native20-execution-20261009-receipt.json",
+          "sha256": "1cbe41376d4f65da7165ec0d502aa242afcb104d1f789f7c392d6dbfc516e751"
+        },
+        "scalarUnit": {
+          "path": "/private/tmp/keyload-r875-kl029-scalar-complete58-native20-execution-20261009-receipt.json",
+          "sha256": "3b7e9a77a6c2c83727f1e18a977a3c829cdca70b57aed328d11339bc5fa00db3"
+        },
+        "processRecovery": {
+          "path": "/private/tmp/keyload-r875-kl029-complete18-native20-process-execution-20261009-receipt.json",
+          "sha256": "fad4be6a0457b9e132cec46a0b4fa785b5f73d55dbe3564670eaee0799d5e7af"
+        }
+      },
+      "linuxRf3NormalAndScalarPending": true
     }
   },
   "KL-030": {
@@ -47435,6 +48471,17 @@
       "scope": "Actual erased follower native snapshot and retained ordered tail, complete public SDK/MCP full replay/authorization/healthy update and cold identity flow authored; exact-source Linux execution pending.",
       "runtimeQualified": false,
       "taskComplete": false
+    },
+    "currentComplete49AdmissionSourceDevelopment": {
+      "sourceContractTotalPerProfile": 49,
+      "original35Preserved": true,
+      "addedNative14": true,
+      "guardedJoin": {
+        "path": "/private/tmp/keyload-r886-kl035-complete-native-admission-and-image-repair-joined-20261009.json",
+        "sha256": "0b82452b193e4174e0aa0f3fc18387d8d74d9b15c7f1370b1c1d1b0ac9ad29a8"
+      },
+      "wholeTaskAccepted": false,
+      "changedFlowCompilationNativeBindingLinuxNormalScalarPending": true
     }
   },
   "KL-036": {
@@ -47719,6 +48766,17 @@
       "scope": "Three genuine capture-pointer tamper/restoration/same-Move cold parent flows authored. Native initial catalog prerequisites and exact typed original policy-denial oracle repaired from original55f failures; fresh runtime qualification pending.",
       "runtimeQualified": false,
       "taskComplete": false
+    },
+    "currentOriginalCloseSourceJoinDevelopment": {
+      "sourceJoined": true,
+      "sourceJoin": {
+        "path": "/private/tmp/keyload-r887-kl036-transfer-close-whole-source-joined-20261009.json",
+        "sha256": "ab7963864abcbac144f461d1b44262bf3c32fdf59556999ab43b0103c39eeeee"
+      },
+      "sourceExpectedCasesPerProfile": 37,
+      "nativeCensusPending": true,
+      "normalScalarLinuxRf3Pending": true,
+      "allAcceptanceClosed": false
     }
   },
   "KL-037": {

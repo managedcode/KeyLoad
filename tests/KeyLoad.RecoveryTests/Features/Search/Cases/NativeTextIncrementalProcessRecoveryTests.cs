@@ -8,6 +8,11 @@ internal sealed class NativeTextIncrementalProcessRecoveryTests
     [Arguments(NativeTextFaultStage.NativePostingWritten)]
     [Arguments(NativeTextFaultStage.NativeInventoryFlushed)]
     [Arguments(NativeTextFaultStage.ManifestPublished)]
+    [Arguments(NativeTextFaultStage.IncrementalIntentFlushed)]
+    [Arguments(NativeTextFaultStage.NativeDeletionWritten)]
+    [Arguments(NativeTextFaultStage.NativeAdditionWritten)]
+    [Arguments(NativeTextFaultStage.CanonicalCheckpointAcknowledged)]
+    [Arguments(NativeTextFaultStage.PendingIntentRetired)]
     public async Task AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(
         NativeTextFaultStage stage)
         => await NativeTextIncrementalProcessTrial.RunAsync(stage,

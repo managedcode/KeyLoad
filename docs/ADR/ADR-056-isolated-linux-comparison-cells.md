@@ -66,6 +66,27 @@ This decision changes benchmark execution and evidence accounting, not database 
 
 The ADR remains Accepted until the required implementation and exact-source Linux evidence are complete. The canonical feature documents and status records remain the authority for which gates have actually passed.
 
+
+## Native image annotation oracle correction, 2026-10-09
+
+REQ/AC-BC-IMAGE-MODEL-001 and TASK-BC-IMAGE-MODEL-001 preserve AC-ISO-002/003 and
+AC-IMAGE-006. Pinned Aspire 13.6 `WithImage` creates `ContainerImageAnnotation`
+with the parsed registry/image combined in `Image`, leaving nullable `Registry`
+unset. The HelixDB and SurrealDB resource-model cases therefore require exactly
+null `Registry`; they retain every existing digest, image/tag, mount, endpoint,
+secret parameter, configuration, wait and unsupported-topology assertion.
+
+Ordered implementation: freeze this oracle contract; correct only the two existing
+ComparisonTests expectations; integration owner builds and runs the complete native
+`/*/*/Isolated*Resource*/*` comparison selection with 20 native slots; then the fresh
+exact-source Linux image prerequisite and all independent matrices remain mandatory.
+Owned files are `IsolatedHelixDbResourceTests.cs` and `IsolatedSurrealDbResourceTests.cs`
+under ComparisonTests/Features/BenchmarkComparisons/Cases, plus this ADR and the
+feature trace. No data migration, product boundary or provider change is involved;
+rollback restores these test/doc changes without rewriting original reports.
+Original556c preparation errors remain authentic failed evidence. Model/configuration
+verification cannot qualify actual native membership, workload or publication.
+
 ## Measurement scheduling and ingestion contract, 2026-10-09
 
 Related requirements: REQ/AC-SCALE-024..028 and TASK-SCALE-MEASUREMENT-SCHEDULING-001,

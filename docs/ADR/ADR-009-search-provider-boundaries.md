@@ -132,3 +132,59 @@ REQ-FTS-INC-INVENTORY-002: The writable native owner settles eviction and joins 
 AC-FTS-INC-INVENTORY-002: Existing maintained bilingual update/delete/Restore, observed posting cancellation and reader-drain/cold-owner operations must return their full literal healthy pages with unchanged canonical cuts and exact inventory checks. The damaged-manifest operation must fail with the owned projection Corruption detail, preserve complete canonical state, then exact repair must restore its literal healthy operation. R654 original failures remain retained; this source correction is unexecuted.
 
 Implementation: NativeTextIndex native factory option; NativeTextIncrementalNativeOwner original eviction then native SaveMetaData then joined disposal; NativeTextEnvelopeCodec maps only native Corruption at the owned envelope boundary to ProjectionCorrupt. No serialization fallback, file omission, format change, new deadline or provider replacement.
+
+
+### TASK-KL034-NATIVE-WAIT-AUTHORITY-002
+
+REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 retains the existing exact token/applied
+authority contract. SearchWaitAuthorityTests adds genuine native wrong atomic
+partition, changed placement epoch and zero minimum-position refusals, plus
+missing/negative persisted canonical AppliedBytes. Each actual WaitForIndex call
+returns its existing exact TokenInvalidated or Corruption detail, no partial
+result, and unchanged complete native bytes/cut. The metadata trials save and
+restore only the exact actual original native applied row under joined fixture
+ownership; restoration is test corruption repair, not a migration/production
+recovery or manufactured new read authority. Its intentional repair commit may
+advance the local storage cut; healthy wait must report the original actual
+replica-applied token, never that local Store.Position. Full independently literal
+WaitForIndexResult/schema/policy plus bilingual document/rank pages and complete
+canonical cut/image invariance prove healthy continuation. Original assertion
+and fixture/projection cleanup/restore errors are all retained.
+
+Canonical source ownership: Unit Search Cases/SearchWaitAuthorityTests.cs,
+Helpers/SearchWaitAuthorityTrial.cs and Assertions/SearchWaitAuthorityState.cs;
+existing actual ReplicaAppliedPositionWaitFixture, native projection and public
+SearchEngine own the real operations. No mock/provider/new dispatcher/timer,
+new timeout/default/token/API/alias/format or policy change. Root guarded join,
+coherent build, exact fresh native metadata and normal/scalar native controls and the existing real Linux RF3 scope qualify
+the source; authored case counts are not discovery or pass evidence. Existing
+KL02958/18/9 scope and all mandatory global suites remain unchanged.
+
+Broader KL034 remains explicit: current WaitForIndexRequest selects NativeText
+only. ApproximateSearchRequest has no minimum token or wait selector; existing
+ANN pins/stale-generation/replay/public reads do not by themselves implement an
+ANN minimum-prefix wait. This initial FTS boundary cannot silently close broader
+required projection waiting/generation criteria. Any additive ANN wait interface
+requires its own accepted generated contract, authority/lifecycle/budget and
+real SDK/official MCP/Q1 complete-flow qualification. No new public API is
+invented here and no broader capability is declared complete.
+
+
+### TASK-KL034-NATIVE-PROVIDER-FAILURE-003
+
+REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002 and REQ/AC-SEARCH-005 preserve
+WaitForIndexExecution's existing unavailable-provider failure. The same actual
+replica-applied seed, fresh authorized native canonical view and original
+minimum token are passed to a real SearchEngine with its supported absent
+native text provider. Its actual operation must return the exact existing
+UnsupportedCapability detail, null partial result and unchanged complete
+canonical image/cut. The actual registered native projection then completes
+WaitForIndex with independently literal complete result and bilingual document
+rank pages, preserving the whole native canonical image/cut. No provider fake,
+fallback, configuration/default, timeout, token, public API or production code
+change is introduced. All initiating and native fixture/projection cleanup
+failures remain joined and retained. This adds one source-declared case to
+SearchWaitAuthorityTests; fresh native metadata and normal/scalar execution are
+required, not inferred. Existing KL02958/18/9 remains unchanged. Root owns join,
+compiler, runtime verification and final original-task closure; all mandatory
+Linux full-suite/RF3/product qualification gates remain required.

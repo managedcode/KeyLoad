@@ -12,7 +12,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Actual stopped native rows distinguish unknown cancellation from the one genuine disposal ACK.</summary>
 internal static class PartitionMovementRetireGrantDispositionRf3Trial
 {
-    private const string Administrator = "root";
+    private const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
     private const string DatabaseDirectory = "database";
 
     internal static async Task<PartitionMoveResult> RunCorruptAsync(TwoRf3MembershipWave wave,

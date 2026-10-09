@@ -16,10 +16,17 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         => phases.AdmitAndExecuteAsync(principalId, request, state, role, intended, null,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken);
 
-    internal async Task<PartitionMoveParentState> EffectAsync(string principalId, PartitionMoveRequest request,
+    internal Task<PartitionMoveParentState> EffectAsync(string principalId, PartitionMoveRequest request,
         PartitionMoveParentState state, PartitionMovementParentPhaseRole grantRole,
         PartitionMovementParentPhaseRole effectRole, PartitionMovePhaseCommand intended, PhysicalShardRecord receiver,
         ReadExecutionBudget work, CancellationToken cancellationToken)
+        => EffectAsync(principalId, request, state, grantRole, effectRole, intended, receiver,
+            work, null, cancellationToken);
+
+    internal async Task<PartitionMoveParentState> EffectAsync(string principalId, PartitionMoveRequest request,
+        PartitionMoveParentState state, PartitionMovementParentPhaseRole grantRole,
+        PartitionMovementParentPhaseRole effectRole, PartitionMovePhaseCommand intended, PhysicalShardRecord receiver,
+        ReadExecutionBudget work, Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         work.Check();
         var header = state.Header
@@ -28,6 +35,10 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (intended.Stage == PartitionMovePeerStage.StagePage)
         {
+            if (phaseObservation is not null && intended.PageOrdinal == PartitionMovementProtocol.InitialPhaseOrdinal)
+            { await phaseObservation(GrainRequestPhase.ParentStagePreflight, cancellationToken).ConfigureAwait(false); }
+            work.Check();
+            cancellationToken.ThrowIfCancellationRequested();
             var descriptor = state.Selected?.OriginalDescriptor
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
             PartitionMovementParentCaptureLimits.RequirePlannedStageCapacity(state, intended, receiver,

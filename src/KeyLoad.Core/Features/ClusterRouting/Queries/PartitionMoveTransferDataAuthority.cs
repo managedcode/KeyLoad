@@ -22,12 +22,13 @@ public sealed partial class DatabaseEngine
         PartitionMovePeerEnvelopeValidation.RequireStructure(envelope, Limits.MaxBatchBytes);
         var capture = NativeSerialization.Deserialize<PartitionMoveCaptureRequest>(original.Body.Span);
         RequireTransferDataCaptureBounds(capture);
+        var maximumPageBytes = Math.Min(capture.MaximumPageBytes, Limits.MaxBatchBytes);
         var identity = OriginalMovePhaseIdentity(envelope, phase.OriginalPhaseCommandId, localPrincipalId);
         return Store.Read(view =>
         {
             RequireTransferDataSourceScope(view, localPrincipalId, verified, envelope, capture, identity, work);
             return PartitionMoveTransferDataReader.Read(view, phase.OriginalFence!, phase.OriginalDescriptor!, work,
-                Limits, capture.MaximumPageBytes, capture.MaximumImageBytes, capture.MaximumRecords);
+                Limits, maximumPageBytes, capture.MaximumImageBytes, capture.MaximumRecords);
         });
     }
 
@@ -98,7 +99,7 @@ public sealed partial class DatabaseEngine
 
     private void RequireTransferDataCaptureBounds(PartitionMoveCaptureRequest capture)
     {
-        if (capture.MaximumPageBytes <= PartitionMoveProtocol.EmptyCount || capture.MaximumPageBytes > Limits.MaxBatchBytes
+        if (capture.MaximumPageBytes <= PartitionMoveProtocol.EmptyCount
             || capture.MaximumImageBytes <= PartitionMoveProtocol.EmptyCount || capture.MaximumImageBytes > Limits.MaxQueryReadBytes
             || capture.MaximumRecords <= PartitionMoveProtocol.EmptyCount || capture.MaximumRecords > Limits.MaxScanRecords)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }

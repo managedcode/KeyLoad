@@ -787,6 +787,9 @@ coverage. Retain full unit/scalar/recovery/RF3/comparison and exact-source Linux
 logs/TRX/archives/job URLs before closing AC-SCALE-022. This contract enables no
 new website open-loop metric projection.
 
+
+TASK-SCALE-CGROUP-ORIGINAL-DIAGNOSTIC-001 refines only the existing REQ/AC-SCALE-016 failed native envelope observation. Authentic556 benchmark-contract AcScale016 passed its hardware-not-null predicate, then failed the original hardware-available/envelope-null guard. Raw native cgroup membership/mount/controller/limit bytes are not retained, so the exact cause remains OPEN. Before any source repair or root/budget policy change, the failed guard retains its original InvalidOperationException and invokes the EXISTING independent ScaleServerCgroupOracle.ReadCurrent under unchanged4KiB/64ancestor limits through the canonical failure observer. Its actual exception joins the original failure ledger; a successful oracle still leaves the original failure. The case cannot become PASS, skip or fallback. No new reader, copied raw private inputs, process command, options/clock/token/deadline or product acceptance change is introduced. Fresh Linux native evidence decides the owning failed predicate; original556 remains immutable. This is diagnostic source mapping, not qualification or a hardware repair. ADR103/ADR117 remain governing with no boundary change.
+
 ## Functional scheduling and ingestion clarification, 2026-10-09
 
 Status: accepted implementation contract. The native scheduling repair is scoped

@@ -26,7 +26,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
     [Test]
     public async Task RealStorePersistsNativeSnapshotAndRejectsStaleCompareExchange()
     {
-        await WithStoreAsync(async (fixture, store, log, token) =>
+        await WithStoreAsync(async (fixture, store, _, log, token) =>
         {
             var initial = await store.ReadAsync(token);
             await Assert.That(fixture.Database.LastApplied).IsEqualTo(log.State.CommittedIndex);
@@ -50,7 +50,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
     [Test]
     public async Task CancelledNativeCompareExchangeDoesNotCreateAnyMembershipRow()
     {
-        await WithStoreAsync(async (fixture, store, log, token) =>
+        await WithStoreAsync(async (fixture, store, _, log, token) =>
         {
             var initial = await store.ReadAsync(token);
             var inserted = initial.Insert(ReplicaMembershipNativeTests.Entry(), new TableVersion(FirstVersion, ZeroEtag))!;
@@ -70,7 +70,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
         });
     }
 
-    private static async Task WithStoreAsync(Func<TestDatabase, ReplicaMembershipStore, DurableReplicaLog, CancellationToken, Task> verify)
+    internal static async Task WithStoreAsync(Func<TestDatabase, ReplicaMembershipStore, ReplicaMembershipTable, DurableReplicaLog, CancellationToken, Task> verify)
     {
         using var fixture = new TestDatabase();
         ClusterPrincipalPolicy.Initialize(fixture.Database);
@@ -113,7 +113,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
         local.MarkTransportReady();
         await ReadyLeaderAsync(consensus, linked.Token);
         var store = new ReplicaMembershipStore(fixture.Database, coordinator, consensus, ClusterPrincipalPolicy.InternalPrincipalId, UnitRoutingOptions.Membership());
-        await verify(fixture, store, log, linked.Token);
+        await verify(fixture, store, (ReplicaMembershipTable)host.Services.GetRequiredService<IMembershipTable>(), log, linked.Token);
     }
 
     private static async Task ReadyLeaderAsync(ReplicaConsensus consensus, CancellationToken cancellationToken)

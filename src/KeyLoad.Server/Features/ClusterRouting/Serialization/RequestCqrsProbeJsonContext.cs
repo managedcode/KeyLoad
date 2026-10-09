@@ -9,6 +9,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 [JsonSerializable(typeof(RequestCqrsProbeArmRecord))]
 [JsonSerializable(typeof(RequestCqrsProbeReleaseRecord))]
 [JsonSerializable(typeof(RequestCqrsProbeMarkerRecord))]
+[JsonSerializable(typeof(RequestCqrsProbeActivationRecord))]
+[JsonSerializable(typeof(RequestCqrsProbeLiveRecord))]
 internal sealed partial class RequestCqrsProbeJsonContext : JsonSerializerContext
 {
 }

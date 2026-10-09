@@ -22,10 +22,13 @@ internal static class OrleansSiloConfiguration
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
         IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries,
-        IControlledDocumentCommandRouter? controlledDocuments, CancellationToken startupCancellation)
+        IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
+        CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
+        if (sealedObserver is not null)
+        { builder.Services.AddSingleton(sealedObserver); }
         if (options.MembershipAuthority.RemoteDocumentReads)
         {
             builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();

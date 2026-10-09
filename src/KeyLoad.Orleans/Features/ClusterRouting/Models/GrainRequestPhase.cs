@@ -9,7 +9,11 @@ internal enum GrainRequestPhase
     SubmitReturned,
     ControlledDocumentGrantSettled,
     ControlledDocumentOutcomeReturned,
-    RetireOperationSealed
+    RetireOperationSealed,
+    ParentStagePreflight,
+    TransferPageRetainedBudgetExceeded,
+    TransferPageReturned,
+    ParentTransferCloseFailed
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

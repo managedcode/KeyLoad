@@ -1046,3 +1046,39 @@ REQ/AC-CRS-005 and REQ/AC-CLIENT-004/005 require actual healthy routed continuat
 AC-CRS-FRESH-READINESS-002 replaces only the two advisory before/after boolean assertions with one actual GET health/ready at each same boundary through the already owned SDK HttpClient. Require HTTP200 and the exact two-field JSON object status=ready/voters=3, bounded to128 body bytes with original response/body disposal. That native endpoint independently executes existing compatible-cohort and catalog admission. Any non200, malformed/extra/missing field, oversized body, cancellation or disposal failure fails the whole case. Do not poll, retry, sleep, extend any deadline, change product/cache/discovery behavior or infer readiness from a prior snapshot. The original before/after incarnation/node/applied and placement comparisons, full immutable receipts, changed-content denial, minimum-token SDK/official-MCP reads, complete literal state and original receipt replay all remain mandatory.
 
 Root owns IntegrationTests ClusterRouting Helpers/RequestCqrsRf3Callers.cs (the original owned native HTTP operation), Contracts/RequestCqrsRf3Protocol.cs (fixture-only128-byte bound), Assertions/RequestCqrsFaultReplayContinuation.cs (two call sites) and the unchanged exact FaultSubmit/Returned SDK/MCP whole cases. Existing ADR082 owns this test-only observation contract; no new public schema, provider, trust boundary, storage or runtime implementation. Freeze, join, native build/format and exact original Linux normal/scalar task cases precede current closure. Preserve original failed artifact11589298518 SHA25635d4bffaeed1db10fcc365af728b60c1515fec33ada040a5f4cdf069ced5b688; rollback removes this coherent oracle amendment, never admits the failed original. Scope remains open until those genuine current-source RF3 flows pass.
+
+
+### TASK-CRS-C1-NATIVE-WAL-KIND-001: original native store-open failure classification
+
+REQ-CRS-DIAG-005 / AC-CRS-DIAG-005 extends the existing closed C1 failure-kind
+classification with exactly `WalCorruption` and `WalFullLogCorruption`, selected
+only by the pinned public ZoneTree `WriteAheadLogCorruptionException` and
+`WriteAheadLogFullLogCorruptionException` CLR types. These are fixed categories,
+not arbitrary exception type names or messages. No path, segment identity, nested
+exception text, WAL bytes, caller data or checksum values may enter the record.
+The original first failure phase, 256-byte strict canonical parser, native failure
+exit2, unchanged input/success receipt, empty success stderr, fatal precedence,
+primary/cleanup failures and all process/readers/lock joins remain mandatory.
+
+Original source556c13ab78c839df68b09dce1e9fc92bef576bfe run37891957916 attempt1
+KL015 normal32/32 passed; scalar30/32 passed, with the two genuine SDK/official MCP
+held-write/revocation flows failing at offline `OpenStore/Other` after owned wave
+shutdown. This original observation does not establish a checksum cause. The
+fixed categories make a future original native class observable without changing
+storage, exception propagation or any operation/assertion/deadline. Existing
+`SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects` and
+`OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects` retain
+the complete denied-write, unchanged business state, restored caller, positive
+outcome and joined offline no-original-outcome checks. Existing genuine negative
+child inspection followed by healthy reopen controls remain unchanged; no
+property-only category test replaces those whole flows.
+
+ADR-082 owns this diagnostic-only source contract. Freeze docs first, append the
+two enum categories without changing existing values, add the two actual type
+patterns in CrashHost ClusterRouting failure evidence, then root builds and
+executes existing full C1 controls and fresh exact-source Linux KL015 normal/scalar
+lanes. A new category is still a failed original child, never an accepted receipt.
+The canonical official ZoneTree repair/publication gate remains independent; no
+consumer checksum fallback, format migration, fork package or local reference is
+authorized. Rollback removes only these two diagnostic categories and matching
+patterns; original failed records remain immutable.

@@ -12,7 +12,7 @@ internal static class PartitionMoveParentExecution
     private const string PhaseCompleted = "The controlled partition movement phase completed.";
 
     internal static async Task<PartitionMoveResult> ExecuteAsync(DecodedGrainRequest original,
-        IServiceProvider services, TimeProvider clock,
+        IServiceProvider services, TimeProvider clock, GrainRequestCodec codec, IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
@@ -29,8 +29,14 @@ internal static class PartitionMoveParentExecution
         var parent = services.GetService<IPartitionMovementParent>()
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
+        var phaseObservation = codec.HasPhaseObserver ? CreatePhaseObservation(codec, original, context) : null;
         return await parent.ExecuteAsync(original.Envelope, request, work,
             phase => writer.ProgressAsync(new GrainRequestProgress(original.Envelope.RequestId)
-            { MovePhase = phase }, PhaseCompleted), token).ConfigureAwait(true);
+            { MovePhase = phase }, PhaseCompleted), phaseObservation, token).ConfigureAwait(true);
     }
+    private static Func<GrainRequestPhase, CancellationToken, ValueTask> CreatePhaseObservation(GrainRequestCodec codec,
+        DecodedGrainRequest original, IGrainContext context)
+        => (phase, token) => phase is GrainRequestPhase.ParentStagePreflight or GrainRequestPhase.ParentTransferCloseFailed
+            ? codec.ObservePhaseAsync(original, phase, context, token)
+            : throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
 }

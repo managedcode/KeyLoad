@@ -31,7 +31,7 @@ internal static class ReplicaIsolationFlow
         var oldAdmin = new KeyLoadClient(oldAdminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         var originalStatus = await McpCallerAssertions.SdkSuccessAsync(await oldAdmin.StatusAsync(cancellationToken));
         await Assert.That(originalStatus.ConsensusTerm > Zero).IsTrue();
-        await ReplicaIsolationFlowAssertions.StatusAsync(originalStatus, identities[isolated], isolated, receipt.Token.Incarnation,
+        await ReplicaIsolationFlowAssertions.StatusAsync(originalStatus, identities[isolated].NodeId, isolated, receipt.Token.Incarnation, identities[isolated].ReadGeneration,
             originalStatus.ConsensusTerm);
         using var oldSdkHttp = fixture.App.CreateHttpClient(isolated, ClusterFixtureProtocol.HttpEndpointName);
         oldSdkHttp.Timeout = ClusterFixtureProtocol.ClientTimeout;
@@ -40,7 +40,7 @@ internal static class ReplicaIsolationFlow
         await using var oldAdminMcp = await McpOfficialClient.ConnectAsync(fixture, isolated, fixture.AdminKey, cancellationToken);
         var nativeStatus = await McpCallerAssertions.SuccessAsync<NodeStatus>(await oldAdminMcp.CallAsync(
             McpCallerTools.AdminStatus, new { }, cancellationToken));
-        await ReplicaIsolationFlowAssertions.StatusAsync(nativeStatus.Value, identities[isolated], isolated, receipt.Token.Incarnation,
+        await ReplicaIsolationFlowAssertions.StatusAsync(nativeStatus.Value, identities[isolated].NodeId, isolated, receipt.Token.Incarnation, identities[isolated].ReadGeneration,
             originalStatus.ConsensusTerm);
         var reference = new EntityRef(partition, Collection, DocumentId);
         await DocumentSessionReadRf3Assertions.HealthyAsync(oldSdk, oldMcp, reference, receipt.Token, FirstJson, First, cancellationToken);
@@ -56,8 +56,8 @@ internal static class ReplicaIsolationFlow
         await ReplicaIsolationFlowAssertions.ReceiptAsync(next, nextCommand, Second);
         var after = await McpCallerAssertions.SdkSuccessAsync(await majority.StatusAsync(cancellationToken));
         await Assert.That(after.ConsensusTerm > originalStatus.ConsensusTerm).IsTrue();
-        await ReplicaIsolationFlowAssertions.StatusAsync(after, identities[authority.Leader], authority.Leader,
-            receipt.Token.Incarnation, authority.Status.ConsensusTerm);
+        await ReplicaIsolationFlowAssertions.StatusAsync(after, identities[authority.Leader].NodeId, authority.Leader,
+            receipt.Token.Incarnation, identities[authority.Leader].ReadGeneration, authority.Status.ConsensusTerm);
         await ReplicaIsolationStatusIdentity.VerifyOfficialAsync(fixture, authority.Leader, identities[authority.Leader],
             receipt.Token.Incarnation, after.ConsensusTerm, cancellationToken);
         await ReplicaIsolationFlowAssertions.RefusedAsync(oldSdk, oldMcp, reference, receipt.Token, next.Token,
@@ -69,7 +69,7 @@ internal static class ReplicaIsolationFlow
 
     private static async Task VerifyRestoredAsync(ClusterFixture fixture, ReplicaIsolationOwner owner, EntityRef reference,
         CommitReceipt original, CommandRequest originalCommand, CommitReceipt next, CommandRequest nextCommand,
-        McpPersistedIdentity identity, IReadOnlyDictionary<string, string> identities, CancellationToken cancellationToken)
+        McpPersistedIdentity identity, IReadOnlyDictionary<string, NodeStatus> identities, CancellationToken cancellationToken)
     {
         foreach (var node in owner.Resources)
         { await VerifyNodeAsync(fixture, node, reference, original, originalCommand, next, nextCommand, identity, cancellationToken); }

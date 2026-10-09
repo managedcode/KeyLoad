@@ -19,7 +19,10 @@ internal static class NativeTextIncrementalCrashScenario
         { return false; }
         var stage = Enum.Parse<NativeTextFaultStage>(args[StageArgument], ignoreCase: false);
         if (stage is not (NativeTextFaultStage.NativePostingWritten
-            or NativeTextFaultStage.NativeInventoryFlushed or NativeTextFaultStage.ManifestPublished))
+            or NativeTextFaultStage.NativeInventoryFlushed or NativeTextFaultStage.ManifestPublished
+            or NativeTextFaultStage.IncrementalIntentFlushed or NativeTextFaultStage.NativeDeletionWritten
+            or NativeTextFaultStage.NativeAdditionWritten or NativeTextFaultStage.CanonicalCheckpointAcknowledged
+            or NativeTextFaultStage.PendingIntentRetired))
         { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
         await RunAsync(args[RootArgument], Guid.Parse(args[IncarnationArgument]), stage, args[ModeArgument]);
         return true;

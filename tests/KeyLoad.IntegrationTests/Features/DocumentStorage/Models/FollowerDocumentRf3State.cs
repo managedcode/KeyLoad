@@ -8,6 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 /// <summary>Owns only this test's actual resources and observations; it is never a database or diagnostic payload.</summary>
 internal sealed class FollowerDocumentRf3State(FollowerDocumentCaller mode, FollowerDocumentChange change)
 {
+    internal FollowerDocumentRf3FailureStage Stage { get; set; } = FollowerDocumentRf3FailureStage.StartingWave;
     internal FollowerDocumentCaller Mode { get; } = mode;
     internal FollowerDocumentChange Change { get; } = change;
     internal string Root { get; set; } = string.Empty;

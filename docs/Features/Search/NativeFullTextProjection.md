@@ -275,3 +275,135 @@ REQ-FTS-INC-INVENTORY-002: The writable native owner settles eviction and joins 
 AC-FTS-INC-INVENTORY-002: Existing maintained bilingual update/delete/Restore, observed posting cancellation and reader-drain/cold-owner operations must return their full literal healthy pages with unchanged canonical cuts and exact inventory checks. The damaged-manifest operation must fail with the owned projection Corruption detail, preserve complete canonical state, then exact repair must restore its literal healthy operation. R654 original failures remain retained; this source correction is unexecuted.
 
 Implementation: NativeTextIndex native factory option; NativeTextIncrementalNativeOwner original eviction then native SaveMetaData then joined disposal; NativeTextEnvelopeCodec maps only native Corruption at the owned envelope boundary to ProjectionCorrupt. No serialization fallback, file omission, format change, new deadline or provider replacement.
+
+
+## TASK-KL029-INCREMENTAL-SEVEN-CUTS-001 — exact incremental process boundaries
+
+Related REQ/AC-FTS-INCREMENTAL-003/005 and REQ/AC-FTS-INC-009/017 remain unchanged. The three previously authored incremental arguments are retained. Five appended diagnostic stages independently identify the durable intent, first native deletion, first native addition, validated original canonical ACK and actual intent retirement. Together with native inventory and manifest publication these cover all seven required boundaries; the original generic first-posting boundary remains an additional supporting control. Eight source-authored arguments are not an observed native census or execution result.
+
+| Required boundary | Actual owner event | CrashHost stage |
+| --- | --- | --- |
+| Intent flush | `PersistIntent` completes before the owner observer | `IncrementalIntentFlushed` |
+| First deletion | First actual exact-triple `DeleteRecord` returns | `NativeDeletionWritten` |
+| First addition | First actual exact-triple `UpsertRecord` returns | `NativeAdditionWritten` |
+| Native inventory | Actual native handles flush/join and inventory is captured | `NativeInventoryFlushed` |
+| Checkpoint publication | Complete native manifest publication finishes | `ManifestPublished` |
+| Canonical ACK | Actual journal/materializer receipt passes fresh checkpoint, original intent and native inventory validation | `CanonicalCheckpointAcknowledged` |
+| Intent retirement | Actual original pending `File.Delete` returns | `PendingIntentRetired` |
+
+Existing fault-stage ordinals 0 through 4 are preserved; appended stages occupy 5 through 9 in the listed appended order. They are source diagnostics, never authority or a public operation. The optional null observer retains the normal execution path and allocates no callback. Deletion and addition observations occur once per actual owner after their own native effects; no additional effect, provider, retry or deadline is introduced.
+
+The owning real-process trial retains its acknowledged bilingual update/delete, literal selected and removed queries, stable native IDs/revisions/tombstones/token triples, canonical record digest, actual applied/store positions and joined original child/readers/locks. A bounded private sidecar records the actual immutable checkpoint command before its existing preparation and its actual canonical result before settlement. This sidecar is test evidence, never intent authority. Recovery still uses the native persisted intent; after retirement, identical native command replay resolves its genuine retained outcome and must leave the journal index, applied position and store position unchanged. Complete receipt equality, original command/consumer/token scope and monotone receipt position are checked before healthy revision 3 and after final cold reopen. Neither a new command ID nor a synthetic receipt can fill the post-retirement result.
+
+Implementation order and ownership: docs/ADR freeze; Server Search protocol/page preparation/native writer/owner/checkpoint settlement/session observer; CrashHost Search actual boundary selection and immutable command/receipt evidence; Recovery Search exact eight arguments and full checkpoint continuation assertions; root guarded join, complete build, genuine native census, Linux normal/scalar recovery and required RF3 qualification. Rollback removes only these additive diagnostic hooks/test evidence; canonical formats, public DTO aliases/Ids, storage providers, budgets and the original three cases remain unchanged. Existing broader negative/released-consumer/corruption and RF3 gates remain mandatory. This source checkpoint claims no runtime PASS, power-loss durability or KL029 acceptance closure.
+
+
+## TASK-KL029-PERSISTED-INTENT-CORRUPTION-001
+
+REQ/AC-FTS-INCREMENTAL-005 and AC-FTS-INCREMENTAL-003 require a genuine
+malformed durable intent refusal, not just a damaged completed manifest. The
+Unit Search NativeTextIncrementalIntentCorruptionTests flow configures persisted
+authority/consumer, commits the original bilingual canonical seed, begins the
+actual native maintenance owner and prepares a real page with its original
+canonical checkpoint command. After that owner joins, damage exactly one byte
+of its actual checksummed intent.bin; a new native owner with the same original
+Build identity must reject Corruption with no partial result, unchanged complete
+canonical bytes/position and the damaged evidence preserved. Restore only the
+exact original bytes in an owning finally retaining primary+repair failures.
+
+Healthy continuation reopens that same enrolled generation and requires its
+complete original checkpoint intent bytes, applies those actual native postings,
+commits and settles the original command/receipt, verifies the original prefix,
+and replays the same checkpoint command without canonical cut/image change.
+Complete independently literal selected Ukrainian/English pages, scores and
+references are checked before and after another native-owner reopen. No fresh
+ACK ID, fabricated intent/receipt, rebuild fallback, clock advance, provider
+replacement or new timeout. Existing eight incremental process arguments and
+ten full-generation cuts remain mandatory. This is Unit real-owner operation
+evidence, not process-kill or RF3 qualification.
+
+Stages: docs/ADR freeze; feature-local Cases and Helpers implementation; root
+guarded join/full build/fresh native census; normal/scalar Linux Unit and unchanged
+required recovery/RF3 gates. Root owns runtime/source/image/Git integration.
+Rollback removes only this regression/docs; product formats/contracts unchanged.
+Expired original unACKed token qualification remains explicit pending evidence;
+released-consumer rejection does not substitute for expiry.
+
+
+## TASK-KL029-ORIGINAL-PAGE-NATURAL-EXPIRY-001
+
+REQ/AC-FTS-INCREMENTAL-005 requires original unACKed token expiry separately
+from released-consumer rejection. NativeTextIncrementalExpiryTests obtains a
+real canonical page, durable original PreparePage and verified native signed
+ProjectionBatchClaims through DatabaseEngine.Verify with the persisted key.
+Join the original maintenance owner, then await that actual signed ExpiresAt
+using the unchanged actual owner TimeProvider and original TUnit cancellation.
+No clock advance, lifetime override or new deadline: the existing default is
+five minutes. No live maintenance session/budget is retained across the wait.
+
+A new original-identity owner may physically replay its durable native intent;
+it must never renew the token or invent an ACK. The original native checkpoint
+command returns exact TokenInvalidated, null payload and the fixed expiry detail;
+canonical documents/outbox/consumer checkpoint remain unchanged. Its first real
+failed native command may persist its own failure outcome and advance the native
+apply/store cut; that is retained evidence, not an index ACK or model effect.
+Full immutable failure-result replay must leave the complete canonical image/cut
+unchanged. Original intent bytes stay present; Verify cannot return partial success.
+
+The operator then genuinely releases the original canonical consumer and native
+generation under fresh persisted authority. A distinct actual canonical consumer
+with the same original validated definition receives a fresh Build and original
+checkpoint ACK; complete literal selected bilingual pages, full receipt replay,
+and another native-owner reopen prove healthy continuation. No token re-signing,
+fake expiry/receipt/provider, ignored failure, timing retry or timeout increase.
+This is native Unit operation evidence; existing SDK/MCP/Q1 RF3 and all18 process
+cuts plus mandatory global Linux gates remain separate and required. Root owns
+guarded integration, fresh metadata/execution and source-image evidence.
+
+### TASK-KL029-NATIVE-TASK-ACCEPTANCE-001
+
+REQ/AC-TUNIT-ENTRY-010 and REQ/AC-FTS-001–007,
+REQ/AC-FTS-INCREMENTAL-001–005/007 and REQ/AC-FTS-INC-009–017
+retain the original KL029 architecture predicates: projection deletion plus
+canonical replay returns literal results, checkpoint crashes cannot conceal
+updates, and stale revisions cannot resurrect. Add only KL-029 normal and
+scalar-caller cells to the closed native task matrix/manual choice. Preserve
+all nine prior tasks, full mandatory build/rules/unit normal/scalar/recovery/RF3
+coverage gates, original source-image identity/admission, native20 slots,
+Detailed live output, strict caller environment, retained failure/no-skip checks
+and genuine joined Aspire cleanup. Scoped task receipts never replace full
+suites or supply coverage/provider/performance/endurance/power-loss evidence.
+
+Three exact closed selectors cover the source-authored58 Unit instances
+(including damaged durable original intent and natural original-token expiry),
+18 genuine process Recovery instances (ten full-generation and eight incremental,
+including all seven required cuts plus retained generic posting control), and
+nine genuine RF3 instances (SDK, official MCP and Q1 maintenance paths, persisted
+row/field/revocation/read-cut, leader loss/restart, cancellation and healthy
+continuation). Source counts/displays/constructor expectations are not native
+discovery proof. Root must freshly bind every exact UID, method, instance, typed
+parameter, primary-constructor reported class, source span/hash and assembly/PDB
+against the final coherent image before the canonical contract is admitted.
+
+The natural expiry flow retains unchanged default five-minute lifetime and
+original cancellation, actual signed ExpiresAt, original durable intent/failed
+ACK and canonical pin/outbox/documents, then genuine Release and distinct fresh
+consumer/native generation Build with full literal bilingual/cold continuation.
+Keep thirty-minute Unit/Recovery and sixty-minute RF3 native deadlines unchanged;
+scalar means actual caller DOTNET_EnableHWIntrinsic=0, never unproved server mode.
+
+Ordered stages: freeze this complete source scope; prepare guarded additive
+contract/closed enums/workflow; root coherent build and actual selected metadata;
+strict bind/reseal, root join/commit/push; authenticate both original Linux task
+artifacts API/ZIP/source/run/attempt/native TRX/images/environment/readers/cleanup
+and every final verifier conclusion. Missing/failed/skipped/changed originals
+retain failure. Root owns live source, discovery/build/workflow/Git; Session owns
+whole KL029 operation review and dedicated original evidence. Rollback removes
+only the additive KL029 lane, preserving every prior task and immutable report.
+No data, serializer, public transport, provider or topology migration occurs.
+
+Actual R875 coherent-image metadata originals now contain exactly 58 Unit,
+18 Recovery and nine RF3 cases for these three closed selectors. The owning
+receipt and eleven-task census plan retain original native process/source/PE/PDB
+before-after evidence. Strict native case admission remains required; metadata
+is not an execution, coverage, Linux RF3 or task-acceptance result.

@@ -9,7 +9,8 @@ internal static class NativeTextIncrementalPostingWriter
 
     internal static void Apply(IndexOfTokenRecordPreviousToken<ulong, ulong> index,
         NativeTextIncrementalPosting[] removals, NativeTextIncrementalPosting[] additions,
-        ReadExecutionBudget budget, Action? firstPosting = null)
+        ReadExecutionBudget budget, Action? firstPosting = null,
+        Action? firstDeletion = null, Action? firstAddition = null)
     {
         Require(removals, budget);
         Require(additions, budget);
@@ -17,6 +18,8 @@ internal static class NativeTextIncrementalPostingWriter
         {
             budget.Check();
             index.DeleteRecord(posting.Token, posting.Record, posting.PreviousToken);
+            firstDeletion?.Invoke();
+            firstDeletion = null;
             firstPosting?.Invoke();
             firstPosting = null;
         }
@@ -24,6 +27,8 @@ internal static class NativeTextIncrementalPostingWriter
         {
             budget.Check();
             index.UpsertRecord(posting.Token, posting.Record, posting.PreviousToken);
+            firstAddition?.Invoke();
+            firstAddition = null;
             firstPosting?.Invoke();
             firstPosting = null;
         }

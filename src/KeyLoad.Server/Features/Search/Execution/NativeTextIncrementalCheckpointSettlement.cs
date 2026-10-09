@@ -13,7 +13,7 @@ internal static class NativeTextIncrementalCheckpointSettlement
     internal static NativeTextIncrementalManifest Complete(string generationPath, NativeTextIncrementalIntent intent,
         NativeTextIncrementalManifest manifest, ProjectionBatchResult acknowledged,
         NativeTextSeedCapture fresh, ReadExecutionBudget budget,
-        IOptions<NativeTextExecutionOptions> options)
+        IOptions<NativeTextExecutionOptions> options, Action<NativeTextFaultStage>? observer = null)
     {
         budget.Check();
         var receipt = acknowledged.Receipt;
@@ -41,6 +41,7 @@ internal static class NativeTextIncrementalCheckpointSettlement
             Path.GetFileName(generationPath), manifest.Scope.NodeId, options);
         NativeTextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, options, budget);
         budget.Check();
+        observer?.Invoke(NativeTextFaultStage.CanonicalCheckpointAcknowledged);
         var completed = manifest;
         if (manifest.Bootstrap && acknowledged.Checkpoint == intent.SourceUpperSequence)
         {
@@ -50,6 +51,7 @@ internal static class NativeTextIncrementalCheckpointSettlement
         }
         budget.Check();
         File.Delete(Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile));
+        observer?.Invoke(NativeTextFaultStage.PendingIntentRetired);
         budget.Check();
         return completed;
     }

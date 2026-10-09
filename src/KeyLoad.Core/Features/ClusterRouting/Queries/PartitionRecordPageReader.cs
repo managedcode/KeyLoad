@@ -17,7 +17,7 @@ internal static class PartitionRecordPageReader
     private const int LastReturnedRecordOffset = 1;
 
     private const string ExaminedBudgetExceeded = "The partition record page exceeds its examined-byte budget.";
-    private const string RetainedBudgetExceeded = "The partition record page exceeds its retained-byte budget.";
+    internal const string RetainedBudgetExceeded = "The partition record page exceeds its retained-byte budget.";
     private const string InvalidNativeAccounting = "The storage view returned inconsistent range accounting.";
 
     internal static PartitionRecordPage Read(IKeyValueView view, PartitionRef partition,

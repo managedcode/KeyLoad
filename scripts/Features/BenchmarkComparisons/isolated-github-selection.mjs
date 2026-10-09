@@ -26,9 +26,7 @@ export function selectCompletedEvidence(capture, context, plan, scaledPlans = []
   const documentJobs = new Set(documentCells.map(documentJobName));
   const regularJobs = jobs.filter(job => !openLoopJobNames.has(job.name) && !documentJobs.has(job.name));
   const regularArtifacts = artifacts.filter(item => !openLoopArtifactNames.has(item.name) && !item.name.startsWith(DOCUMENT.artifactPrefix));
-  const groupedNames = new Set(cells.map(cell => isolatedEvidenceJobName(cell)));
-  const grouped = jobs.some(job => groupedNames.has(job.name));
-  const jobName = cell => grouped ? isolatedEvidenceJobName(cell) : GH.casePrefix + cell.id;
+  const jobName = cell => isolatedEvidenceJobName(cell);
   const targets = [...new Set(cells.map(cell => cell.target))];
   const isWorker = job => job.name.startsWith(GH.casePrefix) || targets.some(target =>
     job.name.startsWith(target + ' / ') && !job.name.startsWith(target + ' / Check / '));

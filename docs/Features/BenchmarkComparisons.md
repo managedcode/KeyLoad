@@ -1438,3 +1438,50 @@ Local development verification on 2026-10-07: final solution Release build compl
 TASK-WEB-NAVIGATION-002 preserves AC-BC-011 and AC-BC-WEB-003: the actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through native mouse press/release, rather than DOM `.click()` which does not model native pointer focus. No forced focus, scroll, renderer mutation, changed destination oracle, deadline or coverage allowance is permitted. Existing popover closure, exact CSS-adjusted clamped target completion, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory.
 
 Original Linux run37758156397/source32bbe23 retained hash#product with scrollY11734 and product absolute top70. It proves destination failure but does not retain the initiating focus/scroll event. Production navigation is unchanged. `SiteContentBrowserTests` retains the full existing action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. Root alone owns fresh native Chrome/Aspire and Linux Website qualification. Source repair does not claim the original production cause or runtime success.
+
+
+### Native image annotation model admission, 2026-10-09
+
+REQ-BC-IMAGE-MODEL-001 / AC-BC-IMAGE-MODEL-001 / TASK-BC-IMAGE-MODEL-001
+requires the pinned Aspire 13.6 native image annotation representation in the
+complete isolated resource-model suite. `AddContainer` retains a registry-qualified
+image in `Image`; without an explicit `WithImageRegistry`, `Registry` is exactly
+null, not an empty string. The existing HelixDB and SurrealDB complete model flows
+assert that exact absence alongside the unchanged image, SHA256, null tag, private
+writable mount, native target port, runner endpoint/image binding and wait owner.
+Their existing two/three-node rejection flows must still leave only the runner,
+without native storage or fabricated cluster membership.
+
+ADR-056 owns this model admission contract. Verification is the existing native
+comparison selection `/*/*/Isolated*Resource*/*` at the original native concurrency
+20, followed by exact-source Linux image preparation and the complete comparison
+matrices. A model pass does not prove native startup, membership, corpus correctness
+or performance. Original source556c13ab run37891957953 attempt1 resource-model
+report remains 122/124 passed with two errors; its authenticated native JSON and
+job log are preserved, and that invocation produced no TRX. This correction changes
+only two incorrect test expectations; it does not alter images or production
+resource composition, configuration, providers, topology, execution or evidence gates.
+
+
+### TASK-BC-NATIVE-CONTRACT-RESULT-001 — actual TUnit result and canonical proof fixtures
+
+REQ-BC-NATIVE-CONTRACT-RESULT-001 / AC-BC-NATIVE-CONTRACT-RESULT-001 refine existing image safe-failure and AC-ISO-006/007 process gates under ADR117. The comparison host is the native TUnit executable, not the retired CLI. A real child must fail with nonzero native exit and report the original NativeClientWorkloadProducesSuccessfulOriginalReports case plus exact expected safe detail in its bounded drained stdout/stderr result. Confidentiality checks still examine both complete captured streams and deny every existing private canary. No error code, privacy, process drain, clock, timeout or test count is weakened; requiring CLI-only stderr after conversion to native TUnit is obsolete scaffolding.
+
+Controlled aggregate fixtures must generate exact current database-group job names from the existing canonical isolatedJobName function before the real Node aggregation CLI runs. Production exact-name/cohort/job/artifact/proof validators are unchanged. Valid fixture proof must let absent/symlink/foreign raw-worker negatives reach their actual InputError boundary; duplicate/failed/expired/unknown/legacy-mixed metadata negatives remain strict. This repairs test-owned input construction, not genuine GitHub provenance or publication authorization.
+
+Traceability: ComparisonHostBindingsSupport supports all original35 AcImage002/005 and AcPerf002/003 real-child cases; IsolatedAggregateCliFixture supports the four original failing missing/symlink/foreign raw CLI cases; IsolatedGitHubCompleteProgram supports the original ControlledClosed330 valid case and all existing metadata corruptions. Their complete negative/healthy controls and every mandatory benchmark suite remain. Source556/run37891957953 artifact11600972020 original1202/1161PASS/41FAIL remains immutable; fresh focused child+Node cases then complete Linux benchmark contracts qualify the repair. One separate AcScale016 actual Linux host-evidence failure remains OPEN: original raw CPU/mount/cgroup inputs are absent, so no source diagnosis or bound/deadline alteration is claimed.
+
+Owning paths: comparison UnitContracts Helpers/ComparisonHostBindingsSupport.cs, Fixtures/IsolatedAggregateCliFixture.cs, Processes/IsolatedGitHubCompleteProgram.cs; feature/ADR034 documentation only. Order: docs frozen before source → root guarded current-base join → real native child/Node regression execution → full Linux benchmark-contract gate. Rollback source-only; no product format/API/provider/schema change, release or publication. No native child is replaced by an in-process test or fake successful CLI.
+
+
+### TASK-BC-CANONICAL-WORKER-NAMES-001 — remove active legacy job selection
+
+REQ-BC-CANONICAL-WORKER-NAMES-001 requires completed evidence selection to use only the existing canonical isolatedEvidenceJobName for every current planned worker. No all-legacy fallback or mixed-name acceptance is allowed. The old Benchmark / prefix remains solely an unexpected-worker rejection classifier; immutable historical reports retain their original names and cannot authorize current selection. Existing strict aggregate proof, current plans, source/run/attempt/profile identity, artifact bounds, failed-cell accounting and mandatory suites remain unchanged. This implements the standing root prohibition on active legacy compatibility under ADR034 and ADR076, without a persisted format or provider change.
+
+AC-BC-CANONICAL-WORKER-NAMES-001 maps to IsolatedGitHubCompleteTests.AcIso006ControlledClosed330MetadataRequiresEveryCellAndOneSuccessfulImageJob: existing valid/modern/modern-failed arguments use genuine canonical worker names through the real Node selection then strict proof projection; new legacy argument changes only all worker names and must fail with the original GH.failure at selection, before proof projection. Existing mixed/foreign/duplicate/absent/expired negatives and all330 planned-cell assertions remain. Controlled inputs exercise production validation and never authenticate GitHub or qualify publication.
+
+Ownership/order: freeze this contract before scripts/Features/BenchmarkComparisons/isolated-github-selection.mjs and the existing ComparisonTests UnitContracts Cases/IsolatedGitHubCompleteTests.cs + Processes/IsolatedGitHubCompleteProgram.cs edits; root guarded join, fresh native Node canonical-positive/legacy-negative processes, then complete mandatory Linux benchmark-contract suite. Preserve original556/run37891957953 reports unchanged. No process deadline, drain budget, image/topology, proof validator, public route, threshold, retry or fallback changes. Source-only until fresh exact-source execution; the separate cgroup cause remains OPEN.
+
+## Native pure/mixed methodology, owner direction 2026-10-09
+
+[Methodology](BenchmarkComparisons/Methodology.md) and [ADR-122](../ADR/ADR-122-native-benchmark-methodology.md) define the current common pure/mixed/ingestion benchmark contract and REQ/AC-METH-001..005. Only native one-node and three-node comparison arms remain active. Earlier two-node cohort counts and original records are historical, not the current execution inventory. Document-family implementation and authentic Linux evidence remain separately tracked; authored methodology is not a passed measurement.

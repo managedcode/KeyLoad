@@ -61,7 +61,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
     private async Task<ReplicaMembershipAuthorityReplyV1> AliveAsync(ReplicaMembershipTable table,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken token)
     {
-        var entry = ReplicaMembershipAuthorityMapping.ToNative(entry: call.CandidateEntry!, membershipOptions: membershipOptions);
+        var entry = ReplicaMembershipAuthorityHeartbeat.ToNative(entry: call.CandidateEntry!, membershipOptions: membershipOptions);
         await table.UpdateIAmAliveAsync(entry, token).ConfigureAwait(false);
         return AppliedReply(call, true);
     }

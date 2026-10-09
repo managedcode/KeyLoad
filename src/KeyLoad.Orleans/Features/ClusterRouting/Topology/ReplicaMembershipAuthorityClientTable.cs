@@ -122,7 +122,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
     {
         ReplicaMembershipProtocol.ValidateEntry(entry);
         var call = NewCall(ReplicaMembershipAuthorityOperation.UpdateIAmAlive) with
-        { CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, ReplicaMembershipAuthorityProtocol.InitialRowETag) };
+        { CandidateEntry = ReplicaMembershipAuthorityHeartbeat.ToWire(entry) };
         _ = await SendAsync(call, cancellationToken).ConfigureAwait(false);
     }
 

@@ -20,7 +20,7 @@ internal static class GrainPartitionMovementCommand
 
     internal static async Task<OperationResult> SubmitAsync(DatabaseEngine database, ICommitCoordinator coordinator,
         DecodedGrainRequest request, PrincipalRecord principal, GrainRequestCodec? codec,
-        IGrainContext? context, CancellationToken cancellationToken)
+        IGrainContext? context, IGrainPartitionMovementSealedOperationObserver? sealedObserver, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var operation = database.VerifyOperationAuthority(Read(request));
@@ -32,6 +32,13 @@ internal static class GrainPartitionMovementCommand
         {
             await codec.ObservePhaseAsync(request, GrainRequestPhase.RetireOperationSealed, context,
                 cancellationToken).ConfigureAwait(true);
+        }
+        if (phase.Stage == PartitionMovePeerStage.Retire && phase.ReceiverEffectAdmission is not null
+            && sealedObserver is not null)
+        {
+            await sealedObserver.BorrowAsync(operation, cancellationToken).ConfigureAwait(true);
+            cancellationToken.ThrowIfCancellationRequested();
+            operation = database.VerifyOperationAuthority(operation);
         }
         return await coordinator.SubmitVerifiedAsync(operation, cancellationToken).ConfigureAwait(true);
     }

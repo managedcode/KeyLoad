@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -18,7 +19,10 @@ internal sealed class ScaleServerHostEvidenceTests
         await Assert.That(hardware).IsNotNull();
         if (hardware is null || envelope is null)
         {
-            throw new InvalidOperationException("Supported Linux host evidence was unavailable.");
+            var failures = new List<Exception>
+            { new InvalidOperationException("Supported Linux host evidence was unavailable.") };
+            ServerFailureObserver.Observe(() => _ = ScaleServerCgroupOracle.ReadCurrent(), failures);
+            throw new AggregateException(failures);
         }
 
         await Assert.That(hardware.LogicalCpuCount > 0 && hardware.PhysicalCoreCount > 0

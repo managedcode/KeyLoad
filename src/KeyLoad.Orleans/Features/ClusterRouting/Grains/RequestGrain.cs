@@ -116,7 +116,8 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
     {
         if (request.Envelope.CommandKind == OperationKind.MovePartition)
         {
-            var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, writer).ConfigureAwait(true);
+            var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, codec,
+                ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)

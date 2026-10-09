@@ -33,6 +33,7 @@ internal static class NativeTextIncrementalProcessAssertions
         var healthy = await ReadAsync(root, NativeTextIncrementalCrashProtocol.HealthyFile, token);
         await LiteralAsync(recovered, healthy: false);
         await LiteralAsync(healthy, healthy: true);
+        await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, original.Request, recovered, token);
         await Assert.That(NativeSerialization.Serialize(recovered.OriginalReceipt).SequenceEqual(NativeSerialization.Serialize(original.Receipt))).IsTrue();
         await Assert.That(original.Receipt.CommandId).IsEqualTo(original.Mutation.CommandId);
         await Assert.That(original.Mutation.Partition).IsEqualTo(NativeTextIncrementalCrashProtocol.Partition);
@@ -44,6 +45,7 @@ internal static class NativeTextIncrementalProcessAssertions
             NativeTextIncrementalCrashProtocol.English, NativeTextIncrementalCrashProtocol.ChangedRevision));
         var healthyOriginal = await NativeTextIncrementalEvidenceFiles.ReadAsync<NativeTextIncrementalCrashOriginal>(root,
             NativeTextIncrementalCrashProtocol.RequestFile, token);
+        await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, healthyOriginal.Request, healthy, token);
         await Assert.That(healthy.OriginalReceipt.CommandId).IsEqualTo(healthyOriginal.Mutation.CommandId);
         await Assert.That(healthyOriginal.Mutation.Partition).IsEqualTo(NativeTextIncrementalCrashProtocol.Partition);
         await Assert.That(healthy.OriginalReceipt.Token.AtomicPartitionId).IsEqualTo(NativeTextIncrementalCrashProtocol.Partition.AtomicPartitionId);
@@ -57,6 +59,9 @@ internal static class NativeTextIncrementalProcessAssertions
         { return; }
         var verified = await ReadAsync(root, NativeTextIncrementalCrashProtocol.VerifiedFile, token);
         await LiteralAsync(verified, healthy: true);
+        await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, healthyOriginal.Request, verified, token);
+        await Assert.That(NativeSerialization.Serialize(verified.Checkpoint).SequenceEqual(
+            NativeSerialization.Serialize(healthy.Checkpoint))).IsTrue();
         await Assert.That(verified.Complete.IndexSha256).IsEqualTo(healthy.Complete.IndexSha256);
         await Assert.That(verified.Complete.ThroughSequence).IsEqualTo(healthy.Complete.ThroughSequence);
         await Assert.That(verified.AppliedPosition).IsEqualTo(healthy.AppliedPosition);

@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.TestInfrastructure;
@@ -41,12 +42,19 @@ internal static class TwoRf3MembershipWaveStartup
                 .Single(resource => resource.Name == "membership-peer-b").GetValueAsync(cancellationToken).ConfigureAwait(false);
         }
         var containerNames = TwoRf3MembershipContainerNames.Read(builder.Resources.OfType<ContainerResource>());
+        if (wave.activationIsolation)
+        {
+            wave.IsolationOwner = await ReplicaIsolationOwner.PrepareSixAsync(builder, root, repository,
+            containerNames, wave, cancellationToken).ConfigureAwait(false);
+        }
         wave.application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         wave.applicationDisposed = false;
         wave.nodeLocksReleased = false;
         if (wave.remoteDocumentReads)
         { wave.RemoteRuntimeOwner = new ContainerRuntimeControl(wave.application, containerNames, repository); }
-        if (wave.localImageSelection is null)
+        if (wave.IsolationOwner is { } isolation)
+        { await isolation.VerifyBeforeStartAsync(wave.application, cancellationToken).ConfigureAwait(false); }
+        else if (wave.localImageSelection is null)
         {
             await TwoRf3MembershipImageAssertions.VerifyAsync(wave.application,
                     githubReference ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch),
@@ -58,15 +66,23 @@ internal static class TwoRf3MembershipWaveStartup
             wave.localImageIdentity = await LocalRf3ImageIdentity.VerifyBeforeStartAsync(wave.application, repository,
                 wave.localImageSelection, TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
         }
+        await StartAndVerifyReadyAsync(wave, wave.application, containerNames, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task StartAndVerifyReadyAsync(TwoRf3MembershipWave wave,
+        DistributedApplication application, Dictionary<string, string> containerNames, CancellationToken cancellationToken)
+    {
         wave.startAttempted = true;
-        await wave.application.StartAsync(cancellationToken).ConfigureAwait(false);
+        await application.StartAsync(cancellationToken).ConfigureAwait(false);
         await wave.WaitForSixHealthyAsync(cancellationToken).ConfigureAwait(false);
+        if (wave.IsolationOwner is { } startedIsolation)
+        { await startedIsolation.VerifyStartedAsync(application, cancellationToken).ConfigureAwait(false); }
         wave.capacity.CaptureOriginalEndpoints(wave);
         if (wave.remoteDocumentReads)
         {
-            await TwoRf3MembershipDataReadiness.WaitAsync(wave.application,
-                wave.application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(),
-                wave.application.Services.GetRequiredService<TimeProvider>(), cancellationToken).ConfigureAwait(false);
+            await TwoRf3MembershipDataReadiness.WaitAsync(application,
+                application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(),
+                application.Services.GetRequiredService<TimeProvider>(), cancellationToken).ConfigureAwait(false);
         }
         if (wave.localImageIdentity is { } identity)
         {

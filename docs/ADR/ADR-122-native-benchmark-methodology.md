@@ -2,6 +2,8 @@
 
 Status: Accepted, 2026-10-09. Owner: KeyLoad creator. Implementation: in progress. Canonical slice: BenchmarkComparisons.
 
+TASK-METH-STRESS admission hardening owns feature-local typed HeavyLoad options, native argument validation and negative controls under integration DocumentStorage. Validate enabled, exact class filter, serial execution and absence of coverage before fixture startup; reject an ordinary broad filter without changing its task-acceptance identity. The native selector rejects an exact heavy filter without opt-in. Rollback reverts this source-bound admission stage without promoting earlier unqualified outputs; original heavy RF3 and full GitHub gates remain required.
+
 ## Context and decision
 
 The owner requires meaningful pure/mixed measurements, actual one-million-record ingestion with 1/10/500 independent clients and only native one-node/three-node comparison topologies. Existing setup seeding and shared client wrappers cannot prove these ingestion claims. Follow the primary-source-backed [Methodology](../Features/BenchmarkComparisons/Methodology.md), REQ/AC-METH-001..005 and REQ/AC-SCALE-024..029. This supersedes two-node active inventory in ADR-034/056/103/109 without changing RF3 majority ACKs, production placement, persisted state or immutable historical outputs.

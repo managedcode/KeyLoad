@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -18,7 +19,7 @@ internal sealed class PartitionMovementParentPageContinuation
 
     internal async Task<PartitionMoveParentState> TransferPagesNextAsync(string principalId,
         PartitionMoveRequest request, PartitionMoveParentState state, PartitionMovementParentPhaseRole role,
-        ReadExecutionBudget work, CancellationToken cancellationToken)
+        ReadExecutionBudget work, Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         if (role == PartitionMovementParentPhaseRole.StagePage)
         {
@@ -69,7 +70,7 @@ internal sealed class PartitionMovementParentPageContinuation
         if (ordinal < total)
         {
             return await StageNextAsync(principalId, request, state, ordinal, work,
-                cancellationToken).ConfigureAwait(false);
+                phaseObservation, cancellationToken).ConfigureAwait(false);
         }
         if (ordinal != total)
         { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.Invalid); }
@@ -104,14 +105,15 @@ internal sealed class PartitionMovementParentPageContinuation
             state.Header!.DestinationOwner, work, cancellationToken);
 
     private async Task<PartitionMoveParentState> StageNextAsync(string principalId, PartitionMoveRequest request,
-        PartitionMoveParentState state, int ordinal, ReadExecutionBudget work, CancellationToken cancellationToken)
+        PartitionMoveParentState state, int ordinal, ReadExecutionBudget work,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         var page = await pageReader.ReadOriginalPageAsync(principalId, request, state, ordinal, work,
-            cancellationToken).ConfigureAwait(false);
+            phaseObservation, cancellationToken).ConfigureAwait(false);
         var intended = PartitionMovementParentNativePhases.StagePage(state.Header!, PartitionMovementParentAuthority.RequireControl(state),
             state.Selected!.OriginalFence!, state.Selected.OriginalDescriptor!, page);
         return await steps.EffectAsync(principalId, request, state, PartitionMovementParentPhaseRole.StageGrant,
             PartitionMovementParentPhaseRole.StagePage, intended, state.Header!.DestinationOwner, work,
-            cancellationToken).ConfigureAwait(false);
+            phaseObservation, cancellationToken).ConfigureAwait(false);
     }
 }

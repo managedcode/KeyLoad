@@ -70,7 +70,8 @@ internal static class NativeTextIncrementalSessionOperations
         var original = session.Intent ?? throw NativeTextErrors.Corrupt();
         session.Manifest = NativeTextIncrementalCheckpointSettlement.Complete(
             NativeTextIncrementalPagePreparation.RequireOwner(session).Path, original,
-            session.Manifest ?? throw NativeTextErrors.Corrupt(), acknowledged, fresh, session.Budget, options);
+            session.Manifest ?? throw NativeTextErrors.Corrupt(), acknowledged, fresh, session.Budget, options,
+            NativeTextIncrementalPagePreparation.RequireOwner(session).FaultObserver);
         session.Checkpoint = original.ThroughSequence;
         session.Intent = null;
         session.Target = null;

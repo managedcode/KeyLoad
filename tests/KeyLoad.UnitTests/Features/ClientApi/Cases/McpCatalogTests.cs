@@ -40,11 +40,14 @@ internal sealed class McpCatalogTests
                 await Assert.That(actual.IsAdapter).IsFalse();
                 await Assert.That(actual.ReadKind.HasValue ^ actual.CommandKind.HasValue).IsTrue();
             }
+            await McpCatalogHintExpectations.RequireAsync(actual, expected.ReadKind, expected.CommandKind);
             await Assert.That(string.IsNullOrWhiteSpace(actual.Description)).IsFalse();
             await Assert.That(actual.InputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
             await Assert.That(actual.InputSchema.GetProperty(AdditionalPropertiesKey).ValueKind).IsEqualTo(JsonValueKind.False);
             await Assert.That(actual.OutputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
         }
+        await McpMovementCatalogSchema.RequireAsync(Find(McpMovementCatalogProtocol.Name));
+        await McpMovementCatalogDecode.RequireAsync(Find(McpMovementCatalogProtocol.Name));
     }
 
     /// <summary>Rejects case-changed names and prevents internal authentication or membership discovery.</summary>

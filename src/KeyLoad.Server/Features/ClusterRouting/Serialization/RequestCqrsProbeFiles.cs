@@ -17,6 +17,8 @@ internal sealed class RequestCqrsProbeFiles
     internal string SessionId { get; }
     private readonly byte[] ownerBytes;
     private readonly RequestCqrsProbeRecords records;
+    private readonly RequestCqrsProbeActivationInventory activations;
+    internal readonly RequestCqrsProbeLiveFiles Live;
 
     private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
         IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
@@ -27,6 +29,8 @@ internal sealed class RequestCqrsProbeFiles
         SessionId = sessionId;
         this.ownerBytes = ownerBytes;
         records = new RequestCqrsProbeRecords(sessionId, voter, ownerBytes, executionOptions, json);
+        activations = new(sessionId, json, records, executionOptions);
+        Live = new(root, sessionId, json, records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, IOptions<ReplicaConfiguration> replicaOptions, IOptions<RequestProbeExecutionOptions> executionOptions)
@@ -88,6 +92,18 @@ internal sealed class RequestCqrsProbeFiles
         }
     }
 
+    internal void WriteActivation(RequestCqrsProbeActivationRecord value)
+    {
+        lock (sync)
+        {
+            RequestCqrsProbeActivationValidation.RequireMarker(value, ReadSnapshotLocked().Markers);
+            var name = RequestCqrsProbeActivationValidation.Name(value);
+            var bytes = json.WriteActivation(value);
+            WriteAtomic(Path.Combine(root, name), bytes);
+            records.RegisterImmutable(name, bytes);
+        }
+    }
+
     private RequestCqrsProbeSnapshot ReadSnapshotLocked()
     {
         const int MaximumFilesStep = 1;
@@ -103,6 +119,8 @@ internal sealed class RequestCqrsProbeFiles
         var arms = new List<RequestCqrsProbeLoadedArm>();
         var releases = new List<RequestCqrsProbeReleaseRecord>();
         var markers = new List<RequestCqrsProbeMarkerRecord>();
+        var witnesses = new List<RequestCqrsProbeActivationRecord>();
+        var live = new List<RequestCqrsProbeLiveRecord>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
         long aggregateBytes = AggregateBytesInitialValue;
         foreach (var path in entries)
@@ -111,8 +129,15 @@ internal sealed class RequestCqrsProbeFiles
             aggregateBytes = checked(aggregateBytes + ValidateEntry(path, name));
             if (aggregateBytes > executionOptions.Value.MaximumAggregateBytes)
             { throw Invalid(); }
-            records.ReadControl(path, name, arms, releases, markers, presentControls);
+            if (RequestCqrsProbeLiveValidation.IsName(name))
+            { Live.Read(path, name, live, presentControls); }
+            else if (RequestCqrsProbeActivationValidation.IsName(name))
+            { activations.Read(path, name, witnesses, presentControls); }
+            else
+            { records.ReadControl(path, name, arms, releases, markers, presentControls); }
         }
+        RequestCqrsProbeActivationInventory.RequireMarkers(witnesses, markers);
+        RequestCqrsProbeLiveFiles.RequireInventory(live, witnesses, markers, root, executionOptions);
         records.ValidatePresence(presentControls);
         records.ValidateInventory(markers);
         records.ValidateCrossRecords(arms, releases, markers);
@@ -131,40 +156,14 @@ internal sealed class RequestCqrsProbeFiles
     }
 
     private void WriteAtomic(string destination, byte[] bytes)
-    {
-        if (OperatingSystem.IsWindows())
-        { throw Invalid(); }
-        if (bytes.Length > executionOptions.Value.MaximumRecordBytes || File.Exists(destination))
-        { throw Invalid(); }
-        var before = ReadSnapshotLocked();
-        if (before.FileCount >= executionOptions.Value.MaximumFiles
-            || before.AggregateBytes + bytes.Length > executionOptions.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
-        var temporary = Path.Combine(root, RequestCqrsProbeProtocol.TemporaryFilePrefix + Guid.NewGuid().ToString(RequestCqrsProbeProtocol.SessionIdFormat) + TemporaryFileSuffix);
-        using (var stream = new FileStream(temporary, new FileStreamOptions
-        {
-            BufferSize = executionOptions.Value.FileBufferBytes,
-            Mode = FileMode.CreateNew,
-            Access = FileAccess.Write,
-            Share = FileShare.None,
-            UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode,
-            Options = FileOptions.WriteThrough
-        }))
-        {
-            stream.Write(bytes);
-            stream.Flush(flushToDisk: true);
-        }
-        var staged = ReadSnapshotLocked();
-        if (staged.FileCount > executionOptions.Value.MaximumFiles
-            || staged.AggregateBytes > executionOptions.Value.MaximumAggregateBytes)
-        { throw Invalid(); }
-        File.Move(temporary, destination, overwrite: false);
-    }
+        => RequestCqrsProbeAtomicFiles.Write(root, destination, bytes, executionOptions, ReadSnapshotLocked);
 
     internal static byte[] ReadRecord(string path, IOptions<RequestProbeExecutionOptions> executionOptions)
         => RequestCqrsProbeFileReader.Read(path, executionOptions);
 
-    private static bool KnownName(string name) => name == RequestCqrsProbeProtocol.OwnerFile
+    private static bool KnownName(string name) => RequestCqrsProbeLiveValidation.IsName(name)
+        || RequestCqrsProbeActivationValidation.IsName(name)
+        || name == RequestCqrsProbeProtocol.OwnerFile
         || IsGuidName(name, RequestCqrsProbeProtocol.ArmFilePrefix, RequestCqrsProbeProtocol.JsonFileSuffix) || IsGuidName(name, RequestCqrsProbeProtocol.TemporaryFilePrefix, TemporaryFileSuffix)
         || name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
         || name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal);

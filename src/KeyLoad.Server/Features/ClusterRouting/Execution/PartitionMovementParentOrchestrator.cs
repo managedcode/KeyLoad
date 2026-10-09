@@ -37,7 +37,8 @@ internal sealed class PartitionMovementParentOrchestrator
     }
 
     internal async Task<PartitionMoveResult> ExecuteAsync(string principalId, PartitionMoveRequest request,
-        ReadExecutionBudget work, Func<PartitionMovePhase, ValueTask> progress, CancellationToken cancellationToken)
+        ReadExecutionBudget work, Func<PartitionMovePhase, ValueTask> progress,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         work.Check();
         var state = await states.ReadCurrentAsync(principalId, request, Guid.Empty, work,
@@ -82,13 +83,13 @@ internal sealed class PartitionMovementParentOrchestrator
             _ = PartitionMovementParentAuthority.RequireObserved(last, last.Stage);
             var role = PartitionMovementParentPhaseRoles.RequireLastRole(header, last);
             state = await TransferNextAsync(principalId, request, state, role, work,
-                cancellationToken).ConfigureAwait(false);
+                phaseObservation, cancellationToken).ConfigureAwait(false);
         }
     }
 
     private Task<PartitionMoveParentState> TransferNextAsync(string principalId, PartitionMoveRequest request,
         PartitionMoveParentState state, PartitionMovementParentPhaseRole role, ReadExecutionBudget work,
-        CancellationToken cancellationToken)
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
         => role switch
         {
             PartitionMovementParentPhaseRole.Prepare or PartitionMovementParentPhaseRole.Fence
@@ -98,7 +99,7 @@ internal sealed class PartitionMovementParentOrchestrator
             PartitionMovementParentPhaseRole.AdvanceCaptured or PartitionMovementParentPhaseRole.StagePage
                 or PartitionMovementParentPhaseRole.StageAcknowledge or PartitionMovementParentPhaseRole.Install
                 or PartitionMovementParentPhaseRole.InstallAcknowledge
-                => pages.TransferPagesNextAsync(principalId, request, state, role, work, cancellationToken),
+                => pages.TransferPagesNextAsync(principalId, request, state, role, work, phaseObservation, cancellationToken),
             PartitionMovementParentPhaseRole.AdvanceInstalled or PartitionMovementParentPhaseRole.FinalizePublication
                 or PartitionMovementParentPhaseRole.Publish or PartitionMovementParentPhaseRole.PublishAcknowledge
                 or PartitionMovementParentPhaseRole.Retire or PartitionMovementParentPhaseRole.RetireAcknowledge

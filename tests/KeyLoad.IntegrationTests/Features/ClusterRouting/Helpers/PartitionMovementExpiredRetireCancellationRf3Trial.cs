@@ -12,7 +12,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Never derives authority from a timeout: retained native phase and own cancellation outcome decide recovery.</summary>
 internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
 {
-    private const string Administrator = "root";
+    private const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
     private const string MissingNativePhase = "The original native expired Retire phase is absent.";
     private readonly List<Exception> failures = [];
     private readonly List<CancellationTokenSource> callers = [];

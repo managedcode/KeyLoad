@@ -11,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Reads actual stopped persisted admin state; the structural threshold is supporting evidence, not a pre-admission history.</summary>
 internal static class PartitionMovementParentCapacityRf3Snapshot
 {
-    private const string Administrator = "root";
+    private const string Administrator = PartitionMovementPublicParentRf3Administrator.PrincipalId;
     private const long BoundaryStep = 1;
     private const int MidpointDivisor = 2;
 

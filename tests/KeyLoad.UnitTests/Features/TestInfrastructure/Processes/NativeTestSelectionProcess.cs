@@ -13,6 +13,7 @@ internal static class NativeTestSelectionProcess
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=0'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=1.5'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=invalid'],
+              ['--KeyLoadTests:Suite=rf3','--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:NativeCoverage:ServerMode=wrong']]) {
               let rejected = false; try { nativeSelection(bad, {}); } catch { rejected = true; }
               if (!rejected) throw new Error('Invalid native test selection was accepted.');

@@ -118,3 +118,116 @@ flowchart LR
 ### TASK-SDK-KESTREL-FAILURE-OBSERVATION-001
 REQ-TUNIT-KESTREL-OBSERVATION-001 / AC-TUNIT-KESTREL-OBSERVATION-001 under ADR-117 and existing ClientApi transport requirements freeze test-only bounded observations for the authentic eb0 five failures: KeyLoadClientNullReadTests.AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation (two existing arguments), KeyLoadClientNullWriteTests.UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads (two existing arguments), and KeyLoadClientTransportTests.MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest. Actual Kestrel start/send/handler/response completion/cancellation records carry only closed stages/status/category and actual monotonic elapsed, ThreadPool available worker/IO threads, pending work and native thread count. At most64 records, saturation explicit. No URL/path/header/body/credential/payload/caller value is inspected or emitted.
 The existing ephemeral loopback Kestrel/default native HTTP handler chain, actual client/request tokens, five-second bounds, full original negative-to-healthy assertions and cleanup remain unchanged. The optional observation is passed only by these flows; no extra request, warmup, retry, timer, NotInParallel or product/config change. On actual failure only, emit closed JSON to original native stderr before rethrowing the initiating exception; diagnostic-output failures join that same ordered ledger. Success emits nothing. This reveals observed stages only; it cannot infer thread-pool starvation or socket/JIT causation. Root owns guarded join/build and exact Linux normal/scalar original TRX/output qualification. No helper-only test or synthetic outcome qualifies the contract.
+
+
+### TASK-KL033-NATIVE-TASK-ACCEPTANCE-001
+
+Accepted additive execution scope under existing REQ/AC-TUNIT-ENTRY-010: [Search](../Features/Search.md#task-kl033-native-task-acceptance-001-original-finite-hybrid-rank-and-explain) freezes all three original finite KL033 predicates and [TestInfrastructure](../Features/TestInfrastructure.md#task-kl033-native-task-acceptance-001) owns unchanged native admission. Actual R863 filtered native metadata binds29 Unit,10 supporting process Recovery and6 genuine RF3 cases per profile. Exact raw class/method/instance/parameter/source identities enter the canonical contract, with original native UID/location/source/assembly observations retained as evidence; source declarations alone are never native case proof.
+
+No topology, provider, ranking, authentication, storage, wire, deadline or parallelism change: retain native20, independent Linux normal/scalar cells, caller-only scalar RF3, existing source/image/TRX/no-skip/no-extra/process/cleanup guards and all prior task/full mandatory jobs. Root owns shared seven-path docs/contract/selectors/workflow join and verification; security owner privately maps actual identities and owns dedicated original artifact harvest. No dependency/KL074/global ANN/performance/full-product closure follows. ADR018 remains Proposed for broader global ranking. Rollback removes only additive dispatch scope; originals and existing lanes remain. Linux source-bound operation qualification is pending.
+
+```mermaid
+flowchart LR
+  A[Exact source and native metadata] --> B[KL033 normal or scalar caller]
+  B --> C[29 Unit real hybrid and supporting controls]
+  B --> D[10 native process recovery cuts]
+  B --> E[6 genuine Aspire SDK MCP Q1 RF3 flows]
+  C --> F[Original TRX source image and cleanup admission]
+  D --> F
+  E --> F
+  F --> G[Finite original task scope only]
+```
+
+
+### TASK-KL035-NATIVE-TASK-ACCEPTANCE-001
+
+Accepted additive native orchestration under unchanged REQ/AC-TUNIT-ENTRY-010: [ClusterReplication](../Features/ClusterReplication.md#task-kl035-native-task-acceptance-001-complete-original-snapshot-installation) retains every original KL035 predicate and [TestInfrastructure](../Features/TestInfrastructure.md#task-kl035-native-task-acceptance-001) owns admission. Root's four actual R863 native censuses bind1 Unit,32 Recovery and2 genuine RF3 cases per profile, with raw UIDs/displays/typed parameters/source locations/process/source-image identity preserved. Canonical contract does not fabricate an instance or outcome from authored arguments.
+
+Append KL035 to existing independent normal/scalar Linux task cells/manual choice while preserving all eight prior tasks including KL033/KL036 and complete mandatory suites. Unchanged native20/deadlines/source-image/original TRX/process/cleanup checks apply. Actual empty follower SDK/official MCP state and stopped native checksum/hardstate/tail are independent of retained-follower operation. Source metadata and local supporting execution do not prove Linux RF3. Scalar RF3 remains caller-only.
+
+Root owns seven shared docs/contract/selectors/workflow paths, build/format/Git and final original evidence review; security owner prepares guarded exact binding and dedicated artifact harvest. Original replica/storage/lifecycle ADR035/036/017/041/061 contracts stay authoritative. No protocol/data/provider/topology migration or requirement weakening. Rollback removes only additive lane and keeps immutable evidence/prior tasks. Process kill is not power-loss/endurance/performance or full-product closure. Delivered-source Linux acceptance remains pending.
+
+```mermaid
+flowchart LR
+  A[Exact source and native metadata] --> B[KL035 normal or scalar caller]
+  B --> C[1 native snapshot contract case]
+  B --> D[32 real native recovery cases]
+  B --> E[Erased follower SDK MCP native cut]
+  B --> F[Retained follower snapshot replay]
+  C --> G[Original source image TRX process cleanup admission]
+  D --> G
+  E --> G
+  F --> G
+  G --> H[Original task scope only]
+```
+
+### TASK-KL029-NATIVE-TASK-ACCEPTANCE-001
+
+REQ/AC-TUNIT-ENTRY-010 and REQ/AC-FTS-001–007,
+REQ/AC-FTS-INCREMENTAL-001–005/007 and REQ/AC-FTS-INC-009–017
+retain the original KL029 architecture predicates: projection deletion plus
+canonical replay returns literal results, checkpoint crashes cannot conceal
+updates, and stale revisions cannot resurrect. Add only KL-029 normal and
+scalar-caller cells to the closed native task matrix/manual choice. Preserve
+all nine prior tasks, full mandatory build/rules/unit normal/scalar/recovery/RF3
+coverage gates, original source-image identity/admission, native20 slots,
+Detailed live output, strict caller environment, retained failure/no-skip checks
+and genuine joined Aspire cleanup. Scoped task receipts never replace full
+suites or supply coverage/provider/performance/endurance/power-loss evidence.
+
+Three exact closed selectors cover the source-authored58 Unit instances
+(including damaged durable original intent and natural original-token expiry),
+18 genuine process Recovery instances (ten full-generation and eight incremental,
+including all seven required cuts plus retained generic posting control), and
+nine genuine RF3 instances (SDK, official MCP and Q1 maintenance paths, persisted
+row/field/revocation/read-cut, leader loss/restart, cancellation and healthy
+continuation). Source counts/displays/constructor expectations are not native
+discovery proof. Root must freshly bind every exact UID, method, instance, typed
+parameter, primary-constructor reported class, source span/hash and assembly/PDB
+against the final coherent image before the canonical contract is admitted.
+
+The natural expiry flow retains unchanged default five-minute lifetime and
+original cancellation, actual signed ExpiresAt, original durable intent/failed
+ACK and canonical pin/outbox/documents, then genuine Release and distinct fresh
+consumer/native generation Build with full literal bilingual/cold continuation.
+Keep thirty-minute Unit/Recovery and sixty-minute RF3 native deadlines unchanged;
+scalar means actual caller DOTNET_EnableHWIntrinsic=0, never unproved server mode.
+
+Ordered stages: freeze this complete source scope; prepare guarded additive
+contract/closed enums/workflow; root coherent build and actual selected metadata;
+strict bind/reseal, root join/commit/push; authenticate both original Linux task
+artifacts API/ZIP/source/run/attempt/native TRX/images/environment/readers/cleanup
+and every final verifier conclusion. Missing/failed/skipped/changed originals
+retain failure. Root owns live source, discovery/build/workflow/Git; Session owns
+whole KL029 operation review and dedicated original evidence. Rollback removes
+only the additive KL029 lane, preserving every prior task and immutable report.
+No data, serializer, public transport, provider or topology migration occurs.
+
+Actual R875 coherent-image metadata originals now contain exactly 58 Unit,
+18 Recovery and nine RF3 cases for these three closed selectors. The owning
+receipt and eleven-task census plan retain original native process/source/PE/PDB
+before-after evidence. Strict native case admission remains required; metadata
+is not an execution, coverage, Linux RF3 or task-acceptance result.
+
+
+## TASK-KL036-NATIVE-SUPPORT-LANE-034 — additive exact two-flow selection
+
+REQ/AC-TUNIT-ENTRY-010 and existing REQ/AC-MOVE-PARENT-LATE-NATIVE-001 plus signed native heartbeat requirements map two actual native-discovered supporting cases to additive KL036 selections. Preserve every entire original task object, all six original KL036 selections and their32 cases. Add `native-owner-late-retire-support` (Integration assembly, suite rf3, one case) and `unit-signed-heartbeat-support` (Unit assembly, one case), giving eight selections/34 cases per normal/scalar profile. The former uses actual six in-process native production owners/SAME factory-sealed operation/ApplyEmbedded; the suite token chooses its existing Integration assembly and never claims Docker RF3 quorum qualification. The latter uses actual persisted native store and signed production client/HTTP/endpoint/table flow, not a six-owner topology. Every mandatory full Unit normal/scalar, recovery/analyzer and genuine Docker/Aspire SDK/MCP RF3 gate remains independent and unchanged.
+
+Exact native originals are r872 late-native (one discovered case) and heartbeat (three discovered cases, selecting ONLY the signed flow). Late UID is `KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementLateNativeOwnerTests.1.1.SameFactorySealedExpiredRetireColdRecordsMissingAuthorityThenSameMoveAndOriginalReceiptAreHealthy.1.1.0`; signed heartbeat UID is `KeyLoad.UnitTests.Features.ClusterRouting.ReplicaMembershipAuthorityHeartbeatFlowTests.1.1.NativeSignedHeartbeatPreservesFullRowRejectsWrongCallerThenHealthyContinuation.1.1.0`. Both parameterTypeFullNames arrays are empty and instance display equals exact method. Original census stdout hashes are54ad9b1baf368fe4d7a9a613007380c03fda010c6119f2ad0bb52dbfec4f7d7e anddeb40e1edee7b1d4e85c80a56cdb7d21c9dda23c5cbedc9b318492574b58961e. These are metadata originals, not runtime outcomes or current rebuilt image authority. Contract metadata retains the existing closed schema; native UID/image/source/PDB rebind remains required after full C# joins.
+
+Both filters use exactly one four-segment native TUnit path; alternatives are never additional path segments. No verifier/key/default/parallel/child/deadline change: native20 cap, workflow180 minutes, discovery1800 seconds, Integration3600-second child bounds, actual supporting parent12-minute case deadline and original90s process/30s cleanup/60s grant contracts remain intact. HistoricalR875 actual eleven-task plan and distinct input-plan hashes are never interchanged or rewritten as proof for these additions. Ordered delivery: docs/traceability freeze→exact additive contract+private original metadata map→root source review/join/fullbuild/native census/strict rebind→actual normal/scalar operations→authenticate originals. No PASS/coverage/product readiness claim from selection or discovery.
+
+
+## TASK-KL035-COMPLETE-SNAPSHOT-ADMISSION-002
+
+REQ/AC-REP-004 and REQ/AC-TUNIT-ENTRY-010 preserve every original KL035 criterion and all35 prior native case objects. Actual root R883 metadata (native0,14 cases,5742 source inputs/437 image inputs, zero drift; stdout SHA02891a853fc6bda7bf31d7d500de9b8b38587360689e895268de85d3c9066fd2) identifies two distinct omitted classes: ReplicaSnapshotRecoveryTests in ReplicaPersistenceTests.cs and ReplicaSnapshotProcessRecoveryTests in ReplicaProcessRecoveryTests.cs. Their14 exact typed native identities are added to the existing Recovery selection. The complete lane is49/profile:1 Unit+46 Recovery+2 actual Aspire Docker RF3. This is metadata admission, never an outcome claim. Existing historical35 binding and every other task/full suite remain unchanged. The neighboring class names in the earlier table did not admit these separate classes.
+
+AC-KL035-PUBLISHED-REPAIR-001 strengthens the SAME four PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState native process rows (SnapshotVerified/Installed × missing/corrupt): retain the genuine published immutable image within the stopped trial, preserve exact original missing/corrupt failure and newer native canonical cut/NodeId/read generation/full receipt. After the original node is disposed, restore only that exact image, cold recover original snapshot4+tail5 and stable original receipts, submit an independently literal new revision5/cut6 native command through the real log/materializer, require its full original receipt and exact retry without another store position, then cold reopen and verify healthy result/old outcomes again. No fabricated receipt, replacement snapshot, recovery fallback, token/deadline change or product behavior. The helper owns assertions for this actual case, not a standalone test.
+
+AC-KL035-PUBLISHED-REPAIR-001 maps to those four existing cases and feature-local ReplicaSnapshotDamageRecovery. Existing node/materializer observed-owner helpers join primary and cleanup failures before trial files are removed. Fixture exact-image repair is not production repair from missing/corrupt bytes. Root must compile, refresh changed-source native metadata/PDB binding, execute actual operations and authenticate delivered-source Linux normal/scalar exact49 union/source-image/TRX/cleanup before acceptance. Original full-suite556 rows and R883 metadata are retained independently; no current PASS, power-loss, endurance, coverage or whole-product promotion.
+
+
+## TASK-KL036-COMPLETE-SOURCE-ADMISSION-001 — native Linux expectations
+
+The KL-036 selected scope preserves every original34 case declaration and adds the real operational capacity, retained native-page failure and original Close/SourceBeginAbort whole flows, for37 source-declared cases per profile. ADR-106 owns their REQ/AC and execution contracts; ADR-117 owns native invocation and original-report reconciliation. This is an admission expectation, not discovered UID/count or a passing result. Exact-source Linux native discovery, normal/scalar execution and all mandatory full suites remain open. The other nine task objects and all original selectors/case declarations remain intact.

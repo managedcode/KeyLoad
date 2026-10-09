@@ -24,6 +24,8 @@ internal static class ControlledPartitionMovementNoneControlFlow
             FirstInstallPage, corpus, originalCallerAddress, originalExpiry);
         var verified = await ControlledPartitionMovementPeerVerification.VerifyAsync(source, runtime,
             admission, request, cancellationToken);
+        var operation = source.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
+            PhysicalShardCatalogFixture.RootPrincipalId, source.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
         var key = KeySpace.Partition(PartitionMoveProtocol.RecordSpace,
             ControlledPartitionMovementCorpus.Partition, ControlledPartitionMovementPrepareRequest.MoveId);
         var originalBytes = source.Store.Read(view => view.ReadOwnedValue(key))
@@ -32,7 +34,7 @@ internal static class ControlledPartitionMovementNoneControlFlow
         var corrupt = NativeSerialization.Serialize(original with { Phase = PartitionMovePhase.None });
         source.Store.Commit((transaction, _) => { transaction.Put(key, corrupt); return true; });
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => RejectAsync(source, verified, cancellationToken), failures);
+        await ServerFailureObserver.ObserveAsync(() => RejectAsync(source, verified, operation, cancellationToken), failures);
         ServerFailureObserver.Observe(() => source.Store.Commit((transaction, _) =>
             { transaction.Put(key, originalBytes); return true; }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -44,18 +46,34 @@ internal static class ControlledPartitionMovementNoneControlFlow
     }
 
     private static async Task RejectAsync(ControlledPartitionMovementNode source,
-        PartitionMovementTransportRequest verified, CancellationToken cancellationToken)
+        PartitionMovementTransportRequest verified, ReplicatedOperation operation, CancellationToken cancellationToken)
     {
         var before = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var position = source.Store.Position;
+        var identity = source.Store.Identity;
+        var applied = source.Database.LastApplied;
         var originalIndex = source.Journal.Log.State.LastIndex;
-        var operation = source.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
-            PhysicalShardCatalogFixture.RootPrincipalId, source.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
+        var originalCommitted = source.Journal.Log.State.CommittedIndex;
+        var issuance = Assert.ThrowsExactly<KeyLoadException>(() => source.Database.CreateVerifiedPartitionMovementOperation(
+            verified.CommandId, PhysicalShardCatalogFixture.RootPrincipalId,
+            source.Database.EvaluationClock.GetUtcNow(), verified.Envelope))
+            ?? throw new InvalidOperationException("Fresh native issuance accepted the malformed original control.");
+        await Assert.That(issuance.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(issuance.Message).IsEqualTo(PartitionMoveProtocol.Invalid);
+        await Assert.That(source.Store.Position).IsEqualTo(position);
+        await Assert.That(source.Store.Identity).IsEqualTo(identity);
+        await Assert.That(source.Database.LastApplied).IsEqualTo(applied);
+        await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store)
+            .SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(originalIndex);
+        await Assert.That(source.Journal.Log.State.CommittedIndex).IsEqualTo(originalCommitted);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => source.Journal.Submit(operation, cancellationToken))
             ?? throw new InvalidOperationException("The original faulted materializer wait did not reject.");
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(failure.Message).IsEqualTo(ReplicaProtocol.CorruptLog);
         await Assert.That(source.Store.Position).IsEqualTo(position);
+        await Assert.That(source.Store.Identity).IsEqualTo(identity);
+        await Assert.That(source.Database.LastApplied).IsEqualTo(applied);
         await Assert.That(ControlledPartitionMovementRawImage.Bytes(source.Store)
             .SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(checked(originalIndex + IndexStep));

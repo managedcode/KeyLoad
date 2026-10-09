@@ -2,8 +2,11 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedGitHubCompleteTests
 {
+    private const string LegacyJobNames = "legacy";
+
     [Test]
     [Arguments("valid")]
+    [Arguments(LegacyJobNames)]
     [Arguments("modern")]
     [Arguments("modern-failed")]
     [Arguments("modern-duplicate")]

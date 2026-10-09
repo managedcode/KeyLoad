@@ -16,6 +16,10 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private bool postingObserved;
     private readonly Action<NativeTextFaultStage>? faultObserver;
     private readonly Action? postingBoundary;
+    private readonly Action? deletionBoundary;
+    private readonly Action? additionBoundary;
+    private bool deletionObserved;
+    private bool additionObserved;
 
     internal NativeTextIncrementalNativeOwner(string root, string leaf, Guid sourceNodeId,
         IOptions<NativeTextExecutionOptions> executionOptions, Action<NativeTextFaultStage>? faultObserver = null)
@@ -26,6 +30,8 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         this.executionOptions = executionOptions;
         this.faultObserver = faultObserver;
         postingBoundary = faultObserver is null ? null : ObservePosting;
+        deletionBoundary = faultObserver is null ? null : ObserveDeletion;
+        additionBoundary = faultObserver is null ? null : ObserveAddition;
     }
 
     internal string Root => root;
@@ -54,7 +60,9 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         foreach (var change in intent.Changes)
         {
             budget.Check();
-            NativeTextIncrementalPostingWriter.Apply(current, change.Removals, change.Additions, budget, postingObserved ? null : postingBoundary);
+            NativeTextIncrementalPostingWriter.Apply(current, change.Removals, change.Additions, budget,
+                postingObserved ? null : postingBoundary, deletionObserved ? null : deletionBoundary,
+                additionObserved ? null : additionBoundary);
         }
         budget.Check();
     }
@@ -84,6 +92,8 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         { throw NativeTextErrors.Corrupt(); }
     }
 
+    internal Action<NativeTextFaultStage>? FaultObserver => faultObserver;
+
     internal void Observe(NativeTextFaultStage stage) => faultObserver?.Invoke(stage);
 
     private void ObservePosting()
@@ -92,6 +102,22 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         { return; }
         postingObserved = true;
         Observe(NativeTextFaultStage.NativePostingWritten);
+    }
+
+    private void ObserveDeletion()
+    {
+        if (deletionObserved)
+        { return; }
+        deletionObserved = true;
+        Observe(NativeTextFaultStage.NativeDeletionWritten);
+    }
+
+    private void ObserveAddition()
+    {
+        if (additionObserved)
+        { return; }
+        additionObserved = true;
+        Observe(NativeTextFaultStage.NativeAdditionWritten);
     }
 
     internal void CloseAfterOperation() => Close();
