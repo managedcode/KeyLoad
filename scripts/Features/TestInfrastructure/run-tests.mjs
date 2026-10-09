@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const defaultMaximumParallelTests = 20;
+const defaultMaximumParallelTests = 50;
 const maximumParallelTests = 50;
 const comparisonParallelTests = 1;
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';

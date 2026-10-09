@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using Orleans.Runtime.Placement;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -44,11 +45,37 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
                 GrainFailureDiagnostics.Log(diagnostics, Errors.Fail(code, GrainRoutingProtocol.InvalidRequest),
                     requestId, stage, code);
             }
+            if (reply.Error is null && context is not null
+                && services.GetService<IGrainActivationMigrationObserver>() is { } migration)
+            {
+                var target = await migration.PrepareMigrationAsync(GrainRequestProbeIdentity.From(request.Envelope),
+                    context, cancellationToken).ConfigureAwait(true);
+                if (target is not null)
+                { MigrateTo(target, cancellationToken); }
+            }
             return reply;
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
             return GrainReplyFactory.Failure(error: error, command: true, diagnostics: diagnostics, requestId: requestId, stage: stage, cancellationToken: cancellationToken, options: options);
+        }
+    }
+    private void MigrateTo(SiloAddress target, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var present = RequestContext.Keys.Contains(IPlacementDirector.PlacementHintKey, StringComparer.Ordinal);
+        var previous = RequestContext.Get(IPlacementDirector.PlacementHintKey);
+        try
+        {
+            RequestContext.Set(IPlacementDirector.PlacementHintKey, target);
+            MigrateOnIdle();
+        }
+        finally
+        {
+            if (present)
+            { RequestContext.Set(IPlacementDirector.PlacementHintKey, previous); }
+            else
+            { RequestContext.Remove(IPlacementDirector.PlacementHintKey); }
         }
     }
 }

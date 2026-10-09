@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextRf3ReplayAssertions
 {
     internal const string UpdatedJson = "{\"text\":\"fresh wording\",\"embedding\":\"unit\",\"secret\":\"private-search-canary\",\"owner\":\"owner-a\"}";
-    private const string ProjectedFirst = "{\"text\":\"fresh wording\",\"embedding\":\"unit\",\"owner\":\"owner-a\"}";
-    private const string ProjectedThird = "{\"text\":\"other\",\"embedding\":\"unit\",\"owner\":\"owner-b\"}";
+    private const string ProjectedFirst = "{\"owner\":\"owner-a\"}";
+    private const string ProjectedThird = "{\"owner\":\"owner-b\"}";
     private const string PutDocumentKind = "putDocument";
     private const string PutVectorKind = "putVector";
     private const string DeleteDocumentKind = "deleteDocument";
@@ -72,10 +72,10 @@ internal static class NativeTextRf3ReplayAssertions
         }
         var first = new DocumentResult(new(scenario.Partition, NativeTextRf3Scenario.Collection,
             NativeTextRf3Scenario.FirstId), NativeTextRf3Scenario.UpdatedRevision, ProjectedFirst, true,
-            [NativeTextRf3Scenario.SecretField]);
+            [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]);
         var third = new DocumentResult(new(scenario.Partition, NativeTextRf3Scenario.Collection,
             NativeTextRf3Scenario.ThirdId), NativeTextRf3Scenario.FirstRevision, ProjectedThird, true,
-            [NativeTextRf3Scenario.SecretField]);
+            [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]);
         await SearchAsync(scenario.Text(English), [new(first, 1d / FirstRankDenominator)], sdk, mcp, token);
         await SearchAsync(scenario.Hybrid(English),
             [new(first, BothBranches / (double)FirstRankDenominator), new(third, 1d / SecondRankDenominator)],

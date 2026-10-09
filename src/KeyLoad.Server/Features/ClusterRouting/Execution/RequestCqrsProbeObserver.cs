@@ -10,6 +10,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private readonly RequestCqrsProbeFiles files;
     private readonly RequestCqrsProbeLifecycle lifecycle;
     private readonly ReplicaConfiguration replica;
+    private readonly IOptions<ReplicaConfiguration> replicaOptions;
     private readonly string siloAddress;
     private readonly CancellationTokenSource stopping = new();
     private Task? shutdown;
@@ -21,6 +22,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
     {
         replica = replicaOptions.Value;
+        this.replicaOptions = replicaOptions;
         this.siloAddress = siloAddress;
         this.files = files;
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
@@ -28,6 +30,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
         receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
     }
+
+    internal RequestCqrsProbeMigration CreateMigration(ReplicaSiloDiscoveryClient discovery)
+        => new(files, lifecycle, replicaOptions, siloAddress, discovery, stopping.Token);
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken cancellationToken)

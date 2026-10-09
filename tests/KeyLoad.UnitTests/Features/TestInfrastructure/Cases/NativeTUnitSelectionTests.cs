@@ -25,7 +25,8 @@ internal sealed class NativeTUnitSelectionTests
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
     private const string ParallelismArgument = "--maximum-parallel-tests";
-    private const string ExpectedDefaultParallelism = "20";
+    private const string ExpectedDefaultParallelism = "50";
+    private const string ExpectedExplicit20Parallelism = "20";
     private const string Explicit20Property = "explicit20";
     private const string Tuned50Property = "tuned50";
     private const string ExpectedTunedParallelism = "50";
@@ -46,7 +47,7 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(args[2]).IsEqualTo("tests/" + project);
         await Assert.That(args[Array.IndexOf(args, "--output") + 1]).IsEqualTo("Detailed");
         await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
-        await AssertParallelismAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedDefaultParallelism)
+        await AssertParallelismAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedExplicit20Parallelism)
             .ConfigureAwait(false);
         await AssertParallelismAsync(selection.RootElement.GetProperty(Tuned50Property), ExpectedTunedParallelism)
             .ConfigureAwait(false);

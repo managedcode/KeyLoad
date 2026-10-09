@@ -50,7 +50,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
     [Test]
     public async Task CancelledNativeCompareExchangeDoesNotCreateAnyMembershipRow()
     {
-        await WithStoreAsync(async (fixture, store, _, log, token) =>
+        await WithStoreAsync(async (fixture, store, table, log, token) =>
         {
             var initial = await store.ReadAsync(token);
             var inserted = initial.Insert(ReplicaMembershipNativeTests.Entry(), new TableVersion(FirstVersion, ZeroEtag))!;
@@ -66,6 +66,18 @@ internal sealed class ReplicaMembershipNativeStoreTests
             await Assert.That(cancelled!.CancellationToken).IsEqualTo(cancellation.Token);
             await Assert.That(log.State).IsEqualTo(before);
             await Assert.That((await store.ReadAsync(token)).Data().Members.Count).IsEqualTo(0);
+            await Assert.That(fixture.Database.LastApplied).IsEqualTo(log.State.CommittedIndex);
+            await Assert.That(await store.CompareExchangeAsync(inserted, token)).IsTrue();
+            var healthy = fixture.Store.Read(view => view.GetRecord<MembershipRecord>(Key))!;
+            await Assert.That(healthy.Version).IsEqualTo((long)FirstVersion);
+            await Assert.That(healthy.Payload.Span.SequenceEqual(inserted.Serialize())).IsTrue();
+            await Assert.That(await store.CompareExchangeAsync(inserted, token)).IsFalse();
+            var repeated = fixture.Store.Read(view => view.GetRecord<MembershipRecord>(Key))!;
+            await Assert.That(repeated.Version).IsEqualTo(healthy.Version);
+            await Assert.That(repeated.Payload.Span.SequenceEqual(healthy.Payload.Span)).IsTrue();
+            var observed = await table.ReadRowAsync(ReplicaMembershipNativeTests.Entry().SiloAddress, token);
+            await Assert.That(observed.Members.Single().Item1.SiloAddress)
+                .IsEqualTo(ReplicaMembershipNativeTests.Entry().SiloAddress);
             await Assert.That(fixture.Database.LastApplied).IsEqualTo(log.State.CommittedIndex);
         });
     }

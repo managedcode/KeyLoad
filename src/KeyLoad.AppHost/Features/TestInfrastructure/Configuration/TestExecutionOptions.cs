@@ -24,7 +24,7 @@ internal sealed class TestExecutionOptions
     private const int DefaultOutputCharacters = 4_096;
     private const int MinimumOutputCharacters = 1;
     private const int MaximumOutputCharacters = 65_536;
-    private const int DefaultMaximumParallelTests = 20;
+    private const int DefaultMaximumParallelTests = 50;
     private const int MinimumMaximumParallelTests = 1;
     private const int MaximumMaximumParallelTests = 50;
 

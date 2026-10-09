@@ -417,3 +417,8 @@ The canonical official ZoneTree repair/publication gate remains independent; no
 consumer checksum fallback, format migration, fork package or local reference is
 authorized. Rollback removes only these two diagnostic categories and matching
 patterns; original failed records remain immutable.
+
+
+## Accepted KL-019 activation movement implementation contract
+
+TASK-KL019-NATIVE-MIGRATION-001 maps REQ/AC-KL019-NATIVE-MIGRATION-001 and AC-ROUTE-002 to the [exact ClusterRouting ownership/stages/regressions](../Features/ClusterRouting.md#task-kl019-native-migration-001--accepted-source-implementation-contract). Use actual native IGrainContext, IPlacementDirector.PlacementHintKey and Grain.MigrateOnIdle after original successful-command lease settlement; restore the exact prior hint/absence. The signed optional observer uses the existing validated ephemeral profile only. Root owns source/docs/CI/Git joins; the whole-task worker owns implementation and all failure repairs. Follow contract→coherent source and genuine negative/healthy/cold tests→Linux build/format/native discovery→normal/scalar-caller RF3→authentic source/image/report/cleanup proof. No storage-format rollout, new protocol/provider or transferred physical handles. Rollback removes optional observer/hook/registration coherently, retaining original qualification gates. This source stage does not mark the ADR Implemented or establish actual migration acceptance.

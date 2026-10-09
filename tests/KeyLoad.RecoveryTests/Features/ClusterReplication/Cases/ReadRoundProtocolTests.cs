@@ -6,16 +6,23 @@ namespace KeyLoad.RecoveryTests;
 /// <summary>AC-REP-006: genuine stored protocol integration, not native Orleans, fault or performance qualification.</summary>
 internal sealed class ReadRoundProtocolTests
 {
+    private const int UnsupportedPair = 2;
+    private const int SupportedQuorum = 3;
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(45);
 
     /// <summary>Actual elected nodes distinguish local/remote application and native control rounds at the same committed cut.</summary>
-    /// <param name="count">Actual independently stored voter count.</param>
+    /// <param name="count">Requested voter count; unsupported two is refused before a genuine three-voter continuation.</param>
     [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
     public async Task ActualStoredQuorumRetainsCommittedDataAcrossBothReadPurposes(int count)
     {
+        if (count == UnsupportedPair)
+        {
+            await RequireUnsupportedPairAsync(count);
+            count = SupportedQuorum;
+        }
         await using var cluster = new ReadRoundStoredCluster(count);
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
@@ -44,22 +51,37 @@ internal sealed class ReadRoundProtocolTests
         await Assert.That(replayed.Mutations).IsEquivalentTo(receipt.Mutations);
     }
 
-    /// <summary>A native control round never emits an application read probe in a real two-voter group.</summary>
+    /// <summary>Native control rounds never emit application read probes from either real three-voter follower.</summary>
     [Test]
     public async Task RemoteControlRoundDoesNotSpendApplicationProbeTraffic()
     {
-        await using var cluster = new ReadRoundStoredCluster(2);
+        await using var cluster = new ReadRoundStoredCluster(SupportedQuorum);
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         cluster.Attach();
         var leader = await cluster.ReadyLeaderAsync(linked.Token);
-        var follower = cluster.Nodes.Single(node => node != leader);
-        await follower.Consensus.ReadBarrierAsync(linked.Token);
-        var probes = leader.Transport.Count(ReplicaRpc.ReadProbe);
-        await Assert.That(probes).IsGreaterThan(0);
-        await follower.Consensus.ReadControlBarrierAsync(linked.Token);
-        await Assert.That(leader.Transport.Count(ReplicaRpc.ReadProbe)).IsEqualTo(probes);
-        await Assert.That(follower.Transport.Count(ReplicaRpc.ControlReadBarrier)).IsEqualTo(1);
+        foreach (var follower in cluster.Nodes.Where(node => node != leader))
+        {
+            await follower.Consensus.ReadBarrierAsync(linked.Token);
+            var probes = leader.Transport.Count(ReplicaRpc.ReadProbe);
+            await Assert.That(probes).IsGreaterThan(0);
+            await follower.Consensus.ReadControlBarrierAsync(linked.Token);
+            await Assert.That(leader.Transport.Count(ReplicaRpc.ReadProbe)).IsEqualTo(probes);
+            await Assert.That(follower.Transport.Count(ReplicaRpc.ControlReadBarrier)).IsEqualTo(1);
+        }
+    }
+
+    private static async Task RequireUnsupportedPairAsync(int count)
+    {
+        InvalidOperationException? refusal = null;
+        try
+        {
+            await using var unsupported = new ReadRoundStoredCluster(count);
+        }
+        catch (InvalidOperationException error)
+        { refusal = error; }
+        await Assert.That(refusal).IsNotNull();
+        await Assert.That(refusal!.Message).IsEqualTo(ReplicaProtocol.InvalidTopology);
     }
 
     private static async Task AssertCommittedAsync(ReadRoundStoredNode node, CommitReceipt receipt, CancellationToken token)

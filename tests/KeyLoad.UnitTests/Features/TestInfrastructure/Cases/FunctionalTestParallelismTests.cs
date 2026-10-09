@@ -10,12 +10,13 @@ internal sealed class FunctionalTestParallelismTests
     private const string SelectedFilter = "/*/*/FunctionalCase/*";
     private const string UnitSuite = "unit";
     private const string UnitProject = "KeyLoad.UnitTests";
-    private const int DefaultParallelism = 20;
+    private const int DefaultParallelism = 50;
+    private const int Explicit20Parallelism = 20;
     private const int TunedParallelism = 50;
 
     [Test]
     [Arguments(null, DefaultParallelism)]
-    [Arguments("20", DefaultParallelism)]
+    [Arguments("20", Explicit20Parallelism)]
     [Arguments("50", TunedParallelism)]
     public async Task AcTunitEntry013TypedFunctionalSelectionPreservesSuiteAndExplicitParallelism(string? selected, int expected)
     {

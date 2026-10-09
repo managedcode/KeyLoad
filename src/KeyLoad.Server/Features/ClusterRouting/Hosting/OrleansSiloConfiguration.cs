@@ -156,6 +156,8 @@ internal static class OrleansSiloConfiguration
                 provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton<IGrainActivationMigrationObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()
+                .CreateMigration(provider.GetRequiredService<ReplicaSiloDiscoveryClient>()));
         }
         services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>())

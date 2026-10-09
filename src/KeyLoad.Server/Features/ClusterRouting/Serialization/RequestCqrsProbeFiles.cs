@@ -19,6 +19,7 @@ internal sealed class RequestCqrsProbeFiles
     private readonly RequestCqrsProbeRecords records;
     private readonly RequestCqrsProbeActivationInventory activations;
     internal readonly RequestCqrsProbeLiveFiles Live;
+    internal readonly RequestCqrsProbeMigrationFiles Migration;
 
     private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
         IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
@@ -31,6 +32,7 @@ internal sealed class RequestCqrsProbeFiles
         records = new RequestCqrsProbeRecords(sessionId, voter, ownerBytes, executionOptions, json);
         activations = new(sessionId, json, records, executionOptions);
         Live = new(root, sessionId, json, records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
+        Migration = new(root, sessionId, new(json, executionOptions), records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, IOptions<ReplicaConfiguration> replicaOptions, IOptions<RequestProbeExecutionOptions> executionOptions)
@@ -121,6 +123,7 @@ internal sealed class RequestCqrsProbeFiles
         var markers = new List<RequestCqrsProbeMarkerRecord>();
         var witnesses = new List<RequestCqrsProbeActivationRecord>();
         var live = new List<RequestCqrsProbeLiveRecord>();
+        var migration = new List<RequestCqrsProbeMigrationRecord>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
         long aggregateBytes = AggregateBytesInitialValue;
         foreach (var path in entries)
@@ -129,7 +132,9 @@ internal sealed class RequestCqrsProbeFiles
             aggregateBytes = checked(aggregateBytes + ValidateEntry(path, name));
             if (aggregateBytes > executionOptions.Value.MaximumAggregateBytes)
             { throw Invalid(); }
-            if (RequestCqrsProbeLiveValidation.IsName(name))
+            if (RequestCqrsProbeMigrationValidation.IsName(name))
+            { Migration.Read(path, name, migration, presentControls); }
+            else if (RequestCqrsProbeLiveValidation.IsName(name))
             { Live.Read(path, name, live, presentControls); }
             else if (RequestCqrsProbeActivationValidation.IsName(name))
             { activations.Read(path, name, witnesses, presentControls); }
@@ -137,11 +142,13 @@ internal sealed class RequestCqrsProbeFiles
             { records.ReadControl(path, name, arms, releases, markers, presentControls); }
         }
         RequestCqrsProbeActivationInventory.RequireMarkers(witnesses, markers);
+        RequestCqrsProbeMigrationFiles.RequireInventory(migration, witnesses, markers);
         RequestCqrsProbeLiveFiles.RequireInventory(live, witnesses, markers, root, executionOptions);
         records.ValidatePresence(presentControls);
         records.ValidateInventory(markers);
         records.ValidateCrossRecords(arms, releases, markers);
         records.CommitArmInventory(arms, releases, markers);
+        Migration.CommitInventory(migration);
         return new(arms, releases, markers, entries.Length, aggregateBytes);
     }
 
@@ -161,7 +168,8 @@ internal sealed class RequestCqrsProbeFiles
     internal static byte[] ReadRecord(string path, IOptions<RequestProbeExecutionOptions> executionOptions)
         => RequestCqrsProbeFileReader.Read(path, executionOptions);
 
-    private static bool KnownName(string name) => RequestCqrsProbeLiveValidation.IsName(name)
+    private static bool KnownName(string name) => RequestCqrsProbeMigrationValidation.IsName(name)
+        || RequestCqrsProbeLiveValidation.IsName(name)
         || RequestCqrsProbeActivationValidation.IsName(name)
         || name == RequestCqrsProbeProtocol.OwnerFile
         || IsGuidName(name, RequestCqrsProbeProtocol.ArmFilePrefix, RequestCqrsProbeProtocol.JsonFileSuffix) || IsGuidName(name, RequestCqrsProbeProtocol.TemporaryFilePrefix, TemporaryFileSuffix)

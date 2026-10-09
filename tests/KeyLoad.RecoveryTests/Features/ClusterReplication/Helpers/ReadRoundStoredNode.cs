@@ -20,6 +20,7 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
     internal ReadRoundStoredNode(string directory, string voter, string[] voters, Guid incarnation, ReadOnlyMemory<byte> signingKey)
     {
         Configuration = new(voter, [.. voters], directory, incarnation) { BenchmarkTopology = voters.Length < 3 };
+        var validatedConfiguration = RecoveryExecutionOptions.Configuration(Configuration);
         stores = ReplicaMaterializerLifecycleStores.Open(
             () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = signingKey }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()),
             () => new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
@@ -28,13 +29,13 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
         try
         {
             Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-            Log = openedLog = new(stores.Replica, RecoveryExecutionOptions.Configuration(Configuration), canonicalDatabase: Database);
+            Log = openedLog = new(stores.Replica, validatedConfiguration, canonicalDatabase: Database);
             Database.Bootstrap(new(Principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
             RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
-            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
-            Consensus = new(Materializer, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), TimeProvider.System);
+            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, validatedConfiguration, RecoveryExecutionOptions.Replica()), RecoveryExecutionOptions.Replica());
+            Consensus = new(Materializer, validatedConfiguration, RecoveryExecutionOptions.Replica(), TimeProvider.System);
         }
         catch (Exception error)
         {

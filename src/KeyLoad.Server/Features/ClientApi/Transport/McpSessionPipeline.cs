@@ -21,6 +21,8 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         }
         catch (KeyLoadException error)
         {
+            McpPipelineFailureDiagnostic.Write(context, message.JsonRpcMessage,
+                McpPipelineFailureStage.IncomingAdmission, error);
             if (request is not null)
             { await RejectAsync(message, request, tool, error.Code, cancellationToken).ConfigureAwait(false); }
             return;
@@ -40,6 +42,8 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         { McpNativeOutput.Validate(message.JsonRpcMessage, maximumBytes, executionOptions); }
         catch (KeyLoadException error)
         {
+            McpPipelineFailureDiagnostic.Write(context, message.JsonRpcMessage,
+                McpPipelineFailureStage.OutgoingNativeOutput, error);
             if (message.JsonRpcMessage is JsonRpcResponse response)
             {
                 McpResponseReplacement.Apply(response, state.Failure(error.Code, CanonicalOperationGateway.RequestId(context)));

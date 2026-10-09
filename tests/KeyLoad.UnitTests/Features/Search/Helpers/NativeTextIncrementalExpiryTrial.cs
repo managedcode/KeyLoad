@@ -22,9 +22,7 @@ internal static class NativeTextIncrementalExpiryTrial
         await Assert.That(claims.Consumer).IsEqualTo(request.Consumer);
         await Assert.That(claims.IndexGeneration).IsEqualTo(request.IndexGeneration);
         await Assert.That(claims.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
-        var delay = claims.ExpiresAt - database.Database.EvaluationClock.GetUtcNow();
-        if (delay > TimeSpan.Zero)
-        { await Task.Delay(delay, database.Database.EvaluationClock, token); }
+        await WaitForOriginalExpiryAsync(database.Database.EvaluationClock, claims.ExpiresAt, token);
         await Assert.That(database.Database.EvaluationClock.GetUtcNow()).IsGreaterThanOrEqualTo(claims.ExpiresAt);
         await retained.RequireAsync(database, token);
         await NativeTextIncrementalIntentOwner.RunAsync(database, async runtime =>
@@ -36,6 +34,20 @@ internal static class NativeTextIncrementalExpiryTrial
             await retained.RequireAsync(database, token);
         });
         await NativeTextIncrementalExpiryHealthy.RunAsync(database, request, token);
+    }
+
+    private static async Task WaitForOriginalExpiryAsync(TimeProvider clock, DateTimeOffset originalExpiry,
+        CancellationToken cancellationToken)
+    {
+        while (clock.GetUtcNow() < originalExpiry)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = originalExpiry - clock.GetUtcNow();
+            if (remaining <= TimeSpan.Zero)
+            { break; }
+            var delay = TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds));
+            await Task.Delay(delay, clock, cancellationToken);
+        }
     }
 
     private static async Task<CommitProjectionBatchRequest> PrepareAsync(TestDatabase database,

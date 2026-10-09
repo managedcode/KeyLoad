@@ -38,8 +38,8 @@ internal static class ReplicaIsolationFlow
         var oldSdk = new KeyLoadClient(oldSdkHttp, identity.Secret, IntegrationClientOptions.Execution());
         await using var oldMcp = await McpOfficialClient.ConnectAsync(fixture, isolated, identity.Secret, cancellationToken);
         await using var oldAdminMcp = await McpOfficialClient.ConnectAsync(fixture, isolated, fixture.AdminKey, cancellationToken);
-        var nativeStatus = await McpCallerAssertions.SuccessAsync<NodeStatus>(await oldAdminMcp.CallAsync(
-            McpCallerTools.AdminStatus, new { }, cancellationToken));
+        var nativeStatus = await McpCallerAssertions.SuccessAsync<NodeStatus>(await oldAdminMcp.CallWithoutBodyAsync(
+            McpCallerTools.AdminStatus, cancellationToken));
         await ReplicaIsolationFlowAssertions.StatusAsync(nativeStatus.Value, identities[isolated].NodeId, isolated, receipt.Token.Incarnation, identities[isolated].ReadGeneration,
             originalStatus.ConsensusTerm);
         var reference = new EntityRef(partition, Collection, DocumentId);

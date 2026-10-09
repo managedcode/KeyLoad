@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class NativeTextWaitRf3Assertions
 {
-    private const string FirstJson = "{\"text\":\"Київ needle needle\",\"embedding\":\"unit\",\"owner\":\"owner-a\"}";
-    private const string SecondJson = "{\"text\":\"needle plain\",\"embedding\":\"unit\",\"owner\":\"owner-b\"}";
+    private const string FirstJson = "{\"owner\":\"owner-a\"}";
+    private const string SecondJson = "{\"owner\":\"owner-b\"}";
     private const string Query = "needle";
     private const long Revision = 1;
     private const int FirstDenominator = 61;
@@ -32,9 +32,9 @@ internal static class NativeTextWaitRf3Assertions
         bool deleted, CancellationToken token)
     {
         var first = new RankedDocument(new(new(scenario.Partition, NativeTextRf3Scenario.Collection,
-            NativeTextRf3Scenario.FirstId), Revision, FirstJson, true, [NativeTextRf3Scenario.SecretField]), 1d / FirstDenominator);
+            NativeTextRf3Scenario.FirstId), Revision, FirstJson, true, [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]), 1d / FirstDenominator);
         var second = new RankedDocument(new(new(scenario.Partition, NativeTextRf3Scenario.Collection,
-            NativeTextRf3Scenario.SecondId), Revision, SecondJson, true, [NativeTextRf3Scenario.SecretField]), 1d / SecondDenominator);
+            NativeTextRf3Scenario.SecondId), Revision, SecondJson, true, [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]), 1d / SecondDenominator);
         RankedDocument[] expected = deleted ? [first] : [first, second];
         var request = scenario.Text(Query);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));

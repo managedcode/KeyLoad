@@ -1082,3 +1082,8 @@ The canonical official ZoneTree repair/publication gate remains independent; no
 consumer checksum fallback, format migration, fork package or local reference is
 authorized. Rollback removes only these two diagnostic categories and matching
 patterns; original failed records remain immutable.
+
+
+## KL-019 native activation movement join
+
+REQ/AC-KL019-NATIVE-MIGRATION-001 and AC-ROUTE-002 use the canonical [ClusterRouting implementation contract](../ClusterRouting.md#task-kl019-native-migration-001--accepted-source-implementation-contract) and ADR-082. Borrow the original actual grain context only after the successful command capability lease settles; restore exact previous native placement hint or absence in finally. The validated optional signed ephemeral observer is absent from ordinary registration. Same canonical digest plus genuinely distinct activation and exact admitted native silo are required after original ingress ProducerDisposed/retirement; advisory intent is not movement proof. Preserve physical storage owners, bounded immutable probe inventory, concurrent identity isolation, original cancellation and full receipts. Internal bounded JSON reader visibility supports this native feature codec only. Source integration does not close current compilation/discovery/Linux RF3 gates.

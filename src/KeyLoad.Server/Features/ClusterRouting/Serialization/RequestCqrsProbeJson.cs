@@ -167,7 +167,7 @@ internal sealed class RequestCqrsProbeJson
         { throw Invalid(); }
     }
 
-    private T Read<T>(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields, JsonTypeInfo<T> typeInfo) where T : struct
+    internal T Read<T>(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields, JsonTypeInfo<T> typeInfo) where T : struct
     {
         try
         {

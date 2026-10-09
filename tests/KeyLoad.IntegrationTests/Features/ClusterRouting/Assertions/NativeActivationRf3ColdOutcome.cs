@@ -11,6 +11,8 @@ internal static class NativeActivationRf3ColdOutcome
     internal static async Task VerifyAsync(TwoRf3MembershipWave wave, RequestCqrsPhaseFaultIdentity identity,
         CommandRequest command, CommitReceipt receipt, CancellationToken cancellationToken)
     {
+        await NodeEpochRf3StatusOracle.EventuallyCaughtUpAsync(wave.Application, wave.Profile,
+            receipt.Token.Position, cancellationToken).ConfigureAwait(false);
         var failures = new List<Exception>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {

@@ -2,6 +2,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication;
 
@@ -9,15 +10,33 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class NativeActivationDuplicateRf3Operation
 {
+    private const int NoFailuresCount = 0;
     internal static async Task VerifyAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers original, RequestCqrsPhaseFaultIdentity identity, CommandRequest command,
         RequestCqrsProbeActivationRecord established, CommitReceipt receipt,
         IReadOnlyList<ReplicaSiloDiscovery> discovery, List<Exception> failures, CancellationToken cancellationToken)
     {
+        RequestCqrsRf3Callers? replacementCaller = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var oldNode = RequestCqrsProbeFixtureProtocol.Nodes.Single(node => RequestCqrsProbeFileNames.OriginForNode(node) == established.Voter);
+            var survivor = RequestCqrsProbeFixtureProtocol.Nodes.First(node => node != oldNode);
+            var owned = await RequestCqrsRf3Callers.ConnectAsync(wave.Application,
+                survivor, identity.Secret, cancellationToken).ConfigureAwait(false);
+            replacementCaller = owned;
+            await VerifyWithCallerAsync(wave, administrator, original, owned, identity, command,
+                established, receipt, discovery, failures, cancellationToken).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        if (replacementCaller is { } caller)
+        { await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+    }
+
+    private static async Task VerifyWithCallerAsync(TwoRf3MembershipWave wave, RequestCqrsRf3Callers administrator,
+        RequestCqrsRf3Callers original, RequestCqrsRf3Callers replacementCaller, RequestCqrsPhaseFaultIdentity identity,
+        CommandRequest command, RequestCqrsProbeActivationRecord established, CommitReceipt receipt,
+        IReadOnlyList<ReplicaSiloDiscovery> discovery, List<Exception> failures, CancellationToken cancellationToken)
+    {
         var oldNode = RequestCqrsProbeFixtureProtocol.Nodes.Single(node => RequestCqrsProbeFileNames.OriginForNode(node) == established.Voter);
-        var survivor = RequestCqrsProbeFixtureProtocol.Nodes.First(node => node != oldNode);
-        await using var replacementCaller = await RequestCqrsRf3Callers.ConnectAsync(wave.Application,
-            survivor, identity.Secret, cancellationToken).ConfigureAwait(false);
         await using (var old = new NativeActivationHeldProducer<Result<CommitReceipt>>(wave.QueryControls, discovery,
             identity.PrincipalId, command.CommandId, established.Voter, token => original.Sdk.CommitAsync(command, token), failures, cancellationToken))
         {
@@ -52,6 +71,8 @@ internal static class NativeActivationDuplicateRf3Operation
             next.Release();
             await SqlRf3Protocol.EqualAsync(receipt, await next.Producer.ConfigureAwait(false));
         }
+        if (failures.Count != NoFailuresCount)
+        { return; }
         await (wave.IsolationOwner ?? throw new InvalidOperationException(NativeActivationRf3Protocol.Missing))
             .RestoreAsync(cancellationToken).ConfigureAwait(false);
         await RequestCqrsPhaseFaultAssertions.VerifyDocumentAsync(original, identity,

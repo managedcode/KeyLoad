@@ -407,3 +407,35 @@ Actual R875 coherent-image metadata originals now contain exactly 58 Unit,
 receipt and eleven-task census plan retain original native process/source/PE/PDB
 before-after evidence. Strict native case admission remains required; metadata
 is not an execution, coverage, Linux RF3 or task-acceptance result.
+
+
+## TASK-KL029-ORIGINAL-EXPIRY-AND-PERSISTED-PRIVACY-002
+
+REQ/AC-FTS-INCREMENTAL-005 retains the original signed five-minute page expiry,
+original owner TimeProvider and original cancellation. Await the actual absolute
+ExpiresAt by a native ceil-millisecond delay and owner-clock recheck; native
+Task.Delay completion alone is not an absolute UTC witness. No margin, new
+deadline, renewal, fake clock or operation retry is permitted. Retain the exact
+expiry assertion, original failed ACK/result replay, unchanged documents/outbox/
+intent, genuine Release, distinct fresh consumer Build and healthy cold reopen.
+NativeTextIncrementalExpiryTests.OriginalUnacknowledgedPageNaturallyExpiresWithoutRenewalThenFreshConsumerBuildReturnsLiteralHealthy
+is the complete real-store operation oracle.
+
+REQ/AC-FTS-002/005/007 retains current persisted field authorization independently
+of text/vector use authorization. The native RF3 reader has the actual text and
+vector use grants, but no pii.read or private raw-read grant. Full expected JSON
+is therefore owner-only, with exact ordered redactions /text, /embedding, /secret.
+Preserve every reference, revision, score, rank and complete SDK/official MCP/Q1
+comparison, original grants, deleted exclusion, leader-loss/restart, Wait prefix
+and receipt replay. NativeTextRf3LeaderLossTests and NativeTextWaitRf3Tests retain
+their existing whole negative/healthy flows; raw administrator receipt documents
+remain complete and unchanged. Product projection and authority do not change.
+
+Original source9c/run37920436876 normal/scalar failures remain immutable evidence.
+The observed wrong-owner maintenance UnknownWriteOutcome is unresolved; retain
+its OwnershipLost assertion and all original no-effect/replay checks. This
+test-only correction requires a fresh coherent build, actual native metadata
+and original normal/scalar Linux reports plus full required recovery/RF3 gates.
+No source packet, timer source audit or privacy derivation qualifies runtime.
+Root owns live integration/build/discovery/Git; rollback removes only these
+test-oracle changes. No public contract, data format or provider migration.
