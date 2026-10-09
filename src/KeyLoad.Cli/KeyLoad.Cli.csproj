@@ -2,12 +2,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.CrashHost" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <ProjectReference Include="../KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
+    <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.Client/KeyLoad.Client.csproj" />
   </ItemGroup>

@@ -28,6 +28,37 @@ internal static class McpPipelineFailureDiagnostic
         { ServerFailureObserver.ThrowIfAny(failures); }
     }
 
+    private const int ExecutionFailureEventId = 6;
+    private const string ExecutionFailureMessage = "MCP native pipeline failed at {Stage} with {Code} and {ExceptionCategory} for {MethodCategory}.";
+    private static readonly Action<ILogger, McpPipelineFailureStage, ErrorCode?, McpPipelineExceptionCategory, McpPipelineMethodCategory, Exception?> LogExecutionFailure =
+        LoggerMessage.Define<McpPipelineFailureStage, ErrorCode?, McpPipelineExceptionCategory, McpPipelineMethodCategory>(LogLevel.Warning,
+            new EventId(ExecutionFailureEventId), ExecutionFailureMessage);
+
+    /// <summary>Observes only an actual owning failure and retains any diagnostic fault with that original.</summary>
+    /// <param name="context">The original scoped HTTP owner.</param>
+    /// <param name="message">The original native message, used only for its closed method category.</param>
+    /// <param name="stage">The actual fixed owning catch boundary.</param>
+    /// <param name="original">The original exception; its text and data never enter logging.</param>
+    internal static void WriteExecutionFailure(HttpContext context, JsonRpcMessage message,
+        McpPipelineFailureStage stage, Exception original)
+    {
+        List<Exception> failures = [original];
+        ServerFailureObserver.Observe(() => LogExecutionFailure(
+            context.RequestServices.GetRequiredService<ILogger<McpSessionPipeline>>(), stage,
+            original is KeyLoadException canonical ? canonical.Code : null, ExceptionCategory(original),
+            Category(message), null), failures);
+        if (failures.Count > OriginalFailureCount)
+        { ServerFailureObserver.ThrowIfAny(failures); }
+    }
+
+    private static McpPipelineExceptionCategory ExceptionCategory(Exception original) => original switch
+    {
+        KeyLoadException => McpPipelineExceptionCategory.KeyLoad,
+        InvalidOperationException => McpPipelineExceptionCategory.InvalidOperation,
+        OperationCanceledException => McpPipelineExceptionCategory.Cancelled,
+        _ => McpPipelineExceptionCategory.Other
+    };
+
     private static McpPipelineMethodCategory Category(JsonRpcMessage message)
         => (message as JsonRpcRequest)?.Method switch
         {

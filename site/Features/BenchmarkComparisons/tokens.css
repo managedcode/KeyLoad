@@ -2,9 +2,9 @@
 :root {
   --page: 1240px;
   --gutter: clamp(1rem, 4.5vw, 3.5rem);
-  --section-gap: clamp(5rem, 11vw, 9.5rem);
+  --section-gap: clamp(4rem, 8vw, 7rem);
   --engine-track: rgba(17, 18, 20, .06);
-  --stage: linear-gradient(180deg, #fbfaf8 0%, #efedf1 100%);
+  --stage: linear-gradient(180deg, #fbfaf8 0%, #f0ecf3 100%);
   --tok-key: #c9b4ff;
   --tok-str: #9fb4ff;
   --tok-val: #ffc9ad;

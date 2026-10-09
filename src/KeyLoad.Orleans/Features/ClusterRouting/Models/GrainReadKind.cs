@@ -126,5 +126,9 @@ public enum GrainReadKind
     /// <summary>Observe actual receiver first issuance under fresh persisted same-subject administrator authority.</summary>
     PartitionMovementReceiverIssuance,
     /// <summary>Observe the actual distinct expired-Retire cancellation outcome under fresh native administrator authority.</summary>
-    PartitionMovementRetireCancellationOutcome
+    PartitionMovementRetireCancellationOutcome,
+    /// <summary>Captures or verifies one stable actual native owner archive under current persisted credentials.</summary>
+    ClusterBackupOwner,
+    /// <summary>Requires an actual provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
+    WaitForAnnIndex
 }

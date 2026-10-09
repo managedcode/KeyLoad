@@ -10,15 +10,19 @@ internal static class RequestCqrsProbeOwnerReader
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
     private const int MaximumJsonDepth = 1;
     private const int RequiredFieldCount = 4;
-    private const int OwnerVersion = 2;
+    internal const int OwnerVersion = 2;
     private const string VersionField = "Version";
     private const string KindField = "Kind";
     private const string SessionField = "SessionId";
     private const string VoterField = "Voter";
-    private const string OwnerKind = "Owner";
+    internal const string OwnerKind = "Owner";
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
 
     internal static RequestCqrsProbeOwnerRecord ReadFile(string path, IOptions<RequestProbeFileOptions> executionOptions)
+        => ReadFile(path, executionOptions, OwnerVersion, OwnerKind);
+
+    internal static RequestCqrsProbeOwnerRecord ReadFile(string path, IOptions<RequestProbeFileOptions> executionOptions,
+        int expectedVersion, string expectedKind)
     {
         const int StructuralValue = 0;
         const int MissingValue = -1;
@@ -38,10 +42,14 @@ internal static class RequestCqrsProbeOwnerReader
         if (input.ReadByte() != MissingValue || input.Length != identity.Length
             || OfflineRegularFile.Inspect(path) != identity)
         { throw new InvalidOperationException(InvalidConfiguration); }
-        return Read(bytes, executionOptions);
+        return Read(bytes, executionOptions, expectedVersion, expectedKind);
     }
 
     internal static RequestCqrsProbeOwnerRecord Read(byte[] bytes, IOptions<RequestProbeFileOptions> executionOptions)
+        => Read(bytes, executionOptions, OwnerVersion, OwnerKind);
+
+    private static RequestCqrsProbeOwnerRecord Read(byte[] bytes, IOptions<RequestProbeFileOptions> executionOptions,
+        int expectedVersion, string expectedKind)
     {
         const int StructuralValue = 0;
         const int VersionInitialValue = 0;
@@ -62,7 +70,7 @@ internal static class RequestCqrsProbeOwnerReader
             { throw new InvalidOperationException(InvalidConfiguration); }
             ReadField(field, ref version, ref kind, ref session, ref ownerVoter);
         }
-        if (seen.Count != RequiredFieldCount || version != OwnerVersion || kind != OwnerKind
+        if (seen.Count != RequiredFieldCount || version != expectedVersion || kind != expectedKind
             || session is null || ownerVoter is null)
         { throw new InvalidOperationException(InvalidConfiguration); }
         return new(version, kind, session, ownerVoter);

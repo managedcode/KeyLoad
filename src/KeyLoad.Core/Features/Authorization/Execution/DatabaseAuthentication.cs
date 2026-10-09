@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const string UnavailableCredentialDetail = "The credential is unavailable or expired.";
+    private const string UnavailableCredentialDetail = DatabaseCredentialValidation.UnavailableCredentialDetail;
 
     /// <summary>Creates the initial administrator and credential if that principal is absent.</summary>
     /// <param name="administrator">Initial persisted cluster administrator.</param>
@@ -37,19 +37,8 @@ public sealed partial class DatabaseEngine
     /// <param name="id">Principal identifier.</param>
     /// <param name="now">Business time used to evaluate expiry.</param>
     /// <returns>The active persisted principal.</returns>
-    public PrincipalRecord Principal(IKeyValueView view, string id, DateTimeOffset now)
-    {
-        const string PrincipalDetailText = UnavailableCredentialDetail;
-
-        ArgumentNullException.ThrowIfNull(view);
-        var principal = view.GetRecord<PrincipalRecord>(KeySpace.Principal(id));
-        if (principal is null || principal.Revoked || principal.ExpiresAt <= now)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, PrincipalDetailText);
-        }
-
-        return principal;
-    }
+    public PrincipalRecord Principal(IKeyValueView view, string id, DateTimeOffset now) =>
+        DatabaseCredentialValidation.ReadPrincipal(view, id, now);
     /// <summary>Verifies an API credential and its active persisted principal.</summary>
     /// <param name="secret">Complete API key secret.</param>
     /// <param name="now">Business time used to evaluate expiry.</param>

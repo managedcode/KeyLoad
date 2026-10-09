@@ -2,22 +2,24 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class RequestCqrsProbePaths
 {
-    internal static void RequireDirectory(string path)
+    internal static void RequireDirectory(string path) => RequireDirectory(path, RequestCqrsProbeProtocol.FixedRoot);
+
+    internal static void RequireDirectory(string path, string expectedRoot)
     {
         const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
 
-        RequirePathAncestors(path);
+        RequirePathAncestors(path, expectedRoot);
         var info = new DirectoryInfo(path);
         if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
         { throw Invalid(); }
         RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateDirectoryMode);
     }
 
-    private static void RequirePathAncestors(string path)
+    private static void RequirePathAncestors(string path, string expectedRoot)
     {
         const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
 
-        if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != RequestCqrsProbeProtocol.FixedRoot)
+        if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != expectedRoot)
         { throw Invalid(); }
         var info = new DirectoryInfo(path);
         if ((info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)

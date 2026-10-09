@@ -132,7 +132,7 @@ internal static class McpCatalogExpectations
     private const string AnnMaintainRoute = "/v1/search/ann/maintain";
     private const string TextMaintain = "keyload_search_text_maintain";
     private const string TextMaintainRoute = "/v1/search/text/maintain";
-    internal const int Count = 76;
+    internal const int Count = 78;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (AnnRead, AnnReadRoute, GrainReadKind.ApproximateSearch, null),
@@ -175,6 +175,8 @@ internal static class McpCatalogExpectations
         (SearchExecute, SearchExecuteRoute, GrainReadKind.Search, null),
         (SearchGraph, SearchGraphRoute, GrainReadKind.GraphSearch, null),
         (WaitForIndexProtocol.Tool, WaitForIndexProtocol.Route, GrainReadKind.WaitForIndex, null),
+        (ClusterBackupProtocol.Tool, ClusterBackupProtocol.Route, GrainReadKind.ClusterBackupOwner, null),
+        (WaitForAnnIndexProtocol.Tool, WaitForAnnIndexProtocol.Route, GrainReadKind.WaitForAnnIndex, null),
         (AdminBackup, AdminBackupRoute, GrainReadKind.Backup, null),
         (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),

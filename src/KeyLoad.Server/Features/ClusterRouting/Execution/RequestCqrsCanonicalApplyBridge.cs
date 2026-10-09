@@ -10,6 +10,7 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
     private const int ContiguousIndexStep = 1;
     private readonly AsyncLocal<RequestCqrsCanonicalApplyScope?> current = new();
     private RequestCqrsProbeObserver? observer;
+    private MovementFrameReplicaObservation? frameObservation;
     private readonly Lock sync = new();
     private RequestCqrsCanonicalApplyScope? held;
     internal void Attach(RequestCqrsProbeObserver owner)
@@ -18,9 +19,17 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
         if (Interlocked.CompareExchange(ref observer, owner, null) is not null)
         { throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions); }
     }
+    internal void AttachFrameObservation(MovementFrameReplicaObservation owner)
+    {
+        if (Interlocked.CompareExchange(ref frameObservation, owner, null) is not null)
+        { throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid); }
+    }
+    internal void CloseFrameObservation() => frameObservation?.Close();
     internal IDisposable? Enter(ReplicaEntry entry)
     {
         var operation = entry.Operation!;
+        if (operation.Kind == OperationKind.PartitionMovementPhase)
+        { return frameObservation?.Enter(entry); }
         if (operation.Kind != OperationKind.Batch || Volatile.Read(ref observer) is not { } owner)
         { return null; }
         if (current.Value is not null)
@@ -105,10 +114,11 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
             { original.IndependentAppendCompleted(); }
         }
     }
-    internal Action<CommitStage, long, int> StorageObserver => (stage, _, _) => ObserveStorage(stage);
-    private void ObserveStorage(CommitStage stage)
+    internal Action<CommitStage, long, int> StorageObserver => ObserveStorage;
+    private void ObserveStorage(CommitStage stage, long position, int ordinal)
     {
         if (stage == CommitStage.JournalFlushed)
         { current.Value?.JournalFlushed(); }
+        frameObservation?.Observe(stage, position, ordinal);
     }
 }

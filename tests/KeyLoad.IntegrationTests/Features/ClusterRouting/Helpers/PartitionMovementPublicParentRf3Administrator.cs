@@ -15,12 +15,16 @@ internal static class PartitionMovementPublicParentRf3Administrator
     private const int SecretBytes = 32;
     private const long InitialPolicyEpoch = 1;
 
+    internal static PrincipalRecord InitialDefinition() => Definition(InitialPolicyEpoch, true);
+
+    internal static PrincipalRecord Definition(long policyEpoch, bool administrator)
+        => new(PrincipalId, Tenant, [], []) { ClusterAdministrator = administrator, PolicyEpoch = policyEpoch };
+
     internal static async Task<string> PersistAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
     {
         var key = CredentialPrefix + Guid.NewGuid().ToString("N");
         var secret = key + CredentialSeparator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
-        var principal = new PrincipalRecord(PrincipalId, Tenant, [], [])
-        { ClusterAdministrator = true, PolicyEpoch = InitialPolicyEpoch };
+        var principal = InitialDefinition();
         var credential = new ApiKeyRecord(key, PrincipalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         using var sourceHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);

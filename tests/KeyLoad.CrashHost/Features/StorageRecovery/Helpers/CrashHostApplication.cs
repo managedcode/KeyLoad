@@ -17,6 +17,8 @@ internal static class CrashHostApplication
         const int RunAsyncArgsComponentIndex = 3;
 
         _ = SerializationExecutionRegistration.Process.Value;
+        if (await ClusterRestoreProcessCutScenario.TryRunAsync(args))
+        { return; }
         if (await NativeTextIncrementalCrashScenario.TryRunAsync(args) || await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;

@@ -25,6 +25,7 @@ internal static class PartitionMovementFinalInstallFrameRf3Assertions
                 await Assert.That(actual.Header!.TerminalResult).IsNull();
                 await Assert.That(actual.Header.OriginalCapturePhaseCommandId).IsEqualTo(before.Header.OriginalCapturePhaseCommandId);
                 await RequireControlAsync(seed, precut, before, actual);
+                await PartitionMovementEmbeddedFailureRf3Assertions.RequireAsync(seed, precut, actual, after, entries);
                 foreach (var entry in entries.Where(entry => entry.Operation is not null))
                 {
                     var operation = entry.Operation!;

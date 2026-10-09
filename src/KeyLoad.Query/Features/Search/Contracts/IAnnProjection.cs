@@ -8,12 +8,14 @@ namespace KeyLoad.Query.Features.Search;
 
 internal interface IAnnProjection
 {
-    IAnnProjectionLease Acquire(IKeyValueView view, ApproximateSearchRequest request,
+    IAnnProjectionLease Acquire(IKeyValueView view, AnnProjectionSelection request,
         ReadExecutionBudget budget);
 }
 
 internal interface IAnnProjectionLease : IDisposable
 {
+    long IndexedAppliedPosition { get; }
+    long IndexGeneration { get; }
     ImmutableArray<VectorRecord> Records { get; }
     AnnSeedWork ScopeWork { get; }
     IOptions<AnnSeedOptions> CallerSeedOptions { get; }

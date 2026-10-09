@@ -36,7 +36,8 @@ internal static class AnnPublicSearchExecutor
             database.Authorization.Require(principal, search.Partition, search.Collection, Capability.VectorSearch);
             database.Authorization.RequireFieldUse(principal, resource, search.VectorField!);
             var owner = projection ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
-            var lease = owner.Acquire(view, request, budget);
+            var lease = owner.Acquire(view, new(search.Partition, search.Collection, search.VectorField!,
+                search.Space!, request.Consumer, request.IndexGeneration), budget);
             Exception? primary = null;
             try
             {

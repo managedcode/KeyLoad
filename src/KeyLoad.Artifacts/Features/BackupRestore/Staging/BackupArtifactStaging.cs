@@ -69,6 +69,8 @@ internal sealed class BackupArtifactStaging
         }
     }
 
+    internal string DirectoryPath => publication.StagePath;
+
     internal void Publish()
     {
         publication.Publish();

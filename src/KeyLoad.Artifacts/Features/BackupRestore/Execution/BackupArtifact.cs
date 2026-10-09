@@ -38,15 +38,23 @@ public static class BackupArtifact
     /// <param name="timeProvider">Borrowed catalog clock; defaults to the system provider.</param>
     public static void Pack(string backupDirectory, string artifactPath, int pieceBytes, TimeProvider? timeProvider = null)
     {
+        PackFiles(backupDirectory, artifactPath, pieceBytes, timeProvider ?? TimeProvider.System, CanonicalFileNames, out _);
+    }
+
+    internal static void PackFiles(string backupDirectory, string artifactPath, int pieceBytes, TimeProvider clock,
+        ImmutableArray<string> requiredNames, out bool created)
+    {
+        created = false;
         if (pieceBytes < MinimumPieceBytes || pieceBytes > MaximumPieceBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(pieceBytes));
         }
-        var files = GetCanonicalFiles(Path.GetFullPath(backupDirectory));
-        var catalog = CreateCatalog(files, pieceBytes, timeProvider ?? TimeProvider.System);
+        var files = GetCanonicalFiles(Path.GetFullPath(backupDirectory), requiredNames);
+        var catalog = CreateCatalog(files, pieceBytes, clock);
         var writer = new SegmentedArtifactWriter();
         PopulateWriter(writer, catalog, files, pieceBytes);
         using var destination = new FileStream(artifactPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        created = true;
         // Save's file descriptors stream each source through a pooled buffer; payloads are not retained in memory.
         destination.Dispose();
         writer.Save(artifactPath);
@@ -58,9 +66,34 @@ public static class BackupArtifact
         flush.Flush(true);
     }
 
-    private static FileInfo[] GetCanonicalFiles(string root)
+    /// <summary>Packages the exact native catalog backup, requiring its original capture receipt digest.</summary>
+    /// <param name="backupDirectory">Actual verified four-file source directory.</param>
+    /// <param name="artifactPath">New operation-owned artifact path.</param>
+    /// <param name="pieceBytes">Existing native transfer piece bound.</param>
+    /// <param name="expectedManifestDigest">Separately retained original capture receipt digest.</param>
+    /// <param name="options">Original centrally validated native storage execution options.</param>
+    /// <param name="timeProvider">Borrowed artifact catalog clock.</param>
+    /// <param name="cancellationToken">Original operation cancellation.</param>
+    public static void PackCatalogBackup(string backupDirectory, string artifactPath, int pieceBytes,
+        string expectedManifestDigest, Microsoft.Extensions.Options.IOptions<KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions> options,
+        TimeProvider timeProvider, CancellationToken cancellationToken) =>
+        CatalogBackupArtifactOperations.Pack(backupDirectory, artifactPath, pieceBytes, expectedManifestDigest,
+            options, timeProvider, cancellationToken);
+
+    /// <summary>Verifies and publishes the exact four-file native archive into an empty destination.</summary>
+    /// <param name="artifactPath">Original bounded-piece artifact path.</param>
+    /// <param name="destination">Explicit clean operator-owned destination.</param>
+    /// <param name="expectedManifestDigest">Separately retained original capture receipt digest.</param>
+    /// <param name="options">Original centrally validated native storage execution options.</param>
+    /// <param name="cancellationToken">Original operation cancellation.</param>
+    public static void UnpackCatalogBackup(string artifactPath, string destination, string expectedManifestDigest,
+        Microsoft.Extensions.Options.IOptions<KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions> options,
+        CancellationToken cancellationToken) =>
+        CatalogBackupArtifactOperations.Unpack(artifactPath, destination, expectedManifestDigest, options, cancellationToken);
+
+    private static FileInfo[] GetCanonicalFiles(string root, ImmutableArray<string> requiredNames)
     {
-        var files = CanonicalFileNames.Select(name => new FileInfo(Path.Combine(root, name))).ToArray();
+        var files = requiredNames.Select(name => new FileInfo(Path.Combine(root, name))).ToArray();
         if (files.Any(file => !file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != NoMatchingAttributes))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidBackupDirectory);

@@ -15,6 +15,13 @@ internal static class RequestCqrsProbeProfilePaths
 
     internal static IReadOnlyDictionary<string, string> Validate(string configuredRoot, string sessionId,
         string dataRoot, IOptions<RequestProbeFileOptions> executionOptions)
+        => Validate(configuredRoot, sessionId, dataRoot, executionOptions,
+            RequestCqrsProbeProfileSettingsReader.VoterNames, RequestCqrsProbeOwnerReader.OwnerVersion,
+            RequestCqrsProbeOwnerReader.OwnerKind);
+
+    internal static IReadOnlyDictionary<string, string> Validate(string configuredRoot, string sessionId,
+        string dataRoot, IOptions<RequestProbeFileOptions> executionOptions, IReadOnlyList<string> voters,
+        int ownerVersion, string ownerKind)
     {
         try
         {
@@ -24,13 +31,13 @@ internal static class RequestCqrsProbeProfilePaths
             if (IsWithin(root, data) || IsWithin(data, root))
             { throw new InvalidOperationException(InvalidConfiguration); }
             ValidateDirectoryAndAncestors(root, PrivateDirectoryMode);
-            ValidateRootEntries(root);
+            ValidateRootEntries(root, voters);
             var nodes = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var voter in RequestCqrsProbeProfileSettingsReader.VoterNames)
+            foreach (var voter in voters)
             {
                 var directory = Path.Combine(root, voter);
                 ValidateDirectoryAndAncestors(directory, PrivateDirectoryMode);
-                ValidateOwnerDirectory(directory, sessionId, global::ClusterResources.Origin(voter), executionOptions);
+                ValidateOwnerDirectory(directory, sessionId, global::ClusterResources.Origin(voter), executionOptions, ownerVersion, ownerKind);
                 nodes.Add(voter, directory);
             }
             return nodes;
@@ -77,18 +84,17 @@ internal static class RequestCqrsProbeProfilePaths
         }
     }
 
-    private static void ValidateRootEntries(string root)
+    private static void ValidateRootEntries(string root, IReadOnlyList<string> voters)
     {
         const int Step = 1;
 
-        var voters = RequestCqrsProbeProfileSettingsReader.VoterNames;
         var entries = Directory.EnumerateFileSystemEntries(root).Take(voters.Count + Step).ToArray();
         if (entries.Length != voters.Count
             || voters.Any(voter => !entries.Contains(Path.Combine(root, voter), StringComparer.Ordinal)))
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
 
-    private static void ValidateOwnerDirectory(string directory, string sessionId, string voter, IOptions<RequestProbeFileOptions> executionOptions)
+    private static void ValidateOwnerDirectory(string directory, string sessionId, string voter, IOptions<RequestProbeFileOptions> executionOptions, int ownerVersion, string ownerKind)
     {
         const int CountValue = 2;
         const int OwnerEntryCount = 1;
@@ -98,7 +104,7 @@ internal static class RequestCqrsProbeProfilePaths
         if (entries.Length != OwnerEntryCount || !string.Equals(Path.GetFileName(entries[FirstIndex]), OwnerFileName, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var ownerPath = Path.Combine(directory, OwnerFileName);
-        var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath, executionOptions);
+        var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath, executionOptions, ownerVersion, ownerKind);
         if (!string.Equals(owner.SessionId, sessionId, StringComparison.Ordinal)
             || !string.Equals(owner.Voter, voter, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }

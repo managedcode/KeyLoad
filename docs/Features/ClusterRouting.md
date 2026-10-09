@@ -395,3 +395,6 @@ Frontend: N/A, internal native execution. No public database protocol, storage f
 | `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/NativeActivationMigrationRf3Scenario.cs` |
 | `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/RequestCqrsProbeFileValidation.cs` |
 | `tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ReplicaMembershipNativeStoreTests.cs` |
+
+
+TASK-CLUSTER-NATIVE-MAINTENANCE-READ-002 retains the existing native request-grain contract and strict64/200 executable-unit/type bounds. Colocate interchangeable text/ANN maintenance capability selection in one typed ClusterRouting Queries helper, behind the same unique request grain. Preserve fresh persisted principal reload, RequireAdministrator before service resolution or payload decoding, exact typed native service/payload pairs, the existing cancellation token, Orleans scheduler continuation and all phase/readiness/admission/disposal behavior. Existing SDK/MCP/RF3 full maintenance flows remain the regression map. ADR: existing request-grain/routing and native-maintenance decisions are sufficient because no public schema, authority, service registration, storage ownership, scheduling attribute or failure contract changes. The caller still owns every lifetime; a helper introduces no dispatcher or request-grain substitute.

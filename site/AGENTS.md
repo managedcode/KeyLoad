@@ -75,9 +75,14 @@
 
 - For the current landing-animation iterations, show the completed local animated preview and obtain the owner's approval before the next commit/push. Prepare the implementation and verification first; approval is the final checkpoint for delivery.
 
+## Owner correction: original artwork informs a live scene, 2026-10-09
+
+- The landing's primary product illustration MUST be an actual native Three.js object/scene. The owner-selected frosted-glass product artwork is a visual direction for its geometry, materials, lighting and movement; it MUST NOT replace the interactive scene with a still image. Original raster artwork may illustrate the README. Preserve the existing native renderer, bounded lifecycle, accessible static poster and qualification gates while making the scene visually engaging.
+- The owner's repeated visual-quality correction requires recognizable, finished model objects in that scene, with readable silhouettes, smooth edges and deliberate spacing. The latest 2026-10-09 instruction selects the original agent-context.png composition: a central three-layer database, eight connected model platforms and the agent above it. Match that visual directly; do not substitute isolated silo groups, grain spheres or label clutter. The owner explicitly requests sufficient polygons for smooth models: ADR-040 now bounds this scene to 120,000 triangles while retaining the 30-draw-call, 1,000,000-pixel and DPR 1.5 limits, native renderer and lifecycle gates.
+
 ## Owner correction: clients and SQL in the cluster illustration, 2026-10-07
 
-- Show generic external clients connected to different silos in the hero cluster illustration. SQL belongs inside the database alongside its connected models; do not depict SQL or SDK as external client objects in this illustration.
+- The owner's 2026-10-09 composition correction supersedes the earlier requirement for three generic external client boxes and a repeated scene logo: remove those objects and their captions from the hero. Keep SQL within the database's connected table model, with all model names available accessibly. The original artwork is the static fallback; the primary scene remains native animated Three.js. This is a product illustration change, not a change to the actual Orleans/RF3 storage architecture.
 
 
 ## Current native comparison topology, owner direction 2026-10-09

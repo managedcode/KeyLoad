@@ -84,9 +84,11 @@ internal static class TwoRf3ClusterResources
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
         var probe = TwoRf3QueryProbe.Create(builder, root, image, localImage);
+        var frameObservation = MovementFrameObservationProfile.Create(builder, root, image, localImage);
         var resources = AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
         TwoRf3QueryProbe.Apply(probe, resources, Nodes);
+        frameObservation?.ApplyReceivers(resources, Nodes);
         TwoRf3RemoteReadResources.Configure(AppHostOptionsRegistration.Get(builder).Control, resources, registerOwners);
         return resources;
     }

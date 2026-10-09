@@ -8,7 +8,7 @@ internal static class McpCatalogHintExpectations
 {
     internal static async Task RequireAsync(McpOperationDescriptor actual, GrainReadKind? read, OperationKind? command)
     {
-        var readOnly = read.HasValue && read != GrainReadKind.Backup;
+        var readOnly = read.HasValue && read is not (GrainReadKind.Backup or GrainReadKind.ClusterBackupOwner);
         var idempotent = read != GrainReadKind.Backup && (read.HasValue || command.HasValue);
         var destructive = !read.HasValue;
         if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes)

@@ -40,17 +40,36 @@ public sealed partial class DatabaseEngine
     /// <param name="request">Bounded feed request and optional cursor.</param>
     /// <returns>The ordered page at one storage cut.</returns>
     public ChangeFeedPage ReadChangeFeed(string principalId, ReadChangeFeedRequest request)
+        => ReadChangeFeed(principalId, request, CancellationToken.None);
+
+    /// <summary>Reads one same-cut projected change page within the original caller budget.</summary>
+    /// <param name="principalId">Persisted principal identifier.</param>
+    /// <param name="request">Original bounded feed request and signed cursor.</param>
+    /// <param name="cancellationToken">Original caller cancellation across all native work.</param>
+    /// <returns>A complete projected page or a failure without a partial page.</returns>
+    public ChangeFeedPage ReadChangeFeed(string principalId, ReadChangeFeedRequest request,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(principalId);
         ArgumentNullException.ThrowIfNull(request);
-        return Store.Read<ChangeFeedPage>(view =>
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
+        budget.Check();
+        return Store.Read<ChangeFeedPage>(original =>
         {
+            budget.Check();
+            var grant = budget.CreateReadGrant(Limits.MaxQueryReadBytes, Limits.MaxScanRecords);
+            var view = budget.CreateView(original, grant);
             var principal = Principal(view, principalId, Clock.GetUtcNow());
             var page = ReadChangeFeedView(view, principal, request, (resource, change) => new DocumentChange(change.Sequence, change.Commit,
                 change.CommittedAt, change.After.Reference, change.After.Revision, change.After.Deleted,
                 change.Before is { } before ? Project(principal, resource, before) : null,
-                change.After.Deleted ? null : Project(principal, resource, change.After)));
-            return new(page.Changes, page.Cursor, page.ThroughSequence, page.Tail, page.FirstAvailable, page.HasMore, page.CutPosition);
+                change.After.Deleted ? null : Project(principal, resource, change.After)),
+                budget.CheckResult);
+            var result = new ChangeFeedPage(page.Changes, page.Cursor, page.ThroughSequence, page.Tail,
+                page.FirstAvailable, page.HasMore, page.CutPosition);
+            budget.CheckResult(result);
+            budget.Check();
+            return result;
         });
     }
     /// <summary>Projects visible changes inside an existing gated read view.</summary>

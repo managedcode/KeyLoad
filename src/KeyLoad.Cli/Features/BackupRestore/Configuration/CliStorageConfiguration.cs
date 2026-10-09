@@ -24,12 +24,16 @@ internal static class CliStorageConfiguration
             options => options.IsValid(), CliBackupExecutionOptions.ValidationMessage));
     }
 
-    private static OptionsManager<T> Bind<T>(string prefix, Func<T> initialize, Func<T, bool> validate, string message)
+    internal static OptionsManager<T> Bind<T>(string prefix, Func<T> initialize, Func<T, bool> validate, string message)
+        where T : class =>
+        Bind<T>(prefix, configuration => new CliStorageOptionsFactory<T>(initialize, configuration, validate, message));
+
+    internal static OptionsManager<T> Bind<T>(string prefix, Func<IConfiguration, IOptionsFactory<T>> createFactory)
         where T : class
     {
         var configuration = new ConfigurationBuilder().AddEnvironmentVariables(prefix).Build();
         using var configurationLifetime = configuration as IDisposable;
-        var options = new OptionsManager<T>(new CliStorageOptionsFactory<T>(initialize, configuration, validate, message));
+        var options = new OptionsManager<T>(createFactory(configuration));
         _ = options.Value;
         return options;
     }

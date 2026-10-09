@@ -41,5 +41,8 @@ internal static class NativeTextWaitRf3Assertions
         var mcp = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await official.CallAsync(McpCallerTools.SearchExecute, request, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
         await SqlRf3Protocol.EqualAsync(expected, mcp.Value);
+        var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.SearchExecute, request);
+        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<RankedDocument[]>(sdk, sql, token));
+        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<RankedDocument[]>(official, sql, token));
     }
 }

@@ -35,7 +35,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
         ApplyProbe = new(Configuration.LocalId);
-        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock, options.RequestCqrsProbe.Enabled ? ApplyProbe.StorageObserver : null);
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.StorageObserver : null);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
@@ -52,9 +52,11 @@ internal sealed class PartitionHost : IAsyncDisposable
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
             BootstrapFreshNode(options);
+            if (options.MovementFrameObservation.Enabled)
+            { ApplyProbe.AttachFrameObservation(new(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, Database, runtimeOptions.RequestProbeExecution)); }
             TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, SearchIndexDirectoryName),
                 runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
-            Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled ? ApplyProbe.Enter : null);
+            Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.Enter : null);
             Consensus = openedConsensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
             Coordinator = openedCoordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
             AnnMaintenance = openedAnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
@@ -72,6 +74,7 @@ internal sealed class PartitionHost : IAsyncDisposable
             { ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
             if (applying is not null)
             { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+            ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
             if (openedText is not null)
             { ServerFailureObserver.Observe(openedText.Dispose, failures); }
             if (openedLog is not null)
@@ -169,6 +172,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         var applying = Materializer.DisposeAsync().AsTask();
         await ServerFailureObserver.ObserveAsync(() => applying, failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
         var closingLog = CloseLogAsync(applying);
         await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(TextProjection.Dispose, failures);

@@ -15,6 +15,101 @@ bounded Actions visibility and cancellation diagnostics for native workloads.
 
 ## Current complete-cohort publication
 
+### Owner-selected product illustration and landing style, 2026-10-09
+
+The owner selected the original frosted-glass, graphite, peach/lilac/periwinkle
+KeyLoad illustration and requested the existing landing in the same visual style.
+This is presentation work in the existing BenchmarkComparisons slice under
+[ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md); no new architectural
+boundary, database contract, measurement authority or renderer is introduced.
+
+| Requirement | Acceptance and evidence |
+|---|---|
+| REQ-BC-PRESENTATION-001: lead with the reason Managed Code built KeyLoad and translate the selected original artwork into a live native Three.js scene. | AC-BC-PRESENTATION-001: the first product screen names one database for AI agents; the opening story explains years of agent development and the progression from vectors to SQL, graphs, events, files and workflows. Desktop and mobile show a procedural frosted-glass database core and connected model objects, with native moving requests and SQL in the connected table model, under the original-artwork composition contract REQ/AC-BC-PRESENTATION-005. The original image remains the README artwork and accessible static fallback; it does not substitute for the landing renderer. Manual screenshot/motion/prose review is the ADR-040 visual-composition exception; source text is not functional proof. |
+| REQ-BC-PRESENTATION-002: make the existing landing coherent with the selected visual style. | AC-BC-PRESENTATION-002: warm light surfaces, restrained peach/lilac/periwinkle details, graphite controls and readable glass surfaces carry through product, composition, model cards, status and credits. Actual Chrome at 1440, 768, 390 and 320 pixels has no page-level overflow; navigation, code scrolling, existing cluster motion/pause/fallback and lower-section layout retain their existing native browser assertions. |
+| REQ-BC-PRESENTATION-003: preserve honest product status and all publication gates. | AC-BC-PRESENTATION-003: current source capability and unfinished full SQL/protocol/cross-partition/production work stay explicit; credits thank actual projects with working links. The genuine content-only builder emits no measurements and passes existing asset budgets/vendor checks. Existing SiteContentBuilderTests, SiteContentBrowserTests, SiteContentCoverageModeTests and native scene lifecycle assertions remain required; renderer budgets are 30 draw calls, 120,000 triangles, 1,000,000 pixels and DPR <=1.5 under the owner's explicit detail correction. Measured/provenance gates and genuine Linux Website publication remain independent and unchanged. |
+| REQ-BC-PRESENTATION-004: make the model geometry recognizable and finished in the owner-identified scene. | AC-BC-PRESENTATION-004: actual desktop/mobile frames show layered document pages with content, a table grid/header, a connected graph, vector points, queued cards, an event clock, a folder/file, a plotted time series, with SQL represented in the table model. REQ/AC-BC-PRESENTATION-005 supersedes the separate SQL terminal, projected captions and silo topology. Beveled edges, distinct silhouettes and deliberate model anchors replace obscuring grain spheres/plain blocks. Motion remains visible; accessible names and the current native composition, lifecycle, vendor, coverage and resource limits pass. Screenshot/motion review is the same ADR-040 visual exception; the existing real Chrome/TUnit cases qualify runtime and budgets. TASK-BC-PRESENTATION-004 owns only scene geometry, callout placement and matching fallback poster objects; the surrounding landing composition stays unchanged. |
+| REQ-BC-PRESENTATION-005: faithfully recreate the owner-selected original agent-context.png composition with detailed native Three.js geometry. | AC-BC-PRESENTATION-005: actual desktop/mobile frames show one central three-layer steel/glass database, a human-agent silhouette above it and exactly eight model platforms, each connected to the database by a native cable: upper-left Tables/SQL grid, upper-right Graphs nodes/edges, left-middle Time series plot, right-middle Vectors point cloud, lower-left Events orbits, front-left Queues cards, front-right Blobs folders and lower-right Documents pages. Smooth curves, finished bevels, graphite metal, frosted glass and peach/lilac/periwinkle lighting match the selected artwork. No generic client boxes, repeated logo, silo/grain substitute or client/silo captions appear. The scene is actual geometry, with no raster plane replacing it. Native renderer attributes report data-scene-models=8, data-scene-agents=1, data-scene-links=8 and data-scene-clients=0; fake RF3 counts are absent. A semantic sr-only list retains all nine model names Documents, Tables, Graphs, Vectors, Queues, Events, Blobs, Time series and SQL, with SQL combined visually with Tables. The original agent-context.png is the exact static fallback. Native TUnit/Chrome asset and scene assertions verify graph-derived counts, meaningful rendered frames, actual motion/pause, fallback delivery, accessible names, responsive bounds and <=120,000 triangles, <=30 draws, <=1,000,000 pixels, DPR <=1.5. Owner screenshot/motion review remains the explicit ADR-040 visual exception; no external requests, new packages or changed vendor/lifecycle/coverage gates. |
+
+TASK-BC-PRESENTATION-005 maps REQ/AC-BC-PRESENTATION-005 to
+[ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md). It explicitly supersedes
+the client/silo/mark illustration requirements in REQ/AC/TASK-BC-SCENE-001..003
+and the earlier hero topology/caption/SQL-terminal details in PRESENTATION-001/004;
+it does not change Orleans, RF3 or physical database ownership. Ordered stages:
+freeze this contract before source writes; construct and batch native geometry;
+use the original fallback in the canonical emitted asset inventory; update native
+TUnit/Chrome assertions; join focused native tests and desktop/mobile animated
+preview; obtain owner approval before commit/push, then retain genuine Linux
+Website/Pages delivery gates. Root owns only the scene geometry, HTML/CSS and
+lifecycle integration. The contract worker owns only this Feature and ADR-040;
+the test worker owns the canonical BenchmarkComparisons site assertions; the
+fallback worker owns only the builder asset inventory and fallback asset path.
+These disjoint parallel workers join through root review. No worker changes
+benchmark arithmetic, renderer vendor bytes or database behavior. Rollback is a
+reviewed source revert of the coherent scene/semantics/fallback/test asset unit;
+it never restores a competing active renderer or weakens evidence gates.
+Backend, public API, persistence, SQL dialect, packages and deployment topology
+are N/A because this task changes only the existing product illustration.
+
+```mermaid
+flowchart LR
+    Original[Owner-selected agent-context.png] --> Native[Three-layer database plus agent and eight models]
+    Original --> Poster[Exact original static fallback]
+    Native --> Checks[Native TUnit and Chrome assertions]
+    Poster --> Checks
+    Checks --> Review[Desktop/mobile animated owner review]
+    Review --> Delivery[Approval then scoped commit and Website gates]
+```
+
+Current PRESENTATION-005 stage: contract established; native source, fallback,
+meaningful browser qualification and owner review are pending. The earlier
+five-case/4,731-triangle local result below qualifies only that previous working-tree
+iteration, not this new composition. The previous full solution build failed on
+four unrelated IntegrationTests errors; no new solution pass, visual acceptance,
+commit/push or Pages receipt is claimed by this specification update.
+
+Earlier TASK-BC-PRESENTATION-001..003 mapped respectively to the same-numbered REQ/AC:
+establish the current content-only build/browser baseline; update HTML/CSS,
+procedural objects/materials and fallback posters; then rebuild and review actual desktop and
+mobile rendering, navigation, image delivery and native site regressions. Root
+owns this bounded task directly: site/Features/BenchmarkComparisons HTML, styles,
+tokens, procedural scene geometry/materials and posters; docs owns the README artwork
+and product story. Tests keep their existing canonical slice and runner. Current
+PRESENTATION-005 uses the disjoint worker ownership defined above. Rollback restores
+the same HTML/CSS/artwork inventory together; unrelated work stays visible.
+The owner-required completed local preview and approval precede the next landing
+commit/push. Local evidence does not prove Pages publication or database readiness.
+
+The current target hero uses the native eight-model/one-agent/eight-link/zero-client
+composition in PRESENTATION-005 and the existing lifecycle. The central three-layer
+database, recognizable model objects and procedural studio reflections follow
+the original artwork, which also supplies the static fallback. The README uses the original generated artwork
+with its generation prompt in docs/assets/readme/agent-database.prompt.txt.
+
+Historical local development evidence for the previous iteration on 2026-10-09:
+the Aspire-owned content-only TUnit
+runner passed all five SiteContentBuilderTests/SiteContentBrowserTests/
+SiteContentCoverageModeTests cases with zero skips. Native coverage passed:
+95% aggregate lines, 88% block outcomes, 96% builder and 93% bootstrap lines.
+The working-tree source manifest is
+`5ffd8f75857e4fd2bd299051257cfa40a070f8ef76b0ad9c61c4ae0d227dcc94`;
+the base revision is 8db9105b, not a commit of these uncommitted edits.
+Manual Chrome review at 1440/768/390/320 px observed native WebGPU rendering,
+no page overflow and contained captions after the narrow-screen correction.
+The final model-quality iteration passed the same five native cases and shows
+nine detailed model silhouettes with shared bounded native geometry. The observed
+scene used 15 draw calls and 4,731 triangles; desktop used 706,440 buffer pixels.
+Pause stopped frame progress and play resumed it. The in-app browser also displayed
+the running scene. All three README Mermaid diagrams
+rendered, and its local links and original image resolved. Scoped SiteTests
+Release build, governance and whitespace checks passed. The full solution build
+attempt failed with four errors in concurrent IntegrationTests changes: two
+LiveQueryChange constructor calls, a UnixFileMode platform analyzer finding and
+an uninstantiated FeedLiveOrder analyzer finding. No database or test repair was
+added to this presentation scope.
+Owner visual approval, commit/push and genuine Linux Website/Pages qualification
+remain pending; this local evidence does not close database or publication gates.
+
 Owner-directed immediate legacy removal is governed by
 [ADR-076](../ADR/ADR-076-current-cohort-publication.md). Its live path supersedes
 the historical comparison-smoke/comparison-suite and three-profile publication
@@ -338,7 +433,7 @@ The owner requested a proper product design and Three.js. [ADR-040](../ADR/ADR-0
 | Requirement | Measurable acceptance | Test or review mapping |
 |---|---|---|
 | REQ-BC-011: product-first responsive design | AC-BC-011: purpose/status/navigation visible at1440/768/390/320px in a single-row header; at ≤760px the same links open from a visible menu control and close after a selection without losing the section scroll. No page overflow, wrapped header or clipped controls; select text fades before its chevron key; labelled table scroll only | Qualified H: SiteBuildTests plus explicit real-browser desktop/mobile visual review |
-| REQ-BC-012: bounded conceptual Three RF3 | AC-BC-012: Three0.186.1 native backend recorded; one renderer/canvas, correct cancellation/disposal/resize/pause; DPR≤1.5,≤1M pixels,≤30 calls,≤5K triangles, no idle loop | Qualified H: vendor/build TUnit contracts; explicit real-browser graphics lifecycle/device evidence exception |
+| REQ-BC-012: bounded conceptual Three product scene | AC-BC-012: Three0.186.1 native backend recorded; one renderer/canvas, correct cancellation/disposal/resize/pause; DPR≤1.5,≤1M pixels,≤30 calls,≤120K triangles under PRESENTATION-005; visible bounded motion, no hidden/offscreen/paused idle loop | Qualified H: vendor/build TUnit contracts; explicit real-browser graphics lifecycle/device evidence exception |
 | REQ-BC-013: accessible independent content | AC-BC-013: semantic labels/focus/tabs and no-JS/reduced/coarse/unavailable-graphics retain text/poster/evidence access | Qualified H: SiteBuildTests plus required keyboard/no-JS/reduced-motion browser review |
 | REQ-BC-014: unchanged historical arithmetic and controls | AC-BC-014: all6 scenarios/11 metrics/profile/repetition/log/whiskers/table/downloads match independent oracle over authentic successful-CI reports | Qualified H: SiteMeasurementTests/SiteMeasurementOracle using actual JS child process; real browser control review |
 | REQ-BC-015: atomic validated report state | AC-BC-015: invalid/path/hash/rapid/error loads never mix data/provenance/downloads; abort and stale generation fencing | Qualified H: SiteEvidenceValidationTests over real production validators and controlled corrupt inputs; required rapid/error browser review |
@@ -1387,7 +1482,11 @@ real rendered bounding boxes in both the measured responsive browser case and
 A missing lower-section stylesheet must fail these assertions. Native build,
 site qualification and actual Website/Pages delivery evidence remain required.
 
-## Orleans cluster illustration (2026-10-06)
+## Historical Orleans cluster illustration (2026-10-06)
+
+> Original design snapshot, superseded for the current hero by
+> REQ/AC/TASK-BC-PRESENTATION-005 above. These historical counts, clients and mark
+> remain a truthful record of the earlier iteration, not current acceptance.
 
 REQ-BC-SCENE-001 / AC-BC-SCENE-001 / TASK-BC-SCENE-001 replace the model-card carousel with three illustrative silo/node groups, eighteen distinct grain activations and thirty intra/inter-silo links. Each node retains its own storage base; grain routing must not suggest migration of storage handles or live telemetry. Desktop and mobile SVG posters convey the same concepts. Native projected DOM labels and the canonical SVG mark remain sharp across viewport/DPR changes. Motion, pause, reduced motion, visibility, disposal and existing renderer budgets remain mandatory.
 

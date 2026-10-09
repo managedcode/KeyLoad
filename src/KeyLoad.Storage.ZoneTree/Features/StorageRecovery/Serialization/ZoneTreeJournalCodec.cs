@@ -22,12 +22,12 @@ internal static class ZoneTreeJournalCodec
     private static readonly Serializer<ZoneTreeJournalMutation[]> Serializer = Services.GetRequiredService<Serializer<ZoneTreeJournalMutation[]>>();
     private static readonly SerializerSessionPool Sessions = Services.GetRequiredService<SerializerSessionPool>();
 
-    internal static byte[] Serialize(StorageMutation[] mutations, int maxFrameBytes)
+    internal static byte[] Serialize(StorageMutation[] mutations, int maxFrameBytes, Action<CommitStage, long, int>? observer = null)
     {
         ArgumentNullException.ThrowIfNull(mutations);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxFrameBytes);
         var records = CreateRecords(mutations);
-        using var buffer = new ZoneTreeJournalBufferWriter(maxFrameBytes);
+        using var buffer = new ZoneTreeJournalBufferWriter(maxFrameBytes, observer);
         using var session = Sessions.GetSession();
         var writer = Writer.Create(buffer, session);
         Serializer.Serialize(records, ref writer);

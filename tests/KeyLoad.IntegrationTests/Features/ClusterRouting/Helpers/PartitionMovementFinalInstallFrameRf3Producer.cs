@@ -86,6 +86,8 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
             var released = await wave.QueryControls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ParentFinalInstallPreflight,
                 RequestCqrsProbeOutcome.Released, signed, cancellationToken).ConfigureAwait(false);
             await Assert.That(released.RequestId).IsEqualTo(marker.RequestId);
+            if (expectedError is not null && wave.frameObservation is { RequiresEvidence: true } frameObservation)
+            { await MovementFrameObservationRf3Producer.RequireAsync(frameObservation, call, caller.Token).ConfigureAwait(false); }
             var actual = await call.ConfigureAwait(false);
             if (expectedError is { } error)
             {

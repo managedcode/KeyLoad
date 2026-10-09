@@ -9,6 +9,7 @@
   backup &lt;offline-database-directory&gt; &lt;empty-backup-directory&gt;
   compact &lt;offline-database-directory&gt;
   restore &lt;backup-directory&gt; &lt;empty-database-directory&gt;
+  restore-cluster (explicit KEYLOAD_CLUSTER_RESTORE__ configuration; every restored group remains paused)
   pack-backup &lt;backup-directory&gt; &lt;new-artifact-file&gt;
   inspect-artifact &lt;artifact-file&gt;
   copy-artifact &lt;artifact-file&gt; &lt;storage-directory&gt;

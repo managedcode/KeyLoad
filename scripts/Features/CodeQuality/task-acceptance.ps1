@@ -2,8 +2,9 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029')][string] $Task,
-    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile,
+    [switch] $AdditionalCensus
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -104,7 +105,57 @@ function Assert-TaskDiscovery([object] $Selection, [object] $Image, [string] $As
     }
     if ($seen.Count -ne $expected.Count -or $seen.Count -eq 0) { throw 'Native task discovery is incomplete.' }
 }
-function Invoke-TaskSelection([object] $Selection, [string] $TaskRoot) {
+function Assert-TaskCandidateDiscovery([object] $Selection, [object] $Image, [string] $Assembly, [string] $Path) {
+    $native = Read-TaskJson $Path
+    if ($native.schemaVersion -ne 1 -or $native.tests -isnot [array] -or
+        $Selection.candidates -isnot [array] -or $Selection.candidates.Count -eq 0) {
+        throw 'Original source-candidate census is absent or invalid.'
+    }
+    $expected = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    $counts = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
+    foreach ($candidate in $Selection.candidates) {
+        $key = $candidate.className + '|' + $candidate.methodName
+        if ($expected.ContainsKey($key) -or $candidate.sourceInstances -lt 1 -or
+            $candidate.sourceInstances -gt 5000 -or $candidate.parameterTypeFullNames -isnot [array]) {
+            throw 'Source-candidate method identity is duplicate or invalid.'
+        }
+        $expected.Add($key, $candidate); $counts.Add($key, 0)
+    }
+    $uids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($case in $native.tests) {
+        $reported = $case.type.namespace + '.' + $case.type.typeName
+        $matchedCandidates = @($Selection.candidates | Where-Object {
+            $scope = '\A' + [regex]::Escape($_.className) + '(?:\([^\r\n)]{1,1024}\))?\z'
+            $reported -cmatch $scope -and $case.type.methodName -ceq $_.methodName
+        })
+        if ($matchedCandidates.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string] $case.uid) -or
+            -not $uids.Add([string] $case.uid)) {
+            throw 'Original native candidate census is unexpected or duplicate.'
+        }
+        $declared = $matchedCandidates[0]
+        $key = $declared.className + '|' + $declared.methodName
+        $uidScope = '\A' + [regex]::Escape($declared.className) + '(?:\([^\r\n)]{1,1024}\))?\.'
+        $source = [string] $declared.sourcePath
+        $location = ([string] $case.location.file).Replace('\','/')
+        $absolute = (Resolve-FcPath $Repository $source).Replace('\','/')
+        if ($case.type.assemblyFullName -cne $Assembly -or ([string] $case.uid) -cnotmatch $uidScope -or
+            (ConvertTo-Json @($declared.parameterTypeFullNames) -Compress) -cne
+            (ConvertTo-Json @($case.type.parameterTypeFullNames) -Compress) -or
+            ($location -cne $absolute -and $location -cne ('/_/' + $source)) -or
+            $case.location.lineStart -lt 1 -or $case.location.lineEnd -lt $case.location.lineStart -or
+            @($Image.sources | Where-Object { $_.path -ceq $source }).Count -ne 1) {
+            throw 'Native candidate census does not bind its source, parameters and compiled image.'
+        }
+        $counts[$key]++
+    }
+    foreach ($key in $expected.Keys) {
+        if ($counts[$key] -ne $expected[$key].sourceInstances) {
+            throw 'Source-candidate census is incomplete; no execution is admitted.'
+        }
+    }
+}
+
+function Invoke-TaskSelection([object] $Selection, [string] $TaskRoot, [bool] $CensusOnly = $false) {
     if ($Selection.selectionId -cnotmatch '\A[a-z][a-z0-9-]{0,79}\z' -or
         $Selection.suite -cnotin @('unit','recovery','rf3')) { throw 'Invalid task selection.' }
     $directory = Join-Path $TaskRoot $Selection.selectionId
@@ -141,22 +192,27 @@ function Invoke-TaskSelection([object] $Selection, [string] $TaskRoot) {
             '--results-directory',(Join-Path $directory 'discovery-native'),'--treenode-filter',$Selection.filter)) 1800
         $row.discoveryExitCode = $discovery.exitCode
         Assert-TaskSettled $discovery
-        Assert-TaskDiscovery $Selection $image $assembly $row.discoveryJsonPath
-        $row.state = 'discovered'
-        $timeout = if ($Selection.suite -ceq 'rf3') { 3600 } else { 1800 }
-        $arguments = [string[]] @((Join-Path $Repository 'scripts/Features/TestInfrastructure/run-tests.mjs'),
-            ('--KeyLoadTests:Suite=' + $Selection.suite), ('--KeyLoadTests:Filter=' + $Selection.filter),
-            ('--KeyLoadTests:ResultsDirectory=' + $row.resultsDirectory), '--KeyLoadTests:ReportTrx=true',
-            '--KeyLoadTests:Execution:MaximumParallelTests=20')
-        $execution = Invoke-TaskChild $directory 'execution' 'node' $arguments $timeout
-        $row.executionExitCode = $execution.exitCode
-        if ([IO.Directory]::Exists($row.resultsDirectory)) {
-            Assert-FcNativeNoReparsePath $row.resultsDirectory
-            $row.originalTrxPaths = @([IO.Directory]::EnumerateFiles($row.resultsDirectory, '*.trx',
-                [IO.SearchOption]::AllDirectories) | Sort-Object -CaseSensitive)
+        if ($CensusOnly) {
+            Assert-TaskCandidateDiscovery $Selection $image $assembly $row.discoveryJsonPath
+            $row.state = 'census-only-native-admission-pending'
+        } else {
+            Assert-TaskDiscovery $Selection $image $assembly $row.discoveryJsonPath
+            $row.state = 'discovered'
+            $timeout = if ($Selection.suite -ceq 'rf3') { 3600 } else { 1800 }
+            $arguments = [string[]] @((Join-Path $Repository 'scripts/Features/TestInfrastructure/run-tests.mjs'),
+                ('--KeyLoadTests:Suite=' + $Selection.suite), ('--KeyLoadTests:Filter=' + $Selection.filter),
+                ('--KeyLoadTests:ResultsDirectory=' + $row.resultsDirectory), '--KeyLoadTests:ReportTrx=true',
+                '--KeyLoadTests:Execution:MaximumParallelTests=50')
+            $execution = Invoke-TaskChild $directory 'execution' 'node' $arguments $timeout
+            $row.executionExitCode = $execution.exitCode
+            if ([IO.Directory]::Exists($row.resultsDirectory)) {
+                Assert-FcNativeNoReparsePath $row.resultsDirectory
+                $row.originalTrxPaths = @([IO.Directory]::EnumerateFiles($row.resultsDirectory, '*.trx',
+                    [IO.SearchOption]::AllDirectories) | Sort-Object -CaseSensitive)
+            }
+            Assert-TaskSettled $execution
+            $row.state = 'executed'
         }
-        Assert-TaskSettled $execution
-        $row.state = 'executed'
     }
     catch [System.Exception] { $row.state = 'failed'; $row.failure = $_.Exception.ToString() }
     $after = Get-PsmTestImage $Repository $project
@@ -169,18 +225,38 @@ function Invoke-TaskSelection([object] $Selection, [string] $TaskRoot) {
 
 $contractPath = Resolve-FcPath $Repository 'scripts/Features/CodeQuality/task-acceptance.contract.json'
 $contract = Read-TaskJson $contractPath
-if ($contract.schemaVersion -ne 1 -or $contract.maximumParallelTests -ne 20) { throw 'Unsupported task contract schema.' }
+if ($contract.schemaVersion -ne 1 -or $contract.maximumParallelTests -ne 50) { throw 'Unsupported task contract schema.' }
 $taskContract = @($contract.tasks | Where-Object { $_.taskId -ceq $Task })
-if ($taskContract.Count -ne 1 -or $taskContract[0].selections.Count -eq 0) { throw 'Task contract is absent or ambiguous.' }
+if ($taskContract.Count -ne 1) { throw 'Task contract is absent or ambiguous.' }
+$censusOnly = $taskContract[0].Contains('censusSelections')
+if ($AdditionalCensus) {
+    if ($Task -cne 'KL-036' -or -not $contract.Contains('additionalCensuses') -or
+        $contract.additionalCensuses -isnot [array]) { throw 'Invalid additional census admission.' }
+    $additional = @($contract.additionalCensuses | Where-Object { $_.taskId -ceq $Task })
+    if ($additional.Count -ne 1 -or $additional[0].censusSelections -isnot [array] -or
+        $additional[0].censusSelections.Count -ne 8) { throw 'Invalid additional census selection.' }
+    $selected = $additional[0].censusSelections
+    $censusOnly = $true
+} elseif ($censusOnly) {
+    if ($Task -cnotin @('KL-034','KL-042') -or $taskContract[0].selections.Count -ne 0 -or
+        $taskContract[0].censusSelections -isnot [array] -or $taskContract[0].censusSelections.Count -eq 0 -or
+        $taskContract[0].censusSelections.Count -gt 32) { throw 'Invalid census-only task admission.' }
+    $selected = $taskContract[0].censusSelections
+} else {
+    if ($taskContract[0].selections.Count -eq 0) { throw 'Task contract is absent or ambiguous.' }
+    $selected = $taskContract[0].selections
+}
 $sourceManifestPath = Resolve-FcPath $Repository ($relative + '/functional-coverage.production-source-manifest.json')
 $source = Read-TaskJson $sourceManifestPath
-$taskRoot = Join-Path $EvidenceRoot ($Task.ToLowerInvariant() + '-' + $Profile)
+$taskSuffix = if ($AdditionalCensus) { '-additional-census' } else { '' }
+$taskRoot = Join-Path $EvidenceRoot ($Task.ToLowerInvariant() + '-' + $Profile + $taskSuffix)
 if ([IO.Directory]::Exists($taskRoot)) { throw 'Task evidence must be fresh.' }
 [void] [IO.Directory]::CreateDirectory($taskRoot)
 $manifest = [ordered]@{ schemaVersion = 1; task = $Task; profile = $Profile
     sourceRevision = $source.sourceRevision; sourceManifestPath = $sourceManifestPath
     contractPath = $contractPath; contractSha256 = Get-FcHash $contractPath
-    qualifiedScope = 'task-scoped; no product/fullsuite/coverage promotion'
+    qualifiedScope = if ($AdditionalCensus) { 'additional-census-only; native binding and acceptance pending' }
+        else { 'task-scoped; no product/fullsuite/coverage promotion' }
     sourceVerificationStdoutPath = Join-Path $taskRoot 'source-verify.stdout.txt'
     sourceVerificationStderrPath = Join-Path $taskRoot 'source-verify.stderr.txt'
     sourceVerificationExitCode = $null; sourceVerificationProcessPath = Join-Path $taskRoot 'source-verify.process.json'
@@ -191,14 +267,18 @@ try {
     Set-Location -LiteralPath $Repository
     if ($Profile -ceq 'scalar') { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', '0') }
     else { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', [NullString]::Value) }
-    foreach ($selection in $taskContract[0].selections) {
-        $manifest.selections += Invoke-TaskSelection $selection $taskRoot
+    foreach ($selection in $selected) {
+        $manifest.selections += Invoke-TaskSelection $selection $taskRoot $censusOnly
     }
     $verification = Invoke-TaskChild $taskRoot 'source-verify' 'pwsh' ([string[]] @('-NoProfile','-File',
         $producer,'-Mode','verify','-Root',$Repository,'-EvidenceRoot',$EvidenceRoot)) 1800
     $manifest.sourceVerificationExitCode = $verification.exitCode
     $manifestPath = Join-Path $taskRoot 'execution-manifest.json'
     Write-TaskOriginal $manifestPath $manifest
+    if ($censusOnly) {
+        Assert-TaskSettled $verification
+        throw 'Original census retained; authenticated exact native case binding is required before execution or acceptance.'
+    }
     # The independent owner verifies original native discovery, exact TRX outcomes and source/image binding.
     & (Join-Path $toolRoot 'task-acceptance.verify.ps1') -Repository $Repository -EvidenceRoot $taskRoot `
         -Task $Task -Profile $Profile -ContractPath $contractPath -ExecutionManifestPath $manifestPath

@@ -8,6 +8,7 @@
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Security/KeyLoad.Security.csproj" />

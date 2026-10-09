@@ -3,7 +3,7 @@ using Orleans.Serialization.Buffers;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-internal sealed class ZoneTreeJournalBufferWriter(int maxFrameBytes) : IBufferWriter<byte>, IDisposable
+internal sealed class ZoneTreeJournalBufferWriter(int maxFrameBytes, Action<CommitStage, long, int>? observer = null) : IBufferWriter<byte>, IDisposable
 {
     private const int UnspecifiedSizeHint = 0;
     private const int NoRemainingBytes = 0;
@@ -16,10 +16,20 @@ internal sealed class ZoneTreeJournalBufferWriter(int maxFrameBytes) : IBufferWr
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         if (count > maxFrameBytes - _buffer.Length)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.EncodedTransactionFrameLimitExceeded);
+            ThrowRejectedPrefix(checked((long)_buffer.Length + count));
         }
 
         _buffer.Advance(count);
+    }
+
+    private void ThrowRejectedPrefix(long attemptedBytes)
+    {
+        var original = Errors.Fail(ErrorCode.ResourceExhausted, ZoneTreePersistenceFormat.EncodedTransactionFrameLimitExceeded);
+        if (observer is null)
+        { throw original; }
+        var failures = new List<Exception> { original };
+        ZoneTreeExistingStoreCleanup.Capture(() => observer(CommitStage.EncodedFrameRejected, attemptedBytes, maxFrameBytes), failures);
+        ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
     }
 
     public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)

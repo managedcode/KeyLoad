@@ -23,7 +23,9 @@ public enum CommitStage
     /// <summary>Snapshot installation has entered its prepared state.</summary>
     InstallPrepared,
     /// <summary>The canonical journal file has been swapped during snapshot replacement.</summary>
-    JournalSwapped
+    JournalSwapped,
+    /// <summary>The native encoder rejected a prefix: long is attempted bytes and int is the unchanged frame cap.</summary>
+    EncodedFrameRejected
 }
 
 /// <summary>Configures one node-local ZoneTree store and its bounded persistence budgets.</summary>

@@ -27,7 +27,20 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
             { await RejectAsync(message, request, tool, error.Code, cancellationToken).ConfigureAwait(false); }
             return;
         }
-        await next(message, cancellationToken).ConfigureAwait(false);
+        catch (Exception error) when (error is not KeyLoadException)
+        {
+            McpPipelineFailureDiagnostic.WriteExecutionFailure(context, message.JsonRpcMessage,
+                McpPipelineFailureStage.IncomingAdmission, error);
+            throw;
+        }
+        try
+        { await next(message, cancellationToken).ConfigureAwait(false); }
+        catch (Exception error)
+        {
+            McpPipelineFailureDiagnostic.WriteExecutionFailure(context, message.JsonRpcMessage,
+                McpPipelineFailureStage.IncomingNativeExecution, error);
+            throw;
+        }
     };
 
     /// <summary>Bounds the complete native message after server metadata and replaces unsafe error details.</summary>

@@ -19,7 +19,7 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
     private bool disposed;
 
     internal NativeAnnPublicReadLease(DatabaseEngine database, IKeyValueView view,
-        NativeAnnGenerationOwner owner, ApproximateSearchRequest request,
+        NativeAnnGenerationOwner owner, AnnProjectionSelection request,
         ServerRuntimeOptions configured, ReadExecutionBudget budget)
     {
         try
@@ -47,6 +47,14 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
         }
     }
 
+    public long IndexedAppliedPosition
+    {
+        get { lock (gate) { ObjectDisposedException.ThrowIf(disposed, this); return current.Manifest.Source.AppliedPosition; } }
+    }
+    public long IndexGeneration
+    {
+        get { lock (gate) { ObjectDisposedException.ThrowIf(disposed, this); return current.Manifest.IndexGeneration; } }
+    }
     public ImmutableArray<VectorRecord> Records => source.Records;
     public IOptions<AnnSeedOptions> CallerSeedOptions => callerOptions;
     public AnnSeedWork ScopeWork => scopeWork;

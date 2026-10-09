@@ -9,7 +9,9 @@ internal static class ZoneTreeBackupRestoreRestore
     private const string RestoreTemporaryPrefix = ".keyload-restore-";
 
     internal static StoreIdentity Restore(string backup, string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation, byte[]? newSigningKey)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation, byte[]? newSigningKey,
+        Action<IAtomicTransaction, StoreIdentity, long, ReadOnlyMemory<byte>>? verifyCatalog = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         var policy = executionOptions.Value;
@@ -22,7 +24,15 @@ internal static class ZoneTreeBackupRestoreRestore
         ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
         try
         {
-            var originalIdentity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy);
+            cancellationToken.ThrowIfCancellationRequested();
+            var originalIdentity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy, out var originalPosition);
+            if (verifyCatalog is not null)
+            {
+                ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity, newIncarnation, newSigningKey);
+                ZoneTreeCatalogRestoreVerification.Require(backup, staging, originalIdentity, originalPosition,
+                    executionOptions, verifyCatalog, cancellationToken);
+            }
+            cancellationToken.ThrowIfCancellationRequested();
             var identity = CreateRestoredIdentity(originalIdentity, newIncarnation, newSigningKey);
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
             var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation);

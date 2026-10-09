@@ -44,7 +44,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             stages, currentSession, principal, request, configured, clock, cancellationToken)).ConfigureAwait(false);
     }
 
-    public IAnnProjectionLease Acquire(IKeyValueView view, ApproximateSearchRequest request,
+    public IAnnProjectionLease Acquire(IKeyValueView view, AnnProjectionSelection request,
         ReadExecutionBudget budget)
     {
         using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);

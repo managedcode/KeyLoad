@@ -89,38 +89,25 @@
   <main>
     <section class="hero" id="product" aria-labelledby="page-title">
       <div class="hero-head">
-        <p class="hero-status"><span class="status-dot" aria-hidden="true"></span>Source&nbsp;available · Early&nbsp;development · .NET&nbsp;10 · Orleans</p>
-        <h1 id="page-title">The database <span class="h1-break">for <span class="kl-mark">AI&nbsp;agents.</span></span></h1>
-      </div>
-      <div class="hero-lede">
-        <p class="hero-summary">One database for AI agents, instead of a dozen. Documents, typed tables, graphs, vectors/search, blobs, queues, events and time series live in one AI-native database and point to each other through canonical entity references. SQL is the familiar shared language; agents connect through the built-in MCP server, services through the typed .NET SDK.</p>
+        <p class="hero-status"><span class="status-dot" aria-hidden="true"></span>AI-native database · Development preview</p>
+        <h1 id="page-title">One database.<span class="h1-break">Built for <span class="kl-mark">AI&nbsp;agents.</span></span></h1>
+        <p class="hero-summary">We've spent years building agents. Every time, the stack grows: vectors, SQL, a graph, events, files, queues. We wanted one database that connects the whole job. <strong>So we're building KeyLoad.</strong></p>
         <div class="hero-actions">
-          <a class="kl-btn kl-btn--primary" href="https://github.com/managedcode/KeyLoad#quick-start">Get started <span aria-hidden="true">↗</span></a>
-          <a class="kl-btn" href="#benchmarks">See the benchmarks</a>
+          <a class="kl-btn kl-btn--primary" href="https://github.com/managedcode/KeyLoad#quick-start">Try the preview <span aria-hidden="true">↗</span></a>
+          <a class="kl-btn" href="#why">Why we built it <span aria-hidden="true">↓</span></a>
         </div>
+        <p class="hero-access">SQL · Native MCP · .NET SDK</p>
       </div>
       <figure class="stage" aria-labelledby="scene-caption">
-        <div class="scene-frame" id="cluster-scene" aria-label="Conceptual Orleans cluster: three silos host grains; storage remains node-local">
+        <div class="scene-frame" id="cluster-scene" aria-label="Conceptual Orleans-powered database: one connected database for an AI agent, with eight linked data models">
           <picture>
-            <source media="(max-width: 760px)" srcset="./Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg">
-            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual Orleans cluster: three clients reach different silos containing SQL, connected data-model grains and node-local storage.">
+            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/agent-context.png" alt="Conceptual Orleans-powered database for an AI agent: tables and SQL, graphs, time series, vectors, events, queues, files and documents connected to one database.">
           </picture>
-          <img class="cluster-core" src="./favicon.svg" alt="" aria-hidden="true" hidden>
-          <div class="silo-label" data-silo-label><strong>Silo A <span>Node A</span></strong><small>Grain activations · Node-local storage</small></div>
-          <div class="silo-label" data-silo-label><strong>Silo B <span>Node B</span></strong><small>Grain activations · Node-local storage</small></div>
-          <div class="silo-label" data-silo-label><strong>Silo C <span>Node C</span></strong><small>Grain activations · Node-local storage</small></div>
-          <span class="model-label" data-graph-label>Documents</span>
-          <span class="model-label" data-graph-label>Tables</span>
-          <span class="model-label" data-graph-label>Graphs</span>
-          <span class="model-label" data-graph-label>Vectors</span>
-          <span class="model-label" data-graph-label>Queues</span>
-          <span class="model-label" data-graph-label>Events</span>
-          <span class="model-label" data-graph-label>Blobs</span>
-          <span class="model-label" data-graph-label>Time series</span>
-          <span class="model-label" data-graph-label>SQL</span>
-          <span class="client-label" data-graph-label><strong>Client 01</strong><small>Requests</small></span>
-          <span class="client-label" data-graph-label><strong>Client 02</strong><small>Requests</small></span>
-          <span class="client-label" data-graph-label><strong>Client 03</strong><small>Requests</small></span>
+          <ul class="sr-only" aria-label="Connected database models">
+            <li data-model-name>Documents</li><li data-model-name>Tables</li><li data-model-name>Graphs</li>
+            <li data-model-name>Vectors</li><li data-model-name>Queues</li><li data-model-name>Events</li>
+            <li data-model-name>Blobs</li><li data-model-name>Time series</li><li data-model-name>SQL</li>
+          </ul>
           <span class="scene-status" data-scene-status role="status">Static illustration.</span>
         </div>
         <ul class="stage-pins" aria-label="What the illustration stands for">
@@ -130,7 +117,7 @@
           <li><b>Orleans</b> grain per request</li>
         </ul>
         <div class="scene-caption-row">
-          <figcaption id="scene-caption"><span class="caption-kicker">One cluster. Many grains. Three storage owners.</span><small class="scene-reference">Conceptual Orleans cluster · Grains route work; storage stays with each node. <a href="https://learn.microsoft.com/dotnet/orleans/overview#what-are-grains" target="_blank" rel="noreferrer">Explore Orleans ↗</a></small></figcaption>
+          <figcaption id="scene-caption"><span class="caption-kicker">Every model. One connected database.</span><small class="scene-reference">Built for the whole agent workflow. <a href="https://learn.microsoft.com/dotnet/orleans/overview#what-are-grains" target="_blank" rel="noreferrer">Explore Orleans ↗</a></small></figcaption>
           <button class="motion-button" id="scene-motion" type="button" aria-pressed="false" aria-controls="cluster-scene" disabled>Pause motion</button>
         </div>
       </figure>
@@ -145,25 +132,25 @@
     <section class="thesis" id="why" aria-labelledby="why-title">
       <header class="section-head">
         <div><p class="eyebrow">Why an AI-native database</p><h2 id="why-title">Agents shouldn't need a dozen databases.</h2></div>
-        <p class="section-intro">One agent step reads a task, looks up a customer, searches similar cases, updates a knowledge graph and stores a file. Today those steps usually span several databases, each with its own client, credentials and failure modes.</p>
+        <p class="section-intro">At Managed Code, we kept hitting the same problem. Each new agent capability meant another system to run, another client to learn and another set of data to keep in sync.</p>
       </header>
       <div class="thesis-grid">
         <article class="thesis-card">
-          <h3>The stitched stack</h3>
-          <ul class="thesis-stack" aria-label="Separate systems behind one agent today">
-            <li><b>Postgres</b> records</li>
-            <li><b>Vector DB</b> embeddings</li>
-            <li><b>Redis · RabbitMQ</b> tasks</li>
-            <li><b>S3</b> files</li>
-            <li><b>Kafka</b> events</li>
-            <li><b>Graph DB</b> relationships</li>
-            <li><b>Time-series DB</b> metrics</li>
-            <li><b>Glue code</b> sync jobs</li>
-          </ul>
-          <p>Seven permission models, seven sets of credentials, copies kept in sync by hand and no transaction that spans them.</p>
+          <p class="card-eyebrow">Sound familiar?</p><h3>It starts with vectors.</h3>
+          <ol class="thesis-stack" aria-label="How an agent's database requirements grow">
+            <li><b>Vectors</b><span>Find similar context</span></li>
+            <li><b>SQL</b><span>But we need real records</span></li>
+            <li><b>Hybrid search</b><span>And exact words, too</span></li>
+            <li><b>Graphs</b><span>What relates to what?</span></li>
+            <li><b>Events</b><span>Remember what happened</span></li>
+            <li><b>Files</b><span>Read that PDF</span></li>
+            <li><b>Queues</b><span>Do something next</span></li>
+            <li><b>Time series</b><span>Track what changes</span></li>
+          </ol>
+          <p>Every requirement makes sense. Together, they become a stack of databases just to build one agent.</p>
         </article>
         <article class="thesis-card thesis-card--one">
-          <h3>One AI-native database</h3>
+          <p class="card-eyebrow">Our answer</p><h3>Keep the whole job together.</h3>
           <ul class="thesis-points">
             <li><b>One reference</b> Any record can point to any other through canonical entity references.</li>
             <li><b>One permission check</b> Keys and policies live in the database, so an agent gets exactly what you grant.</li>
@@ -172,7 +159,7 @@
           </ul>
         </article>
       </div>
-      <p class="thesis-future"><strong>Why we think this is the future:</strong> agents don't think in tables, queues or buckets. When every shape of data lives in one database, an agent step should become one authorized operation instead of a distributed saga held together by glue code. Today its writes within one partition already commit atomically; leased receives, blob uploads and cross-partition work are still separate steps. Nobody should have to run a stack of databases just to let agents get work done.</p>
+      <p class="thesis-future"><strong>Less plumbing. More agent.</strong> A support agent needs the ticket, the customer, similar cases, an attached file and a follow-up task. Those things belong together. KeyLoad is one database for AI agents: connected models, canonical entity references and SQL as the familiar shared language. MCP is built in.</p>
     </section>
 
     <section class="anatomy" id="composition" aria-labelledby="composition-title">
@@ -283,7 +270,7 @@
 
     <section id="benchmarks" class="benchmark-section" aria-labelledby="benchmark-title" data-isolated-catalog="data/isolated-catalog.json">
       <header class="section-head">
-        <div><p class="eyebrow">Native topology comparisons</p><h2 id="benchmark-title">Performance with 1, 2 and 3 nodes.</h2></div>
+        <div><p class="eyebrow">Native topology comparisons</p><h2 id="benchmark-title">Performance with 1 and 3 nodes.</h2></div>
         <p class="section-intro">Each engine, node count and scenario has its own Linux runner. Results show five repetitions of the same intensive workload.</p>
       </header>
       <div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>
@@ -307,17 +294,17 @@
 
     <section class="ledger" aria-labelledby="ledger-title">
       <header class="section-head">
-        <div><p class="eyebrow">Qualification status</p><h2 id="ledger-title">What we show. What we don't claim yet.</h2></div>
-        <p class="section-intro">Cluster qualification is in progress. Generator CPU, allocation and RSS describe the load generator, not database resource budgets.</p>
+        <div><p class="eyebrow">Qualification status</p><h2 id="ledger-title">Built in public.<br>Progress you can inspect.</h2></div>
+        <p class="section-intro">The original plan has 104 tasks. Source implementation and accepted qualification are separate milestones. Follow the live tracker for what is ready and what remains.</p>
       </header>
       <div class="ledger-grid">
-        <article class="ledger-col ledger-col--open"><h3>Open by default</h3><ul>
+        <article class="ledger-col ledger-col--open"><h3>Ready to inspect</h3><ul>
           <li>Source code and architecture decisions</li>
           <li>Benchmark methodology and seeded inputs</li>
           <li>Raw JSON reports with source revision and host</li>
           <li>The GitHub Actions run behind every published figure</li>
         </ul></article>
-        <article class="ledger-col ledger-col--held"><h3>Not claimed yet</h3><ul>
+        <article class="ledger-col ledger-col--held"><h3>Qualification still open</h3><ul>
           <li>Production readiness</li>
           <li>Power-loss durability; process-kill tests do not prove it</li>
           <li>Endurance and overload behavior</li>
@@ -325,7 +312,7 @@
           <li>A performance winner</li>
         </ul></article>
       </div>
-      <a class="text-link" href="https://github.com/managedcode/KeyLoad/actions">Review current GitHub checks <span aria-hidden="true">↗</span></a>
+      <div class="status-links"><a class="text-link" href="https://github.com/managedcode/KeyLoad#project-status">Explore the 104-task plan <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/managedcode/KeyLoad/actions">Review current checks <span aria-hidden="true">↗</span></a></div>
     </section>
 
     <section class="methodology-section" id="methodology" aria-labelledby="methodology-title">
@@ -345,6 +332,21 @@
         <div><p class="eyebrow">Source available, reproducible inputs</p><h2 id="reproduce-title">Inspect the code. Run the suite.</h2><p>GitHub Actions starts the RF3 cluster and comparison engines in Docker through Aspire.</p></div>
         <div class="command-box"><span class="prompt" aria-hidden="true">$</span><code>gh workflow run benchmarks.yml --repo managedcode/KeyLoad --ref main</code><button id="copy-command" type="button" aria-label="Copy benchmark workflow command">Copy</button></div>
       </div>
+    </section>
+    <section class="acknowledgments" id="credits" aria-labelledby="credits-title">
+      <header class="section-head">
+        <div><p class="eyebrow">Built on great work</p><h2 id="credits-title">We didn't build<br>this alone.</h2></div>
+        <p class="section-intro">Thank you to the people behind these projects. Your work lets us spend more time building the database we wanted.</p>
+      </header>
+      <div class="credits-grid">
+        <a href="https://github.com/ZoneTree/ZoneTree"><span class="credit-symbol" aria-hidden="true">Z</span><span><strong>ZoneTree</strong><small>Our storage foundation</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/ZoneTree/ZoneTree.FullTextSearch"><span class="credit-symbol" aria-hidden="true">Aa</span><span><strong>ZoneTree.FullTextSearch</strong><small>Full-text indexing</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/dotnet/orleans"><span class="credit-symbol" aria-hidden="true">O</span><span><strong>Orleans</strong><small>Distributed execution</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/dotnet/runtime"><span class="credit-symbol" aria-hidden="true">.N</span><span><strong>.NET</strong><small>One runtime from server to SDK</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/modelcontextprotocol/csharp-sdk"><span class="credit-symbol" aria-hidden="true">M</span><span><strong>MCP C# SDK</strong><small>The native agent connection</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/managedcode/KeyLoad#credits"><span class="credit-symbol" aria-hidden="true">+</span><span><strong>All contributors &amp; projects</strong><small>Runtime, tooling and comparisons</small></span><span aria-hidden="true">↗</span></a>
+      </div>
+      <p class="license-note">KeyLoad is source available under the <a href="https://github.com/managedcode/KeyLoad/blob/main/LICENSE">Elastic License 2.0</a>. Built by <a href="https://www.managed-code.com/">Managed Code</a>.</p>
     </section>
   </main>
   <footer class="site-footer">

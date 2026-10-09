@@ -400,3 +400,295 @@ flowchart LR
 ```
 
 TASK-KL042-ROSTER-ORIGIN-NATIVE-ANALYZER-002 preserves REQ-BACKUP-ROSTER-RESTORE-001 and AC-BACKUP-ROSTER-RESTORE-001/002 after original source f3d7feb2/run37946644265 failed CA1819 and CA1062. The new unqualified generated-origin digest uses bounded ReadOnlyMemory<byte> at unchanged field Id5; compare its span against exact SHA256 without exposing a mutable array property. Validate actual public reference parameters before native key/identity matching. This is the current new metadata contract, with no format fallback, migration or acceptance claim. Existing genuine restore, first-write/replay, corrupt/missing-origin refusal, exact repair and cold/second-restore flows remain required. Root owns the source repair, coherent integration and fresh original Linux compiler/format/native operation evidence; rollback is confined to this still-unqualified origin contract.
+
+
+## TASK-KL042-NATIVE-RF3-RESTORE-001
+
+
+Implements original architecture KL-042, REQ/AC-BACKUP-001 through004 and006, ADR008/030/016/017/035/036/041/048/061/114/116. The sixteen-path historical roster-origin prerequisite remains separate and insufficient. A physical archive, no-configured-owner DatabaseEngine, replica erase/rejoin, or local roundtrip is not cluster restore acceptance.
+
+REQ-BACKUP-CLUSTER-001 / AC-BACKUP-CLUSTER-001: capture a complete validated catalog epoch, complete immutable atomic partition roster, actual physical owner tuple and per-partition cuts from the same native owned snapshot as the archive. Validate every canonical partition-family occurrence against the roster and actual placement. Fail closed on orphan/missing/corrupt roster, unaccounted owner, unresolved movement or unavailable history. Preserve all model schemas, policy/credentials, original outcomes and journals. A declared vector may contain distinct cuts across physical owners; it must not pretend to be one cross-shard atomic cut.
+
+REQ-BACKUP-CLUSTER-002 / AC-BACKUP-CLUSTER-002: verified off-node publication includes versioned generated-native manifest, exact source incarnation/catalog/placement/roster identities, actual store/applied cuts and streamed per-file checksums. Complete source archives stay immutable. Retention is owned by the actual immutable native archive; no advisory pin or restored index replaces canonical state. Failure/cancellation cannot publish an admitted partial manifest. Use existing centrally validated metadata/scan/query/frame/stream limits and failure-joined native owner lifecycle.
+
+REQ-BACKUP-CLUSTER-003 / AC-BACKUP-CLUSTER-003: offline operator CLI verifies the complete declared manifest and all archives before publication to clean owned target roots. Restore all three voters per physical group using one explicitly fresh group incarnation/signing identity tuple, with distinct real local node identities. Persisted credentials/policies are recovered, not bootstrap-replaced. Source/new identity and per-row origin metadata are strictly bound. Reconcile physical catalog and explicit placements ONLY as an explicit validated restore operation inside unpublished staging; do not relax ordinary startup bootstrap/catalog admission. Old command receipts, read/session/minimum tokens, cursor/lease authority and source journal identities remain fenced.
+
+REQ-BACKUP-CLUSTER-004 / AC-BACKUP-CLUSTER-004: actual new Aspire RF3 topology opens through unchanged configured physical-owner/catalog checks and real consensus barriers. All restored logical models are readable at the declared cuts through genuine SDK, official MCP and versioned Q1. Check full literal rows/resources/events/groups/inbox/outbox/queues/graphs/blob ranges, retained operation identities and native cold images. No external dispatch/redelivery occurs automatically. Failed wrong tuple/missing archive/corruption/old credentials authorization cases preserve target nonpublication or charged closed admission, then exact authorized repair has healthy full continuation.
+
+REQ-BACKUP-CLUSTER-005 / AC-BACKUP-CLUSTER-005: explicit fresh persisted administrator operation records reconciliation and resumes global delivery through one unique request grain and native ordered command with stable retry identity. Same-ID body mismatch refuses, original full result replays, old authority remains fenced and real new lease/cursor processing/inbox/outbox effects occur once. No direct raw flag reset or caller-supplied trusted role.
+
+REQ-BACKUP-CLUSTER-006 / AC-BACKUP-CLUSTER-006: genuine drills retain monotonic capture/restore/recovery timings, declared source cut and actually restored cut, known acknowledged operations after capture and exact observed loss relative to the selected backup. These are actual RPO/RTO measurements, not endurance/performance/power-loss claims or invented targets.
+
+## Physical scope and complete admission
+
+The current default topology is one physical RF3 shard with many logical atomic partitions. Its logical cut vector can share one actual physical apply cut; IDs remain distinct. The implementation must inventory actual explicit placement/registered physical owners and refuse a manifest missing any owner. The existing real two-group movement topology is an additional owner cohort, not a license to label one archive as its cluster backup. Full original KL042 acceptance remains open until every supported owner cohort and all declared model/cross-partition predicates are exercised. Missing owner transport/capture support is explicit UnsupportedCapability/RecoveryRequired, never silently omitted.
+
+## Ordered implementation and exact owners
+
+1. Freeze this contract before generated schema or API additions. Session owns private source; root joins all live contracts/source/docs/workflow and compiler/Git. Preserve historical origin R1 immutable; compose it only at an explicit root checkpoint.
+2. Abstractions BackupRestore Contracts/Serialization owns stable versioned capture manifest, owner/cut/file records and explicit operator restore plan; no credentials or keys in diagnostic manifests. Core BackupRestore Queries/Validation owns complete same-view current roster/canonical census/placement proof and fresh persisted administrator validation. Storage.ZoneTree BackupRestore owns native write-gated archive capture plus bounded same-view metadata callback and verified unpublished restore/reconciliation. Native serializer and pinned raw ZoneTree APIs remain canonical.
+3. Server BackupRestore Execution/Transport and Orleans ClusterRouting native capability reuse own actual request-grain/node-local capture admission/cancellation/join. Existing single physical BackupReceipt API remains truthful; a new complete-cluster capability must not repurpose it. Client BackupRestore and canonical MCP/Q1 catalog expose exact reviewed schemas/effects only after their production owner exists.
+4. CLI BackupRestore Commands/Validation owns explicit offline verified restore-plan admission and complete clean-root publication/rollback. It may not fabricate a configured cluster owner, preserve old live authority, copy old replica journals or silently replace runtime bootstrap. New fresh replica journals follow native clean-cluster startup and ordered materialization. Physical tuple reconciliation binds every archived placement to its declared restored owner; unknown foreign owner/history refuses.
+5. Existing SetDispatch performs ordered dispatch resume under fresh persisted administrator and its stable durable native outcome. Each restored physical owner is resumed explicitly through SDK/MCP/Q1; original replay and same-ID changed-body conflict remain mandatory. Subscription seek/unpause and lease reconciliation retain their existing authorized operations. No new resume command, parallel dispatcher or direct public storage mutation is introduced.
+6. Integration BackupRestore Cases/Helpers/Assertions owns genuine Aspire source and separately clean target cohorts, canonical volume ownership, stopped processes/readers/locks before offline restore and cold reads, discovered endpoints, actual source/admin/policy models and full caller/native state oracles. Recovery CrashHost owns actual process-cut/refusal/publication boundaries. Root owns inventory/task lane binding after actual fresh native census; authored methods are not observed UIDs.
+
+Every commit/apply remains ordered and node-local. Capture/restore callbacks must borrow actual centrally validated options, not recapture/wrap/default them. Source archive and failed target evidence remain available; primary and cleanup failures retain all actual errors. Tokens/receipt identity are never reconstructed to make an oracle pass. Rollback withholds new cluster capability/admission and keeps old APIs, archived source and immutable reports. No legacy format conversion, provider replacement, migration fallback, new timeout or guessed limit.
+
+## Tests and acceptance evidence
+
+Required actual flows: several logical partitions/model families and explicit placement; source credential revoke/restore; same-ID full original receipts; capture while later writes proceed without contaminating chosen archive cut; off-node streamed hash/pack/unpack; clean three-voter restore; old full receipts/tokens/leases/cursors refusal with complete no-effect or genuine ordered failure delta; paused dispatch; fresh SDK/MCP/Q1 literal reads and writes; operator authorized resume/replay/conflict; restored inbox dedup/outbox/group gap/graph repair; all-three joined cold reopen/healthy continuation; malformed/missing/archive/owner negative to exact repair; original source/backup unchanged; measured RPO/RTO. Full unit normal/scalar, genuine process recovery, RF3 normal/scalar, source/PDB/image/discovery/TRX/cleanup and mandatory broader gates remain required. Process kill does not prove power loss. No source-only or selected-scope receipt closes all104 tasks.
+
+```mermaid
+flowchart LR
+  A[Persisted admin unique request grain] --> B[Catalog and complete owner census]
+  B --> C[Native same-view archive and cut vector]
+  C --> D[Verified immutable off-node manifest]
+  D --> E[Explicit clean-root restore plan]
+  E --> F[New RF3 identity and exact catalog reconciliation]
+  F --> G[Paused all-model SDK MCP Q1 cut]
+  G --> H[Authorized ordered resume and cold continuation]
+  H --> I[Original RPO RTO and Linux qualification]
+```
+
+
+## TASK-KL042-CATALOG-CAPTURE-RESTORE-002 implementation refinement
+
+Frozen before private source under REQ/AC-BACKUP-CLUSTER-001–006 above, and the original KL042 product criteria; this is an unqualified implementation proposal, not task closure.
+
+The additive typed `ClusterBackupOwner` capability uses one actual persisted-authorized request grain and the owning node archive gate. Public input carries only version, stable CaptureId and exact expected owner/node conditions. Its server-created credential witness never appears in public schemas and grants no caller role. Revalidate actual credential/principal/policy against the same captured view and again before returning either new capture or immutable replay. Old NoBody AdminBackup keeps its original three-file semantics and non-idempotent effect hints. SDK, official MCP `keyload_admin_cluster_backup` and existing Q1 CALL use one canonical typed operation; this is not full SQL/protocol completion. Public catalog becomes jointly78 only when this operation and separately owned WaitForAnnIndex are composed; initial discovery remains3. Preserve every old76 tuple and computed/enum schema oracle.
+
+Each generated-native PartitionCut appends Id5/6 actual scoped canonical count/digest, preserving Id0..4. The one original bounded native scan computes whole and per-scope SHA256 with exact big-endian length framing, no retained user payload. Empty scopes remain legitimate. Every duplicate complete PartitionRef must agree effective owner ID/incarnation/ordered voters/logical epoch; the actual effective owner's archive must contain that scope. Independent physical positions and directory revisions are retained, never globally equated. Every original-source unpublished transaction recomputes the full native cut/scoped hashes and compares every claimed metadata field before staging reconciliation. A digest cannot grant a role. Real movement split vectors must refuse, and distinct CaptureId coherent recapture must restore independent full literal data/receipts; metadata-only controls do not substitute.
+
+The new native catalog envelope is the fourth file `catalog-backup.native`. Its exact byte SHA256 is the NEW capture receipt ManifestDigest; the envelope retains the original inner manifest digest and native verification checks all three inner files. Thus receipt provenance binds both cut metadata and actual inner files. Original receipts/formats are not renamed. Owning Artifacts PackCatalogBackup/UnpackCatalogBackup reuses native Cartograph segmented writer/extractor with exact four-file names, original piece bounds and reader/staging cleanup. Expected provenance comes from the independently retained original capture receipt; extraction validates before publication. Existing three-file Pack/Unpack behavior remains unchanged, with no fallback.
+
+`restore-cluster` binds explicit offline file-owner configuration via the standard provider: KEYLOAD_CLUSTER_RESTORE__ complete source/target/node/signer/credential vector and KEYLOAD_DATABASELIMITS__ original limits. Keys/credentials are memory-only configuration, never CLI operands, diagnostics or receipt/marker fields. Use mutable configuration scalar/string-array types and construct immutable generated-native owner mappings once; do not invent an immutable collection binder or replace the provider. Native owner/mapping validation remains authoritative. Every supported registered/assigned group has three actual target copies; each actual original archive independently authenticates its separately configured administrator at the operator's current clock. Captured policies are authoritative only at the backup cut, not against later source revocations. Operator explicitly reviews/reapplies missing source policy changes before dispatch resumes. No snapshot role, key fallback or auto-admin is permitted.
+
+Reconciliation writes only the explicit new catalog/default and registered owner/placement tuple, plus original-cut/mapping marker under the genuine recovered original transaction. Preserve roster/FirstSeen/model bytes/policies/old outcomes as history; old authority is fenced by new owner/incarnation/signers and reset apply/membership/clock/paused state. Existing startup/catalog/bootstrap remains strict. Every target has a distinct real NodeId, exact new group incarnation/signer and paused dispatch, verified after joined native restore. Original replicas are not copied. All copies settle before one clean-root publication; the actual original empty directory is moved to a private rollback holder and restored on prepublication failure, with primary+cleanup errors retained. Published valid data is not erased on a subsequent cleanup failure.
+
+The ordered resume stage reuses existing SetDispatch SDK/MCP/Q1 and native durable command identities; it does not add a second dispatcher or raw flag edit. Current target persisted administrator authentication, exact original result replay and changed-body conflict are mandatory. Groups/cursors/leases require their existing explicit reconciliation operations; restore does not silently replay side effects. Old command outcomes/tokens/cursors are retained history and must refuse as current authority, with genuine ordered failure delta distinguished from read-only no effects.
+
+Acceptance remains OPEN: genuine complete multi-owner Aspire restore/cold/model SDK/MCP/Q1 flows, source revoke/key-delete/expiry/refusal→repair, standard-provider binding, fourth-file modification/missing refusal→healthy transfer, split-movement vector denial→coherent recapture, old receipt/token/lease/cursor fences, fresh current-admin explicit resume/replay/conflict, inbox/outbox/group-gap continuation, known acknowledged postcapture loss and actual complete RPO/RTO timing, process recovery and current-source Linux normal/scalar RF3. Source hashes/build/census alone qualify none of these operations. Full-product endurance, power-loss, representative resource/performance and mandatory full suites remain separately mandatory.
+
+## TASK-KL042-WHOLE-RF3-SOURCE-003 exact private ownership and qualification boundary
+
+The source implementation uses ADR-123 stages above and the following exact responsibility paths. Shared enum/catalog files include the exact composed WaitForAnnIndex successor from the separate KL034 owner; their joint78 catalog expectations remain root-owned. The historical sixteen-path roster-origin prerequisite must join first, and the restore callback delta uses its exact proposed base. No source-ready packet changes status/README or claims native qualification.
+
+- `docs/ADR/ADR-123-native-rf3-cluster-restore.md`
+- `docs/Features/BackupRestore.md`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerCut.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerReceipt.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupOwnerRequest.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupPartitionCut.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterBackupProtocol.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterRestoreMarker.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/ClusterRestoreOwnerMapping.cs`
+- `src/KeyLoad.Abstractions/Features/BackupRestore/Contracts/INativeCatalogBackupStore.cs`
+- `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`
+- `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/CatalogBackupArtifactOperations.cs`
+- `src/KeyLoad.Artifacts/Features/BackupRestore/Staging/BackupArtifactExtraction.cs`
+- `src/KeyLoad.Artifacts/Features/BackupRestore/Staging/BackupArtifactStaging.cs`
+- `src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj`
+- `src/KeyLoad.Cli/Features/BackupRestore/Commands/CliClusterRestore.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Commands/ClusterRestoreCoordinator.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/CliStorageConfiguration.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreConfigurationBinding.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreMappingConfiguration.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestoreOperatorConfiguration.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Configuration/ClusterRestorePhysicalOwnerConfiguration.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Contracts/ClusterRestoreExecutionReceipt.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Contracts/ClusterRestoreNodeTarget.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Execution/ClusterRestorePublication.cs`
+- `src/KeyLoad.Cli/Features/BackupRestore/Validation/ClusterRestorePathValidation.cs`
+- `src/KeyLoad.Cli/Features/ClientApi/CliClientMessages.resx`
+- `src/KeyLoad.Cli/Features/ClientApi/Hosting/KeyLoadCliApplication.cs`
+- `src/KeyLoad.Cli/KeyLoad.Cli.csproj`
+- `src/KeyLoad.Client/Features/BackupRestore/Transport/BackupClient.cs`
+- `src/KeyLoad.Core/Features/Authorization/Execution/DatabaseAuthentication.cs`
+- `src/KeyLoad.Core/Features/Authorization/Identity/DatabaseCredentialWitness.cs`
+- `src/KeyLoad.Core/Features/Authorization/Validation/DatabaseCredentialValidation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Contracts/ClusterBackupOwnerCapability.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Execution/ClusterBackupOwnerAuthorization.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Execution/ClusterRestoreCatalogReconciliation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupCanonicalCensus.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupOwnerCapture.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupPlacementRead.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Queries/ClusterBackupRosterCapture.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupMetadataEquality.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupNativeCutVerification.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupOwnerClosureValidation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupPartitionVectorValidation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterBackupRequestValidation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreMappingValidation.cs`
+- `src/KeyLoad.Core/Features/BackupRestore/Validation/ClusterRestoreOperatorValidation.cs`
+- `src/KeyLoad.Orleans/Features/BackupRestore/Queries/ClusterBackupOwnerReadExecution.cs`
+- `src/KeyLoad.Orleans/Features/ClusterRouting/Contracts/INodeAdministration.cs`
+- `src/KeyLoad.Orleans/Features/ClusterRouting/Grains/DatabaseReadGrain.cs`
+- `src/KeyLoad.Orleans/Features/ClusterRouting/Models/GrainReadKind.cs`
+- `src/KeyLoad.Server/Features/BackupRestore/Authentication/ClusterBackupCredentialCapability.cs`
+- `src/KeyLoad.Server/Features/BackupRestore/Execution/ClusterBackupOwnerArchive.cs`
+- `src/KeyLoad.Server/Features/BackupRestore/Transport/ClusterBackupApi.cs`
+- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpReadCatalog.cs`
+- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpToolDescriptions.cs`
+- `src/KeyLoad.Server/Features/ClientApi/Contracts/McpToolHints.cs`
+- `src/KeyLoad.Server/Features/ClientApi/Execution/CanonicalOperationGateway.cs`
+- `src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs`
+- `src/KeyLoad.Server/Features/ClusterRouting/Transport/NodeAdministration.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Contracts/ZoneTreeCatalogBackupMetadata.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeBackupRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeBackupRestoreRestore.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogBackupPublication.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogRestoreEntry.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Recovery/ZoneTreeCatalogRestoreVerification.cs`
+- `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/Serialization/ZoneTreeCatalogBackupMetadataFile.cs`
+- `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReadOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiptOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingReceiveOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3EventingSourceOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3ModelOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Assertions/ClusterRestoreRf3TargetAuthority.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3EventingProtocol.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3OperatorReceipt.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Contracts/ClusterRestoreRf3Protocol.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Fixtures/ClusterRestoreRf3Fixture.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrial.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3AuthorityTrialVector.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3BuilderCleanup.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CallerOwner.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Capture.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CaptureAuthorityTrial.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3CredentialTrial.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingContinuation.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingFences.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingHealthy.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3EventingSeed.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Graph.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3LogFraming.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3NativeArchive.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Operator.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3OperatorObservation.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3ResumeConflict.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3RpoOracle.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3Scenario.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3SecondaryPartition.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Helpers/ClusterRestoreRf3TargetRead.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Models/ClusterRestoreRf3EventingState.cs`
+- `tests/KeyLoad.IntegrationTests/Features/BackupRestore/Models/ClusterRestoreRf3SecondaryState.cs`
+- `tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Helpers/PartitionMovementPublicParentRf3Seed.cs`
+- `tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj`
+
+The source-authored cases are `ClusterRestoreRf3Tests.ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation`, `ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation`, and `ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold`. These names are not native UIDs or observed case counts. All three use the original owned two-RF3 Aspire graph, existing parent/cleanup bounds, exact-source built CLI completion dependencies, native image/profile/membership admission and original resources. Fresh current-source native census, exact normal/scalar runtime evidence and mandatory process/RF3/global gates are pending.
+
+Implementation/evidence residuals remain OPEN: genuine CLI process kill/cancel with unpublished-stage resume/cleanup, byte-original sealed source peer/grain-envelope replay at the new signer, and missing/modified archive-file refusal followed by exact healthy repair. The current negative expected-provenance digest is not represented as missing-file qualification, and fresh signed retry is not represented as the original wire envelope. Original power-loss, endurance, performance and full-product gates remain mandatory.
+
+## TASK-KL042-NATIVE-ENVELOPE-OMISSION-004
+
+REQ/AC-BACKUP-CLUSTER-002/003/004 and original AC-BACKUP-001/002/004. Additive owning Storage catalog-envelope RequireRegular maps only actual FileNotFoundException/DirectoryNotFoundException to the existing closed Corruption/InvalidMetadata; original three-file API/verification behavior remains unchanged. All other original errors propagate and cleanup remains owned.
+
+The actual original native Artifacts extractor creates independent fixture-owned derivative copies of BOTH full off-node archives. Remove ONLY the first derivative catalog-backup.native, never original archives/data/configuration. Actual AppHost-owned original built CLI must emit exact existing Corruption native Problem/exit1, all six dependent resources must be FailedToStart, target publication absent and native log reader/owner shutdown joined. Original archive hashes/cuts remain exact. The SAME fixture then uses its original valid archive configuration and performs complete healthy six-owner SDK/MCP/Q1 models/receipts/dispatch/cold continuation. Existing deadline, native image/profile/membership and full assertions unchanged.
+
+Root must join immutable104 source R2 first, then this exact guarded delta. Authored source only; no compiler/native metadata/runtime qualification. CLI process interruption and original byte-sealed intergrain envelope gates remain OPEN.
+
+## TASK-KL042-CONCURRENT-JOINED-COLD-005
+
+Docs frozen before source. Stable CaptureId first concurrent SDK/officialMCP/Q1 calls require one exact immutable archive/receipt. Owning provider rechecks existing publication INSIDE its ORIGINAL native write gate; current persisted credential/principal/owner checks precede archive existence/read. Exact original native outer-envelope/inner-file checksums and source node/incarnation/physical owner/capture ID/position match are required before return. NEW publication verifies exact request result inside unpublished stage before directory move. No consumer Conflict catch/retry/extra lock and no old CreateBackup/Restore behavior change. Original same-ID replay and final live authorization still required.
+
+Actual four first operations start together through the existing real SDK and official SDK/Q1; all children settle, each retains strict failure/success evidence and requires full original receipt equality. After genuine source AppHost stop/dispose/all locks, reconstitute SAME wave via original retained native parameters/ports/image/options/profile with no capacity selection change; replay same CaptureId across all four routes, unchanged original archive/cut, full public models and source receipts. Stop/readers/locks join again before target restore. Existing parent/cleanup bounds, current ordinary native default50/heavy exclusive1 and scalar semantics unchanged; no new50-overlap evidence claimed.
+
+Existing Archive.Copy correctly disposes the source AppHost; only BackupRestore callers that incorrectly used retained-container Cut.Restart are changed to the shared owning RestartJoined seam. Existing capacity/frame reconfiguration semantics unchanged. Shared TwoRf3 files root explicitly reserved; Movement confirms no active proposals on them.
+
+Source only. Requires whole104R2 then missing-envelope7R2; joint78 and historical16 prerequisites unchanged. All fresh native compiler/census/normal/scalar/process/RF3/full gates remain OPEN.
+
+The node administration owner tracks every accepted concurrent capture producer under its ORIGINAL lifecycle lock, joins all unsettled producers before native storage shutdown, and preserves legacy NoBody backup busy behavior. Each actual capture request independently authenticates inside the existing provider gate and once again before result exposure; no task-result-sharing authorization bypass or consumer retry. Completed producers are removed only as settled ownership, with each original caller retaining its actual task failure/result. No new lock/quota/options wrapper/timer is added. The provider uses its actual already-bound MaintenanceExecution owner for native retained archive verification.
+
+
+## TASK-BACKUP-CAPTURE-ADMISSION-001 — bounded owner producer successor
+
+REQ/AC-BACKUP-CAPTURE-ADMISSION-001 implementation contract
+
+Docs-first REQ/AC-BACKUP-CAPTURE-ADMISSION-001 / TASK-BACKUP-CAPTURE-ADMISSION-001. Root authorization: centrally validated minimum1/default4/ceiling4; not TUnit50 or PhysicalOwnerExecution proof quota.
+
+`ClusterBackupExecutionOptions` [ConfigurationOptions], section `KeyLoad:ClusterBackupExecution`, named MinimumAdmissions=1/DefaultMaximumAdmissions=4/MaximumAdmissionCeiling=4; `MaximumAdmissions` property, IsValid and startup validation. Central ServerRuntimeOptionsRegistration RegisterHostExecution binds ErrorOnUnknownConfiguration=true, ValidateOnStart. NodeAdministration receives SAME IOptions<ClusterBackupExecutionOptions> owner, no wrapper or default recapture.
+
+Every CaptureClusterBackupOwnerAsync entry (including direct trusted interface/inter-grain call) checks cancellation then original lifecycle lock: shutdown=>OwnershipLost; unfinished ordinary backup=>ResourceExhausted; observe then retire only settled captures; activeCount>=actual validatedMaximumAdmissions=>ResourceExhausted before Task.Run; create/register each real Task before releasing same lock. No new lock/semaphore/retry/timer. Callback actual native provider write gate continues canonical closure/fresh persisted credential/policy validation. Admission does not authorize input.
+
+Ordinary NoBody Backup remains exclusive: unfinished ordinary backup OR any active capture refuses ResourceExhausted. Captures never overlap ordinary backup; captures may overlap each other ONLY within bound, with publication serialized by actual storage write gate. Different CaptureIds never share authority. Same CaptureId concurrent admitted calls recheck original immutable archive inside that gate and return identical receipt after fresh authorization.
+
+Task settlement observation: under lifecycle lock inspect IsCompleted only, consume actual Task.Exception when faulted before removal; original caller still receives original task failure. No throwing completed sibling failure into an unrelated healthy caller, no swallowed unobserved exception. Canceled task remains its caller's genuine cancellation. Shutdown atomically sets non-null shutdown snapshot while holding SAME lock, accepts no subsequent task, joins ALL still registered accepted producers before PartitionHost/store closes. Snapshot Task.WhenAll failures are observed and retained in actual disposal failure ledger; no blanket SuppressThrowing for new capture set. Preserve ordinary legacy backup cleanup behavior separately. If both native capture failure and disposal failure exist, retain both primary originals; no synthetic success.
+
+Automated genuine supporting Unit flows use actual PartitionHost/ZoneTree, persisted admin credential/principal and native capability, not a fake INodeAdministration or delegate dispatcher: hold actual canonical store transaction write gate on a bounded joined test Task, submit exactly limit real capture producers directly to NodeAdministration, next call ResourceExhausted with no archive/position change; ordinary Backup also denies. Release original gate, join all actual receipts, compare complete unchanged actual native raw image; actual ordinary backup verifies the complete original native identity/checksum/cut and healthy cold authentication. The supporting unregistered owner must honestly refuse capture with OwnershipLost; successful sameID capture and complete literal models remain mandatory in genuine RF3 concurrent four-route continuation. A separate native cancellation/invalid persisted credential producer settles failed; its original failure remains, freed permit permits genuine healthy capture. Shutdown while exact admitted producers wait must remain uncompleted, further calls OwnershipLost, releasing actual gate joins every original producer; then native file locks close and true cold reopen verifies complete original images. No renewed deadline or sleep-based permit claim.
+
+RF3 full existing four-route concurrent first CaptureId→same full receipt→source cold→same original receipt/full healthy state remains mandatory, plus entire whole042 restore scope. Supporting Unit admission is not RF3 qualification. Test ownership exact guards attached; existing PartitionHostRecoveryFixture may be borrowed only for actual native owner creation, no fabricated snapshot/principal. Native test counts/UID/pass await root current image. New aliases/state are N/A for this options/lifetime-only contract.
+
+
+TASK-KL042-NATIVE-SERIALIZER-DECLARATION-003 implements the already frozen REQ/AC-BACKUP-CLUSTER-001/002 native typed contracts: every primary-record parameter attribute resolves its serializer field constant through the owning record type. Existing numeric field IDs, generated serializer aliases, version values and full typed cold/restore/replay flows remain exact. Native compiler finding CS0103 has no Roslynk code fix; the owning declaration must be completed without replacing or deleting any member or attribute. This current unqualified source declaration repair introduces no format reader, migration or runtime compatibility branch. Original native diagnostics remain failure evidence until the complete current compiler and genuine Linux gates pass.
+
+
+## TASK-KL042-TYPED-BINDING-004 — native generated offline-restore configuration
+
+REQ/AC-BACKUP-CLUSTER-002/003 retain the exact explicit environment configuration, native validation, default values and complete six-owner offline restore flows. CLI selects a concrete `ClusterRestoreOptionsFactory` using the native `ConfigurationBinder.Bind` entry for `ClusterRestoreOperatorConfiguration`; .NET's configuration-binding generator creates its actual nested records and mapping objects. The existing generic factory continues to own all other storage/cache/backup/limits configuration. A shared lifetime entry builds and disposes the original environment configuration once, eagerly evaluates the original OptionsManager and retains the same validation failure. No public visibility widening, dummy allocations, manually duplicated binder, analyzer suppression, compatibility reader or environment-key change.
+
+Enable the native generator only in KeyLoad.Cli and directly pin Microsoft.Extensions.Configuration.Binder to the already resolved Microsoft.Extensions version 10.0.12 through Directory.Packages.props. The current compiler's CA1812 observation on reflection-only nested configuration types has no applicable Roslynk fix; actual generated constructors complete the typed operation instead of deleting declarations. Runtime parity and unsupported-generator diagnostics remain mandatory gates.
+
+Ordered ownership: this specification and ADR-123 precede the CLI Configuration/ClusterRestoreOptionsFactory and shared Bind lifetime overload, CLI project flag and central package reference. Root joins source, then requires the complete native analyzer/build and actual CLI configuration-to-six-owner process/RF3 .NET, official MCP and Q1 restore/negative/cold flows. Existing missing-field, invalid owner/signer/vector, archive corruption, nonempty destination and authorization refusals remain strict. This change adds no getter/setter-only tests and claims no runtime, coverage, acceptance or performance success. Rollback removes the concrete generated binding and returns the original factory selection only; no persisted schema or migration is introduced.
+### TASK-KL042-VISIBLE-NATIVE-LIFETIME-005: join the real fixture owners directly
+
+REQ/AC-BACKUP-CLUSTER-001/002/003/004 and the existing native RF3 restore/source contracts require the same original owners and every initiating/cleanup failure to remain joined. Native CA2000/CA2213 code-fix attempts returned NotFound. The three RF3 authority/credential/restore scenarios must directly await their actual ClusterRestoreRf3Fixture.DisposeAsync in finally, retaining the original operation exception and aggregating it with a genuine cleanup exception only when both occur. The bounded credential helper owns one original rejected fixture at a time and retains the following exact-archive and healthy restore flow. The supporting admission fixture directly disposes its original ServiceProvider and PartitionHostRecoveryFixture; native files join even after service disposal fails, and earlier Administration/Host failures remain present.
+
+Root owns the guarded four-path Integration BackupRestore Helpers and Unit BackupRestore Fixtures source join. Existing ADR-123 and native resource-lifetime requirements suffice; no public schema, diagnostics, storage format, provider, topology, scheduling, deadline or limit changes are introduced. Ordered stages: this contract; current-source semantic edits; coherent compiler/analyzers and complete actual operation/negative/cleanup flows; exact-source Linux native source/PDB/image/report qualification. Runtime and whole-task acceptance remain open. Rollback removes only this coherent direct-lifetime source change without suppressing diagnostics or discarding original failures.
+
+## TASK-KL042-NATIVE-RESUME-OPERATOR-UNION-001
+
+# R3 owning plan successor — per-owner persisted operator union
+
+Approved source correction before first plan persistence: existing ClusterRestoreCoordinator.RequireCredentials and RestoreNodes choose exact credential by SourceOwnerId, so singleton principal/epoch would narrow whole042. Plan Id9 is ImmutableArray<ClusterRestoreOperatorSubject>; Id10/11 unused (never persisted, no compatibility promise), original CreatedAt Id12 unchanged. Alias `keyload.cli.cluster-restore.operator-subject.v1`: Id0 Version,1 SourceOwnerId,2 PrincipalId,3 CapturedPolicyEpoch,4 CredentialFingerprint. Exact complete source owner union, no duplicate/missing/foreign subject; each subject comes only from actual verified original native source view and existing persisted credential verifier. Fingerprint is SHA256 of separately supplied original secret; no secret/role persists in plan.
+
+REQ/AC-BACKUP-RESTORE-OPERATOR-UNION-001 maps original resume001/002 and whole captured credentials criteria: changed/wrong-owner credential or principal/epoch/fingerprint under same operation refuses before native mutation/publication; restores exact original valid supplied credential, same operation/plan/slot then healthy all-owner RF3/cold. Natural current captured key/principal expiry/revocation denies on each read/reconcile/reset/publication/replay; no claimed knowledge of revocations after backup.
+
+Source order: native verified-source read gate→persist original plan/union→admit slots→actual same-transaction reconciliation/reset→all handles joined→fresh per-owner auth check→checked publication/terminal original receipt. Unpublished errors retain native slots/state; foreign/corrupt state never adopted/deleted. Old ordinary Restore unchanged. Source requires owning native ReadVerifiedCatalogBackup callback overload using existing actual copy/journal validation/ZoneTreeRuntime gate/disposal, not an Engine with fabricated configuration. This is local native file-owner API, no public network/caller authority or catalog addition.
+
+Join: historical16→104R2→missing7R2→bounded capture21R4→THIS future resume owner packet. Tests: genuine CLI process cuts, actual wrong-owner/changed credential→same-operation healthy flow, whole six-owner SDK/official MCP/Q1 literal restore/paused dispatch/token fencing/cold; native UID/outcomes only after root current image and Linux originals. No source implementation marked accepted.
+
+Native restore slot persistence follows approved CLI resume R4 contract SHA d0afdbf7ccfb0fa325861aeb164af4b3eb11bbb33beb696b6a80792ae061649d. This is current product state, without old-format support, migration or fallback. Plan Id9 binds the complete ordered per-owner subjects; Id10/11 remain unused. All original42 criteria and source/profile/runtime acceptance remain OPEN.
+
+
+### Frozen original owner/voter/path binding and current native slot framing
+
+
+
+Slot Id7 StageName retains the exact configured RelativeDataDirectory; it does not invent a substitute slot-N data path. Sources retain original configuration order; each source mapping retains its original ordered Target.VoterIds. For every ordered voter occurrence, resolve the exact already configured SourceOwnerId/VoterId→RelativeDataDirectory tuple and assign its SlotOrdinal once. Thus target identity and voter/path placement are complete without new Slot field IDs. Resume uses the SAME previously allocated TargetNodeId at that ordinal and compares every supplied owner/voter/path/mapping/signer value with the admitted original plan before native effects. Input arrays are not mutated; configuration source/mapping/voter order remains frozen. The same original signer bytes are supplied anew and checked against the frozen target fingerprint; all real source identity signer fingerprints are compared in fixture/operator memory, never diagnostic output. Wrong voter/path/owner/key denies, then exact original configuration resumes the same operation.
+
+Internal current native framing helper records (no legacy persisted format): source-file.v1 Id0Name/1Length/2Checksum; state-envelope.v1 Id0Version/1Payload/2Checksum. State file begins feature Magic 0x315253434C4B, followed by the owning generated state-envelope whose native length-framed Payload is SHA256 checked. FileInfo/stream length is bounded by the original MaximumBackupManifestBytes BEFORE allocation; exact payload byte hash is retained independently from semantic decoded plan comparison. Valid pending atomic-replacement bytes can be renamed ONLY after original plan/actual native slot/state lineage validation. Invalid/truncated/foreign pending bytes retain refusal, no deletion or rerun. Existing JSON CLI receipt fields remain unchanged; for ONLY the new persisted terminal state, execution-receipt.v1 Id0CaptureId/1Nodes/2ActualElapsed and node-receipt.v1 Id0SourceOwnerId/1TargetOwnerId/2VoterId/3RelativeDataDirectory/4NodeId/5Incarnation/6DispatchPaused use generated native contracts. They are offline observations, not RF3 StoredOutcome receipts.
+
+The Store.Commit callback long argument in RestoreCatalogBackupSlot is its ACTUAL next native commit position. The original source position is already retained in SlotContext.SourcePosition. No predicted position is persisted; the Reconciled/AuthorityReset rows are written inside the callbacks at their actual native positions and independently read after recovery.
+
+### TASK-KL042-NATIVE-RESUME-PROCESS-CUTS-002 — complete original operation continuation
+
+REQ-BACKUP-RESTORE-RESUME-001 requires a bounded nonempty OperationId distinct from CaptureId, an exclusive destination file owner, exact immutable source envelope/files, complete owner/voter/path/subjects, all original validated storage/database policies and original target identities. AC-BACKUP-RESTORE-RESUME-001 requires same-operation continuation after each genuine admitted process cut, with no fresh Restore rerun, stage deletion or identity replacement. Foreign, corrupt, missing completed slot and changed inputs retain closed refusal and the original state; exact restoration of the fixture-owned original bytes/configuration permits the original operation to continue.
+
+REQ-BACKUP-RESTORE-RESUME-002 requires actual Reconciled and AuthorityReset rows in their respective owning native transactions, actual source-prefix validation/fsync, joined native owners before Ready/publication, and fresh persisted per-owner credential validation on every observation/effect/publication/replay. AC-BACKUP-RESTORE-RESUME-002 maps to actual stopped native rows/full source vector, wrong/expired/revoked credential refusal, changed signer and physical-owner mapping refusal, corrupt plan/progress framing and missing completed-slot refusal, followed by same-operation healthy six-resource SDK/official MCP/Q1 continuation and cold reread. Fingerprints remain memory-only comparison inputs; failure assertions never print them.
+
+REQ-BACKUP-RESTORE-RESUME-003 requires exact checked publication and first complete terminal receipt replay only while the actual target remains at its original native terminal cut. AC-BACKUP-RESTORE-RESUME-003 requires unchanged terminal replay before six target servers start, including original ActualElapsed; real later target writes must produce RecoveryRequired with complete stopped target bytes unchanged, followed by genuine ordinary restored database continuation. A historical receipt never authorizes a current changed target, and position greater-than-or-equal is not accepted as proof.
+
+Production observer is null by default. The closed NativeClusterRestoreStage values report only actual post-barrier events: PlanPublished after checked original native plan flush/reread; SourcePrefixPersisted after complete original journal prefix verification/fsync; Reconciled after actual reconciliation Commit; IdentityPublished after the actual original admitted target identity file publication; AuthorityReset after its actual native Commit; ReadyPublished after full-slot cold verification and checked Ready flush/reread; NodesPublished immediately after the single whole-stage rename. Observation does not create a receipt, completion, grant or authority. Retained state reads emit no fabricated missing barrier.
+
+The CrashHost fixture pauses at those seven genuine events with only stage/PID/fixture OperationId. The original AppHost owns the already-built executable and all six RF3 resources. A bounded native resource reader retains original reader failures. The test validates the same running process identity, command and start time before owned tree kill; actual process exit, AppHost disposal, original readers and existing native file locks must settle before continuation. Offline CLI-only runs use native WithExplicitStart on only the six original target resources; NotStarted is asserted separately from the original automatic dependency refusal's FailedToStart. Existing topology/profile/image/parameters/deadlines are unchanged. Afterwards all six original resources start normally on the same roots/identities and complete SDK/official MCP/Q1, paused dispatch/resume, full models/receipts/token fences and true cold checks.
+
+Exact current slot operation schema is generated native Orleans: slot-context IDs0..10; slot-admission IDs0..3; slot-commit IDs0..5; completion IDs0..7; existing ClusterRestoreMarker appends optional Id3 SlotContext. Plan Id9 is the complete ordered per-owner subject union, Id10/11 remain unused, and Id12 is first CreatedAtUtc. These are current product-state contracts, without old-format support/migration/fallback. Native checksums bind original payload bytes; independently decoded CLR reference graphs are not semantic byte-canonical claims. Original JSON CLI receipt fields remain unchanged.
+
+Native test defaults remain owner-selected ordinary50 and heavy/benchmark exclusive1, without a new overlap or performance claim. Source-authored seven Arguments do not establish native count, UID or outcomes. Qualification requires root's coherent build/source/PDB/census and original Linux process/RF3 execution/cleanup. Every original KL042 predicate, multishard mapping, mandatory full suite, power-loss/endurance/resource/performance and broader production gates remain open until their own evidence exists.
+
+
+## TASK-KL042-NATIVE-RESUME-OWNERSHIP-006 — actual native operation compiler/lifetime repair
+
+REQ/AC-BACKUP-RESTORE-RESUME-001..003 retain the same first plan/slot identity, seven actual process cuts, original source vector and strict exact terminal-cut replay/refusal. The original caller CancellationToken is passed through the typed Runtime/SourceReader/native storage chain; ReadExecutionBudget remains internal and its public API is unchanged. Runtime borrows the original centrally validated IOptions configuration owner; the exclusive destination stream uses its original storage owner StreamBufferBytes. No fresh options/default/lock or task quota is introduced. Enum None=0 is an unissued value and is explicitly rejected by the CrashHost stage selector; all seven observed stage IDs and both native commit IDs are unchanged. Exact lowercase-hex characters use domain constants, and the public ReconcileSlot checks actual nullable inputs before its unchanged native validation.
+
+The direct owning disposal runs in an actual finally; an enclosing catch outside finally preserves/rethrows the initiating exception or both original and replacement cleanup exceptions in order. No fatal exception is turned into a recoverable result, silently removed or flattened. The archive-view runtime is owned until the actual store constructor succeeds; only that success transfers ownership. Deletion occurs only after genuine successful native join. Native scope evaluation, authority, persisted credential checks, callbacks/cuts/publication order, schema aliases/field IDs and all whole-flow assertions remain unchanged. The native compiler/complete current-source process and RF3 results are required after guarded integration; this source repair alone is no acceptance or runtime evidence.
+
+
+## TASK-KL042-NATIVE-RESUME-MISSING-PROGRESS-007 — retain original progress authority
+
+REQ/AC-BACKUP-RESTORE-RESUME-001..003: first Admitted progress may be created only before the native nodes root exists. Missing progress and pending replacement with an existing original stage or published nodes root is RecoveryRequired before any progress write. Existing checked pending recovery remains unchanged; no slot/result/terminal receipt is reconstructed from absence. The original plan, slots, identities, persisted authorization and terminal exact-cut checks retain their original ordering and limits.
+
+Implementation order: this contract precedes ClusterRestoreProgressOwner's pre-write root check. Existing seven genuine process-cut flows additionally delete only the bounded fixture-owned original progress file after joined stopped staged-node cuts (all except PlanPublished, which precedes nodes creation) and after offline publication, assert exact RecoveryRequired Problem and unchanged complete target/operation cuts, restore the exact original bytes with native Flush(true), then require the original complete terminal receipt replay and all existing SDK/official MCP/Q1/cold continuation. Original bytes are read asynchronously with the original cancellation token. Exact original-byte restoration runs in a real finally even if the operation throws a fatal failure; initiating and restoration failures are retained in original occurrence order by rethrow/aggregation outside finally. Restoration uses checked CreateNew and Flush(true), never overwrites an unexpectedly recreated marker. No schema, aliases, IDs, deadline, retry or new test identity changes. Root joins the guarded source; actual compiler, discovery and current-source Linux process/RF3 results remain mandatory and OPEN.

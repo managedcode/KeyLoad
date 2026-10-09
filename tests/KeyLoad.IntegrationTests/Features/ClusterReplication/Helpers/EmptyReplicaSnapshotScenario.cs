@@ -14,6 +14,9 @@ internal static class EmptyReplicaSnapshotScenario
     private const string TailDocument = "ordered-tail";
     private const string TailJson = "{\"tail\":true}";
     private const int NodeCount = 3;
+    private const long NativeSnapshotThreshold = 16;
+    private const long CommandsBeforeFinalInspection = 9;
+    private const long ReplaysBeforeFinalInspection = 8;
     private const string OtherResource = "other-snapshot-resource";
 
     internal static async Task RunAsync(ClusterFixture fixture)
@@ -36,15 +39,17 @@ internal static class EmptyReplicaSnapshotScenario
             running = false;
             EmptyReplicaSnapshotStorage.Erase(fixture, node);
             var final = await ReplicateWhileStoppedAsync(fixture, state, index, timeout.Token);
-            var survivor = state.Clients[(index + 1) % NodeCount];
-            var tailCommand = new CommandRequest(Guid.NewGuid(), state.Partition,
-                [new PutDocument(Collection, TailDocument, TailJson, ExpectedRevision: 0)]);
-            var tail = Success(await RetryDuringElectionAsync(() => survivor.CommitAsync(tailCommand, timeout.Token), timeout.Token));
-            var baseline = await EmptyReplicaSnapshotAssertions.CaptureAsync(survivor, state, timeout.Token);
             await fixture.RestartContainerAsync(node, timeout.Token);
             running = true;
-            var installed = await RequireAppliedAsync(state.Clients[index], state.InitialStatuses[index], tail, timeout.Token);
+            var installed = await RequireAppliedAsync(state.Clients[index], state.InitialStatuses[index], final.Receipt, timeout.Token);
             await Assert.That(installed.NodeId).IsNotEqualTo(state.InitialStatuses[index].NodeId);
+            await fixture.KillContainerAsync(node, Fault, timeout.Token);
+            running = false;
+            var installedSnapshot = await RequireInstalledCutAsync(fixture, node, final.Receipt);
+            await fixture.RestartContainerAsync(node, timeout.Token);
+            running = true;
+            var (tailCommand, tail, baseline) = await CreatePostInstallTailAsync(state, index, installed,
+                final.Receipt, installedSnapshot, timeout.Token);
             mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
             await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
                 baseline, timeout.Token);
@@ -60,6 +65,12 @@ internal static class EmptyReplicaSnapshotScenario
             running = true;
             var reopened = await RequireAppliedAsync(state.Clients[index], installed, tail, timeout.Token);
             await Assert.That(reopened.NodeId).IsEqualTo(installed.NodeId);
+            mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
+            await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
+                baseline, timeout.Token, allRoutes: true);
+            closing = mcp;
+            mcp = null;
+            await closing.DisposeAsync();
             await EmptyReplicaSnapshotAssertions.HealthyAsync(fixture, node, state, tailCommand, tail, timeout.Token);
         }, failures);
         if (mcp is not null)
@@ -70,6 +81,19 @@ internal static class EmptyReplicaSnapshotScenario
             await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(stopped.Name, cleanup.Token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task<long> RequireInstalledCutAsync(ClusterFixture fixture, string node, CommitReceipt final)
+    {
+        var actual = EmptyReplicaSnapshotStorage.ReadInstalledState(fixture, node);
+        await Assert.That(actual.Incarnation).IsEqualTo(final.Token.Incarnation);
+        await Assert.That(actual.Snapshot).IsNotNull();
+        await Assert.That(actual.Snapshot!.Index).IsGreaterThan(0L);
+        await Assert.That(actual.CommittedIndex).IsGreaterThanOrEqualTo(final.Token.Position);
+        await Assert.That(actual.LastIndex).IsGreaterThanOrEqualTo(actual.CommittedIndex);
+        await Assert.That(checked(actual.LastIndex - actual.Snapshot.Index + CommandsBeforeFinalInspection)).IsLessThan(NativeSnapshotThreshold);
+        EmptyReplicaSnapshotStorage.RequireImage(fixture, node, actual.Snapshot);
+        return actual.Snapshot.Index;
     }
 
     private static async Task RequireNativeCutAsync(ClusterFixture fixture, string node,
@@ -107,4 +131,21 @@ internal static class EmptyReplicaSnapshotScenario
         await Assert.That(actual.ReadGeneration).IsGreaterThan(0L);
         return actual;
     }
+    private static async Task<(CommandRequest Command, CommitReceipt Receipt, EmptyReplicaSnapshotBaseline Baseline)>
+        CreatePostInstallTailAsync(SnapshotState state, int index, NodeStatus installed,
+            CommitReceipt finalReceipt, long installedSnapshot, CancellationToken token)
+    {
+        var beforeTail = await RequireAppliedAsync(state.Clients[index], installed, finalReceipt, token);
+        await Assert.That(beforeTail.NodeId).IsEqualTo(installed.NodeId);
+        await Assert.That(beforeTail.ReadGeneration).IsGreaterThanOrEqualTo(installed.ReadGeneration);
+        var tailCommand = new CommandRequest(Guid.NewGuid(), state.Partition,
+            [new PutDocument(Collection, TailDocument, TailJson, ExpectedRevision: 0)]);
+        var tail = Success(await RetryDuringElectionAsync(() => state.Clients[(index + 1) % NodeCount].CommitAsync(tailCommand, token), token));
+        var baseline = await EmptyReplicaSnapshotAssertions.CaptureAsync(state.Clients[(index + 1) % NodeCount], state, token);
+        var afterTail = await RequireAppliedAsync(state.Clients[index], beforeTail, tail, token);
+        await Assert.That(afterTail.NodeId).IsEqualTo(installed.NodeId);
+        await Assert.That(checked(afterTail.Applied - installedSnapshot + ReplaysBeforeFinalInspection)).IsLessThan(NativeSnapshotThreshold);
+        return (tailCommand, tail, baseline);
+    }
+
 }

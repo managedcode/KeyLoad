@@ -56,20 +56,20 @@ internal static class ZoneTreeBackupRestoreRoster
             if (!page.HasMore)
             { break; }
         }
-        var hasOrigins = RequireEveryOriginBound(restored, sourceIncarnation);
+        var hasOrigins = restored.Read(view => RequireEveryOriginBound(view, sourceIncarnation, restored.Identity.Incarnation));
         if (priorIdentity is not null && !hasOrigins)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
         return hasOrigins;
     }
 
-    private static bool RequireEveryOriginBound(ZoneTreeStore restored, Guid sourceIncarnation)
+    internal static bool RequireEveryOriginBound(IKeyValueView view, Guid sourceIncarnation, Guid targetIncarnation)
     {
         byte[]? after = null;
         var prefix = AtomicPartitionRosterRestoreOriginSerialization.OriginPrefix();
         var hasOrigins = false;
         while (true)
         {
-            var page = restored.Read(view => view.Scan(prefix, SingleRow, after));
+            var page = view.Scan(prefix, SingleRow, after);
             if (page.Records.IsEmpty)
             { return hasOrigins; }
             var row = page.Records[FirstRecord];
@@ -77,12 +77,12 @@ internal static class ZoneTreeBackupRestoreRoster
             if (origin is null || origin.Partition is null
                 || !row.Key.Span.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(origin.Partition)))
             { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
-            var original = restored.Read(view => view.ReadOwnedValue(
-                AtomicPartitionRosterRestoreOriginSerialization.EntryKey(origin.Partition))) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
+            var original = view.ReadOwnedValue(
+                AtomicPartitionRosterRestoreOriginSerialization.EntryKey(origin.Partition)) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
             var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(original);
             if (entry is null || entry.Partition != origin.Partition
                 || !AtomicPartitionRosterRestoreOriginSerialization.Matches(origin, origin.Partition,
-                    restored.Identity.Incarnation, original, entry.FirstSeenAppliedIndex, sourceIncarnation))
+                    targetIncarnation, original, entry.FirstSeenAppliedIndex, sourceIncarnation))
             { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
             hasOrigins = true;
             after = row.Key.ToArray();
@@ -91,7 +91,7 @@ internal static class ZoneTreeBackupRestoreRoster
         }
     }
 
-    private static void RequireEntry(KeyValueRecord row, AtomicPartitionCatalogEntryV1 entry,
+    internal static void RequireEntry(KeyValueRecord row, AtomicPartitionCatalogEntryV1 entry,
         AtomicPartitionRosterRestoreOrigin? origin, AtomicPartitionRosterRestoreIdentity? priorIdentity, Guid sourceIncarnation, long sourcePosition, long applied)
     {
         if (entry.Version != AtomicPartitionRosterRestoreOriginSerialization.EntryVersion || entry.Partition is null

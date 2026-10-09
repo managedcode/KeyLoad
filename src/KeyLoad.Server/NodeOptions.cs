@@ -54,6 +54,7 @@ internal sealed record NodeOptions
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
     internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty);
+    internal MovementFrameObservationOptions MovementFrameObservation { get; set; } = MovementFrameObservationOptions.Disabled;
     /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
     public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
 
@@ -82,6 +83,7 @@ internal sealed record NodeOptions
         configuration.Validate();
         MembershipAuthoritySettingsValidator.Validate(MembershipAuthority, this);
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
+        MovementFrameObservationOptionsReader.Validate(MovementFrameObservation, this);
     }
 
     private void ValidatePeers()

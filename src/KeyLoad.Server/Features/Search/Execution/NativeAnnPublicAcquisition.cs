@@ -7,15 +7,14 @@ namespace KeyLoad.Server.Features.Search;
 internal static class NativeAnnPublicAcquisition
 {
     internal static IAnnProjectionLease Acquire(DatabaseEngine database, IKeyValueView view,
-        NativeAnnGenerationOwner owner, ApproximateSearchRequest request,
+        NativeAnnGenerationOwner owner, AnnProjectionSelection request,
         ServerRuntimeOptions configured, ReadExecutionBudget budget)
         => new NativeAnnPublicReadLease(database, view, owner, request, configured, budget);
 
-    internal static void RequireScope(ApproximateSearchRequest request, NativeAnnManifest manifest)
+    internal static void RequireScope(AnnProjectionSelection request, NativeAnnManifest manifest)
     {
-        var search = request.Search;
-        if (manifest.Collection != search.Collection || manifest.Field != search.VectorField
-            || manifest.Space != search.Space || manifest.Consumer.Partition != search.Partition)
+        if (manifest.Collection != request.Collection || manifest.Field != request.VectorField
+            || manifest.Space != request.Space || manifest.Consumer.Partition != request.Partition)
         { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
     }
 

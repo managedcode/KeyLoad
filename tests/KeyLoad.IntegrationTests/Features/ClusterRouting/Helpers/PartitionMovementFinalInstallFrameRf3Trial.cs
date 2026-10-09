@@ -10,7 +10,20 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
 {
     private const int OneByte = 1;
 
-    internal static async Task RunAsync(CancellationToken cancellationToken)
+    internal static Task RunAsync(CancellationToken cancellationToken)
+        => RunOwnedAsync(MovementFrameObservationSelectionMode.Exact, false, false, cancellationToken);
+
+    internal static Task RunUnselectedAsync(bool foreignMove, CancellationToken cancellationToken)
+        => RunOwnedAsync(foreignMove ? MovementFrameObservationSelectionMode.ForeignMove
+            : MovementFrameObservationSelectionMode.Absent, false, false, cancellationToken);
+
+    internal static Task RunObservedFailureColdAsync(CancellationToken cancellationToken)
+        => RunOwnedAsync(MovementFrameObservationSelectionMode.Exact, true, false, cancellationToken);
+
+    internal static Task RunPolicyBusyColdAsync(CancellationToken cancellationToken)
+        => RunOwnedAsync(MovementFrameObservationSelectionMode.Exact, true, true, cancellationToken);
+
+    private static async Task RunOwnedAsync(MovementFrameObservationSelectionMode mode, bool continueFailedState, bool requirePolicyFence, CancellationToken cancellationToken)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
@@ -22,7 +35,7 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
             var originalCap = new ZoneTreeStorageExecutionOptions().MaxFrameBytes;
             wave = await TwoRf3MembershipWave.StartProtectedFramesAsync(originalCap, caller.Token);
             seed = await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, caller.Token);
-            await ExecuteAsync(wave, seed, originalCap, caller.Token);
+            await ExecuteAsync(wave, seed, originalCap, mode, continueFailedState, requirePolicyFence, caller.Token);
         }, failures).ConfigureAwait(false);
         if (seed is { } clients)
         { await ServerFailureObserver.ObserveAsync(() => clients.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
@@ -32,7 +45,7 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
     }
 
     private static async Task ExecuteAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        int originalCap, CancellationToken cancellationToken)
+        int originalCap, MovementFrameObservationSelectionMode mode, bool continueFailedState, bool requirePolicyFence, CancellationToken cancellationToken)
     {
         var precut = await PartitionMovementFinalInstallFrameRf3Preparation.CaptureAsync(wave, seed, cancellationToken);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
@@ -50,24 +63,30 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
         await precut.Calibrated.RestoreAsync(wave, calibration, cancellationToken);
         await PartitionMovementParentOperationalCapacityRf3Assertions.RequireRestoredAsync(wave, seed, precut.Cuts);
         await RequireHistoryAsync(wave, seed, precut, originalCap, checked(exact - OneByte), cancellationToken);
-        await DenyAndRestoreAsync(wave, seed, precut, exact, cancellationToken);
+        await DenyAndRestoreAsync(wave, seed, precut, exact, originalCap, mode, continueFailedState, requirePolicyFence, cancellationToken);
     }
 
     private static async Task DenyAndRestoreAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        PartitionMovementFinalInstallFramePrecut precut, int exact, CancellationToken cancellationToken)
+        PartitionMovementFinalInstallFramePrecut precut, int exact, int originalCap, MovementFrameObservationSelectionMode mode, bool continueFailedState, bool requirePolicyFence, CancellationToken cancellationToken)
     {
         var failures = new List<Exception>();
         PartitionMovementPublicParentRf3NativeCut[]? joinedRefusal = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var deniedCap = checked(exact - OneByte);
+            wave.frameObservation = MovementFrameObservationFixtureFactory.Create(wave, seed);
             await wave.ReconfigureMovementFrameAsync(deniedCap, cancellationToken);
+            wave.frameObservation.Select(seed, mode);
             _ = await PartitionMovementFinalInstallFrameRf3Producer.ResumeFinalAsync(wave, seed,
                 ErrorCode.ResourceExhausted, cancellationToken);
             var refused = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
                 precut.EffectId, cancellationToken);
             joinedRefusal = refused;
             await PartitionMovementFinalInstallFrameRf3Assertions.RequireDeniedAsync(wave, seed, precut, refused);
+            if (mode == MovementFrameObservationSelectionMode.Exact)
+            { await MovementFrameObservationRf3Assertions.RequireAsync(wave, seed, precut, refused, exact); }
+            else
+            { await wave.frameObservation.RequireAbsentAsync(); }
             var frames = await ReadFinalFramesAsync(wave, seed, precut, refused, deniedCap, cancellationToken);
             foreach (var frame in frames)
             {
@@ -75,10 +94,19 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
                 await Assert.That(frame.Installed).IsFalse();
             }
         }, failures).ConfigureAwait(false);
+        var actualRefusal = joinedRefusal;
+        if (continueFailedState && actualRefusal is not null && failures.Count == PartitionMoveProtocol.EmptyCount)
+        {
+            await ServerFailureObserver.ObserveAsync(() => PartitionMovementObservedFailureColdRf3Continuation.RequireAsync(
+                wave, seed, precut, actualRefusal, originalCap, requirePolicyFence, cancellationToken), failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
+            return;
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var stopped = joinedRefusal ?? await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
                 precut.EffectId, cancellationToken);
+            wave.frameObservation?.RetireAfterJoinedStop(wave);
             await precut.Refused.RestoreAsync(wave, stopped, cancellationToken);
             await PartitionMovementParentOperationalCapacityRf3Assertions.RequireRestoredAsync(wave, seed, precut.Cuts);
             await wave.ReconfigureMovementFrameAsync(exact, cancellationToken);

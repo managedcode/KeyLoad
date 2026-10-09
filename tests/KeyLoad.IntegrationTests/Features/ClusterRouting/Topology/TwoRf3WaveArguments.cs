@@ -13,7 +13,7 @@ internal static class TwoRf3WaveArguments
     private const string ProbeSession = "--KeyLoadTests:RequestCqrsProbe:SessionId=";
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
-        RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null)
+        RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null)
     {
         var args = new List<string>
         {
@@ -35,6 +35,12 @@ internal static class TwoRf3WaveArguments
         { args.Add(RemoteQueryArgument); }
         if (controls is not null)
         { args.Add(ProbeEnabled); args.Add(ProbeRoot + controls.Root); args.Add(ProbeSession + controls.SessionId); }
+        if (frameObservation is not null)
+        {
+            args.Add(MovementFrameObservationFixtureProtocol.EnabledArgument);
+            args.Add(MovementFrameObservationFixtureProtocol.RootArgument + frameObservation.Root);
+            args.Add(MovementFrameObservationFixtureProtocol.SessionArgument + frameObservation.SessionId);
+        }
         if (selection is not null)
         {
             args.AddRange(selection.CreateWaveArguments());

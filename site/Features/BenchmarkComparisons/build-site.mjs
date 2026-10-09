@@ -18,7 +18,7 @@ export const BUILD = Object.freeze({
     'composite-render.mjs'],
   commonAssets: ['contracts.mjs', 'bootstrap.mjs', 'cluster-scene.mjs', 'scene-geometry.mjs',
     'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css',
-    'assets/cluster-poster.svg', 'assets/cluster-poster-mobile.svg'],
+    'assets/agent-context.png'],
   rootAssets: ['favicon.ico', 'favicon-32x32.png', 'favicon-96x96.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
   metadataAssets: [META_ASSET.manifest, META_ASSET.ogImage, META_ASSET.ogSource],
   metadataCopies: [[META_ASSET.manifest, META_ASSET.manifestOutput], [META_ASSET.ogImage, META_ASSET.ogImageOutput]],

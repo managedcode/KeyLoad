@@ -147,6 +147,12 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             return GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
                 principal, request, cancellationToken);
         }
+        if (kind == GrainReadKind.ClusterBackupOwner)
+        {
+            return await ClusterBackupOwnerReadExecution.ExecuteAsync(Administration, principal, request.Payload,
+                services.GetRequiredService<Microsoft.Extensions.Options.IOptions<DatabaseLimits>>(), runtimeClock,
+                request.Envelope.ExpiresAt, cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.PartitionMovementTransferData)
         {
             var execution = new PartitionMovementTransferDataObservedExecution(
@@ -162,11 +168,10 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
                 GrainNativePayload.Read<PartitionMovementCaptureCapability>(request.Payload),
                 cancellationToken).ConfigureAwait(true);
         }
-        if (kind == GrainReadKind.TextMaintenance)
+        if (GrainNativeMaintenanceReadCapabilities.Handles(kind))
         {
-            GrainRequestAuthority.RequireAdministrator(principal);
-            return await services.GetRequiredService<INativeTextMaintenance>().ExecuteAsync(principal,
-                GrainNativePayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
+            return await GrainNativeMaintenanceReadCapabilities.ExecuteAsync(services, principal,
+                kind, request, cancellationToken).ConfigureAwait(true);
         }
         if (kind == GrainReadKind.Document
             && services.GetService<IRemoteDocumentReadRouter>() is { } remoteDocuments)
@@ -179,12 +184,6 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         {
             return await remoteQueries.ReadAsync(request.Envelope, principal,
                 GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(request.Payload), cancellationToken).ConfigureAwait(true);
-        }
-        if (kind == GrainReadKind.AnnMaintenance)
-        {
-            GrainRequestAuthority.RequireAdministrator(principal);
-            return await services.GetRequiredService<INativeAnnMaintenance>().ExecuteAsync(principal,
-                GrainNativePayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
         }
         return await ReadNativeCapabilityAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
     }

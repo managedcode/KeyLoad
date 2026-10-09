@@ -24,20 +24,31 @@ internal static class EmptyReplicaSnapshotAssertions
             Success(await sdk.ReadChangesAsync(new(state.Partition, Collection), token)));
 
     internal static async Task VerifyAsync(KeyLoadClient sdk, McpOfficialClient mcp, SnapshotState state,
-        FinalCommand final, CommandRequest tailCommand, CommitReceipt tail, EmptyReplicaSnapshotBaseline expected, CancellationToken token)
+        FinalCommand final, CommandRequest tailCommand, CommitReceipt tail, EmptyReplicaSnapshotBaseline expected, CancellationToken token, bool allRoutes = false)
+    {
+        await LiteralDocumentsAsync(sdk, mcp, state, tail.Token, token);
+        await ReceiptAsync(sdk, mcp, final.Command, final.Receipt, token, allRoutes);
+        await ReceiptAsync(sdk, mcp, tailCommand, tail, token, allRoutes);
+        await HistoryAsync(sdk, mcp, state, expected, token);
+        await ProcessingAsync(sdk, mcp, state, allRoutes, token);
+        if (allRoutes)
+        {
+            await LiteralDocumentsAsync(sdk, mcp, state, tail.Token, token);
+            await HistoryAsync(sdk, mcp, state, expected, token);
+        }
+    }
+
+    private static async Task LiteralDocumentsAsync(KeyLoadClient sdk, McpOfficialClient mcp, SnapshotState state,
+        CommitToken minimum, CancellationToken token)
     {
         for (var index = 0; index < DocumentCount; index++)
         {
             var id = "doc-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
             var json = "{\"n\":" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + "}";
-            await DocumentAsync(sdk, mcp, new(state.Partition, Collection, id), json, FirstRevision, tail.Token, token);
+            await DocumentAsync(sdk, mcp, new(state.Partition, Collection, id), json, FirstRevision, minimum, token);
         }
-        await DocumentAsync(sdk, mcp, new(state.Partition, Collection, ProjectionDocument), ProjectionJson, FirstRevision, tail.Token, token);
-        await DocumentAsync(sdk, mcp, new(state.Partition, Collection, TailDocument), TailJson, FirstRevision, tail.Token, token);
-        await ReceiptAsync(sdk, mcp, final.Command, final.Receipt, token);
-        await ReceiptAsync(sdk, mcp, tailCommand, tail, token);
-        await HistoryAsync(sdk, mcp, state, expected, token);
-        await ProcessingAsync(sdk, mcp, state, token);
+        await DocumentAsync(sdk, mcp, new(state.Partition, Collection, ProjectionDocument), ProjectionJson, FirstRevision, minimum, token);
+        await DocumentAsync(sdk, mcp, new(state.Partition, Collection, TailDocument), TailJson, FirstRevision, minimum, token);
     }
 
     private static async Task HistoryAsync(KeyLoadClient sdk, McpOfficialClient mcp, SnapshotState state,
@@ -57,7 +68,7 @@ internal static class EmptyReplicaSnapshotAssertions
         await Assert.That(actual.Changes.Changes.Length).IsEqualTo(DocumentCount + 2);
     }
 
-    private static async Task ProcessingAsync(KeyLoadClient sdk, McpOfficialClient mcp, SnapshotState state, CancellationToken token)
+    private static async Task ProcessingAsync(KeyLoadClient sdk, McpOfficialClient mcp, SnapshotState state, bool allRoutes, CancellationToken token)
     {
         await ExactAsync(Success(await sdk.CommitSubscriptionProcessingAsync(state.Processing, token)), state.ProcessingEffect);
         await ExactAsync((await McpCallerAssertions.SuccessAsync<SubscriptionProcessingResult>(await mcp.CallAsync(
@@ -65,6 +76,17 @@ internal static class EmptyReplicaSnapshotAssertions
         await ExactAsync(Success(await sdk.CommitProjectionAsync(state.ProjectionRequest, token)), state.OutboxEffect);
         await ExactAsync((await McpCallerAssertions.SuccessAsync<ProjectionBatchResult>(await mcp.CallAsync(
             McpCallerTools.ProjectionsCommit, state.ProjectionRequest, token))).Value, state.OutboxEffect);
+        if (allRoutes)
+        {
+            var processing = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(state.Partition,
+                McpCallerTools.SubscriptionsProcess, state.Processing);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<SubscriptionProcessingResult>(sdk, processing, token), state.ProcessingEffect);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<SubscriptionProcessingResult>(mcp, processing, token), state.ProcessingEffect);
+            var projection = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(state.Partition,
+                McpCallerTools.ProjectionsCommit, state.ProjectionRequest);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<ProjectionBatchResult>(sdk, projection, token), state.OutboxEffect);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<ProjectionBatchResult>(mcp, projection, token), state.OutboxEffect);
+        }
     }
 
     internal static async Task HealthyAsync(ClusterFixture fixture, string node, SnapshotState state,
@@ -84,8 +106,8 @@ internal static class EmptyReplicaSnapshotAssertions
             await Assert.That(committed.Token.AtomicPartitionId).IsEqualTo(receipt.Token.AtomicPartitionId);
             await Assert.That(committed.Token.OwnershipEpoch).IsEqualTo(receipt.Token.OwnershipEpoch);
             await Assert.That(committed.Token.Position).IsGreaterThan(receipt.Token.Position);
-            await ReceiptAsync(sdk, mcp, next, committed, token);
-            await ReceiptAsync(sdk, mcp, original, receipt, token);
+            await ReceiptAsync(sdk, mcp, next, committed, token, allRoutes: true);
+            await ReceiptAsync(sdk, mcp, original, receipt, token, allRoutes: true);
             await DocumentAsync(sdk, mcp, new(state.Partition, Collection, TailDocument), "{\"tail\":2}", NextRevision, committed.Token, token);
         }, failures);
         if (mcp is not null)
@@ -94,11 +116,18 @@ internal static class EmptyReplicaSnapshotAssertions
     }
 
     private static async Task ReceiptAsync(KeyLoadClient sdk, McpOfficialClient mcp, CommandRequest command,
-        CommitReceipt expected, CancellationToken token)
+        CommitReceipt expected, CancellationToken token, bool allRoutes = false)
     {
         await ExactAsync(Success(await sdk.CommitAsync(command, token)), expected);
         await ExactAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
             McpCallerTools.DocumentsCommit, command, token))).Value, expected);
+        if (allRoutes)
+        {
+            var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(command.Partition,
+                McpCallerTools.DocumentsCommit, command);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, call, token), expected);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, call, token), expected);
+        }
         await Assert.That(expected.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(expected.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
     }
@@ -110,6 +139,10 @@ internal static class EmptyReplicaSnapshotAssertions
         await ExactAsync(Success(await sdk.GetAsync(reference, minimum, token)), expected);
         await ExactAsync((await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token))).Value, expected);
+        var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(reference.Partition,
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum));
+        await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<DocumentResult>(sdk, call, token), expected);
+        await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<DocumentResult>(mcp, call, token), expected);
     }
 
     internal static async Task ExactAsync<T>(T actual, T expected)

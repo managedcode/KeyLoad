@@ -19,6 +19,14 @@ internal static class McpCatalogExpectations
     private const string AppliedTokenProperty = "appliedToken";
     private const string SchemaVersionProperty = "schemaVersion";
     private const string PolicyEpochProperty = "policyEpoch";
+    private const string AnnIndexGenerationProperty = "indexGeneration";
+    private const string IndexedTokenProperty = "indexedToken";
+    private const string CaptureIdProperty = "captureId";
+    private const string ExpectedOwnerProperty = "expectedOwner";
+    private const string ExpectedNodeIdProperty = "expectedNodeId";
+    private const string ArchiveDirectoryProperty = "archiveDirectory";
+    private const string CutProperty = "cut";
+    private const string ManifestDigestProperty = "manifestDigest";
     private const string MultiLaneReceiveName = "keyload_messages_receive_across_lanes";
     private const string RequestsProperty = "requests";
     private const string DashboardName = "keyload_admin_dashboard";
@@ -90,6 +98,12 @@ internal static class McpCatalogExpectations
             [AppliedTokenProperty, SchemaVersionProperty, PolicyEpochProperty]),
         Read(McpCallerTools.SearchExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]),
         Read(McpCallerTools.SearchGraph, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Search]),
+        new(ClusterBackupProtocol.Tool, false, true, false, McpExpectedBody.Object, false,
+            [McpDiscoveryProtocol.Version, CaptureIdProperty, ExpectedOwnerProperty, ExpectedNodeIdProperty],
+            [McpDiscoveryProtocol.Version, ArchiveDirectoryProperty, CutProperty, ManifestDigestProperty]),
+        Read(WaitForAnnIndexProtocol.Tool, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
+            "vectorField", "space", McpDiscoveryProtocol.Consumer, AnnIndexGenerationProperty, MinimumTokenProperty],
+            [IndexedTokenProperty, AnnIndexGenerationProperty, SchemaVersionProperty, PolicyEpochProperty]),
         new(McpCallerTools.AdminBackup, false, false, false, McpExpectedBody.None, false, []),
         Empty(McpCallerTools.AdminAdmission),
         Empty(McpCallerTools.AdminStatus),

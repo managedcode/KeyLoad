@@ -9,7 +9,7 @@ on:
         description: 'Acceptance task; all runs complete qualification and all task lanes'
         type: choice
         default: all
-        options: [all, KL-008, KL-011, KL-014, KL-015, KL-021, KL-027, KL-036, KL-033, KL-035, KL-029]
+        options: [all, KL-008, KL-011, KL-014, KL-015, KL-021, KL-027, KL-036, KL-033, KL-035, KL-029, KL-034, KL-042]
 permissions:
   contents: read
 concurrency:
@@ -225,7 +225,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: ${{ fromJSON(inputs.task == 'KL-008' && '["KL-008"]' || inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || inputs.task == 'KL-027' && '["KL-027"]' || inputs.task == 'KL-036' && '["KL-036"]' || inputs.task == 'KL-033' && '["KL-033"]' || inputs.task == 'KL-035' && '["KL-035"]' || inputs.task == 'KL-029' && '["KL-029"]' || '["KL-008","KL-011","KL-014","KL-015","KL-021","KL-027","KL-036","KL-033","KL-035","KL-029"]') }}
+        task: ${{ fromJSON(inputs.task == 'KL-008' && '["KL-008"]' || inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || inputs.task == 'KL-027' && '["KL-027"]' || inputs.task == 'KL-036' && '["KL-036"]' || inputs.task == 'KL-033' && '["KL-033"]' || inputs.task == 'KL-035' && '["KL-035"]' || inputs.task == 'KL-029' && '["KL-029"]' || inputs.task == 'KL-034' && '["KL-034"]' || inputs.task == 'KL-042' && '["KL-042"]' || '["KL-008","KL-011","KL-014","KL-015","KL-021","KL-027","KL-036","KL-033","KL-035","KL-029","KL-034","KL-042"]') }}
         profile: [normal, scalar]
     steps:
       - name: Download source code
@@ -275,6 +275,17 @@ jobs:
             -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
             -Task $env:KEYLOAD_ACCEPTANCE_TASK -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain additional KL-036 original native census before strict expansion
+        if: ${{ !cancelled() && matrix.task == 'KL-036' && steps.build.outcome == 'success' && steps.source-identity.outcome == 'success' }}
+        shell: pwsh
+        env:
+          KEYLOAD_ACCEPTANCE_PROFILE: ${{ matrix.profile }}
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/task-acceptance.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
+            -Task KL-036 -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE -AdditionalCensus
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify unchanged task source and test images
         if: ${{ !cancelled() && steps.source-identity.outcome == 'success' }}
         shell: pwsh
@@ -293,6 +304,7 @@ jobs:
           name: task-acceptance-${{ matrix.task }}-${{ matrix.profile }}
           path: |
             TestResults/task-acceptance/**
+            artifacts/qualification/**
             artifacts/code-quality/**
             ${{ runner.temp }}/keyload-images/**
           if-no-files-found: error

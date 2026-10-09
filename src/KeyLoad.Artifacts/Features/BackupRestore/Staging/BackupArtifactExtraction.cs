@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.ExceptionServices;
 using Cartograph.Catalog;
 
@@ -7,7 +8,11 @@ namespace KeyLoad.Artifacts;
 internal static class BackupArtifactExtraction
 {
     internal static BackupArtifactStaging StageArtifact(string artifactPath,
-        BackupArtifactDestinationState destinationState)
+        BackupArtifactDestinationState destinationState) =>
+        StageArtifact(artifactPath, destinationState, BackupArtifact.CanonicalFileNames, CancellationToken.None);
+
+    internal static BackupArtifactStaging StageArtifact(string artifactPath, BackupArtifactDestinationState destinationState,
+        ImmutableArray<string> requiredNames, CancellationToken cancellationToken)
     {
         BackupArtifactStaging? staging = null;
         Exception? failure = null;
@@ -18,14 +23,17 @@ internal static class BackupArtifactExtraction
             {
                 BackupArtifactFailurePolicy.TryCapture(() =>
                 {
-                    if (!artifact.Entries.Select(entry => entry.RelativePath).Order().SequenceEqual(BackupArtifact.CanonicalFileNames))
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!artifact.Entries.Select(entry => entry.RelativePath).Order().SequenceEqual(requiredNames))
                     {
                         throw Errors.Fail(ErrorCode.Validation, BackupArtifact.InvalidCatalog);
                     }
                     staging = BackupArtifactStaging.Create(destinationState);
                     foreach (var entry in artifact.Entries)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         CopyEntry(artifact, entry, staging);
+                        cancellationToken.ThrowIfCancellationRequested();
                     }
                 }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
             }

@@ -78,7 +78,6 @@ async function initializeRenderer(state, observers) {
     state.initializationPending = true;
     installRendererHooks(state);
     state.graph = observers.sceneFactory();
-    await state.coreImage.decode();
     if (state.terminal) return releaseResources(state);
     await renderer.init();
     state.initializationPending = false;
@@ -152,9 +151,6 @@ function renderFrame(state, time) {
     updateSceneMotion(state, time);
     state.renderer.render(state.graph.scene, state.graph.camera);
     if (state.terminal) return;
-    projectCoreImage(state);
-    projectSiloLabels(state);
-    projectGraphLabels(state);
     recordFrame(state);
     state.rendererReady = true;
     configureMotionControl(state);
@@ -165,30 +161,6 @@ function renderFrame(state, time) {
   } catch {
     failScene(state, SCENE.state.error, SCENE_TEXT.error);
   }
-}
-
-function projectCoreImage(state) {
-  if (!state.coreImage) return;
-  const projection = state.graph.projectCore(state.width, state.height);
-  state.coreImage.style.width = projection.size + SCENE.core.pixels;
-  state.coreImage.style.height = projection.size + SCENE.core.pixels;
-  state.coreImage.style.transform = projection.transform;
-}
-
-function projectSiloLabels(state) {
-  const positions = state.graph.projectLabels(state.width, state.height);
-  state.siloLabels.forEach((label, index) => {
-    label.style.left = positions[index].x + SCENE.core.pixels;
-    label.style.top = positions[index].y + SCENE.core.pixels;
-  });
-}
-
-function projectGraphLabels(state) {
-  const positions = state.graph.projectAnnotations(state.width, state.height);
-  state.graphLabels.forEach((label, index) => {
-    label.style.left = positions[index].x + SCENE.core.pixels;
-    label.style.top = positions[index].y + SCENE.core.pixels;
-  });
 }
 
 function updateSceneMotion(state, time) {
@@ -232,9 +204,11 @@ function handlePointerMove(state, event) {
 
 function recordFrame(state) {
   state.host.dataset.sceneClients = String(state.graph.counts.clients);
-  state.host.dataset.sceneSilos = String(state.graph.counts.silos);
-  state.host.dataset.sceneGrains = String(state.graph.counts.grains);
+  state.host.dataset.sceneModels = String(state.graph.counts.models);
+  state.host.dataset.sceneAgents = String(state.graph.counts.agents);
   state.host.dataset.sceneLinks = String(state.graph.counts.links);
+  state.host.dataset.scenePose = [state.graph.camera.aspect, state.graph.root.rotation.x,
+    state.graph.root.rotation.y].join(',');
   const metrics = state.renderer.info.render;
   const canvas = state.renderer.domElement;
   const bufferPixels = canvas.width * canvas.height;
@@ -312,7 +286,6 @@ function writeStatus(state, status, message) {
 
 function showPoster(state, visible) {
   if (state.poster) state.poster.hidden = visible ? state.originalPosterHidden : true;
-  if (state.coreImage) state.coreImage.hidden = visible;
 }
 
 function cancelFrame(state) {
@@ -351,7 +324,6 @@ function disposeScene(state, observers) {
 function releaseResources(state) {
   if (state.graph) state.graph.dispose();
   state.graph = null;
-  state.coreImage?.removeAttribute(SCENE.attributes.style);
   if (state.canvasAttached) state.renderer?.domElement?.remove();
   state.canvasAttached = false;
   queueRendererDisposal(state);

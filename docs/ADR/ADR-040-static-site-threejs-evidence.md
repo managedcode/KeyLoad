@@ -4,7 +4,7 @@ Status: Accepted. Website and renderer source are present. Implementation and
 qualification status are owned by the active [implementation status](../implementation/status.json);
 this decision does not claim delivery acceptance. Owner:
 BenchmarkComparisons. Related REQ-BC-011..018, 024/025, 027..029 and
-REQ-BC-WEB-001..007 / their ACs in
+REQ-BC-WEB-001..007 and REQ/AC/TASK-BC-PRESENTATION-005 in
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md), with current vector
 and workload details in [VectorQualification](../Features/BenchmarkComparisons/VectorQualification.md)
 and [ScaledWorkloads](../Features/BenchmarkComparisons/ScaledWorkloads.md).
@@ -15,15 +15,20 @@ Deliver a semantic, responsive static product site in the canonical
 BenchmarkComparisons slice. Product text, navigation, accessible evidence and a
 poster remain available without JavaScript, browser graphics, reduced motion or
 WebGPU. The lazy Three.js figure is conceptual: it must not imply live node
-readiness, replication timing, traffic or measurement values. Logical partitions
-remain distinct from the three physical hosts that own node-local storage.
+readiness, replication timing, traffic or measurement values. The current hero
+illustrates composable models around one database; it does not depict physical
+RF3 membership. Logical partitions remain distinct from physical hosts that own
+node-local storage.
 
 Use the pinned same-origin Three.js 0.186.1 MIT distribution, one lazy
 WebGPURenderer and its native WebGL2 backend selection; use public lifecycle/error
 APIs and no CDN or compatibility shim. Keep procedural geometry only. Bound the
 renderer to one canvas, DPR <= 1.5, <= 1,000,000 drawing-buffer pixels, <= 30 draw
-calls and <= 5,000 triangles. Render on initialization, resize and bounded input;
-settle within 500 ms and run no idle loop. Stop hidden/offscreen work, honor
+calls and <= 120,000 triangles. The owner explicitly requests sufficient polygons
+for smooth detailed model silhouettes. Render on initialization, resize and bounded
+input; animate only while visible, playing and permitted by motion preferences.
+A paused or reduced-motion pose settles within 500 ms with no idle loop. Stop
+hidden/offscreen work, honor
 reduced/coarse motion, and dispose unpublished resources after canceled
 initialization. Resize-to-zero, repeated disposal, pageshow restoration and
 unrecoverable graphics failure leave the static poster and text usable. Physical
@@ -131,6 +136,7 @@ flowchart LR
 | REQ-BC-027 | Current pinned website analyzer dependency and exact source/pipeline validation |
 | REQ-BC-028 | Optional authenticated current aggregate, complete archive/source/freshness and publication authority |
 | REQ-BC-029 | Current shared KeyLoad visual identity without changing evidence semantics |
+| REQ-BC-PRESENTATION-005 | Original-artwork native composition, eight model platforms, one agent, eight cables, no generic clients/scene logo; exact original static fallback and meaningful native/browser/owner proof |
 | REQ-BC-WEB-001..007 | Independent Website source/manual runs; optional ready metrics or accurate content-only output; bounded final Benchmarks dispatch; complete mode-specific qualification, freshness and provider publication |
 
 The feature specification owns detailed contracts, module inventory, executable
@@ -154,6 +160,64 @@ Rollback restores a coherent site asset/source set and retains the last verified
 publication and immutable inputs. It never restores a publisher bypass, synthetic
 metrics or weakened coverage, source, browser or provenance gates.
 
-## Orleans graph presentation contract, 2026-10-06
+## Current original-artwork presentation contract, 2026-10-09
 
-REQ/AC/TASK-BC-SCENE-001 replaces the carousel with the conceptual Orleans graph described in BenchmarkComparisons.md. Preserve native pinned WebGPU/node materials, canonical vector logo, lifecycle and budgets. Three silos host eighteen illustrative activations; thirty routing links and three node-local storage bases explain ownership without claiming live cluster state. The feature spec freezes file ownership, automated browser/asset checks, delivery order and source-revert rollback. No database topology or public protocol changes.
+REQ/AC/TASK-BC-PRESENTATION-005 in the Feature specification supersedes the earlier
+carousel, silo/grain, client-box and repeated-mark hero illustrations. The owner
+selected `site/Features/BenchmarkComparisons/assets/agent-context.png` directly:
+a central three-layer steel/glass database, human agent above it, upper-left
+table/SQL, upper-right graph, left-middle time series, right-middle vector cloud,
+lower-left event orbits, front-left queued cards, front-right file folders and
+lower-right document pages. Eight actual native cables join the eight model
+platforms to the database. Preserve detailed smooth geometry, finished bevels,
+studio lighting and peach/lilac/periwinkle reflections within the updated
+120,000-triangle bound. The live canvas uses procedural native geometry, never a
+raster plane. The original artwork supplies the accessible static fallback.
+No generic client boxes, repeated scene logo, visible client/silo captions or
+alternative silo/grain interpretation remain in this current contract.
+
+The actual geometry graph supplies `data-scene-models=8`, `data-scene-agents=1`,
+`data-scene-links=8` and `data-scene-clients=0`; attributes do not fabricate RF3
+membership. All nine model names remain in a semantic sr-only list, with SQL
+combined visually with the table. Existing renderer/vendor fidelity, no external
+requests, native motion/pause/visibility/disposal, responsive accessibility and
+coverage gates remain unchanged. No packages are added. Database RF3 topology,
+request grains, node-local storage, SQL conformance and measurement semantics
+are outside this presentation task.
+
+Ordered implementation and join contract:
+
+1. Establish Feature REQ/AC/TASK-BC-PRESENTATION-005 and this ADR before source writes.
+2. Root constructs and batches native geometry in `scene-geometry.mjs`, integrates
+   semantics in `index.html`/`scene.css` and actual graph attributes through
+   `scene-lifecycle.mjs`/`scene-observers.mjs`; existing lifecycle behavior remains.
+3. The disjoint fallback worker updates only the canonical builder asset inventory
+   and original fallback path; the test worker updates only the existing native
+   BenchmarkComparisons TUnit/Chrome scene/asset assertions. The contract worker
+   owns only the Feature specification and this ADR. Root reviews every join.
+4. Native tests inspect actual rendered desktop/mobile frames, geometry counts,
+   original fallback delivery, accessible names, motion/pause and renderer budgets.
+   Screenshot/motion judgment remains the explicit visual-composition exception.
+5. Show the completed local animated preview and obtain owner approval before
+   commit/push under site policy. Genuine exact-source Linux Website qualification
+   and a real Pages provider receipt remain separate delivery gates.
+
+```mermaid
+flowchart LR
+    Reference[Original artwork and frozen Feature contract] --> Geometry[Native scene and semantic names]
+    Reference --> Fallback[Exact original static image]
+    Geometry --> Join[Native browser/assets/budget and coverage checks]
+    Fallback --> Join
+    Join --> Owner[Completed animated preview and owner approval]
+    Owner --> Website[Scoped commit then genuine Website and Pages gates]
+```
+
+Rollback restores the coherent reviewed native scene, accessible semantics,
+fallback inventory and matching assertions through a source revert while preserving
+unrelated work, immutable original evidence and all publication/coverage gates.
+It does not retain a second renderer or use a still image as the live scene.
+
+Current stage is the source contract only: implementation, meaningful native
+browser verification, owner approval and delivery remain pending. The Feature
+records earlier local evidence and the four unrelated IntegrationTests errors
+from the prior full-solution attempt; those are not acceptance of this composition.

@@ -24,12 +24,15 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
 
     private PartitionMovementPublicParentRf3Seed(TwoRf3MembershipWave wave, string actualCredential)
     {
+        Credential = actualCredential;
         sourceHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);
         targetHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node4);
         Source = new(sourceHttp, actualCredential, IntegrationClientOptions.Execution());
         Target = new(targetHttp, actualCredential, IntegrationClientOptions.Execution());
     }
 
+    // Borrowed by restored callers only; never diagnostics, a DTO, or trusted role input.
+    internal string Credential { get; }
     internal KeyLoadClient Source { get; }
     internal KeyLoadClient Target { get; }
     internal McpOfficialClient Official => official ?? throw new InvalidOperationException(MissingState);

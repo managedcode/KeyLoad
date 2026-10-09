@@ -95,7 +95,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime) : IAtomi
             return preparedPayload;
         }
 
-        return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes);
+        return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes, runtime.Options.FaultObserver);
     }
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

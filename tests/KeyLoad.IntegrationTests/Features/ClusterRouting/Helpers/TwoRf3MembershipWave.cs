@@ -27,6 +27,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal int? movementMaxBatchBytes;
     internal int? movementMaxFrameBytes;
     internal RequestCqrsProbeFixture? queryControls;
+    internal MovementFrameObservationFixture? frameObservation;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
@@ -136,6 +137,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             await ServerFailureObserver.ObserveAsync(() => retiredNamespace.SettleAfterStopAsync(
             applicationDisposed && nodeLocksReleased, CancellationToken.None), failures);
         }
+        if (applicationDisposed && nodeLocksReleased && frameObservation is { } joinedFrames)
+        { ServerFailureObserver.Observe(() => joinedFrames.DeleteAfterOwnerJoin(this), failures); }
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;
@@ -211,6 +214,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
         return path;
     }
+    internal Task RestartJoinedAsync(CancellationToken cancellationToken)
+        => capacity.RestartJoinedAsync(this, cancellationToken);
+
     internal Task ReconfigureMovementFrameAsync(int maxFrameBytes, CancellationToken cancellationToken)
         => capacity.ReconfigureMovementFrameAsync(this, maxFrameBytes, cancellationToken);
 

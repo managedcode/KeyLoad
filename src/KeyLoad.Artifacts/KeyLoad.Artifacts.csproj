@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
+    <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <PackageReference Include="Cartograph.Catalog" />
     <PackageReference Include="ManagedCode.Storage.FileSystem" />
   </ItemGroup>

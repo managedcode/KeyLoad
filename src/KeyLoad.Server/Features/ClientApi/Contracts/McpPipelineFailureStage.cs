@@ -4,5 +4,6 @@ namespace KeyLoad.Server;
 internal enum McpPipelineFailureStage
 {
     IncomingAdmission,
-    OutgoingNativeOutput
+    OutgoingNativeOutput,
+    IncomingNativeExecution
 }

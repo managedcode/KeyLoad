@@ -89,9 +89,11 @@ internal static class McpToolDescriptions
         McpToolNames.OutboxStatus => OutboxStatus,
         McpToolNames.ProjectionsRead => ProjectionsRead,
         WaitForIndexProtocol.Tool => WaitForIndex,
+        WaitForAnnIndexProtocol.Tool => WaitForAnnIndexProtocol.Description,
         AnnSearchProtocol.Tool => AnnSearchProtocol.Description,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
+        ClusterBackupProtocol.Tool => ClusterBackupProtocol.Description,
         McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
             or McpToolNames.AdminPartitionMove or McpToolNames.AdminPartitionPlacementBind or McpToolNames.AdminPartitionPlacementRead
             => AdminDescription(name),

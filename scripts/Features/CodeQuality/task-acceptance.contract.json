@@ -4441,7 +4441,864 @@
           ]
         }
       ]
+    },
+    {
+      "taskId": "KL-034",
+      "selections": [],
+      "censusSelections": [
+        {
+          "selectionId": "unit-native-text-wait-for-index-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeTextWaitForIndexTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests",
+              "methodName": "RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitForIndexTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-text-wait-observed-work-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeTextWaitObservedWorkTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests",
+              "methodName": "ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-search-wait-authority-tests",
+          "suite": "unit",
+          "filter": "/*/*/SearchWaitAuthorityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "WrongAtomicPartitionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "ChangedPlacementEpochCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "ZeroMinimumPositionCannotPublishIndexAndOriginalAuthorityReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.SearchWaitAuthorityTests",
+              "methodName": "AbsentNativeProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-authority-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitAuthorityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "RealReplicatedMinimumRejectsWrongFutureOrZeroThenActualPinnedPrefixIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ],
+              "sourceArgumentDeclarations": [
+                "WrongIncarnationCase",
+                "WrongAtomicCase",
+                "FutureCase",
+                "ZeroCase",
+                "WrongEpochCase"
+              ],
+              "sourceInstances": 5
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitAuthorityTests",
+              "methodName": "MissingOrNegativeAppliedRowRefusesWithoutPartialThenExactRepairReturnsFullHealthyWaitAndSearch",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitAuthorityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "true",
+                "false"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-generation-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitGenerationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitGenerationTests",
+              "methodName": "ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitGenerationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-observed-work-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitObservedWorkTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
+              "methodName": "ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-pinned-lease-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitPinnedLeaseTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitPinnedLeaseTests",
+              "methodName": "ActualPinnedResidentFrameRejectsWaitThenJoinedReaderReleaseAllowsSameLiteralIndexedPrefix",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitPinnedLeaseTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-provider-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitProviderTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitProviderTests",
+              "methodName": "ActualMissingGenerationOrDisabledCapabilityRejectsNoPartialThenProvisionedPrefixIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitProviderTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-ann-wait-retirement-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeAnnWaitRetirementTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.NativeAnnWaitRetirementTests",
+              "methodName": "ReleasedGenerationKeepsActualPinnedIndexUntilReaderJoinsThenNewNativeGenerationReturnsHealthyPrefix",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeAnnWaitRetirementTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-native-text-wait-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/NativeTextWaitRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests",
+              "methodName": "AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeTextWaitRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-native-ann-wait-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/NativeAnnWaitRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Search.NativeAnnWaitRf3Tests",
+              "methodName": "RealSdkOfficialMcpAndBothQ1MinimumWaitRejectDeniedStaleThenRestoreDeletedExclusionAndColdHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Search/Cases/NativeAnnWaitRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-042",
+      "selections": [],
+      "censusSelections": [
+        {
+          "selectionId": "unit-cluster-backup-admission-whole-flow-tests",
+          "suite": "unit",
+          "filter": "/*/*/ClusterBackupAdmissionWholeFlowTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
+              "methodName": "ActualNativeCaptureOverloadRejectsWithoutEffectsThenSettledFailuresPermitHealthyBackup",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ClusterBackupAdmissionWholeFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.ClusterBackupAdmissionWholeFlowTests",
+              "methodName": "ActualNativeShutdownJoinsEveryAcceptedCaptureAndRejectsNewDirectAdmission",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ClusterBackupAdmissionWholeFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-atomic-partition-roster-restore-tests",
+          "suite": "unit",
+          "filter": "/*/*/AtomicPartitionRosterRestoreTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64"
+              ],
+              "sourceArgumentDeclarations": [
+                "NoApplied",
+                "FirstNewApplied"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster002ForgedHistoricalOriginRefusesWithoutEffectsThenOriginalIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster002MissingOriginAndChangedHistoricalRowRefuseThenExactRepairIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster002CorruptPriorOriginCannotPublishRestoreAndExactRepairContinuesCold",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
+              "methodName": "AcBackupRoster002OwningRestoreIdentityCannotBeMissingOrForgedBeforeHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterRestoreTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-atomic-partition-roster-frame-budget-tests",
+          "suite": "unit",
+          "filter": "/*/*/AtomicPartitionRosterFrameBudgetTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterFrameBudgetTests",
+              "methodName": "AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/AtomicPartitionRosterFrameBudgetTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-cli-backup-restore-flow-tests",
+          "suite": "unit",
+          "filter": "/*/*/CliBackupRestoreFlowTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "methodName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "methodName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+              "methodName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-cli-backup-restore-missing-input-tests",
+          "suite": "unit",
+          "filter": "/*/*/CliBackupRestoreMissingInputTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreMissingInputTests",
+              "methodName": "AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreMissingInputTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-cli-backup-restore-invalid-catalog-tests",
+          "suite": "unit",
+          "filter": "/*/*/CliBackupRestoreInvalidCatalogTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests",
+              "methodName": "AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreInvalidCatalogTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-cli-backup-restore-length-mismatch-tests",
+          "suite": "unit",
+          "filter": "/*/*/CliBackupRestoreLengthMismatchTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests",
+              "methodName": "AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreLengthMismatchTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-backup-cut-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeBackupCutTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentTruncatedPayloadPreservesBackupAndDestination",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004CompleteJournalRequiresExactManifestCut",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int64"
+              ],
+              "sourceArgumentDeclarations": [
+                "-1L",
+                "1L"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004MissingCommittedFrameCannotRestoreEvenWithMatchingFileHash",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentJournalStillRequiresFrameChecksum",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentJournalStillRequiresOrderedSequence",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentJournalStillRequiresNativeMutationPayload",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004TruncatedCheckpointIsRefusedWithoutPublication",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004HashConsistentCheckpointStillRequiresCompleteFooter",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004EmptyNativeBackupHasVerifiedZeroCut",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
+              "methodName": "AcIs004ExactNativeCutRestoresDataWithNewAuthorityAndPausedDispatch",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-backup-restore-staging-join-tests",
+          "suite": "unit",
+          "filter": "/*/*/BackupRestoreStagingJoinTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+              "methodName": "AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupRestoreStagingJoinTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-missing-backup-manifest-tests",
+          "suite": "unit",
+          "filter": "/*/*/MissingBackupManifestTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+              "methodName": "AcBackup002MissingBackupDirectoryRejectsBeforePublication",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/MissingBackupManifestTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests",
+              "methodName": "AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/MissingBackupManifestTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-cli-backup-execution-policy-tests",
+          "suite": "unit",
+          "filter": "/*/*/CliBackupExecutionPolicyTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
+              "methodName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupExecutionPolicyTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-artifact-transfer-rejected-input-flow-tests",
+          "suite": "unit",
+          "filter": "/*/*/ArtifactTransferRejectedInputFlowTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests",
+              "methodName": "AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTransferRejectedInputFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-cluster-restore-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/ClusterRestoreRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "methodName": "ActualTwoRf3ArchiveRestoresAllRegisteredOwnersAndLinkedModelsWithFencedOriginalReceiptsAndColdContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "methodName": "ActualSplitMovementVectorRefusesPublicationThenFreshCaptureRestoresMovedLinkedModelsAndColdContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3Tests",
+              "methodName": "ActualCapturedRevokedAndExpiredCredentialsRefuseOfflinePublicationAndRestoredRequestsThenValidCredentialContinuesCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-cluster-restore-rf3-resume-tests",
+          "suite": "rf3",
+          "filter": "/*/*/ClusterRestoreRf3ResumeTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.ClusterRestoreRf3ResumeTests",
+              "methodName": "ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/ClusterRestoreRf3ResumeTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.NativeClusterRestoreStage"
+              ],
+              "sourceArgumentDeclarations": [
+                "NativeClusterRestoreStage.PlanPublished",
+                "NativeClusterRestoreStage.SourcePrefixPersisted",
+                "NativeClusterRestoreStage.Reconciled",
+                "NativeClusterRestoreStage.IdentityPublished",
+                "NativeClusterRestoreStage.AuthorityReset",
+                "NativeClusterRestoreStage.ReadyPublished",
+                "NativeClusterRestoreStage.NodesPublished"
+              ],
+              "sourceInstances": 7
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-admin-backup-client-parity-tests",
+          "suite": "rf3",
+          "filter": "/*/*/AdminBackupClientParityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.BackupRestore.AdminBackupClientParityTests",
+              "methodName": "AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/BackupRestore/Cases/AdminBackupClientParityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        }
+      ]
     }
   ],
-  "maximumParallelTests": 20
+  "maximumParallelTests": 50,
+  "additionalCensuses": [
+    {
+      "taskId": "KL-036",
+      "censusSelections": [
+        {
+          "selectionId": "rf3-partition-movement-receiver-issue-failover-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementReceiverIssueFailoverRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
+              "methodName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementReceiverIssueFailoverRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-active-adjunct-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementActiveAdjunctRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
+              "methodName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementActiveAdjunctRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-final-install-frame-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementFinalInstallFrameRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFinalInstallFrameRf3Tests",
+              "methodName": "ActualFinalInstallNativeFrameLegalAndOneByteShortRetainEffectsThenSameMoveColdHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFinalInstallFrameRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-frame-observation-scope-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementFrameObservationScopeRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
+              "methodName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFrameObservationScopeRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-cleanup-matrix-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementCleanupMatrixRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole"
+              ],
+              "sourceArgumentDeclarations": [
+                "PartitionMovementCleanupMatrixFaultRole.OtherKnownArm",
+                "PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerArm",
+                "PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl"
+              ],
+              "sourceInstances": 3
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualRetiredOtherResurrectionRefusesPublicationAfterReleasedAndLinkedObservedThenNewSessionColdHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-observed-failure-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementObservedFailureColdRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementObservedFailureColdRf3Tests",
+              "methodName": "ActualObservedFailedInstallColdResumeRetainsNativeFailureThenAbortAndFreshMoveSdkMcpQ1Healthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementObservedFailureColdRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-policy-busy-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementPolicyBusyColdRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyBusyColdRf3Tests",
+              "methodName": "ActualUnsettledMoveRejectsPolicyChangeThenColdAbortAndFreshMoveSdkMcpQ1Healthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyBusyColdRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-policy-epoch-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementPolicyEpochColdRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyEpochColdRf3Tests",
+              "methodName": "ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyEpochColdRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

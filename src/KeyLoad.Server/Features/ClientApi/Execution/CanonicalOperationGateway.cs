@@ -26,6 +26,8 @@ internal static class CanonicalOperationGateway
         }
         if (readKind == GrainReadKind.FollowerDocument)
         { payload = FollowerReadCredentialCapability.Wrap(context, payload); }
+        if (readKind == GrainReadKind.ClusterBackupOwner)
+        { payload = ClusterBackupCredentialCapability.Wrap(context, payload); }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
         var signed = readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)

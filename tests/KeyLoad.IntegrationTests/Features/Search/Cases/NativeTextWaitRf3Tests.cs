@@ -1,5 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
@@ -33,10 +34,19 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
         var cut = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         var failure = await denied.WaitForIndexAsync(request, token);
         await Assert.That(failure.IsSuccess).IsFalse();
+        await Assert.That(failure.Value).IsNull();
         var problem = failure.Problem ?? throw new InvalidOperationException(PermissionCode);
         await Assert.That(problem.ErrorCode).IsEqualTo(PermissionCode);
         await Assert.That(problem.Detail).IsEqualTo(PermissionDetail);
         await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(WaitForIndexProtocol.Tool, request, token),
+            ErrorCode.PermissionDenied, dispatched: true);
+        var sql = SqlRf3Protocol.Call(request.Partition, WaitForIndexProtocol.Tool, request);
+        var sqlDenied = await denied.ExecuteSqlAsync(sql, token);
+        await Assert.That(sqlDenied.IsSuccess).IsFalse();
+        await Assert.That(sqlDenied.Value.ValueKind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);
+        await Assert.That(sqlDenied.Problem?.ErrorCode).IsEqualTo(PermissionCode);
+        await Assert.That(sqlDenied.Problem?.Detail).IsEqualTo(PermissionDetail);
+        await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
             ErrorCode.PermissionDenied, dispatched: true);
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         await Assert.That(after.Applied).IsEqualTo(cut.Applied);

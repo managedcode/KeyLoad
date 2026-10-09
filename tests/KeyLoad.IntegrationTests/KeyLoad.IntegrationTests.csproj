@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Artifacts/KeyLoad.Artifacts.csproj" />
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" IsAspireProjectResource="false" />

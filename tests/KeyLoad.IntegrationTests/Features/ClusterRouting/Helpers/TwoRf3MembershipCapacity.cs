@@ -27,13 +27,16 @@ internal sealed class TwoRf3MembershipCapacity
         await ReconfigureAsync(wave, () => wave.movementMaxFrameBytes = maxFrameBytes, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task ReconfigureAsync(TwoRf3MembershipWave wave, Action applySelection, CancellationToken cancellationToken)
+    internal Task RestartJoinedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+        => ReconfigureAsync(wave, null, cancellationToken);
+
+    private async Task ReconfigureAsync(TwoRf3MembershipWave wave, Action? applySelection, CancellationToken cancellationToken)
     {
         if (!wave.protectedDocuments || originalParameters.Count != CapacityRetainedParameters.Length
             || originalPorts.Count != TwoRf3MembershipProtocol.NodeCount)
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
         _ = await wave.StopForDirectoryReadAsync().ConfigureAwait(false);
-        applySelection();
+        applySelection?.Invoke();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => TwoRf3MembershipWaveStartup.StartCoreAsync(wave, cancellationToken), failures).ConfigureAwait(false);
         if (failures.Count > 0)

@@ -41,13 +41,7 @@ internal static class ZoneTreeBackupRestoreFiles
     internal static StoreIdentity ReadAndVerify(string backup, string staging, ZoneTreeStorageExecutionOptions policy,
         out long position)
     {
-        var manifestBytes = ReadManifest(backup, policy);
-        var manifest = ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(manifestBytes.Span, ZoneTreeMetadataBinary.BackupMagic, BackupManifestUnsupported);
-        if (manifest.Version != BackupManifestVersion || manifest.Position < InitialJournalPosition || manifest.Files.Length != SourceFiles.Length
-            || !manifest.Files.Select(file => file.Name).Order().SequenceEqual(SourceFiles.Order()))
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
-        }
+        var manifest = ReadManifestDefinition(backup, policy);
 
         ReadOnlyMemory<byte> identityBytes = default;
         foreach (var item in manifest.Files)
@@ -68,6 +62,19 @@ internal static class ZoneTreeBackupRestoreFiles
             FileShare.Read, policy.StreamBufferBytes);
         ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy);
         return identity;
+    }
+
+    internal static ZoneTreeBackupRestoreManifest ReadManifestDefinition(string backup, ZoneTreeStorageExecutionOptions policy)
+    {
+        var manifestBytes = ReadManifest(backup, policy);
+        var manifest = ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(manifestBytes.Span, ZoneTreeMetadataBinary.BackupMagic, BackupManifestUnsupported);
+        if (manifest.Version != BackupManifestVersion || manifest.Position < InitialJournalPosition || manifest.Files.Length != SourceFiles.Length
+            || !manifest.Files.Select(file => file.Name).Order().SequenceEqual(SourceFiles.Order()))
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
+        }
+
+        return manifest;
     }
 
     private static ReadOnlyMemory<byte> ReadManifest(string backup, ZoneTreeStorageExecutionOptions policy)
@@ -152,7 +159,7 @@ internal static class ZoneTreeBackupRestoreFiles
         }
     }
 
-    private static ReadOnlyMemory<byte> ReadAndVerifyIdentityFile(string backup,
+    internal static ReadOnlyMemory<byte> ReadAndVerifyIdentityFile(string backup,
         ZoneTreeBackupRestoreManifestFile item, int maximumIdentityFileBytes, int streamBufferBytes)
     {
         var source = Path.Combine(backup, item.Name);

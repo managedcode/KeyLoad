@@ -29,7 +29,8 @@ internal sealed class AnnPublicPinnedLeaseTests
                             database.Database.Authorization.Require(principal, request.Search.Partition,
                                 request.Search.Collection, Capability.VectorSearch);
                             database.Database.Authorization.RequireFieldUse(principal, resource, request.Search.VectorField!);
-                            return runtime.Owner.Acquire(view, request, budget);
+                            return runtime.Owner.Acquire(view, new(request.Search.Partition, request.Search.Collection,
+                                request.Search.VectorField!, request.Search.Space!, request.Consumer, request.IndexGeneration), budget);
                         });
                     var engine = AnnPublicWholeFlow.Engine(database, runtime);
                     AnnSearchPage? partial = null;

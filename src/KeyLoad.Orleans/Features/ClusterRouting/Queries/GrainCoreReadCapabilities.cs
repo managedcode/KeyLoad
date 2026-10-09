@@ -36,7 +36,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
                 GrainNativePayload.Read<ReadSampleRetentionRequest>(payload), cancellationToken),
             GrainReadKind.AggregateReplay => database.ReadAggregateReplay(principal,
                 GrainNativePayload.Read<ReadAggregateReplayRequest>(payload), cancellationToken),
-            GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainNativePayload.Read<ReadChangeFeedRequest>(payload)),
+            GrainReadKind.ChangeFeed => database.ReadChangeFeed(principal, GrainNativePayload.Read<ReadChangeFeedRequest>(payload), cancellationToken),
             GrainReadKind.OutboxStatus => database.GetOutboxStatus(principal, GrainNativePayload.Read<GetOutboxStatusRequest>(payload).Partition),
             GrainReadKind.ProjectionBatch => database.ReadProjectionBatch(principal, GrainNativePayload.Read<ReadProjectionBatchRequest>(payload)),
             GrainReadKind.AtomicPartitionPlacement => database.ReadAtomicPartitionPlacement(principal,

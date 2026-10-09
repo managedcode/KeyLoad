@@ -54,9 +54,12 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<GetOutboxStatusRequest, OutboxStatus>(McpToolNames.OutboxStatus, McpToolRoutes.OutboxStatus, GrainReadKind.OutboxStatus),
         McpOperationFactory.Read<ReadProjectionBatchRequest, ProjectionBatch>(McpToolNames.ProjectionsRead, McpToolRoutes.ProjectionsRead, GrainReadKind.ProjectionBatch),
         McpOperationFactory.Read<WaitForIndexRequest, WaitForIndexResult>(WaitForIndexProtocol.Tool, WaitForIndexProtocol.Route, GrainReadKind.WaitForIndex),
+        McpOperationFactory.Read<WaitForAnnIndexRequest, WaitForAnnIndexResult>(WaitForAnnIndexProtocol.Tool, WaitForAnnIndexProtocol.Route, GrainReadKind.WaitForAnnIndex),
         McpOperationFactory.Read<ApproximateSearchRequest, AnnSearchPage>(AnnSearchProtocol.Tool, AnnSearchProtocol.Route, GrainReadKind.ApproximateSearch),
         McpOperationFactory.Read<SearchRequest, RankedDocument[]>(McpToolNames.SearchExecute, McpToolRoutes.SearchExecute, GrainReadKind.Search),
         McpOperationFactory.Read<GraphSearchRequest, GraphSearchResult>(McpToolNames.SearchGraph, McpToolRoutes.SearchGraph, GrainReadKind.GraphSearch),
+        McpOperationFactory.Read<ClusterBackupOwnerRequest, ClusterBackupOwnerReceipt>(
+            ClusterBackupProtocol.Tool, ClusterBackupProtocol.Route, GrainReadKind.ClusterBackupOwner),
         McpOperationFactory.Read<BackupReceipt>(McpToolNames.AdminBackup, McpToolRoutes.AdminBackup, GrainReadKind.Backup),
         McpOperationFactory.Read<NodeAdmissionStatus>(McpToolNames.AdminAdmission, McpToolRoutes.AdminAdmission, GrainReadKind.Admission),
         McpOperationFactory.Read<NodeStatus>(McpToolNames.AdminStatus, McpToolRoutes.AdminStatus, GrainReadKind.NodeStatus),

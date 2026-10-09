@@ -51,6 +51,7 @@ internal static class AppHostControlOptionsRegistration
                     || HasValue(configuration, BenchmarkScenario) || HasValue(configuration, BenchmarkProfile) || HasValue(configuration, BenchmarkScale);
                 value.ScaleSelected = configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null;
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
+                value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;

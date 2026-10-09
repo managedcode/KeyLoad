@@ -47,12 +47,18 @@ internal static partial class PartitionMovementPublicParentRf3Cut
             work, forward, reverse, samples, blob);
     }
 
-    internal static async Task RequireModelsAsync(PartitionMovementPublicParentRf3Seed seed,
+    internal static async Task RequireCurrentModelsAsync(PartitionMovementPublicParentRf3Seed seed,
         CancellationToken cancellationToken)
     {
         var actual = await CaptureAsync(seed, cancellationToken).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(seed.OriginalModels, actual);
         await LiteralAsync(seed, actual);
+    }
+
+    internal static async Task RequireModelsAsync(PartitionMovementPublicParentRf3Seed seed,
+        CancellationToken cancellationToken)
+    {
+        await RequireCurrentModelsAsync(seed, cancellationToken).ConfigureAwait(false);
         foreach (var original in seed.Originals)
         {
             var replay = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(

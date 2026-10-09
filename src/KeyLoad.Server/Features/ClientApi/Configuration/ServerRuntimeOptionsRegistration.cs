@@ -80,6 +80,9 @@ internal static class ServerRuntimeOptionsRegistration
     private static void RegisterHostExecution(IServiceCollection services, IConfiguration configuration)
     {
         AddDatabasePhaseOptions(services, configuration);
+        services.AddOptions<ClusterBackupExecutionOptions>()
+            .Bind(configuration.GetSection(ClusterBackupExecutionOptions.SectionName), binding => binding.ErrorOnUnknownConfiguration = true)
+            .Validate(options => options.IsValid(), ClusterBackupExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ServerExecutionOptions>()
             .Bind(configuration.GetSection(ServerExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ServerExecutionOptions.ValidationMessage).ValidateOnStart();
@@ -142,6 +145,7 @@ internal static class ServerRuntimeOptionsRegistration
             section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
         node.RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
             node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp);
+        node.MovementFrameObservation = MovementFrameObservationOptionsReader.Read(configuration, node);
     }
 
 }
