@@ -49,11 +49,8 @@ internal sealed class C1OutcomeInspectionFailureEvidence
     {
         if (FirstFailure is not null)
         { return; }
-        var depth = EmptyCount;
-        while (error is AggregateException aggregate && aggregate.InnerExceptions.Count > EmptyCount
-            && depth++ < MaximumAggregateDepth)
-        { error = aggregate.InnerExceptions[PrefixIndex]; }
-        FirstFailure = new(phase, Kind(error), SafeCode(error));
+        var cause = FirstCause(error);
+        FirstFailure = new(phase, Kind(cause), SafeCode(cause));
     }
 
     internal byte[] Bytes()
@@ -113,6 +110,25 @@ internal sealed class C1OutcomeInspectionFailureEvidence
             && Enum.TryParse(field[KindField.Length..].TrimEnd(), out value) && Enum.IsDefined(value);
     }
 
+    private static Exception FirstCause(Exception error)
+    {
+        for (var depth = EmptyCount; depth < MaximumAggregateDepth; depth++)
+        {
+            var next = error switch
+            {
+                AggregateException aggregate when aggregate.InnerExceptions.Count > EmptyCount
+                    => aggregate.InnerExceptions[PrefixIndex],
+                TypeInitializationException initialization => initialization.InnerException,
+                System.Reflection.TargetInvocationException invocation => invocation.InnerException,
+                _ => null
+            };
+            if (next is null)
+            { return error; }
+            error = next;
+        }
+        return error;
+    }
+
     private static C1OutcomeInspectionFailureKind Kind(Exception error) => error switch
     {
         KeyLoadException => C1OutcomeInspectionFailureKind.KeyLoad,
@@ -122,10 +138,30 @@ internal sealed class C1OutcomeInspectionFailureEvidence
         FileNotFoundException => C1OutcomeInspectionFailureKind.MissingFile,
         DirectoryNotFoundException => C1OutcomeInspectionFailureKind.MissingDirectory,
         UnauthorizedAccessException => C1OutcomeInspectionFailureKind.Unauthorized,
+        System.IO.FileLoadException => C1OutcomeInspectionFailureKind.AssemblyLoad,
         IOException => C1OutcomeInspectionFailureKind.Io,
         ArgumentException => C1OutcomeInspectionFailureKind.Argument,
         InvalidOperationException => C1OutcomeInspectionFailureKind.InvalidOperation,
         JsonException => C1OutcomeInspectionFailureKind.Json,
+        global::ZoneTree.Exceptions.DatabaseNotFoundException => C1OutcomeInspectionFailureKind.NativeDatabaseMissing,
+        global::Orleans.Serialization.SerializerException => C1OutcomeInspectionFailureKind.Serialization,
+        TypeInitializationException => C1OutcomeInspectionFailureKind.TypeInitialization,
+        System.Reflection.TargetInvocationException => C1OutcomeInspectionFailureKind.Invocation,
+        KeyNotFoundException => C1OutcomeInspectionFailureKind.MissingKey,
+        InvalidCastException => C1OutcomeInspectionFailureKind.InvalidCast,
+        NotSupportedException => C1OutcomeInspectionFailureKind.NotSupported,
+        OperationCanceledException => C1OutcomeInspectionFailureKind.Cancelled,
+        NullReferenceException => C1OutcomeInspectionFailureKind.NullReference,
+        IndexOutOfRangeException => C1OutcomeInspectionFailureKind.Range,
+        OverflowException => C1OutcomeInspectionFailureKind.Overflow,
+        FormatException => C1OutcomeInspectionFailureKind.Format,
+        TimeoutException => C1OutcomeInspectionFailureKind.Timeout,
+        DllNotFoundException => C1OutcomeInspectionFailureKind.NativeLibraryMissing,
+        EntryPointNotFoundException => C1OutcomeInspectionFailureKind.NativeEntryPointMissing,
+        TypeLoadException => C1OutcomeInspectionFailureKind.TypeLoad,
+        MissingMethodException => C1OutcomeInspectionFailureKind.MissingMethod,
+        MissingFieldException => C1OutcomeInspectionFailureKind.MissingField,
+        Microsoft.Extensions.Options.OptionsValidationException => C1OutcomeInspectionFailureKind.OptionsInvalid,
         _ => C1OutcomeInspectionFailureKind.Other
     };
 

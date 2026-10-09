@@ -10,9 +10,11 @@ internal sealed class C1OutcomeInspectionIdentityTests
         await C1OutcomeInspectionFixture.RunOwnedAsync(async fixture =>
         {
             var wrongNode = await C1OutcomeInspectionAssertions.RunAsync(fixture, nodeId: Guid.NewGuid());
-            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongNode, C1OutcomeInspectionFailurePhase.OpenStore);
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongNode, C1OutcomeInspectionFailurePhase.OpenStore,
+                C1OutcomeInspectionFailureKind.KeyLoad, ErrorCode.TokenInvalidated);
             var wrongIncarnation = await C1OutcomeInspectionAssertions.RunAsync(fixture, incarnation: Guid.NewGuid());
-            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongIncarnation, C1OutcomeInspectionFailurePhase.OpenStore);
+            await C1OutcomeInspectionAssertions.AssertRejectedAsync(wrongIncarnation, C1OutcomeInspectionFailurePhase.OpenStore,
+                C1OutcomeInspectionFailureKind.KeyLoad, ErrorCode.TokenInvalidated);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true);
         }).ConfigureAwait(false);

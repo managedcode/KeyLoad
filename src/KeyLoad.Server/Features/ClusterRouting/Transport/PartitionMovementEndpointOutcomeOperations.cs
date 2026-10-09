@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Orleans;
-using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -63,11 +62,12 @@ internal static class PartitionMovementEndpointOutcomeOperations
             terminal = new()
             {
                 Error = error.Code,
-                SafeDetail = error.Code == ErrorCode.RecoveryRequired
-            && error.Message == ControlledDocumentFailureProtocol.MissingDurableOutcome
-                ? ControlledDocumentFailureProtocol.MissingDurableOutcome : PartitionMovementProtocol.Unavailable
+                SafeDetail = PartitionMovementProtocol.Unavailable
             };
         }
+        if (terminal.Error is not null)
+        { terminal = terminal with { SafeDetail = PartitionMovementProtocol.Unavailable }; }
+        PartitionMovementTransportReplyValidation.RequireValue(terminal);
         var reply = new PartitionMovementTransportReply(query.Original.CommandId, query.Nonce,
             owner.Receiver.LocalOwner(), owner.Receiver.Discovery(), terminal,
             PartitionMoveOriginalDispatchIdentity.Digest(query.Original.CommandId, query.Original.Envelope));

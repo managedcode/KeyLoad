@@ -59,7 +59,7 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
         // Only the current owning call which joined this actual first authorization may dispatch its promoted effect.
         return intended.Stage == PartitionMovePeerStage.Capture
             ? await captures.ExecutePromotedAsync(principalId, request, promoted, work, cancellationToken).ConfigureAwait(false)
-            : await phases.ExecutePromotedAsync(principalId, request, promoted, work, cancellationToken).ConfigureAwait(false);
+            : await phases.ExecutePromotedAsync(principalId, request, promoted, work, phaseObservation, cancellationToken).ConfigureAwait(false);
     }
 
     internal Task<PartitionMoveParentState> AcknowledgeAsync(string principalId, PartitionMoveRequest request,

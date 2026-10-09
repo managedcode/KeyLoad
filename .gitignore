@@ -687,3 +687,4 @@ output/playwright/
 !/docs/implementation/sql-client-commands-postgresql18.json
 !/docs/implementation/sql-client-conformance.json
 !/docs/implementation/status.json
+!/docs/implementation/kl-033-linux-acceptance-20261009.json

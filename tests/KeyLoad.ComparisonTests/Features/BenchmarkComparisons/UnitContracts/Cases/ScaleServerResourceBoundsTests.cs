@@ -1,11 +1,7 @@
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
-
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceBoundsTests
 {
-    private const string UnboundedOutputProcess = "/usr/bin/yes";
-
     [Test]
     public async Task AcScale016NativeProbeStopsAndJoinsWhenItsByteGrantIsExceeded()
     {
@@ -14,8 +10,17 @@ internal sealed class ScaleServerResourceBoundsTests
             return;
         }
 
-        var budget = UnitAppHostResourceOptions.Budget(64);
-        await Assert.ThrowsExactlyAsync<InvalidDataException>(() => ScaleServerResourceProcess.RunAsync(
-            UnboundedOutputProcess, [], cancellationToken: TestContext.Current!.Execution.CancellationToken, budget: budget));
+        await ScaleServerResourceBoundsFlow.RunAsync(diagnostic: false, TestContext.Current!.Execution.CancellationToken);
+    }
+
+    [Test]
+    public async Task AcScale016NativeProbeStopsAndJoinsWhenItsDiagnosticByteGrantIsExceeded()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        await ScaleServerResourceBoundsFlow.RunAsync(diagnostic: true, TestContext.Current!.Execution.CancellationToken);
     }
 }

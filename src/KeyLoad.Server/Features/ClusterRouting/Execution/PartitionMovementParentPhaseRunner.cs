@@ -36,30 +36,36 @@ internal sealed class PartitionMovementParentPhaseRunner(PartitionMovementReceiv
         var current = await receiver.ReadParentStateAsync(principalId, request, phaseId,
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
         var original = RequireFirstAdmission(current, phaseId, intended, admitted.Journal);
-        return await ExecuteFirstAdmittedAsync(principalId, request, current, original, work,
+        return await ExecuteFirstAdmittedAsync(principalId, request, current, original, work, null,
             cancellationToken).ConfigureAwait(false);
     }
 
     internal Task<PartitionMoveParentState> ExecutePromotedAsync(string principalId,
         PartitionMoveRequest request, PartitionMoveParentState state, ReadExecutionBudget work,
         CancellationToken cancellationToken)
+        => ExecutePromotedAsync(principalId, request, state, work, null, cancellationToken);
+
+    internal Task<PartitionMoveParentState> ExecutePromotedAsync(string principalId,
+        PartitionMoveRequest request, PartitionMoveParentState state, ReadExecutionBudget work,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
     {
         var original = PartitionMovementParentPromotionValidation.Require(state);
         if (original.Stage == PartitionMovePeerStage.Capture)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
-        return ExecuteFirstAdmittedAsync(principalId, request, state, original, work, cancellationToken);
+        return ExecuteFirstAdmittedAsync(principalId, request, state, original, work, phaseObservation, cancellationToken);
     }
 
     private async Task<PartitionMoveParentState> ExecuteFirstAdmittedAsync(string principalId,
         PartitionMoveRequest request, PartitionMoveParentState current, PartitionMoveParentPhase original,
-        ReadExecutionBudget work, CancellationToken cancellationToken)
+        ReadExecutionBudget work, Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation,
+        CancellationToken cancellationToken)
     {
         work.Check();
         cancellationToken.ThrowIfCancellationRequested();
         PartitionMoveReceiverSourceWitness? dispatch = null;
         if (!PartitionMoveGrantValidation.IsLocalControl(original.Stage))
         {
-            current = await proofs.IssueFirstAsync(principalId, current, work, cancellationToken).ConfigureAwait(false);
+            current = await proofs.IssueFirstAsync(principalId, current, work, phaseObservation, cancellationToken).ConfigureAwait(false);
             original = current.Pending
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
             dispatch = await receiver.ReadReceiverSourcePendingAsync(principalId, current.Header!.OriginalTransferRequest,

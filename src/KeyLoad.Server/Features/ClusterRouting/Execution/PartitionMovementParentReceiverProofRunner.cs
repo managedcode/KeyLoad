@@ -14,6 +14,11 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
 
     internal async Task<PartitionMoveParentState> IssueFirstAsync(string principalId, PartitionMoveParentState state,
         ReadExecutionBudget work, CancellationToken cancellationToken)
+        => await IssueFirstAsync(principalId, state, work, null, cancellationToken).ConfigureAwait(false);
+
+    internal async Task<PartitionMoveParentState> IssueFirstAsync(string principalId, PartitionMoveParentState state,
+        ReadExecutionBudget work, Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation,
+        CancellationToken cancellationToken)
     {
         var pending = RequirePending(state);
         if (pending.OriginalGrant is not { RequireReceiverIssuance: true }
@@ -30,16 +35,47 @@ internal sealed class PartitionMovementParentReceiverProofRunner(PartitionMoveme
             PartitionMovementParentDeadline.Expiry(work, clock, routing), work, cancellationToken).ConfigureAwait(false);
         var packetBody = ProofBody(principalId, sourceState) with { OriginalReceiverIssuePacket = packet };
         var packetState = await JoinProofAsync(sourceState, packetBody, ProofStep.Packet, work, cancellationToken).ConfigureAwait(false);
+        return await JoinFirstReceiverAsync(principalId, packetState, work, phaseObservation,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<PartitionMoveParentState> JoinFirstReceiverAsync(string principalId,
+        PartitionMoveParentState packetState, ReadExecutionBudget work,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
+    {
         var failures = new List<Exception>();
         PartitionMoveParentState? joined = null;
-        await ServerFailureObserver.ObserveAsync(() => client.IssueReceiverFirstAsync(RequirePending(packetState),
-            work, cancellationToken), failures).ConfigureAwait(false);
+        var acknowledged = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await client.IssueReceiverFirstAsync(RequirePending(packetState), work, cancellationToken).ConfigureAwait(false);
+            acknowledged = true;
+        }, failures).ConfigureAwait(false);
+        if (acknowledged)
+        {
+            await ServerFailureObserver.ObserveAsync(() => ObserveIssuePhaseAsync(packetState,
+                GrainRequestPhase.ParentReceiverIssueAcknowledged, phaseObservation, cancellationToken), failures).ConfigureAwait(false);
+        }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             joined = await ObserveExistingAsync(principalId, packetState, work, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
+        if (joined is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => ObserveIssuePhaseAsync(joined,
+                GrainRequestPhase.ParentReceiverIssueObserved, phaseObservation, cancellationToken), failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
         return joined ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof);
+    }
+
+    private static Task ObserveIssuePhaseAsync(PartitionMoveParentState state, GrainRequestPhase phase,
+        Func<GrainRequestPhase, CancellationToken, ValueTask>? phaseObservation, CancellationToken cancellationToken)
+    {
+        var pending = RequirePending(state);
+        return phaseObservation is not null && pending.Stage == PartitionMovePeerStage.StagePage
+            && pending.PageOrdinal == PartitionMovementProtocol.InitialPhaseOrdinal
+            ? phaseObservation(phase, cancellationToken).AsTask() : Task.CompletedTask;
     }
 
     internal async Task<PartitionMoveParentState> ObserveExistingAsync(string principalId, PartitionMoveParentState state,

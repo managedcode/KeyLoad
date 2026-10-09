@@ -20,7 +20,9 @@ internal enum RequestCqrsProbePhase
     ParentStagePreflight,
     TransferPageRetainedBudgetExceeded,
     TransferPageReturned,
-    ParentTransferCloseFailed
+    ParentTransferCloseFailed,
+    ParentReceiverIssueAcknowledged,
+    ParentReceiverIssueObserved
 }
 
 internal enum RequestCqrsProbeAction

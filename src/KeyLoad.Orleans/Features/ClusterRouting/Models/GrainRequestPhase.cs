@@ -13,7 +13,9 @@ internal enum GrainRequestPhase
     ParentStagePreflight,
     TransferPageRetainedBudgetExceeded,
     TransferPageReturned,
-    ParentTransferCloseFailed
+    ParentTransferCloseFailed,
+    ParentReceiverIssueAcknowledged,
+    ParentReceiverIssueObserved
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

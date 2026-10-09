@@ -76,11 +76,7 @@ internal static partial class ScaleServerResourceProcess
         const string CancellationCleanupFailureMessage = "Server resource process cancellation cleanup failed.";
         try
         {
-            if (await Task.WhenAny(exit, readers) == readers)
-            {
-                await readers;
-            }
-            await exit;
+            await ObserveOriginalTasksAsync(output, error, exit);
             await readers;
             var bytes = await output;
             var diagnosticBytes = await error;
@@ -100,6 +96,22 @@ internal static partial class ScaleServerResourceProcess
                 throw new AggregateException(message, failure, cleanupFailure);
             }
             throw;
+        }
+    }
+
+    private static async Task ObserveOriginalTasksAsync(Task output, Task error, Task exit)
+    {
+        var pending = new List<Task> { output, error, exit };
+        while (true)
+        {
+            var completed = await Task.WhenAny(pending);
+            await completed;
+            if (ReferenceEquals(completed, exit))
+            {
+                return;
+            }
+
+            pending.Remove(completed);
         }
     }
 

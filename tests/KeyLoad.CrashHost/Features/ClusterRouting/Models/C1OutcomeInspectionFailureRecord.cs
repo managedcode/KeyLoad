@@ -23,7 +23,27 @@ internal enum C1OutcomeInspectionFailureKind
     Json,
     Other,
     WalCorruption,
-    WalFullLogCorruption
+    WalFullLogCorruption,
+    NativeDatabaseMissing,
+    Serialization,
+    TypeInitialization,
+    Invocation,
+    MissingKey,
+    InvalidCast,
+    NotSupported,
+    Cancelled,
+    NullReference,
+    Range,
+    Overflow,
+    Format,
+    Timeout,
+    AssemblyLoad,
+    NativeLibraryMissing,
+    NativeEntryPointMissing,
+    TypeLoad,
+    MissingMethod,
+    MissingField,
+    OptionsInvalid
 }
 
 internal sealed record C1OutcomeInspectionFailureRecord(

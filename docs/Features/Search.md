@@ -357,6 +357,34 @@ The optional rerank hook is not selected by the accepted current contract; no re
 
 Root joins the unchanged native architecture under REQ/AC-TUNIT-ENTRY-010 and ADR117, obtains exact delivered-source Linux normal/scalar original artifacts and retains complete native census/TRX/source-image/cleanup evidence before any task acceptance claim. Scalar RF3 changes only the caller; its server processes are not relabeled scalar. All mandatory complete suites remain required. Frontend N/A: execution orchestration only; data/protocol migration N/A. Rollback removes the additive lane while retaining all original reports and prior lanes.
 
+### Original Linux acceptance, 2026-10-09
+
+The complete mapped original KL-033 criteria above passed at source
+`9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f` in
+[Build and Tests run 37920436876](https://github.com/managedcode/KeyLoad/actions/runs/37920436876).
+The [normal job](https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795887)
+and [scalar caller job](https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795704)
+each passed the exact 45-case native union: 29 Unit, 10 genuine process-recovery
+and 6 Aspire-owned RF3 SDK/official MCP/SearchSql/Q1 cases. There were no failed
+or skipped cases. Both profiles used native maximum parallelism 20; the scalar
+profile disabled caller intrinsics only.
+
+The canonical [acceptance record](../implementation/kl-033-linux-acceptance-20261009.json)
+binds the authenticated original archives to their run/source, exact contract,
+native UID/TRX union, source spans, compiled DLL/PDB and unchanged prepared,
+before and after images. All original native process exits and readers joined
+and were disposed without failures. The six emitted relevance observations per
+profile contain actual native candidate windows 1/4/8/32 and measured
+Recall/MRR/nDCG, candidate recall and truncation over the approved corpus.
+The record SHA-256 is
+`f00e939e0de09a22b150c9e1a6858f5521bee1127a5d85a49dd5d833112fed68`.
+
+This closes the original three KL-033 criteria at that source. Current shared
+execution changes require fresh compilation and qualification. The broader
+Search, complete current suites, provider publication, functional coverage,
+performance, endurance and power-loss gates above remain open. ADR: N/A for
+this evidence-only closeout; no runtime or public contract changes.
+
 
 ### TASK-KL034-NATIVE-WAIT-AUTHORITY-002
 

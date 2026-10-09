@@ -37,6 +37,7 @@ internal static class PartitionMoveParentExecution
     private static Func<GrainRequestPhase, CancellationToken, ValueTask> CreatePhaseObservation(GrainRequestCodec codec,
         DecodedGrainRequest original, IGrainContext context)
         => (phase, token) => phase is GrainRequestPhase.ParentStagePreflight or GrainRequestPhase.ParentTransferCloseFailed
+            or GrainRequestPhase.ParentReceiverIssueAcknowledged or GrainRequestPhase.ParentReceiverIssueObserved
             ? codec.ObservePhaseAsync(original, phase, context, token)
             : throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
 }

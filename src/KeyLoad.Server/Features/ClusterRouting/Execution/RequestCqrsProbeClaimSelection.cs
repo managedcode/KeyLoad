@@ -16,6 +16,8 @@ internal static class RequestCqrsProbeClaimSelection
             && (loaded.Record.TargetVoter is null || loaded.Record.TargetVoter == actualVoter)
             && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
             && loaded.Record.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed
+            && !(loaded.Record.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved
+                && loaded.Record.SourceArmId is not null)
             && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();
         if (matches.Length == EmptyMatchesLength)
         { return null; }

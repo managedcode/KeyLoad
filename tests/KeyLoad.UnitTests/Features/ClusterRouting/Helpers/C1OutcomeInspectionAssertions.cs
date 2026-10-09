@@ -70,7 +70,8 @@ internal static class C1OutcomeInspectionAssertions
     }
 
     internal static async Task AssertRejectedAsync(C1OutcomeInspectionProcessResult result,
-        C1OutcomeInspectionFailurePhase? expectedPhase = null)
+        C1OutcomeInspectionFailurePhase? expectedPhase = null,
+        C1OutcomeInspectionFailureKind? expectedKind = null, ErrorCode? expectedCode = null)
     {
         await AssertJoinedAsync(result);
         await Assert.That(result.ExitCode).IsEqualTo(InvalidRequestExitCode);
@@ -79,6 +80,10 @@ internal static class C1OutcomeInspectionAssertions
         await Assert.That(result.StandardError.Length).IsLessThanOrEqualTo(C1OutcomeInspectionFailureEvidence.MaximumBytes);
         if (expectedPhase is { } phase)
         { await Assert.That(failure.Phase).IsEqualTo(phase); }
+        if (expectedKind is { } kind)
+        { await Assert.That(failure.Kind).IsEqualTo(kind); }
+        if (expectedCode is { } code)
+        { await Assert.That(failure.Code).IsEqualTo((int?)code); }
     }
 
     internal static byte[] ValidInput(C1OutcomeInspectionFixture fixture)

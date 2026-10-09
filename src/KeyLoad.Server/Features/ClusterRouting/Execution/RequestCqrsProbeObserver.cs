@@ -15,6 +15,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private Task? shutdown;
     private readonly RequestCqrsProbeHeldCallback hold;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
+    private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
 
     internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
@@ -25,6 +26,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
+        receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
     }
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
@@ -47,8 +49,15 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         {
             if (claim.Identity != identity)
             { throw Invalid(); }
-            files.RequireClaimArmActiveOrRetired(claim.Arm);
-            files.WriteMarker(CreateMarker(claim, RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed), claim.Arm);
+            var failures = new List<Exception>();
+            ServerFailureObserver.Observe(() =>
+            {
+                files.RequireClaimArmActiveOrRetired(claim.Arm);
+                files.WriteMarker(CreateMarker(claim, RequestCqrsProbePhase.ProducerDisposed,
+                    RequestCqrsProbeOutcome.Observed), claim.Arm);
+            }, failures);
+            ServerFailureObserver.Observe(() => receiverIssueAdjunct.ProducerDisposed(claim), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
         }
         finally
         {
@@ -84,6 +93,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         {
             claim = Claim(identity, phase, files.ReadSnapshot());
             if (claim is null)
+            { return; }
+            if (await receiverIssueAdjunct.TryObserveAsync(claim, phase, context, requestCancellation).ConfigureAwait(true))
             { return; }
             if (!TryGetPhase(phase, out var selectedPhase) || claim.Arm.Record.Phase != selectedPhase)
             { return; }

@@ -40359,8 +40359,8 @@
       "remaining": "Fresh exact-source Linux normal/scalar complete unit/recovery/RF3 SDK/MCP/Q1 and source-image/owned cleanup, original parent late-native admission, snapshot fault/resource gates, complete functional coverage, endurance, power-loss and comparable performance remain open. Local selected PASS, authored RF3 flows and native metadata do not close these gates."
     },
     "currentOriginal104TaskCounts": {
-      "done": 16,
-      "inProgress": 88,
+      "done": 17,
+      "inProgress": 87,
       "pending": 0
     },
     "original556Kl008Kl011AcceptedCriteria": {
@@ -40797,6 +40797,125 @@
           "sha256": "ab7963864abcbac144f461d1b44262bf3c32fdf59556999ab43b0103c39eeeee"
         },
         "qualification": "Source joined only; R885 normal50/scalar50 are immutable earlier focused controls, not execution of these new flows. Fresh complete solution build, format, native census, recovery and RF3 Linux gates remain pending."
+      }
+    },
+    "stageXXXVIIDeliveredCommit": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+    "stageXXXVIIDeliveredRemoteVerified": true,
+    "stageXXXVIIIOriginalDevelopment": {
+      "date": "2026-10-09",
+      "sourceCheckoutBeforeCommit": "e0678227e4f51d15a1c9c924ea06cfab14ab19ed",
+      "original104TaskCounts": {
+        "done": 17,
+        "inProgress": 87,
+        "pending": 0
+      },
+      "authenticatedOriginalTaskClosure": {
+        "taskId": "KL-033",
+        "sourceCommit": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+        "runId": 37920436876,
+        "normalPassed": 45,
+        "scalarPassed": 45,
+        "failed": 0,
+        "skipped": 0,
+        "evidencePath": "docs/implementation/kl-033-linux-acceptance-20261009.json",
+        "evidenceSha256": "f00e939e0de09a22b150c9e1a6858f5521bee1127a5d85a49dd5d833112fed68",
+        "scope": "Complete mapped original task acceptance; broader current suites and product qualification remain open."
+      },
+      "guardedSourceJoins": [
+        {
+          "scope": "C1NativeFirstCause",
+          "path": "/private/tmp/keyload-r888-c1-native-cause-source-checkpoint-20261009.json",
+          "sha256": "3c2f8efbbcdb0a257385c659481fa0c0ad497215106e767d2c2dd2ccc5ef2154"
+        },
+        {
+          "scope": "KL035InstallBoundary",
+          "path": "/private/tmp/keyload-r889-kl035-native-install-boundary-source-joined-20261009.json",
+          "sha256": "4967e7809a64323f891eef6c5e38acd3e7266e85554e70901195ed6c1d5058c0"
+        },
+        {
+          "scope": "KL036ReceiverIssueFailover",
+          "path": "/private/tmp/keyload-r890-kl036-receiver-issue-failover-source-joined-20261009.json",
+          "sha256": "7b60e9af5710f80a886ec2980d7992464c008d01169f246d87967735a3852c0a"
+        }
+      ],
+      "sourceOnlyQualification": "C1 taxonomy, native snapshot install byte/cancel boundaries and receiver-issue failover whole flows are joined source only; no new local build/test or Linux runtime pass is claimed.",
+      "newNativeCaseAdmissionPending": [
+        "ReplicaSnapshotInstallBoundaryTests native parameterized identities",
+        "PartitionMovementReceiverIssueFailoverRf3Tests native parameterized identities"
+      ],
+      "existingCanonicalTaskContractsPreserved": {
+        "KL035": 49,
+        "KL036SourceExpected": 37,
+        "allCanonicalTaskObjects": 10
+      },
+      "parallelWholeTaskAgents": [
+        "KL-019",
+        "KL-036",
+        "KL-042"
+      ],
+      "original9cResidualFailures": [
+        "KL029 original natural-expiry precision and RF3 OwnershipLost/UnknownWriteOutcome flows",
+        "KL035 erased-follower native snapshot RF3 original cancellation",
+        "KL015 scalar actual offline OpenStore WalCorruption"
+      ],
+      "coverage": "No current whole-product functional coverage percentage has been measured.",
+      "mandatoryRemaining": [
+        "Fresh complete source build/format/analyzers and native discovery",
+        "Complete normal/scalar Unit and process recovery",
+        "Genuine full Aspire-owned RF3 through SDK and official MCP",
+        "Full functional coverage, endurance/power-loss/fault and comparable performance evidence"
+      ],
+      "original9cCurrentJobSnapshot": {
+        "sourceCommit": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+        "runId": 37920436876,
+        "apiSnapshotPath": "/private/tmp/keyload-original-9c5fe578-current-job-status-20261009.json",
+        "apiSnapshotSha256": "df45ce12821e3d73b0570d11610c7659b7ae26487c179231cca84f243f08ab15",
+        "success": 13,
+        "failure": 10,
+        "active": 1,
+        "failedJobs": [
+          {
+            "jobId": 113786795694,
+            "name": "Qualify KL-036 (normal caller)"
+          },
+          {
+            "jobId": 113786795740,
+            "name": "Qualify KL-029 (scalar caller)"
+          },
+          {
+            "jobId": 113786795748,
+            "name": "Qualify KL-029 (normal caller)"
+          },
+          {
+            "jobId": 113786795759,
+            "name": "Qualify KL-035 (normal caller)"
+          },
+          {
+            "jobId": 113786795953,
+            "name": "Qualify KL-035 (scalar caller)"
+          },
+          {
+            "jobId": 113786796063,
+            "name": "Qualify KL-015 (scalar caller)"
+          },
+          {
+            "jobId": 113786796146,
+            "name": "Qualify KL-021 (scalar caller)"
+          },
+          {
+            "jobId": 113786796248,
+            "name": "Qualify KL-036 (scalar caller)"
+          },
+          {
+            "jobId": 113786796368,
+            "name": "Qualify KL-021 (normal caller)"
+          },
+          {
+            "jobId": 113786841053,
+            "name": "Build and test KeyLoad (ubuntu-latest)"
+          }
+        ],
+        "qualification": "The accepted KL033 jobs completed independently; the complete source run is not green. New KL021/KL036 and full-suite failures require original diagnostic review."
       }
     }
   },
@@ -48473,12 +48592,152 @@
   },
   "KL-033": {
     "title": "Hybrid rank і Explain",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+      "docs/Features/Search.md",
+      "scripts/Features/CodeQuality/task-acceptance.contract.json",
+      "docs/implementation/kl-033-linux-acceptance-20261009.json"
+    ],
+    "qualification": {
+      "task": "TASK-KL033-NATIVE-TASK-ACCEPTANCE-001",
+      "state": "Complete mapped original hybrid rank, literal Explain and measured candidate-window task criteria accepted at 9c5fe578; broader current product qualification remains open.",
+      "nativeUnitCases": 29,
+      "nativeProcessRecoveryCases": 10,
+      "nativeRf3Cases": 6,
+      "runtimeQualified": false,
+      "currentOriginalTaskAcceptance": {
+        "completedAt": "2026-10-09",
+        "sourceCommit": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+        "runId": 37920436876,
+        "attempt": 1,
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "scope": "Complete original architecture KL-033 criteria only; no full-product, full-suite, coverage, performance-winner or server-scalar promotion.",
+        "originalArchitectureCriteria": [
+          "Deterministic BM25/vector candidate merge with weighted RRF and stable ties",
+          "Actual authorized literal score contributions through Explain",
+          "Measured candidate-window effects on the approved relevance corpus"
+        ],
+        "requirements": [
+          "REQ-SEARCH-002",
+          "REQ-SR-001",
+          "REQ-SR-004",
+          "REQ-GSEARCH-003",
+          "REQ-SEARCH-EXPLAIN-001",
+          "REQ-SEARCH-EXPLAIN-002",
+          "REQ-SEARCH-EXPLAIN-003",
+          "REQ-SEARCH-003",
+          "REQ-SEARCH-004",
+          "REQ-SEARCH-007",
+          "REQ-RANK-001",
+          "REQ-RANK-002",
+          "REQ-RANK-003",
+          "REQ-RANK-004"
+        ],
+        "criteria": [
+          "AC-SEARCH-002",
+          "AC-MP-004",
+          "AC-MP-005",
+          "AC-GSEARCH-003",
+          "AC-SEARCH-EXPLAIN-001",
+          "AC-SEARCH-EXPLAIN-002",
+          "AC-SEARCH-EXPLAIN-003",
+          "AC-SEARCH-003",
+          "AC-SEARCH-004",
+          "AC-SEARCH-007",
+          "AC-RANK-001",
+          "AC-RANK-002",
+          "AC-RANK-003",
+          "AC-RANK-004"
+        ],
+        "canonicalCaseContractSha256": "6f290ef2f7a74c936ffb081be932ba18ebe4661de22806449df87388fae063ae",
+        "exactDeclaredUnionPerProfile": 45,
+        "totalPassed": 90,
+        "totalFailed": 0,
+        "totalSkipped": 0,
+        "canonicalEvidencePath": "docs/implementation/kl-033-linux-acceptance-20261009.json",
+        "canonicalEvidenceSha256": "f00e939e0de09a22b150c9e1a6858f5521bee1127a5d85a49dd5d833112fed68",
+        "originalProfiles": [
+          {
+            "profile": "normal",
+            "jobId": 113786795887,
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795887",
+            "jobConclusion": "success",
+            "artifactId": 11612359790,
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/artifacts/11612359790",
+            "artifactSha256": "be8d1f466c7063e254738638a1e28afd2ca388ee8c7919672eb8e7134364a376",
+            "acceptanceReceiptSha256": "5a270578a82317a99bc575f7b50901e5bb7ff5f66b5299962078f80bcd12d8bf",
+            "executionManifestSha256": "daa4b924dabdda11b125f6e7aefeeacb095f2d9f3418e37bcfa2c03b384f58c6",
+            "originalRecordsHashVerified": 45,
+            "passed": 45,
+            "failed": 0,
+            "skipped": 0,
+            "maximumParallelTests": 20,
+            "callerHardwareIntrinsicsDisabled": false,
+            "serverHardwareIntrinsicsDisabled": false,
+            "sourceVerificationExitCode": 0,
+            "nativeUidTrxUnionAndSourcePdbBindingVerified": true,
+            "preparedBeforeAfterImagesEqual": true,
+            "nativeProcessReadersExitJoinedDisposed": true,
+            "selectedSourceDrift": 0
+          },
+          {
+            "profile": "scalar",
+            "jobId": 113786795704,
+            "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795704",
+            "jobConclusion": "success",
+            "artifactId": 11611807575,
+            "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/artifacts/11611807575",
+            "artifactSha256": "d86a621dea1d41f8c33f130bc567ebb9f64735906953ca4eb933bac70e372a82",
+            "acceptanceReceiptSha256": "bfd8274f83f0d04fa0b1db758467b5f61bd3687c76f00570094b367938ac3fb3",
+            "executionManifestSha256": "0b8eee1d6bff02e4d436d924d3f2408e4618a99967b94f7c72992dfe263be6e4",
+            "originalRecordsHashVerified": 45,
+            "passed": 45,
+            "failed": 0,
+            "skipped": 0,
+            "maximumParallelTests": 20,
+            "callerHardwareIntrinsicsDisabled": true,
+            "serverHardwareIntrinsicsDisabled": false,
+            "sourceVerificationExitCode": 0,
+            "nativeUidTrxUnionAndSourcePdbBindingVerified": true,
+            "preparedBeforeAfterImagesEqual": true,
+            "nativeProcessReadersExitJoinedDisposed": true,
+            "selectedSourceDrift": 0
+          }
+        ],
+        "qualityCorpus": {
+          "actualDocuments": 32,
+          "independentQrels": 6,
+          "actualCandidateWindows": [
+            1,
+            4,
+            8,
+            32
+          ],
+          "emittedObservationsPerProfile": 6,
+          "metrics": [
+            "Recall",
+            "MRR",
+            "nDCG",
+            "candidate recall",
+            "truncation"
+          ],
+          "unchangedCanonicalCutAndRepeatedOrderingVerified": true
+        },
+        "evidenceAdmission": "Authenticated original ZIP hashes, exact source/run/contract, all45 original-record hashes per profile, exact native UID/TRX union with no skips, compiled source spans/DLL/PDB, byte-equal before/after image and process-reader joined disposal verified.",
+        "originalFailuresRetained": true,
+        "laterSourceBoundary": "New shared request execution and snapshot/movement changes require fresh current-source compilation and native qualification; the accepted 9c5fe578 originals do not qualify those changes.",
+        "remainingMandatoryGates": [
+          "Complete current normal/scalar Unit, process recovery and full Aspire RF3 original reports",
+          "Full product functional coverage",
+          "Broader Search/provider publication and global ranking qualification",
+          "Representative performance, endurance and power-loss/fault qualification"
+        ]
+      }
+    }
   },
   "KL-034": {
     "title": "Search freshness contract",

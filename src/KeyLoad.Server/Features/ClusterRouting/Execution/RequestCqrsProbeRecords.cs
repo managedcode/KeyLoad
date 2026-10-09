@@ -99,6 +99,8 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     {
         const int DistinctCountValidationBoundary = 1;
 
+        foreach (var arm in arms)
+        { RequestCqrsReceiverIssueAdjunct.RequireDeclaredPair(arm.Record, arms, markers); }
         var armMap = knownArms.ToDictionary(pair => pair.Key, pair => pair.Value.Record);
         foreach (var arm in arms)
         { armMap[arm.Record.ArmId] = arm.Record; }
@@ -138,7 +140,8 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
                 or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
                 or RequestCqrsProbePhase.RetireOperationSealed or RequestCqrsProbePhase.ParentStagePreflight
                 or RequestCqrsProbePhase.TransferPageRetainedBudgetExceeded
-                or RequestCqrsProbePhase.TransferPageReturned or RequestCqrsProbePhase.ParentTransferCloseFailed)
+                or RequestCqrsProbePhase.TransferPageReturned or RequestCqrsProbePhase.ParentTransferCloseFailed
+                or RequestCqrsProbePhase.ParentReceiverIssueAcknowledged or RequestCqrsProbePhase.ParentReceiverIssueObserved)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
         { throw Invalid(); }
         var group = snapshot.Markers

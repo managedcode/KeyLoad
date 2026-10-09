@@ -4,6 +4,13 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved)
+        {
+            return arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null && arm.CommandId != Guid.Empty
+                && arm.SourceRequestId is { } sourceRequest && sourceRequest != Guid.Empty
+                && arm.SourceArmId is { } sourceArm && sourceArm != Guid.Empty && sourceArm != arm.ArmId
+                && arm.Partition is null && arm.TargetVoter is null;
+        }
         if (arm.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed)
         {
             return arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null

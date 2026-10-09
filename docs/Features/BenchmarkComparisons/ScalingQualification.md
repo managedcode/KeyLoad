@@ -101,6 +101,30 @@ changes no sidecar schema, workload, bounds or qualification requirements.
 
 ### Native probe cancellation regression repair
 
+TASK-SCALE-NATIVE-PIPE-025 extends the existing REQ/AC-SCALE-016 settlement
+contract. Observe each original stdout, stderr and exit task independently:
+either pipe fault must immediately enter owned termination and joined settlement,
+even when the other redirected pipe has not reached EOF. Remove successfully
+completed pipe tasks from observation so EOF cannot cause a busy loop; successful
+exit still requires both original readers to finish. Preserve the first operation
+failure and every distinct cleanup failure, existing byte grants, cancellation,
+TERM/KILL bounds and provenance rules.
+
+The source defect is corroborated by the interrupted original Benchmarks run
+37919368060: the real unbounded stdout control has no terminal case result and
+job cleanup terminated its orphan `yes` process. This interrupted suite is not
+qualification. AppHost owns the process observer repair; ComparisonTests owns
+real Linux stdout/stderr overflow controls with the existing validated cleanup
+threshold as a test cancellation bound, exact bound failures and a healthy
+native follow-up after each original operation settles. A private bounded
+readiness marker identifies the actual child PID and start time before an owned
+gate permits `exec yes`; independently assert that this same child exited after
+the bound failure. On every assertion/error path, join the original operations,
+stop any remaining same-identity child and remove the owned marker/gate directory,
+retaining original and cleanup failures together. Only original
+exact-source GitHub Actions build/format and normal/scalar native reports can
+close this stage; no local verification or budget increase is authorized.
+
 TASK-SCALE-NATIVE-CANCELLATION-024 implements the existing REQ/AC-SCALE-016
 settlement contract. The original Linux normal/scalar CI sidecars for run
 37420525126, attempt 1, record an exact-type assertion failure: the original

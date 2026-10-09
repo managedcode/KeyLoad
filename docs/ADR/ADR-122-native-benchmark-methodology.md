@@ -29,6 +29,17 @@ flowchart LR
 
 ## Agent roles and joins
 
+TASK-SCALE-NATIVE-PIPE-025 repairs the existing REQ/AC-SCALE-016 native
+process observation within this wave. First extend ScalingQualification's
+settlement contract, then change only AppHost's ScaleServerResourceProcess
+observer and ComparisonTests' real Linux pipe-bound controls. Each original
+pipe fault must trigger termination before the other pipe reaches EOF; retain
+all original exit/reader joins and first-failure plus cleanup evidence. Real
+stdout and stderr overflow and healthy follow-up flows must retain original
+normal/scalar GitHub reports. No schema, topology, grant, cleanup duration or
+qualification relaxation is introduced. Rollback reverts this coherent source
+stage without counting interrupted suites or promoting prior outputs.
+
 Lead: docs/inventory, host/AppHost/CI, integration, build barrier, original evidence and delivery. Planner agent: JS/site plans/admission and mapped TUnit tests. Native topology agent: C# native 1/3 selection and resource/admission regression tests. Native workload agent: shared lazy document runner, adapter lifecycle/client/readback ownership and mapped regression tests. File ownership must be explicit; coordinate edits to shared contract/target files before writing. Agents must not run concurrent compilers or modify frozen images.
 
 ## Rollout and rollback

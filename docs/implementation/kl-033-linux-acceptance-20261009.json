@@ -1,0 +1,4839 @@
+{
+  "schemaVersion": 1,
+  "taskId": "KL-033",
+  "sourceRevision": "9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f",
+  "workflowRunId": 37920436876,
+  "workflowUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876",
+  "contractSha256": "6f290ef2f7a74c936ffb081be932ba18ebe4661de22806449df87388fae063ae",
+  "originalArchitectureAcceptance": "docs/design/architecture-v0.3.uk.md:733-739",
+  "verifiedScope": "complete mapped KL-033 acceptance only; no full-product, full-suite, coverage, performance-winner or server-scalar promotion",
+  "profiles": [
+    {
+      "profile": "normal",
+      "artifactId": 11612359790,
+      "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/artifacts/11612359790",
+      "archiveSha256": "be8d1f466c7063e254738638a1e28afd2ca388ee8c7919672eb8e7134364a376",
+      "acceptanceReceiptSha256": "5a270578a82317a99bc575f7b50901e5bb7ff5f66b5299962078f80bcd12d8bf",
+      "executionManifestSha256": "daa4b924dabdda11b125f6e7aefeeacb095f2d9f3418e37bcfa2c03b384f58c6",
+      "originalRecordsHashVerified": 45,
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "maximumParallelTests": 20,
+      "serverScalarQualification": false,
+      "callerHardwareIntrinsicsDisabled": false,
+      "sourceVerificationExitCode": 0,
+      "selections": [
+        {
+          "selectionId": "hybrid-whole-and-quality",
+          "suite": "unit",
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "f766961159fff38f5f4adf53facd10df1dd5632b1d8dd9bfd207dd01bd45d8f3",
+          "dllSha256": "aa7588c1e3994fa9d42481ddffb5f84be31058947364825c9d6043621a2e3880",
+          "pdbSha256": "5cda54a1bc188982ff01fa19301bb136da4852a5d4b24bf2781697fb541fadc6",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "0b60a2afa32954990149a222401927b12cefaf489ae6905576d3911714211453",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation.1.1.0",
+              "displayName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 9,
+                "lineEnd": 20
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence.1.1.0",
+              "displayName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 22,
+                "lineEnd": 48
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers.1.1.0",
+              "displayName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 50,
+                "lineEnd": 62
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing.1.1.0",
+              "displayName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 64,
+                "lineEnd": 76
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds.1.1.0",
+              "displayName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 78,
+                "lineEnd": 92
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest.1.1.0",
+              "displayName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 94,
+                "lineEnd": 120
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003RequestedOutputWindowTruncationClearsExhaustive.1.1.0",
+              "displayName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 122,
+                "lineEnd": 137
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003CompleteFiniteTopWindowIsNotExhaustive.1.1.0",
+              "displayName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 139,
+                "lineEnd": 153
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityRealStoreTests.1.1.AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity.1.1.0",
+              "displayName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityRealStoreTests",
+                "methodName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityRealStoreTests.cs",
+                "lineStart": 18,
+                "lineEnd": 42
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates.1.1.0",
+              "displayName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 9,
+                "lineEnd": 49
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents.1.1.0",
+              "displayName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 55,
+                "lineEnd": 75
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank.1.1.0",
+              "displayName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 77,
+                "lineEnd": 96
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray.1.1.0",
+              "displayName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 98,
+                "lineEnd": 118
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainPrivacyWholeFlowTests.1.1.ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState.1.1.0",
+              "displayName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainPrivacyWholeFlowTests",
+                "methodName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainPrivacyWholeFlowTests.cs",
+                "lineStart": 21,
+                "lineEnd": 54
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie.1.1.0",
+              "displayName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 12,
+                "lineEnd": 27
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks.1.1.0",
+              "displayName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 29,
+                "lineEnd": 42
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize.1.1.0",
+              "displayName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 44,
+                "lineEnd": 74
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate.1.1.0",
+              "displayName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 13,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult.1.1.0",
+              "displayName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 40,
+                "lineEnd": 63
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes.1.1.0",
+              "displayName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 65,
+                "lineEnd": 86
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003CandidateAndWindowCountsShareConfiguredRecordBound.1.1.0",
+              "displayName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 88,
+                "lineEnd": 111
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003CancellationIsObservedAndNextMergeRemainsHealthy.1.1.0",
+              "displayName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 113,
+                "lineEnd": 128
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(System.Boolean).1.1.0",
+              "displayName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 12,
+                "lineEnd": 31
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(System.Boolean).2.1.0",
+              "displayName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 12,
+                "lineEnd": 31
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead.1.1.0",
+              "displayName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 33,
+                "lineEnd": 70
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues.1.1.0",
+              "displayName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 71,
+                "lineEnd": 95
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests.1.1.AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings.1.1.0",
+              "displayName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityMetricOracleTests",
+                "methodName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+                "lineStart": 11,
+                "lineEnd": 25
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests.1.1.AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates.1.1.0",
+              "displayName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityMetricOracleTests",
+                "methodName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+                "lineStart": 27,
+                "lineEnd": 38
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-canonical-revision",
+          "suite": "unit",
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "f766961159fff38f5f4adf53facd10df1dd5632b1d8dd9bfd207dd01bd45d8f3",
+          "dllSha256": "aa7588c1e3994fa9d42481ddffb5f84be31058947364825c9d6043621a2e3880",
+          "pdbSha256": "5cda54a1bc188982ff01fa19301bb136da4852a5d4b24bf2781697fb541fadc6",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "8b24e3281a91e76ce9accc6fa1fe6df3501678bee6eb9a34e4766cf61d4f9112",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.SearchTests.1.1.HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors.1.1.0",
+              "displayName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "SearchTests",
+                "methodName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+                "lineStart": 29,
+                "lineEnd": 49
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "native-text-branch-process-recovery",
+          "suite": "recovery",
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "e45425a3d0daa5e294e6455ac0b67f73952c5566e1af26456ef18e791bb7001d",
+          "dllSha256": "8877613176bd78fc7c2ef8c4208d589bb112d19a44ff331fff2a9eb1d202de78",
+          "pdbSha256": "7b482874f90538df304c46f6757ea4bf9feb72ceff6d8a97fd6eadc011360202",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "598440cd92f184b8321193c7583d85aa43b7f008d1d16dd58530b2dc9b7715de",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).1.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).2.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).3.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).4.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).5.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).6.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).7.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).8.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).9.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).10.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-sdk-mcp-rf3",
+          "suite": "rf3",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "4b1d2008b619af0821d558717efab549a7e796a8ca048c831904ca39c1e3c582",
+          "dllSha256": "d4a8839115b159c18bbe7a68fc3ae268577a050c3b214bae4a69e27dd69ccdab",
+          "pdbSha256": "8ff38bb713b7277da04e706e13a6b5a8ba5f078c97844585e8385581a36c2e2a",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "5206f8d7f18ef6d21447ece6642d5a3b852804686c83eb0c5bc6d61e2c95d235",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(System.Boolean).1.1.0",
+              "displayName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 14,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(System.Boolean).2.1.0",
+              "displayName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 14,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle.1.1.0",
+              "displayName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 40,
+                "lineEnd": 60
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits.1.1.0",
+              "displayName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 62,
+                "lineEnd": 87
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation.1.1.0",
+              "displayName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 89,
+                "lineEnd": 114
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse.1.1.0",
+              "displayName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 116,
+                "lineEnd": 127
+              }
+            }
+          ]
+        }
+      ],
+      "candidateWindowQualityObservations": [
+        {
+          "kind": "controlled-search-quality",
+          "query": "english",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d00",
+              "d01",
+              "d25",
+              "d03",
+              "d19",
+              "d06",
+              "d02",
+              "d07",
+              "d14",
+              "d16"
+            ],
+            "vector": [
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d31",
+              "d04",
+              "d30",
+              "d05",
+              "d29",
+              "d22",
+              "d06",
+              "d28",
+              "d20",
+              "d21",
+              "d07",
+              "d27",
+              "d23",
+              "d26",
+              "d25",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d00",
+            "d01",
+            "d03",
+            "d02",
+            "d06",
+            "d07",
+            "d25",
+            "d14",
+            "d19",
+            "d16",
+            "d31",
+            "d04",
+            "d05",
+            "d08",
+            "d09",
+            "d22",
+            "d10",
+            "d20",
+            "d30",
+            "d11",
+            "d21",
+            "d29",
+            "d12",
+            "d13",
+            "d28",
+            "d23",
+            "d15",
+            "d27",
+            "d26",
+            "d17",
+            "d18",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0.8333333333333334,
+            "RecallAt10": 0.8333333333333334,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 0.9876322084609285,
+            "NdcgAt10": 0.9572167062991829
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 2,
+              "CandidateRecall": 0.16666666666666666,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.16666666666666666,
+                "RecallAt10": 0.16666666666666666,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.6244247138302588,
+                "NdcgAt10": 0.6051946896667617
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 6,
+              "CandidateRecall": 0.6666666666666666,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d02",
+                "d03",
+                "d31",
+                "d25"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 0.6666666666666666,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9654913637925913,
+                "NdcgAt10": 0.9357577196171523
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 12,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d03",
+                "d02",
+                "d31",
+                "d04",
+                "d06",
+                "d05",
+                "d25",
+                "d19",
+                "d30",
+                "d07"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.9833859915363458
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d03",
+                "d02",
+                "d06",
+                "d07",
+                "d25",
+                "d14",
+                "d19",
+                "d16",
+                "d31",
+                "d04",
+                "d05",
+                "d08",
+                "d09",
+                "d22",
+                "d10",
+                "d20",
+                "d30",
+                "d11",
+                "d21",
+                "d29",
+                "d12",
+                "d13",
+                "d28",
+                "d23",
+                "d15",
+                "d27",
+                "d26",
+                "d17",
+                "d18",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.8333333333333334,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9876322084609285,
+                "NdcgAt10": 0.9572167062991829
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "ukrainian",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d12",
+              "d08",
+              "d09",
+              "d10",
+              "d24"
+            ],
+            "vector": [
+              "d08",
+              "d09",
+              "d10",
+              "d07",
+              "d11",
+              "d06",
+              "d12",
+              "d05",
+              "d13",
+              "d23",
+              "d04",
+              "d14",
+              "d20",
+              "d21",
+              "d03",
+              "d15",
+              "d22",
+              "d02",
+              "d01",
+              "d00",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30",
+              "d31"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d08",
+            "d09",
+            "d10",
+            "d12",
+            "d24",
+            "d07",
+            "d06",
+            "d05",
+            "d04",
+            "d11",
+            "d03",
+            "d00",
+            "d01",
+            "d02",
+            "d13",
+            "d31",
+            "d14",
+            "d15",
+            "d23",
+            "d20",
+            "d21",
+            "d16",
+            "d22",
+            "d17",
+            "d18",
+            "d19",
+            "d25",
+            "d26",
+            "d27",
+            "d28",
+            "d29",
+            "d30"
+          ],
+          "metrics": {
+            "RecallAt5": 0.7142857142857143,
+            "RecallAt10": 0.8571428571428571,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 0.9876322084609285,
+            "NdcgAt10": 0.9546950454336347
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 3,
+              "CandidateRecall": 0.2857142857142857,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d12",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.2857142857142857,
+                "RecallAt10": 0.2857142857142857,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7932681984677673,
+                "NdcgAt10": 0.7473020605758248
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 9,
+              "CandidateRecall": 0.5714285714285714,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d31",
+                "d00",
+                "d01",
+                "d02",
+                "d07"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5714285714285714,
+                "RecallAt10": 0.5714285714285714,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.8978945719798548
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 15,
+              "CandidateRecall": 0.8571428571428571,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d06",
+                "d05",
+                "d31",
+                "d00",
+                "d01",
+                "d02",
+                "d07",
+                "d03",
+                "d11",
+                "d24",
+                "d04"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5714285714285714,
+                "RecallAt10": 0.5714285714285714,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.8978945719798548
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d24",
+                "d07",
+                "d06",
+                "d05",
+                "d04",
+                "d11",
+                "d03",
+                "d00",
+                "d01",
+                "d02",
+                "d13",
+                "d31",
+                "d14",
+                "d15",
+                "d23",
+                "d20",
+                "d21",
+                "d16",
+                "d22",
+                "d17",
+                "d18",
+                "d19",
+                "d25",
+                "d26",
+                "d27",
+                "d28",
+                "d29",
+                "d30"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.7142857142857143,
+                "RecallAt10": 0.8571428571428571,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9876322084609285,
+                "NdcgAt10": 0.9546950454336347
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "repeated",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d06",
+              "d07",
+              "d14",
+              "d26",
+              "d19",
+              "d00",
+              "d01",
+              "d02",
+              "d16"
+            ],
+            "vector": [
+              "d02",
+              "d01",
+              "d03",
+              "d00",
+              "d04",
+              "d31",
+              "d05",
+              "d30",
+              "d06",
+              "d29",
+              "d22",
+              "d20",
+              "d21",
+              "d07",
+              "d28",
+              "d23",
+              "d27",
+              "d08",
+              "d09",
+              "d10",
+              "d26",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d25",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d01",
+            "d00",
+            "d02",
+            "d06",
+            "d07",
+            "d14",
+            "d26",
+            "d19",
+            "d16",
+            "d31",
+            "d03",
+            "d04",
+            "d05",
+            "d08",
+            "d09",
+            "d10",
+            "d20",
+            "d22",
+            "d11",
+            "d21",
+            "d30",
+            "d12",
+            "d29",
+            "d13",
+            "d23",
+            "d15",
+            "d28",
+            "d27",
+            "d17",
+            "d18",
+            "d25",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0.6666666666666666,
+            "RecallAt10": 1,
+            "MeanReciprocalRankAt10": 0.5,
+            "NdcgAt5": 0.5196923109005864,
+            "NdcgAt10": 0.5657390377312327
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 3,
+              "CandidateRecall": 0.3333333333333333,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d02",
+                "d06",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.3333333333333333,
+                "RecallAt10": 0.3333333333333333,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.5304935598381362,
+                "NdcgAt10": 0.5126101398691953
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 9,
+              "CandidateRecall": 0.8333333333333334,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d02",
+                "d01",
+                "d00",
+                "d06",
+                "d31",
+                "d07",
+                "d03",
+                "d14",
+                "d26"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.4421738509714444,
+                "NdcgAt10": 0.5582556129559126
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 13,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d01",
+                "d00",
+                "d02",
+                "d31",
+                "d03",
+                "d06",
+                "d04",
+                "d05",
+                "d07",
+                "d14",
+                "d26",
+                "d19",
+                "d30"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.3333333333333333,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 0.5,
+                "NdcgAt5": 0.11076341444322195,
+                "NdcgAt10": 0.4558295661050911
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d01",
+                "d00",
+                "d02",
+                "d06",
+                "d07",
+                "d14",
+                "d26",
+                "d19",
+                "d16",
+                "d31",
+                "d03",
+                "d04",
+                "d05",
+                "d08",
+                "d09",
+                "d10",
+                "d20",
+                "d22",
+                "d11",
+                "d21",
+                "d30",
+                "d12",
+                "d29",
+                "d13",
+                "d23",
+                "d15",
+                "d28",
+                "d27",
+                "d17",
+                "d18",
+                "d25",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 0.5,
+                "NdcgAt5": 0.5196923109005864,
+                "NdcgAt10": 0.5657390377312327
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "missing-text",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [],
+            "vector": [
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d05",
+              "d13",
+              "d29",
+              "d04",
+              "d06",
+              "d12",
+              "d14",
+              "d28",
+              "d30",
+              "d03",
+              "d07",
+              "d11",
+              "d15",
+              "d19",
+              "d27",
+              "d31",
+              "d02",
+              "d10",
+              "d18",
+              "d26",
+              "d01",
+              "d09",
+              "d17",
+              "d25",
+              "d00",
+              "d08",
+              "d16",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d05",
+            "d04",
+            "d06",
+            "d03",
+            "d31",
+            "d20",
+            "d13",
+            "d21",
+            "d02",
+            "d07",
+            "d12",
+            "d22",
+            "d01",
+            "d23",
+            "d00",
+            "d14",
+            "d11",
+            "d10",
+            "d15",
+            "d29",
+            "d09",
+            "d08",
+            "d19",
+            "d28",
+            "d30",
+            "d18",
+            "d17",
+            "d27",
+            "d16",
+            "d26",
+            "d25",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0,
+            "RecallAt10": 0.5,
+            "MeanReciprocalRankAt10": 0.16666666666666666,
+            "NdcgAt5": 0,
+            "NdcgAt10": 0.3501661229924068
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 2,
+              "CandidateRecall": 0.25,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d20",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 0.25,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7125794632086186,
+                "NdcgAt10": 0.7125794632086186
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 8,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d20",
+                "d31",
+                "d00",
+                "d21",
+                "d01",
+                "d22",
+                "d02",
+                "d23"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.8441042934522504,
+                "NdcgAt10": 0.9124785389867696
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 14,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d05",
+                "d04",
+                "d20",
+                "d31",
+                "d00",
+                "d21",
+                "d01",
+                "d22",
+                "d02",
+                "d23",
+                "d03",
+                "d13",
+                "d29",
+                "d06"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 0.3333333333333333,
+                "NdcgAt5": 0.3562897316043093,
+                "NdcgAt10": 0.5266116215861236
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d05",
+                "d04",
+                "d06",
+                "d03",
+                "d31",
+                "d20",
+                "d13",
+                "d21",
+                "d02",
+                "d07",
+                "d12",
+                "d22",
+                "d01",
+                "d23",
+                "d00",
+                "d14",
+                "d11",
+                "d10",
+                "d15",
+                "d29",
+                "d09",
+                "d08",
+                "d19",
+                "d28",
+                "d30",
+                "d18",
+                "d17",
+                "d27",
+                "d16",
+                "d26",
+                "d25",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0.5,
+                "MeanReciprocalRankAt10": 0.16666666666666666,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0.3501661229924068
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "graph-selective",
+          "committedPosition": 7,
+          "eligibleCount": 4,
+          "gradeCount": 32,
+          "branchIds": {
+            "graph": [
+              "d00",
+              "d08",
+              "d16",
+              "d24"
+            ]
+          },
+          "branchScores": {
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625
+            ]
+          },
+          "productionIds": [
+            "d00",
+            "d08",
+            "d16",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 1,
+            "RecallAt10": 1,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 1,
+            "NdcgAt10": 1
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 1,
+              "CandidateRecall": 0.25,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 0.25,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7125794632086186,
+                "NdcgAt10": 0.7125794632086186
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "empty-allowlist",
+          "committedPosition": 7,
+          "eligibleCount": 0,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [],
+            "vector": [],
+            "graph": []
+          },
+          "branchScores": {
+            "text": [],
+            "vector": [],
+            "graph": []
+          },
+          "productionIds": [],
+          "metrics": {
+            "RecallAt5": 0,
+            "RecallAt10": 0,
+            "MeanReciprocalRankAt10": 0,
+            "NdcgAt5": 0,
+            "NdcgAt10": 0
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "scalar",
+      "artifactId": 11611807575,
+      "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37920436876/artifacts/11611807575",
+      "archiveSha256": "d86a621dea1d41f8c33f130bc567ebb9f64735906953ca4eb933bac70e372a82",
+      "acceptanceReceiptSha256": "bfd8274f83f0d04fa0b1db758467b5f61bd3687c76f00570094b367938ac3fb3",
+      "executionManifestSha256": "0b8eee1d6bff02e4d436d924d3f2408e4618a99967b94f7c72992dfe263be6e4",
+      "originalRecordsHashVerified": 45,
+      "passed": 45,
+      "failed": 0,
+      "skipped": 0,
+      "maximumParallelTests": 20,
+      "serverScalarQualification": false,
+      "callerHardwareIntrinsicsDisabled": true,
+      "sourceVerificationExitCode": 0,
+      "selections": [
+        {
+          "selectionId": "hybrid-whole-and-quality",
+          "suite": "unit",
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "f766961159fff38f5f4adf53facd10df1dd5632b1d8dd9bfd207dd01bd45d8f3",
+          "dllSha256": "aa7588c1e3994fa9d42481ddffb5f84be31058947364825c9d6043621a2e3880",
+          "pdbSha256": "5cda54a1bc188982ff01fa19301bb136da4852a5d4b24bf2781697fb541fadc6",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "0b950d602f4842f8eff4d9d1b5449c684f3ee99a740a9ce73e26025021e5a38a",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation.1.1.0",
+              "displayName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsDuplicateOrUnknownSourceWindowIdsAsValidation",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 9,
+                "lineEnd": 20
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence.1.1.0",
+              "displayName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsIncomparableScopesAndConflictingCandidateEvidence",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 22,
+                "lineEnd": 48
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers.1.1.0",
+              "displayName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsUnorderedWindowAndInvalidRequestIdentifiers",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 50,
+                "lineEnd": 62
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing.1.1.0",
+              "displayName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank002RejectsDefaultArraysAndInvalidLimitsBeforeCandidateProcessing",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 64,
+                "lineEnd": 76
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds.1.1.0",
+              "displayName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003StrictMissingFailsAndExplicitIncompleteRetainsMissingIds",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 78,
+                "lineEnd": 92
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest.1.1.0",
+              "displayName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003ApproximateAndTruncatedWindowsCannotSatisfyStrictExactRequest",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 94,
+                "lineEnd": 120
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003RequestedOutputWindowTruncationClearsExhaustive.1.1.0",
+              "displayName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003RequestedOutputWindowTruncationClearsExhaustive",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 122,
+                "lineEnd": 137
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeValidationTests.1.1.AcRank003CompleteFiniteTopWindowIsNotExhaustive.1.1.0",
+              "displayName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeValidationTests",
+                "methodName": "AcRank003CompleteFiniteTopWindowIsNotExhaustive",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeValidationTests.cs",
+                "lineStart": 139,
+                "lineEnd": 153
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityRealStoreTests.1.1.AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity.1.1.0",
+              "displayName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityRealStoreTests",
+                "methodName": "AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityRealStoreTests.cs",
+                "lineStart": 18,
+                "lineEnd": 42
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates.1.1.0",
+              "displayName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank001CentralAndTwoOrThreeWindowLayoutsHaveTheSameOrderedCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 9,
+                "lineEnd": 49
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents.1.1.0",
+              "displayName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank002FullIdentityTieOrderUsesIndependentOrdinalComponents",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 55,
+                "lineEnd": 75
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank.1.1.0",
+              "displayName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank001DuplicateCandidateContributesOnceAndAbsentBranchAddsNoRank",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 77,
+                "lineEnd": 96
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeLayoutTests.1.1.AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray.1.1.0",
+              "displayName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeLayoutTests",
+                "methodName": "AcRank004LocalAdapterReusesFullOrderWithoutCopyingItsCanonicalArray",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeLayoutTests.cs",
+                "lineStart": 98,
+                "lineEnd": 118
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainPrivacyWholeFlowTests.1.1.ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState.1.1.0",
+              "displayName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainPrivacyWholeFlowTests",
+                "methodName": "ActualOrdinaryHybridExplainNeverDisclosesDeniedRowAndPreservesCanonicalState",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainPrivacyWholeFlowTests.cs",
+                "lineStart": 21,
+                "lineEnd": 54
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie.1.1.0",
+              "displayName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 12,
+                "lineEnd": 27
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks.1.1.0",
+              "displayName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 29,
+                "lineEnd": 42
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.ThreeWayHybridFusionTests.1.1.AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize.1.1.0",
+              "displayName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "ThreeWayHybridFusionTests",
+                "methodName": "AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/ThreeWayHybridFusionTests.cs",
+                "lineStart": 44,
+                "lineEnd": 74
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate.1.1.0",
+              "displayName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 13,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult.1.1.0",
+              "displayName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 40,
+                "lineEnd": 63
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes.1.1.0",
+              "displayName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 65,
+                "lineEnd": 86
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003CandidateAndWindowCountsShareConfiguredRecordBound.1.1.0",
+              "displayName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003CandidateAndWindowCountsShareConfiguredRecordBound",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 88,
+                "lineEnd": 111
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.GlobalBranchWindowMergeBudgetTests.1.1.AcRank003CancellationIsObservedAndNextMergeRemainsHealthy.1.1.0",
+              "displayName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "GlobalBranchWindowMergeBudgetTests",
+                "methodName": "AcRank003CancellationIsObservedAndNextMergeRemainsHealthy",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/GlobalBranchWindowMergeBudgetTests.cs",
+                "lineStart": 113,
+                "lineEnd": 128
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(System.Boolean).1.1.0",
+              "displayName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 12,
+                "lineEnd": 31
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(System.Boolean).2.1.0",
+              "displayName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates(True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualWeightedBranchesExplainLiteralRanksAndEligibleCandidates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 12,
+                "lineEnd": 31
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead.1.1.0",
+              "displayName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 33,
+                "lineEnd": 70
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridExplainWholeFlowTests.1.1.ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues.1.1.0",
+              "displayName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridExplainWholeFlowTests",
+                "methodName": "ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridExplainWholeFlowTests.cs",
+                "lineStart": 71,
+                "lineEnd": 95
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests.1.1.AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings.1.1.0",
+              "displayName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityMetricOracleTests",
+                "methodName": "AcSearch007HandGoldensCoverPerfectReversedMissingAndTiedOrderings",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+                "lineStart": 11,
+                "lineEnd": 25
+              }
+            },
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.HybridQualityMetricOracleTests.1.1.AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates.1.1.0",
+              "displayName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "HybridQualityMetricOracleTests",
+                "methodName": "AcSearch007EmptyAndNoRelevantEligibleSetsReturnZeroAndRejectDuplicates",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+                "lineStart": 27,
+                "lineEnd": 38
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-canonical-revision",
+          "suite": "unit",
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "f766961159fff38f5f4adf53facd10df1dd5632b1d8dd9bfd207dd01bd45d8f3",
+          "dllSha256": "aa7588c1e3994fa9d42481ddffb5f84be31058947364825c9d6043621a2e3880",
+          "pdbSha256": "5cda54a1bc188982ff01fa19301bb136da4852a5d4b24bf2781697fb541fadc6",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "10b613631647cad725bb9757e9962861ef7a90e3a7ecc5d13b620fb9a1e76c76",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.UnitTests.Features.Search.SearchTests.1.1.HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors.1.1.0",
+              "displayName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+              "type": {
+                "assemblyFullName": "KeyLoad.UnitTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.UnitTests.Features.Search",
+                "typeName": "SearchTests",
+                "methodName": "HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+                "lineStart": 29,
+                "lineEnd": 49
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "native-text-branch-process-recovery",
+          "suite": "recovery",
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "e45425a3d0daa5e294e6455ac0b67f73952c5566e1af26456ef18e791bb7001d",
+          "dllSha256": "8877613176bd78fc7c2ef8c4208d589bb112d19a44ff331fff2a9eb1d202de78",
+          "pdbSha256": "7b482874f90538df304c46f6757ea4bf9feb72ceff6d8a97fd6eadc011360202",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "07e23929fa143434c2fd7ea299a58809d4b21d4ba6c2453613a9e87ad9e6c60f",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).1.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).2.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).3.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).4.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).5.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).6.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(OwnerFlushed, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).7.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativePostingWritten, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).8.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(NativeInventoryFlushed, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).9.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(ManifestPublished, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).10.1.0",
+              "displayName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(GenerationActivated, True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.RecoveryTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.RecoveryTests.Features.Search",
+                "typeName": "NativeTextProjectionProcessRecoveryTests",
+                "methodName": "AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "KeyLoad.Server.Features.Search.NativeTextFaultStage",
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.RecoveryTests/Features/Search/Cases/NativeTextProjectionProcessRecoveryTests.cs",
+                "lineStart": 25,
+                "lineEnd": 38
+              }
+            }
+          ]
+        },
+        {
+          "selectionId": "hybrid-sdk-mcp-rf3",
+          "suite": "rf3",
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0,
+          "nativeImageSha256": "4b1d2008b619af0821d558717efab549a7e796a8ca048c831904ca39c1e3c582",
+          "dllSha256": "d4a8839115b159c18bbe7a68fc3ae268577a050c3b214bae4a69e27dd69ccdab",
+          "pdbSha256": "8ff38bb713b7277da04e706e13a6b5a8ba5f078c97844585e8385581a36c2e2a",
+          "compiledSourceBindingComplete": true,
+          "selectedSourceDrift": 0,
+          "nativeProcessJoinedAndDisposed": true,
+          "originalTrxSha256": "74da87017c9c223d3cdc46ffe9878b30a7bcf0d57534275ead9e35f46588774b",
+          "nativeCases": [
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(System.Boolean).1.1.0",
+              "displayName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(False)",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 14,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(System.Boolean).2.1.0",
+              "displayName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(True)",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": [
+                  "System.Boolean"
+                ]
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 14,
+                "lineEnd": 38
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle.1.1.0",
+              "displayName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 40,
+                "lineEnd": 60
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits.1.1.0",
+              "displayName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ScopeAndAllowlistRerankBeforeFusionAndExpansionDoesNotChangeHits",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 62,
+                "lineEnd": 87
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation.1.1.0",
+              "displayName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ZeroWeightsDoNotSkipPersistedAuthorizationOrRevocation",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 89,
+                "lineEnd": 114
+              }
+            },
+            {
+              "uid": "KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse.1.1.0",
+              "displayName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+              "type": {
+                "assemblyFullName": "KeyLoad.IntegrationTests, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null",
+                "namespace": "KeyLoad.IntegrationTests.Features.Search",
+                "typeName": "ThreeWayHybridRf3Tests(ClusterFixture)",
+                "methodName": "AcGsearch003ZeroWeightGraphLabelsRequirePersistedFieldUse",
+                "methodArity": 0,
+                "returnTypeFullName": "System.Threading.Tasks.Task",
+                "parameterTypeFullNames": []
+              },
+              "location": {
+                "file": "/_/tests/KeyLoad.IntegrationTests/Features/Search/Cases/ThreeWayHybridRf3Tests.cs",
+                "lineStart": 116,
+                "lineEnd": 127
+              }
+            }
+          ]
+        }
+      ],
+      "candidateWindowQualityObservations": [
+        {
+          "kind": "controlled-search-quality",
+          "query": "english",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d00",
+              "d01",
+              "d25",
+              "d03",
+              "d19",
+              "d06",
+              "d02",
+              "d07",
+              "d14",
+              "d16"
+            ],
+            "vector": [
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d31",
+              "d04",
+              "d30",
+              "d05",
+              "d29",
+              "d22",
+              "d06",
+              "d28",
+              "d20",
+              "d21",
+              "d07",
+              "d27",
+              "d23",
+              "d26",
+              "d25",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d00",
+            "d01",
+            "d03",
+            "d02",
+            "d06",
+            "d07",
+            "d25",
+            "d14",
+            "d19",
+            "d16",
+            "d31",
+            "d04",
+            "d05",
+            "d08",
+            "d09",
+            "d22",
+            "d10",
+            "d20",
+            "d30",
+            "d11",
+            "d21",
+            "d29",
+            "d12",
+            "d13",
+            "d28",
+            "d23",
+            "d15",
+            "d27",
+            "d26",
+            "d17",
+            "d18",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0.8333333333333334,
+            "RecallAt10": 0.8333333333333334,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 0.9876322084609285,
+            "NdcgAt10": 0.9572167062991829
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 2,
+              "CandidateRecall": 0.16666666666666666,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.16666666666666666,
+                "RecallAt10": 0.16666666666666666,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.6244247138302588,
+                "NdcgAt10": 0.6051946896667617
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 6,
+              "CandidateRecall": 0.6666666666666666,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d02",
+                "d03",
+                "d31",
+                "d25"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 0.6666666666666666,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9654913637925913,
+                "NdcgAt10": 0.9357577196171523
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 12,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d03",
+                "d02",
+                "d31",
+                "d04",
+                "d06",
+                "d05",
+                "d25",
+                "d19",
+                "d30",
+                "d07"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.9833859915363458
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d01",
+                "d03",
+                "d02",
+                "d06",
+                "d07",
+                "d25",
+                "d14",
+                "d19",
+                "d16",
+                "d31",
+                "d04",
+                "d05",
+                "d08",
+                "d09",
+                "d22",
+                "d10",
+                "d20",
+                "d30",
+                "d11",
+                "d21",
+                "d29",
+                "d12",
+                "d13",
+                "d28",
+                "d23",
+                "d15",
+                "d27",
+                "d26",
+                "d17",
+                "d18",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.8333333333333334,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9876322084609285,
+                "NdcgAt10": 0.9572167062991829
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "ukrainian",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d12",
+              "d08",
+              "d09",
+              "d10",
+              "d24"
+            ],
+            "vector": [
+              "d08",
+              "d09",
+              "d10",
+              "d07",
+              "d11",
+              "d06",
+              "d12",
+              "d05",
+              "d13",
+              "d23",
+              "d04",
+              "d14",
+              "d20",
+              "d21",
+              "d03",
+              "d15",
+              "d22",
+              "d02",
+              "d01",
+              "d00",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30",
+              "d31"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d08",
+            "d09",
+            "d10",
+            "d12",
+            "d24",
+            "d07",
+            "d06",
+            "d05",
+            "d04",
+            "d11",
+            "d03",
+            "d00",
+            "d01",
+            "d02",
+            "d13",
+            "d31",
+            "d14",
+            "d15",
+            "d23",
+            "d20",
+            "d21",
+            "d16",
+            "d22",
+            "d17",
+            "d18",
+            "d19",
+            "d25",
+            "d26",
+            "d27",
+            "d28",
+            "d29",
+            "d30"
+          ],
+          "metrics": {
+            "RecallAt5": 0.7142857142857143,
+            "RecallAt10": 0.8571428571428571,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 0.9876322084609285,
+            "NdcgAt10": 0.9546950454336347
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 3,
+              "CandidateRecall": 0.2857142857142857,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d12",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.2857142857142857,
+                "RecallAt10": 0.2857142857142857,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7932681984677673,
+                "NdcgAt10": 0.7473020605758248
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 9,
+              "CandidateRecall": 0.5714285714285714,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d31",
+                "d00",
+                "d01",
+                "d02",
+                "d07"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5714285714285714,
+                "RecallAt10": 0.5714285714285714,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.8978945719798548
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 15,
+              "CandidateRecall": 0.8571428571428571,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d06",
+                "d05",
+                "d31",
+                "d00",
+                "d01",
+                "d02",
+                "d07",
+                "d03",
+                "d11",
+                "d24",
+                "d04"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5714285714285714,
+                "RecallAt10": 0.5714285714285714,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9531235722535198,
+                "NdcgAt10": 0.8978945719798548
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d08",
+                "d09",
+                "d10",
+                "d12",
+                "d24",
+                "d07",
+                "d06",
+                "d05",
+                "d04",
+                "d11",
+                "d03",
+                "d00",
+                "d01",
+                "d02",
+                "d13",
+                "d31",
+                "d14",
+                "d15",
+                "d23",
+                "d20",
+                "d21",
+                "d16",
+                "d22",
+                "d17",
+                "d18",
+                "d19",
+                "d25",
+                "d26",
+                "d27",
+                "d28",
+                "d29",
+                "d30"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.7142857142857143,
+                "RecallAt10": 0.8571428571428571,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.9876322084609285,
+                "NdcgAt10": 0.9546950454336347
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "repeated",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [
+              "d06",
+              "d07",
+              "d14",
+              "d26",
+              "d19",
+              "d00",
+              "d01",
+              "d02",
+              "d16"
+            ],
+            "vector": [
+              "d02",
+              "d01",
+              "d03",
+              "d00",
+              "d04",
+              "d31",
+              "d05",
+              "d30",
+              "d06",
+              "d29",
+              "d22",
+              "d20",
+              "d21",
+              "d07",
+              "d28",
+              "d23",
+              "d27",
+              "d08",
+              "d09",
+              "d10",
+              "d26",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d25",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406
+            ],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d01",
+            "d00",
+            "d02",
+            "d06",
+            "d07",
+            "d14",
+            "d26",
+            "d19",
+            "d16",
+            "d31",
+            "d03",
+            "d04",
+            "d05",
+            "d08",
+            "d09",
+            "d10",
+            "d20",
+            "d22",
+            "d11",
+            "d21",
+            "d30",
+            "d12",
+            "d29",
+            "d13",
+            "d23",
+            "d15",
+            "d28",
+            "d27",
+            "d17",
+            "d18",
+            "d25",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0.6666666666666666,
+            "RecallAt10": 1,
+            "MeanReciprocalRankAt10": 0.5,
+            "NdcgAt5": 0.5196923109005864,
+            "NdcgAt10": 0.5657390377312327
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 3,
+              "CandidateRecall": 0.3333333333333333,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d02",
+                "d06",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.3333333333333333,
+                "RecallAt10": 0.3333333333333333,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.5304935598381362,
+                "NdcgAt10": 0.5126101398691953
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 9,
+              "CandidateRecall": 0.8333333333333334,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d02",
+                "d01",
+                "d00",
+                "d06",
+                "d31",
+                "d07",
+                "d03",
+                "d14",
+                "d26"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.4421738509714444,
+                "NdcgAt10": 0.5582556129559126
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 13,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d01",
+                "d00",
+                "d02",
+                "d31",
+                "d03",
+                "d06",
+                "d04",
+                "d05",
+                "d07",
+                "d14",
+                "d26",
+                "d19",
+                "d30"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.3333333333333333,
+                "RecallAt10": 0.8333333333333334,
+                "MeanReciprocalRankAt10": 0.5,
+                "NdcgAt5": 0.11076341444322195,
+                "NdcgAt10": 0.4558295661050911
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d01",
+                "d00",
+                "d02",
+                "d06",
+                "d07",
+                "d14",
+                "d26",
+                "d19",
+                "d16",
+                "d31",
+                "d03",
+                "d04",
+                "d05",
+                "d08",
+                "d09",
+                "d10",
+                "d20",
+                "d22",
+                "d11",
+                "d21",
+                "d30",
+                "d12",
+                "d29",
+                "d13",
+                "d23",
+                "d15",
+                "d28",
+                "d27",
+                "d17",
+                "d18",
+                "d25",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.6666666666666666,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 0.5,
+                "NdcgAt5": 0.5196923109005864,
+                "NdcgAt10": 0.5657390377312327
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "missing-text",
+          "committedPosition": 7,
+          "eligibleCount": 32,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [],
+            "vector": [
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d05",
+              "d13",
+              "d29",
+              "d04",
+              "d06",
+              "d12",
+              "d14",
+              "d28",
+              "d30",
+              "d03",
+              "d07",
+              "d11",
+              "d15",
+              "d19",
+              "d27",
+              "d31",
+              "d02",
+              "d10",
+              "d18",
+              "d26",
+              "d01",
+              "d09",
+              "d17",
+              "d25",
+              "d00",
+              "d08",
+              "d16",
+              "d24"
+            ],
+            "graph": [
+              "d31",
+              "d00",
+              "d01",
+              "d02",
+              "d03",
+              "d04",
+              "d05",
+              "d06",
+              "d07",
+              "d08",
+              "d09",
+              "d10",
+              "d11",
+              "d12",
+              "d13",
+              "d14",
+              "d15",
+              "d16",
+              "d17",
+              "d18",
+              "d19",
+              "d20",
+              "d21",
+              "d22",
+              "d23",
+              "d24",
+              "d25",
+              "d26",
+              "d27",
+              "d28",
+              "d29",
+              "d30"
+            ]
+          },
+          "branchScores": {
+            "text": [],
+            "vector": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ],
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625,
+              0.015384615384615385,
+              0.015151515151515152,
+              0.014925373134328358,
+              0.014705882352941176,
+              0.014492753623188406,
+              0.014285714285714285,
+              0.014084507042253521,
+              0.013888888888888888,
+              0.0136986301369863,
+              0.013513513513513514,
+              0.013333333333333334,
+              0.013157894736842105,
+              0.012987012987012988,
+              0.01282051282051282,
+              0.012658227848101266,
+              0.0125,
+              0.012345679012345678,
+              0.012195121951219513,
+              0.012048192771084338,
+              0.011904761904761904,
+              0.011764705882352941,
+              0.011627906976744186,
+              0.011494252873563218,
+              0.011363636363636364,
+              0.011235955056179775,
+              0.011111111111111112,
+              0.01098901098901099,
+              0.010869565217391304
+            ]
+          },
+          "productionIds": [
+            "d05",
+            "d04",
+            "d06",
+            "d03",
+            "d31",
+            "d20",
+            "d13",
+            "d21",
+            "d02",
+            "d07",
+            "d12",
+            "d22",
+            "d01",
+            "d23",
+            "d00",
+            "d14",
+            "d11",
+            "d10",
+            "d15",
+            "d29",
+            "d09",
+            "d08",
+            "d19",
+            "d28",
+            "d30",
+            "d18",
+            "d17",
+            "d27",
+            "d16",
+            "d26",
+            "d25",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 0,
+            "RecallAt10": 0.5,
+            "MeanReciprocalRankAt10": 0.16666666666666666,
+            "NdcgAt5": 0,
+            "NdcgAt10": 0.3501661229924068
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 2,
+              "CandidateRecall": 0.25,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d20",
+                "d31"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 0.25,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7125794632086186,
+                "NdcgAt10": 0.7125794632086186
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 8,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d20",
+                "d31",
+                "d00",
+                "d21",
+                "d01",
+                "d22",
+                "d02",
+                "d23"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.5,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.8441042934522504,
+                "NdcgAt10": 0.9124785389867696
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 14,
+              "CandidateRecall": 1,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d05",
+                "d04",
+                "d20",
+                "d31",
+                "d00",
+                "d21",
+                "d01",
+                "d22",
+                "d02",
+                "d23",
+                "d03",
+                "d13",
+                "d29",
+                "d06"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 0.3333333333333333,
+                "NdcgAt5": 0.3562897316043093,
+                "NdcgAt10": 0.5266116215861236
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 32,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d05",
+                "d04",
+                "d06",
+                "d03",
+                "d31",
+                "d20",
+                "d13",
+                "d21",
+                "d02",
+                "d07",
+                "d12",
+                "d22",
+                "d01",
+                "d23",
+                "d00",
+                "d14",
+                "d11",
+                "d10",
+                "d15",
+                "d29",
+                "d09",
+                "d08",
+                "d19",
+                "d28",
+                "d30",
+                "d18",
+                "d17",
+                "d27",
+                "d16",
+                "d26",
+                "d25",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0.5,
+                "MeanReciprocalRankAt10": 0.16666666666666666,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0.3501661229924068
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "graph-selective",
+          "committedPosition": 7,
+          "eligibleCount": 4,
+          "gradeCount": 32,
+          "branchIds": {
+            "graph": [
+              "d00",
+              "d08",
+              "d16",
+              "d24"
+            ]
+          },
+          "branchScores": {
+            "graph": [
+              0.01639344262295082,
+              0.016129032258064516,
+              0.015873015873015872,
+              0.015625
+            ]
+          },
+          "productionIds": [
+            "d00",
+            "d08",
+            "d16",
+            "d24"
+          ],
+          "metrics": {
+            "RecallAt5": 1,
+            "RecallAt10": 1,
+            "MeanReciprocalRankAt10": 1,
+            "NdcgAt5": 1,
+            "NdcgAt10": 1
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 1,
+              "CandidateRecall": 0.25,
+              "AnyTruncated": true,
+              "FusedIds": [
+                "d00"
+              ],
+              "Metrics": {
+                "RecallAt5": 0.25,
+                "RecallAt10": 0.25,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 0.7125794632086186,
+                "NdcgAt10": 0.7125794632086186
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 4,
+              "CandidateRecall": 1,
+              "AnyTruncated": false,
+              "FusedIds": [
+                "d00",
+                "d08",
+                "d16",
+                "d24"
+              ],
+              "Metrics": {
+                "RecallAt5": 1,
+                "RecallAt10": 1,
+                "MeanReciprocalRankAt10": 1,
+                "NdcgAt5": 1,
+                "NdcgAt10": 1
+              }
+            }
+          ]
+        },
+        {
+          "kind": "controlled-search-quality",
+          "query": "empty-allowlist",
+          "committedPosition": 7,
+          "eligibleCount": 0,
+          "gradeCount": 32,
+          "branchIds": {
+            "text": [],
+            "vector": [],
+            "graph": []
+          },
+          "branchScores": {
+            "text": [],
+            "vector": [],
+            "graph": []
+          },
+          "productionIds": [],
+          "metrics": {
+            "RecallAt5": 0,
+            "RecallAt10": 0,
+            "MeanReciprocalRankAt10": 0,
+            "NdcgAt5": 0,
+            "NdcgAt10": 0
+          },
+          "windows": [
+            {
+              "Width": 1,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 4,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 8,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            },
+            {
+              "Width": 32,
+              "candidateCount": 0,
+              "CandidateRecall": 0,
+              "AnyTruncated": false,
+              "FusedIds": [],
+              "Metrics": {
+                "RecallAt5": 0,
+                "RecallAt10": 0,
+                "MeanReciprocalRankAt10": 0,
+                "NdcgAt5": 0,
+                "NdcgAt10": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "totalPassed": 90,
+  "totalFailed": 0,
+  "totalSkipped": 0
+}
