@@ -41,7 +41,7 @@ internal sealed class RequestCqrsProbeClaimedCleanup(string root, byte[] ownerBy
         var markers = new List<RequestCqrsProbeMarkerRecord>();
         var present = new HashSet<string>(StringComparer.Ordinal);
         inventory.RequireArmQuota(entries.Select(EntryName));
-        long total = InitialAggregateBytes;
+        var total = InitialAggregateBytes;
         foreach (var path in entries)
         {
             var name = Path.GetFileName(path);

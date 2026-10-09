@@ -75,7 +75,7 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
 
     public void ValidateCommit() => inner.ValidateCommit();
 
-    internal void PersistCandidates()
+    internal void PersistCandidates(Guid currentIncarnation)
     {
         if (candidates.Count == NoCandidates)
         {
@@ -88,12 +88,20 @@ internal sealed class AtomicPartitionRosterTransaction : IAtomicTransaction, IPa
             : NativeSerialization.Deserialize<long>(appliedBytes);
         foreach (var candidate in candidates)
         {
-            var existing = inner.GetRecord<AtomicPartitionCatalogEntryV1>(candidate.Value);
+            var existingBytes = inner.ReadOwnedValue(candidate.Value);
+            var existing = existingBytes is null ? null : NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(existingBytes);
             if (existing is not null)
             {
-                AtomicPartitionRosterEntryValidation.Validate(existing, candidate.Key, storePosition, currentAppliedIndex);
+                var historicalBound = AtomicPartitionRosterOriginValidation.ReadBound(inner, existing,
+                    existingBytes!, currentIncarnation);
+                AtomicPartitionRosterEntryValidation.Validate(existing, candidate.Key, storePosition,
+                    Math.Max(currentAppliedIndex, historicalBound));
                 continue;
             }
+
+            if (existingBytes is not null || inner.ReadOwnedValue(
+                AtomicPartitionRosterRestoreOriginSerialization.OriginKey(candidate.Key)) is not null)
+            { throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry); }
 
             var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
                 ? AtomicPartitionRosterProtocol.NoReplicatedStorePosition : storePosition;

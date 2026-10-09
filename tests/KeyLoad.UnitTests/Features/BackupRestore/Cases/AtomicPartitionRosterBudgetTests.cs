@@ -41,7 +41,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), [FirstStagedValue]);
             bounded.Put(KeySpace.Partition(PartitionRecordFamilies.Document, second,
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), [SecondStagedValue]);
-            bounded.PersistCandidates();
+            bounded.PersistCandidates(fixture.Store.Identity.Incarnation);
             bounded.ValidateCommit();
             return true;
         }));
@@ -113,7 +113,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
             bounded.Reset();
             bounded.Put(KeySpace.Partition(PartitionRecordFamilies.Document, second,
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), NativeSerialization.Serialize(secondRecord));
-            bounded.PersistCandidates();
+            bounded.PersistCandidates(fixture.Store.Identity.Incarnation);
             bounded.ValidateCommit();
             return true;
         });

@@ -22,19 +22,22 @@ internal static class ZoneTreeBackupRestoreRestore
         ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
         try
         {
-            var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy),
-                newIncarnation, newSigningKey);
+            var originalIdentity = ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy);
+            var identity = CreateRestoredIdentity(originalIdentity, newIncarnation, newSigningKey);
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
-            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions);
+            var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation);
             Publish(staging, destinationPath);
             return restoredIdentity;
         }
-        finally
+        catch (Exception primary)
         {
-            if (Directory.Exists(staging))
+            try
             {
-                Directory.Delete(staging, recursive: true);
+                if (Directory.Exists(staging)) { Directory.Delete(staging, recursive: true); }
             }
+            catch (Exception cleanup)
+            { throw new AggregateException(primary, cleanup); }
+            throw;
         }
     }
 
@@ -81,18 +84,42 @@ internal static class ZoneTreeBackupRestoreRestore
     }
 
     private static StoreIdentity ApplyRestoreAuthorityState(string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid sourceIncarnation)
     {
         var runtime = new ZoneTreeStoreRuntime(new ZoneTreeStoreOptions(destination).ResolveExecutionOptions(executionOptions));
-        using var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
-        restored.Commit((tx, _) =>
+        var restored = new ZoneTreeStore(runtime, runtime.Identity.NodeId);
+        Exception? primary = null;
+        try
         {
-            tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
-            tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
-            tx.Delete(KeyCodec.Encode(MembershipNamespace, OrleansMembershipKey));
-            tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
-            return true;
-        });
-        return restored.Identity;
+            var hasHistoricalOrigins = ZoneTreeBackupRestoreRoster.CarryOrigins(restored, sourceIncarnation);
+            restored.Commit((tx, _) =>
+            {
+                tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
+                tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
+                tx.Delete(KeyCodec.Encode(MembershipNamespace, OrleansMembershipKey));
+                tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
+                if (hasHistoricalOrigins)
+                {
+                    tx.PutRecord(AtomicPartitionRosterRestoreOriginSerialization.IdentityKey(),
+                        new AtomicPartitionRosterRestoreIdentity(AtomicPartitionRosterRestoreOriginSerialization.CurrentVersion,
+                            sourceIncarnation, restored.Identity.Incarnation));
+                }
+                return true;
+            });
+            return restored.Identity;
+        }
+        catch (Exception failure)
+        { primary = failure; throw; }
+        finally { DisposeRestoredStore(restored, primary); }
+    }
+
+    private static void DisposeRestoredStore(ZoneTreeStore restored, Exception? primary)
+    {
+        try { restored.Dispose(); }
+        catch (Exception cleanup)
+        {
+            if (primary is null) { throw; }
+            throw new AggregateException(primary, cleanup);
+        }
     }
 }

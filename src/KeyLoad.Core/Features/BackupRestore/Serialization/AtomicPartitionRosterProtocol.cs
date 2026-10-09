@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Features.BackupRestore.Serialization;
 
 internal static class AtomicPartitionRosterProtocol
 {
-    internal const int CurrentVersion = 1;
+    internal const int CurrentVersion = AtomicPartitionRosterRestoreOriginSerialization.EntryVersion;
     internal const long NoReplicatedAppliedIndex = 0;
     internal const long NoReplicatedStorePosition = 0;
     internal const string KeySpace = "atomic-partition-catalog";

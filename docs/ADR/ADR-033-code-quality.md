@@ -4,6 +4,17 @@ Status: Accepted; implementation and complete qualification remain pending. Rela
 
 ## Decision
 
+Owner direction 2026-10-09 adds Roslynk 2.1.0 as a pinned repository-local
+development tool and project-scoped Codex MCP server. The matching
+REQ/AC-CQ-ROS-001..003 and TASK-CQ-ROS-001 implementation contract in
+[CodeQuality](../Features/CodeQuality.md#roslynk-semantic-tooling-owner-direction-2026-10-09)
+owns installation, actual MCP interoperability, complete workspace loading,
+located diagnostics, reviewed fixes, rollback and the final verification join.
+Use its native semantic APIs while retaining the selected analyzer catalog,
+EditorConfig and every independent build/format/TUnit/Aspire/Linux gate.
+Upstream advice to replace builds with workspace diagnostics does not apply.
+The tool and disposable loopback workspace own no database execution or storage.
+
 Use the owner-selected EditorConfig unchanged, the .NET SDK analyzers at `latest-all`, build-time style checks and warnings-as-errors across every solution project. Keep the eight applicable imported rules, excluding the four whose contracts do not apply to KeyLoad. Own editable Roslyn rules in the central source analyzer project and test them through actual SDK Roslyn compilations with TUnit. Keep compiler SARIF 2.1 reports available for successful and failed builds. Preserve the pinned compiler-host package selection; analyzer tests use SDK Roslyn references rather than a second loader.
 Keep `GenerateDocumentationFile` enabled for the native IDE0005 build diagnostic.
 Missing public documentation remains an error; no imported suppression list is permitted.

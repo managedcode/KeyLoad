@@ -28,15 +28,15 @@ internal static class C1OutcomeInspectionJson
         nameof(C1OutcomeInspectionReceipt.Position),
         nameof(C1OutcomeInspectionReceipt.OutcomePresent)
     ];
-    private static readonly C1OutcomeInspectionJsonContext Context = CreateContext();
-    internal static C1OutcomeInspectionJsonContext SharedContext => Context;
+
+    internal static C1OutcomeInspectionJsonContext SharedContext { get; } = CreateContext();
 
     internal static C1OutcomeInspectionRequest ReadRequest(ReadOnlySpan<byte> bytes)
     {
         ValidateShape(bytes, RequestFields, C1OutcomeInspectionProtocol.MaximumRequestBytes, InvalidRequest);
         try
         {
-            var request = JsonSerializer.Deserialize(bytes, Context.C1OutcomeInspectionRequest);
+            var request = JsonSerializer.Deserialize(bytes, SharedContext.C1OutcomeInspectionRequest);
             return C1OutcomeInspectionRequestValidation.Validate(request);
         }
         catch (JsonException)
@@ -60,7 +60,7 @@ internal static class C1OutcomeInspectionJson
     internal static byte[] SerializeRequest(C1OutcomeInspectionRequest request)
     {
         _ = C1OutcomeInspectionRequestValidation.Validate(request);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(request, Context.C1OutcomeInspectionRequest);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(request, SharedContext.C1OutcomeInspectionRequest);
         if (bytes.Length > C1OutcomeInspectionProtocol.MaximumRequestBytes)
         {
             throw InvalidRequest();
@@ -76,7 +76,7 @@ internal static class C1OutcomeInspectionJson
         ValidateShape(bytes, ReceiptFields, C1OutcomeInspectionProtocol.MaximumReceiptBytes, InvalidReceipt);
         try
         {
-            var receipt = JsonSerializer.Deserialize(bytes, Context.C1OutcomeInspectionReceipt);
+            var receipt = JsonSerializer.Deserialize(bytes, SharedContext.C1OutcomeInspectionReceipt);
             if (receipt is null || receipt.Version != C1OutcomeInspectionProtocol.Version
                 || receipt.NodeId == Guid.Empty || receipt.Incarnation == Guid.Empty
                 || receipt.FormatVersion <= FormatVersionValidationBoundary || receipt.Position < PositionValidationBoundary)
@@ -96,7 +96,7 @@ internal static class C1OutcomeInspectionJson
         const int JsonLengthStep = 1;
         const char LineFeedCharacter = '\n';
 
-        var json = JsonSerializer.SerializeToUtf8Bytes(receipt, Context.C1OutcomeInspectionReceipt);
+        var json = JsonSerializer.SerializeToUtf8Bytes(receipt, SharedContext.C1OutcomeInspectionReceipt);
         var lineLength = checked(json.Length + JsonLengthStep);
         if (lineLength > C1OutcomeInspectionProtocol.MaximumReceiptBytes)
         {

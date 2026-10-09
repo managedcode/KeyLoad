@@ -1,5 +1,54 @@
 # CodeQuality
 
+## Roslynk semantic tooling, owner direction 2026-10-09
+
+REQ-CQ-ROS-001 / AC-CQ-ROS-001: restore the published Roslynk 2.1.0 local
+.NET tool from `dotnet-tools.json` and start its native MCP stdio transport with
+`dotnet tool run roslynk -- stdio`. Project-scoped `.codex/config.toml` supplies
+the command and an isolated loopback daemon port. Verify an actual initialize,
+tools/list and open_solution operation against the absolute `KeyLoad.slnx` path;
+wait for loading to finish before accepting any diagnostic result. Tool manifest
+version is authoritative; the upstream MCP server version string is not package
+version evidence. Installation failure or incomplete workspace loading fails
+this criterion and cannot become a clean diagnostic report.
+
+REQ-CQ-ROS-002 / AC-CQ-ROS-002: run native `get_diagnostics` with compiler errors,
+warnings and analyzers included against the complete loaded solution. Review
+located findings, use available native code fixes where suitable, and preserve
+behavior, stable Orleans contracts, enabled analyzer severities and unrelated
+checkout changes. Unavailable code fixes require an owning-source repair, not a
+suppression. Recheck after repairs; fail on remaining errors/warnings or workspace
+load failures. Informational/hidden suggestions are advisory and require review.
+
+REQ-CQ-ROS-003 / AC-CQ-ROS-003: retain the canonical final format, strict Release
+solution build and mapped native TUnit/Aspire operation regressions. Roslynk
+diagnostics supplement these gates; they do not qualify runtime behavior, RF3,
+coverage or exact-source Linux delivery. New behavioral defects need complete-flow
+regressions in their owning slices. No product dependency, runtime protocol,
+storage format or database topology is changed by installing this development tool.
+
+TASK-CQ-ROS-001 maps these criteria to actual local tool/MCP operations (explicit
+manual-evidence exception for developer installation, no source-text tests),
+compiler diagnostics, canonical build/format and the affected existing TUnit
+suites. The lead owns root configuration, policy/docs and final integration;
+read-only workers inspect upstream APIs and the ordered ten-skill quality baseline.
+Ordered stages are pin/install/configure; load/diagnose; assign preserving repairs
+and meaningful regressions by finding; join/freeze source; format/build and run
+mapped suites; record actual results. Baseline findings and generated reports stay
+in ignored artifacts or temporary storage. Delivery qualification remains open
+until the required original Linux evidence exists. Rollback removes only this
+local tool entry and MCP configuration, retaining product repairs and unrelated work.
+ADR: [ADR-033](../ADR/ADR-033-code-quality.md), matching tooling continuation.
+
+```mermaid
+flowchart LR
+    Manifest[Pinned local Roslynk tool] --> MCP[Project stdio MCP connection]
+    MCP --> Workspace[Loaded KeyLoad solution]
+    Workspace --> Findings[Compiler and analyzer findings]
+    Findings --> Repair[Reviewed preserving source fixes]
+    Repair --> Gates[Canonical format build and native tests]
+```
+
 TASK-CQ-UNIT64-010 implements the owner's 2026-10-06 rule-specific correction:
 REQ-CQ-006 / AC-CQ-008 now require KLD0032 at an executable-unit boundary of64
 code lines. File400, aggregate type200, nesting3, token/trivia counting,

@@ -68,7 +68,7 @@ public sealed partial class DatabaseEngine
             return outcome.Result;
         }
         PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
-        return ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
+        return ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome, Store.Identity.Incarnation);
     }
 
     private static OperationResult? ReadAlreadyAppliedOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
@@ -215,11 +215,11 @@ public sealed partial class DatabaseEngine
     }
 
     private static OperationResult ValidateCompiledCommand(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
-        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome)
+        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome, Guid currentIncarnation)
     {
         try
         {
-            transaction.PersistCandidates();
+            transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();
             return outcome.Result;
         }
@@ -231,7 +231,7 @@ public sealed partial class DatabaseEngine
             var failure = new OperationResult(null, exception.Code, exception.Message);
             PersistCommandOutcome(transaction, operation, resultKey, outcome with
             { Result = failure, BlobAuthority = null, CompositionAuthority = null }, replicationIndex, persistOutcome);
-            transaction.PersistCandidates();
+            transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();
             return failure;
         }

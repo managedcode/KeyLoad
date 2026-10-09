@@ -56,3 +56,30 @@ flowchart LR
     Restore --> Review[Reconcile external outcomes]
     Review --> Resume[Explicit authorized dispatch resume]
 ```
+
+## TASK-KL042-ROSTER-RESTORE-ORIGIN-001 — current-format historical coordinate ownership
+
+REQ-BACKUP-ROSTER-RESTORE-001 maps to AC-BACKUP-ROSTER-RESTORE-001: restoring an actual replicated materialization into a new incarnation preserves each complete immutable roster entry and admits its first new scoped write, exact original new receipt replay and cold continuation. Historical firstSeen is never reused as current LastApplied, a minimum token or RF3 authority. Old command receipts/tokens remain incarnation-fenced.
+
+Freeze before code: a generated native per-partition restore-origin record contains version, complete PartitionRef, actual source/new incarnation, admitted historical applied upper bound and SHA256 of the exact retained native roster bytes. The old four-field entry alias/Ids/bytes remain unchanged. Only a byte-identical historical row can use its bound; a new or changed row without its matching origin must satisfy current applied coordinates. The source restore owner validates existing origin against actual source incarnation/digest before carrying it into another restore; malformed/mismatched origin never falls back. FirstSeen local coordinates stay bounded by the verified source physical position. Replicated source coordinates must fit actual source LastApplied or a valid prior per-row origin.
+
+The current staged native restore enumerates one actual roster row at a time and persists one validated historical origin per replicated row using the existing native commit/frame bound, before its original final identity-authority reset/publication. There is no new configured limit or unbounded map. All source/archive bytes stay unchanged; staged failure cannot publish a target. Restored physical position is the original verified cut plus actual historical-origin commits plus the existing reset commit; backups with no replicated roster retain the original single increment. This metadata is historical provenance only, not policy or placement authority. No physical-catalog reconciliation bypass is added.
+
+Ownership: shared generated contracts, canonical keys and pure structural/digest match in Abstractions/BackupRestore; original staged restore in Storage.ZoneTree/BackupRestore; Core roster validation/atomic commit; complete native Unit BackupRestore operation flow. Related ADR008/011/046. Root reviews/joins/builds; native normal/scalar and exact-source Linux remain required. Current-format only, no migration or fallback. New public route/SQL/parser/client behavior N/A. Full KL042 catalog manifest/off-node/clean RF3/outbox/graph/RPO/RTO remains OPEN.
+
+AC-BACKUP-ROSTER-RESTORE-002 requires actual replicated seed→verified backup→clean restore→first new local and early-new-replication command→full literal state and exact receipt replay→cold reopen→second verified restore; complete immutable roster/archive comparison. Corrupt origin version/scope/source/new identity/bound/digest and changed roster bytes must refuse without effect or physical cut change, then exact original repair yields healthy distinct command. Missing origin cannot admit an old firstSeen above current applied. Supporting native Unit flows do not qualify clean RF3 restoration.
+
+This finite native owner regression uses the existing legitimate offline DatabaseEngine composition. Its stored command-outcome incarnation is new, while the archived physical catalog intentionally remains original; it does not prove production RF3 admission or invalidate every old minimum-token placement witness. Physical catalog reconciliation, clean-cluster bootstrap and actual SDK/MCP token fencing remain explicit KL042 gates. Invalid prior origin also rejects a second real restore without target publication or leaked staging; source/archive bytes and cuts stay unchanged, then exact metadata repair and healthy cold operation are required. Generated origin identity/digest metadata is not a MAC, a caller capability, or authority to modify the roster; normal clients cannot write these native families.
+
+Each per-row SourceIncarnation must additionally equal the actual source in the native global restore-identity pair persisted by the final authority commit, whose RestoredIncarnation must equal the actual store identity. Prior pairs are checked against the actual recovered source before carry. Missing, mismatched or orphan identities fail closed; a random nonempty source UUID is insufficient. This pair carries no historical upper bound and cannot admit an unbound row. Empty/local-only backups add no origin metadata or extra commits.
+
+Ordered stages are verify original artifact/source cut → create unpublished new identity → bounded native roster/prior-origin checks → actual per-row historical metadata commits → one final origin-identity/replica-reset/paused-dispatch commit → publish clean target after owner disposal. Any source/metadata/frame/cleanup failure rejects publication and retains primary plus disposal/staging-cleanup failures. Root alone joins, builds, runs native normal/scalar and source-bound Linux; rollback before publication removes only owned staging. This first-release current-format metadata is not a supported upgrade/downgrade migration or compatibility fallback; older source/runtime artifacts do not qualify it.
+
+```mermaid
+flowchart LR
+  A[Verified original backup cut] --> B[Unpublished new store identity]
+  B --> C[Bounded exact roster and prior origin checks]
+  C --> D[Native per-row digest origins]
+  D --> E[Atomic new identity pair and paused authority reset]
+  E --> F[Joined owner then target publication]
+```
