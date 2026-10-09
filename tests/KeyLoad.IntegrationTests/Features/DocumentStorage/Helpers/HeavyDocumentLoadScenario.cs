@@ -114,7 +114,8 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
         {
             token.ThrowIfCancellationRequested();
             var original = client.GetAsync(HeavyDocumentLoadReadback.Sentinel(partition), token);
-            var concurrent = !original.IsCompleted && overlap.HasIncompleteOriginal();
+            // Completion is monotonic: a later incomplete read also existed at the observed incomplete write.
+            var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
             var result = await McpCallerAssertions.SdkSuccessAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result, partition).ConfigureAwait(false);
             if (concurrent)
@@ -129,7 +130,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             token.ThrowIfCancellationRequested();
             var original = owner.CallAsync(McpCallerTools.DocumentsGet,
                 new GetDocumentRequest(HeavyDocumentLoadReadback.Sentinel(partition)), token);
-            var concurrent = !original.IsCompleted && overlap.HasIncompleteOriginal();
+            var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
             var result = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await original.ConfigureAwait(false))
                 .ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, partition).ConfigureAwait(false);
@@ -145,7 +146,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
         {
             token.ThrowIfCancellationRequested();
             var original = owner.CallAsync(McpCallerTools.QueryAst, request, token);
-            var concurrent = !original.IsCompleted && overlap.HasIncompleteOriginal();
+            var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
             var result = await McpCallerAssertions.SuccessAsync<QueryPage>(await original.ConfigureAwait(false))
                 .ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelPageAsync(result.Value).ConfigureAwait(false);

@@ -17,7 +17,7 @@ internal sealed class IsolatedHelixDbResourceTests
         var runner = resources.Single(item => item.Name == IsolatedResourceTopologyFixture.RunnerName);
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, [node]);
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
-        await Assert.That(image.Registry).IsEqualTo(string.Empty);
+        await Assert.That(image.Registry).IsNull();
         await Assert.That(image.Image).IsEqualTo("ghcr.io/helixdb/helixdb");
         await Assert.That(image.Tag).IsNull();
         await Assert.That(image.SHA256).IsEqualTo(BenchmarkResources.HelixDbDigest[7..]);

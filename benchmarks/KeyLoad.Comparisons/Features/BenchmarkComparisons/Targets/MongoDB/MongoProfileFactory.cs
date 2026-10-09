@@ -1,5 +1,5 @@
-using MongoDB.Driver;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace KeyLoad.Comparisons.Targets;
 
