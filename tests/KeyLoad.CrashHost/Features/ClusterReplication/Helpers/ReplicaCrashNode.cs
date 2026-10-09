@@ -36,7 +36,7 @@ internal sealed class ReplicaCrashNode : IDisposable
             ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation, FaultObserver = replicaObserver }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             try
             {
-                Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
+                Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
                 Log = new(ReplicaStore, configurationOptions, observer, canonicalDatabase: Database);
                 Bootstrap();
                 Snapshots = new(Canonical, Log, configurationOptions, CrashExecutionOptions.Replica(), observer);

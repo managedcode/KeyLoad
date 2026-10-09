@@ -32,6 +32,8 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), CommandInboxExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ChangeFeedExecutionOptions>().Bind(configuration.GetSection(ChangeFeedExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ChangeFeedExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<PartitionMovementCheckpointOptions>().Bind(configuration.GetSection(PartitionMovementCheckpointOptions.SectionName))
+            .Validate(options => options.IsValid(), PartitionMovementCheckpointOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<TimeSeriesExecutionOptions>().Bind(configuration.GetSection(TimeSeriesExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), TimeSeriesExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<BlobExecutionOptions>().Bind(configuration.GetSection(BlobExecutionOptions.SectionName))

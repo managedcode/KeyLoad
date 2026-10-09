@@ -1,3 +1,4 @@
+using System.Globalization;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -29,6 +30,14 @@ internal static class TwoRf3RemoteReadResources
         {
             foreach (var resource in resources)
             { resource.WithEnvironment(TwoRf3ProfileProtocol.MovementEnvironment, TwoRf3ProfileProtocol.Enabled); }
+        }
+        if (control.Value.MovementMaxBatchBytes is { } maxBatchBytes)
+        {
+            foreach (var resource in resources)
+            {
+                resource.WithEnvironment(TwoRf3ProfileProtocol.MovementMaxBatchBytesEnvironment,
+                    maxBatchBytes.ToString(CultureInfo.InvariantCulture));
+            }
         }
         if (control.Value.RemotePartitionQueries)
         {

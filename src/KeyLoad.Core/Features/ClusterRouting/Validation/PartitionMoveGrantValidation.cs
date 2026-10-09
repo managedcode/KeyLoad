@@ -15,7 +15,8 @@ internal static class PartitionMoveGrantValidation
             || grant.Stage != envelope.Stage || grant.PageOrdinal != envelope.PageOrdinal || grant.ControlIntentDigest != envelope.ControlIntentDigest
             || grant.OperatorPolicyEpoch <= PartitionMoveProtocol.EmptyCount
             || string.IsNullOrWhiteSpace(grant.OperatorPrincipalId)
-            || grant.AdmissionPosition <= PartitionMoveProtocol.EmptyCount || grant.Settlement is not null || grant.AbortDisposition is not null
+            || grant.AdmissionPosition <= PartitionMoveProtocol.EmptyCount || grant.Settlement is not null
+            || grant.AbortDisposition is not null || grant.RetireCancellationDisposition is not null
             || grant.ExpiresAt != envelope.ExpiresAt || grant.ExpiresAt <= now
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ControlOwner, envelope.ControlOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(grant.ReceiverOwner, receiver)
@@ -30,5 +31,5 @@ internal static class PartitionMoveGrantValidation
             or PartitionMovePeerStage.ControlBeginAbort or PartitionMovePeerStage.ControlFinalizeAbort
             or PartitionMovePeerStage.ControlCompleteRetirement or PartitionMovePeerStage.ControlCancelGrants
             or PartitionMovePeerStage.ControlAdmitCommand or PartitionMovePeerStage.ControlAcknowledgeCommand
-            or PartitionMovePeerStage.ControlFinalizeCommand;
+            or PartitionMovePeerStage.ControlFinalizeCommand or PartitionMovePeerStage.ControlCheckpoint;
 }

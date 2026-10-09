@@ -9,7 +9,7 @@ internal sealed partial class PartitionMovementSourceOwner
         lock (gate)
         {
             closing = true;
-            shutdown ??= CloseAsync(captures.Values.Select(value => value.Completion.Task).ToArray());
+            shutdown ??= CloseAsync(captures.Values.Select(value => value.CompletionTask).ToArray());
             return new(shutdown);
         }
     }
@@ -20,13 +20,12 @@ internal sealed partial class PartitionMovementSourceOwner
         await ServerFailureObserver.ObserveAsync(stopping.CancelAsync, failures).ConfigureAwait(false);
         foreach (var original in capturing)
         { await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false); }
-        PartitionMovementSourceEntry[] retained;
+        IPartitionMovementRetainedSourceImage[] retained;
         lock (gate)
         { retained = sessions.Values.Concat(closedMoves.Values.SelectMany(value => value)).Distinct().ToArray(); }
         foreach (var entry in retained)
         {
-            await ServerFailureObserver.ObserveAsync(() => entry.Session.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            ServerFailureObserver.Observe(entry.ReleaseWork, failures);
+            await ServerFailureObserver.ObserveAsync(() => entry.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         NativeRequestWorkLease[] closureWork;
         lock (gate)

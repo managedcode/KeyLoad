@@ -39,7 +39,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 operationToken).ConfigureAwait(true);
             var result = kind == OperationKind.PartitionMovementPhase
                 ? await GrainPartitionMovementCommand.SubmitAsync(database, coordinator, request, principal,
-                    operationToken).ConfigureAwait(true)
+                    codec, context, operationToken).ConfigureAwait(true)
                 : await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
                     request.Payload, operationToken).ConfigureAwait(true);
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)

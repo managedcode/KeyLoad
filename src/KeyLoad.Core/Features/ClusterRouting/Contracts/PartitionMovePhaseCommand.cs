@@ -15,4 +15,5 @@ internal sealed record PartitionMovePhaseCommand(
     [property: Orleans.Id(8)] int PageOrdinal,
     [property: Orleans.Id(9)] ReadOnlyMemory<byte> Body,
     [property: Orleans.Id(10)] Guid? GrantId = null,
-    [property: Orleans.Id(11)] ImmutableArray<ResourceDefinition> Resources = default);
+    [property: Orleans.Id(11)] ImmutableArray<ResourceDefinition> Resources = default,
+    [property: Orleans.Id(12), System.Text.Json.Serialization.JsonIgnore] PartitionMoveReceiverEffectAdmission? ReceiverEffectAdmission = null);

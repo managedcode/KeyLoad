@@ -60,6 +60,7 @@ internal static class McpToolNames
     internal const string ProjectionsCommit = "keyload_projections_commit";
     internal const string ProjectionsRelease = "keyload_projections_release";
     internal const string OutboxPurge = "keyload_outbox_purge";
+    internal const string AdminPartitionMove = PartitionMovePublicProtocol.ToolName;
     internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
     internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
 }

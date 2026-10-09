@@ -38,8 +38,12 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(controlledDocuments); }
         if (movementCapture is not null)
         { builder.Services.AddSingleton(movementCapture); }
+        if (movementCapture is PartitionMovementSourceOwner sourceOwner)
+        { builder.Services.AddSingleton(sourceOwner.TransferReads); }
         if (movementDispatcher is not null)
         { builder.Services.AddSingleton(movementDispatcher); }
+        if (movementDispatcher is IPartitionMovementParent movementParent)
+        { builder.Services.AddSingleton(movementParent); }
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,

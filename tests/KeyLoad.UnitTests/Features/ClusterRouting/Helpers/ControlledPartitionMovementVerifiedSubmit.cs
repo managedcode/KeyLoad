@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -33,8 +35,16 @@ internal static class ControlledPartitionMovementVerifiedSubmit
                     var principal = receiver.Store.Read(view => receiver.Database.Principal(view, principalId,
                         receiver.Database.EvaluationClock.GetUtcNow()));
                     GrainRequestAuthority.RequireAdministrator(principal);
-                    var operation = receiver.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
-                        principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
+                    var operation = verified.Envelope.Stage == PartitionMovePeerStage.ControlCheckpoint
+                        ? receiver.Database.CreateVerifiedPartitionMovementCheckpointOperation(verified.CommandId,
+                            principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope,
+                            new ReadExecutionBudget(runtime.Core.DatabaseLimits, receiver.Database.EvaluationClock, cancellationToken))
+                        : verified.Envelope.Grant is { RequireReceiverIssuance: true }
+                            ? receiver.Database.CreateVerifiedPartitionMovementParentEffect(verified.CommandId,
+                                principal.Id, verified.Envelope, new ReadExecutionBudget(runtime.Core.DatabaseLimits,
+                                    receiver.Database.EvaluationClock, cancellationToken))
+                            : receiver.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
+                                principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
                     result = receiver.Journal.Submit(operation, cancellationToken);
                 }, failures);
             }

@@ -23,7 +23,7 @@ internal sealed class BlobExecutionPolicyTests
         var healthy = new DatabaseEngine(fixture.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(new() { InitialCatalogProofRecords = 2 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.BlobExecution(new() { InitialCatalogProofRecords = 2 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new("blob-policy", ResourceKind.BlobStore, fixture.Partition.TransactionDomainId));
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, "root",

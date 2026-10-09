@@ -128,7 +128,8 @@ internal sealed class PartitionHost : IAsyncDisposable
             ? new PhysicalShardRecord(options.PhysicalShardId, Configuration.Incarnation,
                 Configuration.VoterIds, PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch) : null;
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
-            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, clock, physicalOwner);
+            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, core.MovementCheckpoints,
+            new Features.ClusterRouting.PartitionMovementCheckpointVerifier(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, runtimeOptions.GrainRouting), clock, physicalOwner);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);
         return database;
     }

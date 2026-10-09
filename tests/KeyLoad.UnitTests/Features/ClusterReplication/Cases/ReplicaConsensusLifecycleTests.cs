@@ -93,7 +93,7 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Log = new(replica, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
         Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
             ReplicaExecutionTestOptions.Configuration(Configuration), execution), execution);

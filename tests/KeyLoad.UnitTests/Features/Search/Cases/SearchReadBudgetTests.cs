@@ -50,7 +50,7 @@ internal sealed class SearchReadBudgetTests
         var documentBytes = Bytes(DocumentKeySpace, Orders);
         var vectorBytes = Bytes(VectorKeySpace, Orders, EmbeddingPath);
         var lineageBytes = KeySpace.Partition(LineageKeySpace, database.Partition, Orders, EmbeddingPath, "a").LongLength;
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var search = new SearchEngine(bounded, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
 

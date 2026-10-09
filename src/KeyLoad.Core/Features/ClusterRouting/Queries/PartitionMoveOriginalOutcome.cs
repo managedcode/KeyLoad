@@ -15,6 +15,8 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(work);
         ArgumentNullException.ThrowIfNull(grant);
         work.Check();
+        if (original.Grant is { RequireReceiverIssuance: true })
+        { movementCheckpointVerifier.RequireReceiverAdministrator(this, localPrincipalId, work); }
         PartitionMovePeerEnvelopeValidation.RequireStructure(original, Limits.MaxBatchBytes);
         if (phaseCommandId == Guid.Empty || string.IsNullOrWhiteSpace(localPrincipalId))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
@@ -36,6 +38,9 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         RequireOriginalMoveOutcomeReceiver(original, catalog.DefaultShard);
+        var originalEpoch = original.Grant is { RequireReceiverIssuance: true }
+            ? RequireMoveReceiverOriginalObservationEpoch(view, principal, original, phaseCommandId)
+            : principal.PolicyEpoch;
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, original.Partition);
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, phaseCommandId, scope);
         var outcome = selected.Outcome
@@ -44,7 +49,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage); }
         if (outcome.Fingerprint != expectedIdentity)
         { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
-        if (outcome.PolicyEpoch != principal.PolicyEpoch)
+        if (outcome.PolicyEpoch != originalEpoch)
         { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
         return outcome.Result;
     }

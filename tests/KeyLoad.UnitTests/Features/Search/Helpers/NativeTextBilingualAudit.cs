@@ -32,7 +32,7 @@ internal static class NativeTextBilingualAudit
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
     internal static async Task VerifyAsync(SearchEngine search, PartitionRef partition, CancellationToken token)
     {
         await LiteralAsync(search, partition, UkrainianQuery, UkrainianId, UkrainianJson, token);

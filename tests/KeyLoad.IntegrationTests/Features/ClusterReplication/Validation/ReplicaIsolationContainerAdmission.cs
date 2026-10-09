@@ -27,7 +27,7 @@ internal static class ReplicaIsolationContainerAdmission
         { return ReplicaIsolationAdmissionMismatch.NetworkMode; }
         if (capabilities.Length != SingleCapability)
         { return ReplicaIsolationAdmissionMismatch.CapabilityCount; }
-        if (capabilities[FirstIndex] != NetAdmin)
+        if (capabilities[FirstIndex] != NativeNetAdmin)
         { return ReplicaIsolationAdmissionMismatch.Capability; }
         if (Text(value, Name) != NamePrefix + name)
         { return ReplicaIsolationAdmissionMismatch.ContainerName; }

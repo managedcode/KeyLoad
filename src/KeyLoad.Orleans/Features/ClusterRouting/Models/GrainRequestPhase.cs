@@ -8,7 +8,8 @@ internal enum GrainRequestPhase
     BeforeSubmit,
     SubmitReturned,
     ControlledDocumentGrantSettled,
-    ControlledDocumentOutcomeReturned
+    ControlledDocumentOutcomeReturned,
+    RetireOperationSealed
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

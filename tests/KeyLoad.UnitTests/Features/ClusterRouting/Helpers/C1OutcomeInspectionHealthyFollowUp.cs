@@ -18,7 +18,7 @@ internal static class C1OutcomeInspectionHealthyFollowUp
         => new(nativeStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
 
     internal static void CommitBatch(C1OutcomeInspectionFixture fixture, PartitionRef partition,
         Guid commandId, string documentId)

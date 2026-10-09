@@ -14,4 +14,5 @@ internal sealed record PartitionMoveControlRecord(
     [property: Orleans.Id(9)] long ControlPosition,
     [property: Orleans.Id(10)] string? ImageDigest,
     [property: Orleans.Id(11)] CommitToken? InstalledReceipt,
-    [property: Orleans.Id(12)] AtomicPartitionPlacementV1? PublishedPlacement);
+    [property: Orleans.Id(12)] AtomicPartitionPlacementV1? PublishedPlacement,
+    [property: Orleans.Id(13)] bool ParentCheckpointRequired = false);

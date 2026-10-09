@@ -20,4 +20,6 @@ internal sealed record PartitionMovePhaseResult(
     [property: Orleans.Id(7)] PartitionMovePhaseGrant? Grant = null,
     [property: Orleans.Id(8)] PartitionMoveCleanupState? Cleanup = null,
     [property: Orleans.Id(9)] PartitionControlCommandRecord? ControlledCommand = null,
-    [property: Orleans.Id(10)] PartitionControlEffectPayload? ControlledEffect = null);
+    [property: Orleans.Id(10)] PartitionControlEffectPayload? ControlledEffect = null,
+    [property: Orleans.Id(11)] PartitionMoveReceiverIssuance? ReceiverIssuance = null,
+    [property: Orleans.Id(12)] PartitionMoveExpiredRetireCancellation? RetireCancellation = null);

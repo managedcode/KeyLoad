@@ -18,14 +18,22 @@ internal static class GrainPartitionMovementCommand
         return phase.Partition.AtomicPartitionId;
     }
 
-    internal static Task<OperationResult> SubmitAsync(DatabaseEngine database, ICommitCoordinator coordinator,
-        DecodedGrainRequest request, PrincipalRecord principal, CancellationToken cancellationToken)
+    internal static async Task<OperationResult> SubmitAsync(DatabaseEngine database, ICommitCoordinator coordinator,
+        DecodedGrainRequest request, PrincipalRecord principal, GrainRequestCodec? codec,
+        IGrainContext? context, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var operation = database.VerifyOperationAuthority(Read(request));
         if (operation.PrincipalId != principal.Id || !principal.ClusterAdministrator)
         { throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired); }
-        return coordinator.SubmitVerifiedAsync(operation, cancellationToken);
+        var phase = NativeCommandPayload.Read<PartitionMovePhaseCommand>(operation);
+        if (phase.Stage == PartitionMovePeerStage.Retire && phase.ReceiverEffectAdmission is not null
+            && codec is { HasPhaseObserver: true })
+        {
+            await codec.ObservePhaseAsync(request, GrainRequestPhase.RetireOperationSealed, context,
+                cancellationToken).ConfigureAwait(true);
+        }
+        return await coordinator.SubmitVerifiedAsync(operation, cancellationToken).ConfigureAwait(true);
     }
 
     private static ReplicatedOperation Read(DecodedGrainRequest request)

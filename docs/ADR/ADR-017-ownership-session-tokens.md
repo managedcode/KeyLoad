@@ -300,3 +300,17 @@ sequenceDiagram
   RequestGrain->>LocalOwner: Revalidate key principal policy and both rows
   LocalOwner-->>Client: Explicit data cut and current authority cut or safe refusal
 ```
+
+
+## TASK-KL021-NATIVE-CAPABILITY-SCHEMA-005
+
+REQ/AC-MTOKEN-ISOLATION-003: owner-approved native schema correction separates the configured additional capability `NET_ADMIN` from the exact native Docker inspect representation `CAP_NET_ADMIN`. The actual source023/run37872325740/attempt1 normal and scalar schema3 originals establish one capability, soleCapabilityMatchesNetAdmin=false and soleCapabilityMatchesPrefixedNetAdmin=true, with exact attached network ID equality. Admission stops at Capability before evaluating RuntimeUser; these failures do not prove the service uid, and that unchanged exact non-root service-user guard remains mandatory. Preserve both original failed reports and their archive/source/image bindings.
+
+This correction supersedes only the unprefixed inspect-literal admission expectation in TASK-KL021-NATIVE-CAPABILITY-OBSERVATION-004. Aspire's existing --cap-add=NET_ADMIN producer remains unchanged. Inspect admission requires ONE exact CAP_NET_ADMIN string, with ordinal equality; unprefixed NET_ADMIN, different case, whitespace, ALL, other capabilities, absent values and multiple capabilities fail closed. There is no OR alias, decoder normalization or fallback. Every original running/privilege/PID/network/name/image/user/source/incarnation predicate and ordering remains unchanged. Diagnostic schema3 continues to report the two separate literal predicates without exporting native identities.
+
+Stages/ownership: IntegrationTests ClusterReplication Serialization declares the native canonical inspect constant separately from the configured diagnostic value; Validation compares only that native constant. Cases retains the existing ordinary supporting case identity and complete independently literal refusal/admission diagnostics, including a mismatched runtime user followed by exact healthy admission. Root alone joins, formats/builds, binds current source/PDB/native case metadata and executes native controls plus fresh genuine Linux former-leader SDK/official MCP/Q1 minimum-token refusal/restoration and cleanup. Controls are ordinary, not functional coverage or RF3 qualification. No database migration or product capability change; rollback restores the prior predicate and retains all originals. Current runtime qualification remains OPEN.
+
+
+### TASK-KL021-FOLLOWER-CANCELLATION-ORACLE-003
+
+REQ/AC-FOLLOWERREAD-001..005 use the canonical DocumentStorage contract for the actual held four-transport cancellation oracle. Require original caller cancellation/no value, actual canceled exception-token boolean for official SDK linked-token ownership, exact Cancelled for direct SDK and conservative UnknownWriteOutcome for Q1 SDK CALL, joined native producer and complete literal healthy continuation. TUnit must not introspect a disposed linked CancellationTokenSource by structural token equality. Product transport/errors/token lifetime, signed authorization, request/store/replica boundaries, all budgets and required suites remain unchanged. Root freezes docs before the guarded two-source correction, builds/formats, runs existing real partial-body SQL/client flows and qualifies actual current Linux RF3 originals. Source-only changes do not close KL021 or the independent initialize/namespace failures; original failed reports remain retained.

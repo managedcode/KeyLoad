@@ -46,16 +46,8 @@ public sealed partial class GrainRequestCodec
     /// <param name="payload">Exact native typed bytes, including the native zero marker for no-DTO capabilities.</param>
     /// <returns>A bounded database-signed envelope with the current incarnation and expiry.</returns>
     public string CreateRead(Guid requestId, string? principalId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
-        => Issue(new GrainRequestEnvelope
-        {
-            Purpose = GrainNativeContracts.RequestPurpose,
-            RequestId = requestId,
-            Incarnation = database.Store.Identity.Incarnation,
-            PrincipalId = principalId,
-            ReadKind = kind,
-            Payload = Encode(payload),
-            ExpiresAt = clock.GetUtcNow() + settings.RequestLifetime
-        });
+        => Issue(GrainRequestEnvelopeConstruction.Read(requestId, database.Store.Identity.Incarnation,
+            principalId, kind, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
 
     /// <summary>Signs one independently keyed request without changing the write's durable deduplication ID.</summary>
     /// <param name="requestId">Fresh request actor identity, independent from a stable write retry.</param>
@@ -65,17 +57,8 @@ public sealed partial class GrainRequestCodec
     /// <param name="payload">Exact bounded native bytes for the typed operation contract.</param>
     /// <returns>A bounded signed request for canonical partition routing.</returns>
     public string CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload)
-        => Issue(new GrainRequestEnvelope
-        {
-            Purpose = GrainNativeContracts.RequestPurpose,
-            RequestId = requestId,
-            Incarnation = database.Store.Identity.Incarnation,
-            PrincipalId = principalId,
-            CommandKind = kind,
-            CommandId = commandId,
-            Payload = Encode(payload),
-            ExpiresAt = clock.GetUtcNow() + settings.RequestLifetime
-        });
+        => Issue(GrainRequestEnvelopeConstruction.Command(requestId, database.Store.Identity.Incarnation,
+            principalId, kind, commandId, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
 
     internal DecodedGrainRequest Verify(string signedRequest)
     {

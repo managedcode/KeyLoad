@@ -136,7 +136,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), TimeProvider.System);
+            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, TimeProvider.System);
 
     internal static byte[] ReadOutcomeBytes(IAtomicStore store, PartitionRef partition, string principal, Guid commandId)
         => store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(partition, principal, commandId)))

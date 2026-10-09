@@ -51,7 +51,8 @@ internal sealed class SampleRollupLimitTests
         => new(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), Options.Create(options), db.Database.EvaluationClock);
+            UnitExecutionOptions.NativeClaimsExecution(), Options.Create(options), db.MovementCheckpoints,
+            UnavailablePartitionMovementCheckpointVerifier.Instance, db.Database.EvaluationClock);
     private static OperationResult Apply(DatabaseEngine engine, PartitionRef partition, Mutation mutation)
     {
         var id = Guid.NewGuid();

@@ -70,6 +70,7 @@ internal static class PartitionMoveGrantStageAdmission
             maximumBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         if (grant.MoveId != phase.MoveId || grant.Settlement is null || grant.AbortDisposition is not null
+            || grant.RetireCancellationDisposition is not null
             || grant.ControlIntentDigest != phase.ControlIntentDigest
             || phase.Stage == PartitionMovePeerStage.Retire && grant.Stage != PartitionMovePeerStage.PublishWitness
             || phase.Stage is PartitionMovePeerStage.Abort or PartitionMovePeerStage.SourceBeginAbort

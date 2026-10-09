@@ -93,6 +93,13 @@ internal static partial class UnitExecutionOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints(PartitionMovementCheckpointOptions? configured = null)
+    {
+        var value = configured ?? new PartitionMovementCheckpointOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<KeyLoad.Query.Features.Search.PackedAnnOptions> PackedAnn(KeyLoad.Query.Features.Search.PackedAnnOptions? configured = null)
     {
         var value = configured ?? new KeyLoad.Query.Features.Search.PackedAnnOptions();

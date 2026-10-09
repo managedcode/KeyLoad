@@ -4,9 +4,9 @@ namespace KeyLoad.Server;
 
 /// <summary>Retains scoped abort barriers and work admissions until actual source journal settlement.</summary>
 internal sealed class PartitionMovementSourceClosures(
-    Lock gate, Dictionary<Guid, PartitionMovementSourceEntry> sessions,
-    Dictionary<Guid, PartitionMovementPendingCapture> captures,
-    Dictionary<PartitionMovementSourceScope, PartitionMovementSourceEntry[]> closedMoves,
+    Lock gate, Dictionary<Guid, IPartitionMovementRetainedSourceImage> sessions,
+    Dictionary<Guid, IPartitionMovementPendingSourceRead> captures,
+    Dictionary<PartitionMovementSourceScope, IPartitionMovementRetainedSourceImage[]> closedMoves,
     Dictionary<PartitionMovementSourceScope, NativeRequestWorkLease> closedAdmissions,
     NativeRequestWorkOwner workOwner, Action requireOpen)
 {
@@ -18,8 +18,8 @@ internal sealed class PartitionMovementSourceClosures(
     internal async Task CloseMoveAsync(PartitionRef partition, Guid moveId)
     {
         var scope = new PartitionMovementSourceScope(partition, moveId);
-        PartitionMovementPendingCapture[] pending;
-        PartitionMovementSourceEntry[] retained;
+        IPartitionMovementPendingSourceRead[] pending;
+        IPartitionMovementRetainedSourceImage[] retained;
         lock (gate)
         {
             requireOpen();
@@ -34,13 +34,13 @@ internal sealed class PartitionMovementSourceClosures(
         foreach (var original in pending)
         { await ServerFailureObserver.ObserveAsync(original.StopAsync, failures).ConfigureAwait(false); }
         foreach (var original in pending)
-        { await ServerFailureObserver.ObserveAsync(() => original.Completion.Task, failures).ConfigureAwait(false); }
+        { await ServerFailureObserver.ObserveAsync(() => original.CompletionTask, failures).ConfigureAwait(false); }
         foreach (var entry in retained)
         { await ServerFailureObserver.ObserveAsync(() => entry.Session.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         lock (gate)
         {
             foreach (var entry in retained)
-            { sessions.Remove(entry.Handle.HandleId); }
+            { sessions.Remove(entry.HandleId); }
 
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -60,7 +60,7 @@ internal sealed class PartitionMovementSourceClosures(
     /// <summary>Returns retained native admission only after the actual durable abort journal is retained.</summary>
     internal void ConfirmMoveClosed(PartitionRef partition, Guid moveId)
     {
-        PartitionMovementSourceEntry[] retained;
+        IPartitionMovementRetainedSourceImage[] retained;
         lock (gate)
         {
             if (!closedMoves.TryGetValue(new(partition, moveId), out retained!))
@@ -85,7 +85,7 @@ internal sealed class PartitionMovementSourceClosures(
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private void RegisterClosure(PartitionMovementSourceScope scope, PartitionMovementSourceEntry[] retained)
+    private void RegisterClosure(PartitionMovementSourceScope scope, IPartitionMovementRetainedSourceImage[] retained)
     {
         NativeRequestWorkLease? admission = null;
         try

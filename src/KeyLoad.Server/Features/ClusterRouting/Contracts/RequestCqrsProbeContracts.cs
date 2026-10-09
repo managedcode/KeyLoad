@@ -15,7 +15,8 @@ internal enum RequestCqrsProbePhase
     CanonicalJournalFlushed,
     CanonicalOutboundObserved,
     CanonicalIndependentAppendCompleted,
-    CanonicalOwnerDisposed
+    CanonicalOwnerDisposed,
+    RetireOperationSealed
 }
 
 internal enum RequestCqrsProbeAction

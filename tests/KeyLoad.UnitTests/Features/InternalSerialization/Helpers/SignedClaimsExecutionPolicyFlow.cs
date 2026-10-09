@@ -28,7 +28,8 @@ internal static class SignedClaimsExecutionPolicyFlow
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             database.Database.GraphOptions, UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.BlobExecution(database.Database.BlobExecution), claimsOptions,
-            UnitExecutionOptions.TimeSeriesExecution(), database.Database.EvaluationClock);
+            UnitExecutionOptions.TimeSeriesExecution(), database.MovementCheckpoints,
+            UnavailablePartitionMovementCheckpointVerifier.Instance, database.Database.EvaluationClock);
 
     internal static OperationResult Acknowledge(DatabaseEngine engine, QueueLaneRef lane, Delivery delivery)
     {

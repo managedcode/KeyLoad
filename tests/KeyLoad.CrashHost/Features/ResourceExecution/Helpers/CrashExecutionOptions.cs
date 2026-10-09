@@ -63,6 +63,13 @@ internal static class CrashExecutionOptions
         return Compose(settings, static value => value.Validate());
     }
 
+    internal static IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints(PartitionMovementCheckpointOptions? configured = null)
+    {
+        var value = configured ?? new PartitionMovementCheckpointOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<QueryExecutionOptions> QueryExecution()
     {
         var settings = new QueryExecutionOptions();

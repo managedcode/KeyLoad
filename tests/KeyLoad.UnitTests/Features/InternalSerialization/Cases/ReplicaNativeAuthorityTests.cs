@@ -18,7 +18,7 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var original = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         var callerBytes = original.NativePayload.ToArray();
@@ -40,7 +40,7 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         var decoded = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(ReplicaProtocolCodec.Serialize(operation));
@@ -61,7 +61,7 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         using var store = files.Open();
@@ -93,7 +93,7 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         using var store = files.Open();
         using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database);
         log.SaveTermAndVote(1, null);

@@ -10,11 +10,13 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
 {
     private const string ClosedDetail = "The partition movement source capability is unavailable.";
     private readonly Lock gate = new();
-    private readonly Dictionary<Guid, PartitionMovementSourceEntry> sessions = [];
-    private readonly Dictionary<Guid, PartitionMovementPendingCapture> captures = [];
-    private readonly Dictionary<PartitionMovementSourceScope, PartitionMovementSourceEntry[]> closedMoves = [];
+    private readonly Dictionary<Guid, IPartitionMovementRetainedSourceImage> sessions = [];
+    private readonly Dictionary<Guid, IPartitionMovementPendingSourceRead> captures = [];
+    private readonly Dictionary<PartitionMovementSourceScope, IPartitionMovementRetainedSourceImage[]> closedMoves = [];
     private readonly Dictionary<PartitionMovementSourceScope, NativeRequestWorkLease> closedAdmissions = [];
     private readonly PartitionMovementSourceClosures closures;
+    private readonly PartitionMovementTransferSourceReads transfers;
+    private readonly PartitionMovementSourceImageLookup images;
     private readonly DatabaseEngine database;
     private readonly ICacheMemoryBudget memory;
     private readonly NativeRequestWorkOwner workOwner;
@@ -35,7 +37,10 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
         this.limits = limits;
         this.clock = clock;
         this.settle = settle;
+        images = new(gate, sessions, RequireMoveOpen, clock);
         closures = new(gate, sessions, captures, closedMoves, closedAdmissions, workOwner, RequireOpen);
+        transfers = new(gate, sessions, captures, closedMoves, database, memory, workOwner, RequireOpen,
+            RequireMoveOpen, stopping.Token);
     }
 
     public async Task<PartitionMovementCaptureHandle> CaptureAsync(PrincipalRecord principal,
@@ -49,10 +54,14 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
         {
             RequireMoveOpen(verified.Partition, verified.MoveId);
             if (captures.TryGetValue(commandId, out var pending))
-            { retained = pending.Completion.Task; }
+            {
+                if (pending is not PartitionMovementPendingCapture originalCapture)
+                { throw Errors.Fail(ErrorCode.Conflict, ClosedDetail); }
+                retained = originalCapture.Completion.Task;
+            }
             else
             {
-                existing = sessions.Values.FirstOrDefault(value => value.CommandId == commandId);
+                existing = sessions.Values.OfType<PartitionMovementSourceEntry>().FirstOrDefault(value => value.CommandId == commandId);
                 if (existing is null)
                 {
                     producer = new(verified.Partition, verified.MoveId);
@@ -64,7 +73,7 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
         {
             var handle = existing?.Handle
                 ?? await retained!.WaitAsync(cancellationToken).ConfigureAwait(false);
-            var current = Find(principal, verified, handle.HandleId, cancellationToken);
+            var current = images.Find(principal, verified, handle.HandleId, cancellationToken);
             var work = new ReadExecutionBudget(limits, clock, cancellationToken);
             database.ValidateVerifiedPartitionMovementCaptureScope(principal.Id, verified, work);
             current.Session.RequireOpen();
@@ -85,7 +94,7 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
                 lock (gate)
                 {
                     RequireMoveOpen(verified.Partition, verified.MoveId);
-                    sessions.Add(handle.HandleId, new(verified, handle, session, retainedWork));
+                    sessions.Add(handle.HandleId, new PartitionMovementSourceEntry(verified, handle, session, retainedWork));
                 }
             }, stopping.Token, cancellationToken);
         try
@@ -106,6 +115,8 @@ internal sealed partial class PartitionMovementSourceOwner : INativePartitionMov
             captures.Remove(RequireGrant(verified));
         }
     }
+
+    internal INativePartitionMovementTransferRead TransferReads => transfers;
 
     internal Task CloseMoveAsync(PartitionRef partition, Guid moveId) => closures.CloseMoveAsync(partition, moveId);
     internal void RequireMoveJoined(PartitionRef partition, Guid moveId) => closures.RequireMoveJoined(partition, moveId);

@@ -2,41 +2,6 @@ using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
-/// <summary>Retains the original capture producer and its independently owned shutdown token.</summary>
-internal sealed class PartitionMovementPendingCapture(PartitionRef partition, Guid moveId) : IDisposable
-{
-    private readonly Lock gate = new();
-    private readonly CancellationTokenSource stopping = new();
-    private Task? cancellation;
-    private bool disposed;
-    internal PartitionRef Partition { get; } = partition;
-    internal Guid MoveId { get; } = moveId;
-    internal CancellationToken StageCancellation => stopping.Token;
-    internal TaskCompletionSource<PartitionMovementCaptureHandle> Completion { get; } =
-        new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal Task StopAsync()
-    {
-        lock (gate)
-        { return disposed ? Task.CompletedTask : cancellation ??= stopping.CancelAsync(); }
-    }
-
-    public void Dispose()
-    {
-        Task? original;
-        lock (gate)
-        {
-            if (disposed)
-            { return; }
-            disposed = true;
-            original = cancellation;
-        }
-        var failures = new List<Exception>();
-        if (original is not null)
-        { ServerFailureObserver.Observe(() => original.GetAwaiter().GetResult(), failures); }
-        try
-        { stopping.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
-}
+/// <summary>Retains the original Capture producer under the shared joined source-read lifetime.</summary>
+internal sealed class PartitionMovementPendingCapture(PartitionRef partition, Guid moveId)
+    : PartitionMovementPendingSourceRead<PartitionMovementCaptureHandle>(partition, moveId);

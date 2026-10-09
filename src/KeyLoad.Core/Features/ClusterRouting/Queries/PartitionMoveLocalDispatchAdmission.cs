@@ -16,6 +16,21 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         var principal = RequireMoveDispatchPrincipal(view, ResolveMoveDispatchOperator(view, original),
             EvaluationClock.GetUtcNow());
+        if (original.Stage == PartitionMovePeerStage.ControlCheckpoint)
+        {
+            var checkpoint = NativeSerialization.Deserialize<PartitionMoveCheckpointBody>(original.Body.Span);
+            if (checkpoint.Version != PartitionMoveProtocol.Version || checkpoint.OperatorPrincipalId != principal.Id
+                || checkpoint.OriginalTransferRequest.MoveId != original.MoveId
+                || checkpoint.OriginalTransferRequest.Partition != original.Partition
+                || checkpoint.OriginalTransferRequest.Mode != PartitionMoveMode.Transfer)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            var parent = PartitionMoveParentStorage.Header(view, original.Partition, original.MoveId, Limits.MaxBatchBytes);
+            if (parent is not null)
+            { PartitionMoveParentValidation.RequireReplayScope(parent, principal.Id, checkpoint.OriginalTransferRequest); }
+            else if (checkpoint.Action != PartitionMoveCheckpointAction.Admit || checkpoint.ExpectedGeneration != PartitionMoveProtocol.EmptyCount)
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+            return;
+        }
         if (original.Stage == PartitionMovePeerStage.ControlPrepare)
         {
             var body = NativeSerialization.Deserialize<PartitionMovePrepareBody>(original.Body.Span);
@@ -36,6 +51,8 @@ public sealed partial class DatabaseEngine
     private string ResolveMoveDispatchOperator(IKeyValueView view, PartitionMovePeerEnvelope original)
         => original.Stage switch
         {
+            PartitionMovePeerStage.ControlCheckpoint
+                => NativeSerialization.Deserialize<PartitionMoveCheckpointBody>(original.Body.Span).OperatorPrincipalId,
             PartitionMovePeerStage.ControlAdmitCommand
                 => NativeSerialization.Deserialize<PartitionControlAdmitBody>(original.Body.Span).OperatorPrincipalId,
             PartitionMovePeerStage.ControlAcknowledgeCommand

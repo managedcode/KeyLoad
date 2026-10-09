@@ -59,29 +59,25 @@ public sealed partial class DatabaseEngine
             principal.PolicyEpoch, body.Phase.Stage, body.Phase.ControlIntentDigest, digest, body.ExpiresAt,
             position, null, PartitionMoveResources.Capture(transaction, phase.Partition, Limits))
             with
-        { PageOrdinal = body.Phase.PageOrdinal };
-        if (body.Phase.Stage is PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire
-            or PartitionMovePeerStage.SourceBeginAbort)
         {
-            var cleanup = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(body.Phase.Body.Span);
-            grant = grant with
-            {
-                CleanupRole = cleanup.Role,
-                CleanupFamily = cleanup.FamilyOrdinal,
-                PrecedingGrantId = cleanup.PrecedingGrantId
-            };
-        }
+            PageOrdinal = body.Phase.PageOrdinal,
+            RequireReceiverIssuance = RequireMoveParentLocalEffectAdmission(transaction, principal, commandId, phase)
+        };
+        grant = BindMoveCleanupGrant(body.Phase, grant);
         if (previous is not null)
         {
             if (previous.PhaseCommandId != grant.PhaseCommandId || previous.BodyDigest != digest
                 || previous.Stage != grant.Stage || previous.PageOrdinal != grant.PageOrdinal || previous.ExpiresAt != grant.ExpiresAt
                 || previous.OperatorPolicyEpoch != grant.OperatorPolicyEpoch
+                || previous.RequireReceiverIssuance != grant.RequireReceiverIssuance
                 || !PhysicalOwnerEntryValidation.SameOwner(previous.ReceiverOwner, grant.ReceiverOwner))
             { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
             grant = previous;
         }
         else
         {
+            if (grant.RequireReceiverIssuance)
+            { RequireMoveReceiverIssueCapacity(transaction, principal, commandId, body.Phase, grant); }
             PartitionMoveGrantStorage.ChangeOutstanding(transaction,
                 PartitionMoveGrantStorage.MoveCountKey(phase.Partition, phase.MoveId), true, Limits.MaxBatchMutations);
             PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
@@ -92,5 +88,20 @@ public sealed partial class DatabaseEngine
         }
         return new(phase.MoveId, phase.Stage, MoveJournalReceipt(transaction, commandId,
             grant.AdmissionPosition, grant.ControlIntentDigest), control, null, null, null, grant);
+    }
+
+    private static PartitionMovePhaseGrant BindMoveCleanupGrant(PartitionMovePhaseCommand phase,
+        PartitionMovePhaseGrant grant)
+    {
+        if (phase.Stage is not (PartitionMovePeerStage.Abort or PartitionMovePeerStage.Retire
+            or PartitionMovePeerStage.SourceBeginAbort))
+        { return grant; }
+        var cleanup = NativeSerialization.Deserialize<PartitionMoveCleanupBody>(phase.Body.Span);
+        return grant with
+        {
+            CleanupRole = cleanup.Role,
+            CleanupFamily = cleanup.FamilyOrdinal,
+            PrecedingGrantId = cleanup.PrecedingGrantId
+        };
     }
 }

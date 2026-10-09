@@ -24,6 +24,8 @@ public sealed partial class DatabaseEngine
     /// <param name="blobOptions">Centrally validated blob restore and catalog proof policy.</param>
     /// <param name="claimsOptions">Centrally validated native signed-claim decoding limits.</param>
     /// <param name="timeSeriesOptions">Centrally validated time-series append admission.</param>
+    /// <param name="checkpointOptions">Dedicated centrally validated canonical movement parent quotas.</param>
+    /// <param name="checkpointVerifier">Configured native proof verifier required before any checkpoint authority can be issued.</param>
     /// <param name="physicalOwner">Optional immutable configured owner enabling explicit multi-owner local execution fences.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
@@ -32,6 +34,8 @@ public sealed partial class DatabaseEngine
         IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<BlobExecutionOptions> blobOptions,
         IOptions<NativeClaimsExecutionOptions> claimsOptions,
         IOptions<TimeSeriesExecutionOptions> timeSeriesOptions,
+        IOptions<PartitionMovementCheckpointOptions> checkpointOptions,
+        IPartitionMovementCheckpointVerifier checkpointVerifier,
         TimeProvider? timeProvider = null, PhysicalShardRecord? physicalOwner = null)
     {
         ArgumentNullException.ThrowIfNull(store);
@@ -57,6 +61,11 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(timeSeriesOptions);
         timeSeriesExecution = timeSeriesOptions.Value;
         timeSeriesExecution.Validate();
+        ArgumentNullException.ThrowIfNull(checkpointOptions);
+        movementCheckpoints = checkpointOptions.Value;
+        movementCheckpoints.Validate();
+        ArgumentNullException.ThrowIfNull(checkpointVerifier);
+        movementCheckpointVerifier = checkpointVerifier;
         OperationLimitsOptions = limits;
         GraphOptions = graphOptions;
         var operationLimits = limits.Value;
@@ -84,6 +93,8 @@ public sealed partial class DatabaseEngine
     internal BlobExecutionOptions BlobExecution { get; }
     internal NativeClaimsExecutionOptions ClaimsExecution { get; }
     private readonly TimeSeriesExecutionOptions timeSeriesExecution;
+    private readonly PartitionMovementCheckpointOptions movementCheckpoints;
+    private readonly IPartitionMovementCheckpointVerifier movementCheckpointVerifier;
     private readonly EventSourceExecutionOptions eventSourceExecution;
     private readonly DueWorkExecutionOptions dueExecution;
     internal DueWorkExecutionOptions DueExecution => dueExecution;

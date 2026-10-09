@@ -354,11 +354,17 @@ qualification, full SQL and its native client protocol, foreign keys, scaling an
 endurance remain in progress. The [status tracker](docs/implementation/status.json)
 records the actual source, test results and remaining acceptance gates.
 
-The recorded Linux baseline passed the complete normal/scalar unit and
-process-recovery suites. Current controlled-partition transfer work has a complete
-local seed/replay/cold-reopen flow; public transfer and fresh full Linux RF3,
-model, recovery and performance qualification remain open. Original source
-identities and results belong in the [qualification records](docs/implementation/status.json).
+The current source includes bounded public partition Transfer/Resume/Abort,
+receiver-issued native proofs, persisted cancellation and joined node-local
+storage ownership. The full Release build and formatter pass. Seventeen support
+flows pass locally in normal and scalar modes; movement and process cases require
+Linux because their fixed loopback listeners cannot bind on this macOS host.
+The preceding [Linux run](https://github.com/managedcode/KeyLoad/actions/runs/37875940598)
+passed all 172 cases across eight task lanes and all 275 recovery cases, while
+the full normal/scalar unit suites retained eight/one failures. Current-source
+public RF3, complete unit/recovery, fault and performance qualification remains
+open. Original source identities and results belong in the
+[qualification records](docs/implementation/status.json).
 
 Current source also includes an explicit bounded follower document read through
 the .NET SDK and MCP, with a selected replica, lag limit and fresh authorization.
@@ -366,11 +372,12 @@ Its [document contract](docs/Features/DocumentStorage.md) keeps the captured dat
 cut distinct from the current authorization cut. Complete current-source RF3
 qualification remains open.
 
-Native TUnit now defaults to 20 parallel tests. GitHub also runs separate
-normal/scalar-caller acceptance lanes for strict indexes, the server/SDK and
-security/telemetry, plus strong/session and follower document reads. These four
-tasks run in eight isolated Linux jobs. Focused task runs retain their complete declared operation
-scope; full build, unit, recovery, RF3 and coverage gates remain mandatory.
+Native TUnit defaults to 20 parallel tests. GitHub runs separate normal/scalar
+acceptance lanes for storage ownership, strict indexes, the server/SDK,
+security/telemetry, strong/session reads, exact vectors and controlled partition
+movement. These seven tasks run in fourteen isolated Linux jobs. Focused task
+runs retain their complete declared operation scope; full build, unit, recovery,
+RF3 and coverage gates remain mandatory.
 
 Complete product functional coverage remains **unmeasured**. The
 [coverage contract](docs/Features/CodeQuality.md) admits whole operation flows,

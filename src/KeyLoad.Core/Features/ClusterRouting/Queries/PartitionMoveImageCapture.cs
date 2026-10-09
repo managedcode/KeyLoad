@@ -38,7 +38,7 @@ internal static class PartitionMoveImageCapture
             fence.SourceCut, frozen, pages.ToImmutable(), PartitionMoveImageDigest.Image(frozen, resources), resources);
     }
 
-    private static void RequireFence(IKeyValueView view, PartitionMoveSourceFenceRecord expected,
+    internal static long RequireFence(IKeyValueView view, PartitionMoveSourceFenceRecord expected,
         PartitionMoveSourceFenceRecord actual, ReadExecutionBudget work)
     {
         if (expected.MoveId != actual.MoveId || expected.SourceCut != actual.SourceCut
@@ -49,7 +49,9 @@ internal static class PartitionMoveImageCapture
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         var applied = work.Read(view, KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
-        if (NativeSerialization.Deserialize<long>(applied) < actual.SourceCut)
+        var currentReadCut = NativeSerialization.Deserialize<long>(applied);
+        if (currentReadCut < actual.SourceCut)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
+        return currentReadCut;
     }
 }

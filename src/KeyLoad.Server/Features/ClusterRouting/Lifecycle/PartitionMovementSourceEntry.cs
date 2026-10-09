@@ -6,21 +6,26 @@ namespace KeyLoad.Server;
 
 /// <summary>Exact retained scope and immutable page owner for one admitted source capability.</summary>
 internal sealed class PartitionMovementSourceEntry(PartitionMovePeerEnvelope verified,
-    PartitionMovementCaptureHandle handle, PartitionMovementImageSession session, NativeRequestWorkLease work)
+    PartitionMovementCaptureHandle handle, PartitionMovementImageSession session, NativeRequestWorkLease work) : IPartitionMovementRetainedSourceImage
 {
-    private int workReleased;
-    internal PartitionRef Partition => verified.Partition;
-    internal Guid MoveId => verified.MoveId;
+    private readonly PartitionMovementRetainedWorkLease retainedWork = new(work);
+    public PartitionRef Partition => verified.Partition;
+    public Guid MoveId => verified.MoveId;
+    public Guid HandleId => Handle.HandleId;
     internal Guid CommandId => verified.Grant!.PhaseCommandId;
     internal PartitionMovementCaptureHandle Handle { get; } = handle;
-    internal PartitionMovementImageSession Session { get; } = session;
-    internal void ReleaseWork()
+    public PartitionMovementImageSession Session { get; } = session;
+    public void ReleaseWork() => retainedWork.Dispose();
+    public async ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref workReleased, SingleRelease) == NotReleased)
-        { work.Dispose(); }
+        var failures = await PartitionMovementSourceEntryDisposal.ObserveSessionAsync(Session).ConfigureAwait(false);
+        try
+        { retainedWork.Dispose(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
-    private const int SingleRelease = 1;
-    private const int NotReleased = 0;
+
     private const string Unavailable = "The partition movement source capability is unavailable.";
     private readonly string scope = JsonData.Fingerprint(verified.Grant!);
 

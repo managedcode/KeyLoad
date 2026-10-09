@@ -2346,6 +2346,284 @@
           ]
         }
       ]
+    },
+    {
+      "taskId": "KL-036",
+      "selections": [
+        {
+          "selectionId": "unit-public-parent-support",
+          "suite": "unit",
+          "filter": "/*/*/(PartitionMovementExpiredRetireCancellationTests)|(PartitionMovementParentUnpreparedCancellationTests)|(ReadExecutionBudgetScopedGrantTests)|(ReadExecutionBudgetSettledGrantTests)|(ControlledPartitionMovementCaptureTests)|(NativeOperationFingerprintTests)|(RequestCqrsBoundaryTests)/(CallerStampedCancellationAuthorityIsDeniedBeforeEffectsThenColdActualPrepareIsHealthy)|(ActualPendingPrepareCannotUseDedicatedExpiredRetireCancellationThenColdPrepareIsHealthy)|(GenuineCancellationRetainsUnknownBodyThroughColdOwnerThenObservesOwnReceiptAndAdmitsFreshPrepare)|(GenuinePreparedWinnerDeniesCancellationBeforeJournalAndRetainsObservedBodyAcrossColdOwner)|(LostCancellationReplyRetainsQuotaAcrossRevokeRestoreAndColdAdminObservationThenFreshMove)|(NativeMetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract)|(FailedNativeReaderRetainsAllowanceAndFreshIndependentReaderContinues)|(NativeDeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead)|(SettledNativeReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger)|(ClosedGrantCannotReadNativeDataOrReturnItsReservationTwice)|(CompletionDoesNotReleaseAnotherUnsettledNativeChildReservation)|(AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl)|(EveryKindAndEscapeMatchesTheExistingGoldenFingerprintShape)|(Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly)|(AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState)|(AcCrs006FailedNativeAdmissionLeavesBothRequestContextKeysUntouched)|(AcCrs006ConcurrentPersistedScopesStayIsolatedThroughNativeCalls)|(AcCrs006PersistedScopeLivesThroughActualConsumerDisposal)",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationTests",
+              "methodName": "CallerStampedCancellationAuthorityIsDeniedBeforeEffectsThenColdActualPrepareIsHealthy",
+              "instanceName": "CallerStampedCancellationAuthorityIsDeniedBeforeEffectsThenColdActualPrepareIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationTests",
+              "methodName": "ActualPendingPrepareCannotUseDedicatedExpiredRetireCancellationThenColdPrepareIsHealthy",
+              "instanceName": "ActualPendingPrepareCannotUseDedicatedExpiredRetireCancellationThenColdPrepareIsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "methodName": "GenuineCancellationRetainsUnknownBodyThroughColdOwnerThenObservesOwnReceiptAndAdmitsFreshPrepare",
+              "instanceName": "GenuineCancellationRetainsUnknownBodyThroughColdOwnerThenObservesOwnReceiptAndAdmitsFreshPrepare",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionMovementParentUnpreparedCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "methodName": "GenuinePreparedWinnerDeniesCancellationBeforeJournalAndRetainsObservedBodyAcrossColdOwner",
+              "instanceName": "GenuinePreparedWinnerDeniesCancellationBeforeJournalAndRetainsObservedBodyAcrossColdOwner",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionMovementParentUnpreparedCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.PartitionMovementParentUnpreparedCancellationTests",
+              "methodName": "LostCancellationReplyRetainsQuotaAcrossRevokeRestoreAndColdAdminObservationThenFreshMove",
+              "instanceName": "LostCancellationReplyRetainsQuotaAcrossRevokeRestoreAndColdAdminObservationThenFreshMove",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionMovementParentUnpreparedCancellationTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "methodName": "NativeMetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract",
+              "instanceName": "NativeMetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetScopedGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "methodName": "FailedNativeReaderRetainsAllowanceAndFreshIndependentReaderContinues",
+              "instanceName": "FailedNativeReaderRetainsAllowanceAndFreshIndependentReaderContinues",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetScopedGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetScopedGrantTests",
+              "methodName": "NativeDeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead",
+              "instanceName": "NativeDeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetScopedGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "methodName": "SettledNativeReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger",
+              "instanceName": "SettledNativeReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetSettledGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "methodName": "ClosedGrantCannotReadNativeDataOrReturnItsReservationTwice",
+              "instanceName": "ClosedGrantCannotReadNativeDataOrReturnItsReservationTwice",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetSettledGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.ReadExecutionBudgetSettledGrantTests",
+              "methodName": "CompletionDoesNotReleaseAnotherUnsettledNativeChildReservation",
+              "instanceName": "CompletionDoesNotReleaseAnotherUnsettledNativeChildReservation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ReadExecutionBudgetSettledGrantTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementCaptureTests",
+              "methodName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+              "instanceName": "AuthenticatedNativeCapturePagesSettleOriginalReceiptAndReopenCapturedControl",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementCaptureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "methodName": "EveryKindAndEscapeMatchesTheExistingGoldenFingerprintShape",
+              "instanceName": "EveryKindAndEscapeMatchesTheExistingGoldenFingerprintShape",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationFingerprintTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "methodName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly",
+              "instanceName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly(0)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationFingerprintTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "methodName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly",
+              "instanceName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly(1)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationFingerprintTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeOperationFingerprintTests",
+              "methodName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly",
+              "instanceName": "Utf8AndUtf16SegmentsPreserveEscapesAndSplitUnicodeExactly(2)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationFingerprintTests.cs",
+              "parameterTypeFullNames": [
+                "System.Int32"
+              ]
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests(RequestCqrsClusterFixture)",
+              "methodName": "AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState",
+              "instanceName": "AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RequestCqrsBoundaryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests(RequestCqrsClusterFixture)",
+              "methodName": "AcCrs006FailedNativeAdmissionLeavesBothRequestContextKeysUntouched",
+              "instanceName": "AcCrs006FailedNativeAdmissionLeavesBothRequestContextKeysUntouched",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RequestCqrsBoundaryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests(RequestCqrsClusterFixture)",
+              "methodName": "AcCrs006ConcurrentPersistedScopesStayIsolatedThroughNativeCalls",
+              "instanceName": "AcCrs006ConcurrentPersistedScopesStayIsolatedThroughNativeCalls",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RequestCqrsBoundaryTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsBoundaryTests(RequestCqrsClusterFixture)",
+              "methodName": "AcCrs006PersistedScopeLivesThroughActualConsumerDisposal",
+              "instanceName": "AcCrs006PersistedScopeLivesThroughActualConsumerDisposal",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RequestCqrsBoundaryTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-type-framing",
+          "suite": "unit",
+          "filter": "/*/*/NativeEncodedTypeMeasureTests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "methodName": "RegisteredTypeFramesResolveBeforeCompleteLiteralPayloadRoundtrip",
+              "instanceName": "RegisteredTypeFramesResolveBeforeCompleteLiteralPayloadRoundtrip",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeEncodedTypeMeasureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "methodName": "MalformedTypeVersionRejectsBeforeFreshHealthyFrameAndCompletePayload",
+              "instanceName": "MalformedTypeVersionRejectsBeforeFreshHealthyFrameAndCompletePayload",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeEncodedTypeMeasureTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.InternalSerialization.NativeEncodedTypeMeasureTests",
+              "methodName": "ConcurrentFreshSessionsJoinAndCancelledAdmissionHasHealthyContinuation",
+              "instanceName": "ConcurrentFreshSessionsJoinAndCancelledAdmissionHasHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeEncodedTypeMeasureTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-public-parent",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementPublicParentFlowTests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPublicParentFlowTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPublicParentFlowTests",
+              "methodName": "ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
+              "instanceName": "ActualPublicParentMovesAllLinkedModelsAndOriginalReceiptsAcrossTwoRf3OwnersAndBackAfterColdReplay",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPublicParentFlowTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-expired-retire-cancellation",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementExpiredRetireCancellationRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "methodName": "ActualSealedRetireExpiryCancelsWithoutEffectsThenColdCancellationAndDistinctCleanupAreHealthy",
+              "instanceName": "ActualSealedRetireExpiryCancelsWithoutEffectsThenColdCancellationAndDistinctCleanupAreHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "methodName": "CorruptActualCancelledGrantColdRefusesThenExactStoppedOriginalRestoreIsHealthy",
+              "instanceName": "CorruptActualCancelledGrantColdRefusesThenExactStoppedOriginalRestoreIsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "methodName": "LostCancellationReplyColdReconcilesActualReceiptThenDistinctCleanupIsHealthy",
+              "instanceName": "LostCancellationReplyColdReconcilesActualReceiptThenDistinctCleanupIsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementExpiredRetireCancellationRf3Tests",
+              "methodName": "UnknownCancellationRetainsFirstAttemptAndQuotaAcrossColdRefusalThenReadsAreHealthy",
+              "instanceName": "UnknownCancellationRetainsFirstAttemptAndQuotaAcrossColdRefusalThenReadsAreHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementExpiredRetireCancellationRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-parent-capacity",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementParentCapacityRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementParentCapacityRf3Tests",
+              "methodName": "ActualCapturedStageShapeBoundAndConfiguredGrantDenialRetainAuthorityThenRestoreHealthyMove",
+              "instanceName": "ActualCapturedStageShapeBoundAndConfiguredGrantDenialRetainAuthorityThenRestoreHealthyMove",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementParentCapacityRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
     }
   ],
   "maximumParallelTests": 20

@@ -38,6 +38,7 @@ internal static class AppHostControlOptionsRegistration
                 value.RemoteDocumentReads = configuration[TwoRf3ProfileProtocol.RemoteDocumentSetting] == TwoRf3ProfileProtocol.Enabled;
                 value.RemotePartitionQueries = configuration[TwoRf3ProfileProtocol.RemoteQuerySetting] == TwoRf3ProfileProtocol.Enabled;
                 value.ProtectedDocumentMovement = configuration[TwoRf3ProfileProtocol.ProtectedDocumentMovementSetting] == TwoRf3ProfileProtocol.Enabled;
+                value.MovementMaxBatchBytes = TwoRf3Profile.ReadMovementMaxBatchBytes(configuration);
                 ProtocolCohortImages.ValidateMode(configuration);
                 value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);
                 value.Ephemeral = configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting);

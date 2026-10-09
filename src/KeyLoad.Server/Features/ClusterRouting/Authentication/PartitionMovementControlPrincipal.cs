@@ -9,6 +9,8 @@ internal static class PartitionMovementControlPrincipal
     internal static string Resolve(DatabaseEngine database, PartitionMovePeerEnvelope verified)
         => verified.Stage switch
         {
+            PartitionMovePeerStage.ControlCheckpoint =>
+                NativeSerialization.Deserialize<PartitionMoveCheckpointBody>(verified.Body.Span).OperatorPrincipalId,
             PartitionMovePeerStage.ControlPrepare =>
                 NativeSerialization.Deserialize<PartitionMovePrepareBody>(verified.Body.Span).OperatorPrincipalId,
             PartitionMovePeerStage.ControlAdvance =>

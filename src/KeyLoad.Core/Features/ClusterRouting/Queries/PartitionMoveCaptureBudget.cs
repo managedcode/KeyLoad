@@ -12,7 +12,7 @@ internal sealed class PartitionMoveCaptureBudget(ReadExecutionBudget work, int m
         if (examined >= maximumRecords)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
         examined = checked(examined + PartitionMoveProtocol.SequenceStep);
-        work.ChargeBytes(bytes);
+        work.ChargeNativeReadRecord(bytes);
         work.Check();
     }
 }

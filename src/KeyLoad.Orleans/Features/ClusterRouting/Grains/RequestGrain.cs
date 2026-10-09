@@ -64,7 +64,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
             var controlledReply = await TryExecuteControlledAsync(request, writer).ConfigureAwait(true);
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
-            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex)
+            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MovePartition)
             { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
             else if (command)
             {
@@ -114,6 +114,11 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
+        if (request.Envelope.CommandKind == OperationKind.MovePartition)
+        {
+            var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, writer).ConfigureAwait(true);
+            return EncodeParent(result, writer.CancellationToken);
+        }
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
         {
             var result = await TextMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,

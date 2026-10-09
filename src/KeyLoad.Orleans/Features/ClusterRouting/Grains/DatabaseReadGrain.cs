@@ -147,6 +147,14 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             return GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
                 principal, request, cancellationToken);
         }
+        if (kind == GrainReadKind.PartitionMovementTransferData)
+        {
+            return await PartitionMovementTransferDataExecution.ExecuteAsync(
+                services.GetRequiredService<INativePartitionMovementTransferRead>(), principal,
+                GrainNativePayload.Read<PartitionMovementTransferDataCapability>(request.Payload),
+                services.GetRequiredService<Microsoft.Extensions.Options.IOptions<DatabaseLimits>>(), runtimeClock,
+                request.Envelope.ExpiresAt, cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.PartitionMovementCapture)
         {
             return await PartitionMovementCaptureExecution.ExecuteAsync(

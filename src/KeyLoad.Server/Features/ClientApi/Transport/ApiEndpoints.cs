@@ -26,6 +26,7 @@ internal static class ApiEndpoints
         ChangeFeedApi.Map(app);
         AuthorizationApi.Map(app);
         AtomicPartitionPlacementApi.Map(app);
+        PartitionMovementPublicApi.Map(app);
         AdminDashboardApi.Map(app);
         app.MapGet(AdmissionPath, (Func<HttpContext, Task<IResult>>)(context =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Admission)));

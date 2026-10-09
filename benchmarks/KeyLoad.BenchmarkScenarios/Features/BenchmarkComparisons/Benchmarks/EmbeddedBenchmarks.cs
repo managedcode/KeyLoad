@@ -145,7 +145,8 @@ public class EmbeddedBenchmarks : IDisposable
 
             store = new(new(directory), options.Storage, options.PointCache, timeProvider);
             database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution, timeProvider);
+                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution, options.MovementCheckpoints,
+                UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },

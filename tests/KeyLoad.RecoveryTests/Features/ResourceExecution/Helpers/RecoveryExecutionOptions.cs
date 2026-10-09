@@ -67,6 +67,13 @@ internal static class RecoveryExecutionOptions
         return Options.Create(settings);
     }
 
+    internal static IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints(PartitionMovementCheckpointOptions? configured = null)
+    {
+        var value = configured ?? new PartitionMovementCheckpointOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<QueryExecutionOptions> QueryExecution()
     {
         var settings = new QueryExecutionOptions();

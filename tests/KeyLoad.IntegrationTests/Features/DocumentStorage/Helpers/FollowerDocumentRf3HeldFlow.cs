@@ -83,7 +83,7 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
             await FollowerDocumentRf3Assertions.RejectedAsync(original, code, state.Identity.Secret);
         }
         else if (state.Change == FollowerDocumentChange.Cancellation)
-        { await FollowerDocumentRf3Assertions.CancelledAsync(original, state.Identity.Secret, state.CallLifetime!.Token); }
+        { await FollowerDocumentRf3Assertions.CancelledAsync(original, state.Identity.Secret, state.Mode, state.CallLifetime!.Token); }
         else
         {
             var redacted = state.Change == FollowerDocumentChange.FieldPolicy;

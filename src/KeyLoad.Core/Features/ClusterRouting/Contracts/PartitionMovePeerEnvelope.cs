@@ -25,6 +25,9 @@ internal enum PartitionMovePeerStage
     ControlAcknowledgeCommand = 20,
     ControlFinalizeCommand = 21,
     ControlApplyCommand = 22,
+    ControlCheckpoint = 23,
+    ReceiverIssue = 24,
+    RetireCancel = 25,
 }
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.PeerEnvelopeAlias)]
@@ -41,4 +44,6 @@ internal sealed record PartitionMovePeerEnvelope(
     [property: Orleans.Id(9)] DateTimeOffset ExpiresAt,
     [property: Orleans.Id(10)] Guid Nonce,
     [property: Orleans.Id(11)] ReadOnlyMemory<byte> Body,
-    [property: Orleans.Id(12)] PartitionMovePhaseGrant? Grant = null);
+    [property: Orleans.Id(12)] PartitionMovePhaseGrant? Grant = null,
+    [property: Orleans.Id(13)] PartitionMoveReceiverIssuanceWitness? ReceiverIssuanceProof = null,
+    [property: Orleans.Id(14)] PartitionMoveReceiverSourceWitness? SourceDispatchWitness = null);

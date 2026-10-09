@@ -40,7 +40,7 @@ internal sealed class BlobRestorePageNormalizationTests
             var restoredPath = Path.Combine(root, RestoredDirectoryName);
             var restoredIdentity = ZoneTreeStore.Restore(backup.BackupPath, restoredPath, UnitExecutionOptions.StorageExecution(), targetIncarnation);
             using var restoredStore = new ZoneTreeStore(new(restoredPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var database = new DatabaseEngine(restoredStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { MetadataPageSize = pageSize }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var database = new DatabaseEngine(restoredStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { MetadataPageSize = pageSize }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             var operations = new BlobStorageOperations(database);
 
             await Assert.That(restoredIdentity.Incarnation).IsEqualTo(targetIncarnation);
@@ -79,7 +79,7 @@ internal sealed class BlobRestorePageNormalizationTests
             var identity = ZoneTreeStore.Restore(backup.BackupPath, restoredPath,
                 UnitExecutionOptions.StorageExecution(), Guid.NewGuid());
             using var store = new ZoneTreeStore(new(restoredPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var bounded = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { RestorePageBytes = 1 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var bounded = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { RestorePageBytes = 1 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             var rejected = Assert.ThrowsExactly<KeyLoadException>(() => new BlobStorageOperations(bounded).NormalizeRestoredStore());
             await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             var fence = store.Read(view => view.ReadOwnedValue(BlobRestoreFence.MarkerKey));
@@ -88,7 +88,7 @@ internal sealed class BlobRestorePageNormalizationTests
             await Assert.That(marker.TargetIncarnation).IsEqualTo(identity.Incarnation);
             await Assert.That(marker.Phase).IsEqualTo(BlobRestorePhase.States);
             await Assert.That(marker.ExclusiveCursor).IsNull();
-            var healthy = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var healthy = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             var operations = new BlobStorageOperations(healthy);
             operations.NormalizeRestoredStore();
             await AssertBoundaryUploadsAreAborted(operations);

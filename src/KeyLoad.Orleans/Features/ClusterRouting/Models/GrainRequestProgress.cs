@@ -11,4 +11,7 @@ public sealed record GrainRequestProgress([property: global::Orleans.Id(0)] Guid
     /// <summary>Gets the completed bounded native text-maintenance phase, when applicable.</summary>
     [global::Orleans.Id(2), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public TextIndexMaintenancePhase? TextPhase { get; init; }
+    /// <summary>Gets the actual completed durable movement phase, when applicable.</summary>
+    [global::Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public PartitionMovePhase? MovePhase { get; init; }
 }

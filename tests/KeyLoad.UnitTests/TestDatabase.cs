@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ClusterRouting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
@@ -24,6 +25,7 @@ internal sealed class TestDatabase : IDisposable
     public string Directory { get; }
     public ZoneTreeStore Store { get; }
     public DatabaseEngine Database { get; }
+    internal IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints { get; } = UnitExecutionOptions.MovementCheckpoints();
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
@@ -42,7 +44,7 @@ internal sealed class TestDatabase : IDisposable
         {
             var clock = timeProvider ?? TimeProvider.System;
             Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(), clock);
+            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(), MovementCheckpoints, UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)

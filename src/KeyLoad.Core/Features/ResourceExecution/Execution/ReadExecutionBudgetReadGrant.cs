@@ -10,6 +10,7 @@ internal sealed class ReadExecutionBudgetReadGrant
     private readonly int maximumRecords;
     private long acceptedBytes;
     private int examinedRecords;
+    private bool completed;
 
     internal ReadExecutionBudgetReadGrant(ReadExecutionBudget budget, long maximumBytes, int maximumRecords)
     {
@@ -18,6 +19,10 @@ internal sealed class ReadExecutionBudgetReadGrant
         this.maximumBytes = maximumBytes;
         this.maximumRecords = maximumRecords;
     }
+
+    internal bool IsCompleted => completed;
+
+    internal void Complete() => completed = true;
 
     internal long ReadBytes => acceptedBytes;
 

@@ -116,5 +116,15 @@ public enum GrainReadKind
     /// <summary>Read one authenticated A-authority document on its protected physical destination.</summary>
     ControlledDocument,
     /// <summary>Read one explicitly bounded follower snapshot under fresh persisted authority.</summary>
-    FollowerDocument
+    FollowerDocument,
+    /// <summary>Fresh bounded canonical control authority for an original acknowledged Capture.</summary>
+    PartitionMovementTransferAuthority,
+    /// <summary>Fresh authenticated source transfer-data session; never a Capture effect.</summary>
+    PartitionMovementTransferData,
+    /// <summary>Read bounded actual canonical parent state without manufacturing an original phase outcome.</summary>
+    PartitionMovementParentState,
+    /// <summary>Observe actual receiver first issuance under fresh persisted same-subject administrator authority.</summary>
+    PartitionMovementReceiverIssuance,
+    /// <summary>Observe the actual distinct expired-Retire cancellation outcome under fresh native administrator authority.</summary>
+    PartitionMovementRetireCancellationOutcome
 }

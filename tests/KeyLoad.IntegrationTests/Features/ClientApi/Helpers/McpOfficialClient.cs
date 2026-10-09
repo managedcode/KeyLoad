@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Aspire.Hosting;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -11,12 +12,14 @@ internal sealed class McpOfficialClient : IAsyncDisposable
 {
     private readonly HttpClient http;
     private readonly HttpClientTransport transport;
+    private readonly McpInitializeHttpObservation observation;
     private McpClient? client;
 
-    private McpOfficialClient(HttpClient http, HttpClientTransport transport)
+    private McpOfficialClient(HttpClient http, HttpClientTransport transport, McpInitializeHttpObservation observation)
     {
         this.http = http;
         this.transport = transport;
+        this.observation = observation;
     }
 
     /// <summary>Gets the genuine connected client; no protocol calls are reimplemented here.</summary>
@@ -55,49 +58,64 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     internal static async Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
         string? key, string protocolVersion, CancellationToken cancellationToken)
     {
-        var connection = McpCallerHttp.Create(app, node);
-        var transport = CreateTransport(connection, key);
-        var owner = new McpOfficialClient(connection, transport);
+        var connection = McpCallerHttp.CreateObserved(app, node, out var observation);
+        HttpClientTransport? transport = null;
+        McpOfficialClient? owner = null;
         try
         {
-            await owner.InitializeAsync(protocolVersion, cancellationToken).ConfigureAwait(false);
+            transport = CreateTransport(connection, key);
+            owner = new McpOfficialClient(connection, transport, observation);
+            await owner.InitializeAsync(protocolVersion, node, cancellationToken).ConfigureAwait(false);
             return owner;
         }
         catch (Exception primary)
         {
-            try
-            { await owner.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception cleanup)
-            { throw new AggregateException(primary, cleanup); }
+            var failures = new List<Exception> { primary };
+            if (owner is not null)
+            { await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+            else
+            { await DisposeUntransferredAsync(transport, connection, observation, failures).ConfigureAwait(false); }
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
+    }
+
+    private static async Task DisposeUntransferredAsync(HttpClientTransport? transport, HttpClient connection,
+        McpInitializeHttpObservation observation, List<Exception> failures)
+    {
+        if (transport is not null)
+        { await ServerFailureObserver.ObserveAsync(() => transport.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        ServerFailureObserver.Observe(connection.Dispose, failures);
+        ServerFailureObserver.Observe(observation.Dispose, failures);
     }
 
     private static HttpClientTransport CreateTransport(HttpClient connection, string? key)
     {
-        try
+        var options = new HttpClientTransportOptions
         {
-            var options = new HttpClientTransportOptions
-            {
-                Endpoint = new Uri(connection.BaseAddress ?? throw new InvalidOperationException(McpCallerProtocol.MissingEndpoint), McpCallerProtocol.Endpoint),
-                TransportMode = HttpTransportMode.StreamableHttp,
-                EnableStandaloneGetStream = false,
-                AdditionalHeaders = key is null ? null : new Dictionary<string, string>(StringComparer.Ordinal)
-                { [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + key }
-            };
-            return new HttpClientTransport(options, connection);
-        }
-        catch (Exception)
-        {
-            connection.Dispose();
-            throw;
-        }
+            Endpoint = new Uri(connection.BaseAddress ?? throw new InvalidOperationException(McpCallerProtocol.MissingEndpoint), McpCallerProtocol.Endpoint),
+            TransportMode = HttpTransportMode.StreamableHttp,
+            EnableStandaloneGetStream = false,
+            AdditionalHeaders = key is null ? null : new Dictionary<string, string>(StringComparer.Ordinal)
+            { [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + key }
+        };
+        return new HttpClientTransport(options, connection);
     }
 
-    private async Task InitializeAsync(string protocolVersion, CancellationToken cancellationToken)
+    private async Task InitializeAsync(string protocolVersion, string node, CancellationToken cancellationToken)
     {
-        client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+        try
+        {
+            client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception original)
+        {
+            observation.WriteAndThrow(original, node);
+            throw;
+        }
+        finally
+        { observation.Stop(); }
     }
 
     /// <summary>Calls the official tool API with the actual canonical typed request serialized at its public boundary.</summary>
@@ -133,6 +151,10 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         { await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         await ServerFailureObserver.ObserveAsync(() => transport.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(http.Dispose, failures);
+        try
+        { observation.Dispose(); }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

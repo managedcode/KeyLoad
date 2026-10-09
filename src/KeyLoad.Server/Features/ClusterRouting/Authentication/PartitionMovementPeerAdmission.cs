@@ -9,12 +9,12 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Authenticates configured A movement traffic before any receiver-local native capability is issued.</summary>
-internal sealed partial class PartitionMovementPeerAdmission : IDisposable
+internal sealed class PartitionMovementPeerAdmission : IDisposable
 {
-    private const int EmptyBodyBytes = 0;
-    private const string NonceFormat = "N";
+    internal const int EmptyBodyBytes = 0;
+    internal const string NonceFormat = "N";
     private const string SiloSeparator = ":";
-    private const string InvalidProof = "The partition movement peer proof is invalid.";
+    internal const string InvalidProof = "The partition movement peer proof is invalid.";
     private readonly NodeOptions options;
     private readonly DatabaseEngine database;
     private readonly ReplicaConfiguration configuration;
@@ -104,7 +104,7 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
         return request;
     }
 
-    private PartitionMovementMac CreateControlMac()
+    internal PartitionMovementMac CreateControlMac()
     {
         var configured = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
             ? options.PeerSecret : options.MembershipAuthority.AuthorityPeerSecret;
@@ -128,4 +128,32 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
+    internal PartitionMovementExecutionOptions Execution => execution;
+    internal NodeOptions Options => options;
+    internal DatabaseEngine Database => database;
+    internal ReplicaConfiguration Configuration => configuration;
+    internal TimeProvider Clock => clock;
+    internal GrainRoutingOptions Routing => routing;
+    internal IOptions<OrleansMembershipOptions> Membership => membership;
+    internal ReplicaMembershipAuthorityAddressPins Pins => pins;
+    internal ReplicaMembershipAuthorityReplayCache Replay => replay;
+
+    internal Task<PartitionMovementOutcomeTransportRequest> VerifyOutcomeAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementOutcomePeerAdmission.VerifyOutcomeAsync(this, body, signature, token);
+
+    internal Task<PartitionMovementTransferDataRequest> VerifyTransferDataAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementTransferDataPeerAdmission.VerifyTransferDataAsync(this, body, signature, token);
+
+    internal Task<PartitionMovementReceiverIssueRequest> VerifyReceiverIssueAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementReceiverIssuePeerAdmission.VerifyReceiverIssueAsync(this, body, signature, token);
+
+    internal Task<PartitionMovementReceiverIssueQuery> VerifyReceiverIssueQueryAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementReceiverIssuePeerAdmission.VerifyReceiverIssueQueryAsync(this, body, signature, token);
+
+    internal Task<PartitionMovementRetireCancellationRequest> VerifyRetireCancellationAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementRetireCancellationPeerAdmission.VerifyRetireCancellationAsync(this, body, signature, token);
+
+    internal Task<PartitionMovementRetireCancellationQuery> VerifyRetireCancellationQueryAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
+        => PartitionMovementRetireCancellationPeerAdmission.VerifyRetireCancellationQueryAsync(this, body, signature, token);
 }

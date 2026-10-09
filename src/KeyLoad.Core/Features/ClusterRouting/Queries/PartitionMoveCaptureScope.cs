@@ -15,6 +15,9 @@ public sealed partial class DatabaseEngine
         if (original.Stage != PartitionMovePeerStage.Capture || original.Grant is null)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         RequireMovementReceiver(original);
+        var receiverAdmission = original.Grant is { RequireReceiverIssuance: true }
+            ? VerifyMoveReceiverEffectProof(localPrincipalId, original.Grant.PhaseCommandId, original,
+                NativeSerialization.Serialize(original), work) : null;
         var body = NativeSerialization.Deserialize<PartitionMoveCaptureRequest>(original.Body.Span);
         Store.Read(view =>
         {
@@ -23,6 +26,7 @@ public sealed partial class DatabaseEngine
             var principal = Principal(admitted, localPrincipalId, now);
             if (!principal.ClusterAdministrator)
             { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            RequireMoveReceiverCaptureAdmission(admitted, principal, original, receiverAdmission);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(admitted)
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);

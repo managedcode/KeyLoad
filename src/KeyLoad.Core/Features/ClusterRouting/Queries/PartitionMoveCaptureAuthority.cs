@@ -16,6 +16,9 @@ public sealed partial class DatabaseEngine
         if (verified.Stage != PartitionMovePeerStage.Capture || verified.Grant is null)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         RequireMovementReceiver(verified);
+        var receiverAdmission = verified.Grant is { RequireReceiverIssuance: true }
+            ? VerifyMoveReceiverEffectProof(localPrincipalId, verified.Grant.PhaseCommandId, verified,
+                NativeSerialization.Serialize(verified), work) : null;
         var body = NativeSerialization.Deserialize<PartitionMoveCaptureRequest>(verified.Body.Span);
         if (body.MaximumPageBytes <= PartitionMoveProtocol.EmptyCount
             || body.MaximumPageBytes > Limits.MaxBatchBytes
@@ -30,6 +33,7 @@ public sealed partial class DatabaseEngine
             var principal = Principal(admitted, localPrincipalId, EvaluationClock.GetUtcNow());
             if (!principal.ClusterAdministrator)
             { throw Errors.Fail(ErrorCode.PermissionDenied, ClusterAdministrationRequiredMessage); }
+            RequireMoveReceiverCaptureAdmission(admitted, principal, verified, receiverAdmission);
             var catalog = PhysicalShardCatalogRecordSerialization.Read(admitted)
                 ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
             PartitionMoveGrantValidation.Require(verified, verified.Grant.PhaseCommandId,

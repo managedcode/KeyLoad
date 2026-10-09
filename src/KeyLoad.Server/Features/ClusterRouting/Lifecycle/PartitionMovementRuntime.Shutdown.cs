@@ -20,15 +20,36 @@ internal sealed partial class PartitionMovementRuntime
         foreach (var original in originalOperations)
         { await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false); }
         if (source is not null)
-        { await ServerFailureObserver.ObserveAsync(() => source.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            Task? sourceShutdown = null;
+            try
+            { sourceShutdown = source.DisposeAsync().AsTask(); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            if (sourceShutdown is not null)
+            { await ServerFailureObserver.ObserveAsync(() => sourceShutdown, failures).ConfigureAwait(false); }
+        }
         if (client is not null)
-        { ServerFailureObserver.Observe(client.Dispose, failures); }
+        {
+            try
+            { client.Dispose(); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        }
         if (admission is not null)
-        { ServerFailureObserver.Observe(admission.Dispose, failures); }
+        {
+            try
+            { admission.Dispose(); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        }
         try
         { stopping.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        parent = null;
+        parentDatabase = null;
+        parentClock = null;
         lock (gate)
         { joined = true; }
         ServerFailureObserver.ThrowIfAny(failures);

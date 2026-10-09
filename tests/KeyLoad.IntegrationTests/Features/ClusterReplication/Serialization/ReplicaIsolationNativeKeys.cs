@@ -26,6 +26,7 @@ internal static class ReplicaIsolationNativeKeys
     internal const string Linux = "linux";
     internal const string Running = "running";
     internal const string NetAdmin = "NET_ADMIN";
+    internal const string NativeNetAdmin = "CAP_NET_ADMIN";
     internal const string ImageInspect = "image";
     internal const string Inspect = "inspect";
     internal const string Format = "--format";

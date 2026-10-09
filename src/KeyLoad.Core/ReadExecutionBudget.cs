@@ -9,22 +9,19 @@ namespace KeyLoad.Core;
 /// <summary>Bounds logical storage work, output bytes and elapsed time within one consistent read cut.</summary>
 public sealed class ReadExecutionBudget
 {
-    private const int EmptyElementCount = 0;
 
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
-    private const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
-    private const string ExaminedRecordsExceeded = "The read execution examined-record budget is exceeded.";
-    private const string GrantOwnerMismatch = "The read grant belongs to a different operation.";
+    internal const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
     private const string TextTokensExceeded = "The search corpus token budget is exceeded.";
+    private const long NoReservedReadBytes = 0;
     private readonly DatabaseLimits limits;
+    private ReadExecutionBudgetScopedReadGrants? readGrants;
     private readonly CancellationToken cancellationToken;
     private readonly TimeProvider clock;
     private readonly long started;
+    private TimeSpan lifetimeBound;
     private long bytes;
     private int resultBytesLimit;
-    private long reservedReadGrantBytes;
-    private int examinedGrantRecords;
-    private int reservedGrantRecords;
     private long textTokens;
     private ReadExecutionBudgetStageCancellation? stageCancellation;
 
@@ -37,6 +34,7 @@ public sealed class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(options);
         limits = options.Value;
         limits.Validate();
+        lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
         resultBytesLimit = limits.MaxBatchBytes;
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
@@ -46,8 +44,33 @@ public sealed class ReadExecutionBudget
     /// <summary>Gets accepted logical key/value bytes; this is not physical disk I/O.</summary>
     public long ReadBytes => bytes;
 
+    internal TimeSpan RemainingLifetime
+    {
+        get
+        {
+            Check();
+            var remaining = lifetimeBound - clock.GetElapsedTime(started);
+            if (remaining <= TimeSpan.Zero)
+            { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded); }
+            return remaining;
+        }
+    }
+
+    internal void ConstrainLifetime(DateTimeOffset absoluteExpiry)
+    {
+        Check();
+        var remaining = absoluteExpiry - clock.GetUtcNow();
+        if (remaining <= TimeSpan.Zero)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded); }
+        var bounded = clock.GetElapsedTime(started) + remaining;
+        if (bounded < lifetimeBound)
+        { lifetimeBound = bounded; }
+    }
+
     internal CancellationToken Cancellation => cancellationToken;
     internal int MaximumResultBytes => resultBytesLimit;
+    internal long MaximumNativeReadBytes => limits.MaxQueryReadBytes;
+    internal int MaximumNativeScanRecords => limits.MaxScanRecords;
 
     internal void ConstrainResultBytes(int maximumBytes)
     {
@@ -63,17 +86,7 @@ public sealed class ReadExecutionBudget
     {
         ArgumentNullException.ThrowIfNull(view);
         Check();
-        return new BudgetedReadView(view, this);
-    }
-
-    internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant)
-    {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(grant);
-        Check();
-        if (!grant.BelongsTo(this))
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
-        return new BudgetedReadView(view, this, grant);
+        return new BudgetedReadView(view, this, readGrants?.Current);
     }
 
     /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
@@ -81,7 +94,7 @@ public sealed class ReadExecutionBudget
     {
         cancellationToken.ThrowIfCancellationRequested();
         Volatile.Read(ref stageCancellation)?.Check();
-        if (clock.GetElapsedTime(started) > TimeSpan.FromSeconds(limits.QueryDeadlineSeconds))
+        if (clock.GetElapsedTime(started) > lifetimeBound)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
         }
@@ -94,82 +107,13 @@ public sealed class ReadExecutionBudget
         return stages.Enter(stageToken);
     }
 
-    /// <summary>Reserves one non-borrowable raw-byte ceiling for a sequential query leaf.</summary>
-    /// <param name="maximumBytes">Maximum accepted native bytes reserved for that leaf.</param>
-    /// <param name="maximumRecords">Maximum native point attempts and range records reserved for that leaf.</param>
-    /// <returns>A reader sharing this operation's aggregate bytes, deadline and cancellation.</returns>
-    internal ReadExecutionBudgetReadGrant CreateReadGrant(long maximumBytes, int maximumRecords)
-    {
-        Check();
-        ArgumentOutOfRangeException.ThrowIfNegative(maximumBytes);
-        ArgumentOutOfRangeException.ThrowIfNegative(maximumRecords);
-        if (maximumBytes > limits.MaxQueryReadBytes - bytes - reservedReadGrantBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
-        }
-        if (maximumRecords > limits.MaxScanRecords - examinedGrantRecords - reservedGrantRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
-        }
-        reservedReadGrantBytes += maximumBytes;
-        reservedGrantRecords += maximumRecords;
-        return new(this, maximumBytes, maximumRecords);
-    }
-
-    internal void ChargeReadGrant(ReadExecutionBudgetReadGrant grant, long count)
-    {
-        Check();
-        ArgumentNullException.ThrowIfNull(grant);
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (!grant.BelongsTo(this))
-        {
-            throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
-        }
-        if (count > grant.RemainingBytes || count > reservedReadGrantBytes
-            || count > limits.MaxQueryReadBytes - bytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
-        }
-        if (grant.RemainingRecords == EmptyElementCount || reservedGrantRecords == EmptyElementCount
-            || examinedGrantRecords >= limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
-        }
-        bytes += count;
-        reservedReadGrantBytes -= count;
-        examinedGrantRecords++;
-        reservedGrantRecords--;
-        grant.Accept(count);
-    }
-
-    internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
-    {
-        Check();
-        ArgumentNullException.ThrowIfNull(grant);
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
-        ArgumentOutOfRangeException.ThrowIfNegative(records);
-        if (!grant.BelongsTo(this))
-        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
-        if (count > grant.RemainingBytes || count > reservedReadGrantBytes
-            || count > limits.MaxQueryReadBytes - bytes)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded); }
-        if (records > grant.RemainingRecords || records > reservedGrantRecords
-            || records > limits.MaxScanRecords - examinedGrantRecords)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded); }
-        bytes += count;
-        reservedReadGrantBytes -= count;
-        examinedGrantRecords += records;
-        reservedGrantRecords -= records;
-        grant.AcceptObserved(count, records);
-    }
-
     /// <summary>Accepts examined storage bytes before the consumer allocates or decodes them.</summary>
     /// <param name="count">Nonnegative key/value work, including matching scan lookahead.</param>
     public void ChargeBytes(long count)
     {
         Check();
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (count > limits.MaxQueryReadBytes - bytes - reservedReadGrantBytes)
+        if (count > limits.MaxQueryReadBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }
@@ -196,7 +140,7 @@ public sealed class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(view);
         Check();
         byte[]? value = null;
-        view.ReadValue(key, borrowed => value = borrowed.ToArray(), ChargeBytes);
+        view.ReadValue(key, borrowed => value = borrowed.ToArray(), ChargeNativeReadRecord);
         Check();
         return value;
     }
@@ -211,7 +155,7 @@ public sealed class ReadExecutionBudget
         ArgumentNullException.ThrowIfNull(view);
         Check();
         T? record = null;
-        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), ChargeBytes);
+        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), ChargeNativeReadRecord);
         Check();
         return record;
     }
@@ -229,7 +173,7 @@ public sealed class ReadExecutionBudget
     {
         ArgumentNullException.ThrowIfNull(view);
         Check();
-        var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, ChargeBytes, cancellationToken);
+        var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, ChargeNativeReadRecord, cancellationToken);
         Check();
         return result;
     }
@@ -269,4 +213,26 @@ public sealed class ReadExecutionBudget
         Check();
         return counter.Length;
     }
+    private ReadExecutionBudgetScopedReadGrants ReadGrants => readGrants ??= new(this);
+    internal long RemainingReadGrantBytes => limits.MaxQueryReadBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
+    internal int RemainingReadGrantRecords => limits.MaxScanRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
+    private const int EmptyClaimedRecords = 0;
+    internal void AcceptReadGrantBytes(long count) => bytes += count;
+    internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.CompleteReadGrant(grant);
+    internal ReadExecutionBudgetReadGrantLease EnterReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.EnterReadGrant(grant);
+    internal void ExitReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.ExitReadGrant(grant);
+    internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant) => ReadGrants.CreateView(view, grant);
+    internal ReadExecutionBudgetReadGrant CreateReadGrant(long maximumBytes, int maximumRecords)
+        => ReadGrants.CreateReadGrant(maximumBytes, maximumRecords);
+    internal void ChargeReadGrant(ReadExecutionBudgetReadGrant grant, long count) => ReadGrants.ChargeReadGrant(grant, count);
+    internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
+        => ReadGrants.ImportReadGrant(grant, count, records);
+    internal void ChargeNativeReadRecord(long count)
+    {
+        if (readGrants is { } grants)
+        { grants.ChargeNativeReadRecord(count); }
+        else
+        { ChargeBytes(count); }
+    }
+
 }

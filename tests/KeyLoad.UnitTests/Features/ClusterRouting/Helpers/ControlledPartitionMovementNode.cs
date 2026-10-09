@@ -14,6 +14,7 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     private readonly string root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private ControlledPartitionMovementNativeNode native;
     private bool closed;
+    private IPartitionMovementCheckpointVerifier checkpointVerifier = UnavailablePartitionMovementCheckpointVerifier.Instance;
 
     internal ControlledPartitionMovementNode(PhysicalShardRecord owner,
         long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries)
@@ -40,14 +41,23 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     internal void OpenAfterChild()
     {
         ObjectDisposedException.ThrowIf(closed, this);
-        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
+    }
+
+    internal void ReopenWithCheckpointVerifier(IPartitionMovementCheckpointVerifier verifier)
+    {
+        ArgumentNullException.ThrowIfNull(verifier);
+        ObjectDisposedException.ThrowIf(closed, this);
+        native.Dispose();
+        checkpointVerifier = verifier;
+        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
     }
 
     internal void Reopen()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native.Dispose();
-        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
     }
 
     internal KeyLoadException ReopenAfterExpectedCorruptApply()
@@ -61,7 +71,7 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         { original = failure; }
         if (original is null)
         { throw new InvalidOperationException("The original faulted apply worker did not retain its corruption."); }
-        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries);
+        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries);
         return original;
     }
 

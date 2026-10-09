@@ -1,6 +1,6 @@
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal static class PartitionMovementWire
+internal static partial class PartitionMovementWire
 {
     private const int MinimumBodyBytes = 1;
     private const int SingleSignature = 1;
@@ -11,6 +11,14 @@ internal static class PartitionMovementWire
 
     internal static Task<byte[]> ReadOutcomeAsync(HttpRequest request, int maximumBytes, CancellationToken cancellationToken)
         => ReadExactAsync(request, PartitionMovementProtocol.OutcomePath, maximumBytes, cancellationToken);
+
+    internal static Task<byte[]> ReadTransferDataAsync(HttpRequest request, int maximumBytes, CancellationToken cancellationToken)
+        => ReadExactAsync(request, PartitionMovementProtocol.TransferDataPath, maximumBytes, cancellationToken);
+
+    internal static Task<byte[]> ReadReceiverIssueAsync(HttpRequest request, bool query,
+        int maximumBytes, CancellationToken cancellationToken)
+        => ReadExactAsync(request, query ? PartitionMovementProtocol.ReceiverIssueProofPath
+            : PartitionMovementProtocol.ReceiverIssuePath, maximumBytes, cancellationToken);
 
     private static async Task<byte[]> ReadExactAsync(HttpRequest request, PathString exactPath,
         int maximumBytes, CancellationToken cancellationToken)

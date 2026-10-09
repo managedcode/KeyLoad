@@ -1,43 +1,43 @@
 using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 {
-    private DistributedApplication? application;
-    private ContainerRuntimeControl? RemoteRuntimeOwner { get; set; }
-    private string? dataRoot;
+    internal readonly TwoRf3MembershipCapacity capacity = new();
+    internal DistributedApplication? application;
+    internal ContainerRuntimeControl? RemoteRuntimeOwner { get; set; }
+    internal string? dataRoot;
     private bool dataRootOwned;
-    private bool startAttempted;
-    private bool applicationDisposed;
-    private bool nodeLocksReleased;
+    internal bool startAttempted;
+    internal bool applicationDisposed;
+    internal bool nodeLocksReleased;
     private bool cleanupFailed;
-    private readonly bool registerPhysicalOwners;
-    private readonly bool remoteDocumentReads;
-    private readonly bool remotePartitionQueries;
-    private readonly bool queryProbe;
-    private readonly bool protectedDocuments;
-    private RequestCqrsProbeFixture? queryControls;
-    private readonly LocalRf3ImageSelection.Selection? localImageSelection;
-    private LocalRf3ImageIdentity.Identity? localImageIdentity;
+    internal readonly bool registerPhysicalOwners;
+    internal readonly bool remoteDocumentReads;
+    internal readonly bool remotePartitionQueries;
+    internal readonly bool queryProbe;
+    internal readonly bool protectedDocuments;
+    internal int? movementMaxBatchBytes;
+    internal RequestCqrsProbeFixture? queryControls;
+    internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
+    internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false)
-    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; }
+    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null)
+    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; movementMaxBatchBytes = maximumBatchBytes; }
 
-    internal string? MovementTargetPeerKey { get; private set; }
+    internal string OwnedDataRoot => dataRoot
+        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
+
+    internal string? MovementTargetPeerKey { get; set; }
 
     internal NodeEpochRf3Profile Profile
     {
         get => field
-        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); private set;
+        ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); set;
     }
     internal ContainerRuntimeControl RemoteRuntime => RemoteRuntimeOwner
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
@@ -62,6 +62,13 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
 
+    internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(int maxBatchBytes, CancellationToken token)
+    {
+        new DatabaseLimits { MaxBatchBytes = maxBatchBytes }.Validate();
+        return StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
+            probe: true, protectedDocument: true, maximumBatchBytes: maxBatchBytes), token);
+    }
+
     internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true), cancellationToken);
 
@@ -83,65 +90,10 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }
 
-    private async Task StartCoreAsync(CancellationToken cancellationToken)
-    {
-        var root = CreateOwnedRoot();
-        Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile;
-        var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
-        string? githubReference = null;
-        if (localImageSelection is null)
-        {
-            githubReference = await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken)
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repository, localImageSelection, cancellationToken)
-                .ConfigureAwait(false) ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
-        }
-        if (queryProbe)
-        { queryControls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid()); }
-        var args = TwoRf3WaveArguments.Create(root, localImageSelection, registerPhysicalOwners, remoteDocumentReads, remotePartitionQueries, queryControls, protectedDocuments);
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
-            cancellationToken).ConfigureAwait(false);
-        if (protectedDocuments)
-        {
-            MovementTargetPeerKey = await builder.Resources.OfType<ParameterResource>()
-                .Single(resource => resource.Name == "membership-peer-b").GetValueAsync(cancellationToken).ConfigureAwait(false);
-        }
-        var containerNames = TwoRf3MembershipContainerNames.Read(builder.Resources.OfType<ContainerResource>());
-        application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
-        if (remoteDocumentReads)
-        { RemoteRuntimeOwner = new ContainerRuntimeControl(application, containerNames, repository); }
-        if (localImageSelection is null)
-        {
-            await TwoRf3MembershipImageAssertions.VerifyAsync(application,
-                    githubReference ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch),
-                    cancellationToken)
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            localImageIdentity = await LocalRf3ImageIdentity.VerifyBeforeStartAsync(application, repository,
-                localImageSelection, TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
-        }
-        startAttempted = true;
-        await application.StartAsync(cancellationToken).ConfigureAwait(false);
-        await WaitForSixHealthyAsync(cancellationToken).ConfigureAwait(false);
-        if (remoteDocumentReads)
-        {
-            await TwoRf3MembershipDataReadiness.WaitAsync(application,
-                application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(),
-                application.Services.GetRequiredService<TimeProvider>(), cancellationToken).ConfigureAwait(false);
-        }
-        if (localImageIdentity is { } identity)
-        {
-            await LocalRf3ImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
-                TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
-        }
-    }
+    private Task StartCoreAsync(CancellationToken cancellationToken)
+        => TwoRf3MembershipWaveStartup.StartCoreAsync(this, cancellationToken);
 
-    private async Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
+    internal async Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
     {
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
@@ -184,7 +136,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         return dataRoot ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.InvalidRoot);
     }
 
-    private async Task DisposeApplicationAsync(List<Exception> failures)
+    internal async Task DisposeApplicationAsync(List<Exception> failures)
     {
         var owned = application;
         if (owned is null)
@@ -199,14 +151,14 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { cleanupFailed = true; }
     }
 
-    private bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased
+    internal bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased
         && !cleanupFailed && dataRoot is not null;
 
     private bool CanDeleteRoot(List<Exception> failures)
         => dataRootOwned && dataRoot is not null && failures.Count == 0 && !cleanupFailed
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
 
-    private void AssertAllNodeLocksReleased()
+    internal void AssertAllNodeLocksReleased()
     {
         var root = dataRoot ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.InvalidRoot);
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
@@ -218,7 +170,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         nodeLocksReleased = true;
     }
 
-    private string CreateOwnedRoot()
+    internal string CreateOwnedRoot()
     {
         var path = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, "artifacts",
             "qualification", "membership-stage1a-" + Guid.NewGuid().ToString("N"));
@@ -229,4 +181,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
         return path;
     }
+    internal Task ReconfigureMovementCapacityAsync(int maxBatchBytes, CancellationToken cancellationToken)
+        => capacity.ReconfigureMovementCapacityAsync(this, maxBatchBytes, cancellationToken);
+
 }

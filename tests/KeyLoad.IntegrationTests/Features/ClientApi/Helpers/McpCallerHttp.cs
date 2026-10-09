@@ -1,5 +1,9 @@
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
+using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
@@ -28,4 +32,34 @@ internal static class McpCallerHttp
         http.Timeout = Timeout.InfiniteTimeSpan;
         return http;
     }
+    /// <summary>Uses the same native default factory chain and discovered endpoint with passive initialization observation.</summary>
+    internal static HttpClient CreateObserved(DistributedApplication app, string node, out McpInitializeHttpObservation observation)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        ArgumentException.ThrowIfNullOrWhiteSpace(node);
+        var endpoint = app.GetEndpoint(node, McpCallerProtocol.HttpEndpoint);
+        var factory = app.Services.GetRequiredService<IHttpMessageHandlerFactory>();
+        observation = new(factory.CreateHandler(string.Empty));
+        HttpClient? http = null;
+        try
+        {
+            http = new HttpClient(observation, disposeHandler: false);
+            var options = app.Services.GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>().Get(string.Empty);
+            foreach (var configure in options.HttpClientActions)
+            { configure(http); }
+            http.BaseAddress = endpoint;
+            http.Timeout = Timeout.InfiniteTimeSpan;
+            return http;
+        }
+        catch (Exception original)
+        {
+            var failures = new List<Exception> { original };
+            if (http is not null)
+            { ServerFailureObserver.Observe(http.Dispose, failures); }
+            ServerFailureObserver.Observe(observation.Dispose, failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
 }

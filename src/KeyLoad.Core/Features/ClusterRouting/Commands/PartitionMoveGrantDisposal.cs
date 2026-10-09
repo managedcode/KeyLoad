@@ -22,6 +22,11 @@ public sealed partial class DatabaseEngine
         foreach (var row in ReadMoveGrantIndex(transaction, control))
         {
             var grant = ReadIndexedMoveGrant(transaction, control, row);
+            if (grant.RetireCancellationDisposition is not null)
+            {
+                RequireRetireGrantCancellationDisposition(transaction, control, grant);
+                continue;
+            }
             if (grant.Settlement is not null || grant.AbortDisposition is not null)
             { continue; }
             var barrier = grant.ReceiverOwner.Incarnation == control.SourcePlacement.Incarnation ? source : target;
@@ -46,6 +51,16 @@ public sealed partial class DatabaseEngine
         return !pending;
     }
 
+    private void RequireClosedRetireGrantIntegrity(IKeyValueView view, PartitionMoveControlRecord control)
+    {
+        foreach (var row in ReadMoveGrantIndex(view, control))
+        {
+            var grant = ReadIndexedMoveGrant(view, control, row);
+            if (grant.RetireCancellationDisposition is not null)
+            { RequireRetireGrantCancellationDisposition(view, control, grant); }
+        }
+    }
+
     private void RequireNoUnsettledMoveGrants(IKeyValueView view, PartitionMoveControlRecord control)
     {
         if (PartitionMoveGrantStorage.Outstanding(view,
@@ -54,6 +69,11 @@ public sealed partial class DatabaseEngine
         foreach (var row in ReadMoveGrantIndex(view, control))
         {
             var grant = ReadIndexedMoveGrant(view, control, row);
+            if (grant.RetireCancellationDisposition is not null)
+            {
+                RequireRetireGrantCancellationDisposition(view, control, grant);
+                continue;
+            }
             if (grant.Settlement is null && grant.AbortDisposition is null)
             { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority); }
         }

@@ -13,6 +13,7 @@ internal sealed record EmbeddedBenchmarkRuntimeOptions(IOptions<DatabaseLimits> 
     IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution, IOptions<BlobExecutionOptions> BlobExecution,
     IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution,
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
+    IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints,
     IOptions<ZoneTreeStorageExecutionOptions> Storage,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache);
 
@@ -44,6 +45,8 @@ internal static class EmbeddedBenchmarkRuntimeRegistration
                 settings => settings.IsValid(), NativeClaimsExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<TimeSeriesExecutionOptions>(configuration, TimeSeriesExecutionOptions.SectionName,
                 settings => settings.IsValid(), TimeSeriesExecutionOptions.ValidationMessage),
+            BenchmarkScenarioOptionsRegistration.Read<PartitionMovementCheckpointOptions>(configuration, PartitionMovementCheckpointOptions.SectionName,
+                settings => settings.IsValid(), PartitionMovementCheckpointOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreeStorageExecutionOptions>(configuration, ZoneTreeStorageExecutionOptions.SectionName,
                 settings => settings.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreePointCacheExecutionOptions>(configuration, ZoneTreePointCacheExecutionOptions.SectionName,

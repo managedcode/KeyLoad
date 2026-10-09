@@ -27,7 +27,7 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
         ReplicaMaterializer? openedMaterializer = null;
         try
         {
-            Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+            Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
             Log = openedLog = new(stores.Replica, RecoveryExecutionOptions.Configuration(Configuration), canonicalDatabase: Database);
             Database.Bootstrap(new(Principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,

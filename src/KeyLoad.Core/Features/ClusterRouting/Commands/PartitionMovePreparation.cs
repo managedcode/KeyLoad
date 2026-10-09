@@ -8,7 +8,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private PartitionMoveControlRecord PreparePartitionMove(IAtomicTransaction transaction,
-        PrincipalRecord principal, PartitionMoveRequest request, long position)
+        PrincipalRecord principal, PartitionMoveRequest request, long position, bool parentRequired)
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidatePartition(request.Partition);
@@ -22,7 +22,11 @@ public sealed partial class DatabaseEngine
         var history = PartitionMoveControlStorage.ReadHistory(transaction, request.Partition,
             request.MoveId, Limits.MaxBatchBytes);
         if (history is not null)
-        { return RequireExistingMove(history, principal, request, destination); }
+        {
+            if (history.ParentCheckpointRequired != parentRequired)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.MissingAuthority); }
+            return RequireExistingMove(history, principal, request, destination);
+        }
         var placement = ResolveRegisteredPlacement(transaction, request.Partition, directory.ControlOwner);
         if (placement.Revision != request.ExpectedPlacementRevision)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
@@ -40,7 +44,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.Conflict); }
         var record = new PartitionMoveControlRecord(PartitionMoveProtocol.Version, request.MoveId,
             request.Partition, principal.Id, principal.PolicyEpoch, placement, destination,
-            PartitionMovePhase.Prepared, PartitionMoveProtocol.EmptyCount, position, null, null, null);
+            PartitionMovePhase.Prepared, PartitionMoveProtocol.EmptyCount, position, null, null, null, parentRequired);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction,
             PartitionMoveGrantStorage.DatabaseKey(request.Partition.TenantId, request.Partition.DatabaseId),

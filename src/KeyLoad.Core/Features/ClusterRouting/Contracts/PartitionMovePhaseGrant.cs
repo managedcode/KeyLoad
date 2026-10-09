@@ -24,7 +24,9 @@ internal sealed record PartitionMovePhaseGrant(
     [property: Orleans.Id(17)] PartitionMoveCleanupRole? CleanupRole = null,
     [property: Orleans.Id(18)] int? CleanupFamily = null,
     [property: Orleans.Id(19)] Guid? PrecedingGrantId = null,
-    [property: Orleans.Id(20)] int PageOrdinal = PartitionMoveProtocol.EmptyCount);
+    [property: Orleans.Id(20)] int PageOrdinal = PartitionMoveProtocol.EmptyCount,
+    [property: Orleans.Id(21)] bool RequireReceiverIssuance = false,
+    [property: Orleans.Id(22)] PartitionMoveRetireCancellationDisposition? RetireCancellationDisposition = null);
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.GrantBodyAlias)]
 internal sealed record PartitionMoveAuthorizeBody(

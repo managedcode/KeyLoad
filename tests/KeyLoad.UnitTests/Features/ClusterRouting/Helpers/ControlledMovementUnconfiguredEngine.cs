@@ -11,5 +11,5 @@ internal static class ControlledMovementUnconfiguredEngine
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
 }

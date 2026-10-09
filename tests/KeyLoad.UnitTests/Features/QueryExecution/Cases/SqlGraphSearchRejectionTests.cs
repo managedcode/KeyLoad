@@ -84,7 +84,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task ParameterCountAndCompleteRequestBoundsAreEnforced()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 512 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 512 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
         const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;

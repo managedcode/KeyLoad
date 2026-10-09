@@ -40,7 +40,7 @@ internal static class ScalarIndexCrashScenario
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
             CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
-            CrashExecutionOptions.TimeSeriesExecution());
+            CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
 
     private static void Prepare(DatabaseEngine database)
     {

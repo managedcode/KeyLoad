@@ -19,14 +19,18 @@ internal sealed class ReplicaIsolationCapabilityAdmissionTests
     public async Task WrongPrefixedAbsentAndMultipleCapabilitiesRejectBeforeExactHealthyAdmission()
     {
         await VerifyAsync(["SYS_ADMIN"], ReplicaIsolationAdmissionMismatch.Capability, "true", "false", "false");
-        await VerifyAsync(["CAP_NET_ADMIN"], ReplicaIsolationAdmissionMismatch.Capability, "true", "false", "true");
+        await VerifyAsync(["NET_ADMIN"], ReplicaIsolationAdmissionMismatch.Capability, "true", "true", "false");
+        await VerifyAsync(["cap_net_admin"], ReplicaIsolationAdmissionMismatch.Capability, "true", "false", "false");
+        await VerifyAsync([" CAP_NET_ADMIN"], ReplicaIsolationAdmissionMismatch.Capability, "true", "false", "false");
+        await VerifyAsync(["ALL"], ReplicaIsolationAdmissionMismatch.Capability, "true", "false", "false");
         await VerifyAsync([], ReplicaIsolationAdmissionMismatch.CapabilityCount, "false", "false", "false");
-        await VerifyAsync(["NET_ADMIN", "SYS_ADMIN"], ReplicaIsolationAdmissionMismatch.CapabilityCount, "false", "false", "false");
-        await VerifyAsync(["NET_ADMIN"], ReplicaIsolationAdmissionMismatch.None, "true", "true", "false");
+        await VerifyAsync(["CAP_NET_ADMIN", "SYS_ADMIN"], ReplicaIsolationAdmissionMismatch.CapabilityCount, "false", "false", "false");
+        await VerifyAsync(["CAP_NET_ADMIN"], ReplicaIsolationAdmissionMismatch.RuntimeUser, "true", "false", "true", "0:0");
+        await VerifyAsync(["CAP_NET_ADMIN"], ReplicaIsolationAdmissionMismatch.None, "true", "false", "true");
     }
 
     private static async Task VerifyAsync(string[] capabilities, ReplicaIsolationAdmissionMismatch expected,
-        string single, string exact, string prefixed)
+        string single, string exact, string prefixed, string user = ServiceUser)
     {
         using var document = JsonDocument.Parse(JsonSerializer.Serialize(new
         {
@@ -38,7 +42,7 @@ internal sealed class ReplicaIsolationCapabilityAdmissionTests
             CapAdd = capabilities,
             Name = "/node1",
             ConfigImage = Image,
-            User = ServiceUser,
+            User = user,
             FaultSource = Source,
             Incarnation = Incarnation.ToString("D")
         }));

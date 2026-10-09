@@ -23,29 +23,42 @@ public sealed partial class DatabaseEngine
             _ => new Mutation[] { mutation }
         };
 
-    private void AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
+    private void AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
+        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
         if (mutation is QueueToGraph forward)
         {
             ValidateForward(forward);
-            Authorization.Require(principal, partition, forward.Queue, Capability.QueueInspect);
-            Authorization.Require(principal, partition, forward.Graph, Capability.GraphWrite);
-            var source = Resource(view, partition, forward.Queue, ResourceKind.WorkQueue);
-            var target = Resource(view, partition, forward.Graph, ResourceKind.Graph);
+            RequireCompositionCapabilities(principal, partition, forward);
+            var source = BatchResource(view, partition, forward.Queue, admission, ResourceKind.WorkQueue);
+            var target = BatchResource(view, partition, forward.Graph, admission, ResourceKind.Graph);
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
         }
         else if (mutation is GraphToQueueMutation reverse)
         {
             ValidateReverse(partition, reverse);
+            RequireCompositionCapabilities(principal, partition, reverse);
+            var source = BatchResource(view, partition, reverse.Graph, admission, ResourceKind.Graph);
+            var target = BatchResource(view, partition, reverse.Queue, admission, ResourceKind.WorkQueue);
+            BatchResource(view, partition, reverse.Start.Collection, admission, ResourceKind.Collection);
+            RequireRawSource(principal, source);
+            RequireTargetWrites(principal, target);
+        }
+    }
+
+    private void RequireCompositionCapabilities(PrincipalRecord principal, PartitionRef partition, Mutation mutation)
+    {
+        if (mutation is QueueToGraph forward)
+        {
+            Authorization.Require(principal, partition, forward.Queue, Capability.QueueInspect);
+            Authorization.Require(principal, partition, forward.Graph, Capability.GraphWrite);
+        }
+        else if (mutation is GraphToQueueMutation reverse)
+        {
             Authorization.Require(principal, partition, reverse.Graph, Capability.GraphRead);
             Authorization.Require(principal, partition, reverse.Queue, Capability.QueuePublish);
             Authorization.Require(principal, partition, reverse.Start.Collection, Capability.DocumentsRead);
-            var source = Resource(view, partition, reverse.Graph, ResourceKind.Graph);
-            var target = Resource(view, partition, reverse.Queue, ResourceKind.WorkQueue);
-            Resource(view, partition, reverse.Start.Collection, ResourceKind.Collection);
-            RequireRawSource(principal, source);
-            RequireTargetWrites(principal, target);
         }
     }
 

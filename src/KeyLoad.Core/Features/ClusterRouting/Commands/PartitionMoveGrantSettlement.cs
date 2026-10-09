@@ -14,7 +14,7 @@ public sealed partial class DatabaseEngine
         var grant = PartitionMoveGrantStorage.Read(transaction, phase.Partition, body.GrantId, Limits.MaxBatchBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var receipt = body.Settlement;
-        if (grant.AbortDisposition is not null || grant.OperatorPrincipalId != principal.Id || grant.OperatorPolicyEpoch != principal.PolicyEpoch
+        if (grant.RetireCancellationDisposition is not null || grant.AbortDisposition is not null || grant.OperatorPrincipalId != principal.Id || grant.OperatorPolicyEpoch != principal.PolicyEpoch
             || grant.MoveId != phase.MoveId || grant.ControlIntentDigest != phase.ControlIntentDigest
             || receipt.CommandId != grant.PhaseCommandId
             || receipt.AppliedPosition <= PartitionMoveProtocol.EmptyCount

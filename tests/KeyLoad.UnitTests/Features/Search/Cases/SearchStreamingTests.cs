@@ -93,7 +93,7 @@ internal sealed class SearchStreamingTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"text\":\"alpha\",\"padding\":\"" + new string('x', 1_024) + "\"}"));
         var position = db.Store.Position;
-        var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = 128 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = 128 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => bounded.SearchAsync("root",
             new(db.Partition, Collection, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
         await Assert.That(failure.Code)

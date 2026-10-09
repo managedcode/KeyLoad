@@ -9,4 +9,5 @@ internal sealed record PartitionMovementTransportReply(
     [property: global::Orleans.Id(1)] Guid Nonce,
     [property: global::Orleans.Id(2)] PhysicalShardRecord Receiver,
     [property: global::Orleans.Id(3)] ReplicaSiloDiscovery Discovery,
-    [property: global::Orleans.Id(4)] GrainOperationReply Reply);
+    [property: global::Orleans.Id(4)] GrainOperationReply Reply,
+    [property: global::Orleans.Id(5)] string OriginalPhaseIdentityDigest = PartitionMovementProtocol.NoOriginalPhaseIdentityDigest);

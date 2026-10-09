@@ -84,13 +84,20 @@ internal static class FollowerDocumentRf3Assertions
         }
     }
 
-    internal static async Task CancelledAsync(FollowerDocumentPublicObservation observation, string secret, CancellationToken token)
+    internal static async Task CancelledAsync(FollowerDocumentPublicObservation observation, string secret, FollowerDocumentCaller mode,
+        CancellationToken token)
     {
         await Assert.That(token.IsCancellationRequested).IsTrue();
         await Assert.That(observation.IsSuccess).IsFalse();
         await Assert.That(observation.Value).IsNull();
         if (observation.Failure is OperationCanceledException failure)
-        { await Assert.That(failure.CancellationToken).IsEqualTo(token); return; }
-        await RejectedAsync(observation, ErrorCode.Cancelled, secret);
+        {
+            await Assert.That(failure.CancellationToken.IsCancellationRequested).IsTrue();
+            await Assert.That(observation.Problem).IsNull();
+            await Assert.That(observation.Official).IsNull();
+            return;
+        }
+        var code = mode == FollowerDocumentCaller.SqlSdk ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled;
+        await RejectedAsync(observation, code, secret);
     }
 }

@@ -29,7 +29,7 @@ internal sealed class ReadExecutionTests
         database.Configure(Orders, ResourceKind.Collection);
         database.Configure(Links, ResourceKind.Graph);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha\"}"));
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = MaximumBatchBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = MaximumBatchBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SearchEngine(bounded, UnitExecutionOptions.QueryExecution())
             .Search(RootIdentity, new(database.Partition, Orders, FieldTextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
