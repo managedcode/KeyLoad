@@ -32,7 +32,6 @@ internal static class SiteVectorAssetSourceTokens
     public const string FragmentGroup = "fragment";
     public const string TextJoinSeparator = " ";
     public const string QueryReferenceFailure = "The vector poster contains an unresolved or ambiguous local reference.";
-    public const string MobilePosterRelativePath = "site/Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg";
 
     public static readonly Regex SvgUrlReference = new(SvgUrlReferencePattern,
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -40,17 +39,4 @@ internal static class SiteVectorAssetSourceTokens
         RegexOptions.CultureInvariant);
     public static readonly Regex UrlFunction = new(UrlFunctionPattern,
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    public static readonly string[] CanonicalPathAttributes =
-    [
-        PathDataAttribute,
-        StrokeAttribute,
-        StrokeWidthAttribute,
-        StrokeLinecapAttribute,
-        StrokeLinejoinAttribute,
-    ];
-    public static readonly string[] PosterPaths =
-    [
-        SiteVectorAssetTokens.PosterRelativePath,
-        MobilePosterRelativePath,
-    ];
 }

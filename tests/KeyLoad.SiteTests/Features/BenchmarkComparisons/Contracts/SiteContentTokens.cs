@@ -21,8 +21,8 @@ internal static class SiteContentTokens
     public const string Request = "request";
     public const string Url = "url";
     public const string Width = "innerWidth";
-    public const string MobilePosterSuffix = "cluster-poster-mobile.svg";
-    public const string DesktopPosterSuffix = "cluster-poster.svg";
+    public const string MobilePosterSuffix = "agent-context.png";
+    public const string DesktopPosterSuffix = "agent-context.png";
     public const string ProductTitle = "KeyLoad — the AI-native database for AI agents";
     public const string TitleField = "title";
     public const string StaticStatus = "Static illustration.";
@@ -84,7 +84,6 @@ internal static class SiteContentTokens
         SiteAssetTokens.TokenStylesheet,
         SiteAssetTokens.SceneStylesheet,
         SiteAssetTokens.PosterAsset,
-        SiteAssetTokens.MobilePosterAsset,
     ];
 
     public static readonly string[] RootAssets =

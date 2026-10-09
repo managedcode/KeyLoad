@@ -92,7 +92,7 @@ internal static class SiteBrowserUiTokens
     public const string EmulationFeatureValue = "value";
     public const int RendererPixelLimit = 1_000_000;
     public const int RendererDrawCallLimit = 30;
-    public const int RendererTriangleLimit = 5000;
+    public const int RendererTriangleLimit = 120_000;
     public const double RendererPixelRatioLimit = 1.5d;
     public const int ViewportDesktopWidth = 1440;
     public const int ViewportTabletWidth = 768;

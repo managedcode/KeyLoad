@@ -4,42 +4,37 @@ internal static class SiteBrowserSceneTokens
 {
     public const string BrowserSceneUnsupported = "The browser did not reach a supported or explicitly unsupported scene state.";
     public const string BrowserSceneError = "A real browser renderer initialization error occurred.";
-    public const string SilosField = "silos";
-    public const string GrainsField = "grains";
+    public const string ModelsField = "models";
+    public const string AgentsField = "agents";
     public const string ClientsField = "clients";
     public const string ModelLabelsField = "modelLabels";
-    public const string ClientLabelsField = "clientLabels";
     public const string LinksField = "links";
     public const string DescriptionField = "description";
-    public const string LabelsField = "labels";
-    public const string TextField = "text";
-    public const string VisibleField = "visible";
-    public const string ContainedField = "contained";
+    public const string CaptionsField = "captions";
+    public const string MarksField = "marks";
     public const string LabelsHiddenField = "labelsHidden";
-    public const string GraphReadyPredicate = "document.querySelector('#cluster-scene')?.dataset.sceneState === 'ready' && document.querySelectorAll('#cluster-scene [data-silo-label]').length === 3 && document.querySelectorAll('#cluster-scene .model-label[data-graph-label]').length === 9 && document.querySelectorAll('#cluster-scene .client-label[data-graph-label]').length === 3 && [...document.querySelectorAll('#cluster-scene [data-silo-label], #cluster-scene [data-graph-label]')].every(label => {const style=getComputedStyle(label);return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity)>0;})";
+    public const int ModelCount = 8;
+    public const int AgentCount = 1;
+    public const int LinkCount = 8;
+    public const string GraphReadyPredicate = "document.querySelector('#cluster-scene')?.dataset.sceneState === 'ready' && document.querySelector('#cluster-scene canvas') !== null";
     public const string ClusterGraphScript = """
         (() => {
           const host = document.querySelector('#cluster-scene');
-          const bounds = host.getBoundingClientRect();
-          const readLabels = (selector, nameSelector) => [...host.querySelectorAll(selector)].map(label => {
-            const rect = label.getBoundingClientRect(), style = getComputedStyle(label);
-            return { text: (nameSelector ? label.querySelector(nameSelector).textContent : label.textContent).replace(/\s+/g, ' ').trim(),
-              visible: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0,
-              contained: rect.width > 0 && rect.height > 0 && rect.left >= bounds.left && rect.right <= bounds.right &&
-                rect.top >= bounds.top && rect.bottom <= bounds.bottom };
-          });
           return {
-            silos: Number(host.dataset.sceneSilos), grains: Number(host.dataset.sceneGrains),
+            models: Number(host.dataset.sceneModels), agents: Number(host.dataset.sceneAgents),
             links: Number(host.dataset.sceneLinks), clients: Number(host.dataset.sceneClients),
             description: host.querySelector('.cluster-poster').alt,
-            labels: readLabels('.silo-label[data-silo-label]'),
-            modelLabels: readLabels('.model-label[data-graph-label]'),
-            clientLabels: readLabels('.client-label[data-graph-label]', 'strong')
+            marks: host.querySelectorAll('img.cluster-core').length,
+            captions: host.querySelectorAll('[data-silo-label], [data-graph-label], .client-label, .model-label').length,
+            modelLabels: [...host.querySelectorAll('[data-model-name]')].map(label => ({
+              text: label.textContent.replace(/\s+/g, ' ').trim(),
+              accessible: !!label.closest('.sr-only') && label.getAttribute('aria-hidden') !== 'true'
+            }))
           };
         })()
         """;
+    public const string TextField = "text";
+    public const string AccessibleField = "accessible";
     public static readonly string[] ModelNames =
         ["Documents", "Tables", "Graphs", "Vectors", "Queues", "Events", "Blobs", "Time series", "SQL"];
-    public static readonly string[] ClientNames = ["Client 01", "Client 02", "Client 03"];
-    public static readonly string[] SiloNames = ["A", "B", "C"];
 }

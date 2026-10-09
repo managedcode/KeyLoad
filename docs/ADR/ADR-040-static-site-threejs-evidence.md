@@ -217,7 +217,11 @@ fallback inventory and matching assertions through a source revert while preserv
 unrelated work, immutable original evidence and all publication/coverage gates.
 It does not retain a second renderer or use a still image as the live scene.
 
-Current stage is the source contract only: implementation, meaningful native
-browser verification, owner approval and delivery remain pending. The Feature
-records earlier local evidence and the four unrelated IntegrationTests errors
-from the prior full-solution attempt; those are not acceptance of this composition.
+Current stage: native implementation and the exact original-artwork fallback are
+present. The 2026-10-09 owner-requested Website build repair aligns the existing
+asset and browser assertions with this composition while preserving motion,
+fallback, accessibility, coverage and publication gates. Manual browser evidence
+and successful scoped compilation/static building are recorded in the Feature;
+exact-source Linux qualification, owner visual approval and delivery remain
+pending. Earlier local results do not qualify this composition or current database
+source.

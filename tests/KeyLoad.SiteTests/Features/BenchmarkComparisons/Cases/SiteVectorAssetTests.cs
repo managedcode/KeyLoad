@@ -1,4 +1,3 @@
-using System.Xml;
 using System.Xml.Linq;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
@@ -6,23 +5,37 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteVectorAssetTests
 {
     [Test]
-    public async Task AC_VEC_001_CommittedPosterIsAccessibleVectorArtworkWithClusterGraph()
+    public async Task AC_VEC_001_SelectedOriginalArtworkIsPreservedInBuiltSite()
     {
-        var inputs = SiteTestInputs.Read();
-        foreach (var posterPath in SiteVectorAssetSourceTokens.PosterPaths)
-        {
-            await VerifyPoster(Path.Combine(inputs.Repository, posterPath), inputs.Repository);
-        }
+        var inputs = SiteContentInputs.FromEnvironment();
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await using var temporary = SiteTempDirectory.Create();
+        var build = await SiteContentBuilderProcess.BuildAsync(inputs, temporary.Output, token);
+        await Assert.That(build.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
+        await Assert.That(build.StandardError.Length).IsEqualTo(SiteTokens.Zero);
+        var source = await File.ReadAllBytesAsync(Path.Combine(inputs.Repository,
+            SiteVectorAssetTokens.PosterRelativePath), token);
+        var emitted = await File.ReadAllBytesAsync(Path.Combine(temporary.Output,
+            SiteAssetTokens.EmittedFeatureRelativePath, SiteAssetTokens.PosterAsset), token);
+        await Assert.That(source.AsSpan().SequenceEqual(emitted)).IsTrue();
+        await Assert.That(source.AsSpan().StartsWith(SiteVectorAssetTokens.PngSignature)).IsTrue();
+        await Assert.That(Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(source)))
+            .IsEqualTo(SiteVectorAssetTokens.OriginalArtworkSha256);
+        await Assert.That(File.Exists(Path.Combine(temporary.Output, SiteAssetTokens.EmittedFeatureRelativePath,
+            SiteVectorAssetTokens.ObsoleteDesktopPoster))).IsFalse();
+        await Assert.That(File.Exists(Path.Combine(temporary.Output, SiteAssetTokens.EmittedFeatureRelativePath,
+            SiteVectorAssetTokens.ObsoleteMobilePoster))).IsFalse();
     }
 
     [Test]
     public async Task AC_VEC_002_CanonicalFaviconIsSafeVectorArtworkAtSiteRoot()
     {
-        var inputs = SiteTestInputs.Read();
+        var inputs = SiteContentInputs.FromEnvironment();
         var faviconPath = Path.Combine(inputs.Repository, SiteVectorAssetTokens.FaviconRelativePath);
         await Assert.That(File.Exists(faviconPath)).IsTrue();
         var favicon = XDocument.Load(faviconPath, LoadOptions.None);
         await Assert.That(favicon.Root?.Name.LocalName).IsEqualTo(SiteVectorAssetSourceTokens.SvgElement);
+        await Assert.That(favicon.Root?.Name.NamespaceName).IsEqualTo(SiteVectorAssetTokens.SvgNamespace);
 
         await Assert.That(HasVectorGeometry(favicon)).IsTrue();
         await AssertSafeVector(favicon);
@@ -96,52 +109,4 @@ internal sealed class SiteVectorAssetTests
         element.Name.LocalName is SiteVectorAssetSourceTokens.PathElement or SiteVectorAssetSourceTokens.RectElement or
             SiteVectorAssetSourceTokens.CircleElement or SiteVectorAssetSourceTokens.PolygonElement or
             SiteVectorAssetSourceTokens.TextElement);
-
-    private static async Task AssertClusterLabels(XDocument poster)
-    {
-        var text = string.Join(SiteVectorAssetSourceTokens.TextJoinSeparator,
-            poster.Descendants().Where(element => element.Name.LocalName == SiteVectorAssetSourceTokens.TextElement)
-            .Select(element => element.Value));
-        foreach (var label in SiteVectorAssetTokens.RequiredLabels)
-        {
-            await Assert.That(text.Contains(label, StringComparison.OrdinalIgnoreCase)).IsTrue();
-        }
-    }
-
-    private static async Task AssertCanonicalKeyPath(XDocument poster, string repository)
-    {
-        var favicon = XDocument.Load(Path.Combine(repository, SiteVectorAssetTokens.FaviconRelativePath), LoadOptions.None);
-        var canonicalPath = favicon.Descendants().Single(element =>
-            element.Name.LocalName == SiteVectorAssetSourceTokens.PathElement);
-        var matchingPaths = poster.Descendants().Where(element =>
-            element.Name.LocalName == SiteVectorAssetSourceTokens.PathElement &&
-            (string?)element.Attribute(SiteVectorAssetSourceTokens.PathDataAttribute) ==
-            (string?)canonicalPath.Attribute(SiteVectorAssetSourceTokens.PathDataAttribute)).ToArray();
-        await Assert.That(matchingPaths.Length).IsEqualTo(SiteTokens.One);
-        var path = matchingPaths.Single();
-        foreach (var attributeName in SiteVectorAssetSourceTokens.CanonicalPathAttributes)
-        {
-            await Assert.That((string?)path.Attribute(attributeName)).IsEqualTo((string?)canonicalPath.Attribute(attributeName));
-        }
-    }
-
-    private static async Task VerifyPoster(string posterPath, string repository)
-    {
-        XDocument poster;
-        try
-        {
-            poster = XDocument.Load(posterPath, LoadOptions.None);
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or XmlException)
-        {
-            throw new InvalidDataException(SiteVectorAssetTokens.MissingPosterFailure, exception);
-        }
-
-        await Assert.That(poster.Root?.Name.LocalName).IsEqualTo(SiteVectorAssetSourceTokens.SvgElement);
-        await Assert.That(poster.Root?.Name.NamespaceName).IsEqualTo(SiteVectorAssetTokens.SvgNamespace);
-        await Assert.That(HasVectorGeometry(poster)).IsTrue();
-        await AssertSafeVector(poster);
-        await AssertClusterLabels(poster);
-        await AssertCanonicalKeyPath(poster, repository);
-    }
 }

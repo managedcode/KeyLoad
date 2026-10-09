@@ -5,20 +5,26 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteVectorAssetBrowserTests
 {
     [Test]
-    public async Task AC_VEC_003_RealFavicon404KeepsTheVectorPosterAndNeverBecomesReady()
+    public async Task AC_VEC_003_RealRendererModule404KeepsOriginalArtworkAndNeverBecomesReady()
     {
-        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var inputs = SiteContentInputs.FromEnvironment();
         var token = TestContext.Current!.Execution.CancellationToken;
-        await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
+        await using var temporary = SiteTempDirectory.Create();
+        var build = await SiteContentBuilderProcess.BuildAsync(inputs, temporary.Output, token);
+        await Assert.That(build.ExitCode).IsEqualTo(SiteTokens.ProcessSuccessExitCode);
+        await Assert.That(build.StandardError.Length).IsEqualTo(SiteTokens.Zero);
+        await using var browser = await SiteContentBrowserStartup.StartAsync(inputs, temporary.Output, token);
         var cdp = browser.Chrome.Cdp;
         await browser.Chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, token);
-        File.Delete(Path.Combine(browser.Output, SiteAssetTokens.FaviconSvg));
+        var missingModule = Path.Combine(SiteAssetTokens.EmittedFeatureRelativePath,
+            SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.WebGpuVendorModule);
+        File.Delete(Path.Combine(temporary.Output, missingModule));
         await cdp.CommandAsync(SiteVectorAssetTokens.DisableCacheMethod, new Dictionary<string, object?>
         {
             [SiteVectorAssetTokens.CacheDisabledField] = true,
         }, token);
         using var http = new HttpClient { Timeout = TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds) };
-        using var response = await http.GetAsync(new Uri(browser.BaseUrl + SiteAssetTokens.FaviconSvg), token);
+        using var response = await http.GetAsync(new Uri(browser.BaseUrl + missingModule.Replace(Path.DirectorySeparatorChar, '/')), token);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
         await browser.Chrome.NavigateAsync(browser.BaseUrl + SiteAssetTokens.IndexHtml, token);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, token);

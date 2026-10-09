@@ -61,12 +61,18 @@ flowchart LR
     Review --> Delivery[Approval then scoped commit and Website gates]
 ```
 
-Current PRESENTATION-005 stage: contract established; native source, fallback,
-meaningful browser qualification and owner review are pending. The earlier
-five-case/4,731-triangle local result below qualifies only that previous working-tree
-iteration, not this new composition. The previous full solution build failed on
-four unrelated IntegrationTests errors; no new solution pass, visual acceptance,
-commit/push or Pages receipt is claimed by this specification update.
+Current PRESENTATION-005 stage: the native scene and original-artwork fallback are
+implemented. Manual in-app-browser review observed eight model platforms, one
+agent, eight links, 117,027 triangles and nine draw calls. The owner-directed
+Website build repair on 2026-10-09 updates the existing asset/browser oracles to
+this composition: the exact PNG replaces the retired SVGs, the canvas replaces
+the removed projected mark, and renderer limits use the approved 120,000-triangle
+bound. Motion, fallback, accessibility, coverage and publication gates remain
+mandatory. The static content-only build and SiteTests Release compilation pass
+locally with zero compiler warnings/errors; no local tests were run for this
+repair. Exact-source Linux Website/Pages qualification and owner visual approval
+remain pending. The earlier five-case/4,731-triangle result below qualifies only
+that previous iteration, not this composition or the current database source.
 
 Earlier TASK-BC-PRESENTATION-001..003 mapped respectively to the same-numbered REQ/AC:
 establish the current content-only build/browser baseline; update HTML/CSS,
