@@ -27,20 +27,31 @@ public static class AtomicPartitionRosterRestoreOriginSerialization
     public static byte[] EntryPrefix() => KeyCodec.Encode(KeySpace, KeyVersion, EntryKind);
     /// <summary>Encodes the original four-field roster key without changing its bytes.</summary>
     /// <param name="partition">Complete logical partition scope.</param>
-    public static byte[] EntryKey(PartitionRef partition) => KeyCodec.Encode(KeySpace, KeyVersion, EntryKind,
-        partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, partition.PartitionKey);
+    public static byte[] EntryKey(PartitionRef partition)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+        return KeyCodec.Encode(KeySpace, KeyVersion, EntryKind,
+            partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, partition.PartitionKey);
+    }
     /// <summary>Encodes the historical origin key in its separate native family.</summary>
     /// <param name="partition">Complete logical partition scope.</param>
-    public static byte[] OriginKey(PartitionRef partition) => KeyCodec.Encode(KeySpace, KeyVersion, OriginKind,
-        partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, partition.PartitionKey);
+    public static byte[] OriginKey(PartitionRef partition)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+        return KeyCodec.Encode(KeySpace, KeyVersion, OriginKind,
+            partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, partition.PartitionKey);
+    }
 
     /// <summary>Checks the actual source/new identity pair without granting live authority.</summary>
     /// <param name="identity">Actual native restore identity metadata.</param>
     /// <param name="currentIncarnation">Actual owning store incarnation.</param>
     public static bool MatchesIdentity(AtomicPartitionRosterRestoreIdentity identity, Guid currentIncarnation)
-        => identity.Version == CurrentVersion && identity.SourceIncarnation != Guid.Empty
+    {
+        ArgumentNullException.ThrowIfNull(identity);
+        return identity.Version == CurrentVersion && identity.SourceIncarnation != Guid.Empty
             && identity.RestoredIncarnation == currentIncarnation && currentIncarnation != Guid.Empty
             && identity.SourceIncarnation != currentIncarnation;
+    }
 
     /// <summary>Checks metadata identity only; it grants no live read or replica authority.</summary>
     /// <param name="origin">Actual native historical metadata.</param>
@@ -51,10 +62,13 @@ public static class AtomicPartitionRosterRestoreOriginSerialization
     /// <param name="actualSourceIncarnation">Source from the owning native restore identity pair.</param>
     public static bool Matches(AtomicPartitionRosterRestoreOrigin origin, PartitionRef partition,
         Guid currentIncarnation, ReadOnlySpan<byte> originalRow, long firstSeenAppliedIndex, Guid actualSourceIncarnation)
-        => origin.Version == CurrentVersion && origin.Partition == partition
+    {
+        ArgumentNullException.ThrowIfNull(origin);
+        return origin.Version == CurrentVersion && origin.Partition == partition
             && origin.SourceIncarnation != Guid.Empty && origin.SourceIncarnation == actualSourceIncarnation
             && origin.RestoredIncarnation == currentIncarnation
             && currentIncarnation != Guid.Empty && origin.SourceIncarnation != currentIncarnation
             && firstSeenAppliedIndex > NoAppliedIndex && origin.AppliedUpperBound >= firstSeenAppliedIndex && origin.EntryDigest is { Length: SHA256.HashSizeInBytes }
-            && CryptographicOperations.FixedTimeEquals(origin.EntryDigest, SHA256.HashData(originalRow));
+            && CryptographicOperations.FixedTimeEquals(origin.EntryDigest.Span, SHA256.HashData(originalRow));
+    }
 }

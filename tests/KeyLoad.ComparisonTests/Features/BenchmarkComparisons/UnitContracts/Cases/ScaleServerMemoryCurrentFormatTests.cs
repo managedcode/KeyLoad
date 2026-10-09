@@ -15,6 +15,7 @@ internal sealed class ScaleServerMemoryCurrentFormatTests
     private const string InteriorSpace = "123 456\n";
     private const string ExtraLine = "123456\n0\n";
     private const string Unlimited = "max\n";
+    private const string Empty = "";
     private const long CounterBytes = 123456;
     private const long ZeroBytes = 0;
 
@@ -37,7 +38,7 @@ internal sealed class ScaleServerMemoryCurrentFormatTests
     [Arguments(InteriorSpace)]
     [Arguments(ExtraLine)]
     [Arguments(Unlimited)]
-    [Arguments(string.Empty)]
+    [Arguments(Empty)]
     public async Task AcScale016MalformedMemoryCounterRejectsThenHealthyFollowUp(string text)
     {
         await Assert.That(ScaleServerProcessMetrics.TryMemoryCurrent(text, out _)).IsFalse();

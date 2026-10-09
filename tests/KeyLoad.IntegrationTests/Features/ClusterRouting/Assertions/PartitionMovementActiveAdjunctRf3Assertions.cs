@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;

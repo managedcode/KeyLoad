@@ -19,7 +19,7 @@ internal static class ScaleServerResourceBoundsFlow
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
-                () => ExecuteAsync(state, diagnostic, budget, cancellation.Token, timeout), failures.Add);
+                () => ExecuteAsync(state, diagnostic, budget, timeout, cancellation.Token), failures.Add);
         }
         finally
         {
@@ -36,7 +36,7 @@ internal static class ScaleServerResourceBoundsFlow
     }
 
     private static async Task ExecuteAsync(State state, bool diagnostic, ScaleServerResourceSampleBudget budget,
-        CancellationToken token, CancellationTokenSource timeout)
+        CancellationTokenSource timeout, CancellationToken token)
     {
         Directory.CreateDirectory(state.Directory);
         var original = ScaleServerResourceProcess.RunAsync(ScaleServerResourceBoundsNativeFixture.ShellProcess,

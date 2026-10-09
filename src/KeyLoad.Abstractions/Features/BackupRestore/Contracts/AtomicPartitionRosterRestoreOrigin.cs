@@ -15,7 +15,7 @@ public sealed record AtomicPartitionRosterRestoreOrigin(
     [property: Orleans.Id(AtomicPartitionRosterRestoreOriginFields.SourceIncarnation)] Guid SourceIncarnation,
     [property: Orleans.Id(AtomicPartitionRosterRestoreOriginFields.RestoredIncarnation)] Guid RestoredIncarnation,
     [property: Orleans.Id(AtomicPartitionRosterRestoreOriginFields.AppliedUpperBound)] long AppliedUpperBound,
-    [property: Orleans.Id(AtomicPartitionRosterRestoreOriginFields.EntryDigest)] byte[] EntryDigest);
+    [property: Orleans.Id(AtomicPartitionRosterRestoreOriginFields.EntryDigest)] ReadOnlyMemory<byte> EntryDigest);
 
 internal static class AtomicPartitionRosterRestoreOriginFields
 {

@@ -13,6 +13,7 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     private readonly HttpClient http;
     private readonly HttpClientTransport transport;
     private readonly McpInitializeHttpObservation observation;
+    private readonly NativeMcpInitializeLogObservation nativeObservation = new();
     private McpClient? client;
 
     private McpOfficialClient(HttpClient http, HttpClientTransport transport, McpInitializeHttpObservation observation)
@@ -106,16 +107,18 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     {
         try
         {
+            nativeObservation.Start();
             client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+                loggerFactory: nativeObservation, cancellationToken: cancellationToken).ConfigureAwait(false);
+            nativeObservation.ThrowIfAny();
         }
         catch (Exception original)
         {
-            observation.WriteAndThrow(original, node);
+            observation.WriteAndThrow(original, node, nativeObservation);
             throw;
         }
         finally
-        { observation.Stop(); }
+        { nativeObservation.Stop(); observation.Stop(); }
     }
 
     /// <summary>Calls the official tool API with the actual canonical typed request serialized at its public boundary.</summary>
@@ -153,6 +156,10 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         ServerFailureObserver.Observe(http.Dispose, failures);
         try
         { observation.Dispose(); }
+        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        try
+        { nativeObservation.Dispose(); }
         catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);

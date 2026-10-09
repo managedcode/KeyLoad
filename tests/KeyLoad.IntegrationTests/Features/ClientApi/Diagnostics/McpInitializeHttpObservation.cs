@@ -33,9 +33,11 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
     }
 
     /// <summary>Preserves the initiating native exception and bounded diagnostic write failures.</summary>
-    internal void WriteAndThrow(Exception original, string node)
+    internal void WriteAndThrow(Exception original, string node, NativeMcpInitializeLogObservation nativeObservation)
     {
         var failures = new List<Exception> { original };
+        nativeObservation.Stop();
+        nativeObservation.Write(failures);
         lock (gate)
         {
             ServerFailureObserver.Observe(() => Console.Error.WriteLine(JsonSerializer.Serialize(new

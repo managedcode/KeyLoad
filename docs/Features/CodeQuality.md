@@ -20,21 +20,22 @@ checkout changes. Unavailable code fixes require an owning-source repair, not a
 suppression. Recheck after repairs; fail on remaining errors/warnings or workspace
 load failures. Informational/hidden suggestions are advisory and require review.
 
-REQ-CQ-ROS-003 / AC-CQ-ROS-003: retain the canonical final format, strict Release
-solution build and mapped native TUnit/Aspire operation regressions. Roslynk
-diagnostics supplement these gates; they do not qualify runtime behavior, RF3,
-coverage or exact-source Linux delivery. New behavioral defects need complete-flow
-regressions in their owning slices. No product dependency, runtime protocol,
-storage format or database topology is changed by installing this development tool.
+REQ-CQ-ROS-003 / AC-CQ-ROS-003: retain the canonical final format and strict Release
+solution build for preserving source repairs. The owner clarified this task on
+2026-10-09 as Roslynk code-quality inspection and fixes only; do not execute test
+suites or expand this task into behavioral regression work. Runtime/RF3/coverage
+qualification is N/A to this scoped inspection and remains open in its owning
+workstreams. No product dependency, runtime protocol, storage format or database
+topology is changed by installing this development tool.
 
 TASK-CQ-ROS-001 maps these criteria to actual local tool/MCP operations (explicit
 manual-evidence exception for developer installation, no source-text tests),
-compiler diagnostics, canonical build/format and the affected existing TUnit
-suites. The lead owns root configuration, policy/docs and final integration;
+compiler diagnostics and canonical build/format. The lead owns root
+configuration, policy/docs and final integration;
 read-only workers inspect upstream APIs and the ordered ten-skill quality baseline.
 Ordered stages are pin/install/configure; load/diagnose; assign preserving repairs
-and meaningful regressions by finding; join/freeze source; format/build and run
-mapped suites; record actual results. Baseline findings and generated reports stay
+by finding; join/freeze source; format/build; record actual results. Baseline
+findings and generated reports stay
 in ignored artifacts or temporary storage. Delivery qualification remains open
 until the required original Linux evidence exists. Rollback removes only this
 local tool entry and MCP configuration, retaining product repairs and unrelated work.
@@ -46,8 +47,18 @@ flowchart LR
     MCP --> Workspace[Loaded KeyLoad solution]
     Workspace --> Findings[Compiler and analyzer findings]
     Findings --> Repair[Reviewed preserving source fixes]
-    Repair --> Gates[Canonical format build and native tests]
+    Repair --> Gates[Canonical format and build]
 ```
+
+Local Roslynk inspection on2026-10-09 loaded all27/27 projects to Ready and
+rechecked the solution with compiler errors, warnings and analyzers included.
+The initial27 errors were repaired; the recheck reported zero errors and zero
+warnings. Informational/hidden suggestions remain advisory, including existing
+namespace/folder differences and intentionally unused fluent assertion results;
+this result does not claim every style suggestion has been eliminated. The
+owner-scoped follow-up performs formatting and compilation only, without test
+execution or additional runtime qualification. Original diagnostic reports are
+kept outside the checkout.
 
 TASK-CQ-UNIT64-010 implements the owner's 2026-10-06 rule-specific correction:
 REQ-CQ-006 / AC-CQ-008 now require KLD0032 at an executable-unit boundary of64

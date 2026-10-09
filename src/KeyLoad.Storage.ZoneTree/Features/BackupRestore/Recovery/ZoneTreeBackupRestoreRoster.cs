@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Storage;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -23,13 +22,15 @@ internal static class ZoneTreeBackupRestoreRoster
         var sourceApplied = restored.Read(view => view.ReadOwnedValue(KeyCodec.Encode(
             ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey)));
         var applied = sourceApplied is null ? NoAppliedIndex : NativeSerialization.Deserialize<long>(sourceApplied);
-        if (applied < NoAppliedIndex) { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+        if (applied < NoAppliedIndex)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
         byte[]? after = null;
         var prefix = AtomicPartitionRosterRestoreOriginSerialization.EntryPrefix();
         while (true)
         {
             var page = restored.Read(view => view.Scan(prefix, SingleRow, after));
-            if (page.Records.IsEmpty) { break; }
+            if (page.Records.IsEmpty)
+            { break; }
             var row = page.Records[FirstRecord];
             var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(row.Value.Span);
             if (entry is null || entry.Partition is null)
@@ -52,10 +53,12 @@ internal static class ZoneTreeBackupRestoreRoster
                 });
             }
             after = row.Key.ToArray();
-            if (!page.HasMore) { break; }
+            if (!page.HasMore)
+            { break; }
         }
         var hasOrigins = RequireEveryOriginBound(restored, sourceIncarnation);
-        if (priorIdentity is not null && !hasOrigins) { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+        if (priorIdentity is not null && !hasOrigins)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
         return hasOrigins;
     }
 
@@ -67,15 +70,15 @@ internal static class ZoneTreeBackupRestoreRoster
         while (true)
         {
             var page = restored.Read(view => view.Scan(prefix, SingleRow, after));
-            if (page.Records.IsEmpty) { return hasOrigins; }
+            if (page.Records.IsEmpty)
+            { return hasOrigins; }
             var row = page.Records[FirstRecord];
             var origin = NativeSerialization.Deserialize<AtomicPartitionRosterRestoreOrigin>(row.Value.Span);
             if (origin is null || origin.Partition is null
                 || !row.Key.Span.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(origin.Partition)))
             { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
             var original = restored.Read(view => view.ReadOwnedValue(
-                AtomicPartitionRosterRestoreOriginSerialization.EntryKey(origin.Partition)));
-            if (original is null) { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+                AtomicPartitionRosterRestoreOriginSerialization.EntryKey(origin.Partition))) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidRoster);
             var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(original);
             if (entry is null || entry.Partition != origin.Partition
                 || !AtomicPartitionRosterRestoreOriginSerialization.Matches(origin, origin.Partition,
@@ -83,7 +86,8 @@ internal static class ZoneTreeBackupRestoreRoster
             { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
             hasOrigins = true;
             after = row.Key.ToArray();
-            if (!page.HasMore) { return hasOrigins; }
+            if (!page.HasMore)
+            { return hasOrigins; }
         }
     }
 
@@ -100,6 +104,7 @@ internal static class ZoneTreeBackupRestoreRoster
             && entry.FirstSeenStorePosition > NoStorePosition && entry.FirstSeenStorePosition <= sourcePosition;
         var replicated = entry.FirstSeenStorePosition == NoStorePosition && entry.FirstSeenAppliedIndex > NoAppliedIndex
             && entry.FirstSeenAppliedIndex <= Math.Max(applied, origin?.AppliedUpperBound ?? NoAppliedIndex);
-        if (!local && !replicated) { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
+        if (!local && !replicated)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidRoster); }
     }
 }

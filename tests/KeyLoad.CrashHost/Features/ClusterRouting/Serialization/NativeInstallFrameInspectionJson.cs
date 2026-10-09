@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
@@ -36,7 +35,8 @@ internal static class NativeInstallFrameInspectionJson
     internal static byte[] SerializeRequest(NativeInstallFrameInspectionRequest request)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(Validate(request), C1OutcomeInspectionJson.SharedContext.NativeInstallFrameInspectionRequest);
-        if (bytes.Length > C1OutcomeInspectionProtocol.MaximumRequestBytes) { throw InvalidRequest(); }
+        if (bytes.Length > C1OutcomeInspectionProtocol.MaximumRequestBytes)
+        { throw InvalidRequest(); }
         return bytes;
     }
 
@@ -44,7 +44,8 @@ internal static class NativeInstallFrameInspectionJson
     {
         ValidateReceipt(receipt);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(receipt, C1OutcomeInspectionJson.SharedContext.NativeInstallFrameInspectionReceipt);
-        if (bytes.Length > C1OutcomeInspectionProtocol.MaximumReceiptBytes) { throw InvalidReceipt(); }
+        if (bytes.Length > C1OutcomeInspectionProtocol.MaximumReceiptBytes)
+        { throw InvalidReceipt(); }
         return bytes;
     }
 
@@ -60,10 +61,11 @@ internal static class NativeInstallFrameInspectionJson
 
     private static NativeInstallFrameInspectionRequest Validate(NativeInstallFrameInspectionRequest? request)
     {
-        if (request is null) { throw InvalidRequest(); }
+        if (request is null)
+        { throw InvalidRequest(); }
         _ = C1OutcomeInspectionRequestValidation.Validate(new(request.Version, request.Directory, request.ExpectedNodeId,
             request.Incarnation, request.PrincipalId, request.CommandId, request.Partition));
-        new ZoneTreeStorageExecutionOptions { MaxFrameBytes = request.MaximumFrameBytes }.Validate();
+        NativeInstallFrameInspectionOptions.ValidateMaximumFrameBytes(request.MaximumFrameBytes);
         return request;
     }
 

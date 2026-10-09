@@ -1,4 +1,5 @@
 using System.Net;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Query;
 using ModelContextProtocol.Protocol;
 
@@ -80,14 +81,18 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         if (rejected is null)
         { throw new InvalidOperationException(McpCallerProtocol.MissingClient); }
         await Assert.That(rejected.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-        await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
+        await using var callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
+        var expected = await callers.Sdk.QueryCapabilitiesAsync(deadline.Token);
+        await Assert.That(expected.IsSuccess).IsTrue();
+        var session = callers.Mcp;
         var first = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         await Assert.That(first.Value.AstVersion).IsEqualTo(McpCallerProtocol.AstVersion);
         await Assert.That(first.Value.ReadOnly).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(expected.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(first.Value))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(first.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(second.Value))).IsTrue();
         await Assert.That(first.RequestId).IsNotEqualTo(second.RequestId);
     }

@@ -1,5 +1,4 @@
 using KeyLoad.Client;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -25,7 +24,8 @@ internal static class PartitionMovementActiveAdjunctRf3Producer
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             _ = await Task.WhenAny(marker, call).ConfigureAwait(false);
-            if (!marker.IsCompletedSuccessfully) { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
+            if (!marker.IsCompletedSuccessfully)
+            { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
             var primary = await marker.ConfigureAwait(false);
             faults = PartitionMovementActiveAdjunctRf3Fault.Create(wave, seed, primary, duplicate);
             var failed = await call.ConfigureAwait(false);
@@ -79,7 +79,8 @@ internal static class PartitionMovementActiveAdjunctRf3Producer
 
     private static async Task JoinMarkerAsync(Task<RequestCqrsProbeMarkerRecord> marker, CancellationToken originalWait)
     {
-        try { _ = await marker.ConfigureAwait(false); }
+        try
+        { _ = await marker.ConfigureAwait(false); }
         catch (OperationCanceledException) when (originalWait.IsCancellationRequested) { }
     }
     private const int NoMarkers = 0;

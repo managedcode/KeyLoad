@@ -16,6 +16,7 @@
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../KeyLoad.Server/KeyLoad.Server.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.AppHost" />

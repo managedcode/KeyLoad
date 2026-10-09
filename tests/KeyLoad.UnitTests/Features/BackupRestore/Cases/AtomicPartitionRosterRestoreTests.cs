@@ -50,7 +50,7 @@ internal sealed class AtomicPartitionRosterRestoreTests
             var variants = new[] { original with { Version = WrongVersion }, original with { AppliedUpperBound = NoHistoricalBound },
                 original with { Partition = AtomicPartitionRosterFixture.Destination }, original with { SourceIncarnation = Guid.Empty },
                 original with { SourceIncarnation = Guid.NewGuid() },
-                original with { RestoredIncarnation = Guid.NewGuid() }, original with { EntryDigest = [] } };
+                original with { RestoredIncarnation = Guid.NewGuid() }, original with { EntryDigest = ReadOnlyMemory<byte>.Empty } };
             foreach (var variant in variants)
             {
                 fixture.Target.Commit((transaction, _) => { transaction.PutRecord(key, variant); return true; });

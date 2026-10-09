@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -42,11 +41,15 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     {
         var fixture = new AtomicPartitionRosterRestoreFixture();
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => fixture.Initialize(), failures);
-        if (failures.Count == 0) { await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures); }
-        if (fixture.Target is { } target) { ServerFailureObserver.Observe(target.Dispose, failures); }
-        if (fixture.Source is { } source) { ServerFailureObserver.Observe(source.Dispose, failures); }
-        if (failures.Count == 0) { ServerFailureObserver.Observe(() => Directory.Delete(fixture.Root, true), failures); }
+        ServerFailureObserver.Observe(fixture.Initialize, failures);
+        if (failures.Count == 0)
+        { await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures); }
+        if (fixture.Target is { } target)
+        { ServerFailureObserver.Observe(target.Dispose, failures); }
+        if (fixture.Source is { } source)
+        { ServerFailureObserver.Observe(source.Dispose, failures); }
+        if (failures.Count == 0)
+        { ServerFailureObserver.Observe(() => Directory.Delete(fixture.Root, true), failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -121,7 +124,8 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         await Assert.That(AtomicPartitionRosterRestoreAssertions.CanonicalDigest(Target)).IsEqualTo(digest);
         var after = ArchiveDigests(backup);
         await Assert.That(after.Count).IsEqualTo(archive.Count);
-        foreach (var entry in archive) { await Assert.That(after[entry.Key]).IsEqualTo(entry.Value); }
+        foreach (var entry in archive)
+        { await Assert.That(after[entry.Key]).IsEqualTo(entry.Value); }
     }
 
     internal async Task AssertArchiveUnchangedAsync()
