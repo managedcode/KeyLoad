@@ -421,6 +421,8 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build functional RF3 tests
         run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
+      - name: Test exclusive heavy-load admission
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/rf3-heavy-admission --KeyLoadTests:ReportTrx=true
       - name: Test ingestion while SDK and MCP reads are active
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*' --KeyLoadTests:HeavyLoad:Enabled=true --KeyLoadTests:TimeoutMinutes=140 --KeyLoadTests:ResultsDirectory=TestResults/rf3-heavy-load --KeyLoadTests:ReportTrx=true
       - name: Clean up this job's Docker registry
@@ -432,6 +434,7 @@ jobs:
         with:
           name: keyload-functional-heavy-load
           path: |
+            TestResults/rf3-heavy-admission/**
             TestResults/rf3-heavy-load/**
             ${{ runner.temp }}/keyload-images/**
             artifacts/code-quality/**

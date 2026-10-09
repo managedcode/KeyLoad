@@ -8,6 +8,7 @@ internal sealed class IsolatedKeyLoadAdmissionTests
     private const string ReadPath = "/v1/documents/get";
     private const string PrincipalId = "principal";
     private const string TenantId = "tenant";
+    private const int ChangedBodyBytes = 131_072;
     /// <summary>AC-ISO-003/005: the benchmark accommodates c16 while production remains bounded at eight.</summary>
     [Test]
     public async Task IntensiveAdmissionAcceptsSixteenVerifiedClientsAndRejectsCapacityOverflow()
@@ -56,7 +57,7 @@ internal sealed class IsolatedKeyLoadAdmissionTests
             () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http()).Status(), options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
             () => IsolatedKeyLoadAdmissionProfile.Verify(
-                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with { MaxBodyBytes = 1_024 })).Status(), options))).IsNotNull();
+                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with { MaxBodyBytes = ChangedBodyBytes })).Status(), options))).IsNotNull();
     }
 
     [Test]

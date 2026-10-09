@@ -24,6 +24,7 @@ internal sealed class HeavyDocumentLoadRf3Tests : IAsyncDisposable
     [Test]
     public async Task MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads()
     {
+        HeavyDocumentLoadAdmission.ValidateRuntime();
         var failures = new List<Exception>();
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         deadline.CancelAfter(HeavyDocumentLoadProtocol.Deadline);

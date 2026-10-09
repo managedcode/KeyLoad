@@ -15,7 +15,7 @@ import { exactKeys, AGGREGATE } from './aggregate-contracts.mjs';
 
 export const FUNCTIONAL = Object.freeze({
   job: 'KeyLoad functional RF3 million-record ingestion', artifact: 'keyload-functional-heavy-load',
-  steps: Object.freeze(['Test ingestion while SDK and MCP reads are active', 'Save original functional load results and image receipts']),
+  steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and image receipts']),
   archive: 'archives/keyload-functional-heavy-load.zip',
   className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadRf3Tests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',

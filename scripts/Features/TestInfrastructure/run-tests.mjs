@@ -43,13 +43,13 @@ export function nativeSelection(input, inherited = process.env) {
   const project = projects.get(suite);
   if (!project) throw new Error('Unsupported native TUnit suite.');
   const heavyLoad = values.has(heavyLoadEnabledOption);
+  if (!heavyLoad && values.get('Filter') === heavyLoadFilter) {
+    throw new Error('Heavy RF3 load requires its explicit enabled selection.');
+  }
   if (heavyLoad && (values.get(heavyLoadEnabledOption) !== 'true' || suite !== 'rf3'
     || values.get('Filter') !== heavyLoadFilter || values.has('CoverageSettings')
     || [...values.keys()].some(key => key.startsWith('NativeCoverage:')))) {
     throw new Error('Heavy RF3 load requires its exact exclusive functional selection.');
-  }
-  if (!heavyLoad && suite === 'rf3' && values.get('Filter') === heavyLoadFilter) {
-    throw new Error('Heavy RF3 load requires explicit enabled admission.');
   }
   const parallel = Number(values.get('Execution:MaximumParallelTests')
     ?? (suite === 'comparison' || heavyLoad ? comparisonParallelTests : defaultMaximumParallelTests));
