@@ -184,6 +184,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(TimeProvider.System);
         siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
         siloBuilder.Services.AddSingleton(fixture.Codec);
+        siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
         siloBuilder.Services.AddSingleton(routing);
         siloBuilder.Services.AddSingleton(fixture.JournalOptions);
         siloBuilder.Services.AddOptions<NativeRuntimeTestOptions>()
@@ -219,13 +220,11 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
     {
         siloBuilder.AddOrleansGraph(configureGraph: graph =>
         {
-            graph.AllowClientCallGrain<IRequestGrain>()
+            graph.AllowClientCallGrain<IConnectionGrain>()
                 .AllowClientCallGrain<IRuntimeJournalReplayGrain>()
                 .AllowClientCallGrain<IRuntimeJournalGraphCallerProbeGrain>()
-                .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
-                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
-                .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
-                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And();
+                .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
+                .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And();
         });
     }
 }

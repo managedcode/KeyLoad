@@ -44,6 +44,9 @@ internal static class ServerApplication
     {
         var settings = app.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value;
         using var deadline = new CancellationTokenSource(settings.ShutdownTimeout, app.Services.GetRequiredService<TimeProvider>());
+        var connections = app.Services.GetRequiredService<ServerConnectionRegistry>();
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures).ConfigureAwait(false);
         if (silo is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => silo.StopAsync(deadline.Token), failures).ConfigureAwait(false);

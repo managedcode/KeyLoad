@@ -16,10 +16,11 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     private bool disposed;
 
     internal GrainRequestIdentityScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
-        Guid requestId, Guid commandId, CancellationToken cancellationToken, global::Orleans.Runtime.SiloAddress? placement = null)
+        Guid requestId, Guid commandId, CancellationToken cancellationToken,
+        global::Orleans.Runtime.SiloAddress? placement = null, Guid connectionId = default)
     {
         placement ??= runtimeServices.GetService<IPhysicalRequestPlacement>()?.Current;
-        var state = new GrainRequestContextState(requestId, commandId);
+        var state = new GrainRequestContextState(requestId, commandId, connectionId);
         var claims = principal is null ? null : GrainIdentityContext.CreatePrincipal(principal.Id);
         NativeRequestContextAdmission.Admit(runtimeServices, claims, state, cancellationToken, placement);
         placementSelected = placement is not null;

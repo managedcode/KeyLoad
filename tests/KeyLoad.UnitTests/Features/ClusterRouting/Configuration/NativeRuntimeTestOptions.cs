@@ -14,10 +14,12 @@ internal sealed record NativeRuntimeTestOptions
     private const int MaximumTimeoutSeconds = 60;
     private const int MaximumRestartTimeoutSeconds = 120;
     private const int MinimumDurationMilliseconds = 1;
+    private const int OrdinaryCollectionDays = 1;
 
     internal TimeSpan StartupTimeout { get; init; } = TimeSpan.FromSeconds(StartupSeconds);
     internal TimeSpan ShutdownTimeout { get; init; } = TimeSpan.FromSeconds(ShutdownSeconds);
     internal TimeSpan CompletionTimeout { get; init; } = TimeSpan.FromSeconds(CompletionSeconds);
+    internal TimeSpan OrdinaryCollectionAge { get; init; } = TimeSpan.FromDays(OrdinaryCollectionDays);
     internal TimeSpan PollInterval { get; init; } = TimeSpan.FromMilliseconds(PollMilliseconds);
     internal TimeSpan RetryDelay { get; init; } = TimeSpan.FromMilliseconds(RetryMilliseconds);
     internal TimeSpan HeldJobDelay { get; init; } = TimeSpan.FromSeconds(HeldJobSeconds);
@@ -29,7 +31,9 @@ internal sealed record NativeRuntimeTestOptions
         && Bounded(HeldJobDelay) && RestartBounded(RestartHeldJobDelay)
         && RestartBounded(RestartCompletionTimeout)
         && RestartHeldJobDelay >= StartupTimeout + ShutdownTimeout + CompletionTimeout
-        && RestartHeldJobDelay + CompletionTimeout <= RestartCompletionTimeout;
+        && RestartHeldJobDelay + CompletionTimeout <= RestartCompletionTimeout
+        && OrdinaryCollectionAge >= StartupTimeout + ShutdownTimeout + CompletionTimeout
+        && OrdinaryCollectionAge <= TimeSpan.FromDays(OrdinaryCollectionDays);
 
     private static bool Bounded(TimeSpan duration) => duration >= TimeSpan.FromMilliseconds(MinimumDurationMilliseconds)
         && duration <= TimeSpan.FromSeconds(MaximumTimeoutSeconds);

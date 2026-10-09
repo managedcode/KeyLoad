@@ -30,6 +30,25 @@ internal sealed class RequestCqrsProbeProfile
     internal static RequestCqrsProbeProfile? Read(IDistributedApplicationBuilder builder, string dataRoot,
         bool ephemeral, int? benchmarkNodeCount, IReadOnlyDictionary<string, RuntimeContainerImage> images)
     {
+        var settings = ReadSettings(builder, dataRoot, ephemeral, benchmarkNodeCount);
+        if (settings is null)
+        { return null; }
+        ArgumentNullException.ThrowIfNull(images);
+        ValidateImages(images);
+        return Create(builder, dataRoot, settings);
+    }
+
+    internal static RequestCqrsProbeProfile? ReadLocal(IDistributedApplicationBuilder builder, string dataRoot,
+        bool ephemeral, int? benchmarkNodeCount, LocalDevelopmentContainerImage image)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        var settings = ReadSettings(builder, dataRoot, ephemeral, benchmarkNodeCount);
+        return settings is null ? null : Create(builder, dataRoot, settings);
+    }
+
+    private static RequestCqrsProbeProfileSettings? ReadSettings(IDistributedApplicationBuilder builder,
+        string dataRoot, bool ephemeral, int? benchmarkNodeCount)
+    {
         ArgumentNullException.ThrowIfNull(builder);
         var settings = AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe;
         if (settings is null)
@@ -37,8 +56,12 @@ internal sealed class RequestCqrsProbeProfile
         if (!ephemeral || benchmarkNodeCount is not null)
         { throw new InvalidOperationException(InvalidConfiguration); }
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
-        ArgumentNullException.ThrowIfNull(images);
-        ValidateImages(images);
+        return settings;
+    }
+
+    private static RequestCqrsProbeProfile Create(IDistributedApplicationBuilder builder, string dataRoot,
+        RequestCqrsProbeProfileSettings settings)
+    {
         var nodeRoots = RequestCqrsProbeProfilePaths.Validate(settings.Root, settings.SessionId, dataRoot, AppHostOptionsRegistration.Get(builder).RequestProbeFiles);
         return new(settings.SessionId, nodeRoots);
     }

@@ -92,10 +92,7 @@ public sealed partial class GrainRequestCodec
     internal DecodedGrainRequest VerifyRequest(string signedRequest, Guid actorId)
     {
         var request = Verify(signedRequest);
-        if (request.Envelope.RequestId != actorId)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
+        GrainRequestScope.RequireRequestIdentity(request.Envelope, actorId);
 
         return request;
     }

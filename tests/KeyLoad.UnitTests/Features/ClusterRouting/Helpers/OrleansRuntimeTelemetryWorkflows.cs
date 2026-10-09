@@ -154,8 +154,8 @@ internal static class OrleansRuntimeTelemetryWorkflows
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-            requestId, Guid.Empty, deadline.Token);
-        var request = fixture.Cluster.Client.GetGrain<IRequestGrain>(requestId);
+            requestId, Guid.Empty, deadline.Token, connectionId: fixture.ConnectionId);
+        var request = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var stream = request.ExecuteStreamAsync(signed, deadline.Token).WithBatchSize(GrainRequestStreamProtocol.BatchSize);
         await using var iterator = stream.GetAsyncEnumerator(deadline.Token);
         if (!await iterator.MoveNextAsync())

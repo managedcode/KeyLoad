@@ -2,6 +2,32 @@
 
 Status: Accepted; implementation and complete qualification remain pending. Related requirements, acceptance criteria and current slice ownership are canonical in [CodeQuality](../Features/CodeQuality.md).
 
+## Native failure constructor classification, 2026-10-09
+
+REQ/AC-CQ-NATIVE-EXCEPTION-001 and TASK-CLIENT-CONNECTION under ADR-125
+require existing KeyLoadException constructors to remain intact with native
+generated serialization. KLD0021 governs Orleans DTO constructors; a native
+System.Exception hierarchy is a runtime failure, not a DTO. The first joined
+diagnostic stage produced five false positives on those existing constructors.
+
+Implementation order: freeze this semantic boundary; classify actual direct or
+indirect Exception inheritance in CodeQuality/Analyzers/
+OrleansContractConstructorAnalyzer.cs using the active compilation symbol and
+SymbolEqualityComparer; add real framework Roslyn inputs to the existing
+OrleansContractConstructorTests; join build, diagnostics and original GitHub
+analyzer tests. The implementation owner may reuse existing metadata constants.
+Root owns contracts, the join and source delivery; the analyzer owner supplies
+the semantic repair and focused tests. No name/namespace-based whitelist,
+suppression, severity change or ordinary DTO-constructor exemption is allowed.
+Existing positive/negative cases and compiler-success assertions remain mandatory.
+
+This does not change persisted/public formats or add a runtime dependency. Rollout
+is one coherent analyzer/regression source stage with the connection repair.
+Rollback restores those changes together; removing legitimate constructors or
+silencing the diagnostic cannot substitute for qualification. Analyzer tests run
+in their original GitHub gate; actual native Serializer<Exception> and capacity/
+wrong-owner RPC execution independently verify the repaired runtime failure path.
+
 ## Decision
 
 Owner direction 2026-10-09 adds Roslynk 2.1.0 as a pinned repository-local

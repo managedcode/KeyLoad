@@ -3,7 +3,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsRf3WaveArguments
 {
     internal static string[] Create(string dataRoot, IReadOnlyDictionary<string, string> images,
-        bool configureCohort, string? snapshotThresholdArgument, RequestCqrsProbeFixture? controls)
+        bool configureCohort, string? snapshotThresholdArgument, RequestCqrsProbeFixture? controls,
+        KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageSelection.Selection? selection = null)
     {
         var args = new List<string>
         {
@@ -24,6 +25,7 @@ internal static class RequestCqrsRf3WaveArguments
             args.Add("--KeyLoadTests:RequestCqrsProbe:Root=" + controls.Root);
             args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
         }
+        if (selection is not null) { args.AddRange(selection.CreateWaveArguments()); }
         return [.. args];
     }
 

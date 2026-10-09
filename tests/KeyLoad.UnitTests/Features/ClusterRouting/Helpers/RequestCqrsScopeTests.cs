@@ -45,12 +45,12 @@ internal static class RequestCqrsScopeCases
         try
         {
             var previousUser = new ClaimsPrincipal();
-            var previousState = new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid());
+            var previousState = new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid(), fixture.ConnectionId);
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
                 _ = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-                    Guid.Empty, Guid.Empty, CancellationToken.None));
+                    Guid.Empty, Guid.Empty, CancellationToken.None, connectionId: fixture.ConnectionId));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await userSlot.AssertPriorAsync(RequestCqrsPriorContextValue.Object, previousUser);
             await stateSlot.AssertPriorAsync(RequestCqrsPriorContextValue.Object, previousState);
@@ -67,7 +67,7 @@ internal static class RequestCqrsScopeCases
     {
         var requestId = Guid.NewGuid();
         var previousUser = new ClaimsPrincipal();
-        var previousState = new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid());
+        var previousState = new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid(), fixture.ConnectionId);
         var userSlot = RequestCqrsContextSlot.Capture(OrleansIdentityConstants.USER_CLAIMS);
         var stateSlot = RequestCqrsContextSlot.Capture(GrainRequestStreamProtocol.ContextKey);
         try
@@ -75,12 +75,12 @@ internal static class RequestCqrsScopeCases
             userSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousUser);
             stateSlot.SetPrior(RequestCqrsPriorContextValue.Object, previousState);
             using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, null,
-                requestId, Guid.Empty, CancellationToken.None))
+                requestId, Guid.Empty, CancellationToken.None, connectionId: fixture.ConnectionId))
             {
                 await Assert.That(RequestContext.Keys.Contains(OrleansIdentityConstants.USER_CLAIMS,
                     StringComparer.Ordinal)).IsFalse();
                 await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-                    .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty));
+                    .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId));
                 var signed = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
                     NativeSerialization.Serialize(0));
                 var result = await fixture.Cluster.Client.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
@@ -113,7 +113,7 @@ internal static class RequestCqrsScopeCases
     {
         var oldUser = userPrior == RequestCqrsPriorContextValue.Object ? new ClaimsPrincipal() : null;
         var oldState = statePrior == RequestCqrsPriorContextValue.Object
-            ? new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid()) : null;
+            ? new GrainRequestContextState(Guid.NewGuid(), Guid.NewGuid(), fixture.ConnectionId) : null;
         userSlot.SetPrior(userPrior, oldUser);
         stateSlot.SetPrior(statePrior, oldState);
         var graphContext = new object();
@@ -121,7 +121,7 @@ internal static class RequestCqrsScopeCases
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-            requestId, commandId, CancellationToken.None))
+            requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId))
         {
             var published = (ClaimsPrincipal?)RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS);
             var identity = published?.Identities.Single();
@@ -132,7 +132,7 @@ internal static class RequestCqrsScopeCases
             await Assert.That(published.FindFirst(ClaimTypes.NameIdentifier)?.Value).IsEqualTo(principal.Id);
             await Assert.That(identity.HasClaim(ClaimTypes.Role, ProjectedRoleName)).IsFalse();
             await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-                .IsEqualTo(new GrainRequestContextState(requestId, commandId));
+                .IsEqualTo(new GrainRequestContextState(requestId, commandId, fixture.ConnectionId));
             await Assert.That(ReferenceEquals(RequestContext.Get(UnrelatedKey), graphContext)).IsTrue();
         }
 

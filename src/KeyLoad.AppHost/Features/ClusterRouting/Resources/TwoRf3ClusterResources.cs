@@ -140,6 +140,7 @@ internal static class TwoRf3ClusterResources
             TwoRf3TopologyResources.ApplyPeerEndpoints(resource, group);
             ApplyAuthoritySettings(resource, groupA, profile, physicalB, incarnationB,
                 firstPeer, secondPeer, firstGroup, secondGroup);
+            KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
             TwoRf3TopologyResources.WaitForAuthority(resource, resources, firstGroup.Length, groupA);
             resources[index] = resource;

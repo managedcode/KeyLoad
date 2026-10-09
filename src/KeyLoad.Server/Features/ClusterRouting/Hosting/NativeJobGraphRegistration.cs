@@ -32,12 +32,12 @@ internal static class NativeJobGraphRegistration
                 graph.AddTransition(edge.Source, edge.Target, transition);
             }
         }
-        graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IRequestGrain).FullName!,
-            new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IRequestGrain.ExecuteStreamAsync)));
-        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IRequestGrain).FullName!,
-            new GrainTransition(RuntimeJournalClient.ReadCoreCallerMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
-        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IRequestGrain).FullName!,
-            new GrainTransition(RuntimeJournalClient.SendCommandCallerMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
+        graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IConnectionGrain).FullName!,
+            new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IConnectionGrain.ExecuteStreamAsync)));
+        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,
+            new GrainTransition(RuntimeJournalClient.ReadCoreCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
+        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IConnectionGrain).FullName!,
+            new GrainTransition(RuntimeJournalClient.SendCommandCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
         services.Remove(descriptor);
         services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }

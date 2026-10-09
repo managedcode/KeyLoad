@@ -28,7 +28,8 @@ internal sealed class RuntimeJournalReplayActivatorConfiguration(
                     services.GetRequiredService<IGrainFactory>(),
                     services.GetRequiredService<GrainRequestCodec>(),
                     services.GetRequiredService<RuntimeJournalClient>(),
-                    services.GetRequiredService<IOptions<NativeRuntimeTestOptions>>()),
+                    services.GetRequiredService<IOptions<NativeRuntimeTestOptions>>(),
+                    services.GetRequiredService<NativeConnectionOwnerIdentity>()),
                 new DefaultGrainActivator(services, grainClass)));
         }
     }

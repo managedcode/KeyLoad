@@ -57,10 +57,11 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     private async Task<GrainOperationReply> SendAsync(PrincipalRecord principal, Guid requestId,
         Guid commandId, string signed, CancellationToken cancellationToken)
     {
-        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);
         var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var reply = await GrainRequestStreamConsumer.DrainAsync(
-            createStream: token => grains.GetGrain<IRequestGrain>(requestId).ExecuteStreamAsync(signed, token), serializer: serializer,
+            createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, token), serializer: serializer,
             requestId: requestId, clock: clock, cancellationToken: cancellationToken, options: routingOptions).ConfigureAwait(false);
         if (reply.Error is { } error)
         {

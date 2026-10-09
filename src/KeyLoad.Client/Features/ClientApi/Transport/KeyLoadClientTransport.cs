@@ -33,7 +33,11 @@ internal sealed class KeyLoadClientTransport
     private async Task<Result<T>> SendCore<T>(string path, object? request, bool write, Guid? id,
         HttpMethod method, bool allowNullResult, CancellationToken cancellationToken)
     {
-        using var message = new HttpRequestMessage(method, path);
+        using var message = new HttpRequestMessage(method, path)
+        {
+            Version = http.DefaultRequestVersion,
+            VersionPolicy = http.DefaultVersionPolicy
+        };
         message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
         if (id is { } command)
         {

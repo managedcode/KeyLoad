@@ -118,7 +118,7 @@ classDiagram
     RelationalRowValidation --> DocumentRecord : validates final row image
 ```
 
-The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the existing unique Orleans request/read actors and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
+The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/Features/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the connection actors with call-local authorized reads and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
 
 [SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) extends that identity
 with mirrored PNG/ICO exports, static landing SEO/OG/Twitter/JSON-LD and an authored
@@ -129,8 +129,8 @@ Source assets and local rendering do not establish indexing or publication.
 ```mermaid
 flowchart LR
     Admin[Same origin admin console] --> API[AdminDashboard API and MCP]
-    API --> Request[Unique request grain]
-    Request --> Read[Admin authorized read grain]
+    API --> Request[Connection grain]
+    Request --> Read[Call-local authorized read execution]
     Read --> Core[Bounded catalog and queue readers]
     Read --> Node[Node local file and process observer]
 ```
@@ -139,22 +139,22 @@ Read the root and nearest project-local AGENTS.md before changing this solution.
 
 The [documentation index](README.md) is the complete entry point for 25 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps the canonical KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
-Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
+Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, connection grains with isolated operations, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
-Request/read grains are short-lived operation owners with no persisted request
-state; current settlement asks for native deactivation after original work and
-cleanup. Persistent connections require a separate bounded connection/session
-grain, still unimplemented. [Connection ownership](Features/ClientApi.md#persistent-connection-ownership)
-and [request lifetimes](Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
-distinguish these contracts and retain the open real-client, activation-count,
-backlog and RAM qualification gates.
+Owner correction 2026-10-09 and [ADR-125](ADR/ADR-125-connection-owned-execution.md)
+select one Orleans grain per actual connection, with bounded parallel independent
+operations and commands. Each call has fresh signed identity and persisted
+authorization; readers execute in call-local helpers. Completing a call releases
+its resources. Disconnect/idle expiry joins original work and closes the activation.
+[Connection ownership](Features/ClientApi.md#persistent-connection-ownership) and
+[execution lifetimes](Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
+retain open native-client, activation-count and matched Linux RAM/performance gates.
 
 Native Orleans execution/scheduling choices are mapped per grain and method in
 [ClusterRouting ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md)
 and [ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md). Bounded
 interchangeable workers, advisory OneWay hints, selective operation-control
-interleaving and persistent one-time jobs are candidate joins; existing unique
-request grains and reliable serial partition/due paths remain the current source.
+interleaving and persistent one-time jobs are candidate joins; connection stream interleaving and reliable serial partition/due paths are source-present.
 Runtime/provider/fault and matched performance evidence are pending.
 The owner's broad [Orleans capability review](Features/ClusterRouting/CapabilityReview.md)
 maps Streams/pub-sub, native transactional storage, durable state/jobs, per-silo
@@ -247,7 +247,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Features/Search/Queries/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Artifacts | Features/BackupRestore/Execution/ArtifactTransfer.cs, Features/BackupRestore/Execution/BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |
 | src/KeyLoad.Replication | Features/ClusterReplication/Execution/ClusterCoordinator.cs, Features/ClusterReplication/Storage/DurableReplicaLog.cs, Features/ClusterReplication/Execution/ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
-| src/KeyLoad.Orleans | Features/ClusterRouting/Grains/{RequestGrain,DatabaseReadGrain,CommandPartitionGrain}.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
+| src/KeyLoad.Orleans | Features/ClusterRouting/Grains/{ConnectionGrain,CommandPartitionGrain}.cs; Queries/ConnectionReadExecution.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
 | src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, Features/ClusterRouting/Hosting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | KeyLoadClient.cs, Features/QueryExecution/Queries/KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
 | src/KeyLoad.Cli | Program.cs, Features/ClientApi/Hosting/KeyLoadCliApplication.cs, Features/ClientApi/Transport/CliClientApi.cs and Features/BackupRestore/Commands/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
@@ -560,7 +560,7 @@ classDiagram
 
 ## Current implementation and qualification gaps
 
-The product design retains historical DotNext-candidate and standalone-first text beneath the current owner clarification. Current AGENTS policy supersedes those choices. The current server source composes a node-local PartitionHost with the Orleans silo, distributed grain directory, activation repartitioner and separate request grains under [ADR-036](ADR/ADR-036-orleans-foundation.md). The three-node Aspire graph is present. No current integration case forces activation migration and verifies node-local storage ownership afterward; delivered-source GitHub qualification is pending. TUnit package/test migration and persisted principal/API-key verifier, grant, feed and paused local restore behavior are source-present. Public BlobStorage and official MCP/agent contracts are Accepted and source-present, with exact delivered-SHA qualification pending. The diagrams show mandatory ownership and delivery boundaries; they do not claim every target is implemented. Current build/formatter prerequisites and their exact historical source cuts are recorded in [CodeQuality evidence](implementation/code-quality.md); full solution and delivered-SHA qualification remain open.
+The product design retains historical DotNext-candidate and standalone-first text beneath the current owner clarification. Current AGENTS policy supersedes those choices. The current server source composes a node-local PartitionHost with the Orleans silo, distributed grain directory, activation repartitioner and connection grains with isolated operations under [ADR-125](ADR/ADR-125-connection-owned-execution.md). The three-node Aspire graph is present. No current integration case forces activation migration and verifies node-local storage ownership afterward; delivered-source GitHub qualification is pending. TUnit package/test migration and persisted principal/API-key verifier, grant, feed and paused local restore behavior are source-present. Public BlobStorage and official MCP/agent contracts are Accepted and source-present, with exact delivered-SHA qualification pending. The diagrams show mandatory ownership and delivery boundaries; they do not claim every target is implemented. Current build/formatter prerequisites and their exact historical source cuts are recorded in [CodeQuality evidence](implementation/code-quality.md); full solution and delivered-SHA qualification remain open.
 
 The successful [GitHub CI baseline 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) measured commit 9c570f8c33a7a9667507a8e1c0ca68860de3be45. It does not qualify later uncommitted work, power-loss durability, endurance or production readiness. See [implementation status](implementation/status.json), [durability audit](implementation/durability-audit.md), [comparative benchmark contract](implementation/comparative-benchmarks.md), [RepositoryGovernance](Features/RepositoryGovernance.md) and [ADR-032](ADR/ADR-032-mcaf-governance.md).
 
@@ -868,12 +868,12 @@ application ReadProbe/ReadBarrier admission from trusted native membership
 ControlReadBarrier and heartbeat reserve. ClusterReplication owns real consensus
 rounds/strict new-method guards; Orleans ClusterReplication owns signed
 classification/replay snapshots, and ClusterRouting owns the same node-owned
-consensus membership read. Production RF3, request-grain isolation, persisted
+consensus membership read. Production RF3, operation-context isolation, persisted
 authorization, ordered apply and node-local ZoneTree ownership remain required.
 
 ```mermaid
 flowchart LR
-  Request[Authorized request grain] --> AppRead[Application read barrier]
+  Request[Authorized operation on connection grain] --> AppRead[Application read barrier]
   AppRead --> Probe[Signed empty ReadProbe]
   Probe --> ReadPool[Bounded ReadBarrier pool]
   Membership[Native membership table] --> Control[Trusted control read]
@@ -921,10 +921,10 @@ not establish the contribution of any stage to native latency.
 
 ```mermaid
 flowchart LR
-    SDK[Public SDK or MCP] --> Auth[Fresh authentication request grain]
+    SDK[Public SDK or MCP] --> Auth[Fresh authentication on connection grain]
     Auth --> AuthCut[Authorized RF3 quorum cut]
     AuthCut --> Credentials[Persisted credential and principal]
-    Credentials --> Request[Fresh operation request grain]
+    Credentials --> Request[Fresh operation on same connection grain]
     Request --> OperationCut[Authorized RF3 operation cut]
     OperationCut --> Host[Node local PartitionHost]
     Host --> Log[Physical replica log]
@@ -1053,7 +1053,7 @@ flowchart LR
 
 Native Search scheduling follows [ADR-081](ADR/ADR-081-awaited-native-search-execution.md):
 one analytical reservation spans the complete awaited default-scheduler read and
-native settlement while the Orleans request grain yields. Physical handles,
+native settlement while the Orleans connection grain yields. Physical handles,
 committed state and authorization remain node-local/canonical. Genuine RF3
 liveness qualification is required before claiming the scheduler repair delivered.
 

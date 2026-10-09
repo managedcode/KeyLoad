@@ -26,9 +26,10 @@ internal static class DatabaseCredentialResolver
         try
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
+            using var connection = ServerConnectionFeature.Acquire(context, context.RequestAborted);
             using var requestContext = node.OpenRequestContext(null, requestId,
-                Guid.Empty, context.RequestAborted);
-            reply = await node.ExecuteAsync(requestId, token, false, context.RequestAborted).ConfigureAwait(false);
+                Guid.Empty, connection.Token, connection.Id);
+            reply = await node.ExecuteAsync(requestId, token, false, connection.Token).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })

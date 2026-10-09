@@ -48,7 +48,9 @@ internal static class NativeTestSelectionProcess
             const standard = nativeSelection(standardArgs, {});
             const rejectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RelationalSqlRf3JoinRejectionTests/*", localArgs[2]];
             const rejection = nativeSelection(rejectionArgs, {});
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs]) {
+            const connectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*", localArgs[2]];
+            const connection = nativeSelection(connectionArgs, {});
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -83,7 +85,21 @@ internal static class NativeTestSelectionProcess
               }
               throw new Error('Unsupported public12 filter was accepted.');
             }
-            console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection, rejectionUnsupportedCount }));
+            let connectionUnsupportedCount = 0;
+            for (const badFilter of ['/*/*/ConnectionRf3SequentialTests/*',
+              '/*/*/ConnectionRf3*/*',
+              '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests|OtherCase)/*',
+              '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/* ']) {
+              try {
+                nativeSelection([connectionArgs[0], '--KeyLoadTests:Filter='+badFilter, connectionArgs[2]], {});
+              } catch (failure) {
+                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                connectionUnsupportedCount++; continue;
+              }
+              throw new Error('Unsupported connection RF3 filter was accepted.');
+            }
+            console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

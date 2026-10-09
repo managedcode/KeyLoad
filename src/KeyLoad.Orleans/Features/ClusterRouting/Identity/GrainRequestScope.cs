@@ -4,6 +4,12 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainRequestScope
 {
+    internal static void RequireRequestIdentity(GrainRequestEnvelope request, Guid requestId)
+    {
+        if (request.RequestId != requestId)
+        { throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest); }
+    }
+
     internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now, TimeSpan maximumFuture)
     {
         if (request.Incarnation != incarnation

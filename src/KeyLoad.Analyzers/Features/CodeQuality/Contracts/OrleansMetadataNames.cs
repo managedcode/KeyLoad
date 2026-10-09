@@ -3,6 +3,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 internal static class OrleansMetadataNames
 {
     public const string GenerateSerializerAttribute = "Orleans.GenerateSerializerAttribute";
+    public const string SystemException = "System.Exception";
     public const string GrainInterface = "Orleans.IGrain";
     public const string Grain = "Orleans.Grain";
     public const string IdAttribute = "Orleans.IdAttribute";

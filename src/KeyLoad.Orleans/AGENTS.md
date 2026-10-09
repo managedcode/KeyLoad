@@ -1,8 +1,11 @@
 # KeyLoad.Orleans
 
+## Connection execution, owner decision 2026-10-09
+- The root's latest grain-per-connection decision and ADR-125 supersede earlier separately activated request/read-grain clauses below. Reuse one server-owned connection grain with parallel bounded call-local operations and fresh authorization; no per-operation activation or completed-request history. ConnectionGrain and ConnectionReadExecution replace the former RequestGrain/DatabaseReadGrain entry points. Preserve ordered node-local commits, RF3 and independent operation cancellation; native close joins work before deactivation.
+
 ## Purpose and entry points
 - Owns Orleans grain routing and Orleans-backed membership integration.
-- Main types: `Features/ClusterRouting/Grains/RequestGrain.cs`, `Features/ClusterRouting/Grains/CommandPartitionGrain.cs`, `Features/ClusterRouting/Grains/DatabaseReadGrain.cs` and `Features/ClusterRouting/Topology/ReplicaMembershipTable.cs`.
+- Main types: `Features/ClusterRouting/Grains/ConnectionGrain.cs`, `Features/ClusterRouting/Grains/CommandPartitionGrain.cs`, `Features/ClusterRouting/Queries/ConnectionReadExecution.cs` and `Features/ClusterRouting/Topology/ReplicaMembershipTable.cs`.
 
 ## Ownership and boundaries
 - Owner correction 2026-10-04: every feature MUST group its actual responsibilities into feature-local role folders; do not place mixed grains, commands, queries, contracts, models, streaming, identity, serialization or topology files directly in the slice root. `ClusterRouting` uses `Grains/`, `Commands/`, `Queries/`, `Contracts/`, `Models/`, `Streaming/`, `Identity/`, `Serialization/`, `Diagnostics/` and `Topology/`. `ClusterReplication` separates grain services, discovery, transport, authentication, replay, contracts and models. `ResourceExecution` separates models, contracts, serialization, authentication and validation. Small capability slices use `Queries/`; do not create empty role folders.
@@ -23,7 +26,7 @@
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
 - Owned slice: `ClusterRouting`; target feature path: `Features/ClusterRouting/`, matching `docs/Features/ClusterRouting.md`.
-- `Features/ClusterRouting/Grains/RequestGrain.cs`, `Features/ClusterRouting/Grains/CommandPartitionGrain.cs`, `Features/ClusterRouting/Grains/DatabaseReadGrain.cs` and `Features/ClusterRouting/Topology/ReplicaMembershipTable.cs` are current entry points; grain routing belongs in the named slice.
+- `Features/ClusterRouting/Grains/ConnectionGrain.cs`, `Features/ClusterRouting/Grains/CommandPartitionGrain.cs`, `Features/ClusterRouting/Queries/ConnectionReadExecution.cs` and `Features/ClusterRouting/Topology/ReplicaMembershipTable.cs` are current entry points; grain routing belongs in the named slice.
 
 ## ResourceExecution ownership
 - `Features/ResourceExecution/` owns the accepted ADR-058 internal cache-control metadata and bounded wire/authentication/correlation prerequisites, with matching ResourceExecution feature docs and tests.

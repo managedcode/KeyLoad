@@ -38,7 +38,8 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private NativeRequestWorkOwner? requestWork;
     private readonly string ownerId = Guid.NewGuid().ToString("N");
 
-    internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null)
+    internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
+        IGrainRequestPhaseObserver? observer = null)
     {
         Clock = clock ?? TimeProvider.System;
         RoutingOptions = UnitRoutingOptions.Routing(routing);
@@ -51,7 +52,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             builder.AddSiloBuilderConfigurator<RequestCqrsSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RequestCqrsClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, Clock, RoutingOptions);
+            Codec = new GrainRequestCodec(Database.Database, Clock, RoutingOptions) { PhaseObserver = observer };
         }
         catch (Exception startupFailure)
         {
@@ -70,6 +71,8 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     }
 
     internal TestCluster Cluster { get; }
+    internal Guid ConnectionId { get; } = Guid.NewGuid();
+    internal NativeRuntimeTestOptions Timing { get; } = new();
     internal GrainRequestCodec Codec { get; }
     internal TestDatabase Database { get; }
     internal TimeProvider Clock { get; }
@@ -200,20 +203,22 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(fixture.RoutingOptions);
         siloBuilder.Services.AddSingleton(UnitExecutionOptions.Messaging());
         siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
-        siloBuilder.Services.AddSingleton<GrainRequestCodec>();
+        siloBuilder.Services.AddSingleton(fixture.Codec);
+        siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
+        siloBuilder.Services.Configure<global::Orleans.Configuration.GrainCollectionOptions>(
+            settings => settings.CollectionAge = fixture.Timing.OrdinaryCollectionAge);
         siloBuilder.Services.AddSingleton(new RequestCqrsCapabilityLedger());
         siloBuilder.Services.AddSingleton<IConfigureGrainTypeComponents>(services =>
             new RequestCqrsGrainComponentConfigurator(services.GetRequiredService<GrainClassMap>(), services));
         siloBuilder.AddOrleansGraph(configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IRequestCqrsIdentityProbeGrain>();
-            graph.AllowClientCallGrain<IRequestGrain>()
-                .AddGrainTransition<IRequestGrain, IRequestGrain>()
-                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-                .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
-                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
-                .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
-                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And();
+            graph.AllowClientCallGrain<IManagementGrain>();
+            graph.AllowClientCallGrain<IConnectionGrain>()
+                .AddGrainTransition<IConnectionGrain, IConnectionGrain>()
+                .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(IConnectionGrain.ExecuteStreamAsync)).And()
+                .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
+                .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And();
         });
         siloBuilder.UseOrleansCommunication();
     }

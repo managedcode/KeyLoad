@@ -13,6 +13,10 @@ internal sealed class NativeTUnitSelectionTests
     private const string UnsupportedRejectionCountProperty = "rejectionUnsupportedCount";
     private const string RejectionFilter = "/*/*/RelationalSqlRf3JoinRejectionTests/*";
     private const string StandardProperty = "standard";
+    private const string ConnectionProperty = "connection";
+    private const string ConnectionUnsupportedCountProperty = "connectionUnsupportedCount";
+    private const string ConnectionFilter = "/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*";
+    private const int ExpectedConnectionRejectionCount = 4;
     private const string LocalArgumentsEnvironment = "KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS";
     private const string LocalEnabledEnvironment = "KeyLoadTests__LocalRf3Image__Enabled";
     private const string LocalProvenanceEnvironment = "KEYLOAD_IMAGE_PROVENANCE";
@@ -66,6 +70,9 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(LocalProperty), LocalFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(StandardProperty), StandardFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RejectionProperty), RejectionFilter).ConfigureAwait(false);
+            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(ConnectionProperty), ConnectionFilter).ConfigureAwait(false);
+            await Assert.That(selection.RootElement.GetProperty(ConnectionUnsupportedCountProperty).GetInt32())
+                .IsEqualTo(ExpectedConnectionRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);
         }
     }

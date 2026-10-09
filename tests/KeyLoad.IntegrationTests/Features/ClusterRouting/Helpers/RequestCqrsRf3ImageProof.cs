@@ -13,21 +13,28 @@ internal static class RequestCqrsRf3ImageProof
     private const string MissingReference = "A verified current server image reference is required.";
     private const string ResourceMismatch = "An actual Aspire node image does not match its verified source receipt.";
 
-    internal static async Task<RequestCqrsRf3Images> ReadAsync(CancellationToken cancellationToken)
+    internal static async Task<RequestCqrsRf3Images> ReadAsync(CancellationToken cancellationToken,
+        LocalRf3ImageSelection.Selection? selection = null)
     {
         var root = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
-        var localIdentity = await LocalRf3ImageIdentity.ReadVerifiedAsync(root, cancellationToken).ConfigureAwait(false);
+        var localIdentity = await LocalRf3ImageIdentity.ReadVerifiedAsync(root, selection ?? LocalRf3ImageSelection.Read(),
+            cancellationToken).ConfigureAwait(false);
         var current = localIdentity?.Reference
             ?? await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken).ConfigureAwait(false);
         return new(current);
     }
 
     internal static async Task<LocalRf3ImageIdentity.Identity?> VerifyModelAsync(DistributedApplication app,
-        IReadOnlyDictionary<string, string> expected, CancellationToken cancellationToken)
+        IReadOnlyDictionary<string, string> expected, CancellationToken cancellationToken,
+        LocalRf3ImageSelection.Selection? selection = null)
     {
         ArgumentNullException.ThrowIfNull(app);
-        var localIdentity = await LocalRf3ImageIdentity.VerifyBeforeStartAsync(app,
-            ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, cancellationToken).ConfigureAwait(false);
+        var root = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
+        var localIdentity = selection is null
+            ? await LocalRf3ImageIdentity.VerifyBeforeStartAsync(app, root, cancellationToken).ConfigureAwait(false)
+            : await LocalRf3ImageIdentity.VerifyBeforeStartAsync(app, root, selection,
+                [RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, RequestCqrsRf3Protocol.Node3],
+                cancellationToken).ConfigureAwait(false);
         if (localIdentity is not null)
         {
             var expectedReference = ValidateExpectedReferences(expected);

@@ -54,7 +54,8 @@ internal static class MultiLaneReceiveExecution
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, Guid parentId, CancellationToken token)
     {
         var actorId = Guid.NewGuid();
-        using var identity = new GrainRequestIdentityScope(services, principal, actorId, leaf.RequestId, token);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        using var identity = new GrainRequestIdentityScope(services, principal, actorId, leaf.RequestId, token, connectionId: connectionId);
         var signed = codec.CreateCommand(actorId, principal.Id, OperationKind.Receive, leaf.RequestId,
             NativeSerialization.Serialize(leaf));
         var invoked = false;
@@ -64,7 +65,7 @@ internal static class MultiLaneReceiveExecution
                 createStream: cancellation =>
                 {
                     invoked = true;
-                    return grains.GetGrain<IRequestGrain>(actorId).ExecuteStreamAsync(signed, cancellation);
+                    return grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, cancellation);
                 },
                 serializer: serializer, requestId: actorId, clock: clock, options: routing,
                 cancellationToken: token).ConfigureAwait(true);

@@ -45,7 +45,8 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, IGra
         var principal = GrainRequestAuthority.ReloadForRequest(Database, parent.Envelope, clock);
         GrainRequestAuthority.RequireAdministrator(principal);
         var actorId = Guid.NewGuid();
-        using var identity = new GrainRequestIdentityScope(services, principal, actorId, commandId, token);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        using var identity = new GrainRequestIdentityScope(services, principal, actorId, commandId, token, connectionId: connectionId);
         var signed = command is { } kind ? codec.CreateCommand(actorId, principal.Id, kind, commandId, payload)
             : codec.CreateRead(actorId, principal.Id, read!.Value, payload);
         var invoked = false;
@@ -55,7 +56,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, IGra
             reply = await GrainRequestStreamConsumer.DrainAsync(cancellation =>
             {
                 invoked = true;
-                return grains.GetGrain<IRequestGrain>(actorId).ExecuteStreamAsync(signed, cancellation);
+                return grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, cancellation);
             }, serializer, actorId, clock, routing, token).ConfigureAwait(true);
         }
         catch (KeyLoadException error) when (invoked && command is not null)

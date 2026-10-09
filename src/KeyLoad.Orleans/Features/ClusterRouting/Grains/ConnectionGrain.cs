@@ -7,7 +7,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
 
-/// <summary>Routes one independently keyed operation through the native bounded CQRS stream.</summary>
+/// <summary>Owns parallel operations for one connection through native bounded CQRS streams.</summary>
 /// <param name="codec">Shared database-signed request verifier.</param>
 /// <param name="diagnostics">Operational logging for unexpected failures, without exception objects on the wire.</param>
 /// <param name="chunkSerializer">The actual registered Orleans serializer for request chunks.</param>
@@ -16,26 +16,61 @@ namespace KeyLoad.Orleans;
 /// <param name="options">The centrally validated request execution snapshot.</param>
 /// <param name="services">Borrowed native silo services for independent lane composition.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.RequestAlias), global::Orleans.Placement.PreferLocalPlacement]
-public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> diagnostics,
+public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,
     NativeRequestWorkOwner workOwner, IOptions<GrainRoutingOptions> options, IServiceProvider services)
-    : Grain, IRequestGrain
+    : Grain, IConnectionGrain, IAsyncDisposable
 {
+    private readonly NativeConnectionOperationOwner operations = new(options);
+
     /// <inheritdoc />
-    /// <param name="signedRequest">The database-signed request addressed to this unique request actor.</param>
+    /// <param name="signedRequest">The database-signed operation executed by this connection owner.</param>
     /// <param name="cancellationToken">Cancellation for validation and downstream capability execution.</param>
     /// <returns>A lazy native stream over the existing authorized capability.</returns>
     public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
         string signedRequest, CancellationToken cancellationToken)
     {
-        var requestId = this.GetPrimaryKey();
+        var requestId = OperationRequestId(signedRequest);
         var phaseSettlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
-        Action settled = phaseSettlement is null ? DeactivateOnIdle
-            : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext, DeactivateOnIdle);
-        return NativeCqrsStreamLifetime.Run(
+        Action settled = phaseSettlement is null ? static () => { }
+            : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext);
+        return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.Run(
             createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
-            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: cancellationToken, options: options, owner: workOwner);
+            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: workOwner), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task CloseAsync(string signedControl, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        codec.VerifyConnectionClose(signedControl, this.GetPrimaryKey());
+        try
+        { await operations.CloseAsync().ConfigureAwait(true); }
+        finally
+        { DeactivateOnIdle(); }
+    }
+
+    /// <inheritdoc />
+    public override async Task OnDeactivateAsync(global::Orleans.DeactivationReason reason, CancellationToken cancellationToken)
+    {
+        var ownedFailure = await NativeRequestWorkSettlement.JoinAsync(DisposeAsync().AsTask()).ConfigureAwait(true);
+        var nativeFailure = await NativeRequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken)).ConfigureAwait(true);
+        NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(ownedFailure, nativeFailure));
+    }
+
+    /// <inheritdoc />
+    public ValueTask DisposeAsync() => operations.DisposeAsync();
+
+    private Guid OperationRequestId(string signedRequest)
+    {
+        if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState state
+            && state.RequestId != Guid.Empty)
+        { return state.RequestId; }
+        try
+        { return codec.Verify(signedRequest).Envelope.RequestId; }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { return Guid.NewGuid(); }
     }
 
     private async ValueTask<Result<GrainOperationReply>> ExecuteCapabilityAsync(string signedRequest, Guid requestId,
@@ -48,7 +83,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         {
             writer.CancellationToken.ThrowIfCancellationRequested();
             var request = codec.VerifyRequest(signedRequest, requestId);
-            GrainIdentityContext.Validate(request.Envelope, requestId);
+            GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
             phaseSettlement?.SetIdentity(request);
             stage = GrainFailureStage.CapabilityExecution;
             command = request.Envelope.CommandKind is not null;
@@ -77,8 +112,10 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
             else
             {
                 stage = GrainFailureStage.CapabilityExecution;
-                var reader = GrainFactory.GetGrain<IDatabaseReadGrain>(request.Envelope.RequestId);
-                reply = await reader.ExecuteAsync(signedRequest, writer.CancellationToken).ConfigureAwait(true);
+                var reader = new ConnectionReadExecution(codec, services.GetRequiredService<KeyLoad.Core.DatabaseEngine>(),
+                    services.GetRequiredService<KeyLoad.Core.ICommitCoordinator>(), services, clock, workOwner,
+                    diagnostics, ((IGrainBase)this).GrainContext);
+                reply = await reader.ExecuteAsync(request, writer.CancellationToken).ConfigureAwait(true);
             }
 
             return GrainReplyFactory.StreamResult(reply: reply, options: options);

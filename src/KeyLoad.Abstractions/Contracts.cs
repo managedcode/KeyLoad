@@ -93,8 +93,11 @@ public enum ErrorCode
 }
 
 /// <summary>Represents a safe, caller-visible KeyLoad failure with its domain code and HTTP status.</summary>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(KeyLoadException.NativeAlias)]
 public sealed class KeyLoadException : Exception
 {
+    internal const string NativeAlias = "keyload.error.v1";
     private const string DefaultSafeDetail = "A KeyLoad operation failed.";
     /// <summary>Initializes a KeyLoad exception with the supplied domain code, safe detail, and HTTP status.</summary>
     /// <param name="code">Identifies the domain error.</param>
@@ -132,9 +135,11 @@ public sealed class KeyLoadException : Exception
     }
 
     /// <summary>Gets the domain error code.</summary>
+    [Orleans.Id(0)]
     public ErrorCode Code { get; }
 
     /// <summary>Gets the corresponding HTTP status code.</summary>
+    [Orleans.Id(1)]
     public int StatusCode { get; }
 
     /// <summary>Creates the safe problem detail for this failure.</summary>

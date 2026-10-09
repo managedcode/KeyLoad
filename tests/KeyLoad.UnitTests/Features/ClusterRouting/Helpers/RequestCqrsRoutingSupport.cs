@@ -197,9 +197,9 @@ internal static class RequestCqrsNativeCommandStream
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using IDisposable context = publishContext
             ? new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, contextPrincipal,
-                requestId, commandId, deadline.Token)
+                requestId, commandId, deadline.Token, connectionId: fixture.ConnectionId)
             : RequestCqrsClientContext.Set(null, false, null, includeState: false);
-        var actor = fixture.Cluster.Client.GetGrain<IRequestGrain>(requestId);
+        var actor = fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var stream = actor.ExecuteStreamAsync(signed, deadline.Token)
             .WithBatchSize(GrainRequestStreamProtocol.BatchSize);
         if (beforeFirstPull is not null)

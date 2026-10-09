@@ -40,9 +40,10 @@ internal static class CanonicalOperationGateway
         try
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
+            using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
             using var requestContext = node.OpenRequestContext(principal, requestId,
-                commandId, cancellationToken);
-            reply = await node.ExecuteAsync(requestId, signed, commandKind.HasValue, cancellationToken).ConfigureAwait(false);
+                commandId, connection.Token, connection.Id);
+            reply = await node.ExecuteAsync(requestId, signed, commandKind.HasValue, connection.Token).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })

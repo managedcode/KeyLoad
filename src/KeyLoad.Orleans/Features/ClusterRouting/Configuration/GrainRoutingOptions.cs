@@ -15,6 +15,8 @@ public sealed class GrainRoutingOptions
     private const int MaximumFutureMinutes = 2;
     private const int MaximumProducerCount = 64;
     private const int MaximumFrameCount = 128;
+    private const int MaximumConnectionCount = 4_096;
+    private const int MaximumOperationsPerConnection = 8;
     private const int MinimumPositiveCount = 1;
     private const int MaximumReplyBytesCeiling = 16_777_216;
     private const int MaximumInitialReplyBufferBytes = 4_096;
@@ -39,6 +41,13 @@ public sealed class GrainRoutingOptions
     public int MaximumRequestProducers { get; set; } = MaximumProducerCount;
     /// <summary>Gets or sets the maximum active request and capability frames admitted by one silo.</summary>
     public int MaximumTotalFrames { get; set; } = MaximumFrameCount;
+
+    /// <summary>Gets or sets the admitted physical connections per server node.</summary>
+    public int MaximumConnections { get; set; } = MaximumConnectionCount;
+    /// <summary>Gets or sets the independently executing operations per connection.</summary>
+    public int MaximumConnectionOperations { get; set; } = MaximumOperationsPerConnection;
+    /// <summary>Gets or sets idle physical transport expiry while no operation is active.</summary>
+    public TimeSpan ConnectionIdleTimeout { get; set; } = MaximumDuration;
 
     /// <summary>Gets or sets the encoded capability reply bytes.</summary>
     public int MaximumReplyBytes { get; set; } = MaximumReplyBytesCeiling;
@@ -80,6 +89,9 @@ public sealed class GrainRoutingOptions
         && MaximumRequestProducers is >= MinimumPositiveCount and <= MaximumProducerCount
         && MaximumTotalFrames is >= MinimumPositiveCount and <= MaximumFrameCount
         && MaximumRequestProducers <= MaximumTotalFrames
+        && MaximumConnections is >= MinimumPositiveCount and <= MaximumConnectionCount
+        && MaximumConnectionOperations is >= MinimumPositiveCount and <= MaximumOperationsPerConnection
+        && IsBounded(ConnectionIdleTimeout)
         && MaximumReplyBytes is >= MinimumPositiveCount and <= MaximumReplyBytesCeiling
         && InitialReplyBufferBytes is >= MinimumPositiveCount and <= MaximumInitialReplyBufferBytes
         && MaximumStartedBytes is >= MinimumPositiveCount and <= MaximumStartedBytesCeiling

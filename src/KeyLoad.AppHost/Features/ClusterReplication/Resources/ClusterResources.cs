@@ -129,6 +129,7 @@ internal static class ClusterResources
             resource.WithBindMount(coverageDirectory!, NativeCoverageRf3Protocol.CoverageOutputDirectory);
             coverageImage.Apply(resource, name);
         }
+        KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
         ClusterResourceSettings.Apply(builder, resource, containerUser);
         probes?.Apply(resource, name);
         ApplyPeers(resource, nodeNames, benchmarkNodeCount.HasValue);
@@ -165,11 +166,13 @@ internal static class ClusterResources
         }
         var images = localImage is null && coverageImage is null
             ? ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount) : null;
-        var probes = localImage is null && coverageImage is null
-            ? RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images!)
-            : AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is null
-                ? null
-                : throw new InvalidOperationException(ReadImagesAndProbesMessageText);
+        var probes = localImage is not null
+            ? RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral, benchmarkNodeCount, localImage)
+            : coverageImage is null
+                ? RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images!)
+                : AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is null
+                    ? null
+                    : throw new InvalidOperationException(ReadImagesAndProbesMessageText);
         return (localImage, images, probes);
     }
 

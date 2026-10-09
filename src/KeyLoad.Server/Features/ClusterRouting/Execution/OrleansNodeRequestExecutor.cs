@@ -9,16 +9,27 @@ namespace KeyLoad.Server;
 internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> routingOptions,
     ILogger<OrleansNode> logger)
 {
-    internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory grains, IServiceProvider services,
-        PhysicalShardCatalogStartup? catalog, Guid requestId, string signedRequest, bool command,
+    internal static Task CloseAsync(IGrainFactory grains, IServiceProvider services,
+        Guid connectionId, CancellationToken cancellationToken)
+        => grains.GetGrain<IConnectionGrain>(connectionId).CloseAsync(
+            services.GetRequiredService<GrainRequestCodec>().CreateConnectionClose(connectionId), cancellationToken);
+
+    internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
+        PhysicalShardCatalogStartup? catalog, bool databaseReady, bool requireCatalogAdmission,
+        Guid requestId, string signedRequest, bool command,
         CancellationToken cancellationToken)
     {
+        if (requireCatalogAdmission && (!databaseReady || catalog is null || !catalog.IsReady))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
+        var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         var clock = services.GetRequiredService<TimeProvider>();
         using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         await services.GetRequiredService<ReplicaSiloDiscoveryClient>()
             .EnsureCompatibleCohortAsync(execution.Token).ConfigureAwait(false);
-        if (catalog is not null)
+        if (requireCatalogAdmission && catalog is not null)
         {
             if (!catalog.IsReady)
             {
@@ -26,7 +37,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
             }
             await catalog.EnsureAdmissionAsync(execution.Token).ConfigureAwait(false);
         }
-        var reply = await DrainAsync(grains, services, requestId, signedRequest, command, clock,
+        var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
             execution.Token, cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } error)
         {
@@ -36,13 +47,13 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
     }
 
     private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
-        Guid requestId, string signedRequest, bool command, TimeProvider clock,
+        Guid connectionId, Guid requestId, string signedRequest, bool command, TimeProvider clock,
         CancellationToken executionToken, CancellationToken callerToken)
     {
         try
         {
             return await GrainRequestStreamConsumer.DrainAsync(
-                createStream: token => grains.GetGrain<IRequestGrain>(requestId).ExecuteStreamAsync(signedRequest, token),
+                createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token),
                 serializer: services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                 requestId: requestId, clock: clock, cancellationToken: executionToken, options: routingOptions).ConfigureAwait(false);
         }

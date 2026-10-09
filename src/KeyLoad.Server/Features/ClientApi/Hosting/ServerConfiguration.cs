@@ -22,8 +22,16 @@ internal static class ServerConfiguration
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
         builder.Services.AddRuntimeOptions(builder.Configuration);
+        ServerConnectionTransportComposition.Configure(builder);
         builder.Services.AddOptions<KestrelServerOptions>().Configure<IOptions<ServerExecutionOptions>>(
             (server, configured) => server.Limits.MaxRequestBodySize = configured.Value.MaximumBodyBytes);
+        builder.Services.AddOptions<KestrelServerOptions>().Configure<ServerConnectionRegistry>(
+            (server, connections) => server.ConfigureEndpointDefaults(listen =>
+            {
+                listen.Use(next => connection => connections.RunAsync(connection, () => next(connection)));
+                ((Microsoft.AspNetCore.Connections.IMultiplexedConnectionBuilder)listen).Use(
+                    next => connection => connections.RunAsync(connection, () => next(connection)));
+            }));
         builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
         builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
             .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
@@ -97,6 +105,7 @@ internal static class ServerConfiguration
     private static void Register(IServiceCollection services)
     {
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
         services.AddSingleton<AdminNodeObserver>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();

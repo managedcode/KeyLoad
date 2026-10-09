@@ -29,19 +29,18 @@ internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(TimeProvider.System);
         siloBuilder.Services.AddSingleton(fixture.RequestWork);
         siloBuilder.Services.AddSingleton(fixture.Codec);
+        siloBuilder.Services.AddSingleton<NativeConnectionOwnerIdentity>();
         siloBuilder.Services.AddSingleton(fixture.Routing);
         siloBuilder.Services.AddSingleton(fixture.DurableJobOptions);
         siloBuilder.Services.AddSingleton(fixture.JournalOptions);
         siloBuilder.Services.AddSingleton(fixture.DueOptions);
         siloBuilder.AddOrleansGraph(configureGraph: graph => graph
-            .AllowClientCallGrain<IRequestGrain>()
+            .AllowClientCallGrain<IConnectionGrain>()
             .AllowClientCallGrain<IRecurringDueCoordinatorGrain>()
-            .AddGrainTransition<IRecurringDueCoordinatorGrain, IRequestGrain>()
-            .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-            .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
-            .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
+            .AddGrainTransition<IRecurringDueCoordinatorGrain, IConnectionGrain>()
+            .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IConnectionGrain.ExecuteStreamAsync)).And()
+            .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
+            .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
         siloBuilder.UseOrleansCommunication();
         NativeRuntimeJournalRegistration.Register(siloBuilder, fixture.JournalOptions, fixture.DurableJobOptions);
     }

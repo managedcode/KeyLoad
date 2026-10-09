@@ -16,8 +16,8 @@ internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
     private readonly System.Threading.Lock gate = new();
     private readonly ActivityListener listener;
     private readonly OrleansRuntimeTelemetryMutation mutation;
-    private const string RequestStreamMethodName = nameof(IRequestGrain.ExecuteStreamAsync);
-    private const string CapabilityMethodName = nameof(IDatabaseReadGrain.ExecuteAsync);
+    private const string RequestStreamMethodName = nameof(IConnectionGrain.ExecuteStreamAsync);
+    private const string CapabilityMethodName = nameof(ICommandPartitionGrain.ExecuteAsync);
     private const string MethodNameSeparator = "/";
     private const string NativeRequestStreamStartMethod =
         "Orleans.Runtime.IAsyncEnumerableGrainExtension/StartEnumeration<T>";

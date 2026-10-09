@@ -157,16 +157,16 @@ Details: [composition guide](docs/Features/DatabaseComposition.md) · [transacti
 
 ```mermaid
 flowchart LR
-    Callers["SDK · MCP · SQL · HTTP"] --> Request["Short-lived Orleans<br/>request grain"]
+    Callers["SDK · MCP · SQL · HTTP"] --> Request["One Orleans grain<br/>per connection"]
     Request --> Partition["Partition grains"]
     Partition --> N1[("Node 1<br/>ZoneTree")]
     Partition --> N2[("Node 2<br/>ZoneTree")]
     Partition --> N3[("Node 3<br/>ZoneTree")]
 ```
 
-Each authenticated call gets its own request grain, with bounded call-local data and no persisted request state. After the operation and its stream cleanup settle, it requests deactivation immediately instead of waiting for ordinary idle collection. Completed requests are not kept as a history of active grains. Actual activation and memory recovery under load still require qualification.
+Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
 
-Persistent connections will have a separate, bounded connection/session grain; that connection layer is still in development. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
+Connection execution under [ADR-125](docs/ADR/ADR-125-connection-owned-execution.md) passed eight local native flows and five real SDK/official MCP Aspire Docker RF3 flows. Complete Linux fault, endurance and performance qualification remains open. This transport ownership does not deliver native SQL session compatibility. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the three replicas. See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
 
 ## Why .NET, Orleans and ZoneTree
 

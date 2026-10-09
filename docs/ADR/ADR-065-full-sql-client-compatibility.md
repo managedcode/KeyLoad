@@ -65,19 +65,18 @@ family keeps the full SQL gate false. PostgreSQL wire3.0 is the first native
 client target, with explicit3.2 negotiation fixtures before advertising that
 version. Current HTTP/JSON plus official MCP remain their actual transports.
 
-Owner clarification 2026-10-09 requires a separate Orleans connection/session
-grain for each accepted persistent logical client connection. Its bounded
-disposable session state is distinct from a fresh state-free operation grain;
-request/read activations request DeactivateOnIdle after their original work and
-cleanup settle. [ClientApi connection requirements](../Features/ClientApi.md#persistent-connection-ownership)
-own REQ/AC-CLIENT-CONNECTION-001/002 and TASK-CLIENT-CONNECTION;
-[ClusterRouting lifetime requirements](../Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
-own REQ/AC-ORL-013 and TASK-ORL-REQUEST-LIFETIME. Freeze actual connection identity,
-transport callbacks, typed quotas, scheduling, cancellation and joined teardown
-before integration. A session must reload current persisted authorization for
-each operation and cannot retain storage views, trusted roles or completed
-request history. Native-client/MCP interoperability and activation/RAM recovery
-remain unqualified; this decision does not advertise a delivered session layer.
+Owner correction 2026-10-09 and [ADR-125](ADR-125-connection-owned-execution.md)
+select one grain per actual connection, admitting bounded parallel independent
+operations and commands without creating request/read activations. Signed
+operation identity, principal, read cut, deadline and result remain call-local;
+current persisted authorization is reloaded for every call. Connection close
+stops admission, cancels and joins original work before native deactivation.
+[ClientApi](../Features/ClientApi.md#persistent-connection-ownership) owns
+REQ/AC-CLIENT-CONNECTION-001/002 and TASK-CLIENT-CONNECTION;
+[ClusterRouting](../Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
+owns REQ/AC-ORL-013 and TASK-ORL-REQUEST-LIFETIME. Native SQL protocol work must
+reuse this boundary while retaining its separately defined connection protocol
+requirements. Runtime and matched Linux performance qualification remain open.
 
 [Command inventory](../implementation/sql-client-commands-postgresql18.json)
 enumerates all183 entries from the official version18 command index. Family
@@ -106,7 +105,7 @@ flowchart LR
     Clients[SDK MCP Native SQL clients] --> Transport[Bounded authenticated transport]
     Transport --> Compile[Versioned typed SQL compiler]
     Compile --> Gateway[Canonical signed gateway]
-    Gateway --> Request[Fresh request grain]
+    Gateway --> Request[Isolated operation on connection grain]
     Request --> Host[Node local ZoneTree RF3 owner]
     Host --> Models[Linked relational and other models]
 ```
@@ -203,7 +202,7 @@ contract alone. The later native implementation contract must fix version/frame/
 encoding, statement/result types and OIDs, simple/extended protocol, portal/cut,
 implicit/explicit transaction state, SQLSTATE, startup/catalog client probes,
 pipeline/connection/reply numeric limits and original execution drain. Every
-command revalidates persisted principal/policy and uses a fresh request grain.
+command revalidates persisted principal/policy and uses a fresh operation context on its connection grain.
 Current SHA256 API-key verifiers are not SCRAM verifiers. Do not invent SCRAM,
 trusted roles or DefaultHttpContext to impersonate the HTTP gateway. Any native
 authentication/TLS or transport-neutral gateway admission contract must preserve

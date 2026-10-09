@@ -1,4 +1,63 @@
 {
+  "TASK-CLIENT-CONNECTION": {
+    "title": "One actual connection grain with parallel independent operations and commands",
+    "status": "local_native8_and_actual_sdk_mcp_aspire_rf3_5_passed_qualification_pending",
+    "feature": "docs/Features/ClientApi.md",
+    "decision": "docs/ADR/ADR-125-connection-owned-execution.md",
+    "requirements": [
+      "REQ-CLIENT-CONNECTION-001",
+      "REQ-CLIENT-CONNECTION-002",
+      "REQ-ORL-013"
+    ],
+    "acceptance": [
+      "AC-CLIENT-CONNECTION-001",
+      "AC-CLIENT-CONNECTION-002",
+      "AC-ORL-013"
+    ],
+    "task": "TASK-CLIENT-CONNECTION",
+    "runtimeQualified": false,
+    "performanceQualified": false,
+    "fullTaskComplete": false,
+    "sourceStage": "ConnectionGrain replaces per-request and per-read activations. Actual Kestrel connection identity, bounded independent native streams, fresh authorization, per-call cancellation and joined disconnect/shutdown are implemented. Atomic-partition ordered commit/apply and RF3 receipts remain authoritative. Generated KeyLoadException serialization and original caller-before-close fixture ordering repaired the actual native failure paths. The local full-solution Release checkpoint passed at 22:05Z; native8 passed8/failed0/skipped0. Selected actual SDK HTTP/2 and official MCP Docker/Aspire RF3 passed5/failed0/skipped0 using five unique image invocations with identical server input digest. Later shared integration-reference rebuild hit two CS0103 SampleChunkSnapshotFile findings during concurrent TimeSeries work; the selected smoke used the previously compiled unchanged connection runner and freshly built server images. Broader suites and new GitHub performance activity were not selected at owner request.",
+    "limits": {
+      "maximumConnectionsPerNode": 4096,
+      "maximumOperationsPerConnection": 8,
+      "connectionIdleSeconds": 120,
+      "maximumProducersPerSilo": 64,
+      "maximumExecutionFramesPerSilo": 128,
+      "waitingQueue": 0
+    },
+    "beforeMeasurement": {
+      "sourceCommit": "f1d1b0905bd41035b1d0634eb44bc8a9866a1be3",
+      "runId": 37990964853,
+      "runAttempt": 2,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37990964853",
+      "status": "both_attempts_native_image_setup_blocked_by_dockerhub_pull_rate_limit_no_measurements_owner_stopped_further_github_activity",
+      "sourceContract": "Immutable source retains byte-identical old RequestGrain runtime; only exact native preflight/version and negative cell oracle repairs precede the runtime stage. Same canonical workloads and Linux main-only provenance guards."
+    },
+    "metrics": "Comparable canonical 100k/1m record and >=100k operation Linux cells remain pending. Existing allocation output measures the client only; server allocations and performance activation sampling are unmeasured. Native IManagementGrain activation inventory is functional lifecycle evidence, not a performance sample.",
+    "verification": {
+      "canonicalBuild": "local_dotnet_build_KeyLoad_slnx_Release_no_restore_disable_build_servers_passed_0_warnings_0_errors_2026_10_09T22_05Z",
+      "nativeOperations": "local_arm64_net10_ConnectionNative8_passed8_failed0_skipped0_5_374s_TestResults_connection_native_final_original_failures_retained",
+      "scalarOperations": "not_selected_owner_requested_focused_local_real_database_smoke",
+      "processRecovery": "not_selected_owner_requested_focused_local_real_database_smoke",
+      "aspireRf3SdkAndOfficialMcp": "local_arm64_net10_ConnectionRf3_selected5_passed5_failed0_skipped0_exit0_duration8m33s985ms_2026_10_09T22_35Z",
+      "matchedLinuxPerformance": "unmeasured_before_image_prerequisites_blocked_both_attempts_further_github_activity_stopped_at_owner_request",
+      "aspireRf3Report": "TestResults/connection-rf3-local-catalog-repaired/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+      "aspireRf3ReportSha256": "3b58cab7c1d33a5a655f9e60656557eba0da9dadfdee1877d68478ab37b4769e",
+      "serverInputDigest": "sha256:077cbb309ca1a6fe147086d10dbc2071868377468b7dfaebec3ec80b060be414",
+      "localImageInvocations": [
+        "8083cb53ff0e4fc9bab95ea3e6a46a51",
+        "a4ce175747504e4490f0767d8f3f0e21",
+        "020030f4178043d8904464757db1d8f7",
+        "e78cc9ce72d340eba5533321ea62c874",
+        "c6f2ed629c484fe49c34aab465a7a793"
+      ],
+      "laterIntegrationReferenceBuild": "local_attempt_failed2_CS0103_SampleChunkSnapshotFile_during_shared_TimeSeries_join_server_built_and_actual_image_smoke_passed",
+      "idleEvidence": "functional_native_connection_close_and_activation_removal_observed_exact_custom120s_timer_vs_native_keepalive_not_independently_proven",
+      "ownedRf3Cleanup": "all5_fixtures_joined_and_postrun_docker_inventory_confirmed0_owned_containers_0_owned_image_tags"
+    }
+  },
   "BENCHMARK-METHODOLOGY-001": {
     "title": "Primary-source native benchmark methodology and shared actual-scale workloads",
     "status": "implementation_checkpoint_github_verification_pending",

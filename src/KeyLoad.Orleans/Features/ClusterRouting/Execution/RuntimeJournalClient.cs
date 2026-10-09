@@ -81,9 +81,10 @@ internal sealed class RuntimeJournalClient(
         var principal = await PrepareAsync(token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
         var signed = codec.CreateRuntimeJournalRead(requestId, kind, payload);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId,
-            Guid.Empty, token);
-        var actor = grains.GetGrain<IRequestGrain>(requestId);
+            Guid.Empty, token, connectionId: connectionId);
+        var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         var reply = await DrainAsRuntimeJournalCallerAsync(ReadCoreCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
                 createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
@@ -100,8 +101,9 @@ internal sealed class RuntimeJournalClient(
         var principal = await PrepareAsync(token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
         var signed = codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
-        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token);
-        var actor = grains.GetGrain<IRequestGrain>(requestId);
+        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token, connectionId: connectionId);
+        var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         return await DrainAsRuntimeJournalCallerAsync(SendCommandCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
                 createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,

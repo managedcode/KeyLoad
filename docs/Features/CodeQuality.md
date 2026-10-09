@@ -1,5 +1,28 @@
 # CodeQuality
 
+## Native exception classification, 2026-10-09
+
+REQ-CQ-NATIVE-EXCEPTION-001 / AC-CQ-NATIVE-EXCEPTION-001 preserve KLD0021's
+Error rule for instance constructors on Orleans DTOs while classifying the actual
+System.Exception inheritance hierarchy as native runtime failures. Orleans
+generated exception serializers delegate the base exception segment to the
+native codec; exceptions retain their legitimate constructors. The connection
+repair under ADR-125 exposed five KLD0021 findings on the existing KeyLoadException
+constructors after its missing generated serializer was added. Removing those
+public constructors would change the declared failure contract.
+
+Under ADR-033, CodeQuality owns a semantic classification repair in
+OrleansContractConstructorAnalyzer: resolve the actual System.Exception symbol
+from the active compilation and compare inheritance with SymbolEqualityComparer.
+Do not suppress KLD0021, change severity, whitelist namespaces/types by text, or
+relax constructor denial for DTOs. Real Roslyn/TUnit
+OrleansContractConstructorTests must prove direct and indirect native exceptions
+retain constructors while a name lookalike and a normal generated DTO still
+produce the original located Error. Existing cases stay unchanged. Source build
+and original GitHub analyzer execution are required, alongside the separate
+ConnectionNativeFailureTests actual Serializer<Exception> and negative RPC cases.
+
+
 ## Roslynk semantic tooling, owner direction 2026-10-09
 
 REQ-CQ-ROS-001 / AC-CQ-ROS-001: restore the published Roslynk 2.1.0 local

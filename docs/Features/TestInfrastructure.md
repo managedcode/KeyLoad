@@ -1091,3 +1091,26 @@ Original job/artifact bindings are KL034 normal113978740486/11639990404, scalar1
 Ordered implementation: freeze this trace in TestInfrastructure and ADR117; replace only KL034/KL042 censusSelections with the existing strict selections/cases schema using those exact original arrays; root guards/joins/builds/commits/pushes; freshly discover and execute both complete Linux normal/scalar scopes through the unchanged canonical Aspire/TUnit entry; authenticate every source/image/UID/TRX/outcome/environment/process/resource-cleanup gate. The strict producer independently rebinds the actual new compiled image before execution. Existing ten task objects and ordinal raw arrays, KL036 strict37 and its separate eight-selection/fourteen-source-instance additional census, all twelve task identities, ordinary50/heavy exclusive1 and every original timeout/auth/RF3/SDK/official MCP/Q1 requirement stay exact. No producer/verifier/workflow bypass, synthesized UID/display, timeout change or classification promotion is introduced.
 
 Root owns live integration and Git/Linux delivery; the qualification owner retains both-profile original API/archive/native-identity ledgers and repairs actual complete-flow failures. Rollback restores only these two original census task objects and this additive trace, retaining immutable originals and every other object. No product/persistence/trust/provider/topology boundary changes. Strict execution admission is prepared; complete current-source operation acceptance, required full suites, coverage, endurance and power-loss gates remain OPEN.
+
+## Connection execution RF3 local-image cohort, 2026-10-09
+
+ADR-125's REQ/AC-CLIENT-CONNECTION-001/002 and REQ/AC-ORL-013 reuse the
+existing ADR-119 TUnit-owned actual-image preparation and explicit child identity.
+The additional exact selector is:
+
+    /*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*
+
+It owns all five expanded native SDK/official MCP instances, including actual
+HTTP/2 same-connection overlap. No wildcard/subset/mixed-image or GitHub identity
+exception is added. ConnectionRf3Scenario starts LocalRf3ImageTestSession,
+passes its explicit Selection through RequestCqrsRf3ImageProof and wave startup,
+verifies the three modeled tags and actual image IDs, and joins the original
+wave before exact-tag cleanup. Existing caller defaults remain unchanged when
+this selector is absent. Native arguments propagate explicitly without ambient
+image mutation. The established closed private CQRS probe profile remains
+required for bounded actual operation/activation witnesses. Native-image
+preparation and source receipt verification precede RF3 startup; no stale image,
+manually started nodes or local benchmark execution is admitted. All measured
+qualification remains original Linux GitHub evidence. Complete existing positive/
+negative native selection tests remain mandatory alongside actual five RF3 flows;
+adding selector code alone does not pass either gate.

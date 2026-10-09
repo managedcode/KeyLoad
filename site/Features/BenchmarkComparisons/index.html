@@ -114,7 +114,7 @@
           <li><b>MCP</b> server built in</li>
           <li><b>SQL</b> shared language</li>
           <li><b>RF3</b> three replicas</li>
-          <li><b>Orleans</b> grain per request</li>
+          <li><b>Orleans</b> grain per connection</li>
         </ul>
         <div class="scene-caption-row">
           <figcaption id="scene-caption"><span class="caption-kicker">Every model. One connected database.</span><small class="scene-reference">Built for the whole agent workflow. <a href="https://learn.microsoft.com/dotnet/orleans/overview#what-are-grains" target="_blank" rel="noreferrer">Explore Orleans ↗</a></small></figcaption>
@@ -242,14 +242,14 @@
       <div class="engine-inner kl-graphite">
         <div class="engine-copy">
           <p class="eyebrow">Built on .NET 10 and Orleans</p>
-          <h2 id="engine-title">A grain per request. Storage that stays home.</h2>
-          <p>Orleans gives every request its own grain and finds the right partition through a distributed grain directory. Grains can move between nodes to balance load; the data does not. ZoneTree files, write-ahead logs and the ordered commit gate stay with each node's PartitionHost, so moving a grain never copies storage.</p>
+          <h2 id="engine-title">A grain per connection. Parallel operations.</h2>
+          <p>Orleans gives each connection one grain that runs bounded parallel operations and commands, with separate request identities and fresh authorization. It finds the right partition through a distributed grain directory. Grains can move between nodes to balance load; ZoneTree files, write-ahead logs and the ordered commit gate stay with each node's PartitionHost.</p>
           <p class="engine-note">Activation-migration qualification is still in progress.</p>
           <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/ClusterRouting.md">Cluster routing contract <span aria-hidden="true">↗</span></a>
         </div>
         <ol class="stack" aria-label="Request path through the engine">
           <li class="layer"><span class="layer-tag">Callers</span><span class="layer-body"><span class="pill">MCP server</span><span class="pill">.NET SDK</span><span class="pill">SQL</span></span></li>
-          <li class="layer"><span class="layer-tag">Request grain</span><span class="layer-body">One Orleans grain per request</span></li>
+          <li class="layer"><span class="layer-tag">Connection grain</span><span class="layer-body">One Orleans grain per connection, with bounded parallel operations</span></li>
           <li class="layer"><span class="layer-tag">Partition grains</span><span class="layer-body">Atomic partitions, routed not pinned</span></li>
           <li class="layer layer--hosts"><span class="layer-tag">PartitionHost × 3</span><span class="hosts"><span class="host"><b>Node A</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node B</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node C</b>ZoneTree · WAL<small>apply gate</small></span></span></li>
         </ol>
@@ -263,7 +263,7 @@
       </header>
       <div class="why-grid">
         <a class="shape" href="https://github.com/dotnet/runtime"><span class="shape-no">.NET 10</span><h3>A fast, memory-efficient runtime</h3><p>Spans, pooled buffers and hardware intrinsics keep hot paths lean; SIMD work is measured before any speed claim. One language from server to SDK, CLI and tests.</p><span class="shape-link">dotnet/runtime <span aria-hidden="true">↗</span></span></a>
-        <a class="shape" href="https://github.com/dotnet/orleans"><span class="shape-no">Orleans</span><h3>A cluster runtime proven in production</h3><p>Virtual actors from Microsoft Research that have powered Halo's cloud services. Membership and failure detection are built in; KeyLoad adds a grain per request and turns on the experimental distributed directory and activation repartitioning, still being qualified.</p><span class="shape-link">dotnet/orleans <span aria-hidden="true">↗</span></span></a>
+        <a class="shape" href="https://github.com/dotnet/orleans"><span class="shape-no">Orleans</span><h3>A cluster runtime proven in production</h3><p>Virtual actors from Microsoft Research that have powered Halo's cloud services. Membership and failure detection are built in; KeyLoad uses one grain per connection with isolated operations and turns on the experimental distributed directory and activation repartitioning, still being qualified.</p><span class="shape-link">dotnet/orleans <span aria-hidden="true">↗</span></span></a>
         <a class="shape" href="https://github.com/ZoneTree/ZoneTree"><span class="shape-no">ZoneTree</span><h3>Storage that lives inside the node</h3><p>An embedded, persistent, ordered key-value engine written in C#, with a write-ahead log. One engine under every model, plus ZoneTree.FullTextSearch for text.</p><span class="shape-link">ZoneTree/ZoneTree <span aria-hidden="true">↗</span></span></a>
       </div>
     </section>

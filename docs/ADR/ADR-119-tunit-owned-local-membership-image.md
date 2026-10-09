@@ -272,3 +272,42 @@ normal/scalar selection proof, actual12 RF3 reports and original Linux delivery
 remain pending until executed; neither this selector nor source review closes
 full SQL or SQL-client protocol conformance. Rollback removes this additional
 selector and its assertions as one unit.
+
+
+## Connection execution RF3 local-image cohort, 2026-10-09
+
+ADR-125's REQ/AC-CLIENT-CONNECTION-001/002 and REQ/AC-ORL-013 reuse the
+existing ADR-119 TUnit-owned actual-image preparation and explicit child identity.
+The additional exact selector is:
+
+    /*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*
+
+It owns all five expanded native SDK/official MCP instances, including actual
+HTTP/2 same-connection overlap. No wildcard/subset/mixed-image or GitHub identity
+exception is added. ConnectionRf3Scenario starts LocalRf3ImageTestSession,
+passes its explicit Selection through RequestCqrsRf3ImageProof and wave startup,
+verifies the three modeled tags and actual image IDs, and joins the original
+wave before exact-tag cleanup. Existing caller defaults remain unchanged when
+this selector is absent. Native arguments propagate explicitly without ambient
+image mutation. The established closed private CQRS probe profile remains
+required for bounded actual operation/activation witnesses. Native-image
+preparation and source receipt verification precede RF3 startup; no stale image,
+manually started nodes or local benchmark execution is admitted. All measured
+qualification remains original Linux GitHub evidence. Complete existing positive/
+negative native selection tests remain mandatory alongside actual five RF3 flows;
+adding selector code alone does not pass either gate.
+
+The first actual local connection run reached fresh image preparation but the
+child ClusterResources rejected that image combined with the required private
+CQRS probe before any database node started. This source integration gap is
+repaired under the explicit connection cohort above. ClusterResources must use
+RequestCqrsProbeProfile.ReadLocal with its already validated
+LocalDevelopmentContainerImage for the homogeneous ephemeral three-node topology.
+Share the existing mode, private owner-root/session and per-voter file validation
+with the ordinary Read path; do not synthesize RuntimeContainerImage objects or
+GitHub digests for local tags. Keep coverage-image/probe rejection, comparison,
+protocol-cohort and GitHub-identity rejections, exact current source receipt/config
+ID checks and model/started-container image proof. Root owns these two AppHost
+source joins and reruns the unchanged five actual SDK/MCP connection flows after
+build. The interrupted original startup failures remain retained; no completed
+RF3 pass or performance result is inferred from image preparation.

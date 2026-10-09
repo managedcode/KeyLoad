@@ -21,9 +21,9 @@ internal static class MultiLaneReceiveNativeFlow
         var signed = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
             NativeSerialization.Serialize(request));
         using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-            actor, commandId, token);
+            actor, commandId, token, connectionId: fixture.ConnectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            createStream: cancellation => fixture.Cluster.Client.GetGrain<IRequestGrain>(actor)
+            createStream: cancellation => fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId)
                 .ExecuteStreamAsync(signed, cancellation),
             serializer: fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId: actor, clock: fixture.Database.Database.EvaluationClock,

@@ -34,3 +34,8 @@
 
 ## Native TUnit entry, owner correction 2026-10-07
 - ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.
+
+## Connection execution, owner correction 2026-10-09
+- ADR-125 supersedes the historical unique grain per request/read execution boundary. Qualify one server-owned grain per actual Kestrel transport connection, fresh persisted authentication and separate signed operation GUIDs through the real .NET SDK and official MCP SDK. Retain ordered node-local partition apply and authentic RF3 membership.
+- Prove reuse and cleanup with actual native activation identity, IGrainContext.Deactivated and native management inventory through the existing authenticated private probe profile. Only armed, bounded test observations may allocate lifecycle watchers; never infer activation counts from proxy counters, source text, public caller IDs or forced collection.
+- The test caller MUST own and dispose the original SocketsHttpHandler for physical-disconnect proof. Use the discovered direct HTTP/2 endpoint and real SDK for overlapping operations on one transport connection; pinned official MCP2.2.0 remains on its supported HTTP/1 transport. Preserve original task cancellation, terminal results, evidence and joined Aspire shutdown.

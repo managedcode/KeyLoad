@@ -19,7 +19,7 @@ internal static class GrainIdentityContext
     {
         if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
             || state.RequestId != actorRequestId || state.RequestId != envelope.RequestId
-            || state.CommandId != envelope.CommandId)
+            || state.CommandId != envelope.CommandId || state.ConnectionId == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
@@ -47,6 +47,16 @@ internal static class GrainIdentityContext
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }
+    }
+
+    internal static void ValidateConnection(GrainRequestEnvelope envelope, Guid connectionId)
+    {
+        if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
+            || connectionId == Guid.Empty || state.ConnectionId != connectionId)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+        }
+        Validate(envelope, envelope.RequestId);
     }
 
     internal static void ValidatePrincipal(ClaimsPrincipal principal, string subject)

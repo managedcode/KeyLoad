@@ -43,6 +43,16 @@ internal sealed class RequestCqrsRf3Callers : IAsyncDisposable
         string node, string adminKey, CancellationToken cancellationToken)
     {
         var http = McpCallerHttp.Create(app, node);
+        return await ConnectOwnedAsync(app, node, adminKey, http, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal static Task<RequestCqrsRf3Callers> ConnectObservedAsync(DistributedApplication app,
+        string node, string adminKey, HttpClient observedSdkHttp, CancellationToken cancellationToken)
+        => ConnectOwnedAsync(app, node, adminKey, observedSdkHttp, cancellationToken);
+
+    private static async Task<RequestCqrsRf3Callers> ConnectOwnedAsync(DistributedApplication app,
+        string node, string adminKey, HttpClient http, CancellationToken cancellationToken)
+    {
         try
         {
             var sdk = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());

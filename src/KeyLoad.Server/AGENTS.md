@@ -1,5 +1,8 @@
 # KeyLoad.Server
 
+## Connection execution, owner decision 2026-10-09
+- The root's latest grain-per-connection decision and ADR-125 supersede earlier separately activated request-grain clauses below. Native Kestrel connection middleware issues the server owner ID; SDK/HTTP/stateless MCP calls reuse it and may execute independent commands/operations concurrently. Bind every fresh operation to signed identity/current authorization, bound admission, and join disconnect/idle/shutdown cleanup before stopping the silo. Never trust caller connection IDs or advertise native SQL session compatibility from this physical transport integration.
+
 ## Purpose and entry points
 - Owns the KeyLoad server process, HTTP API composition and Orleans silo/node configuration.
 - Entry point: `Program.cs`; API routes: `Features/ClientApi/Transport/ApiEndpoints.cs`; Orleans node setup: `Features/ClusterRouting/Hosting/OrleansNode.cs`; configuration: `NodeOptions.cs`.

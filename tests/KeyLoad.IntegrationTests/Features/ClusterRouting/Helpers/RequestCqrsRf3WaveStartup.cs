@@ -15,12 +15,13 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
     RequestCqrsProbeFixture? controls, string? physicalShardOverrideNode,
     Guid? physicalShardOverrideId, RequestCqrsLifecycleEvidence? lifecycleEvidence, QueryExecutionOptions? queryExecution,
+    KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageSelection.Selection? selection,
     CancellationToken cancellationToken) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
     private const string IncompleteNativeAdmission = "The native C1 wave did not admit all three owned instances.";
     private const string IncompletePhysicalShardOverride = "The physical shard override requires both a node and identity.";
-    private readonly string[] args = RequestCqrsRf3WaveArguments.Create(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
+    private readonly string[] args = RequestCqrsRf3WaveArguments.Create(dataRoot, images, configureCohort, snapshotThresholdArgument, controls, selection);
     private DistributedApplication? application;
     private IDistributedApplicationTestingBuilder? testingBuilder;
     private RequestCqrsRf3Diagnostics? diagnostics;
@@ -34,11 +35,12 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
         RequestCqrsProbeFixture? controls = null, string? physicalShardOverrideNode = null,
         Guid? physicalShardOverrideId = null, RequestCqrsLifecycleEvidence? lifecycleEvidence = null,
-        QueryExecutionOptions? queryExecution = null)
+        QueryExecutionOptions? queryExecution = null,
+        KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageSelection.Selection? selection = null)
     {
         return await RequestCqrsRf3StartupExecution.RunAsync(() => new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
             requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
-            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, queryExecution, cancellationToken)).ConfigureAwait(false);
+            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, queryExecution, selection, cancellationToken)).ConfigureAwait(false);
     }
 
     private void ApplyPhysicalShardOverride(IDistributedApplicationTestingBuilder builder)
@@ -91,7 +93,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         builder.Eventing.Subscribe<BeforeResourceStartedEvent>(nativeAdmission.BeforeResourceStartsAsync);
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         var localImageIdentity = await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, selection).ConfigureAwait(false);
         nativeAdmission.ReleaseVerifiedModel();
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.NodeReadiness);

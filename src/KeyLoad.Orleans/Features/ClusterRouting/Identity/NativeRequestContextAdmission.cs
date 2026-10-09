@@ -14,7 +14,7 @@ internal static class NativeRequestContextAdmission
     {
         var options = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         cancellationToken.ThrowIfCancellationRequested();
-        if (state.RequestId == Guid.Empty)
+        if (state.RequestId == Guid.Empty || state.ConnectionId == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

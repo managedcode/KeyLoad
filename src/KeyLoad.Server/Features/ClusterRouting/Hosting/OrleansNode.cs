@@ -26,6 +26,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     private readonly NativeRequestWorkOwner requestWork = new(runtimeOptions.GrainRouting);
     private readonly OrleansNodeRequestExecutor requests = new(runtimeOptions.GrainRouting,
         loggerFactory.CreateLogger<OrleansNode>());
+    private readonly NativeConnectionOwnerIdentity connectionOwner = new();
     private IHost? host;
     private IGrainFactory? grains;
     private Task? shutdown;
@@ -79,9 +80,13 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     /// <param name="requestId">The fresh request identity.</param>
     /// <param name="commandId">The stable command identity, empty for reads.</param>
     /// <param name="cancellationToken">Cancels validation and actual native encoding.</param>
+    /// <param name="connectionId">Actual accepted transport owner, or the registered service owner when absent.</param>
     public GrainRequestIdentityScope OpenRequestContext(PrincipalRecord? principal, Guid requestId, Guid commandId,
-        CancellationToken cancellationToken)
-        => new(RuntimeServices, principal, requestId, commandId, cancellationToken);
+        CancellationToken cancellationToken, Guid? connectionId = null)
+        => new(RuntimeServices, principal, requestId, commandId, cancellationToken,
+            connectionId: connectionId ?? NativeConnectionExecutionIdentity.Resolve(RuntimeServices));
+
+    public Guid InternalConnectionId => connectionOwner.Id;
 
     private IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
         ? running.Services : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
@@ -115,7 +120,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
             runtimeOptions, runtimeClock).ConfigureAwait(false));
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
-        var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
+        var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
             address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, sealedObserver, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
@@ -158,16 +163,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
 
     private Task<GrainOperationReply> ExecuteCoreAsync(Guid requestId, string signedRequest, bool command,
         bool requireCatalogAdmission, CancellationToken cancellationToken)
-    {
-        if (requireCatalogAdmission && !DatabaseReady)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-        var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var catalog = requireCatalogAdmission ? Volatile.Read(ref physicalShardCatalog) : null;
-        if (requireCatalogAdmission && (catalog is null || !catalog.IsReady))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-        return requests.ExecuteAsync(factory, RuntimeServices, catalog, requestId, signedRequest, command,
-            cancellationToken);
-    }
+        => requests.ExecuteAsync(Grains, Volatile.Read(ref host)?.Services,
+            Volatile.Read(ref physicalShardCatalog), DatabaseReady, requireCatalogAdmission,
+            requestId, signedRequest, command, cancellationToken);
 
     /// <summary>Joins native request work before stopping membership, replica lifecycles or physical owners.</summary>
     /// <param name="cancellationToken">Cancellation bounds this caller's wait, without interrupting owned cleanup.</param>
@@ -208,5 +206,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     }
 
     /// <inheritdoc />
-    public ValueTask DisposeAsync() => new(StopAsync(CancellationToken.None));
+    public async ValueTask DisposeAsync()
+    {
+        await StopAsync(CancellationToken.None).ConfigureAwait(false);
+        await requestWork.DisposeAsync().ConfigureAwait(false);
+    }
 }

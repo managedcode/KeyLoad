@@ -10,13 +10,13 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
     internal void SetIdentity(DecodedGrainRequest request)
         => identity = GrainRequestProbeIdentity.From(request.Envelope);
 
-    internal void Settle(IGrainContext? context, Action deactivate)
+    internal void Settle(IGrainContext? context, Action? deactivate = null)
     {
         var observedIdentity = identity;
         identity = null;
         var probeFailure = observedIdentity is { } value
             ? Capture(() => codec.ObserveProducerDisposed(value, context)) : null;
-        var deactivationFailure = Capture(deactivate);
+        var deactivationFailure = deactivate is null ? null : Capture(deactivate);
         ThrowCombined(probeFailure, deactivationFailure);
     }
 

@@ -51,10 +51,36 @@ public sealed class OrleansContractConstructorAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        if (IsNativeException(containingType, context))
+        {
+            return;
+        }
+
         context.ReportDiagnostic(Diagnostic.Create(
             Rule,
             constructor.Identifier.GetLocation(),
             containingType.Name));
+    }
+
+    private static bool IsNativeException(INamedTypeSymbol type, SyntaxNodeAnalysisContext context)
+    {
+        var exceptionType = context.SemanticModel.Compilation.GetTypeByMetadataName(
+            OrleansMetadataNames.SystemException);
+        if (exceptionType is null)
+        {
+            return false;
+        }
+
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            context.CancellationToken.ThrowIfCancellationRequested();
+            if (SymbolEqualityComparer.Default.Equals(current, exceptionType))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool HasGenerateSerializer(INamedTypeSymbol type) =>

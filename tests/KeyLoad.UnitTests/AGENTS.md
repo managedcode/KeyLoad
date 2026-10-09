@@ -53,3 +53,7 @@
 
 ## Native TUnit entry, owner correction 2026-10-07
 - ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.
+
+## Connection execution, owner correction 2026-10-09
+- ADR-125 supersedes the historical unique grain per request/read execution boundary. Use one stable server-owned connection grain identity for multiple separately authenticated and signed operation GUIDs. Test fixtures and native background owners carry their stable connection identity explicitly; clients never choose a trusted connection ID.
+- Native ClusterRouting cases MUST verify actual operation results and committed ZoneTree records, concurrent independent commands on the same activation, principal/context isolation, selected cancellation, bounded admission, joined producer settlement and native management removal after signed close. Native TestCluster results remain development evidence and do not replace Docker/Aspire RF3 or measured GitHub performance qualification.

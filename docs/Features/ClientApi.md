@@ -63,18 +63,18 @@ keeps both native and full SQL qualification false until actual evidence exists.
 
 ## Persistent connection ownership
 
-Owner clarification 2026-10-09 requires one Orleans connection/session grain
-for each accepted persistent logical client connection, separately from each
-short-lived request grain. Current HTTP operations and the official MCP transport
-do not establish that this session layer exists. Native SQL and persistent MCP
-session integration remain implementation targets under
-[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md); request cleanup is owned
-by [ClusterRouting](ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
+Owner decision 2026-10-09 selects one Orleans grain per actual client connection,
+with parallel operations and commands and no separately activated request/read
+grains. [ADR-125](../ADR/ADR-125-connection-owned-execution.md) freezes native
+Kestrel connection identity, typed limits, call isolation and joined teardown.
+Current HTTP and stateless official MCP execution use the physical transport;
+native SQL sessions remain a separate target under
+[ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md).
 
 | Requirement | Measurable acceptance | Automated proof / current state |
 |---|---|---|
-| REQ-CLIENT-CONNECTION-001: an accepted persistent logical connection has one server-authenticated Orleans session identity and bounded disposable state; each operation retains its separate signed request identity and fresh persisted authorization. | AC-CLIENT-CONNECTION-001: real native SQL clients and official MCP clients where persistent sessions apply perform multiple operations through the same connection owner, while concurrent connections and requests have distinct isolated identities. Credential/policy revocation rejects the next operation and preserves stored state; reconnect obtains a fresh connection identity without recovering stale roles, payloads or results. | TASK-CLIENT-CONNECTION / planned ClientApi connection whole-flow tests and Aspire RF3 native-client/official MCP cases. No current implementation or passing evidence is claimed. |
-| REQ-CLIENT-CONNECTION-002: bound connection admission, retained state, in-flight work, disconnect/idle expiry and joined cleanup through validated typed options. | AC-CLIENT-CONNECTION-002: saturation has a fixed typed rejection without unbounded admission or buffers; disconnect/idle expiry cancels and joins original operations, releases session resources and requests native deactivation. Abrupt transport/silo loss, slow consumption and cancellation during cleanup preserve committed-write uncertainty and recover capacity within the frozen observation deadlines; native session activations return to baseline. | Same task and real transport/fault/lifecycle tests; exact numeric limits, protocol state, scheduling and teardown ownership must be frozen before implementation. Source/configuration alone is not acceptance. |
+| REQ-CLIENT-CONNECTION-001: each actual server-owned connection reuses one Orleans execution identity and bounded disposable state; operations retain separate signed identities and fresh persisted authorization, with independent operations and commands able to overlap. | AC-CLIENT-CONNECTION-001: real SDK and official MCP operations reuse the same owner on a persistent transport; native runtime observations prove one activation and no per-operation read/request activation. Hold one command while a differently authorized independent command completes, cancel only the held call, and verify both actual outcomes and stored state. Credential/policy revocation rejects the next operation; reconnect obtains a fresh owner with no stale identity or result. | TASK-CLIENT-CONNECTION / native ConnectionNativeOperationTests, ConnectionNativeFailureTests, ConnectionNativeSettlementTests and private-probe Aspire RF3 ConnectionRf3SequentialTests, ConnectionRf3OverlapTests, ConnectionRf3AuthorizationTests. Local full-solution22:05Z checkpoint passed with0warnings/errors; corrected native8 passed8/failed0/skipped0 and actual SDK/official MCP Aspire Docker RF3 selected5 passed5/failed0/skipped0. Five unique image invocations used the same server input digest; original codec/cleanup-order/startup failures remain retained. ADR-125 records the local evidence and subsequent shared test-dependency build failure; complete Linux gates remain open. Native SQL transport conformance remains separately unqualified. |
+| REQ-CLIENT-CONNECTION-002: bound connection admission, retained state, concurrent work, disconnect/idle expiry and joined cleanup through validated typed options, with no operation wait queue or completed history. | AC-CLIENT-CONNECTION-002: saturation produces a typed rejection and recovers capacity; operation failure, cancellation, deadline and early disposal leave the connection reusable. Actual transport disconnect/idle expiry cancels and joins original operations before native deactivation, observed before ordinary collection; abrupt silo loss retains original receipt/uncertain-write contracts. At most 4096 transports, 8 operations per connection and unchanged 64/128 silo producer/frame caps are enforced by real flows. | Same task and native/RF3 transport, authorization, fault and lifecycle cases under ADR-125. Source/configuration is not acceptance; original Linux performance comparison remains pending. |
 
 ClientApi owns transport/session registration and lifetime; QueryExecution owns
 actual SQL statement/portal/transaction semantics. The connection grain owns no
@@ -86,6 +86,15 @@ routing plus original cancellation/cleanup joins; then qualify the complete
 mapped Linux Aspire RF3 scope. Session routing must not serialize unrelated
 operations accidentally or introduce blanket reentrancy. Rollback is scoped
 source rollback before protocol qualification, with no data migration or fallback.
+
+AC-CLIENT-CONNECTION-002 includes native error propagation: capacity rejection
+and invalid signed-close scope must preserve KeyLoadException Code, StatusCode
+and safe message across the actual RPC. ADR-125 freezes `keyload.error.v1`
+generated serialization with stable Code field0 and StatusCode field1. The
+original first native cohort passed5/failed2; its failing RPC spans confirm a
+missing exception codec, while cleanup masked the primary exception. Retain that
+failure evidence and require the unchanged negative RPC assertions plus a native
+roundtrip before marking the repair qualified.
 
 REQ-CLIENT-010 / AC-CLIENT-010 / AC-DIAG-001..004 add bounded internal RF3
 dispatch evidence under [ADR-036](../ADR/ADR-036-orleans-foundation.md).
@@ -255,7 +264,7 @@ MCP і agent surface required; accepted contracts, exact names and wrappers are 
 ADR-039 and [MCP acceptance](ClientApi.md). Implementation and
 runtime qualification remain pending. SDK bearer/API key не містить trusted roles;
 credentials/authorization — [Authorization](Authorization.md). Every operation має
-окремий Orleans request grain, тоді node-local host виконує операцію;
+connection grain з окремим контекстом операції, тоді node-local host виконує операцію;
 [ADR-020](../ADR/ADR-020-independent-query-contexts.md) не дозволяє per-client
 head-of-line blocking або storage ownership у session facade. Native stateless
 transport does not capture a session principal. The .NET SDK exposes typed BackupAsync in Features/BackupRestore and
@@ -367,7 +376,7 @@ further explicit call may create another archive. `SetDispatchAsync(Guid
 commandId, bool paused, CancellationToken)` requires a nonempty caller-owned ID,
 sends bodyless `POST /v1/admin/dispatch?paused=true|false` with that exact
 `X-KeyLoad-Command-Id`, and returns the canonical boolean. The server's persisted
-administrator authorization, signed operation, separate request grain, replay
+administrator authorization, signed operation on its connection grain, replay
 and conflicting-payload semantics are unchanged; no caller role is accepted.
 
 Ownership is `Client/Features/BackupRestore/Transport/BackupClient.cs` and
@@ -455,12 +464,12 @@ REQ-CLIENT-002 / AC-MP-009 retains the real Kestrel mid-body cancellation and he
 
 ## TASK-KL026-BOUNDED-ROLLUP-001 public boundary
 
-REQ-SERIES-024 / AC-SERIES-024 in [TimeSeries](TimeSeries.md) and [ADR120](../ADR/ADR-120-bounded-persisted-series-rollups.md) add only canonical typed `ReadSampleRollupRequest -> SampleRollupResult` at `/v1/series/rollups/read`, SDK ReadSampleRollupAsync and underlying on-demand `keyload_series_read_rollup` schema/read-only hints. Initial discovery catalog remains bounded under ADR114; grants are checked fresh by the owning request/read cut. RefreshSampleRollup / DropSampleRollup use the existing authorized CommitAsync / keyload_documents_commit Batch mutation schema, native request grain and RF3 acknowledgement path. Authored SampleRollupRf3Tests uses persisted credentials and literal SDK/official-MCP/shared-SQL parity; no native qualification or complete KL026 claim follows from source.
+REQ-SERIES-024 / AC-SERIES-024 in [TimeSeries](TimeSeries.md) and [ADR120](../ADR/ADR-120-bounded-persisted-series-rollups.md) add only canonical typed `ReadSampleRollupRequest -> SampleRollupResult` at `/v1/series/rollups/read`, SDK ReadSampleRollupAsync and underlying on-demand `keyload_series_read_rollup` schema/read-only hints. Initial discovery catalog remains bounded under ADR114; grants are checked fresh by the owning request/read cut. RefreshSampleRollup / DropSampleRollup use the existing authorized CommitAsync / keyload_documents_commit Batch mutation schema, native connection grain and RF3 acknowledgement path. Authored SampleRollupRf3Tests uses persisted credentials and literal SDK/official-MCP/shared-SQL parity; no native qualification or complete KL026 claim follows from source.
 
 
 ## TASK-KL098-TOPIC-RETENTION-001 contract join
 
-[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and SQL CALL keyload_documents_commit use the same typed mutation decoder and fresh authorized request grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. Current raw backup/snapshot includes bounded native identity tombstones inside existing topic-event-id family without a format migration. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionRf3Tests and native TopicRetentionOperationTests bind this join; build/runtime/exact-SHA Linux recovery/RF3 qualification remains pending.
+[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and SQL CALL keyload_documents_commit use the same typed mutation decoder and fresh authorized operation on its connection grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. Current raw backup/snapshot includes bounded native identity tombstones inside existing topic-event-id family without a format migration. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionRf3Tests and native TopicRetentionOperationTests bind this join; build/runtime/exact-SHA Linux recovery/RF3 qualification remains pending.
 
 
 ### TASK-DIAG-NATIVE-EVENTSOURCE-004 (authored)

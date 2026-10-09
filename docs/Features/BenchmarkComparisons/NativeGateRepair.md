@@ -67,3 +67,43 @@ current cohort.
 The external job artifacts and sealed originals remain the source of truth for
 these records. Do not rewrite their bytes or treat their historical plan labels as
 current acceptance criteria.
+
+
+## Connection-execution comparison preparation, 2026-10-09
+
+Original old-runtime source `6af5938696c1af61051040bd2d515bc140d773a4`,
+Benchmarks run37986409035 attempt2, failed before any measurement. Authenticated
+native document archive11645560990 contains22 cases,11 failed SurrealDB cases;
+its full readback case reports `SurrealDbServerVersionMismatch`. The raw native
+version response was not retained. Contract archive11645251789 contains1305
+cases,1304 passed and one failed: the negative TimeSeries CellId fixture supplied
+its actual three-node cell instead of a different cell. No numeric result or
+aggregate qualifies that source.
+
+Checkpoint `f1d1b0905bd41035b1d0634eb44bc8a9866a1be3` repairs only the exact
+pinned SurrealDB version oracle and that negative fixture, with an independent
+bounded actual HTTP version assertion in the unchanged native readback flow.
+The immutable old RequestGrain source is byte-identical; canonical workloads,
+image pins, inventories, topology, resource/durability and main-only provenance
+are unchanged. Full original Benchmarks run37990964853 attempt1 is the prepared
+BEFORE cohort; all performance qualification remains pending.
+
+Attempt1 image job114025123180 failed before native version/workload execution
+while pulling the pinned `registry:3.1.2` image: Docker Hub returned its
+unauthenticated pull-rate limit. Normal benchmark contracts passed; scalar
+contracts failed and require their original bounded failure evidence before any
+diagnosis. No performance cell ran. One complete same-source retry, attempt2,
+started at21:41:22Z on fresh Linux jobs. This infrastructure retry does not
+relable either original failure as success or provide a measurement.
+
+The expected `surrealdb-3.2.4+20260803.93ab219` reply is derived from the
+[immutable native version handler](https://github.com/surrealdb/surrealdb/blob/93ab219d69f09d8f999851b0359c80ebe6726102/surrealdb/server/src/ntw/version.rs),
+[package version construction](https://github.com/surrealdb/surrealdb/blob/93ab219d69f09d8f999851b0359c80ebe6726102/surrealdb/server/src/cnf/mod.rs)
+and SHA-verified Linux-amd64 image binary metadata. Selected OCI index is
+`sha256:51baed8709f57f67dcf04b30e3177db846803fa9342dae2be58c6fa5f8d59843`;
+embedded binary SHA256 is `8f0471ee2018384e2aaeb4028d5fea670f28bf86a2df3d9b04da00364ea7aff8`.
+This is source/artifact inference until the original GitHub actual HTTP assertion
+passes; the missing old raw body is not reconstructed as runtime evidence.
+Strict exact equality and rejection remain; no alternate-version acceptance or
+compatibility fallback is introduced. Current native operations and whole
+cohort are still required before claiming the repair qualified.

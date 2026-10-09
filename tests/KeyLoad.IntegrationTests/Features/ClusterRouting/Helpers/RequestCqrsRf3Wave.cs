@@ -65,9 +65,11 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     internal static Task<RequestCqrsRf3Wave> StartProbedAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, RequestCqrsProbeFixture controls,
         CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null,
-        QueryExecutionOptions? queryExecution = null)
+        QueryExecutionOptions? queryExecution = null,
+        KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageSelection.Selection? selection = null)
         => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort: false, requireHealthy: true,
-            null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle, queryExecution: queryExecution);
+            null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle, queryExecution: queryExecution,
+            selection: selection);
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
         ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,

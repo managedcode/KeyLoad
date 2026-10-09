@@ -1,4 +1,3 @@
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -36,18 +35,7 @@ internal sealed partial class OrleansNode
         {
             await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
         }
-        try
-        {
-            await requestWork.DisposeAsync().ConfigureAwait(false);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
+        await ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

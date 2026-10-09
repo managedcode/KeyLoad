@@ -8,7 +8,6 @@ using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using ManagedCode.Communication.Orleans.Converters;
-using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
@@ -19,7 +18,7 @@ namespace KeyLoad.Server;
 internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
-        ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
+        ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, NativeConnectionOwnerIdentity connectionOwner, IPAddress address,
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
         IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries,
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
@@ -27,6 +26,7 @@ internal static class OrleansSiloConfiguration
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
+        builder.Services.AddSingleton(connectionOwner);
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
         if (options.MembershipAuthority.RemoteDocumentReads)
@@ -201,17 +201,7 @@ internal static class OrleansSiloConfiguration
 #pragma warning disable ORLEANSEXP001
         silo.AddActivationRepartitioner();
 #pragma warning restore ORLEANSEXP001
-        silo.AddOrleansGraph(configureGraph: graph => graph.AllowClientCallGrain<IRequestGrain>()
-            .AddGrainServiceTransition<RecurringDueGrainService, IRecurringDueCoordinatorGrain>(
-                nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
-            .AddGrainTransition<IRecurringDueCoordinatorGrain, IRequestGrain>()
-            .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-            .AddGrainTransition<IRequestGrain, IRequestGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-            .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
-            .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
-            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And());
+        ConnectionGrainGraphRegistration.Register(silo, options.RequestCqrsProbe.Enabled);
         NativeRuntimeJournalRegistration.Register(silo, journal, jobs);
     }
 }

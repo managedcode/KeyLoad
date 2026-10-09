@@ -17,6 +17,7 @@ internal static class LocalRf3ImageSelection
     private const string Rf3SuiteArgument = "--KeyLoadTests:Suite=rf3";
     private const string RejectionFilterArgument = "--KeyLoadTests:Filter=/*/*/RelationalSqlRf3JoinRejectionTests/*";
     private const string MembershipFilterArgument = "--KeyLoadTests:Filter=/*/*/TwoRf3MembershipProfileTests/*";
+    private const string ConnectionFilterArgument = "--KeyLoadTests:Filter=/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*";
     private const string StandardFilterArgument = "--KeyLoadTests:Filter=/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
@@ -61,7 +62,7 @@ internal static class LocalRf3ImageSelection
             throw new InvalidOperationException("The local RF3 image selection is invalid.");
         }
         var arguments = JsonSerializer.Deserialize<string[]>(value);
-        if (arguments is not [Rf3SuiteArgument, MembershipFilterArgument or StandardFilterArgument or RejectionFilterArgument, EnabledArgument]
+        if (arguments is not [Rf3SuiteArgument, MembershipFilterArgument or StandardFilterArgument or RejectionFilterArgument or ConnectionFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

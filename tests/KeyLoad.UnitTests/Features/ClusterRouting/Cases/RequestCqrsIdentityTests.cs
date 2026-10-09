@@ -21,7 +21,7 @@ internal static class RequestCqrsIdentityCases
         var subject = new string(TwoByteSubjectCharacter[0], SubjectCharacters);
         PersistPrincipal(fixture, subject);
         var requestId = Guid.NewGuid();
-        var state = new GrainRequestContextState(requestId, Guid.Empty);
+        var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
         var principal = GrainIdentityContext.CreatePrincipal(subject);
         var clientPrincipalSerializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<ClaimsPrincipal>>();
         var clientStateSerializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<GrainRequestContextState>>();
@@ -66,7 +66,7 @@ internal static class RequestCqrsIdentityCases
     internal static async Task AcCrs006AbsentPrincipalIsAcceptedOnlyForSignedAuthentication(RequestCqrsClusterFixture fixture)
     {
         var requestId = Guid.NewGuid();
-        var state = new GrainRequestContextState(requestId, Guid.Empty);
+        var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
         var token = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
             NativeSerialization.Serialize(0));
         using var context = RequestCqrsClientContext.Set(null, false, state);
@@ -83,7 +83,7 @@ internal static class RequestCqrsIdentityCases
             NativeSerialization.Serialize(0));
         var priorCalls = await ProbeGrain(fixture, requestId).CapabilityCallsAsync();
         using var context = RequestCqrsClientContext.Set(null, false,
-            new GrainRequestContextState(requestId, Guid.Empty), presentNullPrincipal: true);
+            new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId), presentNullPrincipal: true);
         var result = await Probe(fixture, requestId, token);
         await Assert.That(result.Accepted).IsFalse();
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Unauthenticated);
@@ -95,7 +95,7 @@ internal static class RequestCqrsIdentityCases
         var requestId = Guid.NewGuid();
         var subject = "native-context-subject-" + Guid.NewGuid().ToString("N");
         PersistPrincipal(fixture, subject);
-        var state = StateFor(invalid, requestId);
+        var state = StateFor(invalid, requestId, fixture.ConnectionId);
         var principal = PrincipalFor(invalid, subject);
         var priorCalls = await ProbeGrain(fixture, requestId).CapabilityCallsAsync();
         var token = SignedRead(fixture, requestId, subject);
@@ -113,7 +113,7 @@ internal static class RequestCqrsIdentityCases
         var subject = "native-signed-subject-" + Guid.NewGuid().ToString("N");
         PersistPrincipal(fixture, subject);
         var wrongId = Guid.NewGuid();
-        var state = new GrainRequestContextState(requestId, Guid.Empty);
+        var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
         var principal = GrainIdentityContext.CreatePrincipal(subject);
         var priorCalls = await ProbeGrain(fixture, requestId).CapabilityCallsAsync();
         var signedForOtherActor = SignedRead(fixture, wrongId, subject);
@@ -129,7 +129,7 @@ internal static class RequestCqrsIdentityCases
         var authenticate = fixture.Codec.CreateRead(authenticateId, null, GrainReadKind.Authenticate,
             NativeSerialization.Serialize(0));
         using var forged = RequestCqrsClientContext.Set(principal, true,
-            new GrainRequestContextState(authenticateId, Guid.Empty));
+            new GrainRequestContextState(authenticateId, Guid.Empty, fixture.ConnectionId));
         var rejected = await Probe(fixture, authenticateId, authenticate);
         await Assert.That(rejected.Accepted).IsFalse();
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Unauthenticated);
@@ -152,13 +152,13 @@ internal static class RequestCqrsIdentityCases
     private static Task<RequestCqrsProbeResult> Probe(RequestCqrsClusterFixture fixture, Guid requestId, string token)
         => ProbeGrain(fixture, requestId).ValidateAsync(token, requestId);
 
-    private static GrainRequestContextState? StateFor(RequestCqrsInvalidContext invalid, Guid requestId)
+    private static GrainRequestContextState? StateFor(RequestCqrsInvalidContext invalid, Guid requestId, Guid connectionId)
         => invalid switch
         {
-            RequestCqrsInvalidContext.MismatchedRequest => new(Guid.NewGuid(), Guid.Empty),
-            RequestCqrsInvalidContext.MismatchedCommand => new(requestId, Guid.NewGuid()),
+            RequestCqrsInvalidContext.MismatchedRequest => new(Guid.NewGuid(), Guid.Empty, connectionId),
+            RequestCqrsInvalidContext.MismatchedCommand => new(requestId, Guid.NewGuid(), connectionId),
             RequestCqrsInvalidContext.MissingState => null,
-            _ => new(requestId, Guid.Empty)
+            _ => new(requestId, Guid.Empty, connectionId)
         };
 
     private static ClaimsPrincipal? PrincipalFor(RequestCqrsInvalidContext invalid, string subject)

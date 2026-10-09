@@ -17,6 +17,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private readonly RequestCqrsProbeHeldCallback hold;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
+    private readonly Lazy<ConnectionProbeCapture> connections;
 
     internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
@@ -29,6 +30,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         lifecycle = new(executionOptions);
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
         receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
+        connections = new(() => new ConnectionProbeCapture(files, executionOptions));
     }
 
     internal RequestCqrsProbeMigration CreateMigration(ReplicaSiloDiscoveryClient discovery)
@@ -112,6 +114,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
             var marker = CreateMarker(claim, selectedPhase, outcome);
             files.WriteMarker(marker);
             RequestCqrsProbeActivationCapture.Observe(files, marker, context);
+            if (gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)
+            { await connections.Value.ObserveAsync(marker, context, requestCancellation).ConfigureAwait(true); }
             if (!gate)
             { ThrowOrdinary(); }
             await HoldAsync(claim, selectedPhase, context, requestCancellation).ConfigureAwait(true);
@@ -136,7 +140,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
             { throw Invalid(); }
             return existing;
         }
-        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot, replica.LocalId);
+        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot, replica.LocalId, phase);
         if (selected is null)
         { return null; }
         // Retain the first validated request identity so the later disposal callback can join across voters.
@@ -172,6 +176,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(stopping.Cancel, failures);
         await ServerFailureObserver.ObserveAsync(() => join, failures).ConfigureAwait(false);
+        if (connections.IsValueCreated)
+        { await ServerFailureObserver.ObserveAsync(() => connections.Value.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         try
         {
             stopping.Dispose();

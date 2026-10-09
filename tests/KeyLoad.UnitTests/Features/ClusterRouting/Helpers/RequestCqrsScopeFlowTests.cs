@@ -51,18 +51,18 @@ internal static class RequestCqrsScopeFlowCases
         {
             var producerSawScope = false;
             using (new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-                requestId, commandId, CancellationToken.None))
+                requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId))
             {
                 var reply = await GrainRequestStreamConsumer.DrainAsync(
                     token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                         writer => CompleteWhileScopedAsync(writer, requestId, commandId, principal.Id,
-                            () => producerSawScope = true), token),
+                            () => producerSawScope = true, fixture.ConnectionId), token),
                     fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<
                         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
                 await Assert.That(reply.Payload.IsEmpty).IsFalse();
                 await Assert.That(producerSawScope).IsTrue();
-                await AssertPublishedContextAsync(requestId, commandId, principal.Id);
+                await AssertPublishedContextAsync(requestId, commandId, principal.Id, fixture.ConnectionId);
             }
 
             await userSlot.AssertOriginalAsync();
@@ -91,7 +91,7 @@ internal static class RequestCqrsScopeFlowCases
         try
         {
             using var scope = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
-                requestId, commandId, CancellationToken.None);
+                requestId, commandId, CancellationToken.None, connectionId: fixture.ConnectionId);
             arrive();
             await bothReady.Task;
             var token = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureResource, commandId,
@@ -113,27 +113,27 @@ internal static class RequestCqrsScopeFlowCases
 
     private static async ValueTask<Result<GrainOperationReply>> CompleteWhileScopedAsync(
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid requestId, Guid commandId,
-        string subject, Action producerCompleted)
+        string subject, Action producerCompleted, Guid connectionId)
     {
-        await AssertPublishedContextAsync(requestId, commandId, subject);
+        await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
         await writer.StartedAsync(new GrainRequestProgress(requestId));
         try
         {
-            await AssertPublishedContextAsync(requestId, commandId, subject);
+            await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
         }
         finally
         {
-            await AssertPublishedContextAsync(requestId, commandId, subject);
+            await AssertPublishedContextAsync(requestId, commandId, subject, connectionId);
             producerCompleted();
         }
     }
 
-    private static async Task AssertPublishedContextAsync(Guid requestId, Guid commandId, string subject)
+    private static async Task AssertPublishedContextAsync(Guid requestId, Guid commandId, string subject, Guid connectionId)
     {
         var principal = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) as ClaimsPrincipal;
         await Assert.That(principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value).IsEqualTo(subject);
         await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
-            .IsEqualTo(new GrainRequestContextState(requestId, commandId));
+            .IsEqualTo(new GrainRequestContextState(requestId, commandId, connectionId));
     }
 }

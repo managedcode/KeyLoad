@@ -2,7 +2,7 @@
 
 KeyLoad — одна composable база для AI agents: документи, таблиці, графи,
 пошук, time series, blobs, черги та події поєднуються через авторизовані SQL,
-SDK і MCP операції. Orleans виконує кожен запит через окремий request grain;
+SDK і MCP операції. Orleans використовує один grain на connection з паралельними ізольованими операціями;
 node-local PartitionHost володіє ZoneTree, журналами та ordered apply gate.
 Початкова production topology — RF3, orchestration і тести належать Aspire.
 
@@ -157,3 +157,4 @@ flowchart LR
 | [ADR-119: TUnit-owned local membership image](ADR-119-tunit-owned-local-membership-image.md) | Accepted |
 
 | [ADR-122: Native comparable benchmark methodology](ADR-122-native-benchmark-methodology.md) | Accepted |
+| [ADR-125: Connection-owned parallel execution](ADR-125-connection-owned-execution.md) | Accepted |

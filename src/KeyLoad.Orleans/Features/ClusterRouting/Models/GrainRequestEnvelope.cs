@@ -6,7 +6,7 @@ public sealed record GrainRequestEnvelope
 {
     /// <summary>Versioned purpose preventing cross-protocol token reuse.</summary>
     [global::Orleans.Id(GrainNativeContracts.PurposeField)] public required string Purpose { get; init; }
-    /// <summary>Unique request actor key; retries retain the command ID but receive a fresh request ID.</summary>
+    /// <summary>Unique operation identity; retries retain the command ID but receive a fresh request ID.</summary>
     [global::Orleans.Id(GrainNativeContracts.RequestIdField)] public required Guid RequestId { get; init; }
     /// <summary>Database incarnation rejecting tokens from another installation.</summary>
     [global::Orleans.Id(GrainNativeContracts.IncarnationField)] public required Guid Incarnation { get; init; }

@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Supplies the closed context for direct real-database leaf tests, without replacing persisted authorization.</summary>
 internal static class SignedGrainRequestTestContext
 {
+    private static readonly Guid ExecutionOwnerId = Guid.NewGuid();
     internal static async Task<GrainOperationReply> ExecuteAsync(GrainCommandExecutor executor,
         DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
     {
@@ -25,7 +26,7 @@ internal static class SignedGrainRequestTestContext
             {
                 RequestContext.Remove(principalKey);
             }
-            RequestContext.Set(stateKey, new GrainRequestContextState(request.Envelope.RequestId, request.Envelope.CommandId));
+            RequestContext.Set(stateKey, new GrainRequestContextState(request.Envelope.RequestId, request.Envelope.CommandId, ExecutionOwnerId));
             return await executor.ExecuteAsync(request, actorKey, cancellationToken);
         }
         finally
