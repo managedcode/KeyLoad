@@ -190,5 +190,8 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             : marker.Outcome == RequestCqrsProbeOutcome.FaultRequested;
     }
 
+    internal RequestCqrsProbeCleanupInventory CreateCleanupInventory()
+        => new(knownArms, retiredArms, observedControls, executionOptions, json);
+
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);
 }

@@ -35,4 +35,6 @@ internal sealed class FollowerDocumentRf3State(FollowerDocumentCaller mode, Foll
     internal PrincipalRecord Principal { get; set; } = null!;
     internal ApiKeyRecord Credential { get; set; } = null!;
     internal ReadFollowerDocumentRequestV1 Request { get; set; } = null!;
+    internal CommandRequest ChangedCommand { get; set; } = null!;
+    internal CommitReceipt ChangedReceipt { get; set; } = null!;
 }

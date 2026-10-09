@@ -1800,3 +1800,31 @@ Source-only status: the above reviewed exact owner implementation and complete R
 
 
 Exact refused-length qualification remains OPEN: the actual failed StoredOutcome encoded-Advance detail proves serializer capacity refusal, while actual successful WAL payload F is inspected separately. It does not itself retain the attempted rejected prefix/full candidate length. Restored legal F alone must not be counted as proof that the denied candidate was exactly F. A separately reviewed owning observation of actual Advance bytes is required; no numeric public detail, synthetic serialization, tolerance or inferred +1 credit is introduced in this source checkpoint.
+
+
+## TASK-KL036-ACTIVE-ADJUNCT-CLAIMED-CLEANUP-001 — source-only original producer cleanup
+
+REQ-MOVE-ACTIVE-ADJUNCT-CLEANUP-001 requires the exact genuinely admitted producer to dispose its own immutable claim even when a newly introduced invalid UNCLAIMED adjunct makes ordinary global admission fail. AC-MOVE-ACTIVE-ADJUNCT-CLEANUP-001 maps to `PartitionMovementActiveAdjunctRf3Tests.ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes(bool duplicate)`, with actual arguments false/true. ADR106 owns the trust/lifecycle contract; StorageRecovery ownership, original RF3 and all mandatory suites remain unchanged.
+
+`RequestCqrsProbeClaimedCleanup` is ProducerDisposed-only, under the original lock and centrally validated file/record/arm/aggregate/mode/flush budgets. It verifies owner bytes, original own claim bytes, every present known arm and all previously registered immutable controls. Unfamiliar structurally bounded UNCLAIMED arms count toward quotas but are not decoded, registered, claimed or executed. Unknown markers/releases, own/known mutation, lost immutable controls and duplicate disposal fail closed. Ordinary strict snapshot/admission, ca784 wrapped adjunct handling, native operation authority and callback tokens remain unchanged. The original primary and each cleanup failure remain visible.
+
+A genuine hold can fail from strict InvalidFiles BEFORE cancellation, so the test never fabricates Cancelled or Released. Actual ProducerDisposed after the original SDK task settles establishes a distinct fixture `DisposedGateJoined` cleanup fact; ordinary `Settled`, release/cancellation and WaitForSettlement meanings remain unchanged. It joins only the original observed gate once and permits original-owned retirement/resource cleanup. All native owners/readers must still settle and original18 locks release before cold scans or deletion.
+
+Both real Aspire cases retain the failed ingress, require the genuine disposal marker with the same request/command/voter, deny any faulty-arm marker/claim and any fabricated settlement. Exact private faulty arm removal precedes fresh normal admission. Complete stopped transferred-family bytes remain identical except explicitly separate actual outcome/proof/control metadata. The original unknown StagePage stays charged with its immutable first body/grant/nonce/expiry, absent native effect result and original actual receiver issuance. Cold Resume observes the real issuance only and remains RecoveryRequired; genuine same-Move Abort retains its actual disposition, then the existing fresh-Move SDK/MCP/Q1 full-model/original-receipt/cold replay completes. No unknown redispatch, grant renewal, new lifetime, fake outcome or storage reset.
+
+```mermaid
+flowchart LR
+  A[Actual Issue ACK hold] --> B[Unclaimed wrong or duplicate adjunct]
+  B --> C[Original strict ingress failure]
+  C --> D[Actual original ProducerDisposed]
+  D --> E[Distinct disposed gate join and exact control removal]
+  E --> F[Cold charged Resume observation only]
+  F --> G[Genuine Abort and fresh healthy SDK MCP Q1]
+```
+
+This is authored source only. Build, native discovery, Linux normal/scalar RF3 and original artifacts are OPEN. Dedicated own-arm mutation/unknown marker-release lifecycle negative matrix remains OPEN; the two active negative operation cases do not claim that matrix or exact native final-frame +1, future embedded SafeDetail bound, endurance or production readiness.
+
+
+R3 source correction for AC-MOVE-PARENT-CLAIMED-DISPOSAL-001: every admitted known NON-retired arm must be present as its exact original bytes in the purpose cleanup snapshot, not only the disposing arm and observed controls. The known-arm set is checked after all actual present records have passed exact byte verification and before any marker publication. Legitimately already-retired absence remains allowed; unfamiliar unclaimed arms remain quota-only and unadmitted. ValidateEntry remains private and is borrowed as the original owner delegate.
+
+Dedicated removal negative matrix remains OPEN: actual owner removal and OTHER known non-retired arm removal must reject disposal before publication; exact original repair must precede genuine original disposal and whole no-effect/healthy/cold continuation. Existing two active malformed-adjunct cases do not cover this matrix. No source/runtime acceptance credit is assigned until the genuine producer/cleanup refusal boundary and complete automated flow are implemented and qualified.

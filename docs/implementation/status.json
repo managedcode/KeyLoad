@@ -210,7 +210,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "stage40_whole_036_029_028_native_source_joined_context_compile_failure_repaired_fresh_linux_build_discovery_and_acceptance_pending",
+    "verificationStage": "stage41_whole_030_036_021_001_native_source_joined_nesting_build_failure_repaired_fresh_linux_build_discovery_and_acceptance_pending",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -41167,6 +41167,92 @@
         "KL-030"
       ],
       "privateAdditionalWholeSource": "KL-042 immutable104+7 packets retain exact RestoreRestore prerequisite; not live joined"
+    },
+    "stageXLDeliveredCommit": "a73cbc00432b05cce1540f23912a7665c8c04bf4",
+    "stageXLDeliveredRemoteVerified": true,
+    "stageXLIOriginalDevelopment": {
+      "sourceBase": "a73cbc00432b05cce1540f23912a7665c8c04bf4",
+      "sourceJoinReceipts": [
+        {
+          "task": "KL-030",
+          "receipt": "/private/tmp/keyload-r900-kl030-managed-provider-whole-source-joined-20261009.json",
+          "sha256": "926b64e345f9e1c54a8a6e08098557a413347e44ef480d794ccb91ef4d2595a5",
+          "paths": 6,
+          "kind": "guarded source only"
+        },
+        {
+          "task": "KL-036",
+          "receipt": "/private/tmp/keyload-r901-kl036-claimed-producer-disposal-source-joined-20261009.json",
+          "sha256": "51ff8c350edaea6ddab7e870416bd185f1dd5a4bfa99374d7aa6da4ac9655183",
+          "paths": 18,
+          "kind": "guarded source only"
+        },
+        {
+          "task": "KL-021",
+          "receipt": "/private/tmp/keyload-r902-kl021-native-cold-replay-source-joined-20261009.json",
+          "sha256": "0a95abf991795bbccb9426078cca0572210604a7e0b3d84d52cfd3d4f7840b2d",
+          "paths": 7,
+          "kind": "guarded source only"
+        },
+        {
+          "task": "KL-001",
+          "receipt": "/private/tmp/keyload-r903-kl001-platform-whole-source-joined-20261009.json",
+          "sha256": "8fab0b91e77664d3d2720d06014b36f6527da230f76903aebecf4b5b1930b9e4",
+          "paths": 3,
+          "kind": "guarded source only"
+        }
+      ],
+      "rootRepairReceipt": "/private/tmp/keyload-root-stage41-native-owner-and-ann-delta-source-20261009.json",
+      "rootRepairReceiptSha256": "b00304c7e8f60c7f6c526cf4d1f5e153731d5599fef2fe556add15cd4c5f9fab",
+      "priorOriginalLinux": {
+        "run": 37939456309,
+        "attempt": 1,
+        "job": 113849874864,
+        "log": "/private/tmp/keyload-original-a73cbc00-full-build-job-v1.log",
+        "sha256": "cb80c6c26d9d0b01738953a166b87ed356348ec49996a40d44637649adf429b6",
+        "uniqueDiagnostic": "KLD0033 RequestCqrsProbeFiles.ReadSnapshotLocked nesting4 maximum3"
+      },
+      "qualification": "authored complete native operation continuations; actual fresh compilation, native UID/image/report and normal/scalar acceptance remain pending",
+      "actualOriginal104Tasks": {
+        "done": 17,
+        "in_progress": 87,
+        "pending": 0
+      },
+      "nativeOrdinaryParallelism": 50,
+      "heavyRf3Parallelism": 1,
+      "actual50OverlapQualified": false,
+      "parallelWorkerModel": "gpt-6.1-sol",
+      "parallelWorkerReasoning": "medium",
+      "fiveDistinctWholeTaskWorkersAssignedAcrossWaves": true,
+      "actualWorkerConcurrencyCeiling": 3,
+      "wholeTaskOpenGates": {
+        "KL-030": [
+          "fresh actual managed native deletion/reinsertion/rebuild/save/load and normal/scalar task outcomes",
+          "required recovery/RF3/resource/recall measurements"
+        ],
+        "KL-036": [
+          "actual rejected final-frame prefix exactly cap+1 through all three target owners",
+          "dedicated claimed/foreign known-arm/marker-release cleanup refusal matrix",
+          "current complete normal/scalar RF3 and original cleanup/image evidence"
+        ],
+        "KL-021": [
+          "actual current SDK and official MCP initialization and operation cause evidence",
+          "complete current-source follower/session/strong/token/refusal/replay/cold normal and scalar caller cases"
+        ],
+        "KL-001": [
+          "clean private NuGet.org restore/archive/source/license/native closure",
+          "current enabled full solution build and actual scalar/package license artifacts"
+        ],
+        "KL-042": [
+          "guarded review/join of whole native restore packets",
+          "actual native CLI stable-operation interruption/resume and six-owner original qualification"
+        ]
+      },
+      "unchangedProductGates": [
+        "all required unit/process recovery/real Docker Aspire RF3 suites",
+        "coverage excluding load tests",
+        "performance/fault/endurance/power-loss gates"
+      ]
     }
   },
   "TIME-PROVIDER-001": {

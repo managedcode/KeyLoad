@@ -133,13 +133,12 @@ internal sealed class RequestCqrsProbeFiles
             if (aggregateBytes > executionOptions.Value.MaximumAggregateBytes)
             { throw Invalid(); }
             if (RequestCqrsProbeMigrationValidation.IsName(name))
-            { Migration.Read(path, name, migration, presentControls); }
-            else if (RequestCqrsProbeLiveValidation.IsName(name))
-            { Live.Read(path, name, live, presentControls); }
-            else if (RequestCqrsProbeActivationValidation.IsName(name))
-            { activations.Read(path, name, witnesses, presentControls); }
-            else
-            { records.ReadControl(path, name, arms, releases, markers, presentControls); }
+            { Migration.Read(path, name, migration, presentControls); continue; }
+            if (RequestCqrsProbeLiveValidation.IsName(name))
+            { Live.Read(path, name, live, presentControls); continue; }
+            if (RequestCqrsProbeActivationValidation.IsName(name))
+            { activations.Read(path, name, witnesses, presentControls); continue; }
+            records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
         RequestCqrsProbeActivationInventory.RequireMarkers(witnesses, markers);
         RequestCqrsProbeMigrationFiles.RequireInventory(migration, witnesses, markers);
@@ -164,6 +163,9 @@ internal sealed class RequestCqrsProbeFiles
 
     private void WriteAtomic(string destination, byte[] bytes)
         => RequestCqrsProbeAtomicFiles.Write(root, destination, bytes, executionOptions, ReadSnapshotLocked);
+
+    internal void WriteClaimedProducerDisposed(RequestCqrsProbeMarkerRecord marker, RequestCqrsProbeLoadedArm claim)
+        => new RequestCqrsProbeClaimedCleanup(root, ownerBytes, executionOptions, json, records, sync, ValidateEntry).Write(marker, claim);
 
     internal static byte[] ReadRecord(string path, IOptions<RequestProbeExecutionOptions> executionOptions)
         => RequestCqrsProbeFileReader.Read(path, executionOptions);

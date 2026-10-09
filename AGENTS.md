@@ -171,6 +171,8 @@ Rule format:
 - Existing rules MUST remain present and mandatory; change or remove a rule only under explicit rule-specific owner direction, never as framework cleanup.
 
 ## Global Skills
+- Owner direction 2026-10-09 authorizes installing and using [Roslynk](https://github.com/mrpmorris/Roslynk) in this checkout for live semantic navigation, compiler/analyzer diagnostics and reviewed fixes. Pin its published tool version in the repository, configure project-scoped MCP access, and fix confirmed findings without weakening existing diagnostics. Roslynk supplements the canonical formatter, Release solution build, native TUnit/Aspire suites and exact-source Linux qualification; its workspace diagnostics MUST NOT replace those gates. This scoped tool/configuration authorization supersedes historical bootstrap tool-installation restrictions for Roslynk only and does not authorize installing upstream skills or changing global agent configuration.
+
 The owner's 2026-10-06 approval to implement the reviewed native DurableJobs path also authorizes its matching native Journaling API (`ORLEANSEXP005`). Confine that opt-in to the journal provider, native jobs integration and their registration/tests under ADR-110; do not use a global NoWarn or suppress unrelated diagnostics. Journal metadata remains RF3-authoritative and distinct from creator-authorized business effects.
 
 The explicit owner instruction to enable Orleans distributed directory and activation repartitioning is consent to those two native experimental APIs. Confine compiler opt-in ORLEANSEXP003/ORLEANSEXP001 to their two configuration calls, with ADR-034 evidence; it does not authorize global NoWarn, suppression of quality diagnostics or changing analyzer severity.

@@ -57,8 +57,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() =>
             {
-                files.RequireClaimArmActiveOrRetired(claim.Arm);
-                files.WriteMarker(CreateMarker(claim, RequestCqrsProbePhase.ProducerDisposed,
+                files.WriteClaimedProducerDisposed(CreateMarker(claim, RequestCqrsProbePhase.ProducerDisposed,
                     RequestCqrsProbeOutcome.Observed), claim.Arm);
             }, failures);
             ServerFailureObserver.Observe(() => receiverIssueAdjunct.ProducerDisposed(claim), failures);

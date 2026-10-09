@@ -48,14 +48,27 @@ internal sealed class FollowerDocumentRf3QuorumFlow(FollowerDocumentRf3State sta
         }
         if (indexOfFollower < 0)
         { throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner); }
-        await VerifyResumedOwnersAsync(RequestCqrsRf3Protocol.NodeName(indexOfFollower), follower, token).ConfigureAwait(false);
+        var node = RequestCqrsRf3Protocol.NodeName(indexOfFollower);
+        var beforeCold = await VerifyResumedOwnersAsync(node, follower, token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.KillingRestoredFollower;
+        await state.Wave!.KillAsync(node, token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.RestartingRestoredFollower;
+        await state.Wave.RestartAsync(node, token).ConfigureAwait(false);
+        state.Stage = FollowerDocumentRf3FailureStage.ReadingRestoredDiscovery;
+        var coldDiscovery = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(state.Wave.App, node,
+            state.Profile, token).ConfigureAwait(false);
+        await Assert.That(coldDiscovery.VoterId).IsEqualTo(follower);
+        state.Stage = FollowerDocumentRf3FailureStage.VerifyingColdFollower;
+        await VerifyResumedOwnersAsync(node, follower, token, beforeCold).ConfigureAwait(false);
     }
 
-    private async Task VerifyResumedOwnersAsync(string node, string follower, CancellationToken token)
+    private async Task<NodeStatus> VerifyResumedOwnersAsync(string node, string follower, CancellationToken token,
+        NodeStatus? beforeCold = null)
     {
         RequestCqrsRf3Callers? resumedAdmin = null;
         RequestCqrsRf3Callers? resumedCaller = null;
         var resumeFailures = new List<Exception>();
+        NodeStatus? resumedStatus = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             try
@@ -64,6 +77,17 @@ internal sealed class FollowerDocumentRf3QuorumFlow(FollowerDocumentRf3State sta
                 resumedAdmin = await RequestCqrsRf3Callers.ConnectAsync(state.Wave!.App, node, state.Profile.AdminKey, token).ConfigureAwait(false);
                 state.Stage = FollowerDocumentRf3FailureStage.ConnectingRestoredCaller;
                 resumedCaller = await RequestCqrsRf3Callers.ConnectAsync(state.Wave.App, node, state.Identity.Secret, token).ConfigureAwait(false);
+                state.Stage = FollowerDocumentRf3FailureStage.ReadingRestoredStatus;
+                resumedStatus = await McpCallerAssertions.SdkSuccessAsync(
+                    await resumedAdmin.Sdk.StatusAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
+                await FollowerDocumentRf3Assertions.FollowerStatusAsync(resumedStatus, follower);
+                if (beforeCold is not null)
+                {
+                    await Assert.That(resumedStatus.NodeId).IsEqualTo(beforeCold.NodeId);
+                    await Assert.That(resumedStatus.Incarnation).IsEqualTo(beforeCold.Incarnation);
+                    await Assert.That(resumedStatus.ReadGeneration).IsGreaterThanOrEqualTo(beforeCold.ReadGeneration);
+                    await Assert.That(resumedStatus.Applied).IsGreaterThanOrEqualTo(beforeCold.Applied);
+                }
                 state.Stage = FollowerDocumentRf3FailureStage.VerifyingRestoredHealthy;
                 await new FollowerDocumentRf3Continuation(state).VerifyHealthyAsync(resumedAdmin.Sdk, resumedCaller, follower, token).ConfigureAwait(false);
             }
@@ -76,5 +100,6 @@ internal sealed class FollowerDocumentRf3QuorumFlow(FollowerDocumentRf3State sta
         await RequestCqrsPhaseFaultCleanup.RunAsync(string.Empty, false, null, null, false,
             resumedCaller, resumedAdmin, null, null, null, null, null, Guid.Empty, resumeFailures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(resumeFailures);
+        return resumedStatus ?? throw new InvalidOperationException(FollowerDocumentRf3Protocol.MissingOwner);
     }
 }

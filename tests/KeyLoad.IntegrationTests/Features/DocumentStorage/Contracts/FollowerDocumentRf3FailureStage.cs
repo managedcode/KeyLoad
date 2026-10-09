@@ -6,5 +6,6 @@ internal enum FollowerDocumentRf3FailureStage
     StartingWave, CapturingHeldRead, ChangingAndReleasing, ObservingOriginalAndContinuing,
     KillingOtherVoter, RestartingOtherVoter, WaitingRestoredHealth, ReadingRestoredStatus,
     ReadingRestoredDiscovery, ConnectingRestoredAdministrator, ConnectingRestoredCaller,
-    VerifyingRestoredHealthy
+    VerifyingRestoredHealthy, ReplayingOriginalReceipt, VerifyingReplayDocument,
+    KillingRestoredFollower, RestartingRestoredFollower, VerifyingColdFollower
 }

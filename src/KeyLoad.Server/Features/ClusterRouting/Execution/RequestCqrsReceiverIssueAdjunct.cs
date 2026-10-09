@@ -50,8 +50,7 @@ internal sealed class RequestCqrsReceiverIssueAdjunct(RequestCqrsProbeFiles file
     internal void ProducerDisposed(RequestCqrsProbeClaim primary)
     {
         if (primary.ReceiverIssueAdjunct is not { } adjunct) { return; }
-        files.RequireClaimArmActiveOrRetired(adjunct.Arm);
-        files.WriteMarker(createMarker(adjunct, RequestCqrsProbePhase.ProducerDisposed,
+        files.WriteClaimedProducerDisposed(createMarker(adjunct, RequestCqrsProbePhase.ProducerDisposed,
             RequestCqrsProbeOutcome.Observed), adjunct.Arm);
     }
 

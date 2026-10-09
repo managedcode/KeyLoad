@@ -58,6 +58,8 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
         var command = RequestCqrsPhaseFaultProvisioning.UpdateCommand(state.Identity, Guid.NewGuid());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token).ConfigureAwait(false)).ConfigureAwait(false);
         await FollowerDocumentRf3Assertions.FullReceiptAsync(receipt, command, state.Placement);
+        state.ChangedCommand = command;
+        state.ChangedReceipt = receipt;
         await Assert.That(receipt.Token.Position).IsGreaterThan(state.Before.Applied);
         state.Changed = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
         await FollowerDocumentRf3Assertions.FollowerStatusAsync(state.Changed, state.ReplicaId);
