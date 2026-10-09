@@ -38,6 +38,7 @@ internal sealed class SiteContentBrowserTests
             [SiteBrowserTokens.DeviceScaleFactorField] = SiteContentBrowserTokens.DeviceScaleFactor,
             [SiteBrowserTokens.MobileField] = true,
         }, token);
+        await browser.Chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, token);
         await browser.Chrome.NavigateAsync(browser.BaseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, token);
         await SiteBrowserVisualAssertions.AssertLowerSectionsAsync(cdp, token);
         var mobile = await ReadContentStateAsync(browser.Chrome.Cdp, token);
