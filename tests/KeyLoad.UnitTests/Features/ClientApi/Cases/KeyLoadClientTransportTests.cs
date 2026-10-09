@@ -60,9 +60,21 @@ internal sealed class KeyLoadClientTransportTests
     [Test]
     public async Task MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest()
     {
+        var observation = new KeyLoadClientKestrelObservation();
+        try
+        { await ExecuteObservedAsync(observation); }
+        catch (Exception original)
+        {
+            observation.WriteAndThrow(original);
+            throw;
+        }
+    }
+
+    private static async Task ExecuteObservedAsync(KeyLoadClientKestrelObservation observation)
+    {
         var partialResponse = Encoding.UTF8.GetBytes(PartialNodeJson + new string(PartialBodyCharacter, PartialBodyCharacterCount));
         var response = new MidBodyCancellationResponse(partialResponse, Status(NodeAfterCancellation), CancellationFirstChunkSize);
-        await using var server = await KeyLoadClientKestrelServer.StartAsync(response.HandleAsync);
+        await using var server = await KeyLoadClientKestrelServer.StartAsync(response.HandleAsync, observation);
 
         using var cancellation = new CancellationTokenSource();
         using var nextRequestCancellation = new CancellationTokenSource();
@@ -71,11 +83,13 @@ internal sealed class KeyLoadClientTransportTests
         Task? nextRequest = null;
         try
         {
-            await WaitForFirstChunkAsync(response.FirstChunkWritten.Task, response.HandlerEntered.Task,
-                response.HandlerFailure.Task, pending, () => response.Stage);
+            await KeyLoadClientFirstChunkCoordination.WaitForFirstChunkAsync(response.FirstChunkWritten.Task, response.HandlerEntered.Task,
+                response.HandlerFailure.Task, pending, () => response.Stage, TimeSpan.FromSeconds(ServerWaitSeconds));
             await Assert.That(pending.IsCompleted).IsFalse();
             await cancellation.CancelAsync();
+            observation.Record(KestrelObservationStage.CallerCancelled, token: cancellation.Token);
             var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
+            observation.Record(KestrelObservationStage.SdkCompleted);
             response.ReleaseSecondWrite();
             await WaitForRequestAbortAsync(response);
 
@@ -84,6 +98,7 @@ internal sealed class KeyLoadClientTransportTests
             var nextRequestTask = client.StatusAsync(nextRequestCancellation.Token);
             nextRequest = nextRequestTask;
             var next = await nextRequestTask.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
+            observation.Record(KestrelObservationStage.SdkCompleted);
             await Assert.That(next.IsSuccess).IsTrue();
             await Assert.That(next.Value!.NodeId).IsEqualTo(NodeAfterCancellation);
         }
@@ -91,6 +106,7 @@ internal sealed class KeyLoadClientTransportTests
         {
             response.ReleaseSecondWrite();
             await cancellation.CancelAsync();
+            observation.Record(KestrelObservationStage.CallerCancelled, token: cancellation.Token);
             await nextRequestCancellation.CancelAsync();
             await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             if (nextRequest is not null)
@@ -125,35 +141,6 @@ internal sealed class KeyLoadClientTransportTests
         catch (TimeoutException exception)
         {
             throw new TimeoutException($"Timed out waiting for Kestrel request abort; stage: {response.Stage}.", exception);
-        }
-    }
-
-    private static async Task WaitForFirstChunkAsync(Task firstChunkWritten, Task handlerEntered,
-        Task<(FirstRequestStage Stage, Exception Error)> handlerFailure,
-        Task<ManagedCode.Communication.Result<NodeStatus>> pending, Func<FirstRequestStage> currentStage)
-    {
-        try
-        {
-            var completed = await Task.WhenAny(firstChunkWritten, handlerFailure, pending)
-                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
-            if (completed == pending && !firstChunkWritten.IsCompleted)
-            {
-                var result = await pending;
-                throw new InvalidOperationException(
-                    $"SDK request completed before first Kestrel chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}; success: {result.IsSuccess}; code: {result.Problem?.ErrorCode}.");
-            }
-            if (completed == handlerFailure)
-            {
-                var failure = await handlerFailure;
-                throw new InvalidOperationException(
-                    $"Kestrel first response failed during {failure.Stage}.", failure.Error);
-            }
-        }
-        catch (TimeoutException exception)
-        {
-            throw new TimeoutException(
-                $"Timed out waiting for the first Kestrel response chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}; SDK completed: {pending.IsCompleted}; SDK status: {pending.Status}.",
-                exception);
         }
     }
 

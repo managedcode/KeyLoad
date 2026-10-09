@@ -332,20 +332,21 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **12 accepted, 92 in progress and 0 pending**.
+The original 104-task plan has **14 accepted, 90 in progress and 0 pending**.
 Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
 document CRUD/CAS, **KL-012** batch/idempotency, **KL-013** document-only filter/query,
 **KL-016** committed projection
 outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates, **KL-022** graph storage, **KL-023** bounded graph traversal
-**KL-020** three-node replicated apply and **KL-026** retention, expiry and rollups.
+**KL-020** three-node replicated apply, **KL-026** retention, expiry and rollups,
+**KL-014** server/CLI and typed SDK outcomes, and **KL-027** canonical vectors
+and exact search.
 Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
-KL-014 passed all 12 declared cases in each of the normal and scalar Linux
-task lanes in [run 37861333290](https://github.com/managedcode/KeyLoad/actions/runs/37861333290).
-Its current-source acceptance is reopened after one RF3 readiness failure in
-[run 37868406144](https://github.com/managedcode/KeyLoad/actions/runs/37868406144);
-that original failure remains retained.
+The [client acceptance record](docs/Features/ClientApi.md) and
+[vector acceptance record](docs/Features/Search.md) bind those original task
+criteria to their accepted source. Later changes require fresh qualification;
+complete solution, coverage, endurance and performance gates remain open.
 
 Current source includes bounded same-partition relational INNER JOIN, multi-lane
 queue receive with independent leaf receipts, and shared SDK, MCP and SQL operations
@@ -356,15 +357,13 @@ records the actual source, test results and remaining acceptance gates.
 
 The current source includes bounded public partition Transfer/Resume/Abort,
 receiver-issued native proofs, persisted cancellation and joined node-local
-storage ownership. The full Release build and formatter pass. Seventeen support
-flows pass locally in normal and scalar modes; movement and process cases require
-Linux because their fixed loopback listeners cannot bind on this macOS host.
-The preceding [Linux run](https://github.com/managedcode/KeyLoad/actions/runs/37875940598)
-passed all 172 cases across eight task lanes and all 275 recovery cases, while
-the full normal/scalar unit suites retained eight/one failures. Current-source
-public RF3, complete unit/recovery, fault and performance qualification remains
-open. Original source identities and results belong in the
-[qualification records](docs/implementation/status.json).
+storage ownership. It also includes real capture-pointer fault/recovery and
+erased-follower snapshot plus ordered-tail flows. The full Release build and
+formatter pass. Related bank, HTTP client, hybrid rank/Explain and native text
+process-recovery tests pass all 290 selected cases across normal and scalar
+modes locally. Fresh source-bound Linux public RF3, complete unit/recovery,
+fault and performance qualification remains open. Original source identities,
+failures and results belong in the [qualification records](docs/implementation/status.json).
 
 Current source also includes an explicit bounded follower document read through
 the .NET SDK and MCP, with a selected replica, lag limit and fresh authorization.

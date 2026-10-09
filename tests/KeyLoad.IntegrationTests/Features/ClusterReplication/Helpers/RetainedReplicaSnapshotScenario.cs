@@ -36,7 +36,7 @@ internal static class RetainedReplicaSnapshotScenario
         }
     }
 
-    private static async Task<SnapshotState> ConfigureAndProduceAsync(ClusterFixture fixture,
+    internal static async Task<SnapshotState> ConfigureAndProduceAsync(ClusterFixture fixture,
         CancellationToken cancellationToken)
     {
         var clients = Enumerable.Range(1, NodeCount).Select(number => fixture.Client(NodeName(number))).ToArray();
@@ -102,7 +102,7 @@ internal static class RetainedReplicaSnapshotScenario
         return new(index, name, directory);
     }
 
-    private static async Task<FinalCommand> ReplicateWhileStoppedAsync(ClusterFixture fixture, SnapshotState state,
+    internal static async Task<FinalCommand> ReplicateWhileStoppedAsync(ClusterFixture fixture, SnapshotState state,
         int stoppedIndex, CancellationToken cancellationToken)
     {
         var availableNodes = Enumerable.Range(0, state.Clients.Length).Where(index => index != stoppedIndex).ToArray();
@@ -202,9 +202,9 @@ internal static class RetainedReplicaSnapshotScenario
     }
 
     private sealed record SnapshotConfiguration(SubscriptionRef Subscription, ProjectionConsumerRef Consumer);
-    private sealed record StoppedReplica(int Index, string Name, string Directory);
-    private sealed record FinalCommand(CommandRequest Command, CommitReceipt Receipt);
-    private sealed record SnapshotState(KeyLoadClient[] Clients, PartitionRef Partition, SubscriptionRef Subscription,
+    internal sealed record StoppedReplica(int Index, string Name, string Directory);
+    internal sealed record FinalCommand(CommandRequest Command, CommitReceipt Receipt);
+    internal sealed record SnapshotState(KeyLoadClient[] Clients, PartitionRef Partition, SubscriptionRef Subscription,
         ProjectionConsumerRef Consumer, SubscriptionProcessingRequest Processing, SubscriptionProcessingResult ProcessingEffect,
         ProjectionBatch Batch, CommitProjectionBatchRequest ProjectionRequest, ProjectionBatchResult OutboxEffect,
         NodeStatus[] InitialStatuses);

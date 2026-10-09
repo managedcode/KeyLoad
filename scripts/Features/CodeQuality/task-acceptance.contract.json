@@ -2622,6 +2622,37 @@
               "parameterTypeFullNames": []
             }
           ]
+        },
+        {
+          "selectionId": "rf3-capture-pointer",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementCapturePointerRf3Tests/(MissingOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy)|(ChangedOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy)|(ActualNonCaptureRowPointerRefusesThenExactOriginalColdResumeIsHealthy)",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "methodName": "MissingOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "instanceName": "MissingOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCapturePointerRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "methodName": "ChangedOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "instanceName": "ChangedOriginalCapturePointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCapturePointerRf3Tests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCapturePointerRf3Tests",
+              "methodName": "ActualNonCaptureRowPointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "instanceName": "ActualNonCaptureRowPointerRefusesThenExactOriginalColdResumeIsHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCapturePointerRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
         }
       ]
     }

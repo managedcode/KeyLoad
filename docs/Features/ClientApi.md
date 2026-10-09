@@ -819,7 +819,7 @@ removal were authenticated. The status tracker retains the per-profile receipts.
 This closure covers the original task criteria; current complete normal/scalar,
 full RF3, coverage, endurance, power-loss and performance gates remain open.
 
-Current-source requalification is reopened: [run 37868406144, normal job
+An earlier source requalification was reopened: [run 37868406144, normal job
 113620545601](https://github.com/managedcode/KeyLoad/actions/runs/37868406144/job/113620545601)
 at source `47c40e325ead186c27586fb5fa6c89f136a8b594` passed seven Kestrel and four
 of five RF3 cases. The original SdkSubmitReturnedCancellationReusesCommittedReceipt
@@ -835,3 +835,43 @@ the resolved flow and fresh exact normal/scalar qualification.
 TASK-MCP-INIT-OBSERVATION-001 / REQ-MCP-INIT-OBSERVATION-001 / AC-MCP-INIT-OBSERVATION-001 retain an original failed official SDK Initialize and its unchanged pinned2026-07-28 protocol, token and deadlines. ClientApi Integration Helpers/McpOfficialClient and McpCallerHttp own a passive DelegatingHandler over the same public default IHttpMessageHandlerFactory chain and HttpClientFactoryOptions.HttpClientActions in native order used by Aspire CreateHttpClient, with the actual Aspire GetEndpoint discovery. Diagnostics/McpInitializeHttpObservation owns at most eight closed HTTP observations during Initialize only: HTTP method category, actual numeric response status, send/response completion and cancellation flags, and safe exception category. It reads no headers, request/response content, caller values or inventories; responses and tokens pass unchanged. The caller emits the bounded original sequence through Console.Error plus ServerFailureObserver before rethrow, retaining diagnostic and cleanup failures. Native owned resource evidence retains topology identity; this record maps only known node names or Other. No retry, version fallback, timeout increase, product transport or storage change is authorized.
 
 Ordered implementation is this contract, the passive HTTP/helper delta, root native build/format, existing AcMcp003UnsupportedOfficialProtocolRejectsThenCurrentCallerExecutes failed-initialize followed by two healthy native MCP executions, AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall and the original failing HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes whole flow and fresh Linux RF3 original reports. Source ownership remains private until guarded root join; root alone compiles and delivers. Rollback removes this observation delta with no data migration. Exact023 failure remains unqualified: its SDK discarded the initiating RPC/HTTP/probe exception. Status observations cannot independently classify JSON-RPC error versus successful-status discover-probe timeout without payload access, which remains prohibited. Success disables recording; later calls are unchanged. No synthetic/parser-only cases replace real caller flows, no coverage promotion.
+
+## Current original KL-014 task acceptance, 2026-10-09
+
+REQ-CLIENT-002, REQ-CLIENT-004, REQ-CLIENT-005 and AC-MP-009, AC-CLIENT-004, AC-CLIENT-005
+qualify the original architecture task criteria at source
+`55f3e1771c0c4534640218808b44c3f8119437a9`. ADR-117 owns native source-bound execution; existing
+ADR-039 owns the SDK/MCP outcome contract.
+
+[normal job 113675923395](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923395)
+passed the exact 12-case declared union without skips. Original artifact
+[11596587004](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11596587004)
+has authenticated SHA256 `d1fa31f3ddf0979832772a85a0cb5c0991eb7a519873b8257f752d5f32bd69a3`.
+
+[scalar job 113675923577](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923577)
+passed the exact 12-case declared union without skips. Original artifact
+[11596576965](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11596576965)
+has authenticated SHA256 `edacc0788ca1f9ce9c85a97ab0c28e33f527837e3f69c2533b33932a00ee1aa9`.
+
+Original API/run/attempt/archive digest, exact native discovery/UID/TRX unions,
+compiled source/PE/PDB and Git source/build-input bytes, prepared/before/after
+images, native20/profile environment, joined child readers/exit/disposal, final
+source verification and owned RF3 image registry removal were authenticated.
+The canonical status retains the compact profile receipts; original failed
+and earlier passing cohorts remain unchanged.
+
+Seven real Kestrel transport controls and five complete Aspire RF3 flows per
+profile qualify typed success-null/refusal/absent-read behavior, actual fresh
+roots and built CLI/configuration, persisted nonadministrator authority, same-ID
+unknown-write retry, complete independently literal receipt scopes/durability,
+minimum-token documents, changed-content conflict and original replay after
+healthy later commit. This does not claim an unprovisioned operating-system
+installation or replace the required RF3 topology with a single-node server.
+
+This closes only the original task scope at the accepted source. Stage36
+Pointer/allocation/diagnostic source is not qualified by these originals.
+Mandatory complete current normal/scalar/recovery/full RF3, full product
+functional coverage, endurance/power-loss/fault and performance gates remain
+open; no production readiness, speed superiority or full-model/full-SQL claim
+follows. Root owns final evidence review and status/doc join. ADR: N/A for this
+evidence-only closeout; no runtime contract changes.

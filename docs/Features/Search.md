@@ -299,3 +299,42 @@ Native owning-config clarification for TASK-KL034-NATIVE-FTS-WAIT-001: actual ca
 Under REQ-SEARCH-001, REQ-SR-002 and REQ-VECTOR-PROFILE-001..003, the original KL027 criteria map to the existing complete native operations: CanonicalVectorPublicMetricTests and VectorMetricGoldenTests prove independent distance/top-k boundaries; VectorMetricValidationTests and ConfiguredVectorProfileSchemaTests/NullArrayTests prove exact malformed/model/dimension rejection with healthy follow-up; CanonicalVectorAtomicRevisionTests and ConfiguredVectorProfileTests prove whole failed receipts/replay, atomic document/vector/lineage rollback, valid revision2 publication and genuine native cold reopen. SearchTests and ImmutableVectorInputTests retain stale revision, finite extremes, owned query and cancellation behavior. The exact native unit union contains27 cases, without benchmark contributors.
 
 AC-KL027-NATIVE-001: current normal and hardware-disabled unit invocations must discover and execute precisely those27 original UIDs/types/parameters/source paths and report27/27 with no skips, original failures, joined exit/readers/disposal and unchanged original source/DLL/PDB manifests. AC-KL027-NATIVE-002: ConfiguredVectorProfileRf3Tests must execute its four actual sdk/mcp/sdk-sql/mcp-sql complete negative/replay/healthy flows on the genuine Aspire-owned RF3 topology, with discovered endpoints, persisted configured model, independent full document/revision/rank oracles and exact same-command receipt parity; all owned resources and image registry must settle. Its scalar profile disables caller-process intrinsics only and does not relabel the three server processes. Both native lanes run independently in the existing Linux task matrix under ADR117 with TUnit limit20. Runtime/package/protocol/performance claims remain scoped to actual original evidence. Mandatory full current-source normal/scalar/recovery/RF3 and other task/product gates remain separate; adding a selector, a local pass or changing status cannot waive them. Root owns this contract, exact original metadata union, bounded task adapter/verifier, workflow, artifact verification and final acceptance evidence; no production code or capability change belongs to the lane addition.
+
+## Original KL-027 task acceptance, 2026-10-09
+
+REQ-SEARCH-001, REQ-SR-002, REQ-VECTOR-PROFILE-001, REQ-VECTOR-PROFILE-002, REQ-VECTOR-PROFILE-003 and AC-SEARCH-001, AC-MP-004, AC-KL027-NATIVE-001, AC-KL027-NATIVE-002
+qualify the original architecture task criteria at source
+`55f3e1771c0c4534640218808b44c3f8119437a9`. ADR-117 owns native source-bound execution; existing
+Search metric/atomicity contracts and ADR-035 own vector correctness.
+
+[normal job 113675923322](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923322)
+passed the exact 31-case declared union without skips. Original artifact
+[11597045667](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11597045667)
+has authenticated SHA256 `b65f68bfd6e7177f24999f2b25d2f295289ba982d07839fceedb735da3121500`.
+
+[scalar job 113675923319](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923319)
+passed the exact 31-case declared union without skips. Original artifact
+[11596895627](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11596895627)
+has authenticated SHA256 `d920fa4b7b12dd3e522082646326c55ae2b3f703c5a1306f35b7921006cad2dd`.
+
+Original API/run/attempt/archive digest, exact native discovery/UID/TRX unions,
+compiled source/PE/PDB and Git source/build-input bytes, prepared/before/after
+images, native20/profile environment, joined child readers/exit/disposal, final
+source verification and owned RF3 image registry removal were authenticated.
+The canonical status retains the compact profile receipts; original failed
+and earlier passing cohorts remain unchanged.
+
+Twenty-seven native vector operations per profile qualify independent metric
+and exact top-k/allowlist correctness, malformed/model/dimension rejection,
+atomic document/vector revision and failed-outcome replay with cold healthy
+continuation. Four genuine RF3 sdk/mcp/sdk-sql/mcp-sql flows retain full literal
+document/revision/rank and original receipt assertions. Scalar RF3 disables
+intrinsics only in the caller; server processes are not relabeled scalar.
+
+This closes only the original task scope at the accepted source. Stage36
+Pointer/allocation/diagnostic source is not qualified by these originals.
+Mandatory complete current normal/scalar/recovery/full RF3, full product
+functional coverage, endurance/power-loss/fault and performance gates remain
+open; no production readiness, speed superiority or full-model/full-SQL claim
+follows. Root owns final evidence review and status/doc join. ADR: N/A for this
+evidence-only closeout; no runtime contract changes.

@@ -25,6 +25,18 @@ internal sealed class KeyLoadClientNullWriteTests
     [Arguments("{")]
     public async Task UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads(string unavailable)
     {
+        var observation = new KeyLoadClientKestrelObservation();
+        try
+        { await ExecuteObservedAsync(unavailable, observation); }
+        catch (Exception original)
+        {
+            observation.WriteAndThrow(original);
+            throw;
+        }
+    }
+
+    private static async Task ExecuteObservedAsync(string unavailable, KeyLoadClientKestrelObservation observation)
+    {
         var partition = new PartitionRef("tenant", "database", "domain", PartitionId);
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(Collection, Document, Json, ExpectedRevision: 0)]);
@@ -53,15 +65,17 @@ internal sealed class KeyLoadClientNullWriteTests
             { await context.Response.WriteAsync("null", context.RequestAborted); }
             else
             { await JsonSerializer.SerializeAsync(context.Response.Body, document, JsonDefaults.Options, context.RequestAborted); }
-        });
+        }, observation);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5), TimeProvider.System);
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var unknown = await client.CommitAsync(command, deadline.Token);
+        observation.Record(KestrelObservationStage.SdkCompleted);
         await Assert.That(unknown.IsSuccess).IsFalse();
         await Assert.That(unknown.Value).IsNull();
         await Assert.That(unknown.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.UnknownWriteOutcome));
         await Assert.That(unknown.Problem?.Detail).IsEqualTo(UnknownDetail);
         var retry = await client.CommitAsync(command, deadline.Token);
+        observation.Record(KestrelObservationStage.SdkCompleted);
         await Assert.That(retry.IsSuccess).IsTrue();
         await Assert.That(NativeSerialization.Serialize(retry.Value!).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
         await VerifyRequestsAndReadsAsync(client, command, requests, headers, reference, document, deadline.Token);

@@ -7,6 +7,8 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal sealed class DatabasePhaseExecutionOptionsTests
 {
+    private const int OutcomeCount = 6;
+    private const int BucketCount = 16;
     private const int MinimumStripeCounterBytes = (32 * 6 * 16 + 32) * sizeof(long);
     private const string MisspelledMode = "Enable";
     private const string MisspelledReservation = "StrpieCount";
@@ -126,7 +128,40 @@ internal sealed class DatabasePhaseExecutionOptionsTests
         await Assert.That(disabled.Failure.ParamName).IsEqualTo(parameter);
         await Assert.That(enabled.Failure.ParamName).IsEqualTo(parameter);
         await Assert.That(disabled.Allocated).IsLessThan(MinimumStripeCounterBytes);
-        await Assert.That(enabled.Allocated).IsEqualTo(disabled.Allocated);
+        await Assert.That(enabled.Allocated).IsLessThan(MinimumStripeCounterBytes);
+        await RequireHealthyBankAsync(false);
+        await RequireHealthyBankAsync(true);
+    }
+
+    private static async Task RequireHealthyBankAsync(bool enabled)
+    {
+        var bank = DatabasePhaseTestComposition.Create(enabled);
+        var phase = DatabasePhaseKind.ProviderWriteGateHold;
+        var started = bank.Begin();
+        bank.End(phase, DatabasePhaseOutcome.Completed, started);
+        bank.RecordBusy(phase);
+        var captured = bank.Capture();
+
+        await Assert.That(captured.Enabled).IsEqualTo(enabled);
+        await Assert.That(captured.Quality).IsEqualTo(DatabaseProfileQuality.None);
+        if (enabled)
+        {
+            var lane = ((int)phase * OutcomeCount + (int)DatabasePhaseOutcome.Completed) * BucketCount;
+            await Assert.That(captured.Histogram.Sum()).IsEqualTo(1L);
+            await Assert.That(captured.Histogram.Skip(lane).Take(BucketCount).Sum()).IsEqualTo(1L);
+            await Assert.That(captured.BusyAttempts.Sum()).IsEqualTo(1L);
+            await Assert.That(captured.BusyAttempts[(int)phase]).IsEqualTo(1L);
+        }
+        else
+        {
+            await Assert.That(started).IsEqualTo(-1L);
+            await Assert.That(captured.Histogram.IsEmpty).IsTrue();
+            await Assert.That(captured.BusyAttempts.IsEmpty).IsTrue();
+        }
+        var following = bank.Capture();
+        await Assert.That(following.Histogram).IsEquivalentTo(captured.Histogram);
+        await Assert.That(following.BusyAttempts).IsEquivalentTo(captured.BusyAttempts);
+        await Assert.That(following.Quality).IsEqualTo(captured.Quality);
     }
 
     private static (ArgumentOutOfRangeException Failure, long Allocated) RejectConstruction(

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
+using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -21,6 +22,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         using var deadline = new CancellationTokenSource(executionLifetime, clock);
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var token = operation.Token;
+        await AwaitNativeReplicaPrerequisiteAsync(token).ConfigureAwait(false);
         var administrator = await AuthenticateAdministratorAsync(token).ConfigureAwait(false);
         await SubmitBootstrapAsync(administrator, token).ConfigureAwait(false);
         await VerifyCatalogAsync(administrator.Id, token).ConfigureAwait(false);
@@ -44,6 +46,29 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
     }
 
     internal void CloseAdmission() => Volatile.Write(ref ready, AdmissionClosed);
+
+    private const long BeforeFirstConsensusTerm = 0;
+    private const long BeforeFirstCommittedEntry = 0;
+
+    private async Task AwaitNativeReplicaPrerequisiteAsync(CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
+            if (state.TransportReady && state.LeaderId is not null
+                && partition.Configuration.VoterIds.Contains(state.LeaderId, StringComparer.Ordinal)
+                && state.Term > BeforeFirstConsensusTerm && state.CommittedIndex > BeforeFirstCommittedEntry
+                && state.MaterializedPosition >= state.CommittedIndex && node.HasCompatibleCohort
+                && (state.Role == ReplicaRole.Follower
+                    || state.Role == ReplicaRole.Leader
+                    && await partition.Consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false)))
+            {
+                return;
+            }
+            await Task.Delay(partition.Configuration.HeartbeatInterval, clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     private async Task<PrincipalRecord> AuthenticateAdministratorAsync(CancellationToken cancellationToken)
     {

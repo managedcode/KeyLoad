@@ -22,8 +22,7 @@ internal static class PartitionMovementParentPolicyRestoreTrial
         await DeniedReadAsync(source, target, () => fixture.Read(request, phaseId), ErrorCode.Unauthenticated);
         await ConfigureAsync(source, root with { PolicyEpoch = checked(root.PolicyEpoch + 2) }, RepairPrincipalId);
         source.Reopen();
-        await DeniedReadAsync(source, target, () => source.Database.ResolveOutcome(
-            ControlledPartitionMovementCorpus.SeedOperation(source.Database)), ErrorCode.PermissionDenied);
+        await DeniedOriginalUserOutcomeAsync(source, target);
         await PartitionMovementParentIssuanceFaultTrial.ExecuteAsync(source, target, fixture, request, phaseId, DeniedPrincipalId);
         var cold = fixture.Read(request, phaseId);
         await Assert.That(cold.Pending!.OriginalIssuancePolicyEpoch).IsEqualTo(root.PolicyEpoch);
@@ -42,6 +41,21 @@ internal static class PartitionMovementParentPolicyRestoreTrial
         var targetState = ControlledPartitionMovementExpiryOwnerState.Capture(target);
         var denied = Assert.Throws<KeyLoadException>(read);
         await Assert.That(denied.Code).IsEqualTo(expected);
+        await sourceState.AssertUnchangedAsync(source);
+        await targetState.AssertUnchangedAsync(target);
+    }
+
+    private const string ChangedPolicyDiagnostic = "The principal policy changed since this command was evaluated.";
+
+    private static async Task DeniedOriginalUserOutcomeAsync(ControlledPartitionMovementNode source,
+        ControlledPartitionMovementNode target)
+    {
+        var sourceState = ControlledPartitionMovementExpiryOwnerState.Capture(source);
+        var targetState = ControlledPartitionMovementExpiryOwnerState.Capture(target);
+        var denied = source.Database.ResolveOutcome(ControlledPartitionMovementCorpus.SeedOperation(source.Database));
+        await Assert.That(denied.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(denied.Json).IsNull();
+        await Assert.That(denied.SafeDetail).IsEqualTo(ChangedPolicyDiagnostic);
         await sourceState.AssertUnchangedAsync(source);
         await targetState.AssertUnchangedAsync(target);
     }
