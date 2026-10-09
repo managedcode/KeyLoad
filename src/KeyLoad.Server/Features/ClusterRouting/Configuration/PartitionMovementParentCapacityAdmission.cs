@@ -46,7 +46,10 @@ internal static class PartitionMovementParentCapacityAdmission
         var grant = FutureGrant(state, receiver, resources);
         var journal = FutureJournal(Math.Max(PartitionMovementParentCapacityBounds.Bound(receiver), PartitionMovementParentCapacityBounds.Bound(state.Header!.ControlOwner)));
         var pending = checked(FuturePending(phase, receiver, grant, journal) + PartitionMovementParentCapacityBounds.Bound(resources));
-        var source = FutureWitness(SourceReply(state, pending, cluster));
+        var stateCapacity = PartitionMovementParentCapacityFinalInstall.StateCapacity(state, phase, receiver, resources, grant, journal);
+        var pendingSlots = PartitionMovementParentCapacityFinalInstall.IsFinal(state, phase)
+            ? PartitionMovementFinalOutcomeCapacityProtocol.ParentPhaseSlots : PartitionMovementFinalOutcomeCapacityProtocol.SinglePhaseSlot;
+        var source = FutureWitness(SourceReply(state, pending, cluster, stateCapacity, pendingSlots));
         var envelope = FutureEnvelope(phase, grant, ReferenceFieldBytes, ReferenceFieldBytes);
         var request = Root<PartitionMovementReceiverIssueRequest>(checked(ReferenceFieldBytes
             + ScalarFieldBytes + GuidFieldBytes * FutureCapacityGuidOccurrences3 + envelope + source + journal * FutureCapacityJournalOccurrences2
@@ -64,7 +67,7 @@ internal static class PartitionMovementParentCapacityAdmission
         pending = checked(pending + source + packet + proof);
         if (phase.Stage == PartitionMovePeerStage.Capture)
         { pending = checked(pending + CaptureFields(state, receiver, resources, cluster)); }
-        var dispatch = FutureWitness(SourceReply(state, pending, cluster));
+        var dispatch = FutureWitness(SourceReply(state, pending, cluster, stateCapacity, pendingSlots));
         var finalEnvelope = FutureEnvelope(phase, grant, proof, dispatch);
         var transport = Root<PartitionMovementTransportRequest>(checked(ReferenceFieldBytes + GuidFieldBytes * FutureCapacityGuidOccurrences2
             + finalEnvelope + journal + FutureDiscovery(state.Header.ControlOwner, cluster) + ScalarFieldBytes * FutureCapacityScalarOccurrences2));
@@ -72,9 +75,13 @@ internal static class PartitionMovementParentCapacityAdmission
             + grant + proof + dispatch);
         var effectCommand = Root<PartitionMovePhaseCommand>(checked(PartitionMovementParentCapacityBounds.Bound(phase) + PartitionMovementParentCapacityBounds.Bound(resources)
             + GuidFieldBytes + admission));
-        var outcome = FuturePhaseResult(state, journal, grant, issued, ReferenceFieldBytes);
-        var outcomeProof = FutureWitness(TransportReply<PartitionMovePhaseResult>(receiver, cluster, outcome));
-        var retained = checked(pending + FutureOutcome(outcome) + outcomeProof);
+        var outcome = PartitionMovementParentCapacityFinalInstall.OutcomeCapacity(state, phase,
+            FutureOutcome(FuturePhaseResult(state, journal, grant, issued, ReferenceFieldBytes)));
+        var nativeOutcomeWitness = FutureOutcomeWitness(outcome, ReferenceFieldBytes);
+        var outcomeReply = TransportReply<KeyLoad.Orleans.PartitionMovementOutcomeWitness>(receiver, cluster, nativeOutcomeWitness);
+        var outcomeProof = FutureOutcomeProof(outcomeReply);
+        var completedOutcomeWitness = Root<KeyLoad.Orleans.PartitionMovementOutcomeWitness>(FutureOutcomeWitness(outcome, outcomeProof));
+        var retained = checked(pending + outcome + outcomeProof);
         if (phase.Stage == PartitionMovePeerStage.Retire)
         { retained = checked(retained + CancellationFields(state, phase, receiver, cluster, grant, journal, dispatch)); }
         var parent = Root<PartitionMoveParentPhase>(retained);
@@ -82,18 +89,22 @@ internal static class PartitionMovementParentCapacityAdmission
             + PartitionMovementParentCapacityBounds.Bound(state.Header.OriginalTransferRequest) + PartitionMovementParentCapacityBounds.Bound(state.Header.OperatorPrincipalId)
             + ScalarFieldBytes * FutureCapacityScalarOccurrences4 + GuidFieldBytes * FutureCapacityGuidOccurrences7 + DateTimeFieldBytes * FutureCapacityDateTimeOccurrences2 + retained));
         var checkpointCommand = Root<PartitionMovePhaseCommand>(checked(PartitionMovementParentCapacityBounds.Bound(phase) + Bytes(checkpoint)));
-        RequireBound(maximumBytes, request, proof, dispatch, transport, parent, checkpoint,
+        var observedSource = SourceReply(state, retained, cluster, checked(stateCapacity + outcome), pendingSlots);
+        RequireBound(maximumBytes, PartitionMovementParentCapacityFinalInstall.IsFinal(state, phase)
+            ? PartitionMovementFinalOutcomeCapacityProtocol.Exceeded : PartitionMoveProtocol.Capacity,
+            request, proof, dispatch, transport, outcomeReply,
+            completedOutcomeWitness, observedSource, parent, checkpoint,
             NativeOperation(state, issuerCommand), NativeOperation(state, effectCommand),
             NativeOperation(state, checkpointCommand));
         return parent;
     }
 
-    private static void RequireBound(long maximum, params long[] values)
+    private static void RequireBound(long maximum, string detail, params long[] values)
     {
         foreach (var value in values)
         {
             if (value > maximum)
-            { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMoveProtocol.Capacity); }
+            { throw Errors.Fail(ErrorCode.BudgetExceeded, detail); }
         }
     }
 }

@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
@@ -29,9 +30,17 @@ public sealed partial class DatabaseEngine
         ReplicatedOperation original, CommandOutcomePartitionScope scope)
     {
         var principal = Principal(view, original.PrincipalId, EvaluationClock.GetUtcNow());
+        if (BlobStorageOperations.Handles(original.Kind))
+        { RequireControlledBlobInitialPolicy(principal, original); }
         var publication = PartitionMovePublishedPlacementStorage.Read(view, scope.Partition!);
         if (publication is null)
         { return null; }
+        if (BlobStorageOperations.Handles(original.Kind))
+        {
+            if (publication.Destination.Incarnation == Store.Identity.Incarnation)
+            { return null; }
+            return CaptureControlledBlobCommandView(view, principal, original, scope, publication);
+        }
         var command = RequireControlledDocumentBatch(original, scope.Partition!);
         RequireControlledDocumentPolicies(principal, command, PartitionMoveResources.Capture(view, command.Partition, Limits));
         var control = PartitionMoveControlStorage.ReadHistory(view, command.Partition, publication.MoveId,

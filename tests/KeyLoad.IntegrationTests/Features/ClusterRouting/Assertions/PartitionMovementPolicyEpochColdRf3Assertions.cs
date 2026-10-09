@@ -69,7 +69,10 @@ internal static class PartitionMovementPolicyEpochColdRf3Assertions
             await PartitionMovementCapturePointerRf3Cut.RequireExactRemainingRowsAsync(original, actual, allowed);
             await Assert.That(actual.StorePosition - original.StorePosition).IsEqualTo((long)entries.Length);
             if (original.Header is not null)
-            { await RequireOriginalUserOutcomesAsync(seed, original, actual); }
+            {
+                await RequireOriginalUserOutcomesAsync(seed, original, actual);
+                await PartitionMovementBlobOriginalOutcomeRf3Assertions.RequireAsync(seed, original, actual);
+            }
         }
     }
 

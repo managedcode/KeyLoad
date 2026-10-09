@@ -17,17 +17,40 @@ internal static class NativeAnnWaitRf3Scenario
         var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, token);
         var deniedIdentity = await scenario.CreateReaderAsync(fixture, false, false, false, false, token);
         var identity = await scenario.CreateReaderAsync(fixture, false, true, false, false, token);
-        await using var administrator = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, fixture.AdminKey, token);
+        using var sdkHttp = NativeAnnWaitObservedSdk.Create(fixture.App, Node, out var observation, out var handler);
+        try
+        {
+            using (handler)
+            {
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    await using var administrator = await RequestCqrsRf3Callers.ConnectObservedAsync(
+                        fixture.App, Node, fixture.AdminKey, sdkHttp, token);
+                    await RunObservedAsync(fixture, scenario, deniedIdentity.Secret, identity.Secret,
+                        administrator, observation, failures, token);
+                }, failures);
+            }
+        }
+        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+    }
+
+    private static async Task RunObservedAsync(ClusterFixture fixture, NativeTextRf3Scenario scenario,
+        string deniedSecret, string readerSecret, RequestCqrsRf3Callers administrator,
+        NativeAnnWaitHttpObservation observation, List<Exception> failures, CancellationToken token)
+    {
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var pin = (await new NativeAnnMaintenanceRf3Scenario(scenario.Partition)
                 .RequestAsync(administrator.Sdk, administrator.Mcp, token)) with
             { Collection = NativeTextRf3Scenario.Collection, Field = NativeTextRf3Scenario.VectorField, Space = NativeTextRf3Scenario.SpaceFor() };
-            var built = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.MaintainAnnIndexAsync(pin, token));
-            await using var denied = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, deniedIdentity.Secret, token);
+            var built = await NativeAnnWaitRf3Build.ExecuteAsync(administrator.Sdk, pin, observation, token);
+            await using var denied = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, deniedSecret, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, identity.Secret, token);
+                await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, Node, readerSecret, token);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var request = new WaitForAnnIndexRequest(scenario.Partition, NativeTextRf3Scenario.Collection,
@@ -47,7 +70,7 @@ internal static class NativeAnnWaitRf3Scenario
                     await NativeAnnWaitRf3Assertions.AllPathsAsync(reader, changed, restored.Source!.AppliedPosition, token);
                     await NativeAnnWaitRf3Assertions.LiteralAsync(reader, scenario, pin, true, token);
                     var beforeStop = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
-                    await NativeAnnWaitRf3Cold.RunAsync(fixture, identity.Secret, scenario, pin, changed, command, receipt, beforeStop, token);
+                    await NativeAnnWaitRf3Cold.RunAsync(fixture, readerSecret, scenario, pin, changed, command, receipt, beforeStop, token);
                 }, failures);
             }, failures);
         }, failures);

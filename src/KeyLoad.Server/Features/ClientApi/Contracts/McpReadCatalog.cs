@@ -35,6 +35,8 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<AggregateSamplesRequest, SampleAggregate>(McpToolNames.SeriesAggregate, McpToolRoutes.SeriesAggregate, GrainReadKind.AggregateSamples),
         McpOperationFactory.Read<AggregateSampleWindowsRequest, SampleAggregateWindowsResult>(McpToolNames.SeriesWindows,
             McpToolRoutes.SeriesWindows, GrainReadKind.AggregateSampleWindows),
+        McpOperationFactory.Read<ReadSampleChunkWindowRequest, SampleChunkWindowResult>(SampleChunkProtocol.ReadTool,
+            SampleChunkProtocol.ReadRoute, GrainReadKind.SampleChunkWindow),
         McpOperationFactory.Read<ReadSampleRollupRequest, SampleRollupResult>(McpToolNames.SeriesRollup,
             McpToolRoutes.SeriesRollup, GrainReadKind.SampleRollup),
         McpOperationFactory.Read<ReadSampleRetentionRequest, SampleRetentionStatus>(McpToolNames.SeriesRetention,

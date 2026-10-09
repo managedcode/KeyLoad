@@ -64,7 +64,8 @@ public sealed partial class DatabaseEngine
                 or CompareExchangeSaga or ExpireSaga => Capability.SchedulerManage | Capability.QueuePublish,
             AppendSamples => Capability.SeriesAppend,
             ExpireSamples => Capability.SeriesManage,
-            RefreshSampleRollup => Capability.SeriesManage | Capability.SeriesRead,
+            RefreshSampleRollup or OpenSampleChunkWindow or SealSampleChunkWindow or MergeSampleChunkWindow
+                or DropSampleChunkWindow => Capability.SeriesManage | Capability.SeriesRead,
             DropSampleRollup => Capability.SeriesManage,
             StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
             PutVector => Capability.DocumentsWrite,

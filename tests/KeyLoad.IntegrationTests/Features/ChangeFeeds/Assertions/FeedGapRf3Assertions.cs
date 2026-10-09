@@ -6,7 +6,6 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class FeedGapRf3Assertions
 {
-    private const long HiddenSequence = 2;
 
     internal static async Task<ChangeFeedPage> AdvanceAsync(RequestCqrsRf3Callers reader,
         FeedLiveRf3Scenario scenario, string cursor, CancellationToken token)
@@ -22,7 +21,7 @@ internal static class FeedGapRf3Assertions
         foreach (var page in pages)
         {
             await Assert.That(page.Changes.IsEmpty).IsTrue();
-            await Assert.That(page.ThroughSequence).IsEqualTo(HiddenSequence);
+            await Assert.That(page.ThroughSequence).IsEqualTo(FeedLiveRf3Protocol.HiddenSequence);
             await Assert.That(page.Tail).IsEqualTo(FeedLiveRf3Protocol.UpdatedSequence);
             await Assert.That(page.FirstAvailable).IsEqualTo(FeedLiveRf3Protocol.FirstSequence);
             await Assert.That(page.HasMore).IsTrue();

@@ -32,7 +32,7 @@ internal sealed class SampleChunkEncodingPlan
     internal long ColumnsBytes { get; }
 
     internal static SampleChunkEncodingPlan Create(ReadOnlySpan<SampleRecord> records,
-        ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
+        SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int IndexInitialValue = 0;
 

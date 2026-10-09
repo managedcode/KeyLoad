@@ -29,8 +29,8 @@ internal static class ReplicaIsolationStatusIdentity
         Guid incarnation, long minimumTerm, CancellationToken cancellationToken)
     {
         await using var client = await McpOfficialClient.ConnectAsync(fixture, resource, fixture.AdminKey, cancellationToken);
-        var status = await McpCallerAssertions.SuccessAsync<NodeStatus>(await client.CallAsync(
-            McpCallerTools.AdminStatus, new { }, cancellationToken));
+        var status = await McpCallerAssertions.SuccessAsync<NodeStatus>(await client.CallWithoutBodyAsync(
+            McpCallerTools.AdminStatus, cancellationToken));
         await ReplicaIsolationFlowAssertions.StatusAsync(status.Value, original.NodeId, resource, incarnation, original.ReadGeneration, minimumTerm);
     }
 
@@ -52,8 +52,8 @@ internal static class ReplicaIsolationStatusIdentity
         await Assert.That(identities.ContainsKey(leader)).IsTrue();
         await ReplicaIsolationFlowAssertions.StatusAsync(status, original.NodeId, leader, incarnation, original.ReadGeneration, status.ConsensusTerm);
         await using var official = await McpOfficialClient.ConnectAsync(fixture, resource, fixture.AdminKey, cancellationToken);
-        var native = await McpCallerAssertions.SuccessAsync<NodeStatus>(await official.CallAsync(
-            McpCallerTools.AdminStatus, new { }, cancellationToken));
+        var native = await McpCallerAssertions.SuccessAsync<NodeStatus>(await official.CallWithoutBodyAsync(
+            McpCallerTools.AdminStatus, cancellationToken));
         await ReplicaIsolationFlowAssertions.StatusAsync(native.Value, original.NodeId, leader, incarnation, original.ReadGeneration, status.ConsensusTerm);
     }
 }

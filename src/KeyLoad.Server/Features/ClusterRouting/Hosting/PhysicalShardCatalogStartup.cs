@@ -6,7 +6,8 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHost partition, IOptions<NodeOptions> nodeOptions,
-    TimeProvider clock, IOptions<GrainRoutingOptions> routingOptions, IOptions<McpExecutionOptions> mcpExecutionOptions)
+    TimeProvider clock, IOptions<GrainRoutingOptions> routingOptions, IOptions<McpExecutionOptions> mcpExecutionOptions,
+    ILogger<PhysicalShardCatalogStartup> logger)
 {
     private const int AdmissionClosed = 0;
     private const int AdmissionReady = 1;
@@ -52,17 +53,30 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
 
     private async Task AwaitNativeReplicaPrerequisiteAsync(CancellationToken cancellationToken)
     {
+        var observation = new PhysicalShardCatalogPrerequisiteObservation();
+        try
+        { await AwaitNativeReplicaPrerequisiteCoreAsync(observation, cancellationToken).ConfigureAwait(false); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { observation.Failed(logger, error); throw; }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { observation.Failed(logger, error); throw; }
+    }
+
+    private async Task AwaitNativeReplicaPrerequisiteCoreAsync(PhysicalShardCatalogPrerequisiteObservation observation,
+        CancellationToken cancellationToken)
+    {
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
+            observation.Capture(state);
             if (state.TransportReady && state.LeaderId is not null
                 && partition.Configuration.VoterIds.Contains(state.LeaderId, StringComparer.Ordinal)
                 && state.Term > BeforeFirstConsensusTerm && state.CommittedIndex > BeforeFirstCommittedEntry
-                && state.MaterializedPosition >= state.CommittedIndex && node.HasCompatibleCohort
+                && state.MaterializedPosition >= state.CommittedIndex && observation.Cohort(node.HasCompatibleCohort)
                 && (state.Role == ReplicaRole.Follower
                     || state.Role == ReplicaRole.Leader
-                    && await partition.Consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false)))
+                    && observation.Leader(await partition.Consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false))))
             {
                 return;
             }

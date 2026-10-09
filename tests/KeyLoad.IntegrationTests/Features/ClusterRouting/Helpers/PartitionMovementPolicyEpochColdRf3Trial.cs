@@ -30,31 +30,49 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
         var first = await PartitionMovementPolicyEpochColdRf3Operations.TransferAsync(seed, seed.FirstRequest,
             seed.OriginalPlacement, seed.Directory.ControlOwner, cancellationToken).ConfigureAwait(false);
         await seed.VerifyAsync(cancellationToken).ConfigureAwait(false);
+        var postMove = await PartitionMovementControlledBlobNewEffectsRf3Trial.RequireAsync(seed, first, cancellationToken).ConfigureAwait(false);
+        var lifecycle = await PartitionMovementControlledBlobLifecycleRf3Trial.RunAsync(wave, seed, first, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobPolicyEpochRf3Replays.RequireQ1PositiveAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobCurrentReadsRf3Assertions.RequireAsync(seed, cancellationToken).ConfigureAwait(false);
         var original = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobFailedEffectRf3Assertions.RequireAsync(seed, postMove, original);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireStoredAsync(seed, lifecycle, original);
         await PartitionMovementPolicyEpochColdRf3Assertions.RequirePolicyAsync(original,
             PartitionMovementPublicParentRf3Administrator.InitialDefinition(), first);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobNewEffectsRf3Trial.RequireColdReplayAsync(seed, postMove, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireCallsAsync(seed, lifecycle, null, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobPolicyEpochRf3Replays.RequireChangedOriginalDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
+        var unchanged = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
+            cancellationToken).ConfigureAwait(false);
+        await PartitionMovementParentOperationalCapacityRf3Assertions.RequireNoEffectsAsync(wave, original, unchanged);
+        await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPolicyEpochColdRf3Operations.DemoteAsync(wave, cancellationToken).ConfigureAwait(false);
-        await RequireDemotedAsync(wave, seed, first, cancellationToken).ConfigureAwait(false);
+        await RequireDemotedAsync(wave, seed, first, lifecycle, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPolicyEpochColdRf3Operations.RestoreAsync(wave, cancellationToken).ConfigureAwait(false);
         var restored = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementPolicyEpochColdRf3Assertions.RequireRestoredAsync(original, restored, first);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireOriginalRowsAsync(seed, lifecycle, original, restored);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, seed.FirstRequest,
             first, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireCallsAsync(seed, lifecycle, ErrorCode.PermissionDenied, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPolicyEpochColdRf3Replays.RequireOldUsersDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobPolicyEpochRf3Replays.RequireDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicParentRf3Cut.RequireCurrentModelsAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobCurrentReadsRf3Assertions.RequireAsync(seed, cancellationToken).ConfigureAwait(false);
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementPolicyEpochColdRf3Assertions.RequireReplayRowsAsync(wave, seed, restored, after);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireOriginalRowsAsync(seed, lifecycle, original, after);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
-        await ReverseAndColdAsync(wave, seed, first, cancellationToken).ConfigureAwait(false);
+        await ReverseAndColdAsync(wave, seed, first, postMove, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task RequireDemotedAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        PartitionMoveResult first, CancellationToken cancellationToken)
+        PartitionMoveResult first, PartitionMovementControlledBlobCommandRf3Proof[] lifecycle, CancellationToken cancellationToken)
     {
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             cancellationToken).ConfigureAwait(false);
@@ -65,6 +83,9 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
             await PartitionMovementPublicCallerReplay.RequireDeniedSubjectAsync(seed.Source, seed.Official,
                 seed.FirstRequest with { Mode = mode }, cancellationToken).ConfigureAwait(false);
         }
+        await PartitionMovementBlobPolicyEpochRf3Replays.RequireDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobLifecycleRf3Assertions.RequireCallsAsync(seed, lifecycle, ErrorCode.PermissionDenied, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobCurrentReadsRf3Assertions.RequireDeniedAsync(seed, cancellationToken).ConfigureAwait(false);
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementParentOperationalCapacityRf3Assertions.RequireNoEffectsAsync(wave, before, after);
@@ -72,7 +93,7 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
     }
 
     private static async Task ReverseAndColdAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        PartitionMoveResult first, CancellationToken cancellationToken)
+        PartitionMoveResult first, PartitionMovementPublicParentRf3BlobOriginals postMove, CancellationToken cancellationToken)
     {
         var placement = await PartitionMovementPolicyEpochColdRf3Operations.PlacementAsync(seed,
             cancellationToken).ConfigureAwait(false);
@@ -86,6 +107,8 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
         var terminal = await PartitionMovementPolicyEpochColdRf3Operations.TransferAsync(seed, request,
             placement, first.DestinationOwner, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicParentRf3Cut.RequireCurrentModelsAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobCurrentReadsRf3Assertions.RequireAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobNewEffectsRf3Trial.RequireCurrentBytesAsync(seed, postMove, cancellationToken).ConfigureAwait(false);
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, request,
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(before).ConfigureAwait(false);
@@ -93,6 +116,8 @@ internal static class PartitionMovementPolicyEpochColdRf3Trial
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, request,
             terminal, cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicParentRf3Cut.RequireCurrentModelsAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementBlobCurrentReadsRf3Assertions.RequireAsync(seed, cancellationToken).ConfigureAwait(false);
+        await PartitionMovementControlledBlobNewEffectsRf3Trial.RequireCurrentBytesAsync(seed, postMove, cancellationToken).ConfigureAwait(false);
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, request,
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementParentOperationalCapacityRf3Assertions.RequireNoEffectsAsync(wave, before, after);

@@ -3,7 +3,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 internal static class SampleChunkRecordDecoder
 {
     internal static SampleRecord[] Decode(SampleChunkPayload payload, SampleChunkDecodedText text,
-        ReadExecutionBudget budget)
+        SampleChunkWork budget)
     {
         const int PreviousTicksInitialValue = 0;
         const int PreviousSequenceInitialValue = 0;

@@ -7,7 +7,7 @@ namespace KeyLoad.Orleans;
 internal static class GrainControlledReadCapabilities
 {
     internal static bool Handles(GrainReadKind kind)
-        => kind is GrainReadKind.ControlledDocument or GrainReadKind.PartitionMovementOutcome or GrainReadKind.PartitionMovementTransferAuthority or GrainReadKind.PartitionMovementParentState or GrainReadKind.PartitionMovementReceiverIssuance or GrainReadKind.PartitionMovementRetireCancellationOutcome;
+        => kind is GrainReadKind.ControlledBlob or GrainReadKind.ControlledDocument or GrainReadKind.PartitionMovementOutcome or GrainReadKind.PartitionMovementTransferAuthority or GrainReadKind.PartitionMovementParentState or GrainReadKind.PartitionMovementReceiverIssuance or GrainReadKind.PartitionMovementRetireCancellationOutcome;
 
     internal static object Execute(DatabaseEngine database, IServiceProvider services,
         TimeProvider clock, PrincipalRecord principal, DecodedGrainRequest request,
@@ -16,6 +16,9 @@ internal static class GrainControlledReadCapabilities
         var limits = services.GetRequiredService<IOptions<DatabaseLimits>>();
         return request.Envelope.ReadKind switch
         {
+            GrainReadKind.ControlledBlob => ControlledBlobReadExecution.Execute(database,
+                limits, clock, principal, request.Envelope,
+                GrainNativePayload.Read<ControlledBlobReadRequest>(request.Payload), cancellationToken),
             GrainReadKind.ControlledDocument => ControlledDocumentReadExecution.Execute(database,
                 limits, clock, principal, request.Envelope,
                 GrainNativePayload.Read<ControlledDocumentReadRequest>(request.Payload), cancellationToken),

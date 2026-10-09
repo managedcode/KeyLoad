@@ -4,6 +4,8 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase == RequestCqrsProbePhase.AuthorizationReload && arm.SourceArmId is not null)
+        { return RequestCqrsSampleChunkProbePair.ValidAdjunct(arm); }
         if (arm.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved)
         {
             return arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null && arm.CommandId != Guid.Empty

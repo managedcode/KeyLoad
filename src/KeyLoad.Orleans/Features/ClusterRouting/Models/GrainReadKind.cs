@@ -130,5 +130,9 @@ public enum GrainReadKind
     /// <summary>Captures or verifies one stable actual native owner archive under current persisted credentials.</summary>
     ClusterBackupOwner,
     /// <summary>Requires an actual provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
-    WaitForAnnIndex
+    WaitForAnnIndex,
+    /// <summary>Read a bounded server-delegated Blob result or current data at its published owner.</summary>
+    ControlledBlob,
+    /// <summary>Read one authorized bounded sample-chunk window at its committed cut.</summary>
+    SampleChunkWindow
 }

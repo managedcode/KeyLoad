@@ -65,14 +65,18 @@ internal static class ClusterBackupAdmissionWholeFlow
         await Assert.That(fixture.ReadCompleteImage()).IsEquivalentTo(original);
         if (stopping is null)
         { await fixture.RequireHealthyOrdinaryBackupAsync(original, ct); }
-        else
+        stopping ??= fixture.Administration.DisposeAsync().AsTask();
+        var shutdownFailures = await Assert.ThrowsExactlyAsync<AggregateException>(() => stopping);
+        ArgumentNullException.ThrowIfNull(shutdownFailures);
+        fixture.ObservedShutdownFailure = shutdownFailures;
+        await Assert.That(shutdownFailures.InnerExceptions.Count).IsEqualTo(accepted.Count);
+        await Assert.That(shutdownFailures.InnerExceptions.All(error => error is KeyLoadException native
+            && native.Code == ErrorCode.OwnershipLost)).IsTrue();
+        foreach (var producer in accepted)
         {
-            var shutdownFailures = await Assert.ThrowsExactlyAsync<AggregateException>(() => stopping);
-            ArgumentNullException.ThrowIfNull(shutdownFailures);
-            await Assert.That(shutdownFailures.InnerExceptions.Count).IsEqualTo(accepted.Count);
-            await Assert.That(shutdownFailures.InnerExceptions.All(error => error is KeyLoadException native
-                && native.Code == ErrorCode.OwnershipLost)).IsTrue();
-            fixture.ObservedShutdownFailure = shutdownFailures;
+            var originalFailure = producer.Exception!.InnerExceptions.Single();
+            await Assert.That(shutdownFailures.InnerExceptions.Count(error => ReferenceEquals(error, originalFailure)))
+                .IsEqualTo(accepted.Count(task => ReferenceEquals(task.Exception!.InnerExceptions.Single(), originalFailure)));
         }
         await fixture.RequireUnchangedAndColdAsync(original);
     }

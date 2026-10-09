@@ -14,10 +14,10 @@ public sealed partial class DatabaseEngine
     {
         var control = RequireRetiredCommandControl(transaction, operatorPrincipal, body.Control, out var destination);
         var original = VerifyOperationAuthority(body.OriginalOperation);
-        var command = RequireControlledDocumentBatch(original, control.Partition);
+        var command = RequireControlledCommandBody(original, control.Partition);
         var principal = Principal(transaction, original.PrincipalId, now);
-        var resources = PartitionMoveResources.Capture(transaction, command.Partition, Limits);
-        RequireControlledDocumentPolicies(principal, command, resources);
+        var resources = PartitionMoveResources.Capture(transaction, control.Partition, Limits);
+        RequireControlledCommandPolicies(principal, original, control.Partition, resources);
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
         var identity = new PartitionControlCommandIdentity(scope.Kind, scope.Partition, original.PrincipalId, original.Id);
         var previous = PartitionControlCommandStorage.Read(transaction, identity, Limits.MaxBatchBytes);
@@ -46,7 +46,7 @@ public sealed partial class DatabaseEngine
         PartitionControlCommandStorage.Write(transaction, admitted, Limits.MaxBatchBytes);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction, principal.Id, true, Limits.MaxBatchMutations);
         PartitionMoveGrantStorage.ChangeOutstanding(transaction,
-            PartitionMoveGrantStorage.DatabaseKey(command.Partition.TenantId, command.Partition.DatabaseId),
+            PartitionMoveGrantStorage.DatabaseKey(control.Partition.TenantId, control.Partition.DatabaseId),
             true, Limits.MaxBatchMutations);
         return admitted;
     }

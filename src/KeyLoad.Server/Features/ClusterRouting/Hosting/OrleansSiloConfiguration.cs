@@ -20,7 +20,7 @@ internal static class OrleansSiloConfiguration
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, NativeConnectionOwnerIdentity connectionOwner, IPAddress address,
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
-        IRemoteDocumentReadRouter? remoteDocuments, IRemotePartitionQueryRouter? remoteQueries,
+        IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs, IRemotePartitionQueryRouter? remoteQueries,
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
         CancellationToken startupCancellation)
     {
@@ -34,6 +34,8 @@ internal static class OrleansSiloConfiguration
             builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
             if (remoteDocuments is not null)
             { builder.Services.AddSingleton(remoteDocuments); }
+            if (remoteBlobs is not null)
+            { builder.Services.AddSingleton(remoteBlobs); }
             if (remoteQueries is not null)
             { builder.Services.AddSingleton(remoteQueries); }
         }
@@ -193,6 +195,7 @@ internal static class OrleansSiloConfiguration
             checked(routing.Value.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
         silo.AddGrainService<PartitionReplicaGrainService>();
         silo.AddGrainService<RecurringDueGrainService>();
+        silo.AddGrainService<SampleChunkGrainService>();
         silo.AddActivityPropagation();
         // ADR-036: owner explicitly requires these two native experimental services.
 #pragma warning disable ORLEANSEXP003

@@ -15,7 +15,17 @@ internal static class ClusterRestoreRf3ArchiveOmissionTrial
         ImmutableArray<ClusterBackupOwnerReceipt> originals, ImmutableArray<string> archives,
         string ownedRoot, CancellationToken cancellationToken)
     {
-        var root = Path.Combine(ownedRoot, DerivativeDirectory);
+        var copies = await CopyOriginalsAsync(originals, archives,
+            Path.Combine(ownedRoot, DerivativeDirectory), cancellationToken).ConfigureAwait(false);
+        File.Delete(Path.Combine(copies[FirstOwner], CatalogEnvelopeFile));
+        await target.StartRejectedMissingAsync(copies, cancellationToken).ConfigureAwait(false);
+        await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal static Task<ImmutableArray<string>> CopyOriginalsAsync(
+        ImmutableArray<ClusterBackupOwnerReceipt> originals, ImmutableArray<string> archives,
+        string root, CancellationToken cancellationToken)
+    {
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
         { File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
@@ -28,8 +38,6 @@ internal static class ClusterRestoreRf3ArchiveOmissionTrial
                 original.ManifestDigest, IntegrationExecutionOptions.StorageExecution(), cancellationToken);
             copies.Add(copy);
         }
-        File.Delete(Path.Combine(copies[FirstOwner], CatalogEnvelopeFile));
-        await target.StartRejectedMissingAsync(copies.MoveToImmutable(), cancellationToken).ConfigureAwait(false);
-        await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);
+        return Task.FromResult(copies.MoveToImmutable());
     }
 }

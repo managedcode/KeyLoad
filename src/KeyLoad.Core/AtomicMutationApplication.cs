@@ -98,7 +98,15 @@ public sealed partial class DatabaseEngine
             DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
             ApplyCrossPartitionReverseEdge edge => ApplyGraphReverseDelivery(tx, principal, partition, edge),
             CompleteCrossPartitionReverseEdge edge => CompleteGraphReverseDelivery(tx, principal, partition, edge),
-            AppendSamples samples => Append(tx, principal, partition, samples),
+            AppendSamples samples => Append(tx, principal, partition, samples, now),
+            OpenSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowOpen.Execute(
+                this, tx, principal, partition, window, TimeSeriesOptions),
+            SealSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowSeal.Execute(
+                this, tx, principal, partition, window, TimeSeriesOptions),
+            MergeSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowMerge.Execute(
+                this, tx, principal, partition, window, TimeSeriesOptions),
+            DropSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowDrop.Execute(
+                this, tx, principal, partition, window, TimeSeriesOptions),
             ExpireSamples samples => Expire(tx, principal, partition, samples, now),
             RefreshSampleRollup rollup => global::KeyLoad.Core.Features.TimeSeries.SampleRollupCommands.Refresh(
                 this, tx, principal, partition, rollup, timeSeriesExecution.MaximumRollupBuckets),

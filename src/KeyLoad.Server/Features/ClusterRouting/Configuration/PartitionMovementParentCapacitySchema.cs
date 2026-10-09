@@ -15,6 +15,8 @@ internal static class PartitionMovementParentCapacitySchema
     internal const int FutureEnvelopeScalarOccurrences3 = 3;
     internal const int FutureEnvelopeGuidOccurrences3 = 3;
     internal const int FutureWitnessGuidOccurrences2 = 2;
+    internal const int FutureOutcomeWitnessScalarOccurrences2 = 2;
+    internal const int FutureOutcomeProofScalarOccurrences2 = 2;
     internal const int GrainReplyReferenceOccurrences2 = 2;
     internal const int SourceReplyReferenceOccurrences2 = 2;
     internal const int SourceReplyScalarOccurrences2 = 2;
@@ -24,7 +26,7 @@ internal static class PartitionMovementParentCapacitySchema
     internal const int FutureIssuanceGuidOccurrences5 = 5;
     internal const int FutureIssuanceDigestOccurrences4 = 4;
     internal const int FuturePhaseResultReferenceOccurrences2 = 2;
-    internal const int FutureOutcomeReferenceOccurrences4 = 4;
+    internal const int FutureOutcomeReferenceOccurrences5 = 5;
     internal const int FutureCommitScalarOccurrences3 = 3;
     internal const int FutureCommitReferenceOccurrences2 = 2;
     internal const int FutureFenceScalarOccurrences2 = 2;

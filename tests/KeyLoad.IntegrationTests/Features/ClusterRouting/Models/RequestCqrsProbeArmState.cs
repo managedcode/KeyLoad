@@ -19,6 +19,7 @@ internal sealed class RequestCqrsProbeArmState(string principalId, Guid commandI
     internal bool Settled { get; set; }
     internal bool DisposedGateJoined { get; set; }
     internal bool Retired { get; set; }
+    internal bool ProcessOwnerJoined { get; set; }
     internal bool ProducerDisposedSeen { get; set; }
     internal bool CanonicalOwnerDisposedSeen { get; set; }
     internal bool OwnerDisposedSeen => Phase == RequestCqrsProbePhase.CanonicalJournalFlushed

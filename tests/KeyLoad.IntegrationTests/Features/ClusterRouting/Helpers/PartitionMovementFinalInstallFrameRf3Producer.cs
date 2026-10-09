@@ -58,8 +58,18 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
             cancellationToken), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    internal static async Task<PartitionMoveResult?> ResumeFinalAsync(TwoRf3MembershipWave wave,
+    internal static Task<PartitionMoveResult?> ResumeFinalAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, ErrorCode? expectedError, CancellationToken cancellationToken)
+        => ResumeFinalCoreAsync(wave, seed, expectedError, null, cancellationToken);
+
+    internal static Task<PartitionMoveResult?> ResumeCapacityRefusalAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
+        => ResumeFinalCoreAsync(wave, seed, ErrorCode.BudgetExceeded,
+            PartitionMovementFinalOutcomeCapacityProtocol.Exceeded, cancellationToken);
+
+    private static async Task<PartitionMoveResult?> ResumeFinalCoreAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, ErrorCode? expectedError, string? expectedDetail,
+        CancellationToken cancellationToken)
     {
         var signed = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave,
             cancellationToken).ConfigureAwait(false);
@@ -93,6 +103,8 @@ internal static class PartitionMovementFinalInstallFrameRf3Producer
             {
                 await Assert.That(actual.IsFailed).IsTrue();
                 await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(error.ToString());
+                if (expectedDetail is not null)
+                { await Assert.That(actual.Problem?.Detail).IsEqualTo(expectedDetail); }
             }
             else
             { terminal = await McpCallerAssertions.SdkSuccessAsync(actual); }

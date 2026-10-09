@@ -28,6 +28,21 @@ internal static class ZoneTreeIdentityFile
         return identity;
     }
 
+    internal static void ValidateBeforeOpen(ZoneTreeStoreOptions options)
+    {
+        if (!Directory.Exists(options.Directory))
+        {
+            return;
+        }
+        var path = Path.Combine(options.Directory, IdentityFileName);
+        if (File.Exists(path))
+        {
+            Validate(Read(path, options.MaximumIdentityFileBytes, options.StreamBufferBytes), options);
+            return;
+        }
+        RequireEmptyDirectory(options.Directory);
+    }
+
     private static void RequireEmptyOwnedDirectory(string directory, FileStream ownership)
     {
         ArgumentNullException.ThrowIfNull(ownership);
@@ -40,9 +55,17 @@ internal static class ZoneTreeIdentityFile
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
 
+        RequireEmptyDirectory(directory);
+    }
+
+    private static void RequireEmptyDirectory(string directory)
+    {
+        var ownerPath = Path.GetFullPath(Path.Combine(directory, OwnerLockFileName));
         foreach (var entry in Directory.EnumerateFileSystemEntries(directory))
         {
-            if (!string.Equals(Path.GetFullPath(entry), ownerPath, StringComparison.Ordinal))
+            if (!string.Equals(Path.GetFullPath(entry), ownerPath, StringComparison.Ordinal)
+                || (File.GetAttributes(entry) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoFileAttributes
+                || new FileInfo(entry).Length != NoFileAttributes)
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
             }

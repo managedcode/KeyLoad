@@ -28,6 +28,7 @@ internal static class FeedLiveRf3Protocol
     internal const long DeletedRevision = 3;
     internal const decimal UpdatedNumber = 2m;
     internal const long FirstSequence = 1;
+    internal const long HiddenSequence = 2;
     internal const long UpdatedSequence = 3;
     internal const long DeletedSequence = 4;
     internal const int PageLimit = 1;

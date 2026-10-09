@@ -136,7 +136,7 @@ internal static class PartitionMovementFinalInstallFrameRf3Trial
         return frames.ToArray();
     }
 
-    private static async Task RequireHistoryAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
+    internal static async Task RequireHistoryAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         PartitionMovementFinalInstallFramePrecut precut, int originalCap, int deniedCap, CancellationToken cancellationToken)
     {
         var last = precut.State.LastIssued!;

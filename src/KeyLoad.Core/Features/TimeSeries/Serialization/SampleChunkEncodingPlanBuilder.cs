@@ -28,7 +28,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         eventIds = new(capacity, StringComparer.Ordinal);
     }
 
-    internal void Add(SampleRecord? record, int index, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
+    internal void Add(SampleRecord? record, int index, SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyIndex = 0;
         const int RecordCountSingleItemCount = 1;
@@ -58,7 +58,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         count++;
     }
 
-    internal SampleChunkEncodingPlan Complete(ReadExecutionBudget budget)
+    internal SampleChunkEncodingPlan Complete(SampleChunkWork budget)
     {
         const long TotalInitialValue = 0L;
 
@@ -115,7 +115,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         }
     }
 
-    private void AddColumnLengths(SampleRecord record, int index, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
+    private void AddColumnLengths(SampleRecord record, int index, SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyIndex = 0;
         const int FirstValueRecordIndex = 0;

@@ -8,7 +8,7 @@ internal static class FeedLiveRf3Assertions
 {
     internal static async Task<ChangeFeedPage> FeedAsync(RequestCqrsRf3Callers reader,
         FeedLiveRf3Scenario scenario, ReadChangeFeedRequest request, CommitToken commit,
-        long sequence, long revision, string json, bool updated, CancellationToken token)
+        long sequence, long revision, string json, bool updated, long tail, CancellationToken token)
     {
         var page = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadChangesAsync(request, token));
         await LiteralAsync(page, scenario, commit, sequence, revision, json, updated);
@@ -18,10 +18,21 @@ internal static class FeedLiveRf3Assertions
         await LiteralAsync(official, scenario, commit, sequence, revision, json, updated);
         await SqlRf3Protocol.EqualAsync(page.Changes, official.Changes);
         var sql = SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.Feed, request);
-        await LiteralAsync(await SqlRf3Protocol.SdkAsync<ChangeFeedPage>(reader.Sdk, sql, token),
-            scenario, commit, sequence, revision, json, updated);
-        await LiteralAsync(await SqlRf3Protocol.McpAsync<ChangeFeedPage>(reader.Mcp, sql, token),
-            scenario, commit, sequence, revision, json, updated);
+        var sdkSql = await SqlRf3Protocol.SdkAsync<ChangeFeedPage>(reader.Sdk, sql, token);
+        await LiteralAsync(sdkSql, scenario, commit, sequence, revision, json, updated);
+        var mcpSql = await SqlRf3Protocol.McpAsync<ChangeFeedPage>(reader.Mcp, sql, token);
+        await LiteralAsync(mcpSql, scenario, commit, sequence, revision, json, updated);
+        await FeedPageRf3Assertions.RequireAsync(page, sequence, tail, commit, request,
+            async next => await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadChangesAsync(next, token)));
+        await FeedPageRf3Assertions.RequireAsync(official, sequence, tail, commit, request,
+            async next => (await McpCallerAssertions.SuccessAsync<ChangeFeedPage>(
+                await reader.Mcp.CallAsync(FeedLiveRf3Protocol.Feed, next, token))).Value);
+        await FeedPageRf3Assertions.RequireAsync(sdkSql,
+            sequence, tail, commit, request, next => SqlRf3Protocol.SdkAsync<ChangeFeedPage>(reader.Sdk,
+                SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.Feed, next), token));
+        await FeedPageRf3Assertions.RequireAsync(mcpSql,
+            sequence, tail, commit, request, next => SqlRf3Protocol.McpAsync<ChangeFeedPage>(reader.Mcp,
+                SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.Feed, next), token));
         return page;
     }
 

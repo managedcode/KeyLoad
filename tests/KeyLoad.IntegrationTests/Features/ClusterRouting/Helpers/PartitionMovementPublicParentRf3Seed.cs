@@ -44,6 +44,11 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     internal IReadOnlyList<(CommandRequest Command, CommitReceipt Receipt)> Originals => originals;
     internal PartitionMovementPublicParentRf3ModelCut OriginalModels { get; private set; } = null!;
     internal BlobMetadata Blob { get; private set; } = null!;
+    private const int OriginalPartCount = 2;
+    private const int OriginalFirstPart = 0;
+    private const int OriginalTailPart = 1;
+
+    internal PartitionMovementPublicParentRf3BlobOriginals BlobOriginals { get; private set; } = null!;
     internal static byte[] BlobRange => [0x41, 0x41, 0x42, 0x42];
     internal static string ForwardMessage => CompositionMessage;
     internal static string DerivedMessage => ReversePrefix + EdgePrefix + CompositionMessage;
@@ -141,9 +146,11 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         var first = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 0, firstBytes, BlobIntegrity.PartHash(firstBytes));
         var tailBytes = new byte[] { 0x42, 0x42, 0x42, 0x42 };
         var tail = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 1, tailBytes, BlobIntegrity.PartHash(tailBytes));
+        var partReceipts = new List<BlobCommitResult<BlobUploadInfo>>(OriginalPartCount);
         foreach (var request in new[] { first, tail })
         {
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await Source.WriteBlobPartAsync(request, cancellationToken));
+            partReceipts.Add(receipt);
             blobReplays.Add(async token =>
             {
                 await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await Source.WriteBlobPartAsync(request, token)));
@@ -156,6 +163,7 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var completed = await McpCallerAssertions.SdkSuccessAsync(await Source.CompleteBlobUploadAsync(complete, cancellationToken));
         Blob = completed.Value;
+        BlobOriginals = new(begin, begun, first, partReceipts[OriginalFirstPart], tail, partReceipts[OriginalTailPart], complete, completed);
         blobReplays.Add(async token =>
         {
             await SqlRf3Protocol.EqualAsync(completed, await McpCallerAssertions.SdkSuccessAsync(await Source.CompleteBlobUploadAsync(complete, token)));

@@ -9,7 +9,7 @@ internal static class SampleChunkChecksum
     private const string DomainText = "keyload.sample-chunk.v1";
     private static readonly byte[] Domain = Encoding.ASCII.GetBytes(DomainText);
 
-    internal static byte[] Compute(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static byte[] Compute(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)
     {
         const int ChecksumHeaderFields = 2;
 
@@ -30,14 +30,14 @@ internal static class SampleChunkChecksum
         return hash.GetHashAndReset();
     }
 
-    internal static void Verify(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static void Verify(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)
     {
         SampleChunkWire.Require(payload.Checksum.Length == SHA256.HashSizeInBytes);
         var actual = Compute(payload, budget, hashChunkBytes);
         SampleChunkWire.Require(CryptographicOperations.FixedTimeEquals(actual, payload.Checksum.Span));
     }
 
-    private static void AppendColumn(IncrementalHash hash, ReadOnlySpan<byte> column, ReadExecutionBudget budget, int hashChunkBytes)
+    private static void AppendColumn(IncrementalHash hash, ReadOnlySpan<byte> column, SampleChunkWork budget, int hashChunkBytes)
     {
         Span<byte> length = stackalloc byte[sizeof(int)];
         BinaryPrimitives.WriteInt32LittleEndian(length, column.Length);
@@ -45,7 +45,7 @@ internal static class SampleChunkChecksum
         Append(hash, column, budget, hashChunkBytes);
     }
 
-    private static void Append(IncrementalHash hash, ReadOnlySpan<byte> value, ReadExecutionBudget budget, int hashChunkBytes)
+    private static void Append(IncrementalHash hash, ReadOnlySpan<byte> value, SampleChunkWork budget, int hashChunkBytes)
     {
         const int OffsetInitialValue = 0;
 

@@ -2,6 +2,7 @@ using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
+using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -23,9 +24,11 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private TimeSpan? shutdownTimeout;
     private TimeProvider? shutdownClock;
     private readonly List<PartitionMovementLateNativeNode> coldNodes = [];
+    private readonly IControlledBlobWireBorrowObserver? blobWireObserver;
 
-    internal PartitionMovementLateNativeOwners()
+    internal PartitionMovementLateNativeOwners(IControlledBlobWireBorrowObserver? blobWireObserver = null)
     {
+        this.blobWireObserver = blobWireObserver;
         var root = Path.Combine(Path.GetTempPath(), "keyload-late-native-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
@@ -44,7 +47,8 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         shutdown = null;
         stopped = false;
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
-        { nodes.Add(new(Settings.Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null)); }
+        { nodes.Add(new(Settings.Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
+            index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null)); }
         shutdownTimeout = nodes.First().ShutdownTimeout;
         shutdownClock = nodes.First().Clock;
         await Task.WhenAll(nodes.Select(node => node.StartAsync(cancellationToken))).ConfigureAwait(false);

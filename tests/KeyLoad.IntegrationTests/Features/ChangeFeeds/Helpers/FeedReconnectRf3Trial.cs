@@ -19,7 +19,7 @@ internal static class FeedReconnectRf3Trial
         {
             var initial = await FeedLiveRf3Assertions.FeedAsync(reader, scenario, scenario.Feed,
                 scenario.Receipt.Token, FeedLiveRf3Protocol.FirstSequence, FeedLiveRf3Protocol.FirstRevision,
-                FeedLiveRf3Protocol.FirstProjected, false, token);
+                FeedLiveRf3Protocol.FirstProjected, false, FeedLiveRf3Protocol.HiddenSequence, token);
             await Assert.That(initial.HasMore).IsTrue();
             cursor = initial.Cursor;
         }
@@ -33,11 +33,11 @@ internal static class FeedReconnectRf3Trial
         var request = scenario.Feed with { Cursor = hidden.Cursor };
         var page = await FeedLiveRf3Assertions.FeedAsync(reconnected, scenario, request, updated.Token,
             FeedLiveRf3Protocol.UpdatedSequence, FeedLiveRf3Protocol.UpdatedRevision,
-            FeedLiveRf3Protocol.UpdatedProjected, true, token);
+            FeedLiveRf3Protocol.UpdatedProjected, true, FeedLiveRf3Protocol.UpdatedSequence, token);
         await Assert.That(page.HasMore).IsFalse();
         await FeedLiveRf3Assertions.FeedAsync(reconnected, scenario, request, updated.Token,
             FeedLiveRf3Protocol.UpdatedSequence, FeedLiveRf3Protocol.UpdatedRevision,
-            FeedLiveRf3Protocol.UpdatedProjected, true, token);
+            FeedLiveRf3Protocol.UpdatedProjected, true, FeedLiveRf3Protocol.UpdatedSequence, token);
         var recoveredOwner = await McpCallerAssertions.SdkSuccessAsync(await recoveredAdmin.Sdk.StatusAsync(token));
         await Assert.That(recoveredOwner.NodeId).IsEqualTo(originalOwner.NodeId);
         await Assert.That(recoveredOwner.Incarnation).IsEqualTo(originalOwner.Incarnation);
@@ -68,6 +68,6 @@ internal static class FeedReconnectRf3Trial
             () => FeedLiveRf3Assertions.DeniedAsync(reader, original, ErrorCode.TokenInvalidated, token), token);
         await FeedLiveRf3Assertions.FeedAsync(reader, scenario, scenario.Feed, scenario.Receipt.Token,
             FeedLiveRf3Protocol.FirstSequence, FeedLiveRf3Protocol.FirstRevision,
-            FeedLiveRf3Protocol.FirstProjected, false, token);
+            FeedLiveRf3Protocol.FirstProjected, false, FeedLiveRf3Protocol.UpdatedSequence, token);
     }
 }

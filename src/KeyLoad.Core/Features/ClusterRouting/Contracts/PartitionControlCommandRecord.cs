@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.BlobStorage;
+
 namespace KeyLoad.Core.Features.ClusterRouting.Contracts;
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.CommandPhaseAlias)]
@@ -25,9 +27,11 @@ internal sealed record PartitionControlCommandRecord(
     [property: Orleans.Id(11)] OperationResult? OriginalResult,
     [property: Orleans.Id(12)] PartitionControlDelegation? Delegation = null,
     [property: Orleans.Id(13)] ReplicatedOperation? OriginalOperation = null,
-    [property: Orleans.Id(14)] ReadOnlyMemory<byte> TargetBody = default);
+    [property: Orleans.Id(14)] ReadOnlyMemory<byte> TargetBody = default,
+    [property: Orleans.Id(15)] BlobOutcomeAuthority? BlobAuthority = null);
 
 [Orleans.GenerateSerializer, Orleans.Alias(PartitionMoveProtocol.CommandEffectAlias)]
 internal sealed record PartitionControlEffectPayload(
     [property: Orleans.Id(0)] CommitReceipt Receipt,
-    [property: Orleans.Id(1)] OperationResult OriginalResult);
+    [property: Orleans.Id(1)] OperationResult OriginalResult,
+    [property: Orleans.Id(2)] BlobOutcomeAuthority? BlobAuthority = null);

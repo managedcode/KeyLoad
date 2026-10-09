@@ -12,6 +12,16 @@ internal static class SampleChunkCodec
     {
         var execution = ReadExecution(executionOptions);
         ArgumentNullException.ThrowIfNull(budget);
+        return EncodeCore(records, SampleChunkWork.Observe(budget), execution, maximumBytes);
+    }
+
+    internal static byte[] EncodeOrdered(ReadOnlySpan<SampleRecord> records,
+        IOptions<TimeSeriesExecutionOptions> executionOptions, int maximumBytes)
+        => EncodeCore(records, SampleChunkWork.Ordered, ReadExecution(executionOptions), maximumBytes);
+
+    private static byte[] EncodeCore(ReadOnlySpan<SampleRecord> records, SampleChunkWork budget,
+        TimeSeriesExecutionOptions execution, int maximumBytes)
+    {
         SampleChunkWire.ValidateMaximum(maximumBytes);
         budget.Check();
         var plan = SampleChunkEncodingPlan.Create(records, budget, execution.TextCancellationCheckIntervalCodeUnits);
@@ -45,6 +55,20 @@ internal static class SampleChunkCodec
     {
         var execution = ReadExecution(executionOptions);
         ArgumentNullException.ThrowIfNull(budget);
+        return DecodeCore(bytes, SampleChunkWork.Observe(budget), execution, maximumBytes);
+    }
+
+    internal static SampleRecord[] DecodeWithWork(ReadOnlySpan<byte> bytes, SampleChunkWork work,
+        IOptions<TimeSeriesExecutionOptions> executionOptions, int maximumBytes)
+        => DecodeCore(bytes, work, ReadExecution(executionOptions), maximumBytes);
+
+    internal static SampleRecord[] DecodeOrdered(ReadOnlySpan<byte> bytes,
+        IOptions<TimeSeriesExecutionOptions> executionOptions, int maximumBytes)
+        => DecodeCore(bytes, SampleChunkWork.Ordered, ReadExecution(executionOptions), maximumBytes);
+
+    internal static SampleRecord[] DecodeCore(ReadOnlySpan<byte> bytes, SampleChunkWork budget,
+        TimeSeriesExecutionOptions execution, int maximumBytes)
+    {
         SampleChunkWire.ValidateMaximum(maximumBytes);
         if (bytes.Length > maximumBytes)
         {

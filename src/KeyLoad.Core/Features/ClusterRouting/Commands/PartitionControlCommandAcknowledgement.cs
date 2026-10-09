@@ -15,14 +15,15 @@ public sealed partial class DatabaseEngine
         var grant = PartitionMoveGrantStorage.Read(transaction, body.Identity.Partition!, body.TargetGrantId,
             Limits.MaxBatchBytes) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
         var bodyDigest = Convert.ToHexStringLower(SHA256.HashData(record.TargetBody.Span));
-        var payload = new PartitionControlEffectPayload(body.TargetReceipt, body.OriginalResult);
+        var payload = new PartitionControlEffectPayload(body.TargetReceipt, body.OriginalResult, body.BlobAuthority);
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(payload)));
         PartitionControlCommandValidation.Require(record with
         {
             Phase = PartitionControlCommandPhase.EffectAcknowledged,
             TargetEffect = body.TargetReceipt,
             TargetEffectDigest = digest,
-            OriginalResult = body.OriginalResult
+            OriginalResult = body.OriginalResult,
+            BlobAuthority = body.BlobAuthority
         }, body.Identity);
         if (grant.BodyDigest != bodyDigest || grant.Stage != PartitionMovePeerStage.ControlApplyCommand || grant.PhaseCommandId != record.EffectId
             || grant.MoveId != record.Delegation!.MoveId || grant.AbortDisposition is not null
@@ -42,7 +43,8 @@ public sealed partial class DatabaseEngine
             Phase = PartitionControlCommandPhase.EffectAcknowledged,
             TargetEffect = body.TargetReceipt,
             TargetEffectDigest = digest,
-            OriginalResult = body.OriginalResult
+            OriginalResult = body.OriginalResult,
+            BlobAuthority = body.BlobAuthority
         };
         PartitionControlCommandStorage.Write(transaction, acknowledged, Limits.MaxBatchBytes);
         return acknowledged;

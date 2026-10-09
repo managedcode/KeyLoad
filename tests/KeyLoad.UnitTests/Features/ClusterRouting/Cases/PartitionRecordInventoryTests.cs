@@ -6,7 +6,7 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    private const int ExpectedFamilyCount = 58;
+    private const int ExpectedFamilyCount = 62;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     private static readonly string[] ExpectedFamilies =
@@ -18,7 +18,8 @@ internal sealed class PartitionRecordInventoryTests
         "outbox", "outbox-head", "outcome-locator-v1", "outcome-locator-v2", "outcome-v2", "projection-consumer", "projection-receipt", "queue-counters",
         "queue-transfer-intent", "queue-transfer-source-capacity", "queue-transfer-target-capacity",
         "queue-transfer-target-receipt", "ready", "recurring-saga-capacity", "recurring-schedule",
-        "saga-state", "sample", "sample-id", "sample-retention-v1", "sample-rollup-v1", "sample-sequence", "scheduled",
+        "saga-state", "sample", "sample-chunk-block", "sample-chunk-correction", "sample-chunk-manifest",
+        "sample-chunk-window", "sample-id", "sample-retention-v1", "sample-rollup-v1", "sample-sequence", "scheduled",
         "stream-head", "subscription", "subscription-completion", "subscription-inbox",
         "subscription-window", "topic-event", "topic-event-id", "topic-head", "unique", "vector",
         "vector-projection-effect", "vector-projection-lineage", "visibility-epoch"

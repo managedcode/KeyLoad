@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server;
+using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,9 +22,10 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
     private Task? applicationDisposal;
     private Task? partitionDisposal;
 
-    internal PartitionMovementLateNativeNode(string[] arguments, IGrainPartitionMovementSealedOperationObserver? observer)
+    internal PartitionMovementLateNativeNode(string[] arguments, IGrainPartitionMovementSealedOperationObserver? observer,
+        IControlledBlobWireBorrowObserver? blobWireObserver = null)
     {
-        Application = ServerConfiguration.Build(arguments, observer);
+        Application = ServerConfiguration.Build(arguments, observer, blobWireObserver);
         ShutdownTimeout = Application.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value.ShutdownTimeout;
         Clock = Application.Services.GetRequiredService<TimeProvider>();
     }

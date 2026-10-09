@@ -5,7 +5,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 /// <summary>Selects the one unclaimed private arm that matches the validated request identity.</summary>
 internal static class RequestCqrsProbeClaimSelection
 {
-    internal static RequestCqrsProbeLoadedArm? Find(GrainRequestProbeIdentity identity, RequestCqrsProbeSnapshot snapshot, string actualVoter)
+    internal static RequestCqrsProbeLoadedArm? Find(GrainRequestProbeIdentity identity, RequestCqrsProbeSnapshot snapshot, string actualVoter, GrainRequestPhase phase)
     {
         const int EmptyMatchesLength = 0;
         const int ClaimEmptyMatchesLength = 1;
@@ -22,9 +22,7 @@ internal static class RequestCqrsProbeClaimSelection
         if (matches.Length == EmptyMatchesLength)
         { return null; }
         if (matches.Length != ClaimEmptyMatchesLength)
-        { throw Invalid(); }
+        { return RequestCqrsSampleChunkProbePair.Select(matches, phase); }
         return matches[MatchesFirstIndex];
     }
-
-    private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);
 }

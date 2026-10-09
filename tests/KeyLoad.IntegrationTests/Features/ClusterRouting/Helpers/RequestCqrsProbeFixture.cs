@@ -67,7 +67,7 @@ internal sealed class RequestCqrsProbeFixture
         lock (sync)
         {
             if (!arms.TryGetValue(armId, out var arm) || arm.Action != RequestCqrsProbeAction.Hold
-                || arm.Retired || arm.Settled || arm.DisposedGateJoined || requestId == Guid.Empty
+                || arm.Retired || arm.Settled || arm.DisposedGateJoined || arm.ProcessOwnerJoined || requestId == Guid.Empty
                 || arm.RequestId != requestId || arm.ReleaseWritten)
             { throw new InvalidOperationException(InvalidRelease); }
             var bytes = RequestCqrsProbeJsonWriter.Release(SessionId, armId, requestId);
@@ -96,7 +96,7 @@ internal sealed class RequestCqrsProbeFixture
         {
             admissionStopped = true;
             open = arms.Values.Where(arm => arm.Action == RequestCqrsProbeAction.Hold
-                && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined).ToArray();
+                && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined).ToArray();
         }
         foreach (var arm in open)
         {
@@ -134,7 +134,7 @@ internal sealed class RequestCqrsProbeFixture
         lock (sync)
         {
             if (cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
-                || (arm.Action == RequestCqrsProbeAction.Hold && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined))
+                || (arm.Action == RequestCqrsProbeAction.Hold && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined))
             { throw new InvalidOperationException(InvalidArm); }
             foreach (var voter in Nodes)
             {
@@ -152,6 +152,13 @@ internal sealed class RequestCqrsProbeFixture
     internal void JoinDisposedGate(Guid armId, Task originalProducer)
     { lock (sync) { RequestCqrsProbeDisposedGateCleanup.Join(ArmFor(armId), activeGates, originalProducer); } }
 
+    internal void JoinKilledOwnerGates(TwoRf3MembershipWave wave, Aspire.Hosting.DistributedApplication originalOwner,
+        IReadOnlyList<Guid> originalArms)
+    {
+        lock (sync)
+        { RequestCqrsProbeKilledOwnerCleanup.Join(wave, originalOwner, originalArms, arms, activeGates, Json); }
+    }
+
     internal void RetainEvidence()
     {
         lock (sync)
@@ -164,8 +171,8 @@ internal sealed class RequestCqrsProbeFixture
         {
             admissionStopped = true;
             if (arms.Values.Any(arm => (arm.Action == RequestCqrsProbeAction.Hold
-                    && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.Retired)
-                || (arm.RequestId is not null && !arm.OwnerDisposedSeen)))
+                    && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined && !arm.Retired)
+                || (arm.RequestId is not null && !arm.OwnerDisposedSeen && !arm.ProcessOwnerJoined)))
             { throw new InvalidOperationException(UnsettledGates); }
             if (cleaned || retainEvidence)
             { return Task.CompletedTask; }

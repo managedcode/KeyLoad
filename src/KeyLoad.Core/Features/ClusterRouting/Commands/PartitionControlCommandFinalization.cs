@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
         var scope = CommandOutcomePartitionIdentity.Resolve(original);
         var selected = CommandOutcomeKeyResolver.Select(transaction, original.PrincipalId, original.Id, scope);
         var stored = BuildStoredOutcome(record.Fingerprint, dataPrincipal.PolicyEpoch, record.OriginalResult,
-            null, null, scope);
+            record.BlobAuthority, null, scope);
         if (selected.Outcome is { } previous)
         {
             if (previous.Fingerprint != record.Fingerprint

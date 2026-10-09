@@ -1,3 +1,4 @@
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.QueryExecution;
@@ -16,12 +17,14 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     private Task? disposal;
     internal bool IsJoined => work.IsJoined;
     internal IRemoteDocumentReadRouter? Router { get; private set; }
+    internal IRemoteBlobReadRouter? BlobRouter { get; private set; }
     internal IControlledDocumentCommandRouter? CommandRouter { get; private set; }
     internal IRemotePartitionQueryRouter? QueryRouter { get; private set; }
     internal RemoteDocumentEndpoint? Endpoint { get; private set; }
 
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
-        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock)
+        PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
+        IControlledBlobWireBorrowObserver? wireObserver = null)
     {
         var settings = options.Node.Value.MembershipAuthority;
         if (!settings.RemoteDocumentReads)
@@ -29,7 +32,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         var runtime = new RemoteDocumentRuntime(options);
         try
         {
-            runtime.Initialize(node, partition, options, clock);
+            runtime.Initialize(node, partition, options, clock, wireObserver);
             return runtime;
         }
         catch (Exception primary)
@@ -45,17 +48,19 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     }
 
     private void Initialize(OrleansNode node, PartitionHost partition,
-        ServerRuntimeOptions options, TimeProvider clock)
+        ServerRuntimeOptions options, TimeProvider clock, IControlledBlobWireBorrowObserver? wireObserver)
     {
         var settings = options.Node.Value.MembershipAuthority;
         if (settings.Mode == MembershipAuthoritySettingsProtocol.Authority)
         {
-            client = new(options.Node, options.Membership, clock);
+            client = new(options.Node, options.Membership, clock, wireObserver);
             Router = new RemoteDocumentRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
+            BlobRouter = new RemoteBlobReadRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
             if (options.PartitionMovement.Value.Enabled)
             {
                 CommandRouter = new ControlledDocumentCommandRouter(node, partition, options.Node,
-                options.Core.DatabaseLimits, clock);
+                options.Core.DatabaseLimits,
+                new ControlledBlobSourceRead(node, partition, options.Node, options.Core.DatabaseLimits, client, clock), clock);
             }
             if (settings.RemotePartitionQueries)
             { QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock); }
@@ -66,7 +71,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
                 options.GrainRouting, options.Membership, clock);
             var controlled = new RemoteControlledDocumentReceiver(node, partition, options.Node,
                 options.Membership, options.GrainRouting, clock);
-            Endpoint = new(options.Node, receiver, work, controlled, options.Membership, options.GrainRouting, clock);
+            var controlledBlob = new RemoteControlledBlobReceiver(node, partition, options.Node,
+                options.Membership, options.GrainRouting, clock);
+            Endpoint = new(options.Node, receiver, work, controlled, controlledBlob, options.Membership, options.GrainRouting, clock);
         }
     }
 

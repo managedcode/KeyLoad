@@ -7,6 +7,7 @@ using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -17,7 +18,8 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerConfiguration
 {
-    internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null)
+    internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
+        IControlledBlobWireBorrowObserver? blobWireObserver = null)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
@@ -36,7 +38,7 @@ internal static class ServerConfiguration
         builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
             .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
                 ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
-        Register(builder.Services);
+        Register(builder.Services, blobWireObserver);
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
         McpServerComposition.Register(builder);
@@ -102,7 +104,7 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services)
+    private static void Register(IServiceCollection services, IControlledBlobWireBorrowObserver? blobWireObserver)
     {
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
@@ -117,7 +119,10 @@ internal static class ServerConfiguration
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         PhysicalOwnerRegistrationServices.Add(services);
-        services.AddSingleton<OrleansNode>();
+        if (blobWireObserver is null)
+        { services.AddSingleton<OrleansNode>(); }
+        else
+        { services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider, blobWireObserver)); }
         services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
         services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(
             provider.GetRequiredService<IOptions<NodeOptions>>(),

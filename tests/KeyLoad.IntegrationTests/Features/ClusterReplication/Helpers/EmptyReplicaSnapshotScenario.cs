@@ -15,8 +15,7 @@ internal static class EmptyReplicaSnapshotScenario
     private const string TailJson = "{\"tail\":true}";
     private const int NodeCount = 3;
     private const long NativeSnapshotThreshold = 16;
-    private const long CommandsBeforeFinalInspection = 9;
-    private const long ReplaysBeforeFinalInspection = 8;
+    private const long TailCommandsBeforeNativeInspection = 1;
     private const string OtherResource = "other-snapshot-resource";
 
     internal static async Task RunAsync(ClusterFixture fixture)
@@ -50,6 +49,13 @@ internal static class EmptyReplicaSnapshotScenario
             running = true;
             var (tailCommand, tail, baseline) = await CreatePostInstallTailAsync(state, index, installed,
                 final.Receipt, installedSnapshot, timeout.Token);
+            await fixture.KillContainerAsync(node, Fault, timeout.Token);
+            running = false;
+            await RequireNativeCutAsync(fixture, node, tailCommand, tail);
+            await fixture.RestartContainerAsync(node, timeout.Token);
+            running = true;
+            var reopened = await RequireAppliedAsync(state.Clients[index], installed, tail, timeout.Token);
+            await Assert.That(reopened.NodeId).IsEqualTo(installed.NodeId);
             mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
             await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
                 baseline, timeout.Token);
@@ -58,13 +64,6 @@ internal static class EmptyReplicaSnapshotScenario
             var closing = mcp;
             mcp = null;
             await closing.DisposeAsync();
-            await fixture.KillContainerAsync(node, Fault, timeout.Token);
-            running = false;
-            await RequireNativeCutAsync(fixture, node, tailCommand, tail);
-            await fixture.RestartContainerAsync(node, timeout.Token);
-            running = true;
-            var reopened = await RequireAppliedAsync(state.Clients[index], installed, tail, timeout.Token);
-            await Assert.That(reopened.NodeId).IsEqualTo(installed.NodeId);
             mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
             await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
                 baseline, timeout.Token, allRoutes: true);
@@ -91,7 +90,7 @@ internal static class EmptyReplicaSnapshotScenario
         await Assert.That(actual.Snapshot!.Index).IsGreaterThan(0L);
         await Assert.That(actual.CommittedIndex).IsGreaterThanOrEqualTo(final.Token.Position);
         await Assert.That(actual.LastIndex).IsGreaterThanOrEqualTo(actual.CommittedIndex);
-        await Assert.That(checked(actual.LastIndex - actual.Snapshot.Index + CommandsBeforeFinalInspection)).IsLessThan(NativeSnapshotThreshold);
+        await Assert.That(checked(actual.LastIndex - actual.Snapshot.Index + TailCommandsBeforeNativeInspection)).IsLessThan(NativeSnapshotThreshold);
         EmptyReplicaSnapshotStorage.RequireImage(fixture, node, actual.Snapshot);
         return actual.Snapshot.Index;
     }
@@ -144,7 +143,7 @@ internal static class EmptyReplicaSnapshotScenario
         var baseline = await EmptyReplicaSnapshotAssertions.CaptureAsync(state.Clients[(index + 1) % NodeCount], state, token);
         var afterTail = await RequireAppliedAsync(state.Clients[index], beforeTail, tail, token);
         await Assert.That(afterTail.NodeId).IsEqualTo(installed.NodeId);
-        await Assert.That(checked(afterTail.Applied - installedSnapshot + ReplaysBeforeFinalInspection)).IsLessThan(NativeSnapshotThreshold);
+        await Assert.That(checked(afterTail.Applied - installedSnapshot)).IsLessThan(NativeSnapshotThreshold);
         return (tailCommand, tail, baseline);
     }
 

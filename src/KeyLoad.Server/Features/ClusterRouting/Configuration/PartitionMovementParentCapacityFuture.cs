@@ -51,16 +51,24 @@ internal static class PartitionMovementParentCapacityFuture
     internal static long FutureWitness(long reply)
         => checked(ReferenceFieldBytes + ScalarFieldBytes + GuidFieldBytes * FutureWitnessGuidOccurrences2 + Bytes(reply) + DigestField);
 
+    internal static long FutureOutcomeWitness(long operationResult, long transportProof)
+        => checked(ReferenceFieldBytes + operationResult
+            + ScalarFieldBytes * FutureOutcomeWitnessScalarOccurrences2 + transportProof);
+
+    internal static long FutureOutcomeProof(long reply)
+        => checked(ReferenceFieldBytes + ScalarFieldBytes * FutureOutcomeProofScalarOccurrences2
+            + GuidFieldBytes * FutureWitnessGuidOccurrences2 + Bytes(reply) + DigestField);
+
     internal static long GrainReply<T>(long typedValue)
     {
         var value = checked(ReferenceFieldBytes + NativeEncodedTypeMeasure.Measure<T>() + typedValue);
         return checked(ReferenceFieldBytes + Bytes(Root<GrainValue>(value)) + ReferenceFieldBytes * GrainReplyReferenceOccurrences2);
     }
 
-    internal static long SourceReply(PartitionMoveParentState state, long pending, string cluster)
+    internal static long SourceReply(PartitionMoveParentState state, long pending, string cluster, long? stateCapacity = null, int pendingSlots = PartitionMovementFinalOutcomeCapacityProtocol.SinglePhaseSlot)
     {
-        // The native reader aliases identical pending/last/selected IDs. Internal fields remain independent.
-        var snapshot = checked(PartitionMovementParentCapacityBounds.Bound(state) + pending + ReferenceFieldBytes * SourceReplyReferenceOccurrences2);
+        // Final Install reserves every phase occurrence independently; original reader aliases are not sizing authority.
+        var snapshot = checked((stateCapacity ?? PartitionMovementParentCapacityBounds.Bound(state)) + pending * pendingSlots + ReferenceFieldBytes * SourceReplyReferenceOccurrences2);
         var result = checked(ReferenceFieldBytes + snapshot + ScalarFieldBytes * SourceReplyScalarOccurrences2);
         var reply = checked(ReferenceFieldBytes + ScalarFieldBytes * SourceReplyScalarOccurrences2 + GuidFieldBytes * SourceReplyGuidOccurrences2
             + DateTimeFieldBytes + PartitionMovementParentCapacityBounds.Bound(state.Header!.ControlOwner) + PartitionMovementParentCapacityBounds.Bound(state.CurrentOperatorPrincipalId)
@@ -90,7 +98,7 @@ internal static class PartitionMovementParentCapacityFuture
     // are charged by PartitionMovementParentCapacityBounds.Bound(OperationResult); unbounded future native SafeDetail remains an open gate.
     // Actual observed/checkpoint limits continue to reject overflow without losing pending authority.
     internal static long FutureOutcome(long phaseResult)
-        => checked(ReferenceFieldBytes * FutureOutcomeReferenceOccurrences4 + NativeEncodedTypeMeasure.Measure<PartitionMovePhaseResult>() + phaseResult);
+        => checked(ReferenceFieldBytes * FutureOutcomeReferenceOccurrences5 + NativeEncodedTypeMeasure.Measure<PartitionMovePhaseResult>() + phaseResult);
 
     internal static long FutureCommit(PartitionMoveParentState state)
         => checked(ReferenceFieldBytes + GuidFieldBytes + ReferenceFieldBytes + GuidFieldBytes

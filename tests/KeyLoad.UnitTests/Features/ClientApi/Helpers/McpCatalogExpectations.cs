@@ -126,18 +126,10 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    private const string AnnRead = "keyload_search_ann_read";
-    private const string AnnReadRoute = "/v1/search/ann";
-    private const string AnnMaintain = "keyload_search_ann_maintain";
-    private const string AnnMaintainRoute = "/v1/search/ann/maintain";
-    private const string TextMaintain = "keyload_search_text_maintain";
-    private const string TextMaintainRoute = "/v1/search/text/maintain";
-    internal const int Count = 78;
+    internal const int Count = 79;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
-        (AnnRead, AnnReadRoute, GrainReadKind.ApproximateSearch, null),
-        (AnnMaintain, AnnMaintainRoute, null, OperationKind.MaintainAnnIndex),
-        (TextMaintain, TextMaintainRoute, null, OperationKind.MaintainTextIndex),
+        .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (DocumentsReadFollower, DocumentsReadFollowerRoute, GrainReadKind.FollowerDocument, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
@@ -162,6 +154,7 @@ internal static class McpCatalogExpectations
         (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
         (SeriesRollup, SeriesRollupRoute, GrainReadKind.SampleRollup, null),
         (SeriesRetention, SeriesRetentionRoute, GrainReadKind.SampleRetention, null),
+        ("keyload_series_chunk_window", "/v1/series/chunks/window", GrainReadKind.SampleChunkWindow, null),
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),

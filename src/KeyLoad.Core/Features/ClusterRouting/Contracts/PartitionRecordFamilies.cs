@@ -45,6 +45,10 @@ internal static class PartitionRecordFamilies
     internal const string RecurringSchedule = "recurring-schedule";
     internal const string SagaState = "saga-state";
     internal const string Sample = "sample";
+    internal const string SampleChunkBlock = "sample-chunk-block";
+    internal const string SampleChunkCorrection = "sample-chunk-correction";
+    internal const string SampleChunkManifest = "sample-chunk-manifest";
+    internal const string SampleChunkWindow = "sample-chunk-window";
     internal const string SampleIdentity = "sample-id";
     internal const string SampleRetention = "sample-retention-v1";
     internal const string SampleRollup = "sample-rollup-v1";
@@ -106,6 +110,10 @@ internal static class PartitionRecordFamilies
         RecurringSchedule,
         SagaState,
         Sample,
+        SampleChunkBlock,
+        SampleChunkCorrection,
+        SampleChunkManifest,
+        SampleChunkWindow,
         SampleIdentity,
         SampleRetention,
         SampleRollup,

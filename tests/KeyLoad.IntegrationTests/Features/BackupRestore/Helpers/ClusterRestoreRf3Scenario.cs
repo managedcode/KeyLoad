@@ -52,8 +52,10 @@ internal static class ClusterRestoreRf3Scenario
                 await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);
                 await ClusterRestoreRf3ArchiveOmissionTrial.RequireAsync(target, originals, archives, ownedRoot,
                     cancellationToken).ConfigureAwait(false);
+                var repairedArchives = await ClusterRestoreRf3ArchiveMutationTrial.RequireAndRepairAsync(target,
+                    originals, archives, ownedRoot, cancellationToken).ConfigureAwait(false);
                 await RestoreAndVerifyAsync(target, seed, originals, eventing, secondary,
-                    invalidCredentials, cancellationToken).ConfigureAwait(false);
+                    invalidCredentials, repairedArchives, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception original)
             {
@@ -76,14 +78,16 @@ internal static class ClusterRestoreRf3Scenario
 
     private static async Task RestoreAndVerifyAsync(ClusterRestoreRf3Fixture target,
         PartitionMovementPublicParentRf3Seed seed, ImmutableArray<ClusterBackupOwnerReceipt> originals,
-        ClusterRestoreRf3EventingState eventing, ClusterRestoreRf3SecondaryState secondary, IReadOnlyList<string>? invalidCredentials, CancellationToken cancellationToken)
+        ClusterRestoreRf3EventingState eventing, ClusterRestoreRf3SecondaryState secondary,
+        IReadOnlyList<string>? invalidCredentials, ImmutableArray<string> repairedArchives, CancellationToken cancellationToken)
     {
         var restoreStarted = TimeProvider.System.GetTimestamp();
-        await target.StartAsync(restore: true, cancellationToken).ConfigureAwait(false);
+        await target.StartDerivativeArchiveAsync(repairedArchives, rejectModified: false, cancellationToken).ConfigureAwait(false);
         var nativeNodes = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals,
             dispatchPaused: true).ConfigureAwait(false);
         await target.RequireOperatorReceiptAsync(nativeNodes).ConfigureAwait(false);
-        await Assert.That(target.OriginalOperatorExits).IsEquivalentTo(new[] { ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.SuccessfulExit },
+        await Assert.That(target.OriginalOperatorExits).IsEquivalentTo(new[] { ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.FailedExit,
+            ClusterRestoreRf3Protocol.FailedExit, ClusterRestoreRf3Protocol.SuccessfulExit },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await target.StartAsync(restore: false, cancellationToken).ConfigureAwait(false);
         if (invalidCredentials is not null)

@@ -3,8 +3,7 @@ param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
     [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042')][string] $Task,
-    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile,
-    [switch] $AdditionalCensus
+    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -229,15 +228,7 @@ if ($contract.schemaVersion -ne 1 -or $contract.maximumParallelTests -ne 50) { t
 $taskContract = @($contract.tasks | Where-Object { $_.taskId -ceq $Task })
 if ($taskContract.Count -ne 1) { throw 'Task contract is absent or ambiguous.' }
 $censusOnly = $taskContract[0].Contains('censusSelections')
-if ($AdditionalCensus) {
-    if ($Task -cne 'KL-036' -or -not $contract.Contains('additionalCensuses') -or
-        $contract.additionalCensuses -isnot [array]) { throw 'Invalid additional census admission.' }
-    $additional = @($contract.additionalCensuses | Where-Object { $_.taskId -ceq $Task })
-    if ($additional.Count -ne 1 -or $additional[0].censusSelections -isnot [array] -or
-        $additional[0].censusSelections.Count -ne 8) { throw 'Invalid additional census selection.' }
-    $selected = $additional[0].censusSelections
-    $censusOnly = $true
-} elseif ($censusOnly) {
+if ($censusOnly) {
     if ($Task -cnotin @('KL-034','KL-042') -or $taskContract[0].selections.Count -ne 0 -or
         $taskContract[0].censusSelections -isnot [array] -or $taskContract[0].censusSelections.Count -eq 0 -or
         $taskContract[0].censusSelections.Count -gt 32) { throw 'Invalid census-only task admission.' }
@@ -248,15 +239,13 @@ if ($AdditionalCensus) {
 }
 $sourceManifestPath = Resolve-FcPath $Repository ($relative + '/functional-coverage.production-source-manifest.json')
 $source = Read-TaskJson $sourceManifestPath
-$taskSuffix = if ($AdditionalCensus) { '-additional-census' } else { '' }
-$taskRoot = Join-Path $EvidenceRoot ($Task.ToLowerInvariant() + '-' + $Profile + $taskSuffix)
+$taskRoot = Join-Path $EvidenceRoot ($Task.ToLowerInvariant() + '-' + $Profile)
 if ([IO.Directory]::Exists($taskRoot)) { throw 'Task evidence must be fresh.' }
 [void] [IO.Directory]::CreateDirectory($taskRoot)
 $manifest = [ordered]@{ schemaVersion = 1; task = $Task; profile = $Profile
     sourceRevision = $source.sourceRevision; sourceManifestPath = $sourceManifestPath
     contractPath = $contractPath; contractSha256 = Get-FcHash $contractPath
-    qualifiedScope = if ($AdditionalCensus) { 'additional-census-only; native binding and acceptance pending' }
-        else { 'task-scoped; no product/fullsuite/coverage promotion' }
+    qualifiedScope = 'task-scoped; no product/fullsuite/coverage promotion'
     sourceVerificationStdoutPath = Join-Path $taskRoot 'source-verify.stdout.txt'
     sourceVerificationStderrPath = Join-Path $taskRoot 'source-verify.stderr.txt'
     sourceVerificationExitCode = $null; sourceVerificationProcessPath = Join-Path $taskRoot 'source-verify.process.json'

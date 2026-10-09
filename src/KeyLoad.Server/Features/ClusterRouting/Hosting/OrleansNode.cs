@@ -1,6 +1,7 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
+using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -15,10 +16,12 @@ namespace KeyLoad.Server;
 /// <param name="clock">Borrowed runtime clock for the silo and its shutdown deadlines.</param>
 /// <param name="physicalOwnerWork">Borrowed configured proof work owner, joined before native silo shutdown.</param>
 /// <param name="sealedObserver">Optional explicitly borrowed in-process observation, never execution authority.</param>
+/// <param name="blobWireObserver">Optional fixture-owned signed-byte borrow, joined with the original request.</param>
 internal sealed partial class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
     ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
-    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null) : IAsyncDisposable
+    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
+    IControlledBlobWireBorrowObserver? blobWireObserver = null) : IAsyncDisposable
 {
     private NodeOptions Options => nodeOptions.Value;
     private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
@@ -117,11 +120,11 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
         var address = await OrleansNodeAddressResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref remoteDocuments, await RemoteDocumentRuntime.CreateAsync(this, partition,
-            runtimeOptions, runtimeClock).ConfigureAwait(false));
+            runtimeOptions, runtimeClock, blobWireObserver).ConfigureAwait(false));
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, sealedObserver, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, sealedObserver, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
@@ -130,7 +133,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
             && !Options.MembershipAuthority.RemoteDocumentReads)
         { return; }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
-            built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution);
+            built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution,
+            loggerFactory.CreateLogger<PhysicalShardCatalogStartup>());
         Volatile.Write(ref physicalShardCatalog, catalog);
         var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local

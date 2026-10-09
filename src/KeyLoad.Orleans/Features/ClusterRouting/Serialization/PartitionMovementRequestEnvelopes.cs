@@ -41,6 +41,23 @@ internal static class PartitionMovementRequestEnvelopes
         };
     }
 
+    internal static GrainRequestEnvelope Outcome(DatabaseEngine database, DateTimeOffset now,
+        TimeSpan requestLifetime, Guid requestId, string localPrincipalId,
+        PartitionMovementOutcomeQuery query, DateTimeOffset queryExpiry)
+    {
+        RequireExpiry(now, requestLifetime, queryExpiry);
+        return new GrainRequestEnvelope
+        {
+            Purpose = PartitionMovementRequestScope.OutcomePurpose,
+            RequestId = requestId,
+            Incarnation = database.Store.Identity.Incarnation,
+            PrincipalId = localPrincipalId,
+            ReadKind = GrainReadKind.PartitionMovementOutcome,
+            Payload = GrainNativePayload.Copy(NativeSerialization.Serialize(query), database.Limits.MaxBatchBytes),
+            ExpiresAt = queryExpiry
+        };
+    }
+
     private static void RequireExpiry(DateTimeOffset now, TimeSpan requestLifetime, DateTimeOffset expiresAt)
     {
         if (expiresAt <= now || expiresAt > now + requestLifetime)

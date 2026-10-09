@@ -1,3 +1,4 @@
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Orleans;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -16,16 +17,19 @@ internal sealed class RemoteDocumentClient : IDisposable
     private readonly NodeOptions options;
     private readonly IOptions<OrleansMembershipOptions> membership;
     private readonly TimeProvider clock;
+    private readonly IControlledBlobWireBorrowObserver? wireObserver;
     private readonly HttpClient http;
     private readonly SocketsHttpHandler handler;
     private readonly ReplicaMembershipAuthorityAddressPins pins;
 
     internal RemoteDocumentClient(IOptions<NodeOptions> options,
-        IOptions<OrleansMembershipOptions> membership, TimeProvider clock)
+        IOptions<OrleansMembershipOptions> membership, TimeProvider clock,
+        IControlledBlobWireBorrowObserver? wireObserver = null)
     {
         this.options = options.Value;
         this.membership = membership;
         this.clock = clock;
+        this.wireObserver = wireObserver;
         pins = new(this.options.MembershipAuthority.TrustedGroupSiloEndpoints, membership);
         var failures = new List<Exception>();
         HttpClient? created = null;
@@ -65,6 +69,10 @@ internal sealed class RemoteDocumentClient : IDisposable
     internal Task<ControlledDocumentReadResult> ReadControlledAsync(RemoteControlledDocumentCall call,
         CancellationToken cancellationToken)
         => RemoteControlledDocumentExchange.ReadAsync(http, pins, options, membership, clock, call, cancellationToken);
+
+    internal Task<ControlledBlobReadResult> ReadControlledBlobAsync(RemoteControlledBlobCall call,
+        CancellationToken cancellationToken)
+        => RemoteControlledBlobExchange.ReadAsync(http, pins, options, membership, clock, call, wireObserver, cancellationToken);
 
     private async Task<RemoteDocumentReplyV1> ReadReplyAsync(RemoteDocumentCallV1 call,
         CancellationToken cancellationToken)
@@ -111,7 +119,7 @@ internal sealed class RemoteDocumentClient : IDisposable
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership)
             || SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort
-            || reply.Controlled is not null
+            || reply.Controlled is not null || reply.ControlledBlob is not null
             || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null)
             || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null)
             || reply.QueryLeaf is not null && call.QueryLeaf is null

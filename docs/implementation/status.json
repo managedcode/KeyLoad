@@ -262,7 +262,7 @@
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
     "canonicalBuildPassed": true,
-    "canonicalFormatterPassed": true,
+    "canonicalFormatterPassed": false,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
@@ -349,35 +349,29 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity quiet",
-      "nativeExitCode": 0,
-      "buildCompletedSuccessfully": true,
-      "errors": 0,
-      "warnings": 0,
-      "elapsed": "00:02:28.68",
-      "log": "/private/tmp/keyload-stage44-canonical-release-build-r2-original-20261009.log",
-      "logSha256": "7e618d8bd2f828ccbab754048dff7b0140760be9f7cdb3f29957bae14b5a3c11",
-      "qualification": "Canonical whole-solution local development build after the approved native source repairs and complete formatter; exact delivered-source Linux runtime and coverage remain open."
-    },
-    "currentFormatter": {
       "commandArgs": [
         "dotnet",
-        "format",
+        "build",
         "KeyLoad.slnx",
-        "--verify-no-changes",
         "--no-restore",
+        "--configuration",
+        "Release",
         "--verbosity",
         "quiet",
-        "--report",
-        "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json"
+        "-t:Rebuild"
       ],
       "nativeExitCode": 0,
-      "diagnosticCount": 0,
-      "report": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json",
-      "reportSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "log": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.log",
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "qualification": "Actual complete SDK formatter verification after the seven source-format corrections; local development only."
+      "buildCompletedSuccessfully": true,
+      "sourceCoherent": true,
+      "started": "2026-10-09T23:11:00.766110+00:00",
+      "ended": "2026-10-09T23:13:05.513540+00:00",
+      "log": "/private/tmp/keyload-stage44-current-release-build-r13-20261010/original.log",
+      "logSha256": "4c0987aab5e2525c3cf9b23f7a9600cd5415c0606db23600bf3dfec33d75eeb4",
+      "qualification": "Actual coherent full Release clean rebuild with analyzers passed; original R12 MSBuild child failure retained, no Linux/runtime qualification."
+    },
+    "currentFormatter": {
+      "status": "pending_after_current_source_joins",
+      "qualification": "Historical R2 formatter pass does not qualify the newly joined source."
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -40327,7 +40321,7 @@
     },
     "currentOriginal104TaskCounts": {
       "done": 17,
-      "inProgress": 87,
+      "in_progress": 87,
       "pending": 0
     },
     "original556Kl008Kl011AcceptedCriteria": {
@@ -41865,6 +41859,276 @@
       "inputCount": 5587,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+    },
+    "previousCurrentBuildBeforeJoinedStageXLIVWave": {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity quiet",
+      "nativeExitCode": 0,
+      "buildCompletedSuccessfully": true,
+      "errors": 0,
+      "warnings": 0,
+      "elapsed": "00:02:28.68",
+      "log": "/private/tmp/keyload-stage44-canonical-release-build-r2-original-20261009.log",
+      "logSha256": "7e618d8bd2f828ccbab754048dff7b0140760be9f7cdb3f29957bae14b5a3c11",
+      "qualification": "Canonical whole-solution local development build after the approved native source repairs and complete formatter; exact delivered-source Linux runtime and coverage remain open."
+    },
+    "previousCurrentFormatterBeforeJoinedStageXLIVWave": {
+      "commandArgs": [
+        "dotnet",
+        "format",
+        "KeyLoad.slnx",
+        "--verify-no-changes",
+        "--no-restore",
+        "--verbosity",
+        "quiet",
+        "--report",
+        "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json"
+      ],
+      "nativeExitCode": 0,
+      "diagnosticCount": 0,
+      "report": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.json",
+      "reportSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "log": "/private/tmp/keyload-stage44-full-format-verify-r2-20261009.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "Actual complete SDK formatter verification after the seven source-format corrections; local development only."
+    },
+    "stageXLIVJoinedWave20261010": {
+      "observedAt": "2026-10-09T22:45:03.398804+00:00",
+      "sourceJoins": [
+        {
+          "proof": "/private/tmp/keyload-stage44-ready-wave-native-join-r1-20261010/actual-join-proof.json",
+          "paths": 70
+        },
+        {
+          "proof": "/private/tmp/keyload-stage44-snapshot-corruption-native-join-r1-20261010/actual-join-proof.json",
+          "paths": 12
+        },
+        {
+          "proof": "/private/tmp/keyload-stage44-backup-feed-native-join-r1-20261010/actual-join-proof.json",
+          "proofSha256": "149ed540c622133002c26b1ed429f1bd1ddb89ca4997419a4efee8b1d9753507",
+          "paths": 19
+        },
+        {
+          "proof": "/private/tmp/keyload-stage44-r8-repairs-043037-native-join-r1-20261010/actual-join-proof.json",
+          "proofSha256": "25610a727034015008bdf37114eb7bc313a13860bc9439507b3c65de6b81f615",
+          "paths": 9
+        },
+        {
+          "proof": "/private/tmp/keyload-stage44-paired-native-preflight-join-r1-20261010/actual-join-proof.json",
+          "proofSha256": "322146c6e679e59046dcc3347b96ebbec7e8344736a4cf94645a9926360b8876",
+          "paths": 14
+        }
+      ],
+      "focusedRecoveryBuild": {
+        "commandArgs": [
+          "dotnet",
+          "build",
+          "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+          "--no-restore",
+          "--configuration",
+          "Release",
+          "--verbosity",
+          "quiet"
+        ],
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "evidence": "/private/tmp/keyload-stage44-current-recovery-build-r1-20261009/original-build.json",
+        "qualification": "Focused local development build before snapshot repair; not whole-solution or Linux qualification."
+      },
+      "originalRecoveryBeforeRepair": {
+        "exitCode": 2,
+        "actualCases": 5,
+        "passed": 0,
+        "failed": 5,
+        "sourceCoherent": true,
+        "nativeParallelConfigured": 50,
+        "observedFiftyOverlap": false,
+        "evidence": "/private/tmp/keyload-stage44-native-sample-recovery-r2-20261010/original-native-run.json",
+        "originalTrxSha256": "4b85758ed713ada7252de0e4f39a7eb6d6082440225c22f87ee72f9fb1bdf3ea",
+        "failure": "Full UTF8 snapshot was incorrectly bounded by stdout character quota; same five unchanged operation oracles require a fresh post-repair run."
+      },
+      "postRepairRuntimeExecuted": true,
+      "coverageMeasured": true,
+      "acceptedTaskCounts": {
+        "done": 17,
+        "in_progress": 87,
+        "pending": 0
+      },
+      "qualificationClaim": false,
+      "open": [
+        "fresh_whole_formatter",
+        "whole_normal_and_scalar_Unit",
+        "whole_process_recovery",
+        "Aspire_Docker_RF3_real_DotNet_and_official_MCP_Q1",
+        "qualified_merged_coverage",
+        "endurance_fault_and_comparable_GitHub_performance"
+      ],
+      "currentFullLocalBuildPassed": true,
+      "currentFullLocalBuildEvidence": "/private/tmp/keyload-stage44-current-release-build-r13-20261010/original-build.json",
+      "focusedUnitOriginal": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010/original-native-run.json",
+        "exitCode": 2,
+        "actualCases": 81,
+        "passed": 79,
+        "failed": 2,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 18,
+        "qualificationClaim": false
+      },
+      "focusedRecoveryOriginal": {
+        "evidence": "/private/tmp/keyload-stage44-focused-sample-recovery-r3-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 5,
+        "passed": 5,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "qualificationClaim": false
+      },
+      "focusedDevelopmentCoverage": {
+        "path": "/private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010/coverage.cobertura.xml",
+        "sha256": "abcf9fe3c861b0fc73d942a80b036c47864ffa5ce759b8fb097f0ed574bcd1a4",
+        "summary": {
+          "line-rate": "0.1955772499727087",
+          "branch-rate": "0.13572045280122794",
+          "lines-covered": "12541",
+          "lines-valid": "64123",
+          "branches-covered": "5659",
+          "branches-valid": "41696"
+        },
+        "scope": "focused local functional tests only; not complete production coverage",
+        "runExitCode": 2,
+        "qualifiedProductCoverage": false
+      },
+      "completeProductCoverageMeasured": false,
+      "focusedUnitFixturePrerequisiteRepairs": {
+        "joined": true,
+        "clock": "Retention fixture evaluation clock is later than the original unchanged cutoff.",
+        "appliedPosition": "Mixed atomic fixture uses the existing native journal/materializer admission; acknowledged position is checked against the actual persisted applied record.",
+        "oraclesPreserved": true,
+        "postRepairRuntimeExecuted": true,
+        "qualificationClaim": false,
+        "retentionClockPhase": "Seed and explicitly seal at Start, then advance monotonically to Until before unchanged expiry; preserve all expected revisions and automatic-seal behavior."
+      },
+      "focusedUnitSecondOriginal": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-coverage-r2-20261010/original-native-run.json",
+        "exitCode": 2,
+        "actualCases": 84,
+        "passed": 83,
+        "failed": 1,
+        "sourceCoherent": true,
+        "binariesCoherent": false,
+        "changedBinaries": [
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Abstractions.dll",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Replication.dll",
+          "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Core.dll"
+        ],
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 19,
+        "qualificationClaim": false
+      },
+      "focusedScalarFirstOriginal": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-scalar-coverage-r1-20261010/original-native-run.json",
+        "exitCode": 2,
+        "actualCases": 84,
+        "passed": 83,
+        "failed": 1,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "changedBinaries": [],
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 35,
+        "qualificationClaim": false
+      },
+      "focusedRecoveryFourthOriginal": {
+        "evidence": "/private/tmp/keyload-stage44-focused-sample-recovery-r4-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 5,
+        "passed": 5,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "changedBinaries": [],
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 5,
+        "qualificationClaim": false
+      },
+      "instrumentationOverlapRefusedAsCoverageEvidence": true,
+      "coverageRetryRequiresSeparateInstrumentation": true,
+      "originalCleanBuildWorkerFailure": {
+        "evidence": "/private/tmp/keyload-stage44-current-release-build-r12-20261010/original-build.json",
+        "sourceCoherent": true,
+        "error": "MSB4166",
+        "exitCode": 1,
+        "actualChildDiagnosticUnavailable": true
+      },
+      "focusedUnitAfterClockPhaseRepair": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-r3-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 84,
+        "passed": 84,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 19,
+        "originalLogSha256": "d832f815ad25867dff4a868f7406bb3d8009649026f8ad8d0aacf86d6466442a",
+        "qualificationClaim": false
+      },
+      "focusedScalarAfterClockPhaseRepair": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-scalar-r2-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 84,
+        "passed": 84,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 19,
+        "originalLogSha256": "67091126f70c772bdf85445b0994b8b3c9b5be8035dfabae3d251c9267134dcb",
+        "qualificationClaim": false
+      },
+      "focusedRecoveryAfterCleanRebuild": {
+        "evidence": "/private/tmp/keyload-stage44-focused-sample-recovery-r5-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 5,
+        "passed": 5,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 5,
+        "originalLogSha256": "7794d8e0422942ac4bee9cc29aa3bf7d6ceed84c94b67d0fe8638df0e88067b0",
+        "qualificationClaim": false
+      },
+      "currentFocusedNormalAndScalarAndRecoveryPassed": true
+    },
+    "currentGovernance": {
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "passed": true,
+      "qualification": "Source governance only; no runtime acceptance."
+    },
+    "previousCurrentBuildBeforePairedPreflight": {
+      "commandArgs": [
+        "dotnet",
+        "build",
+        "KeyLoad.slnx",
+        "--no-restore",
+        "--configuration",
+        "Release",
+        "--verbosity",
+        "quiet"
+      ],
+      "nativeExitCode": 0,
+      "buildCompletedSuccessfully": true,
+      "sourceCoherent": true,
+      "started": "2026-10-09T22:46:29.655050+00:00",
+      "ended": "2026-10-09T22:48:27.204594+00:00",
+      "log": "/private/tmp/keyload-stage44-current-release-build-r10-20261010/original.log",
+      "logSha256": "212a64426591defebf93b060fc31f9a6113fcc701a16aab278d3a29cde42d698",
+      "qualification": "Actual coherent full Release local build passed after joined source/analyzer repairs; no Linux/runtime acceptance or task closure."
     }
   },
   "TIME-PROVIDER-001": {
@@ -50213,6 +50477,14 @@
       "allAcceptanceClosed": false,
       "productCoveragePercent": null,
       "remaining": "Required actual native build/format/normal/scalar/process/publicRF3/source-image/Linux/fault/resource gates remain open; no local source proof promoted."
+    },
+    "currentStageXLIVWholeTaskDevelopment": {
+      "r8RepairSourceJoin20261010": {
+        "proof": "/private/tmp/keyload-stage44-r8-repairs-043037-native-join-r1-20261010/actual-join-proof.json",
+        "description": "Genuine two-store native receiving work crosses original existing deadline, then exact BudgetExceeded/no partial/full unchanged images+cuts and fresh healthy literal query; no clock reset or RF3 transport claim.",
+        "runtimeExecuted": false,
+        "qualificationClaim": false
+      }
     }
   },
   "KL-038": {
@@ -50475,7 +50747,13 @@
       "nativeAdmission": "Both authenticated original normal/scalar censuses now bind the strict mapped cases; fresh-source image validation and actual whole-flow execution remain mandatory.",
       "originalNativeSourceCommit": "d2323ed056153ae8bd2ec833fc316ac5863903a4",
       "originalNativeRunId": 37977314792,
-      "originalNativeBindingManifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4"
+      "originalNativeBindingManifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4",
+      "backupFeedSourceJoin20261010": {
+        "proof": "/private/tmp/keyload-stage44-backup-feed-native-join-r1-20261010/actual-join-proof.json",
+        "description": "Actual current-source safe lexical destination admission and native symlink leaf/ancestor refusal→same-path repair→healthy/cold operations, plus original modified-WAL archive refusal and joined repair continuation. Runtime unexecuted after join.",
+        "runtimeExecuted": false,
+        "qualificationClaim": false
+      }
     }
   },
   "KL-043": {
@@ -50592,7 +50870,28 @@
     },
     "verificationStage": "R290 full Release and R294 format pass; current InternalSerialization/query/typed-row/scan owning normal/scalar606/606 and real indexed/idempotency process recovery2/2 pass. This is a subset, not the complete current-format recovery/RF3 or original Linux gate; no migration or legacy format path is added.",
     "coverage": "unmeasured",
-    "crap": "unmeasured"
+    "crap": "unmeasured",
+    "currentStageXLIVWholeTaskDevelopment": {
+      "r8RepairSourceJoin20261010": {
+        "proof": "/private/tmp/keyload-stage44-r8-repairs-043037-native-join-r1-20261010/actual-join-proof.json",
+        "description": "Existing zero/unknown capability and unsupported-magic original cases now preserve full rejection inventory, repair exact original identity, require authority/cut/literal record, perform actual followup commit and cold reopen.",
+        "runtimeExecuted": false,
+        "qualificationClaim": false
+      },
+      "pairedIdentityPreflightSourceJoin": {
+        "proof": "/private/tmp/keyload-stage44-paired-native-preflight-join-r1-20261010/actual-join-proof.json",
+        "proofSha256": "322146c6e679e59046dcc3347b96ebbec7e8344736a4cf94645a9926360b8876",
+        "paths": 14
+      },
+      "pairedPreflightFocusedNormalScalarPassed": {
+        "nativeArgumentCasesPerMode": 3,
+        "suiteEvidence": [
+          "/private/tmp/keyload-stage44-focused-unit-r3-20261010/original-native-run.json",
+          "/private/tmp/keyload-stage44-focused-unit-scalar-r2-20261010/original-native-run.json"
+        ],
+        "wholeTaskComplete": false
+      }
+    }
   },
   "KL-044": {
     "title": "Release gate і operational handbook",
@@ -51119,7 +51418,99 @@
         "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "qualification": "actual_normal_scalar_and_BDN36_codec_controls_canonical_layout_rewrite_recovery_RF3_and_Linux_pending"
       }
-    ]
+    ],
+    "currentStageXLIVWholeTaskDevelopment": {
+      "sourceJoined": true,
+      "schedulerAndArtifactAndCorruptionSource": "Actual coherent scheduler/native quota32/pair/provider-job-byte digest/all-six SIGKILL-owner source and complete bounded snapshots/enrolled corruption flows joined; native code cleanup retains all original operation semantics.",
+      "sourceProofs": [
+        {
+          "proof": "/private/tmp/keyload-stage44-ready-wave-native-join-r1-20261010/actual-join-proof.json",
+          "paths": 70
+        },
+        {
+          "proof": "/private/tmp/keyload-stage44-snapshot-corruption-native-join-r1-20261010/actual-join-proof.json",
+          "paths": 12
+        }
+      ],
+      "actualOriginalRecoveryBeforeRepair": {
+        "exitCode": 2,
+        "actualCases": 5,
+        "passed": 0,
+        "failed": 5,
+        "sourceCoherent": true,
+        "nativeParallelConfigured": 50,
+        "observedFiftyOverlap": false,
+        "evidence": "/private/tmp/keyload-stage44-native-sample-recovery-r2-20261010/original-native-run.json",
+        "originalTrxSha256": "4b85758ed713ada7252de0e4f39a7eb6d6082440225c22f87ee72f9fb1bdf3ea",
+        "failure": "Full UTF8 snapshot was incorrectly bounded by stdout character quota; same five unchanged operation oracles require a fresh post-repair run."
+      },
+      "runtimeQualified": false,
+      "qualification": "Current post-repair Unit/process/RF3/Linux/runtime/coverage gates remain OPEN; no acceptance promotion.",
+      "postSnapshotRepairFocusedRecovery": {
+        "evidence": "/private/tmp/keyload-stage44-focused-sample-recovery-r3-20261010/original-native-run.json",
+        "exitCode": 0,
+        "actualCases": 5,
+        "passed": 5,
+        "failed": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "qualificationClaim": false
+      },
+      "focusedUnitBeforeNextRepair": {
+        "evidence": "/private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010/original-native-run.json",
+        "exitCode": 2,
+        "actualCases": 81,
+        "passed": 79,
+        "failed": 2,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "nativeParallelConfigured": 50,
+        "actualTrxIntervalOverlap": 18,
+        "qualificationClaim": false
+      },
+      "afterClockAndAppliedPrerequisiteRepair": {
+        "unit": {
+          "evidence": "/private/tmp/keyload-stage44-focused-unit-r3-20261010/original-native-run.json",
+          "exitCode": 0,
+          "actualCases": 84,
+          "passed": 84,
+          "failed": 0,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "actualTrxIntervalOverlap": 19,
+          "originalLogSha256": "d832f815ad25867dff4a868f7406bb3d8009649026f8ad8d0aacf86d6466442a",
+          "qualificationClaim": false
+        },
+        "unit-scalar": {
+          "evidence": "/private/tmp/keyload-stage44-focused-unit-scalar-r2-20261010/original-native-run.json",
+          "exitCode": 0,
+          "actualCases": 84,
+          "passed": 84,
+          "failed": 0,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "actualTrxIntervalOverlap": 19,
+          "originalLogSha256": "67091126f70c772bdf85445b0994b8b3c9b5be8035dfabae3d251c9267134dcb",
+          "qualificationClaim": false
+        },
+        "recovery": {
+          "evidence": "/private/tmp/keyload-stage44-focused-sample-recovery-r5-20261010/original-native-run.json",
+          "exitCode": 0,
+          "actualCases": 5,
+          "passed": 5,
+          "failed": 0,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "actualTrxIntervalOverlap": 5,
+          "originalLogSha256": "7794d8e0422942ac4bee9cc29aa3bf7d6ceed84c94b67d0fe8638df0e88067b0",
+          "qualificationClaim": false
+        }
+      }
+    }
   },
   "KL-079": {
     "title": "Resumable change feed і обмежені live queries",
@@ -51154,6 +51545,12 @@
         "total": 15,
         "passed": 15,
         "qualification": "Actual selected local feeds/live cases only; no whole-task or RF3/coverage acceptance inference."
+      },
+      "backupFeedSourceJoin20261010": {
+        "proof": "/private/tmp/keyload-stage44-backup-feed-native-join-r1-20261010/actual-join-proof.json",
+        "description": "Actual complete independent feed-page fields/cursor continuation and original live cursor after all-three cold restart with fresh persisted callers. Existing original operation/test identities preserved; runtime unexecuted after join.",
+        "runtimeExecuted": false,
+        "qualificationClaim": false
       }
     }
   },

@@ -25,4 +25,5 @@ internal sealed record RemoteDocumentReplyV1(
     [property: global::Orleans.Id(4)] string? SafeDetail,
     [property: global::Orleans.Id(5)] ReplicaSiloDiscovery EndpointDiscovery,
     [property: global::Orleans.Id(6)] PartitionQueryLeafResultV1? QueryLeaf = null,
-    [property: global::Orleans.Id(7)] ControlledDocumentReadResult? Controlled = null);
+    [property: global::Orleans.Id(7)] ControlledDocumentReadResult? Controlled = null,
+    [property: global::Orleans.Id(8)] ControlledBlobReadResult? ControlledBlob = null);

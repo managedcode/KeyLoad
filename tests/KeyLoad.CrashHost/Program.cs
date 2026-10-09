@@ -1,3 +1,3 @@
 using KeyLoad.CrashHost;
 
-await CrashHostApplication.RunAsync(args);
+await SampleChunkCrashHostApplication.RunAsync(args);

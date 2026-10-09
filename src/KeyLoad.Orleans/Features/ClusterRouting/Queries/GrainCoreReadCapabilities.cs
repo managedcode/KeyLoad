@@ -32,6 +32,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
                 GrainNativePayload.Read<AggregateSampleWindowsRequest>(payload), cancellationToken),
             GrainReadKind.SampleRollup => database.ReadSampleRollup(principal,
                 GrainNativePayload.Read<ReadSampleRollupRequest>(payload), cancellationToken),
+            GrainReadKind.SampleChunkWindow => database.ReadSampleChunkWindow(principal,
+                GrainNativePayload.Read<ReadSampleChunkWindowRequest>(payload), cancellationToken),
             GrainReadKind.SampleRetention => database.ReadSampleRetention(principal,
                 GrainNativePayload.Read<ReadSampleRetentionRequest>(payload), cancellationToken),
             GrainReadKind.AggregateReplay => database.ReadAggregateReplay(principal,
@@ -50,7 +52,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
     internal static bool Handles(GrainReadKind kind) => kind is >= GrainReadKind.Document and <= GrainReadKind.Samples
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
-        or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.AggregateReplay
+        or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.SampleChunkWindow or GrainReadKind.AggregateReplay
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
         or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
         or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges or GrainReadKind.OwnedDocument;

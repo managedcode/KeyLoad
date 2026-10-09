@@ -10,7 +10,7 @@ public sealed partial class DatabaseEngine
     private const string ConflictingSampleContentDetail = "A sample ID was reused with different content.";
     private const string SampleBeforeRetentionFloorDetail = "A sample cannot be appended before the series retention floor.";
 
-    private MutationReceipt Append(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, AppendSamples append)
+    private MutationReceipt Append(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, AppendSamples append, DateTimeOffset evaluatedAt)
     {
         const int SamplesLengthValidationBoundary = 1;
         const string SampleBatchBudgetDetail = "The sample batch exceeds its budget.";
@@ -35,6 +35,7 @@ public sealed partial class DatabaseEngine
         var sequenceKey = KeySpace.Partition(SampleSequenceSpace, partition, append.SeriesSet, append.SeriesId);
         var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : AppendAbsentCount;
         var retention = SampleRetentionStateReader.Read(tx, partition, append.SeriesSet, append.SeriesId);
+        var chunks = new SampleChunkAppendOwner(this, tx, partition, append.SeriesSet, append.SeriesId, TimeSeriesOptions);
         foreach (var sample in append.Samples)
         {
             JsonData.Identifier(sample.EventId);
@@ -59,6 +60,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleBeforeRetentionFloorDetail);
             }
             var record = new SampleRecord(append.SeriesId, sample, checked(++sequence), tags);
+            chunks.Append(record, evaluatedAt);
             tx.PutRecord(KeySpace.Partition(nameof(sample), partition, append.SeriesSet, append.SeriesId, sample.Timestamp, sequence), record);
             tx.PutRecord(idKey, fingerprint);
         }

@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkNumericValidator
 {
-    internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget)
+    internal static void Validate(SampleChunkPayload payload, SampleChunkWork budget)
     {
         const int PriorTicksInitialValue = 0;
         const int PriorSequenceInitialValue = 0;

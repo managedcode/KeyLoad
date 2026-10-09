@@ -1,3 +1,5 @@
+using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -6,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal sealed class ControlledDocumentCommandRouter(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> options, IOptions<DatabaseLimits> limits, TimeProvider clock)
+    IOptions<NodeOptions> options, IOptions<DatabaseLimits> limits, ControlledBlobSourceRead blobReads, TimeProvider clock)
     : IControlledDocumentCommandRouter
 {
     public async Task<OperationResult?> TryExecuteAsync(GrainRequestEnvelope envelope,
@@ -15,7 +17,8 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
         Func<CancellationToken, ValueTask>? outcomeObserved = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (envelope.CommandKind != OperationKind.Batch)
+        if (envelope.CommandKind != OperationKind.Batch
+            && (envelope.CommandKind is not { } kind || !BlobStorageOperations.Handles(kind)))
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable); }
         var runtime = node.Movement
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.Unavailable);
@@ -46,14 +49,14 @@ internal sealed class ControlledDocumentCommandRouter(OrleansNode node, Partitio
         node.CatalogRequestCodec().ValidateScope(envelope);
         var principal = GrainRequestAuthority.ReloadForRequest(partition.Database, envelope, clock);
         var work = new ReadExecutionBudget(limits, clock, token);
-        var original = partition.Database.CreateNativeOperation(OperationKind.Batch,
+        var original = partition.Database.CreateNativeOperation(envelope.CommandKind!.Value,
             envelope.CommandId, principal.Id, clock.GetUtcNow(), payload);
         var context = partition.Database.TryCaptureControlledDocumentCommand(principal.Id, original, work);
         if (context is null)
         { return null; }
         var control = PhysicalOwnerConfiguredTuples.Control(options.Value, partition).Owner;
         var phases = new ControlledDocumentPhaseExecution(runtime, control, partition, grantSettled, outcomeObserved);
-        var flow = new ControlledDocumentCommandFlow(partition, phases, clock);
+        var flow = new ControlledDocumentCommandFlow(partition, phases, blobReads, envelope.RequestId, limits, clock);
         try
         {
             var result = await flow.ExecuteAsync(original, context, envelope.ExpiresAt, work, token)

@@ -13,13 +13,19 @@ internal sealed class RuntimeJournalReaderFenceTests
     public async Task AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(int capability)
     {
         using var fixture = new RuntimeJournalReaderFixture();
+        StoreIdentity originalIdentity;
+        long originalPosition;
         using (var created = fixture.Open(fixture.CanonicalPath))
         {
             await Assert.That(created.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
             RuntimeJournalReaderFixture.WriteRuntimeRecord(created, RuntimeJournalReaderFixture.RuntimeJournalKey,
                 RuntimeJournalReaderFixture.RuntimeJournalValue);
+            originalIdentity = created.Identity;
+            originalPosition = created.Position;
         }
 
+        var originalBytes = await File.ReadAllBytesAsync(
+            RuntimeJournalReaderFixture.IdentityPath(fixture.CanonicalPath));
         await RuntimeJournalReaderFixture.RewriteCapabilityAsync(fixture.CanonicalPath, capability);
         var before = await RuntimeJournalReaderFixture.ReadFilesAsync(fixture.CanonicalPath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -35,6 +41,8 @@ internal sealed class RuntimeJournalReaderFenceTests
         {
             await Assert.That(after[file.Key]).IsEquivalentTo(file.Value, CollectionOrdering.Matching);
         }
+        await RuntimeJournalReaderRepairContinuation.RequireAsync(fixture, originalIdentity, originalPosition,
+            originalBytes, TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 
     [Test]
@@ -101,12 +109,18 @@ internal sealed class RuntimeJournalReaderFenceTests
     public async Task AcNative002UnsupportedIdentityMagicRejectsWithoutChangingNativeFiles()
     {
         using var fixture = new RuntimeJournalReaderFixture();
+        StoreIdentity originalIdentity;
+        long originalPosition;
         using (var created = fixture.Open(fixture.CanonicalPath))
         {
             RuntimeJournalReaderFixture.WriteRuntimeRecord(created, RuntimeJournalReaderFixture.RuntimeJournalKey,
                 RuntimeJournalReaderFixture.RuntimeJournalValue);
+            originalIdentity = created.Identity;
+            originalPosition = created.Position;
         }
 
+        var originalBytes = await File.ReadAllBytesAsync(
+            RuntimeJournalReaderFixture.IdentityPath(fixture.CanonicalPath));
         await RuntimeJournalReaderFixture.CorruptIdentityMagicAsync(fixture.CanonicalPath);
         var before = await RuntimeJournalReaderFixture.ReadFilesAsync(fixture.CanonicalPath);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -122,5 +136,7 @@ internal sealed class RuntimeJournalReaderFenceTests
         {
             await Assert.That(after[file.Key]).IsEquivalentTo(file.Value, CollectionOrdering.Matching);
         }
+        await RuntimeJournalReaderRepairContinuation.RequireAsync(fixture, originalIdentity, originalPosition,
+            originalBytes, TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 }

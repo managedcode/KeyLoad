@@ -80,6 +80,7 @@ internal static class ZoneTreeBackupRestoreRestore
         {
             throw Errors.Fail(ErrorCode.Conflict, RestoreDestinationNotEmpty);
         }
+        ZoneTreeCatalogBackupPublication.RequirePath(destination);
     }
 
     private static StoreIdentity CreateRestoredIdentity(StoreIdentity identity, Guid? newIncarnation,

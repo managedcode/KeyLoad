@@ -8,7 +8,7 @@ internal static class SampleChunkUtf16
 {
     private const int MinimumCodeUnitStride = 1;
 
-    internal static void Write(string value, Span<byte> destination, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static void Write(string value, Span<byte> destination, SampleChunkWork budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
 
@@ -27,7 +27,7 @@ internal static class SampleChunkUtf16
         budget.Check();
     }
 
-    internal static string Decode(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static string Decode(ReadOnlySpan<byte> bytes, SampleChunkWork budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
         const int StartEmptyCount = 0;
@@ -59,7 +59,7 @@ internal static class SampleChunkUtf16
         }
     }
 
-    internal static void ValidateFallback(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static void ValidateFallback(ReadOnlySpan<byte> bytes, SampleChunkWork budget, int hashChunkBytes)
     {
         const int EmptyTextBytes = 0;
         const int OddByteLengthMask = 1;

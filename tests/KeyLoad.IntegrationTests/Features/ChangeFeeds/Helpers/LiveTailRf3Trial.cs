@@ -33,6 +33,8 @@ internal static class LiveTailRf3Trial
         var fresh = await McpCallerAssertions.SuccessAsync<LiveQuerySnapshot>(await reader.Mcp.CallAsync(
             FeedLiveRf3Protocol.LiveStart, new StartLiveQueryRequest(scenario.Query), token));
         await SqlRf3Protocol.EqualAsync(new[] { LiveTailRf3Assertions.UpdatedRow }, fresh.Value.Rows.ToArray());
+        (administrator, reader) = await LiveSubscriptionRf3Cold.RestartAsync(owner, administrator, reader,
+            scenario, token);
         var deletion = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(
             new(Guid.NewGuid(), scenario.Partition, [new DeleteDocument(FeedLiveRf3Protocol.Collection,
                 FeedLiveRf3Protocol.First, FeedLiveRf3Protocol.UpdatedRevision)]), token));

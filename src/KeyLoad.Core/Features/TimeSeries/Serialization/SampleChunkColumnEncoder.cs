@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 internal static class SampleChunkColumnEncoder
 {
     internal static SampleChunkPayload CreatePayload(ReadOnlySpan<SampleRecord> records,
-        SampleChunkEncodingPlan plan, ReadExecutionBudget budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
+        SampleChunkEncodingPlan plan, SampleChunkWork budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyEncodedColumnBytes = 0;
 
@@ -25,7 +25,7 @@ internal static class SampleChunkColumnEncoder
     }
 
     private static void WriteNumericColumns(ReadOnlySpan<SampleRecord> records, byte[] utcTicks,
-        byte[] offsets, byte[] sequences, byte[] values, ReadExecutionBudget budget)
+        byte[] offsets, byte[] sequences, byte[] values, SampleChunkWork budget)
     {
         const int TickPositionInitialValue = 0;
         const int OffsetPositionInitialValue = 0;
@@ -70,7 +70,7 @@ internal static class SampleChunkColumnEncoder
     }
 
     private static void WriteTextColumns(ReadOnlySpan<SampleRecord> records, SampleChunkEncodingPlan plan,
-        byte[] series, byte[] eventIds, byte[] tags, ReadExecutionBudget budget, int hashChunkBytes,
+        byte[] series, byte[] eventIds, byte[] tags, SampleChunkWork budget, int hashChunkBytes,
         int textCancellationCheckIntervalCodeUnits)
     {
         const int SeriesPositionInitialValue = 0;

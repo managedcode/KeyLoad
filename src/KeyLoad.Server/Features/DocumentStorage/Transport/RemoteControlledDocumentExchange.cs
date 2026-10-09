@@ -67,7 +67,7 @@ internal static class RemoteControlledDocumentExchange
     {
         token.ThrowIfCancellationRequested();
         if (call.Request.Frame.ExpiresAt <= clock.GetUtcNow() || reply.RequestId != call.RequestId || reply.Nonce != call.Nonce
-            || reply.Result is not null || reply.QueryLeaf is not null
+            || reply.Result is not null || reply.QueryLeaf is not null || reply.ControlledBlob is not null
             || (reply.Error is null) != (reply.Controlled is not null)
             || reply.Error is null && reply.SafeDetail is not null
             || reply.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(reply.SafeDetail))

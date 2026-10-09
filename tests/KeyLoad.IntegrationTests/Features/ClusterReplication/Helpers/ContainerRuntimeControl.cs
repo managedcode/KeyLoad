@@ -150,6 +150,9 @@ internal sealed class ContainerRuntimeControl(
         { failure.Data[RestartDiagnosticsFailureKey] = diagnosticFailure; }
     }
 
+    internal IReadOnlyDictionary<string, ContainerRuntimeKillReceipt> RequireKilledOwners(DistributedApplication originalOwner)
+        => ContainerRuntimeKilledOwnerValidation.Require(app, originalOwner, containerNames, pendingReceipts);
+
     private string GetContainerName(string resourceName) => containerNames.TryGetValue(resourceName, out var name)
         ? name
         : throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,

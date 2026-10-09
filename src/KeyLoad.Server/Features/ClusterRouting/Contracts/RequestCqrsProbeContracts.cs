@@ -23,7 +23,10 @@ internal enum RequestCqrsProbePhase
     ParentTransferCloseFailed,
     ParentReceiverIssueAcknowledged,
     ParentReceiverIssueObserved,
-    ParentFinalInstallPreflight
+    ParentFinalInstallPreflight,
+    SampleChunkAdmissionPersisted,
+    SampleChunkNativeJobReturned,
+    SampleChunkAdmissionRefused
 }
 
 internal enum RequestCqrsProbeAction

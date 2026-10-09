@@ -16,7 +16,10 @@ internal enum GrainRequestPhase
     ParentTransferCloseFailed,
     ParentReceiverIssueAcknowledged,
     ParentReceiverIssueObserved,
-    ParentFinalInstallPreflight
+    ParentFinalInstallPreflight,
+    SampleChunkAdmissionPersisted,
+    SampleChunkNativeJobReturned,
+    SampleChunkAdmissionRefused
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

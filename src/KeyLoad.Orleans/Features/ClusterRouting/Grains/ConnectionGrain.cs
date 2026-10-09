@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.BlobStorage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
@@ -130,7 +131,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
     private async ValueTask<GrainOperationReply?> TryExecuteControlledAsync(DecodedGrainRequest request,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
-        if (request.Envelope.CommandKind != OperationKind.Batch)
+        if (request.Envelope.CommandKind != OperationKind.Batch
+            && (request.Envelope.CommandKind is not { } kind || !BlobStorageOperations.Handles(kind)))
         { return null; }
         var controlled = services.GetService<IControlledDocumentCommandRouter>();
         if (controlled is null)

@@ -66,16 +66,7 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     internal void RecordOperatorExit(int value) { OriginalOperatorExitCode = value; originalOperatorExits.Add(value); }
     internal void AdmitServers(bool value) => ServersAdmitted = value;
     internal string DataRoot { get; }
-    internal string ExpectedSignerFingerprint
-    {
-        get
-        {
-            var original = Convert.FromBase64String(profile.SigningKey);
-            try
-            { return Convert.ToHexStringLower(SHA256.HashData(original)); }
-            finally { CryptographicOperations.ZeroMemory(original); }
-        }
-    }
+    internal string ExpectedSignerFingerprint => ClusterRestoreRf3SignerIdentity.Fingerprint(profile.SigningKey);
     internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings { get; }
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
@@ -147,6 +138,11 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     internal Task StartRejectedMissingAsync(ImmutableArray<string> derivatives, CancellationToken cancellationToken)
         => StartCoreAsync(restore: true, ErrorCode.Corruption, null, wrongDigest: false, derivatives, ClusterRestoreRf3ArchiveOmissionTrial.MissingDetail, null,
             cancellationToken);
+
+    internal Task StartDerivativeArchiveAsync(ImmutableArray<string> derivatives, bool rejectModified,
+        CancellationToken cancellationToken)
+        => StartCoreAsync(restore: true, rejectModified ? ErrorCode.Corruption : null, null, wrongDigest: false,
+            derivatives, rejectModified ? ClusterRestoreRf3ArchiveMutationTrial.ModifiedDetail : null, null, cancellationToken);
 
     private async Task StartCoreAsync(bool restore, ErrorCode? expectedFailure, string? operatorCredential, bool wrongDigest,
         ImmutableArray<string>? sourceArchives, string? exactFailureDetail, NativeClusterRestoreStage? cut, CancellationToken cancellationToken)

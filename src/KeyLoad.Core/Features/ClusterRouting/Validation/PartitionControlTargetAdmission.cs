@@ -9,7 +9,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private (ReplicatedOperation Original, CommandRequest Command) RequireControlledDocumentTarget(
+    private (ReplicatedOperation Original, CommandRequest? Command) RequireControlledDocumentTarget(
         IKeyValueView view, PartitionMovePhaseCommand phase, PartitionControlApplyBody body,
         Guid effectId, DateTimeOffset now)
     {
@@ -28,7 +28,7 @@ public sealed partial class DatabaseEngine
             || delegation.ControlAdmissionPosition <= PartitionMoveProtocol.EmptyCount
             || delegation.ExpiresAt <= now || delegation.Principal.Revoked || delegation.Principal.ExpiresAt <= now
             || delegation.Principal.Id != expected.PrincipalId || delegation.Principal.PolicyEpoch <= PartitionMoveProtocol.EmptyCount
-            || delegation.OriginalKind != OperationKind.Batch || delegation.OriginalPayloadJson != original.PayloadJson
+            || delegation.OriginalKind != original.Kind || delegation.OriginalPayloadJson != original.PayloadJson
             || delegation.Fingerprint != CommandFingerprint(original)
             || delegation.ControlOwner is null
             || !PhysicalOwnerEntryValidation.SameOwner(delegation.ControlOwner, phase.ControlOwner)
@@ -41,7 +41,7 @@ public sealed partial class DatabaseEngine
             || placement.Incarnation != Store.Identity.Incarnation)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
         RequireControlEffectResources(phase, delegation, stage);
-        var command = RequireControlledDocumentBatch(original, phase.Partition);
+        var command = RequireControlledCommandBody(original, phase.Partition);
         if (JsonData.Fingerprint(command) != JsonData.Fingerprint(body.Command))
         { throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage); }
         return (original, command);

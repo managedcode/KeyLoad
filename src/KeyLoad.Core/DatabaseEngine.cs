@@ -59,6 +59,7 @@ public sealed partial class DatabaseEngine
         ClaimsExecution = claimsOptions.Value;
         ClaimsExecution.Validate();
         ArgumentNullException.ThrowIfNull(timeSeriesOptions);
+        TimeSeriesOptions = timeSeriesOptions;
         timeSeriesExecution = timeSeriesOptions.Value;
         timeSeriesExecution.Validate();
         ArgumentNullException.ThrowIfNull(checkpointOptions);
@@ -93,6 +94,7 @@ public sealed partial class DatabaseEngine
     internal BlobExecutionOptions BlobExecution { get; }
     internal NativeClaimsExecutionOptions ClaimsExecution { get; }
     private readonly TimeSeriesExecutionOptions timeSeriesExecution;
+    internal IOptions<TimeSeriesExecutionOptions> TimeSeriesOptions { get; }
     private readonly PartitionMovementCheckpointOptions movementCheckpoints;
     private readonly IPartitionMovementCheckpointVerifier movementCheckpointVerifier;
     private readonly EventSourceExecutionOptions eventSourceExecution;

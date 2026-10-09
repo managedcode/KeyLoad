@@ -14,6 +14,8 @@ internal static class TimeSeriesApi
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.AggregateSamples, request));
         app.MapPost(TimeSeriesReadProtocol.WindowsRoute, (AggregateSampleWindowsRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.AggregateSampleWindows, request));
+        app.MapPost(SampleChunkProtocol.ReadRoute, (ReadSampleChunkWindowRequest request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.SampleChunkWindow, request));
         app.MapPost(SampleRollupProtocol.ReadRoute, (ReadSampleRollupRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.SampleRollup, request));
         app.MapPost(TimeSeriesReadProtocol.RetentionRoute, (ReadSampleRetentionRequest request, HttpContext context) =>

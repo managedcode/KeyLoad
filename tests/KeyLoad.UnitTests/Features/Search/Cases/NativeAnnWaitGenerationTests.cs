@@ -59,7 +59,8 @@ internal sealed class NativeAnnWaitGenerationTests
         var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
             [Row(database, FirstRecord, FirstDenominator), Row(database, SecondRecord, SecondDenominator)],
             database.Store.Position, AnnPageMode.Exact, true, pin.IndexGeneration, AnnPageMode.Approximate);
-        await Assert.That(NativeSerialization.Serialize(page).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(System.Text.Json.JsonSerializer.Serialize(page, JsonDefaults.Options))
+            .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await Assert.That(page.Documents.Any(row => row.Document.Reference.Id == DeletedId)).IsFalse();
     }
 

@@ -13,7 +13,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private GrainQueryReadCapabilities Query => query ??= new(services.GetRequiredService<QueryEngine>(),
         services.GetRequiredService<SearchEngine>(), runtimeClock, services.GetRequiredService<PhysicalShardRecord>());
     private INodeAdministration Administration => services.GetRequiredService<INodeAdministration>();
-    private readonly GrainBlobReadCapabilities blobs = new(localDatabase);
+    private readonly GrainBlobReadExecution blobs = new(localDatabase, services);
 
     internal async Task<object?> ReadAsync(DecodedGrainRequest request, Guid requestId,
         CancellationToken cancellationToken)
@@ -92,7 +92,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainBlobReadCapabilities.Handles(kind))
         {
-            return blobs.Execute(kind, principal.Id, request.Payload, cancellationToken);
+            return await blobs.ExecuteAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {

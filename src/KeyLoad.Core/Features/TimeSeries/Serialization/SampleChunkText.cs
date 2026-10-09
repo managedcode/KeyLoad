@@ -9,7 +9,7 @@ internal static class SampleChunkText
     private const byte Utf16Encoding = 1;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
-    internal static long FramedSize(string value, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
+    internal static long FramedSize(string value, SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EncodingFlagBits = 1;
 
@@ -19,7 +19,7 @@ internal static class SampleChunkText
     }
 
     internal static void WriteFramed(string value, Span<byte> destination, ref int position,
-        ReadExecutionBudget budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
+        SampleChunkWork budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
     {
         const int EncodingFlagBits = 1;
 
@@ -40,7 +40,7 @@ internal static class SampleChunkText
         position += byteLength;
     }
 
-    internal static long ValidateFramed(ref SampleChunkReader reader, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static long ValidateFramed(ref SampleChunkReader reader, SampleChunkWork budget, int hashChunkBytes)
     {
         const int EncodingFlagMask = 1;
         const int PrefixBitOffset = 1;
@@ -54,7 +54,7 @@ internal static class SampleChunkText
         return checked((long)byteLength);
     }
 
-    internal static string ReadFramed(ref SampleChunkReader reader, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static string ReadFramed(ref SampleChunkReader reader, SampleChunkWork budget, int hashChunkBytes)
     {
         const int EncodingFlagMask = 1;
         const int PrefixBitOffset = 1;
@@ -71,7 +71,7 @@ internal static class SampleChunkText
         return result;
     }
 
-    private static int MeasureText(string value, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits,
+    private static int MeasureText(string value, SampleChunkWork budget, int textCancellationCheckIntervalCodeUnits,
         out byte encoding)
     {
         const int Utf8LengthInitialValue = 0;
@@ -125,7 +125,7 @@ internal static class SampleChunkText
         return current <= OneByteUtf8MaximumCodeUnit ? OneByteUtf8Length : current <= TwoByteUtf8MaximumCodeUnit ? TwoByteUtf8Length : ThreeByteUtf8Length;
     }
 
-    private static void ValidateBytes(ReadOnlySpan<byte> bytes, byte encoding, ReadExecutionBudget budget, int hashChunkBytes)
+    private static void ValidateBytes(ReadOnlySpan<byte> bytes, byte encoding, SampleChunkWork budget, int hashChunkBytes)
     {
         if (encoding == Utf8Encoding)
         {
@@ -137,7 +137,7 @@ internal static class SampleChunkText
         }
     }
 
-    private static void ValidateUtf8(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
+    private static void ValidateUtf8(ReadOnlySpan<byte> bytes, SampleChunkWork budget, int hashChunkBytes)
     {
         const int OffsetInitialValue = 0;
         const int Utf16CodeUnitBytes = 2;

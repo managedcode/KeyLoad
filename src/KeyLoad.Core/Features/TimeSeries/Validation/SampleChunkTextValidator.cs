@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkTextValidator
 {
-    internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static void Validate(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)
     {
         const long TextBytesInitialValue = 0L;
         const int EmptySeriesBytes = 0;
@@ -44,7 +44,7 @@ internal static class SampleChunkTextValidator
     }
 
     private static void ValidateTagIndexes(ref SampleChunkReader reader, int recordCount, int dictionaryCount,
-        ReadExecutionBudget budget)
+        SampleChunkWork budget)
     {
         const int TagIndexWordCount = 4;
         const int NextFirstIndexInitialValue = 0;

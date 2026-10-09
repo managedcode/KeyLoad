@@ -11,6 +11,12 @@ internal sealed record BlobCommandScope(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobCommandScopeFields.UploadId)] Guid? UploadId)
 {
     internal static T Payload<T>(ReplicatedOperation operation) => NativeCommandPayload.Read<T>(operation);
+    internal static Capability RequiredCapability(OperationKind kind) => kind switch
+    {
+        OperationKind.DeleteBlob => Capability.BlobDelete,
+        OperationKind.ReclaimBlob => Capability.BlobManage,
+        _ => Capability.BlobWrite
+    };
     internal static BlobCommandScope From(ReplicatedOperation operation) => operation.Kind switch
     {
         OperationKind.BeginBlobUpload => Begin(Payload<BeginBlobUploadRequest>(operation)),
@@ -77,12 +83,7 @@ internal sealed class BlobAuthority(DatabaseEngine database)
         var scope = BlobCommandScope.From(operation);
         if (scope.CommandId != operation.Id || scope.UploadId == Guid.Empty)
         { throw BlobErrors.Validation(); }
-        var capability = operation.Kind switch
-        {
-            OperationKind.DeleteBlob => Capability.BlobDelete,
-            OperationKind.ReclaimBlob => Capability.BlobManage,
-            _ => Capability.BlobWrite
-        };
+        var capability = BlobCommandScope.RequiredCapability(operation.Kind);
         _ = Scope(view, principal, scope.Blob, capability);
         var head = Reader.Head(view, scope.Blob);
         var state = scope.UploadId is { } upload ? Reader.State(view, scope.Blob, upload) : null;

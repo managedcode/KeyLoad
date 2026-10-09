@@ -1,3 +1,4 @@
+using KeyLoad.Server.Features.BlobStorage;
 using System.Globalization;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -13,6 +14,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private readonly NodeOptions options;
     private readonly RemoteDocumentReceiver receiver;
     private readonly RemoteControlledDocumentReceiver controlled;
+    private readonly RemoteControlledBlobReceiver controlledBlob;
     private readonly RemoteDocumentWorkOwner owner;
     private readonly ReplicaMembershipAuthorityAddressPins pins;
     private readonly ReplicaMembershipAuthorityReplayCache replay;
@@ -20,12 +22,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private readonly TimeProvider clock;
 
     internal RemoteDocumentEndpoint(IOptions<NodeOptions> nodeOptions, RemoteDocumentReceiver receiver,
-        RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled, IOptions<OrleansMembershipOptions> membershipOptions,
+        RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled, RemoteControlledBlobReceiver controlledBlob,
+        IOptions<OrleansMembershipOptions> membershipOptions,
         IOptions<GrainRoutingOptions> routingOptions, TimeProvider clock)
     {
         options = nodeOptions.Value;
         this.receiver = receiver;
         this.controlled = controlled;
+        this.controlledBlob = controlledBlob;
         this.owner = owner;
         this.clock = clock;
         routing = routingOptions.Value;
@@ -80,6 +84,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             if (!callerMac.Verify(body, RemoteDocumentWire.Signature(context.Request.Headers), reply: false))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
             var transport = RemoteDocumentWire.DecodeCall(body);
+            if (transport.ControlledBlob is { } blobCall)
+            {
+                if (transport.Document is not null || transport.Controlled is not null)
+                { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+                await RemoteControlledBlobEndpointExecution.ExecuteAsync(context, blobCall,
+                    controlledBlob, options, pins, replay, clock, token).ConfigureAwait(false);
+                return;
+            }
             if ((transport.Document is null) == (transport.Controlled is null))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
             if (transport.Controlled is { } controlledCall)
@@ -88,43 +100,47 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
                     controlled, options, pins, replay, clock, token).ConfigureAwait(false);
                 return;
             }
-            var call = transport.Document!;
-            receiver.Validate(call, token);
-            if (!replay.TryUse(call.Nonce))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-            var address = SiloAddress.FromParsableString(call.CallerSiloAddress);
-            if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-            var voter = Array.IndexOf(options.MembershipAuthority.AuthorityEndpoints, call.CallerVoter);
-            await pins.PinCallerAsync(voter, address.Endpoint.Address, token).ConfigureAwait(false);
-            var remaining = call.ExpiresAt - clock.GetUtcNow();
-            if (remaining <= TimeSpan.Zero)
-            { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.Unavailable); }
-            using var originalExpiry = new CancellationTokenSource(remaining, clock);
-            using var original = CancellationTokenSource.CreateLinkedTokenSource(token, originalExpiry.Token);
-            RemoteDocumentReplyV1 reply;
-            try
-            {
-                if (call.QueryLeaf is not null)
-                {
-                    var leaf = await receiver.ReadLeafAsync(call, original.Token).ConfigureAwait(false);
-                    reply = new(call.RequestId, call.Nonce, null, null, null, receiver.Discovery(), leaf);
-                }
-                else
-                {
-                    var result = await receiver.ReadAsync(call, original.Token).ConfigureAwait(false);
-                    reply = new(call.RequestId, call.Nonce, result, null, null, receiver.Discovery());
-                }
-            }
-            catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
-            { reply = new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery()); }
-            var encoded = RemoteDocumentWire.Encode(reply, RemoteDocumentWire.ReplyMaximum(call));
-            using var replyMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
-            context.Response.Headers[RemoteDocumentProtocol.SignatureHeader] = replyMac.Sign(encoded, reply: true);
-            context.Response.ContentType = RemoteDocumentProtocol.ContentType;
-            context.Response.ContentLength = encoded.Length;
-            await context.Response.Body.WriteAsync(encoded, original.Token).ConfigureAwait(false);
+            await ExecuteDocumentCallAsync(context, transport.Document!, token).ConfigureAwait(false);
         }
+    }
+
+    private async Task ExecuteDocumentCallAsync(HttpContext context, RemoteDocumentCallV1 call, CancellationToken token)
+    {
+        receiver.Validate(call, token);
+        if (!replay.TryUse(call.Nonce))
+        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        var address = SiloAddress.FromParsableString(call.CallerSiloAddress);
+        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
+        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        var voter = Array.IndexOf(options.MembershipAuthority.AuthorityEndpoints, call.CallerVoter);
+        await pins.PinCallerAsync(voter, address.Endpoint.Address, token).ConfigureAwait(false);
+        var remaining = call.ExpiresAt - clock.GetUtcNow();
+        if (remaining <= TimeSpan.Zero)
+        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.Unavailable); }
+        using var originalExpiry = new CancellationTokenSource(remaining, clock);
+        using var original = CancellationTokenSource.CreateLinkedTokenSource(token, originalExpiry.Token);
+        RemoteDocumentReplyV1 reply;
+        try
+        {
+            if (call.QueryLeaf is not null)
+            {
+                var leaf = await receiver.ReadLeafAsync(call, original.Token).ConfigureAwait(false);
+                reply = new(call.RequestId, call.Nonce, null, null, null, receiver.Discovery(), leaf);
+            }
+            else
+            {
+                var result = await receiver.ReadAsync(call, original.Token).ConfigureAwait(false);
+                reply = new(call.RequestId, call.Nonce, result, null, null, receiver.Discovery());
+            }
+        }
+        catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
+        { reply = new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery()); }
+        var encoded = RemoteDocumentWire.Encode(reply, RemoteDocumentWire.ReplyMaximum(call));
+        using var replyMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
+        context.Response.Headers[RemoteDocumentProtocol.SignatureHeader] = replyMac.Sign(encoded, reply: true);
+        context.Response.ContentType = RemoteDocumentProtocol.ContentType;
+        context.Response.ContentLength = encoded.Length;
+        await context.Response.Body.WriteAsync(encoded, original.Token).ConfigureAwait(false);
     }
 
     public ValueTask DisposeAsync()

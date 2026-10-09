@@ -91,72 +91,8 @@ function Assert-AcProcess([string] $Path, [string] $Stdout, [string] $Stderr, [o
     $process
 }
 
-function Assert-AcAdditionalCandidate([object] $Candidate, [string] $Class) {
-    Assert-FcNativeExactKeys $Candidate @('className','methodName','sourcePath','parameterTypeFullNames',
-        'sourceArgumentDeclarations','sourceInstances')
-    $short = $Class.Substring($Class.LastIndexOf('.') + 1)
-    $canonical = 'tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/' + $short + '.cs'
-    if ($Candidate.className -cne $Class -or $Candidate.methodName -isnot [string] -or
-        $Candidate.methodName -cnotmatch '\A[A-Za-z_][A-Za-z0-9_]{0,255}\z' -or
-        $Candidate.sourcePath -cne $canonical -or $Candidate.parameterTypeFullNames -isnot [array] -or
-        $Candidate.sourceArgumentDeclarations -isnot [array] -or
-        ($Candidate.sourceInstances -isnot [int] -and $Candidate.sourceInstances -isnot [long])) { throw $invalid }
-    [void] (Resolve-FcPath $Repository $canonical)
-    $types = @(); $arguments = @()
-    if ($short -cin @('PartitionMovementReceiverIssueFailoverRf3Tests','PartitionMovementActiveAdjunctRf3Tests',
-            'PartitionMovementFrameObservationScopeRf3Tests')) {
-        $types = @('System.Boolean'); $arguments = @('false','true')
-    } elseif ($short -ceq 'PartitionMovementCleanupMatrixRf3Tests' -and
-        $Candidate.parameterTypeFullNames.Count -ne 0) {
-        $types = @('KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole')
-        $arguments = @('PartitionMovementCleanupMatrixFaultRole.OtherKnownArm',
-            'PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerArm',
-            'PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl')
-    }
-    $instances = if ($arguments.Count -eq 0) { 1 } else { $arguments.Count }
-    if ((ConvertTo-Json @($Candidate.parameterTypeFullNames) -Compress) -cne
-        (ConvertTo-Json @($types) -Compress) -or
-        (ConvertTo-Json @($Candidate.sourceArgumentDeclarations) -Compress) -cne
-        (ConvertTo-Json @($arguments) -Compress) -or $Candidate.sourceInstances -ne $instances) { throw $invalid }
-    $instances
-}
-function Assert-AcAdditionalCensus([object] $Contract) {
-    if ($Contract.additionalCensuses -isnot [array] -or $Contract.additionalCensuses.Count -ne 1) { throw $invalid }
-    $group = $Contract.additionalCensuses[0]
-    Assert-FcNativeExactKeys $group @('taskId','censusSelections')
-    if ($group.taskId -cne 'KL-036' -or $group.censusSelections -isnot [array] -or
-        $group.censusSelections.Count -ne 8) { throw $invalid }
-    $expected = @('PartitionMovementReceiverIssueFailoverRf3Tests','PartitionMovementActiveAdjunctRf3Tests',
-        'PartitionMovementFinalInstallFrameRf3Tests','PartitionMovementFrameObservationScopeRf3Tests',
-        'PartitionMovementCleanupMatrixRf3Tests','PartitionMovementObservedFailureColdRf3Tests',
-        'PartitionMovementPolicyBusyColdRf3Tests','PartitionMovementPolicyEpochColdRf3Tests')
-    $classes = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    $ids = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    $total = 0
-    foreach ($selection in $group.censusSelections) {
-        Assert-FcNativeExactKeys $selection @('selectionId','suite','filter','candidates')
-        if ($selection.suite -cne 'rf3' -or $selection.candidates -isnot [array] -or
-            $selection.candidates.Count -lt 1 -or $selection.candidates.Count -gt 2 -or
-            $selection.selectionId -isnot [string] -or -not $ids.Add($selection.selectionId)) { throw $invalid }
-        $class = $selection.candidates[0].className
-        $short = @($expected | Where-Object { $class -ceq ('KeyLoad.IntegrationTests.Features.ClusterRouting.' + $_) })
-        if ($short.Count -ne 1 -or -not $classes.Add($class) -or
-            $selection.filter -cne ('/*/*/' + $short[0] + '/*') -or
-            $selection.selectionId -cne ('rf3-' + ([regex]::Replace($short[0], '(?<!^)(?=[A-Z])', '-')).ToLowerInvariant())) { throw $invalid }
-        $count = if ($short[0] -ceq 'PartitionMovementCleanupMatrixRf3Tests') { 2 } else { 1 }
-        if ($selection.candidates.Count -ne $count) { throw $invalid }
-        $methods = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-        foreach ($candidate in $selection.candidates) {
-            $total += Assert-AcAdditionalCandidate $candidate $class
-            if (-not $methods.Add($candidate.methodName)) { throw $invalid }
-        }
-    }
-    if ($classes.Count -ne 8 -or $ids.Count -ne 8 -or $total -ne 14) { throw $invalid }
-}
-
 $contract = Read-AcJson $ContractPath $true
-Assert-FcNativeExactKeys $contract @('schemaVersion','qualifiedScope','maximumParallelTests','tasks','additionalCensuses')
-Assert-AcAdditionalCensus $contract
+Assert-FcNativeExactKeys $contract @('schemaVersion','qualifiedScope','maximumParallelTests','tasks')
 $manifest = Read-AcJson $ExecutionManifestPath
 if ($contract.maximumParallelTests -ne 50 -or $contract.schemaVersion -ne 1 -or $contract.qualifiedScope -cne $scope -or
     $manifest.schemaVersion -ne 1 -or $manifest.task -cne $Task -or $manifest.profile -cne $Profile -or

@@ -30,7 +30,7 @@ internal sealed class TestDatabase : IDisposable
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
         NativeClaimsExecutionOptions? claimsExecution = null, TimeProvider? timeProvider = null,
-        bool nativeReplicaAdmission = false)
+        bool nativeReplicaAdmission = false, TimeSeriesExecutionOptions? timeSeriesExecution = null)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
@@ -44,7 +44,7 @@ internal sealed class TestDatabase : IDisposable
         {
             var clock = timeProvider ?? TimeProvider.System;
             Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(), MovementCheckpoints, UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
+            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(timeSeriesExecution), MovementCheckpoints, UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)

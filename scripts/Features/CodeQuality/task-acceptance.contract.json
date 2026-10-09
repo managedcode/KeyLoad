@@ -2722,6 +2722,193 @@
             }
           ]
         }
+      ,
+        {
+          "selectionId": "rf3-partition-movement-receiver-issue-failover-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementReceiverIssueFailoverRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
+              "methodName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation",
+              "instanceName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementReceiverIssueFailoverRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
+              "methodName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation",
+              "instanceName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementReceiverIssueFailoverRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-active-adjunct-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementActiveAdjunctRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
+              "methodName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes",
+              "instanceName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementActiveAdjunctRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
+              "methodName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes",
+              "instanceName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementActiveAdjunctRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-final-install-frame-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementFinalInstallFrameRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFinalInstallFrameRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFinalInstallFrameRf3Tests",
+              "methodName": "ActualFinalInstallNativeFrameLegalAndOneByteShortRetainEffectsThenSameMoveColdHealthyContinuation",
+              "instanceName": "ActualFinalInstallNativeFrameLegalAndOneByteShortRetainEffectsThenSameMoveColdHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFinalInstallFrameRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-frame-observation-scope-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementFrameObservationScopeRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
+              "methodName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy",
+              "instanceName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy(False)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFrameObservationScopeRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
+              "methodName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy",
+              "instanceName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy(True)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFrameObservationScopeRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ]
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-cleanup-matrix-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementCleanupMatrixRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy",
+              "instanceName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy(OtherKnownArm)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy",
+              "instanceName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy(ClaimedOwnerArm)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy",
+              "instanceName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy(RetainedObservedControl)",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole"
+              ]
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
+              "methodName": "ActualRetiredOtherResurrectionRefusesPublicationAfterReleasedAndLinkedObservedThenNewSessionColdHealthy",
+              "instanceName": "ActualRetiredOtherResurrectionRefusesPublicationAfterReleasedAndLinkedObservedThenNewSessionColdHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-observed-failure-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementObservedFailureColdRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementObservedFailureColdRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementObservedFailureColdRf3Tests",
+              "methodName": "ActualObservedFailedInstallColdResumeRetainsNativeFailureThenAbortAndFreshMoveSdkMcpQ1Healthy",
+              "instanceName": "ActualObservedFailedInstallColdResumeRetainsNativeFailureThenAbortAndFreshMoveSdkMcpQ1Healthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementObservedFailureColdRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-policy-busy-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementPolicyBusyColdRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyBusyColdRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyBusyColdRf3Tests",
+              "methodName": "ActualUnsettledMoveRejectsPolicyChangeThenColdAbortAndFreshMoveSdkMcpQ1Healthy",
+              "instanceName": "ActualUnsettledMoveRejectsPolicyChangeThenColdAbortAndFreshMoveSdkMcpQ1Healthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyBusyColdRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-movement-policy-epoch-cold-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionMovementPolicyEpochColdRf3Tests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyEpochColdRf3Tests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyEpochColdRf3Tests",
+              "methodName": "ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold",
+              "instanceName": "ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyEpochColdRf3Tests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -5319,161 +5506,5 @@
       ]
     }
   ],
-  "maximumParallelTests": 50,
-  "additionalCensuses": [
-    {
-      "taskId": "KL-036",
-      "censusSelections": [
-        {
-          "selectionId": "rf3-partition-movement-receiver-issue-failover-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementReceiverIssueFailoverRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementReceiverIssueFailoverRf3Tests",
-              "methodName": "ActualIssueAckReadFailoverRetainsOriginalAuthorityAndColdSdkMcpQ1HealthyContinuation",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementReceiverIssueFailoverRf3Tests.cs",
-              "parameterTypeFullNames": [
-                "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-active-adjunct-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementActiveAdjunctRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementActiveAdjunctRf3Tests",
-              "methodName": "ActualActiveWrongRequestOrDuplicateAdjunctFailsThenOriginalOwnerDisposesAndColdAbortFreshMoveCompletes",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementActiveAdjunctRf3Tests.cs",
-              "parameterTypeFullNames": [
-                "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-final-install-frame-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementFinalInstallFrameRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFinalInstallFrameRf3Tests",
-              "methodName": "ActualFinalInstallNativeFrameLegalAndOneByteShortRetainEffectsThenSameMoveColdHealthyContinuation",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFinalInstallFrameRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-frame-observation-scope-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementFrameObservationScopeRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementFrameObservationScopeRf3Tests",
-              "methodName": "ActualUnselectedOrForeignReceiverObservationCannotPublishProofThenSameMoveColdHealthy",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementFrameObservationScopeRf3Tests.cs",
-              "parameterTypeFullNames": [
-                "System.Boolean"
-              ],
-              "sourceArgumentDeclarations": [
-                "false",
-                "true"
-              ],
-              "sourceInstances": 2
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-cleanup-matrix-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementCleanupMatrixRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
-              "methodName": "ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixFaultRole"
-              ],
-              "sourceArgumentDeclarations": [
-                "PartitionMovementCleanupMatrixFaultRole.OtherKnownArm",
-                "PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerArm",
-                "PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl"
-              ],
-              "sourceInstances": 3
-            },
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementCleanupMatrixRf3Tests",
-              "methodName": "ActualRetiredOtherResurrectionRefusesPublicationAfterReleasedAndLinkedObservedThenNewSessionColdHealthy",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementCleanupMatrixRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-observed-failure-cold-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementObservedFailureColdRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementObservedFailureColdRf3Tests",
-              "methodName": "ActualObservedFailedInstallColdResumeRetainsNativeFailureThenAbortAndFreshMoveSdkMcpQ1Healthy",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementObservedFailureColdRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-policy-busy-cold-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementPolicyBusyColdRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyBusyColdRf3Tests",
-              "methodName": "ActualUnsettledMoveRejectsPolicyChangeThenColdAbortAndFreshMoveSdkMcpQ1Healthy",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyBusyColdRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
-            }
-          ]
-        },
-        {
-          "selectionId": "rf3-partition-movement-policy-epoch-cold-rf3-tests",
-          "suite": "rf3",
-          "filter": "/*/*/PartitionMovementPolicyEpochColdRf3Tests/*",
-          "candidates": [
-            {
-              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.PartitionMovementPolicyEpochColdRf3Tests",
-              "methodName": "ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold",
-              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PartitionMovementPolicyEpochColdRf3Tests.cs",
-              "parameterTypeFullNames": [],
-              "sourceArgumentDeclarations": [],
-              "sourceInstances": 1
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "maximumParallelTests": 50
 }

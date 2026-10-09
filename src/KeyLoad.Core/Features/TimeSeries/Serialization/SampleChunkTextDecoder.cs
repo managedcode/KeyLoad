@@ -5,7 +5,7 @@ internal sealed record SampleChunkDecodedText(string SeriesId, string[] EventIds
 
 internal static class SampleChunkTextDecoder
 {
-    internal static SampleChunkDecodedText Decode(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
+    internal static SampleChunkDecodedText Decode(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)
     {
         var seriesReader = new SampleChunkReader(payload.Series.Span);
         var seriesId = SampleChunkText.ReadFramed(ref seriesReader, budget, hashChunkBytes);
@@ -16,7 +16,7 @@ internal static class SampleChunkTextDecoder
         return new(seriesId, eventIds, dictionary, indexes);
     }
 
-    private static string[] DecodeEventIds(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
+    private static string[] DecodeEventIds(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
 
@@ -35,7 +35,7 @@ internal static class SampleChunkTextDecoder
     }
 
     private static (string[] Dictionary, int[] Indexes) DecodeTags(SampleChunkPayload payload,
-        ReadExecutionBudget budget, int hashChunkBytes)
+        SampleChunkWork budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
 

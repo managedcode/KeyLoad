@@ -45,6 +45,13 @@ internal sealed class PartitionMovementParentNativeStep(PartitionMovementParentP
                 descriptor.Resources, actualClusterId, Math.Min(limits.Value.MaxBatchBytes, work.MaximumResultBytes));
         }
         await ObserveFinalInstallAsync(state, intended, work, phaseObservation, cancellationToken).ConfigureAwait(false);
+        if (PartitionMovementParentCapacityFinalInstall.IsFinal(state, intended))
+        {
+            var descriptor = state.Selected?.OriginalDescriptor
+                ?? throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMoveProtocol.MissingAuthority);
+            PartitionMovementParentCaptureLimits.RequirePlannedStageCapacity(state, intended, receiver,
+                descriptor.Resources, actualClusterId, Math.Min(limits.Value.MaxBatchBytes, work.MaximumResultBytes));
+        }
         var cleanupGeneration = intended.Stage == PartitionMovePeerStage.Retire
             ? header.CleanupGeneration : PartitionMoveProtocol.EmptyCount;
         var grantId = PartitionMovementParentPhaseIds.For(request, principalId, grantRole,

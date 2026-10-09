@@ -73,17 +73,10 @@ internal sealed class MetadataIntegrityTests
     public async Task ReparsePointCanonicalFileFailsBeforeDestinationCreation()
     {
         using var fixture = new MetadataBackupFixture();
-        File.Delete(Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName));
-        File.CreateSymbolicLink(Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName),
-            MetadataTestContract.JournalFileName);
-        var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.LinkRestorePath);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeStore.Restore(fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.BackupFileLinkDetail);
-        await Assert.That(Directory.Exists(destination)).IsFalse();
+        var parent = Directory.GetParent(fixture.BackupDirectory) ?? throw new DirectoryNotFoundException();
+        var destination = Path.Combine(parent.FullName, MetadataTestContract.LinkRestorePath);
+        await MetadataLinkRestoreContinuation.RequireAsync(fixture, destination,
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 
     [Test]

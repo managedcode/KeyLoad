@@ -26,6 +26,7 @@ internal static class McpToolDescriptions
     private const string SeriesWindows = "Read dense fixed-width UTC windows anchored at from, including empty windows and a clamped final window. Sample and window caps reject the whole result when exceeded.";
     private const string SeriesRollup = "Read one current explicit UTC rollup bucket with exact revision, raw watermark and finite sum/count statistics; stale snapshots reject until explicit correction.";
     private const string SeriesRetention = "Read the persisted exclusive UTC retention floor, cumulative physical purge count and remaining-page status under current series read authorization.";
+    private const string SeriesSampleChunkWindow = "Read one authorized sample-chunk window with an optional tag filter under one committed cut; result includes generation, revision, source sequence and retention floor. Exceeding the record limit rejects the whole result.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
     private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Default admission requires one physical owner; explicitly configured two-owner deployments may route separately authorized leaves. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
@@ -82,6 +83,7 @@ internal static class McpToolDescriptions
         McpToolNames.GraphIncomingEdges => GraphIncomingEdges,
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
             or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention or McpToolNames.SeriesRollup => SeriesDescription(name),
+        SampleChunkProtocol.ReadTool => SeriesSampleChunkWindow,
         McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst
             or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead or McpToolNames.QueryPartitions
             => QueryDescription(name),

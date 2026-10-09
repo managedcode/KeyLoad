@@ -5,11 +5,23 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Real failed native state survives restart, refusal, authorized Abort and a new complete move.</summary>
 internal static class PartitionMovementObservedFailureColdRf3Continuation
 {
-    internal static async Task RequireAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
+    internal static Task RequireAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
         PartitionMovementFinalInstallFramePrecut precut, PartitionMovementPublicParentRf3NativeCut[] refused,
         int originalFrameCap, bool requirePolicyFence, CancellationToken cancellationToken)
+        => RequireCoreAsync(wave, seed, precut, refused, originalFrameCap, requirePolicyFence, null, cancellationToken);
+
+    internal static Task RequireRestoredCapacityAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
+        PartitionMovementFinalInstallFramePrecut precut, PartitionMovementPublicParentRf3NativeCut[] refused,
+        int originalFrameCap, int originalBatchCap, CancellationToken cancellationToken)
+        => RequireCoreAsync(wave, seed, precut, refused, originalFrameCap, false, originalBatchCap, cancellationToken);
+
+    private static async Task RequireCoreAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
+        PartitionMovementFinalInstallFramePrecut precut, PartitionMovementPublicParentRf3NativeCut[] refused,
+        int originalFrameCap, bool requirePolicyFence, int? originalBatchCap, CancellationToken cancellationToken)
     {
         wave.frameObservation!.RetireAfterJoinedStop(wave);
+        if (originalBatchCap is { } batch)
+        { await wave.ReconfigureMovementCapacityAsync(batch, cancellationToken).ConfigureAwait(false); }
         await wave.ReconfigureMovementFrameAsync(originalFrameCap, cancellationToken).ConfigureAwait(false);
         if (requirePolicyFence)
         {

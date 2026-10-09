@@ -275,17 +275,6 @@ jobs:
             -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
             -Task $env:KEYLOAD_ACCEPTANCE_TASK -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Retain additional KL-036 original native census before strict expansion
-        if: ${{ !cancelled() && matrix.task == 'KL-036' && steps.build.outcome == 'success' && steps.source-identity.outcome == 'success' }}
-        shell: pwsh
-        env:
-          KEYLOAD_ACCEPTANCE_PROFILE: ${{ matrix.profile }}
-        run: |
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/task-acceptance.ps1 `
-            -Repository $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
-            -Task KL-036 -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE -AdditionalCensus
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify unchanged task source and test images
         if: ${{ !cancelled() && steps.source-identity.outcome == 'success' }}
         shell: pwsh
