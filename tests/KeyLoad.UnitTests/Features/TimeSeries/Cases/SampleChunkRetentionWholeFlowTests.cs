@@ -17,7 +17,8 @@ internal sealed class SampleChunkRetentionWholeFlowTests
     {
         var clock = new SampleChunkRetentionClock(SampleChunkCanonicalFixture.Start);
         using var fixture = new SampleChunkCanonicalFixture(timeProvider: clock);
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         var sealId = Guid.NewGuid();
         var seal = new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, AppendedRevision);

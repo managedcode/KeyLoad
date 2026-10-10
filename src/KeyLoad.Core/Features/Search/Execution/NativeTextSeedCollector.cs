@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
 
-internal static class NativeTextSeedCollector
+internal static partial class NativeTextSeedCollector
 {
     private const int PlacementVersion = 1;
     private const long EmptyPosition = 0;
@@ -27,6 +27,52 @@ internal static class NativeTextSeedCollector
     internal static NativeTextSeedCapture CaptureView(DatabaseEngine database, IKeyValueView raw,
         string principalId, NativeTextSeedPin pin, ReadExecutionBudget budget)
     {
+        var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
+        var partition = pin.Consumer.Partition;
+        var documents = new List<DocumentRecord>();
+        var range = budget.VisitRange(raw, DocumentStorageKeys.Prefix(partition, pin.Collection),
+            database.Limits.MaxScanRecords, (key, value) =>
+            {
+                budget.ChargeBytes(value.Length);
+                var document = NativeSerialization.Deserialize<DocumentRecord>(value);
+                if (document.Reference.Partition != partition || document.Reference.Collection != pin.Collection
+                    || document.Revision <= EmptyPosition
+                    || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
+                { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
+                documents.Add(document);
+                return true;
+            });
+        if (range.HasMore)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded); }
+        budget.Check();
+        return metadata with { Documents = documents.ToArray() };
+    }
+
+    internal static T CaptureOnlinePinned<T>(DatabaseEngine database, string principalId,
+        NativeTextSeedPin pin, ReadExecutionBudget budget,
+        Func<IKeyValueView, NativeTextSeedCapture, T> capture)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(pin);
+        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(capture);
+        budget.Check();
+        return database.Store.Read(raw =>
+        {
+            var current = database.Principal(budget.CreateView(raw), principalId, database.EvaluationClock.GetUtcNow());
+            if (!current.ClusterAdministrator)
+            { throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextAdministratorRequired); }
+            var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
+            budget.Check();
+            return capture(raw, metadata);
+        });
+    }
+
+    private const string OnlineTextAdministratorRequired = "Online text maintenance requires current administrator authority.";
+
+    internal static NativeTextSeedCapture CaptureMetadataView(DatabaseEngine database, IKeyValueView raw,
+        string principalId, NativeTextSeedPin pin, ReadExecutionBudget budget)
+    {
         var view = budget.CreateView(raw);
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         var partition = pin.Consumer.Partition;
@@ -44,26 +90,11 @@ internal static class NativeTextSeedCollector
         var applied = NativeSerialization.Deserialize<long>(appliedBytes);
         if (applied < EmptyPosition || consumer.Checkpoint > head.Tail)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
-        var documents = new List<DocumentRecord>();
-        var range = budget.VisitRange(raw, DocumentStorageKeys.Prefix(partition, pin.Collection),
-            database.Limits.MaxScanRecords, (key, value) =>
-            {
-                budget.ChargeBytes(value.Length);
-                var document = NativeSerialization.Deserialize<DocumentRecord>(value);
-                if (document.Reference.Partition != partition || document.Reference.Collection != pin.Collection
-                    || document.Revision <= EmptyPosition
-                    || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
-                { throw Errors.Fail(ErrorCode.Corruption, InvalidScope); }
-                documents.Add(document);
-                return true;
-            });
-        if (range.HasMore)
-        { throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded); }
         budget.Check();
         var identity = database.Store.Identity;
         return new(principal.Id, principal.PolicyEpoch, resource.SchemaVersion,
             database.Store.Position, applied, head.Tail, head.FirstAvailable, consumer.Checkpoint,
-            identity.Incarnation, identity.FormatVersion, identity.ReadGeneration, ResourceDigest(resource, budget), documents.ToArray());
+            identity.Incarnation, identity.FormatVersion, identity.ReadGeneration, ResourceDigest(resource, budget), []);
     }
 
     internal static void RequireReleased(DatabaseEngine database, string principalId,

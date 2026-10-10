@@ -23,7 +23,8 @@ internal static class ClusterRestoreRf3ArchiveJournalMutation
         var digest = await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false);
         file.Position = StartOffset;
         var original = file.ReadByte();
-        if (original == EndOfStream) { throw new InvalidOperationException(InvalidOwnedJournal); }
+        if (original == EndOfStream)
+        { throw new InvalidOperationException(InvalidOwnedJournal); }
         file.Position = StartOffset;
         await file.WriteAsync(new[] { checked((byte)(original ^ OneByte)) }, cancellationToken).ConfigureAwait(false);
         FlushDurably(file);

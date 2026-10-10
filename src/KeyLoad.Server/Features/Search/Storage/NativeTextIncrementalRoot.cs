@@ -11,7 +11,7 @@ internal static class NativeTextIncrementalRoot
     private const int EmptyAttributes = 0;
 
     internal static string Initialize(string directory, Guid sourceNodeId,
-        IOptions<NativeTextExecutionOptions> executionOptions)
+        IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         NativeTextIndex.ValidatePath(directory);
         ArgumentOutOfRangeException.ThrowIfEqual(sourceNodeId, Guid.Empty);
@@ -20,7 +20,16 @@ internal static class NativeTextIncrementalRoot
         NativeTextFileIO.VerifyDirectory(directory);
         NativeTextFileIO.SetPrivateDirectoryMode(directory);
         var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
-        NativeTextRootFiles.InitializeReceipt(root, sourceNodeId, executionOptions);
+        var initialized = File.Exists(Path.Combine(root, NativeTextProtocol.RootReceiptFile));
+        resources?.RegisterRoot(root, budget =>
+        {
+            budget?.Check();
+            NativeTextFileIO.VerifyDirectory(root);
+            if (initialized)
+            { NativeTextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions); }
+        });
+        NativeTextRootFiles.InitializeReceipt(root, sourceNodeId, executionOptions, resources);
+        initialized = true;
         CheckRoot(root, sourceNodeId, executionOptions);
         return root;
     }
@@ -28,7 +37,7 @@ internal static class NativeTextIncrementalRoot
     internal static void CreateGeneration(string root, string leaf, TextProjectionScope scope,
         TextIndexMaintenanceRequest request, long sourceUpperSequence, string resourceSha256,
         ReadExecutionBudget budget,
-        IOptions<NativeTextExecutionOptions> executionOptions)
+        IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         NativeTextValidation.ValidateScope(scope, scope.NodeId);
         if (sourceUpperSequence < NativeTextIncrementalProtocol.InitialSequence
@@ -44,13 +53,16 @@ internal static class NativeTextIncrementalRoot
         var path = Path.Combine(root, leaf);
         if (Directory.Exists(path) || File.Exists(path))
         { throw NativeTextErrors.Ownership(); }
-        Directory.CreateDirectory(path);
+        if (resources is null)
+        { Directory.CreateDirectory(path); }
+        else
+        { resources.MutatePhysical(() => Directory.CreateDirectory(path), budget); }
         NativeTextFileIO.VerifyDirectory(path);
         NativeTextFileIO.SetPrivateDirectoryMode(path);
         NativeTextFileIO.WriteEnvelope(Path.Combine(path, NativeTextProtocol.OwnerFile),
             new NativeTextOwnerReceipt(NativeTextProtocol.FormatVersion, root, leaf, scope.NodeId,
                 scope, [new(NativeTextProtocol.NativeDirectory, true)]),
-            executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions);
+            executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);
         budget.ChargeBytes(NativeSerialization.Measure(request));
         budget.ChargeBytes(SHA256.HashSizeInBytes);
         var originalDigest = SHA256.HashData(NativeSerialization.Serialize(request));
@@ -59,7 +71,7 @@ internal static class NativeTextIncrementalRoot
             sourceUpperSequence, resourceSha256);
         budget.ChargeBytes(NativeSerialization.Measure(enrollment));
         NativeTextFileIO.WriteEnvelope(Path.Combine(path, NativeTextIncrementalProtocol.EnrollmentFile),
-            enrollment, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions);
+            enrollment, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);
         _ = CheckRoot(root, scope.NodeId, executionOptions, budget);
     }
 

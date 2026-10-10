@@ -21,7 +21,8 @@ internal sealed class SampleChunkSnapshotArtifactTests
         var snapshot = Snapshot(fixture, receipt);
         var path = Path.Combine(fixture.Owner.Directory, SnapshotName);
         var maximumBytes = fixture.Owner.Database.Limits.MaxBatchBytes;
-        var before = fixture.Image(); var position = fixture.Owner.Store.Position;
+        var before = fixture.Image();
+        var position = fixture.Owner.Store.Position;
         var oversized = snapshot with { RawImage = new string(OversizeByte, maximumBytes) };
         var token = TestContext.Current!.Execution.CancellationToken;
         await Assert.That(async () => await SampleChunkSnapshotFile.WriteAsync(path, oversized, maximumBytes, token))

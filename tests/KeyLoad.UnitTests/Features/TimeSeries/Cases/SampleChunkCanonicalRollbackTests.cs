@@ -6,7 +6,8 @@ internal sealed class SampleChunkCanonicalRollbackTests
     public async Task AcChunk008012FailedWholeAtomicAppendAndSealRetainsOriginalOutcomeThenHealthy()
     {
         using var fixture = new SampleChunkCanonicalFixture();
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         var raw = fixture.Raw();
         var originalRows = Convert.ToHexString(JsonDefaults.Serialize(fixture.Read().Records));
         var id = Guid.NewGuid();
@@ -20,7 +21,8 @@ internal sealed class SampleChunkCanonicalRollbackTests
         await Assert.That(failed.Json).IsNull();
         await Assert.That(fixture.Raw()).IsEqualTo(raw);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(fixture.Read().Records))).IsEqualTo(originalRows);
-        var image = fixture.Image(); var position = fixture.Owner.Store.Position;
+        var image = fixture.Image();
+        var position = fixture.Owner.Store.Position;
         var replay = fixture.Owner.Submit(OperationKind.Batch, request, id: id);
         await Assert.That(SampleRollupWholeFlow.Outcome(replay)).IsEqualTo(SampleRollupWholeFlow.Outcome(failed));
         await Assert.That(fixture.Image()).IsEqualTo(image);
@@ -44,13 +46,18 @@ internal sealed class SampleChunkCanonicalRollbackTests
         var mutation = new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until);
-        var id = Guid.NewGuid(); var failed = fixture.Commit(id, mutation);
+        var id = Guid.NewGuid();
+        var failed = fixture.Commit(id, mutation);
         await Assert.That(failed.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(failed.Json).IsNull();
         await Assert.That(fixture.Raw()).IsEqualTo(raw);
         await SampleChunkCanonicalAssertions.Replay(fixture, id, mutation, failed);
-        var next = mutation with { WindowId = Guid.NewGuid(), From = SampleChunkCanonicalFixture.Until,
-            Until = SampleChunkCanonicalFixture.Until.AddHours(SampleChunkCanonicalFixture.FirstRevision) };
+        var next = mutation with
+        {
+            WindowId = Guid.NewGuid(),
+            From = SampleChunkCanonicalFixture.Until,
+            Until = SampleChunkCanonicalFixture.Until.AddHours(SampleChunkCanonicalFixture.FirstRevision)
+        };
         fixture.Commit(next);
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal,
             fixture.Request with { WindowId = next.WindowId });

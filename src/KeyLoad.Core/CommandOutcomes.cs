@@ -74,6 +74,7 @@ public sealed partial class DatabaseEngine
         {
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
+        ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
         ReauthorizeExtendedOutcome(view, principal, operation, previous);
 

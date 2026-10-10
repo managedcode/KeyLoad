@@ -62,9 +62,12 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         lock (gate)
         {
             --active;
-            if (active != ServerConnectionProtocol.NoOperations) { return; }
-            if (closing) { drained.TrySetResult(); }
-            else { idle.Change(settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan); }
+            if (active != ServerConnectionProtocol.NoOperations)
+            { return; }
+            if (closing)
+            { drained.TrySetResult(); }
+            else
+            { idle.Change(settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan); }
         }
     }
 
@@ -72,10 +75,12 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     {
         lock (gate)
         {
-            if (closing) { return; }
+            if (closing)
+            { return; }
             closing = true;
             idle.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-            if (active == ServerConnectionProtocol.NoOperations) { drained.TrySetResult(); }
+            if (active == ServerConnectionProtocol.NoOperations)
+            { drained.TrySetResult(); }
         }
         CompleteClose(ServerConnectionProtocol.Closed);
     }
@@ -84,7 +89,8 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     {
         lock (gate)
         {
-            if (closing || active != ServerConnectionProtocol.NoOperations) { return; }
+            if (closing || active != ServerConnectionProtocol.NoOperations)
+            { return; }
             closing = true;
             drained.TrySetResult();
         }
@@ -96,8 +102,10 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(closed.Cancel, failures);
         ServerFailureObserver.Observe(() => transport.Abort(new ConnectionAbortedException(message)), failures);
-        if (failures.Count == ServerConnectionProtocol.NoFailures) { closeSignal.TrySetResult(); }
-        else { closeSignal.TrySetException(failures); }
+        if (failures.Count == ServerConnectionProtocol.NoFailures)
+        { closeSignal.TrySetResult(); }
+        else
+        { closeSignal.TrySetException(failures); }
     }
 
     internal Task CloseAsync()

@@ -42,7 +42,7 @@ public sealed partial class DatabaseEngine
     {
         Span<byte> valueHash = stackalloc byte[NativeAuthorityContract.DigestBytes];
         _ = SHA256.HashData(payload.Value.Span, valueHash);
-        if (claims.Purpose != NativeAuthorityContract.Purpose || claims.Incarnation != identity.Incarnation
+        if (claims.Purpose != KeyLoad.Core.Features.Search.OnlineTextNativeAuthorityPurpose.For(kind) || claims.Incarnation != identity.Incarnation
             || claims.OperationId != id || claims.Kind != kind || claims.PrincipalId != principalId
             || claims.Fingerprint != fingerprint || claims.Error != payload.Error || claims.SafeDetail != payload.SafeDetail
             || claims.ValueHash.Length != valueHash.Length || !CryptographicOperations.FixedTimeEquals(claims.ValueHash.Span, valueHash)
@@ -50,7 +50,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MismatchedAuthority); }
     }
 
-    private void RequireNativeBudget(int byteCount)
+    private void RequireNativeBudget(long byteCount)
     {
         if (byteCount > Limits.MaxBatchBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage); }
@@ -70,7 +70,7 @@ public sealed partial class DatabaseEngine
     private ReplicatedOperation IssueNativeOperation(ReplicatedOperation operation, NativeCommandPayload payload)
     {
         var identity = Store.Identity;
-        var claims = new NativeCommandAuthority(NativeAuthorityContract.Purpose, identity.Incarnation,
+        var claims = new NativeCommandAuthority(KeyLoad.Core.Features.Search.OnlineTextNativeAuthorityPurpose.For(operation.Kind), identity.Incarnation,
             operation.Id, operation.Kind, operation.PrincipalId, NativeOperationFingerprint.Compute(operation),
             SHA256.HashData(payload.Value.Span), payload.Error, payload.SafeDetail);
         var authority = NativeSerialization.Serialize(claims);

@@ -73,7 +73,8 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
             if (state.TransportReady && state.LeaderId is not null
                 && partition.Configuration.VoterIds.Contains(state.LeaderId, StringComparer.Ordinal)
                 && state.Term > BeforeFirstConsensusTerm && state.CommittedIndex > BeforeFirstCommittedEntry
-                && state.MaterializedPosition >= state.CommittedIndex && observation.Cohort(node.HasCompatibleCohort)
+                && state.MaterializedPosition >= state.CommittedIndex
+                && observation.Cohort(await node.AcquireCohortAdmissionAsync(cancellationToken).ConfigureAwait(false))
                 && (state.Role == ReplicaRole.Follower
                     || state.Role == ReplicaRole.Leader
                     && observation.Leader(await partition.Consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false))))

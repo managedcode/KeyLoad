@@ -24,6 +24,7 @@ public sealed partial class DatabaseEngine
 
     internal static Type? NativeOperationPayloadType(OperationKind kind) => kind switch
     {
+        OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
         OperationKind.PartitionMovementPhase => typeof(PartitionMovePhaseCommand),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
@@ -63,6 +64,7 @@ public sealed partial class DatabaseEngine
         { return JsonData.Fingerprint(new { payload.Error, payload.SafeDetail }); }
         return kind switch
         {
+            OperationKind.OnlineTextPublicationPhase => NativeTypedFingerprint<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload.Value),
             OperationKind.Batch => NativeTypedFingerprint<CommandRequest>(payload.Value),
             OperationKind.Receive => NativeTypedFingerprint<ReceiveRequest>(payload.Value),
             OperationKind.Delivery => NativeTypedFingerprint<DeliveryCommand>(payload.Value),

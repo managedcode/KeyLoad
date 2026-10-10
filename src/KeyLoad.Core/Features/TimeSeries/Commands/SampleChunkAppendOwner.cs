@@ -17,8 +17,12 @@ internal sealed class SampleChunkAppendOwner
     internal SampleChunkAppendOwner(DatabaseEngine database, IAtomicTransaction transaction, PartitionRef partition,
         string set, string series, IOptions<TimeSeriesExecutionOptions> options)
     {
-        this.database = database; this.transaction = transaction; this.partition = partition;
-        this.set = set; this.series = series; this.options = options;
+        this.database = database;
+        this.transaction = transaction;
+        this.partition = partition;
+        this.set = set;
+        this.series = series;
+        this.options = options;
         charge = new(database.Limits.MaxQueryReadBytes);
         windows = SampleChunkStorage.Windows(transaction, partition, set, series, options.Value, charge);
     }
@@ -27,10 +31,14 @@ internal sealed class SampleChunkAppendOwner
     {
         var index = windows.FindIndex(window => window.State != SampleChunkWindowState.Dropped
             && record.Sample.Timestamp.UtcTicks >= window.FromUtcTicks && record.Sample.Timestamp.UtcTicks < window.UntilUtcTicks);
-        if (index < SampleChunkLifecycleProtocol.FirstIndex) { return; }
+        if (index < SampleChunkLifecycleProtocol.FirstIndex)
+        { return; }
         var window = windows[index];
-        var next = window with { SourceSequence = record.Sequence,
-            Revision = checked(window.Revision + SampleChunkLifecycleProtocol.First) };
+        var next = window with
+        {
+            SourceSequence = record.Sequence,
+            Revision = checked(window.Revision + SampleChunkLifecycleProtocol.First)
+        };
         if (window.State == SampleChunkWindowState.Open)
         {
             if (window.OpenRecords.Length >= options.Value.MaximumChunkWindowRecords)
@@ -39,7 +47,8 @@ internal sealed class SampleChunkAppendOwner
             if (next.OpenRecords.Length >= SampleChunkWire.MaximumRecords || evaluatedAt.UtcTicks >= window.UntilUtcTicks)
             { next = SampleChunkWindowSeal.Seal(database, transaction, partition, set, series, next, options); }
         }
-        else { next = Correct(window, next, record); }
+        else
+        { next = Correct(window, next, record); }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Window(partition, set, series, next.WindowId),
             next, database.Limits.MaxBatchBytes);
         windows[index] = next;
@@ -57,8 +66,11 @@ internal sealed class SampleChunkAppendOwner
         { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Correction(partition, set, series, original.WindowId, record.Sequence),
             record, database.Limits.MaxBatchBytes);
-        return next with { CorrectionSequences = original.CorrectionSequences.Add(record.Sequence),
+        return next with
+        {
+            CorrectionSequences = original.CorrectionSequences.Add(record.Sequence),
             MaintenanceCommandId = new SampleChunkMaintenanceIdentity(partition, set, series,
-                original.WindowId, original.Generation, next.Revision).CommandId() };
+                original.WindowId, original.Generation, next.Revision).CommandId()
+        };
     }
 }

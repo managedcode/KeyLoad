@@ -19,40 +19,59 @@ internal sealed class ReplicaCohortAdmission
         this.resolve = resolve;
     }
 
-    internal bool HasCompatibleCohort
+    internal bool HasCompatibleCohort => ObserveCompatibleCohort().Compatible;
+
+    internal ReplicaCohortAdmissionStatus ObserveCompatibleCohort()
     {
-        get
+        const int CompatibleInitialValue = 1;
+        const int NoObservedPeers = 0;
+        var local = observations.ReadLocal();
+        if (!local.CurrentContractCompatible)
         {
-            const int CompatibleInitialValue = 1;
-
-            var local = observations.ReadLocal();
-            if (!local.CurrentContractCompatible || !local.TransportReady)
-            {
-                return false;
-            }
-
-            var compatible = CompatibleInitialValue;
-            foreach (var voterId in configuration.VoterIds)
-            {
-                if (voterId == configuration.LocalId || !observations.TryFresh(voterId, out var observation))
-                {
-                    continue;
-                }
-
-                if (!observation!.CurrentContractCompatible)
-                {
-                    return false;
-                }
-
-                if (observation.TransportReady)
-                {
-                    compatible++;
-                }
-            }
-
-            return compatible >= configuration.Majority;
+            return Status(local.ProtocolCompatible ? ReplicaCohortAdmissionCode.LocalReaderMismatch
+                : ReplicaCohortAdmissionCode.LocalProtocolMismatch, NoObservedPeers, NoObservedPeers,
+                NoObservedPeers, NoObservedPeers, NoObservedPeers);
         }
+        if (!local.TransportReady)
+        {
+            return Status(ReplicaCohortAdmissionCode.LocalTransportUnavailable, NoObservedPeers,
+            NoObservedPeers, NoObservedPeers, NoObservedPeers, NoObservedPeers);
+        }
+        var compatible = CompatibleInitialValue;
+        var evaluated = NoObservedPeers;
+        var fresh = NoObservedPeers;
+        var missing = NoObservedPeers;
+        var expired = NoObservedPeers;
+        foreach (var voterId in configuration.VoterIds)
+        {
+            if (voterId == configuration.LocalId)
+            { continue; }
+            evaluated++;
+            var freshness = observations.ReadFresh(voterId, out var observation);
+            if (freshness != ReplicaObservationFreshness.Fresh)
+            {
+                if (freshness == ReplicaObservationFreshness.Expired)
+                { expired++; }
+                else
+                { missing++; }
+                continue;
+            }
+            fresh++;
+            if (!observation!.CurrentContractCompatible)
+            {
+                return Status(observation.ProtocolCompatible ? ReplicaCohortAdmissionCode.PeerReaderMismatch
+                    : ReplicaCohortAdmissionCode.PeerProtocolMismatch, evaluated, fresh, missing, expired, compatible);
+            }
+            if (observation.TransportReady)
+            { compatible++; }
+        }
+        return Status(compatible >= configuration.Majority ? ReplicaCohortAdmissionCode.Compatible
+            : ReplicaCohortAdmissionCode.InsufficientFreshReady, evaluated, fresh, missing, expired, compatible);
     }
+
+    private ReplicaCohortAdmissionStatus Status(ReplicaCohortAdmissionCode code, int evaluated,
+        int fresh, int missing, int expired, int ready)
+        => new(code, configuration.Majority, evaluated, fresh, missing, expired, ready);
 
     internal async Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
     {

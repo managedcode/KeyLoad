@@ -71,6 +71,10 @@ public sealed class PeerSecurity : IDisposable
         };
     }
 
+    // Protected fixture enrollment only. The ordinary handler path is unchanged.
+    internal HttpMessageHandler CreateProtectedHandler(Action<HttpRequestMessage, CancellationToken> observed)
+        => ProtectedDiscoveryHandlerCreation.Create(this, observed);
+
     /// <summary>Validates the exact request and an empty body before consuming bounded nonce admission.</summary>
     /// <param name="request">The actual receiver request.</param>
     /// <param name="cancellationToken">Cancellation of discovery validation.</param>

@@ -76,6 +76,10 @@ internal sealed class TestDatabase : IDisposable
         return time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
     }
 
+    internal OperationResult SubmitIssued(ReplicatedOperation operation)
+        => replicaAdmission is { } native ? native.Submit(operation, explicitTime: true)
+            : throw new InvalidOperationException("This operation requires the fixture-owned native ordered apply path.");
+
     private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,
         SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null)

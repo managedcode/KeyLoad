@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Storage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.TimeSeries;
 
@@ -26,7 +26,8 @@ internal static class SampleChunkWorkDiscovery
                     {
                         var hint = SampleChunkWorkEligibility.Read(database, owned, scope.Partition, scope.Set,
                             scope.Series, scope.Id, database.EvaluationClock.GetUtcNow(), budget);
-                        if (hint is not null) { hints.Add(hint); }
+                        if (hint is not null)
+                        { hints.Add(hint); }
                     }
                     catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
                     { return true; }

@@ -28,7 +28,9 @@ internal static class PartitionMovementCleanupMatrixRf3Producer
             if (!observed.IsCompletedSuccessfully)
             { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
             var primary = await observed.ConfigureAwait(false);
-            if (role == PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl)
+            if (role == PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerBytesChanged)
+            { PartitionMovementCleanupMatrixByteFault.ReplaceClaimed(controls, primary, faults); }
+            else if (role == PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl)
             { PartitionMovementCleanupMatrixRf3Fault.RenameObservedControl(controls, primary, faults); }
             else
             { PartitionMovementCleanupMatrixRf3Fault.RenameAdmittedArm(controls, SelectArm(role, other, primary), primary, faults); }

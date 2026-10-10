@@ -37,10 +37,12 @@ internal sealed class SampleChunkCanonicalLifecycleTests
     public async Task AcChunk010OriginalCancellationPreservesFullCutThenHealthyExactWindow()
     {
         using var fixture = new SampleChunkCanonicalFixture();
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.AppendedRevision));
-        var image = fixture.Image(); var position = fixture.Owner.Store.Position;
+        var image = fixture.Image();
+        var position = fixture.Owner.Store.Position;
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Read(cancellation.Token));

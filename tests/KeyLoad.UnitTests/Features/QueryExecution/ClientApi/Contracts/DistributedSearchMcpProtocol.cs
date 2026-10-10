@@ -1,0 +1,65 @@
+namespace KeyLoad.UnitTests.Features.QueryExecution;
+
+internal static class DistributedSearchMcpProtocol
+{
+    internal const string Tool = "keyload_query_distributed_search";
+    internal const string Route = "/v1/query/distributed-search";
+    internal const string Object = "object";
+    internal const string Boolean = "boolean";
+    internal const string Number = "number";
+    internal const string Closed = "additionalProperties";
+    internal const string Version = "version";
+    internal const string Partitions = "partitions";
+    internal const string Search = "search";
+    internal const string Partition = "partition";
+    internal const string Collection = "collection";
+    internal const string Limit = "limit";
+    internal const string Hits = "hits";
+    internal const string Leaves = "leaves";
+    internal const string Epoch = "statisticsEpoch";
+    internal const string Complete = "complete";
+    internal const string Document = "document";
+    internal const string Reference = "reference";
+    internal const string Score = "score";
+    internal const string Explanation = "explanation";
+    internal const string Contributions = "contributions";
+    internal const string Fusion = "fusionConstant";
+    internal const string Missing = "The distributed-search catalog operation is missing.";
+    internal static readonly string[] RequestFields = [Version, Partitions, Search];
+    internal static readonly string[] ResultFields = [Version, Hits, Leaves, Epoch, Complete];
+    internal static readonly string[] SearchFields = [Partition, Collection, "textField", "text", "vectorField",
+        "vector", "space", Limit, "textWeight", "vectorWeight", Fusion, "allowedIds", "explain", "textIndex"];
+    internal static readonly string[] PartitionFields = ["tenantId", "databaseId", "transactionDomainId", "partitionKey"];
+    internal const string Atomic = "atomicPartitionId";
+    internal const string Vector = "vector";
+    internal const string Space = "space";
+    internal const string AllowedIds = "allowedIds";
+    internal const string Explain = "explain";
+    internal static readonly string[] NullableStrings = ["textField", "text", "vectorField"];
+    internal static readonly string[] Weights = ["textWeight", "vectorWeight"];
+    internal static readonly string[] SpaceFields = ["id", "dimension", "metric", "model", "version"];
+    internal const string CutPosition = "cutPosition";
+    internal const string Policy = "policyEpoch";
+    internal const string Schema = "schemaVersion";
+    internal const string Access = "accessPath";
+    internal const string RevisionField = "revision";
+    internal const string Json = "json";
+    internal const string Redacted = "redacted";
+    internal const string RedactedFields = "redactedFields";
+    internal const string Id = "id";
+    internal const string Branch = "branch";
+    internal const string Rank = "nativeRank";
+    internal const string Weight = "weight";
+    internal const string Contribution = "contribution";
+    internal const int VersionOne = 1;
+    internal const int DefaultLimit = 10;
+    internal const int FusionConstant = 60;
+    internal const long Revision = 7;
+    internal const long Cut = 19;
+    internal const long PolicyEpoch = 3;
+    internal const long SchemaVersion = 1;
+    internal const double RankedScore = 0.25;
+    internal const string LiteralEpoch = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    internal const string AccessPath = "distributedCanonicalSearchV1";
+    internal const string LiteralDocument = "{\"title\":\"independent literal\"}";
+}

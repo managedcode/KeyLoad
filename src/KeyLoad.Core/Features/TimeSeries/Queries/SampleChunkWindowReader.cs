@@ -32,19 +32,27 @@ internal static class SampleChunkWindowReader
         var selected = ImmutableArray.CreateBuilder<SampleRecord>();
         foreach (var record in records)
         {
-            budget.Check(); SampleChunkWindowValidation.Record(record, window, request.SeriesId);
+            budget.Check();
+            SampleChunkWindowValidation.Record(record, window, request.SeriesId);
             if (watermark.Floor is { } floor && record.Sample.Timestamp.UtcTicks < floor
-                || !SampleChunkTagPredicate.Matches(record.TagsJson, tag, request.TagValue)) { continue; }
+                || !SampleChunkTagPredicate.Matches(record.TagsJson, tag, request.TagValue))
+            { continue; }
             if (selected.Count >= request.Limit)
             { throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted); }
-            var projected = record with { TagsJson = database.Authorization.Project(principal,
-                resource.FieldPolicies, record.TagsJson, out _) };
-            budget.CheckResult(projected); selected.Add(projected);
+            var projected = record with
+            {
+                TagsJson = database.Authorization.Project(principal,
+                resource.FieldPolicies, record.TagsJson, out _)
+            };
+            budget.CheckResult(projected);
+            selected.Add(projected);
         }
         var result = new SampleChunkWindowResult(window.WindowId, new(window.FromUtcTicks, TimeSpan.Zero),
             new(window.UntilUtcTicks, TimeSpan.Zero), window.Generation, window.Revision, window.SourceSequence,
             watermark.Floor, selected.ToImmutable(), cutPosition);
-        budget.CheckResult(result); budget.Check(); return result;
+        budget.CheckResult(result);
+        budget.Check();
+        return result;
     }
 
     private static SampleRecord[] Records(IKeyValueView view, ReadSampleChunkWindowRequest request,
@@ -57,7 +65,8 @@ internal static class SampleChunkWindowReader
         var manifest = SampleChunkManifestReader.Read(view, request.Partition, request.Set, request.SeriesId,
             window, options.Value.MaximumChunkWindowRecords, charge, options, work);
         if (window.CorrectionSequences.IsEmpty && !manifest.TagJsonValues.Any(json =>
-            SampleChunkTagPredicate.Matches(json, tag, request.TagValue))) { return []; }
+            SampleChunkTagPredicate.Matches(json, tag, request.TagValue)))
+        { return []; }
         return SampleChunkGenerationReader.Read(view, request.Partition, request.Set, request.SeriesId,
             window, manifest, options, charge, work);
     }

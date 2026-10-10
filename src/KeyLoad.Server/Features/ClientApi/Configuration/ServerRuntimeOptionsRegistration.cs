@@ -146,6 +146,7 @@ internal static class ServerRuntimeOptionsRegistration
         node.RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
             node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp);
         node.MovementFrameObservation = MovementFrameObservationOptionsReader.Read(configuration, node);
+        node.NativeDiscoveryOmission = NativeDiscoveryOmissionOptionsReader.Read(configuration, node);
     }
 
 }

@@ -36,9 +36,12 @@ internal sealed class SampleChunkLifecycleRf3Tests(ClusterFixture fixture)
         }
         finally
         {
-            if (mcp is not null) { await ServerFailureObserver.ObserveAsync(async () => await mcp.DisposeAsync(), failures); }
-            if (http is not null) { ServerFailureObserver.Observe(http.Dispose, failures); }
-            if (deadline is not null) { ServerFailureObserver.Observe(deadline.Dispose, failures); }
+            if (mcp is not null)
+            { await ServerFailureObserver.ObserveAsync(async () => await mcp.DisposeAsync(), failures); }
+            if (http is not null)
+            { ServerFailureObserver.Observe(http.Dispose, failures); }
+            if (deadline is not null)
+            { ServerFailureObserver.Observe(deadline.Dispose, failures); }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

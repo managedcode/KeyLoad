@@ -7,6 +7,7 @@ internal sealed class PartitionMovementCleanupMatrixRf3Tests
     [Arguments(PartitionMovementCleanupMatrixFaultRole.OtherKnownArm)]
     [Arguments(PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerArm)]
     [Arguments(PartitionMovementCleanupMatrixFaultRole.RetainedObservedControl)]
+    [Arguments(PartitionMovementCleanupMatrixFaultRole.ClaimedOwnerBytesChanged)]
     public Task ActualMissingAdmittedArmRefusesOriginalPublicationThenNewSessionSameDatabaseColdHealthy(
         PartitionMovementCleanupMatrixFaultRole role)
         => PartitionMovementCleanupMatrixRf3Trial.RunAsync(role, TestContext.Current!.Execution.CancellationToken);

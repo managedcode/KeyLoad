@@ -140,7 +140,8 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(requestWork.CancelAsync, failures).ConfigureAwait(false);
         if (operations.HasPending)
         {
-            foreach (var caller in callers) { caller.AbortTransport(failures); }
+            foreach (var caller in callers)
+            { caller.AbortTransport(failures); }
         }
         await operations.JoinBoundedAsync(failures, timeout.Token).ConfigureAwait(false);
         if (controls is not null && Discovery.Length == RequestCqrsRf3Protocol.NodeCount)
@@ -163,18 +164,21 @@ internal sealed class ConnectionRf3Scenario : IAsyncDisposable
         { await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         if (wave is not null)
         { await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false); }
-        try { requestWork.Dispose(); }
+        try
+        { requestWork.Dispose(); }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         if (localImage is not null)
         {
-            try { await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false); }
+            try
+            { await localImage.DisposeAsync(removeImage: failures.Count == 0).ConfigureAwait(false); }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         if (controls is not null)
         {
-            if (failures.Count > 0) { controls.RetainEvidence(); }
+            if (failures.Count > 0)
+            { controls.RetainEvidence(); }
             await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false);
         }
         if (rootOwned && !retainEvidence && failures.Count == 0)

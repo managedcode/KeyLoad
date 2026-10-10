@@ -22,7 +22,8 @@ internal static class RequestCqrsProbeKilledOwnerCleanup
         var selected = originalArms.Select(id => arms.TryGetValue(id, out var arm)
             ? arm : throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm)).ToArray();
         RequirePair(selected, json);
-        foreach (var arm in selected) { Require(arm, receipts, gates); }
+        foreach (var arm in selected)
+        { Require(arm, receipts, gates); }
         foreach (var group in selected.GroupBy(arm => arm.GateVoter!))
         {
             if (gates[group.Key] < group.Count())

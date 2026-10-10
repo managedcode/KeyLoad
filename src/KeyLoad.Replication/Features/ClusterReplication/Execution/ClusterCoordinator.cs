@@ -70,7 +70,34 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         return AdmitAsync(database.VerifyOperationAuthority(operation), cancellationToken);
     }
 
+    internal Task<OperationResult> AdmitOnlineTextPublication(ReplicatedOperation operation,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+        if (operation.Kind != OperationKind.OnlineTextPublicationPhase)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend); }
+        return Enqueue(database.VerifyOperationAuthority(operation), cancellationToken).Completion;
+    }
+
+    internal Task<OperationResult> AdmitOnlineProjectionCheckpoint(ReplicatedOperation operation,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+        if (operation.Kind != OperationKind.CommitProjectionBatch)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaProtocol.InvalidAppend); }
+        return Enqueue(database.VerifyOperationAuthority(operation), cancellationToken).Completion;
+    }
+
     private async Task<OperationResult> AdmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        var pending = Enqueue(operation, cancellationToken);
+        try
+        { return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false); }
+        catch (OperationCanceledException)
+        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite); }
+    }
+
+    private AdmittedCommand Enqueue(ReplicatedOperation operation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(operation.PrincipalId);
         cancellationToken.ThrowIfCancellationRequested();
@@ -81,11 +108,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidAppend); }
         var evaluated = operation with { EvaluatedAt = clock.GetUtcNow() };
         var principal = database.Store.Read(view => database.Principal(view, evaluated.PrincipalId, evaluated.EvaluatedAt));
-        var pending = commands.Enqueue(evaluated, principal, bytes, cancellationToken);
-        try
-        { return await pending.Completion.WaitAsync(cancellationToken).ConfigureAwait(false); }
-        catch (OperationCanceledException)
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite); }
+        return commands.Enqueue(evaluated, principal, bytes, cancellationToken);
     }
 
     /// <summary>Admits an authenticated forwarded operation only on a ready current leader.</summary>

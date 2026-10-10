@@ -35,20 +35,32 @@ internal sealed class SampleChunkCorruptImage
         {
             switch (cut)
             {
-                case SampleChunkCorruptionCut.MissingManifest: transaction.Delete(manifestKey); break;
+                case SampleChunkCorruptionCut.MissingManifest:
+                    transaction.Delete(manifestKey);
+                    break;
                 case SampleChunkCorruptionCut.ManifestDigest:
                     var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
-                    transaction.Put(manifestKey, NativeSerialization.Serialize(envelope with { Digest = Flip(envelope.Digest.Span) })); break;
+                    transaction.Put(manifestKey, NativeSerialization.Serialize(envelope with { Digest = Flip(envelope.Digest.Span) }));
+                    break;
                 case SampleChunkCorruptionCut.ManifestVersion:
                 case SampleChunkCorruptionCut.ManifestGeneration:
-                    transaction.Put(manifestKey, ChangedManifest(cut)); break;
-                case SampleChunkCorruptionCut.MissingBlock: transaction.Delete(blockKey); break;
-                case SampleChunkCorruptionCut.BlockDigest: transaction.Put(blockKey, Flip(block)); break;
-                case SampleChunkCorruptionCut.MissingCorrection: transaction.Delete(correctionKey); break;
+                    transaction.Put(manifestKey, ChangedManifest(cut));
+                    break;
+                case SampleChunkCorruptionCut.MissingBlock:
+                    transaction.Delete(blockKey);
+                    break;
+                case SampleChunkCorruptionCut.BlockDigest:
+                    transaction.Put(blockKey, Flip(block));
+                    break;
+                case SampleChunkCorruptionCut.MissingCorrection:
+                    transaction.Delete(correctionKey);
+                    break;
                 case SampleChunkCorruptionCut.CorrectionSequence:
                     var row = NativeSerialization.Deserialize<SampleRecord>(correction);
-                    transaction.Put(correctionKey, NativeSerialization.Serialize(row with { Sequence = SampleChunkCanonicalFixture.InitialSequence })); break;
-                default: throw new ArgumentOutOfRangeException(nameof(cut));
+                    transaction.Put(correctionKey, NativeSerialization.Serialize(row with { Sequence = SampleChunkCanonicalFixture.InitialSequence }));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(cut));
             }
             return true;
         });

@@ -25,9 +25,6 @@ internal sealed class PartitionHost : IAsyncDisposable
     public PartitionHost(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
         CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
     {
-        const string SearchIndexDirectoryName = "search-indexes";
-        const int FailuresCountValidationBoundary = 1;
-
         var options = runtimeOptions.Node.Value;
         var replicaOptions = runtimeOptions.ReplicaConfiguration;
         var executionOptions = runtimeOptions.ReplicaExecution;
@@ -39,6 +36,8 @@ internal sealed class PartitionHost : IAsyncDisposable
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
+        NativeTextIncrementalMaintenanceService? openedTextMaintenance = null;
+        NativeTextOnlineMaintenanceService? openedOnlineText = null;
         NativeAnnMaintenanceService? openedAnnMaintenance = null;
         ClusterCoordinator? openedCoordinator = null;
         CacheMemoryBudget? openedCacheMemory = null;
@@ -54,38 +53,52 @@ internal sealed class PartitionHost : IAsyncDisposable
             BootstrapFreshNode(options);
             if (options.MovementFrameObservation.Enabled)
             { ApplyProbe.AttachFrameObservation(new(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, Database, runtimeOptions.RequestProbeExecution)); }
-            TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, SearchIndexDirectoryName),
-                runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
+            var search = NativeTextHostSearch.Open(Database, DirectoryPath, runtimeOptions, clock);
+            TextProjection = openedText = search.Projection;
+            TextMaintenance = openedTextMaintenance = search.Explicit;
+            OnlineTextMaintenance = openedOnlineText = search.Online;
             Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled || options.MovementFrameObservation.Enabled ? ApplyProbe.Enter : null);
             Consensus = openedConsensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
             Coordinator = openedCoordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
             AnnMaintenance = openedAnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
-            TextMaintenance = new(Database, DirectoryPath, Database.Store.Identity.NodeId, runtimeOptions, clock);
-            TextProjection = new NativeTextSelectedProjection(TextProjection, TextMaintenance, TextMaintenance);
         }
         catch (Exception error)
         {
-            var failures = new List<Exception> { error };
-            if (openedAnnMaintenance is not null)
-            { ServerFailureObserver.Observe(() => openedAnnMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
-            if (openedCoordinator is not null)
-            { ServerFailureObserver.Observe(() => openedCoordinator.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
-            if (openedConsensus is not null)
-            { ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
-            if (applying is not null)
-            { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
-            ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
-            if (openedText is not null)
-            { ServerFailureObserver.Observe(openedText.Dispose, failures); }
-            if (openedLog is not null)
-            { ServerFailureObserver.Observe(() => openedLog.Dispose(), failures); }
-            if (openedCacheMemory is not null)
-            { ServerFailureObserver.Observe(() => openedCacheMemory.Dispose(), failures); }
-            ServerFailureObserver.Observe(() => stores.Dispose(), failures);
-            if (failures.Count > FailuresCountValidationBoundary)
-            { throw new AggregateException(failures); }
+            CleanupFailedConstruction(error, openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
+                openedCoordinator, openedConsensus, applying, openedText, openedLog, openedCacheMemory);
             throw;
         }
+    }
+
+    private void CleanupFailedConstruction(Exception error, NativeTextOnlineMaintenanceService? openedOnlineText,
+        NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
+        ClusterCoordinator? openedCoordinator, ReplicaConsensus? openedConsensus, ReplicaMaterializer? applying,
+        ITextProjection? openedText, DurableReplicaLog? openedLog, CacheMemoryBudget? openedCacheMemory)
+    {
+        const int FailuresCountValidationBoundary = 1;
+        var failures = new List<Exception> { error };
+        if (openedOnlineText is not null)
+        { ServerFailureObserver.Observe(() => openedOnlineText.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        if (openedTextMaintenance is not null)
+        { ServerFailureObserver.Observe(() => openedTextMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        if (openedAnnMaintenance is not null)
+        { ServerFailureObserver.Observe(() => openedAnnMaintenance.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        if (openedCoordinator is not null)
+        { ServerFailureObserver.Observe(() => openedCoordinator.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        if (openedConsensus is not null)
+        { ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        if (applying is not null)
+        { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
+        if (openedText is not null)
+        { ServerFailureObserver.Observe(openedText.Dispose, failures); }
+        if (openedLog is not null)
+        { ServerFailureObserver.Observe(openedLog.Dispose, failures); }
+        if (openedCacheMemory is not null)
+        { ServerFailureObserver.Observe(openedCacheMemory.Dispose, failures); }
+        ServerFailureObserver.Observe(stores.Dispose, failures);
+        if (failures.Count > FailuresCountValidationBoundary)
+        { throw new AggregateException(failures); }
     }
 
     private static void ValidateConstructorArguments(NodeOptions options, IAuthorizationPolicy authorization,
@@ -115,6 +128,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     internal CacheMemoryBudget CacheMemory { get; }
     internal NativeAnnMaintenanceService AnnMaintenance { get; }
     internal NativeTextIncrementalMaintenanceService TextMaintenance { get; }
+    internal NativeTextOnlineMaintenanceService OnlineTextMaintenance { get; }
     /// <summary>Node-owned ordered apply and checkpoint fencing.</summary>
     public ReplicaMaterializer Materializer { get; }
     /// <summary>Node-owned protocol endpoint attached by the Orleans Grain Service.</summary>
@@ -166,6 +180,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => OnlineTextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => TextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => AnnMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Coordinator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);

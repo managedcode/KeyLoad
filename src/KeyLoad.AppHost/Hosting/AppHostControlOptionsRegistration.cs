@@ -52,6 +52,7 @@ internal static class AppHostControlOptionsRegistration
                 value.ScaleSelected = configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null;
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
                 value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
+                value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;

@@ -1,4 +1,5 @@
 using KeyLoad.Server;
+using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage.IO;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -33,6 +34,29 @@ internal static class RequestCqrsProbeFileStore
         { RequestCqrsProbeAtomicWriteSettlement.RemoveFailedPublication(directory, fileName, bytes, failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
+    internal static void ReplaceExactArm(string directory, string fileName, byte[] expected, byte[] replacement)
+    {
+        if (!fileName.StartsWith(RequestCqrsProbeFixtureProtocol.ArmFilePrefix, StringComparison.Ordinal)
+            || !RequestCqrsProbeFileValidation.IsAllowedFileName(fileName)
+            || replacement.Length != expected.Length || replacement.Length is <= 0 or > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
+        { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        VerifyExactFile(directory, fileName, expected);
+        RequestCqrsProbeFileValidation.EnsureQuota(directory, replacement.Length);
+        var temporary = Path.Combine(directory, RequestCqrsProbeFileValidation.TemporaryPrefix
+            + Guid.NewGuid().ToString(RequestCqrsProbeProtocol.SessionIdFormat) + ReplacementTemporarySuffix);
+        var failures = new List<Exception>();
+        ServerFailureObserver.Observe(() =>
+        {
+            WriteTemporary(temporary, replacement);
+            VerifyExactFile(directory, fileName, expected);
+            File.Move(temporary, Path.Combine(directory, fileName), overwrite: true);
+            VerifyExactFile(directory, fileName, replacement);
+        }, failures);
+        CleanupTemporary(temporary, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+    private const string ReplacementTemporarySuffix = ".tmp";
 
     private static void WriteTemporary(string path, ReadOnlySpan<byte> bytes)
     {

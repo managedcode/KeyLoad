@@ -53,6 +53,6 @@ internal static class PartitionMoveFamilyCapture
     }
 
     internal static bool ControlOwned(string family)
-        => family is PartitionRecordFamilies.OutcomeV2 or PartitionRecordFamilies.OutcomeLocator
+        => family is PartitionRecordFamilies.OnlineTextCurrent or PartitionRecordFamilies.OutcomeV2 or PartitionRecordFamilies.OutcomeLocator
             or PartitionRecordFamilies.OutcomeLocatorV2;
 }

@@ -54,8 +54,11 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
                 { await Task.Delay(options.Value.PollInterval, token).ConfigureAwait(false); }
             } while (active.Contains(selected));
             files.WriteConnection(witness with
-            { SelectedActivationCount = ConnectionProbeProtocol.Absent,
-                ClusterConnectionActivationCount = active.Count, Closed = true });
+            {
+                SelectedActivationCount = ConnectionProbeProtocol.Absent,
+                ClusterConnectionActivationCount = active.Count,
+                Closed = true
+            });
         }
         catch (OperationCanceledException) when (stopping.IsCancellationRequested)
         { }
@@ -65,7 +68,8 @@ internal sealed class ConnectionProbeCapture(RequestCqrsProbeFiles files,
     {
         await stopping.CancelAsync().ConfigureAwait(false);
         Task[] pending;
-        lock (gate) { pending = watchers.Values.ToArray(); }
+        lock (gate)
+        { pending = watchers.Values.ToArray(); }
         try
         { await Task.WhenAll(pending).ConfigureAwait(false); }
         finally

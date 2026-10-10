@@ -99,28 +99,10 @@ public sealed partial class GrainRequestCodec
 
     internal ValueTask ObservePhaseAsync(DecodedGrainRequest request, GrainRequestPhase phase,
         IGrainContext? context, CancellationToken cancellationToken)
-    {
-        var observer = PhaseObserver;
-        if (observer is null)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        ArgumentNullException.ThrowIfNull(context);
-        return observer.ObserveAsync(GrainRequestProbeIdentity.From(request.Envelope), phase, context, cancellationToken);
-    }
+        => GrainRequestPhaseObservation.ObserveAsync(PhaseObserver, request, phase, context, cancellationToken);
 
     internal void ObserveProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext? context)
-    {
-        var observer = PhaseObserver;
-        if (observer is null)
-        {
-            return;
-        }
-
-        ArgumentNullException.ThrowIfNull(context);
-        observer.ProducerDisposed(identity, context);
-    }
+        => GrainRequestPhaseObservation.ProducerDisposed(PhaseObserver, identity, context);
 
     private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
         => GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes);

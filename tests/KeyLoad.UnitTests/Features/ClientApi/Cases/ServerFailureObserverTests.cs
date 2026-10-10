@@ -81,7 +81,7 @@ internal sealed class ServerFailureObserverTests
         await Assert.That(failures.Count).IsEqualTo(SingleFailure);
         await Assert.That(failures[0].GetType()).IsEqualTo(typeof(TaskCanceledException));
         var failure = (TaskCanceledException)failures[0];
-        await Assert.That(failure.Task).IsNotNull();
+        await Assert.That((object?)failure.Task).IsNotNull();
         var canceledTask = failure.Task ?? throw new InvalidOperationException(MissingOriginatingTask);
         await Assert.That(canceledTask).IsSameReferenceAs(stage);
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);

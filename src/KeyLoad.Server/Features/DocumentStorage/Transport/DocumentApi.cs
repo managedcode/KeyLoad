@@ -6,6 +6,8 @@ internal static class DocumentApi
     private const string GetPath = "/v1/documents/get";
     private const string FollowerPath = "/v1/documents/read-follower";
 
+    internal static bool IsCommandPath(PathString path) => path == CommandPath;
+
     internal static void Map(WebApplication app)
     {
         app.MapPost(CommandPath, (CommandRequest request, HttpContext context) =>

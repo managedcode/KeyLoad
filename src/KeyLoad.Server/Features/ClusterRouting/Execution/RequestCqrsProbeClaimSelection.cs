@@ -15,6 +15,8 @@ internal static class RequestCqrsProbeClaimSelection
             && loaded.Record.CommandId == identity.CommandId
             && (loaded.Record.TargetVoter is null || loaded.Record.TargetVoter == actualVoter)
             && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
+            && (loaded.Record.Phase != RequestCqrsProbePhase.OnlineTextCaptured
+                || identity.CommandKind == OperationKind.MaintainOnlineTextIndex)
             && loaded.Record.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed
             && !(loaded.Record.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved
                 && loaded.Record.SourceArmId is not null)

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextProjectionShutdown(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate, Action<NativeTextFaultStage>? faultObserver, IOptions<NativeTextExecutionOptions> executionOptions)
+internal sealed class NativeTextProjectionShutdown(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate, Action<NativeTextFaultStage>? faultObserver, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
 {
     private const int FailureEmptyCount = 0;
     private const int FailureSingleItemCount = 1;
@@ -54,7 +54,9 @@ internal sealed class NativeTextProjectionShutdown(string root, IOptions<Databas
         if (!keepFiles && canDelete && generation.CurrentIndex is null)
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
-                root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions)), failures);
+                root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
+            if (failures.Count == FailureEmptyCount)
+            { slot.SharedReservation?.CompleteAfterJoinedCleanup(); }
         }
         return Failure(failures);
     }
@@ -67,7 +69,9 @@ internal sealed class NativeTextProjectionShutdown(string root, IOptions<Databas
         }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
-            root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions)), failures);
+            root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
+        if (failures.Count == FailureEmptyCount)
+        { slot.SharedReservation?.CompleteAfterJoinedCleanup(); }
         return Failure(failures);
     }
 

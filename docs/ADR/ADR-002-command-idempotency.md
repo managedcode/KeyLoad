@@ -194,3 +194,45 @@ status; this closes only the stated original bounded task predicates. It neither
 waives their contracts nor claims broad StorageRecovery/DocumentStorage/product
 readiness. Current source repairs and additional feature requirements require
 fresh exact-source evidence. Root alone joins durable status/README provenance.
+
+
+## TASK-EVENT-APPEND-RF3-001 — original KL083 public whole flow
+
+REQ-EVENT-004/005 and AC-EVENT-004/005 retain the current expected-revision,
+stream-generation EventId identity and same-command replay contracts. The new
+AC-EVENT-APPEND-RF3-001 requires one actual Aspire RF3 flow through the .NET SDK
+and official MCP SDK: the existing literal three-event NoStream seed; exact
+NoStream refusal, same-command changed-content Conflict, changed EventId Conflict,
+partial-duplicate DuplicateEventId and stale append-generation TokenInvalidated
+with full canonical stream invariance;
+persisted EventsRead-only append/retained-command refusal with safe problems;
+two joined Exact3 producers with exactly one complete winner and one immutable
+RevisionConflict; unchanged full successful/failed replay; a fresh Any append
+and the complete independent five-event literal stream, head, revision, sequence,
+metadata and receipt oracle. Each page independently covers the actual receipt
+cut; running-cluster physical positions may advance and are not domain-effect
+oracles. Original event RecordedAt values are retained across refusal/replay.
+
+`EventAppendRf3WholeFlowTests.AcEvent004005PublicConcurrentExactDedupDeniedReplayAndHealthyAnyAppend`
+owns this additive public operation flow. Existing EventAppendWholeFlowTests
+retain isolated local OCC/full mixed rollback controls and the seven original
+EventAppendProcessRecoveryTests retain genuine seeded kill/join/reopen and
+full receipt/dedup/healthy proof. Shared RF3 resources are never stopped by the
+new case. Native ConnectionGrain call-local execution, fresh persisted policy,
+existing caller deadline and full joined SDK/MCP/fixture cleanup remain unchanged.
+No new product format, alias, field ID, capability, quota, dependency or timeout.
+Root owns integration and exact-source Linux normal/scalar/process/RF3 discovery,
+execution and provenance; source presence is not qualification or task closure.
+Broader ADR002 leader-change, full feature/coverage/endurance and power-loss gates
+remain mandatory and explicitly unqualified by this source-only packet.
+
+The final fresh Any append uses the previously rolled-back new EventId from the
+partial-duplicate batch under a fresh CommandId and literal new payload. A leaked
+dedup reservation must fail this healthy operation; it cannot hide behind page
+invariance. The original rejected command retains its failed outcome unchanged.
+
+After that fresh append, the same failed partial batch must replay its exact
+original DuplicateEventId problem. Re-evaluation would now encounter changed
+content at the formerly rolled-back ID and cannot substitute a different error.
+The original NoStream successful command must still replay its original receipt
+at the later head; full canonical events/head remain unchanged.

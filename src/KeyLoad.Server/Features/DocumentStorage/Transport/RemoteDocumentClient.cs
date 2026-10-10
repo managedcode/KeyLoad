@@ -1,6 +1,6 @@
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Orleans;
 using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.QueryExecution;
 using KeyLoad.Storage;
@@ -66,6 +66,13 @@ internal sealed class RemoteDocumentClient : IDisposable
         return reply.QueryLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
     }
 
+    internal async Task<KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1> ReadSearchLeafAsync(
+        RemoteDocumentCallV1 call, CancellationToken cancellationToken)
+    {
+        var reply = await ReadReplyAsync(call, cancellationToken).ConfigureAwait(false);
+        return reply.SearchLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+    }
+
     internal Task<ControlledDocumentReadResult> ReadControlledAsync(RemoteControlledDocumentCall call,
         CancellationToken cancellationToken)
         => RemoteControlledDocumentExchange.ReadAsync(http, pins, options, membership, clock, call, cancellationToken);
@@ -120,9 +127,11 @@ internal sealed class RemoteDocumentClient : IDisposable
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership)
             || SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort
             || reply.Controlled is not null || reply.ControlledBlob is not null
-            || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null)
-            || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null)
-            || reply.QueryLeaf is not null && call.QueryLeaf is null
+            || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
+            || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
+            || reply.QueryLeaf is not null && (call.QueryLeaf is null || reply.SearchLeaf is not null)
+            || reply.SearchLeaf is not null && (call.SearchLeaf is null || reply.Result is not null || reply.QueryLeaf is not null)
+            || reply.Error is not null && (reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
             || reply.Error is null && reply.SafeDetail is not null)
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
         if (reply.Result is { } result && (result.NodeId == Guid.Empty || result.Incarnation != owner.Incarnation
@@ -134,6 +143,10 @@ internal sealed class RemoteDocumentClient : IDisposable
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
         if (reply.QueryLeaf is { } leaf && (leaf.NodeId == Guid.Empty || leaf.Incarnation != owner.Incarnation
             || leaf.ReadGeneration < EmptyApplied || leaf.Partition != RemotePartitionQueryScope.Partition(call)))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        if (reply.SearchLeaf is { } search && (search.Witness is null || search.Witness.NodeId == Guid.Empty
+            || search.Witness.Incarnation != owner.Incarnation || search.Witness.ReadGeneration < EmptyApplied
+            || search.Witness.Partition != RemotePartitionQueryScope.Partition(call)))
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
         if (reply.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(reply.SafeDetail)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }

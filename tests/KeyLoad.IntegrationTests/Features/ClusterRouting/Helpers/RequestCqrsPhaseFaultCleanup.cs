@@ -12,7 +12,7 @@ internal static class RequestCqrsPhaseFaultCleanup
         RequestCqrsRf3Callers? administrator,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? callerCancellation,
         CancellationTokenSource? scenarioDeadline, Task? sdkCall,
-        Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures)
+        Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures, IReadOnlyList<Guid>? additionalArms = null)
     {
         var cleanup = new List<Exception>();
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
@@ -20,6 +20,8 @@ internal static class RequestCqrsPhaseFaultCleanup
             .ConfigureAwait(false);
         await JoinOriginalCallsAsync(sdkCall, mcpCall, cleanup).ConfigureAwait(false);
         await JoinProducerDisposalAsync(controls, discovery, armId, cleanup, deadline.Token).ConfigureAwait(false);
+        foreach (var additional in additionalArms ?? [])
+        { await JoinProducerDisposalAsync(controls, discovery, additional, cleanup, deadline.Token).ConfigureAwait(false); }
         await DisposeClientsAsync(caller, administrator, cleanup).ConfigureAwait(false);
         var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);

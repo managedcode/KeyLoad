@@ -219,6 +219,10 @@ public sealed class ReadExecutionBudget
     private const int EmptyClaimedRecords = 0;
     internal void AcceptReadGrantBytes(long count) => bytes += count;
     internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.CompleteReadGrant(grant);
+    internal void ImportSettledReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
+        => ReadGrants.ImportSettledReadGrant(grant, count, records);
+    internal void CompleteSettledReadGrant(ReadExecutionBudgetReadGrant grant)
+        => ReadGrants.CompleteSettledReadGrant(grant);
     internal ReadExecutionBudgetReadGrantLease EnterReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.EnterReadGrant(grant);
     internal void ExitReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.ExitReadGrant(grant);
     internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant) => ReadGrants.CreateView(view, grant);

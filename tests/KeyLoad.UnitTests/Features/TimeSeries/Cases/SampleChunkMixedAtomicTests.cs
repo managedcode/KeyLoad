@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Storage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -27,7 +27,8 @@ internal sealed class SampleChunkMixedAtomicTests
             fixture.Owner.Partition.TenantId, fixture.Owner.Partition.DatabaseId,
             new ResourceDefinition(Collection, ResourceKind.Collection, fixture.Owner.Partition.TransactionDomainId)),
             SampleChunkCanonicalFixture.Principal, configureId).Get<ResourceDefinition>();
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         var documentPrefix = KeySpace.Partition(PartitionRecordFamilies.Document, fixture.Owner.Partition, Collection);
         var documents = SampleRollupWholeFlow.Image(fixture.Owner, documentPrefix);
         var raw = fixture.Raw();
@@ -41,7 +42,8 @@ internal sealed class SampleChunkMixedAtomicTests
         await Assert.That(failed.Json).IsNull();
         await Assert.That(SampleRollupWholeFlow.Image(fixture.Owner, documentPrefix)).IsEqualTo(documents);
         await Assert.That(fixture.Raw()).IsEqualTo(raw);
-        var image = fixture.Image(); var position = fixture.Owner.Store.Position;
+        var image = fixture.Image();
+        var position = fixture.Owner.Store.Position;
         var replay = fixture.Owner.Submit(OperationKind.Batch, request,
             SampleChunkCanonicalFixture.Principal, request.CommandId);
         await Assert.That(SampleRollupWholeFlow.Outcome(replay)).IsEqualTo(SampleRollupWholeFlow.Outcome(failed));
@@ -77,7 +79,8 @@ internal sealed class SampleChunkMixedAtomicTests
             new RowAccess(), stored.UpdatedAt, Deleted: false);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(stored)))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected)));
-        var image = fixture.Image(); var position = fixture.Owner.Store.Position;
+        var image = fixture.Image();
+        var position = fixture.Owner.Store.Position;
         var actual = fixture.Owner.Database.GetDocument(SampleChunkCanonicalFixture.Principal,
             reference, receipt.Token);
         var projected = new DocumentResult(reference, FirstDocumentRevision, Json, Redacted: false, []);

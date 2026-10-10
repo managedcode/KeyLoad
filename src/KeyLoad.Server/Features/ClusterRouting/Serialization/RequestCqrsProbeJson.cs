@@ -48,6 +48,14 @@ internal sealed class RequestCqrsProbeJson
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || value.Phase == RequestCqrsProbePhase.SampleChunkAdmissionRefused
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
+            || value.Phase == RequestCqrsProbePhase.NativeTextOriginalPostingRead
+                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.Search
+                    || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
+            || value.Phase == RequestCqrsProbePhase.DistributedSearchStatisticsCaptured
+                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.DistributedSearch
+                    || value.CommandId != Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
+            || value.Phase == RequestCqrsProbePhase.OnlineTextCaptured
+                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))

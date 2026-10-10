@@ -17,9 +17,11 @@ internal static class SampleChunkCrashScenario
     {
         if (args.Length == Arguments && SampleChunkEarlyCrashProtocol.IsMode(args[ModeArgument]))
         { await SampleChunkEarlyCrashScenario.RunAsync(args).ConfigureAwait(false); return true; }
-        if (args.Length != Arguments || !SampleChunkCrashContract.IsMode(args[ModeArgument])) { return false; }
+        if (args.Length != Arguments || !SampleChunkCrashContract.IsMode(args[ModeArgument]))
+        { return false; }
         _ = SerializationExecutionRegistration.Process.Value;
-        var mode = args[ModeArgument]; var root = args[DirectoryArgument];
+        var mode = args[ModeArgument];
+        var root = args[DirectoryArgument];
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[StageArgument]),
             int.Parse(args[MutationArgument], CultureInfo.InvariantCulture), false);
         using var store = new ZoneTreeStore(new(root) { FaultObserver = boundary.Observe },

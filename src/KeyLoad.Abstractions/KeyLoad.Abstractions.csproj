@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="KeyLoad.Storage.ZoneTree" />
     <InternalsVisibleTo Include="KeyLoad.Query" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.Client" />

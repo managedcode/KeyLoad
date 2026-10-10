@@ -123,6 +123,10 @@ internal sealed record StoredOutcome(
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Partition)]
     public PartitionRef? Partition { get; init; }
+
+    [JsonIgnore]
+    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.OnlineTextAuthority)]
+    public global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? OnlineTextAuthority { get; init; }
 }
 
 [global::Orleans.GenerateSerializer]

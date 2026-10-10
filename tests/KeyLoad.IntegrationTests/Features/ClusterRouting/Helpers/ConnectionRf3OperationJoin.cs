@@ -25,7 +25,8 @@ internal sealed class ConnectionRf3OperationJoin
         {
             await ServerFailureObserver.ObserveAsync(
                 () => operation.Original.WaitAsync(cancellationToken), failures).ConfigureAwait(false);
-            if (operation.Original.IsCompleted) { terminalObserved.Add(operation.Original); }
+            if (operation.Original.IsCompleted)
+            { terminalObserved.Add(operation.Original); }
         }
     }
 
@@ -50,7 +51,8 @@ internal sealed class ConnectionRf3OperationJoin
         foreach (var operation in operations)
         {
             var arm = controls.ArmFor(operation.Arm);
-            if (arm.RequestId is not { } requestId || arm.ProducerDisposedSeen && arm.Settled) { continue; }
+            if (arm.RequestId is not { } requestId || arm.ProducerDisposedSeen && arm.Settled)
+            { continue; }
             await ServerFailureObserver.ObserveAsync(
                 () => RequestCqrsPhaseFaultAssertions.VerifySettledAsync(controls, arm.ArmId,
                     requestId, arm.CommandId, discovery, cancellationToken), failures).ConfigureAwait(false);

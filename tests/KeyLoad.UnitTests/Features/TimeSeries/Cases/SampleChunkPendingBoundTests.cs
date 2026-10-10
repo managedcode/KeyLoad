@@ -6,11 +6,15 @@ internal sealed class SampleChunkPendingBoundTests
     public async Task AcChunk008009012SameSeriesPendingRefusalReplaysThenActualMergeFreesHealthyCorrection()
     {
         using var fixture = new SampleChunkCanonicalFixture(new()
-        { MaximumPendingChunkWindows = SampleChunkPendingBoundProtocol.Pending,
-            MaximumChunkWindows = SampleChunkPendingBoundProtocol.Windows });
+        {
+            MaximumPendingChunkWindows = SampleChunkPendingBoundProtocol.Pending,
+            MaximumChunkWindows = SampleChunkPendingBoundProtocol.Windows
+        });
         var trial = new SampleChunkPendingBoundTrial(fixture);
-        trial.Seed(); await trial.RequireAsync(firstMerged: false, secondCorrected: false);
-        var mutation = SampleChunkPendingBoundTrial.Overflow; var originalId = Guid.NewGuid();
+        trial.Seed();
+        await trial.RequireAsync(firstMerged: false, secondCorrected: false);
+        var mutation = SampleChunkPendingBoundTrial.Overflow;
+        var originalId = Guid.NewGuid();
         var raw = fixture.Raw();
         var rejected = fixture.Commit(originalId, mutation);
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);

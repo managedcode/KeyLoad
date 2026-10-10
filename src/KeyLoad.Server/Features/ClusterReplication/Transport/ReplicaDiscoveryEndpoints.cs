@@ -32,6 +32,8 @@ internal static class ReplicaDiscoveryEndpoints
             return Results.Unauthorized();
         }
         var payload = NativeSerialization.Serialize(state);
+        if (node.DiscoveryOmission is { } omission)
+        { payload = omission.Transform(payload, state, context, nonce); }
         context.Response.Headers[ReplicaTransportProtocol.DiscoverySignatureHeader] = authentication.SignDiscovery(payload, nonce);
         return Results.Bytes(payload, ServerProtocol.BinaryContentType);
     }

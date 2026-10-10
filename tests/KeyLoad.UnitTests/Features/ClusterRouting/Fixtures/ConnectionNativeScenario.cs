@@ -139,7 +139,8 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
         if (!closed && initialized)
         { await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => CloseAsync(timeout.Token), failures); }
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Fixture.DisposeAsync().AsTask(), failures);
-        try { calls.Dispose(); }
+        try
+        { calls.Dispose(); }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         if (failures.Count > ConnectionNativeProtocol.EmptyFailures)

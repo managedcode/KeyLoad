@@ -39,7 +39,8 @@ internal static class SampleChunkNativeJobRf3Log
             var first = await Task.WhenAny(readers).WaitAsync(token).ConfigureAwait(false);
             receipt = await first.ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
-            if (receipt is null) { throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing); }
+            if (receipt is null)
+            { throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing); }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(owned.Cancel, failures);
         await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(readers), failures).ConfigureAwait(false);
@@ -60,7 +61,8 @@ internal static class SampleChunkNativeJobRf3Log
                 while (await reader.MoveNextAsync().ConfigureAwait(false))
                 {
                     receipt = FindMatch(reader.Current, commandId, executing);
-                    if (receipt is not null) { return; }
+                    if (receipt is not null)
+                    { return; }
                 }
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested) { return; }
@@ -76,7 +78,8 @@ internal static class SampleChunkNativeJobRf3Log
         foreach (var line in actualBatch)
         {
             var receipt = SampleChunkNativeJobRf3Message.Read(line.Content, commandId, executing);
-            if (receipt is not null) { return receipt; }
+            if (receipt is not null)
+            { return receipt; }
         }
         return null;
     }

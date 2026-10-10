@@ -9,7 +9,7 @@ namespace KeyLoad.Orleans;
 
 internal static class TextMaintenanceExecution
 {
-    internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent, IGrainFactory grains,
+    internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent, Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
@@ -22,7 +22,7 @@ internal static class TextMaintenanceExecution
         if (request.CommandId != parent.Envelope.CommandId || request.CommandId == Guid.Empty
             || request.NodeId != database.Store.Identity.NodeId || !Enum.IsDefined(request.Mode))
         { throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest); }
-        var children = new TextMaintenanceChildCalls(parent, grains, services, codec, clock, serializer, routing, diagnostics);
+        var children = new TextMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics);
         TextIndexMaintenanceResult result;
         try
         {

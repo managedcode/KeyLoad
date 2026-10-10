@@ -134,5 +134,11 @@ public enum GrainReadKind
     /// <summary>Read a bounded server-delegated Blob result or current data at its published owner.</summary>
     ControlledBlob,
     /// <summary>Read one authorized bounded sample-chunk window at its committed cut.</summary>
-    SampleChunkWindow
+    SampleChunkWindow,
+    /// <summary>Executes one privately authenticated online text-maintenance phase at its exact native owner.</summary>
+    OnlineTextMaintenance,
+    /// <summary>Read complete globally ranked canonical text/vector results over explicit authorized physical owners.</summary>
+    DistributedSearch,
+    /// <summary>Execute one privately signed bounded phase under its original owner, statistics witness and expiry.</summary>
+    DistributedSearchLeaf
 }

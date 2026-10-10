@@ -30,7 +30,8 @@ internal static class SampleChunkPendingRf3Log
             var first = await Task.WhenAny(readers).WaitAsync(token).ConfigureAwait(false);
             original = await first.ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
-            if (original is null) { throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing); }
+            if (original is null)
+            { throw new InvalidOperationException(SampleChunkPendingRf3Protocol.Missing); }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(owned.Cancel, failures);
         await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(readers), failures).ConfigureAwait(false);
@@ -51,7 +52,8 @@ internal static class SampleChunkPendingRf3Log
                 while (await reader.MoveNextAsync().ConfigureAwait(false))
                 {
                     observed = FindMatch(reader.Current, expected);
-                    if (observed is not null) { return; }
+                    if (observed is not null)
+                    { return; }
                 }
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested) { return; }
@@ -65,7 +67,8 @@ internal static class SampleChunkPendingRf3Log
     {
         foreach (var line in actualBatch)
         {
-            if (!line.Content.Contains(expected, StringComparison.Ordinal)) { continue; }
+            if (!line.Content.Contains(expected, StringComparison.Ordinal))
+            { continue; }
             if (Encoding.UTF8.GetByteCount(line.Content) > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
             { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.RecordLimitExceeded); }
             return line.Content;

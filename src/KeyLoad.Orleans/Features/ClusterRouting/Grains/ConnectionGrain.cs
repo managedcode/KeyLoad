@@ -34,7 +34,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         var requestId = OperationRequestId(signedRequest);
         var phaseSettlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
         Action settled = phaseSettlement is null ? static () => { }
-            : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext);
+        : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext);
         return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.Run(
             createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
@@ -100,7 +100,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             var controlledReply = await TryExecuteControlledAsync(request, writer).ConfigureAwait(true);
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
-            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MovePartition)
+            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
             { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
             else if (command)
             {
@@ -159,19 +159,25 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
                 ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
+        if (request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex)
+        {
+            var result = await OnlineTextExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
+                clock, chunkSerializer, options, diagnostics, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true);
+            return EncodeParent(result, writer.CancellationToken);
+        }
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
         {
-            var result = await TextMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,
+            var result = await TextMaintenanceExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
                 clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
         {
-            var result = await AnnMaintenanceExecution.ExecuteAsync(request, GrainFactory, services, codec,
+            var result = await AnnMaintenanceExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
                 clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
-        var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, GrainFactory, services, codec,
+        var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
             clock, chunkSerializer, options, diagnostics, writer.CancellationToken).ConfigureAwait(true);
         return EncodeParent(lanes, writer.CancellationToken);
     }

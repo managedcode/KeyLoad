@@ -7,6 +7,7 @@ internal static class GrainPartitionResolver
     internal static string Resolve(DecodedGrainRequest request) => request.Envelope.CommandKind switch
     {
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
+        OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),
         OperationKind.Receive => Route<ReceiveRequest>(request, value => (value.RequestId, value.Lane.Partition)),
         OperationKind.Delivery => Route<DeliveryCommand>(request, value => (value.CommandId, value.Lane.Partition)),

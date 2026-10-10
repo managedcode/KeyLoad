@@ -48,6 +48,7 @@ internal sealed class McpCatalogTests
         }
         await McpMovementCatalogSchema.RequireAsync(Find(McpMovementCatalogProtocol.Name));
         await McpMovementCatalogDecode.RequireAsync(Find(McpMovementCatalogProtocol.Name));
+        await global::KeyLoad.UnitTests.Features.QueryExecution.DistributedSearchMcpSchemaAssertions.RequireAsync();
     }
 
     /// <summary>Rejects case-changed names and prevents internal authentication or membership discovery.</summary>

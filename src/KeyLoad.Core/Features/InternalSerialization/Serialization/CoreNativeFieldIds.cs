@@ -237,6 +237,7 @@ internal static class StoredOutcomeFields
     internal const uint CompositionAuthority = 5;
     internal const uint ScopeKind = 6;
     internal const uint Partition = 7;
+    internal const uint OnlineTextAuthority = 8;
 }
 
 internal static class SubscriptionCompletionFields

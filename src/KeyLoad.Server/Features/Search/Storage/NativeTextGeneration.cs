@@ -11,13 +11,16 @@ internal sealed class NativeTextGeneration
 
     private readonly string root;
     private readonly Guid sourceNodeId;
+    private readonly NativeTextResourceOwnership? resources;
+    internal NativeTextResourceOwnership? Resources => resources;
     private List<NativeTextRecord>? pendingRecords = [];
     private NativeTextRecord[]? sealedRecords;
     private HashSet<EntityRef>? references = [];
 
-    internal NativeTextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, IOptions<DatabaseLimits> limitsOptions, NativeTextFileStreamProvider provider, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal NativeTextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, IOptions<DatabaseLimits> limitsOptions, NativeTextFileStreamProvider provider, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         this.executionOptions = executionOptions;
+        this.resources = resources;
         this.root = root;
         this.sourceNodeId = sourceNodeId;
         Leaf = leaf;
@@ -136,7 +139,7 @@ internal sealed class NativeTextGeneration
         VerifyFiles(manifest.Files, budget);
         budget.Check();
         CurrentIndex = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory),
-            new NativeTextFileStreamProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions), executionOptions: executionOptions);
+            new NativeTextFileStreamProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions, resources: resources), executionOptions: executionOptions);
     }
 
     internal void MarkPublished()

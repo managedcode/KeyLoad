@@ -20,7 +20,7 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var settings = nodeOptions.Value.MembershipAuthority;
         var now = clock.GetUtcNow();
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
-            || call.QueryLeaf is not null && !settings.RemotePartitionQueries
+            || (call.QueryLeaf is not null || call.SearchLeaf is not null) && !settings.RemotePartitionQueries
             || settings.Mode != MembershipAuthoritySettingsProtocol.Proxy
             || call.Version != RemoteDocumentProtocol.Version || call.RequestId == Guid.Empty
             || !ReplicaMembershipAuthorityValidation.ValidNonce(call.Nonce)
@@ -85,6 +85,32 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
         var actual = partition.Database.Store.Identity;
         if (result.NodeId != actual.NodeId || result.Incarnation != actual.Incarnation
             || result.ReadGeneration != actual.ReadGeneration)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
+        return result;
+    }
+
+    internal async Task<KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1> ReadSearchLeafAsync(
+        RemoteDocumentCallV1 call, CancellationToken cancellationToken)
+    {
+        Validate(call, cancellationToken);
+        var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
+            call.Fence.PrincipalId, clock.GetUtcNow()));
+        if (principal.TenantId != call.Fence.Tenant)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, RemoteDocumentProtocol.InvalidProof); }
+        var requestId = Guid.NewGuid();
+        var request = call.SearchLeaf ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+        var signed = node.CatalogRequestCodec().CreateDistributedSearchLeaf(requestId, principal.Id,
+            NativeSerialization.Serialize(request), call.ExpiresAt);
+        using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, cancellationToken);
+        var reply = await node.ExecuteAsync(requestId, signed, command: false,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+        Validate(call, cancellationToken);
+        var result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value
+            as KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1
+            ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
+        var actual = partition.Database.Store.Identity;
+        if (result.Witness is null || result.Witness.NodeId != actual.NodeId
+            || result.Witness.Incarnation != actual.Incarnation || result.Witness.ReadGeneration != actual.ReadGeneration)
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
         return result;
     }

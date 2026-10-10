@@ -37,7 +37,8 @@ internal static class SampleChunkCrashState
             var prefix = KeySpace.Partition(family, SampleChunkCrashContract.Partition,
                 SampleChunkCrashContract.Set, SampleChunkCrashContract.Series);
             var page = view.Scan(prefix, SampleChunkCrashContract.MaximumRecords);
-            if (page.HasMore) { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+            if (page.HasMore)
+            { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
             rows.AddRange(page.Records.Select(row =>
                 new[] { Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span) }));
         }
@@ -47,7 +48,8 @@ internal static class SampleChunkCrashState
     internal static string Complete(DatabaseEngine database) => database.Store.Read(view =>
     {
         var page = view.Scan([], SampleChunkCrashContract.MaximumRecords);
-        if (page.HasMore) { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        if (page.HasMore)
+        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
         return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
     });
 }

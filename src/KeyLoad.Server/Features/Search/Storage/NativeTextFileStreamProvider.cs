@@ -3,36 +3,21 @@ using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
+internal sealed partial class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     : IFileStreamProvider
 {
     private const int NativeDefaultStreamBufferBytes = 4_096;
     private readonly LocalFileStreamProvider inner = new();
     private readonly int fileBufferBytes = ReadFileBufferBytes(executionOptions);
-    private readonly NativeTextPathAccess pathAccess = new(root, leaf, sourceNodeId, executionOptions: executionOptions);
+    private readonly NativeTextPathAccess pathAccess = new(root, leaf, sourceNodeId, executionOptions: executionOptions, resources: resources);
 
     public IFileStream CreateFileStream(string path, FileMode mode, FileAccess access, FileShare share,
         int bufferSize = NativeDefaultStreamBufferBytes, FileOptions options = FileOptions.None)
     {
         var full = pathAccess.Resolve(path);
-        var exists = File.Exists(full);
-        var created = false;
-        if (exists)
-        {
-            pathAccess.Require(full, directory: false);
-        }
-        else if (CreatesOrOpens(mode))
-        {
-            pathAccess.Track(full, directory: false);
-            mode = FileMode.CreateNew;
-            created = true;
-        }
-        var stream = inner.CreateFileStream(full, mode, access, share, Math.Min(bufferSize, fileBufferBytes), options);
-        if (created)
-        {
-            NativeTextFileIO.SetPrivateFileMode(full);
-        }
-        return stream;
+        if (resources is null)
+        { return OpenOwned(full, mode, access, share, bufferSize, options); }
+        return resources.MutatePhysical(() => OpenOwned(full, mode, access, share, bufferSize, options));
     }
 
     public bool FileExists(string path)
@@ -71,7 +56,10 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
         {
             pathAccess.Require(full, directory: false);
         }
-        inner.DeleteFile(full);
+        if (resources is null)
+        { inner.DeleteFile(full); }
+        else
+        { resources.DeleteOwnedFile(full, () => inner.DeleteFile(full)); }
     }
 
     public void DeleteDirectory(string path, bool recursive)
@@ -83,7 +71,10 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
             NativeTextFiles.ValidateTrackedNativeLayout(Path.Combine(root, leaf),
                 NativeTextFiles.ReadOwnerForProvider(root, leaf, sourceNodeId, executionOptions: executionOptions), executionOptions: executionOptions);
         }
-        inner.DeleteDirectory(full, recursive);
+        if (resources is null)
+        { inner.DeleteDirectory(full, recursive); }
+        else
+        { resources.DeleteOwnedDirectory(full, () => inner.DeleteDirectory(full, recursive)); }
     }
 
     public string ReadAllText(string path)
@@ -119,7 +110,10 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
         {
             pathAccess.PrepareReplaceTarget(backup);
         }
-        inner.Replace(source, destination, backup);
+        if (resources is null)
+        { inner.Replace(source, destination, backup); }
+        else
+        { resources.ReplaceOwnedFiles(source, destination, backup, () => inner.Replace(source, destination, backup)); }
     }
 
     public DurableFileWriter GetDurableFileWriter() => new(this);

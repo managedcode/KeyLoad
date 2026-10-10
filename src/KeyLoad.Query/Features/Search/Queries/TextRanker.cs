@@ -17,6 +17,7 @@ internal sealed class TextRanker
     private const double Bm25LengthWeight = 0.75;
     private const double IdfSmoothing = 0.5;
     private readonly ReadExecutionBudget budget;
+    private readonly bool retainCandidates;
     private readonly int budgetCheckInterval;
     private readonly int maximumDocumentWords;
     private readonly int maximumWordCharacters;
@@ -31,7 +32,17 @@ internal sealed class TextRanker
 
     public TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
         int maximumDocumentWords, int maximumWordCharacters)
+        : this(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, true)
+    { }
+
+    internal static TextRanker ForStatistics(string query, string field, ReadExecutionBudget budget,
+        int budgetCheckInterval, int maximumDocumentWords, int maximumWordCharacters)
+        => new(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, false);
+
+    private TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
+        int maximumDocumentWords, int maximumWordCharacters, bool retainCandidates)
     {
+        this.retainCandidates = retainCandidates;
         this.budget = budget;
         this.budgetCheckInterval = budgetCheckInterval;
         this.maximumDocumentWords = maximumDocumentWords;
@@ -40,7 +51,7 @@ internal sealed class TextRanker
         lookup = terms.Select((term, index) => (term, index))
             .ToDictionary(pair => pair.term, pair => pair.index, StringComparer.Ordinal);
         frequency = new int[terms.Length];
-        path = terms.Length == EqualOrder ? [] : JsonData.PathSegments(field);
+        path = terms.Length == EqualOrder && retainCandidates ? [] : JsonData.PathSegments(field);
     }
 
     public bool HasTerms => lookup.Count != EmptyElementCount;
@@ -75,13 +86,27 @@ internal sealed class TextRanker
             frequency[index]++;
         }
         totalLength += length;
-        if (counts.Count != EmptyElementCount)
+        if (retainCandidates && counts.Count != EmptyElementCount)
         {
             candidates.Add(new(document.Reference, length, counts));
         }
     }
 
-    public SearchScore[] Rank()
+    public SearchScore[] Rank() => Rank(corpusCount, totalLength, frequency);
+
+    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1 CaptureStatistics()
+    {
+        return KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsCapture.Copy(
+            terms, corpusCount, totalLength, frequency, budget);
+    }
+
+    internal SearchScore[] Rank(KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1 statistics)
+    {
+        KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsValidation.Require(statistics, terms, budget);
+        return Rank(statistics.DocumentCount, statistics.TotalLength, statistics.DocumentFrequencies);
+    }
+
+    private SearchScore[] Rank(int corpusCount, long totalLength, IReadOnlyList<int> frequency)
     {
         if (corpusCount == EmptyElementCount)
         {

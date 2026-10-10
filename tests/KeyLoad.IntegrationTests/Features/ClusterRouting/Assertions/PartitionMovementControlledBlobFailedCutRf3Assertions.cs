@@ -3,8 +3,8 @@ using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server;
+using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 

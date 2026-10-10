@@ -50,8 +50,12 @@ internal sealed class SampleChunkAutomaticSealTests
         var merged = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
         await Assert.That(merged.CutPosition).IsEqualTo(merge.Token.Position);
         await Assert.That(merged.CutPosition).IsEqualTo(fixture.Owner.Store.Position);
-        await EqualAsync(correctedExpected with { Generation = SampleChunkCanonicalFixture.MergedGeneration,
-            Revision = revision + One + One, CutPosition = merged.CutPosition }, merged);
+        await EqualAsync(correctedExpected with
+        {
+            Generation = SampleChunkCanonicalFixture.MergedGeneration,
+            Revision = revision + One + One,
+            CutPosition = merged.CutPosition
+        }, merged);
         await Assert.That(fixture.Raw()).IsEqualTo(raw);
     }
 

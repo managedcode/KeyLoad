@@ -98,35 +98,10 @@ public sealed partial class SearchEngine
             ? PreparedSimilarity.Create(vector.AsMemory(), request.Space!.Metric) : null;
         FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
-        return database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>
-        {
-            if (request.Text is not null)
-            {
-                database.Authorization.RequireFieldUse(principal, resource, request.TextField!);
-            }
-            if (similarity is not null)
-            {
-                database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);
-                database.Authorization.RequireFieldUse(principal, resource, request.VectorField!);
-            }
-            if (eligibility.IsEmpty)
-            {
-                return [];
-            }
-            budget.Check();
-            var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
-            if (request.Text is not null)
-            {
-                fusion.AddBranch(FilteredSearchBranch.Apply(
-                    SearchBranchExecution.RankText(database, textProjection, view, principal, resource, request, budget, execution),
-                    eligibility, budget), request.TextWeight, SearchBranchKind.Text);
-            }
-            if (similarity is not null)
-            {
-                fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility), request.VectorWeight, SearchBranchKind.Vector);
-            }
-            return SearchBranchExecution.ProjectSelected(database, view, principal, resource, fusion.Select(), budget, fusion);
-        });
+        var original = database.WithQueryView(principalId, request.Partition, request.Collection,
+            (view, principal, resource) => SearchCapturedExecution.Start(database, textProjection, view,
+                principal, resource, request, budget, execution, similarity, eligibility));
+        return SearchCapturedExecution.Complete(database, original, request, budget, similarity, eligibility);
     }
 
     /// <summary>Computes the selected vector metric using the same SIMD and scalar grouping as search.</summary>

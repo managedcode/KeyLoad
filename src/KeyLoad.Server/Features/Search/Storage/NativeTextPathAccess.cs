@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
+internal sealed class NativeTextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
 {
     private readonly Lock gate = new();
 
@@ -49,7 +49,7 @@ internal sealed class NativeTextPathAccess(string root, string leaf, Guid source
     {
         lock (gate)
         {
-            NativeTextFiles.TrackNativePath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions);
+            NativeTextFiles.TrackNativePath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions, resources: resources);
         }
     }
 

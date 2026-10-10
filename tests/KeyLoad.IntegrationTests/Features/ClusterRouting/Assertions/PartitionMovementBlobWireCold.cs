@@ -22,11 +22,14 @@ internal sealed record PartitionMovementBlobWireCold(PartitionMovementBlobWireNa
             {
                 var cut = PartitionMovementBlobWireNativeCut.Read(node);
                 var limit = node.Application.Services.GetRequiredService<ServerRuntimeOptions>().Core.DatabaseLimits.Value.MaxScanRecords;
-                if (cut.Applied > limit) { throw new InvalidOperationException("The complete original cold journal exceeded its native record budget."); }
+                if (cut.Applied > limit)
+                { throw new InvalidOperationException("The complete original cold journal exceeded its native record budget."); }
                 var entries = new List<ReplicaEntry>();
                 for (var entry = FirstEntry; entry <= cut.Applied; entry++)
-                { entries.Add(node.Partition.Materializer.Log.ReadEntry(entry)
-                    ?? throw new InvalidOperationException("The original cold journal was missing or compacted.")); }
+                {
+                    entries.Add(node.Partition.Materializer.Log.ReadEntry(entry)
+                    ?? throw new InvalidOperationException("The original cold journal was missing or compacted."));
+                }
                 cuts.Add(new(cut, entries.ToArray()));
             }, failures);
             await ServerFailureObserver.ObserveAsync(() => node.DisposeAsync().AsTask(), failures);
@@ -40,7 +43,9 @@ internal sealed record PartitionMovementBlobWireCold(PartitionMovementBlobWireNa
     {
         await Assert.That(after.Length).IsEqualTo(before.Length);
         for (var index = FirstOwner; index < after.Length; index++)
-        { await PartitionMovementBlobWireNativeCut.RequireEntriesAsync(before[index].Cut, after[index].Cut,
-            after[index].Entries.Where(entry => entry.Index > before[index].Cut.Applied).ToArray()); }
+        {
+            await PartitionMovementBlobWireNativeCut.RequireEntriesAsync(before[index].Cut, after[index].Cut,
+            after[index].Entries.Where(entry => entry.Index > before[index].Cut.Applied).ToArray());
+        }
     }
 }

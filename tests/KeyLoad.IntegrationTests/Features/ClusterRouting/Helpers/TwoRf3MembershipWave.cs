@@ -28,6 +28,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal int? movementMaxFrameBytes;
     internal RequestCqrsProbeFixture? queryControls;
     internal MovementFrameObservationFixture? frameObservation;
+    internal bool nativeDiscoveryOmissionSelected;
+    internal KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
@@ -66,6 +68,11 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
+
+    internal static Task<TwoRf3MembershipWave> StartNativeCapabilityOmissionAsync(CancellationToken token)
+        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
+            probe: true, protectedDocument: true)
+        { nativeDiscoveryOmissionSelected = true }, token);
 
     internal static Task<TwoRf3MembershipWave> StartActivationIsolationAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
@@ -139,6 +146,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         }
         if (applicationDisposed && nodeLocksReleased && frameObservation is { } joinedFrames)
         { ServerFailureObserver.Observe(() => joinedFrames.DeleteAfterOwnerJoin(this), failures); }
+        if (applicationDisposed && nodeLocksReleased && nativeDiscoveryOmission is { } joinedDiscovery)
+        { await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false); }
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;

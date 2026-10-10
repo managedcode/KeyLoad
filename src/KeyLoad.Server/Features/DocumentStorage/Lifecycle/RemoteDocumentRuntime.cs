@@ -1,5 +1,5 @@
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Orleans;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.QueryExecution;
 
@@ -20,6 +20,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     internal IRemoteBlobReadRouter? BlobRouter { get; private set; }
     internal IControlledDocumentCommandRouter? CommandRouter { get; private set; }
     internal IRemotePartitionQueryRouter? QueryRouter { get; private set; }
+    internal IRemoteDistributedSearchRouter? DistributedSearchRouter { get; private set; }
     internal RemoteDocumentEndpoint? Endpoint { get; private set; }
 
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
@@ -63,7 +64,11 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
                 new ControlledBlobSourceRead(node, partition, options.Node, options.Core.DatabaseLimits, client, clock), clock);
             }
             if (settings.RemotePartitionQueries)
-            { QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock); }
+            {
+                QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock);
+                DistributedSearchRouter = new RemoteDistributedSearchRouter(node, partition, options.Node,
+                    options.Core.QueryExecution, client, work, clock);
+            }
         }
         else
         {

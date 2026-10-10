@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.Orleans;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -69,25 +69,33 @@ internal sealed class PartitionMovementBlobWireTrial : IAsyncDisposable
     private async Task DisposeCoreAsync()
     {
         var cleanup = new List<Exception>();
-        if (producer is { } tracked) { owners.TrackProducer(tracked); }
+        if (producer is { } tracked)
+        { owners.TrackProducer(tracked); }
         await ServerFailureObserver.ObserveAsync(owners.StopAsync, cleanup);
-        if (producer is { } original) { await ServerFailureObserver.ObserveAsync(() => owners.JoinProducerAsync(original), cleanup); }
+        if (producer is { } original)
+        { await ServerFailureObserver.ObserveAsync(() => owners.JoinProducerAsync(original), cleanup); }
         if (producer is { IsCompleted: false })
         { cleanup.Add(new InvalidOperationException("The original native blob producer has not joined; retain its callers and roots.")); }
         else
         {
             if (callers is not null)
             {
-                try { await callers.DisposeAsync(); }
+                try
+                { await callers.DisposeAsync(); }
                 catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
                 catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
             }
-            try { observer.Dispose(); } catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
+            try
+            { observer.Dispose(); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
         }
-        if (failures.Count != NoFailures || cleanup.Count != NoFailures) { owners.RetainRoots(); }
-        try { await owners.DisposeAsync(); } catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
+        if (failures.Count != NoFailures || cleanup.Count != NoFailures)
+        { owners.RetainRoots(); }
+        try
+        { await owners.DisposeAsync(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { cleanup.Add(error); }
         failures.AddRange(cleanup);
     }
 }

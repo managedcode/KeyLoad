@@ -14,7 +14,8 @@ internal sealed class SampleChunkSnapshotCountingStream(int maximumBytes) : Stre
     public override void Write(ReadOnlySpan<byte> buffer)
     {
         var next = checked(length + buffer.Length);
-        if (next > maximumBytes) { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
+        if (next > maximumBytes)
+        { throw new InvalidOperationException(SampleChunkCrashContract.Invalid); }
         length = next;
     }
     public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();

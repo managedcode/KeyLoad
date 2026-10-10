@@ -58,11 +58,11 @@ internal sealed class PartitionStores : IDisposable
 
     private static ZoneTreeStoreOptions StoreOptions(NodeOptions options, string directory,
         Action<CommitStage, long, int>? observer = null) => new(directory)
-    {
-        Incarnation = options.Incarnation,
-        SigningKey = Convert.FromBase64String(options.SigningKey),
-        FaultObserver = observer
-    };
+        {
+            Incarnation = options.Incarnation,
+            SigningKey = Convert.FromBase64String(options.SigningKey),
+            FaultObserver = observer
+        };
 
     public void Dispose()
     {

@@ -19,6 +19,13 @@ internal static class SearchBranchExecution
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
             execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+        return RankTextPrepared(database, textProjection, view, principal, resource, request, budget, ranker);
+    }
+
+    internal static SearchScore[] RankTextPrepared(DatabaseEngine database, ITextProjection? textProjection,
+        IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
+        ReadExecutionBudget budget, TextRanker ranker)
+    {
         if (!ranker.HasTerms && request.TextIndex is null)
         {
             return ranker.Rank();
@@ -27,14 +34,7 @@ internal static class SearchBranchExecution
         Exception? primaryFailure = null;
         try
         {
-            if (lease is not null)
-            {
-                ranker.AttachProjection(lease);
-            }
-            database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget, ranker.Visit);
-            var scores = ranker.Rank();
-            VerifyProjectionCandidates(lease, ranker.Terms, scores, budget);
-            return scores;
+            return RankTextCaptured(database, view, principal, request, budget, ranker, lease);
         }
         catch (Exception error)
         {
@@ -45,6 +45,27 @@ internal static class SearchBranchExecution
         {
             TextProjectionLifecycle.Dispose(lease, primaryFailure);
         }
+    }
+
+    internal static SearchScore[] RankTextCaptured(DatabaseEngine database, IKeyValueView captured,
+        PrincipalRecord principal, SearchRequest request, ReadExecutionBudget budget,
+        QueryExecutionOptions execution, ITextProjectionLease? original)
+    {
+        var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
+            execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+        return RankTextCaptured(database, captured, principal, request, budget, ranker, original);
+    }
+
+    internal static SearchScore[] RankTextCaptured(DatabaseEngine database, IKeyValueView captured,
+        PrincipalRecord principal, SearchRequest request, ReadExecutionBudget budget,
+        TextRanker ranker, ITextProjectionLease? original)
+    {
+        if (original is not null)
+        { ranker.AttachProjection(original); }
+        database.VisitVisibleDocuments(captured, principal, request.Partition, request.Collection, budget, ranker.Visit);
+        var scores = ranker.Rank();
+        VerifyProjectionCandidates(original, ranker.Terms, scores, budget);
+        return scores;
     }
 
     internal static RankedDocument[] ProjectSelected(DatabaseEngine database, IKeyValueView view,

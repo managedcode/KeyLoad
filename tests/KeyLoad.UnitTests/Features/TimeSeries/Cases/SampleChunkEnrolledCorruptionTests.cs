@@ -16,7 +16,8 @@ internal sealed class SampleChunkEnrolledCorruptionTests
     public async Task AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(SampleChunkCorruptionCut cut)
     {
         using var fixture = new SampleChunkCanonicalFixture();
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             fixture.WindowId, SampleChunkCanonicalFixture.AppendedRevision));
         var originalId = Guid.NewGuid();

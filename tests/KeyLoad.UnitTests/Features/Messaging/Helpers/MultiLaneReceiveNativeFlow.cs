@@ -15,6 +15,8 @@ internal static class MultiLaneReceiveNativeFlow
     internal static async Task<GrainOperationReply> InvokeAsync<T>(RequestCqrsClusterFixture fixture,
         OperationKind kind, Guid commandId, T request, string principalId, CancellationToken token)
     {
+        var capture = MultiLaneReceiveFailureObservation.Get(fixture);
+        var originalCount = capture.Count;
         var principal = GrainRequestAuthority.Reload(fixture.Database.Database, principalId,
             fixture.Database.Database.EvaluationClock);
         var actor = Guid.NewGuid();
@@ -22,12 +24,14 @@ internal static class MultiLaneReceiveNativeFlow
             NativeSerialization.Serialize(request));
         using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
             actor, commandId, token, connectionId: fixture.ConnectionId);
-        return await GrainRequestStreamConsumer.DrainAsync(
+        var reply = await GrainRequestStreamConsumer.DrainAsync(
             createStream: cancellation => fixture.Cluster.Client.GetGrain<IConnectionGrain>(fixture.ConnectionId)
                 .ExecuteStreamAsync(signed, cancellation),
             serializer: fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId: actor, clock: fixture.Database.Database.EvaluationClock,
             options: fixture.RoutingOptions, cancellationToken: token);
+        capture.SetSummary(originalCount, reply, fixture.RoutingOptions.Value.MaximumDetailCharacters);
+        return reply;
     }
 
     internal static MultiLaneReceiveResult Value(GrainOperationReply reply)

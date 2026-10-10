@@ -32,3 +32,8 @@ Related: `REQ-DSTORE-001/AC-DSTORE-001`, `REQ-DSTORE-004/AC-DSTORE-004`, `REQ-EV
 5. Qualify exact source through GitHub unit, process-recovery, and three-node SDK/MCP tests before claiming atomic cluster movement.
 
 Current identity types and checks are in `src/KeyLoad.Abstractions/Contracts.cs`, `src/KeyLoad.Core/DatabaseEngine.cs`, and `PartitionRef`; `TransactionTests.SameLiteralPartitionKeyCannotCrossTransactionDomains` is existing source evidence. Current delivered-source qualification remains pending.
+
+
+### TASK-KL086-ENQUEUE-COLD-WHOLE-001 supporting operation contract
+
+Under REQ-MSG-001/005 and AC-MSG-001/005, use only existing native DatabaseEngine batch/configure/receive/delivery interfaces and the original same-directory ZoneTree owner. No format/API/routing/migration boundary changes: Core Enqueue already stages QB/QM/ready-or-scheduled/counters atomically. Private tests own only their fresh fixture roots and join each handle before reopen; current persisted authorization is reloaded by real admission. Preserve original failed command outcomes and immutable receipt identity, separate business-image equality from native failure metadata, then prove authorized healthy continuation and cold full lane state. Existing required Unit/scalar/process/RF3 gates are unchanged. Rollback removes only this additive regression/traceability; root owns integration and execution.

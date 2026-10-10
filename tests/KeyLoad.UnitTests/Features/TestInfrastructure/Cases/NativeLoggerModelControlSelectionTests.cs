@@ -39,12 +39,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
     private const string ImageRepository = "ghcr.io/managedcode/keyload";
     private const string ImageTag = "current";
     private const string ImageDigest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string HttpEndpointName = "http";
-    private const string SiloEndpointName = "silo";
-    private const string SiloScheme = "tcp";
     private const string DataMountTarget = "/data";
-    private const int HttpTargetPort = 8080;
-    private const int SiloTargetPort = 11111;
     private const int IdentityParameterCount = 4;
     private const string SuiteSetting = "KeyLoadTests:Suite";
     private const string UnitSuite = "unit";
@@ -125,7 +120,7 @@ internal sealed class NativeLoggerModelControlSelectionTests
         await Assert.That(mount.IsReadOnly).IsFalse();
         await Assert.That(Directory.Exists(mount.Source)).IsTrue();
         await VerifyImageAsync(node);
-        await VerifyEndpointsAsync(node);
+        await NativeLoggerModelEndpointAssertions.VerifyAsync(node);
     }
 
     private static async Task VerifyImageAsync(ContainerResource node)
@@ -136,22 +131,6 @@ internal sealed class NativeLoggerModelControlSelectionTests
         await Assert.That(image.SHA256).IsEqualTo(ImageDigest);
         await Assert.That(node.TryGetContainerImageName(out var actual)).IsTrue();
         await Assert.That(actual).IsEqualTo(ImageRepository + ImageDigestMarker + ImageDigest);
-    }
-
-    private static async Task VerifyEndpointsAsync(ContainerResource node)
-    {
-        var endpoints = node.Annotations.OfType<EndpointAnnotation>().ToArray();
-        await Assert.That(endpoints.Select(endpoint => endpoint.Name).ToArray())
-            .IsEquivalentTo([HttpEndpointName, SiloEndpointName], CollectionOrdering.Matching);
-        var http = endpoints.Single(endpoint => endpoint.Name == HttpEndpointName);
-        await Assert.That(http.Port).IsEqualTo(HttpTargetPort);
-        await Assert.That(http.TargetPort).IsEqualTo(HttpTargetPort);
-        await Assert.That(http.IsProxied).IsFalse();
-        var silo = endpoints.Single(endpoint => endpoint.Name == SiloEndpointName);
-        await Assert.That(silo.UriScheme).IsEqualTo(SiloScheme);
-        await Assert.That(silo.TargetPort).IsEqualTo(SiloTargetPort);
-        await Assert.That(silo.IsExternal).IsFalse();
-        await Assert.That(silo.IsProxied).IsFalse();
     }
 
     private static (string Name, string[] Arguments, bool IncludeImage, string ExpectedMessage)[] RejectedSelections()

@@ -13,7 +13,7 @@ internal static class NativeTextIncrementalCheckpointSettlement
     internal static NativeTextIncrementalManifest Complete(string generationPath, NativeTextIncrementalIntent intent,
         NativeTextIncrementalManifest manifest, ProjectionBatchResult acknowledged,
         NativeTextSeedCapture fresh, ReadExecutionBudget budget,
-        IOptions<NativeTextExecutionOptions> options, Action<NativeTextFaultStage>? observer = null)
+        IOptions<NativeTextExecutionOptions> options, Action<NativeTextFaultStage>? observer = null, NativeTextResourceOwnership? resources = null)
     {
         budget.Check();
         var receipt = acknowledged.Receipt;
@@ -47,10 +47,14 @@ internal static class NativeTextIncrementalCheckpointSettlement
         {
             completed = manifest with { Bootstrap = false };
             NativeTextIncrementalMetadata.Publish(generationPath, completed,
-                options.Value.MaximumDiskBytes, budget, options);
+                options.Value.MaximumDiskBytes, budget, options, resources);
         }
         budget.Check();
-        File.Delete(Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile));
+        var retiredIntent = Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile);
+        if (resources is null)
+        { File.Delete(retiredIntent); }
+        else
+        { resources.DeleteOwnedFile(retiredIntent, () => File.Delete(retiredIntent)); }
         observer?.Invoke(NativeTextFaultStage.PendingIntentRetired);
         budget.Check();
         return completed;

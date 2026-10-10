@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Options;
-using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Server.Features.BlobStorage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
 
@@ -15,9 +15,11 @@ internal sealed class ControlledDocumentCommandFlow(PartitionHost partition,
         ReadExecutionBudget originalWork, CancellationToken cancellationToken)
     {
         if (context.OriginalOutcome is { } retained)
-        { return BlobStorageOperations.Handles(original.Kind)
+        {
+            return BlobStorageOperations.Handles(original.Kind)
             ? await ObserveBlobAsync(original, requestExpiry, originalWork, cancellationToken).ConfigureAwait(false)
-            : retained; }
+            : retained;
+        }
         var admission = context.Admission;
         if (admission is null)
         {

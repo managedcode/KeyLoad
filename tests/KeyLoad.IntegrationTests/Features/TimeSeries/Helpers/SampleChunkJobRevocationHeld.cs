@@ -25,8 +25,11 @@ internal static class SampleChunkJobRevocationHeld
             var held = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.AuthorizationReload,
                 RequestCqrsProbeOutcome.Observed, discovery, token).ConfigureAwait(false);
             await Assert.That(held.CommandId).IsEqualTo(command);
-            var revoked = scenario.Creator with { Grants = [],
-                PolicyEpoch = scenario.Creator.PolicyEpoch + SampleChunkJobRevocationProtocol.NextPolicy };
+            var revoked = scenario.Creator with
+            {
+                Grants = [],
+                PolicyEpoch = scenario.Creator.PolicyEpoch + SampleChunkJobRevocationProtocol.NextPolicy
+            };
             var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
                 Guid.NewGuid(), revoked, token).ConfigureAwait(false));
             await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(actual)))
@@ -37,8 +40,11 @@ internal static class SampleChunkJobRevocationHeld
                 controls, discovery, arm, command, held, token).ConfigureAwait(false);
             await controls.RetireArmAsync(arm, token).ConfigureAwait(false);
             await SampleChunkJobRevocationAssertions.UnchangedAsync(scenario, administrator, token);
-            var restored = scenario.Creator with { PolicyEpoch = actual.PolicyEpoch
-                + SampleChunkJobRevocationProtocol.NextPolicy };
+            var restored = scenario.Creator with
+            {
+                PolicyEpoch = actual.PolicyEpoch
+                + SampleChunkJobRevocationProtocol.NextPolicy
+            };
             await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
                 Guid.NewGuid(), restored, token).ConfigureAwait(false));
             var merged = await scenario.Window.WaitForActualMergeAsync(administrator, token).ConfigureAwait(false);
@@ -56,10 +62,12 @@ internal static class SampleChunkJobRevocationHeld
         IReadOnlyList<KeyLoad.Orleans.ReplicaSiloDiscovery> discovery, Exception? primary,
         CancellationToken token)
     {
-        try { await controls.ReleaseOpenArmsAsync(discovery, token).ConfigureAwait(false); }
+        try
+        { await controls.ReleaseOpenArmsAsync(discovery, token).ConfigureAwait(false); }
         catch (Exception cleanup)
         {
-            if (primary is not null) { throw new AggregateException(primary, cleanup); }
+            if (primary is not null)
+            { throw new AggregateException(primary, cleanup); }
             throw;
         }
     }
@@ -70,8 +78,10 @@ internal static class SampleChunkJobRevocationHeld
         var result = new List<KeyLoad.Orleans.ReplicaSiloDiscovery>();
         foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
             RequestCqrsRf3Protocol.Node3 })
-        { result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
-            node, wave.Profile, token).ConfigureAwait(false)); }
+        {
+            result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
+            node, wave.Profile, token).ConfigureAwait(false));
+        }
         return result;
     }
 }

@@ -222,3 +222,7 @@ flowchart LR
   Scan --> Join[Dispose native iterator then lease slot]
   Join --> Stop[Joined store shutdown]
 ```
+
+
+### TASK-KL039-PUBLIC-RETAINED-READER Storage ownership
+Original REQ/AC-CUT-001..004 additionally map to the exact [public retained-reader flow](../Search/OnlineGenerationLifetime.md#task-kl039-public-retained-reader-finite-original-public-reader-overlap) under ADR-097/095/125. ZoneTreeReadCutLease adds internal point lookup and borrowed callback visitation only while its original native traversal is active; existing copied VisitPrefix callers remain unchanged. Storage-owned bounded captured scopes distinguish actual absence from unadmitted keys and admit every owned key/value/capacity before copying. The fully owned read-only closure may outlive its joined snapshot; no live view/native snapshot remains after slot release. Its same selected FTS reader remains independently leased through the real caller operation. Original one-snapshot/default budget/deadline/format and node-local ownership remain exact. This is a runtime-only adapter, no migration/public API or production readiness claim.

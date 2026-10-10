@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 
 internal static class ClusterBackupOwnerArchive
 {
-    private const string DirectoryName = "cluster-backups";
+    internal const string DirectoryName = "cluster-backups";
     private const string GuidFormat = "N";
     private const string InvalidArchive = "The retained cluster owner archive does not match its native capture identity.";
 

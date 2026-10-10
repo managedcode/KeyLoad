@@ -36,7 +36,8 @@ internal static class SampleChunkStorage
                 windows.Add(window);
                 return true;
             }, observer: charge.Charge);
-        if (scan.HasMore) { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
+        if (scan.HasMore)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted); }
         var active = windows.Where(window => window.State != SampleChunkWindowState.Dropped)
             .OrderBy(window => window.FromUtcTicks).ToArray();
         for (var index = SampleChunkLifecycleProtocol.FirstIndex + SampleChunkLifecycleProtocol.First;

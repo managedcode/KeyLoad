@@ -21,19 +21,26 @@ internal static class NativeTextFileIO
         return NativeTextEnvelopeCodec.Decode<T>(File.ReadAllBytes(path));
     }
 
-    internal static void WriteEnvelope<T>(string path, T value, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void WriteEnvelope<T>(string path, T value, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions,
+        NativeTextResourceOwnership? resources = null)
     {
         var bytes = NativeTextEnvelopeCodec.Encode(value);
-        WriteEncodedEnvelope(path, bytes, maximumBytes, executionOptions: executionOptions);
+        WriteEncodedEnvelope(path, bytes, maximumBytes, executionOptions: executionOptions, resources: resources);
     }
 
-    internal static void WriteEncodedEnvelope(string path, byte[] bytes, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void WriteEncodedEnvelope(string path, byte[] bytes, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions,
+        NativeTextResourceOwnership? resources = null)
     {
         const int LongLengthEmptyCount = 0;
 
         if (bytes.LongLength is <= LongLengthEmptyCount || bytes.LongLength > maximumBytes)
         {
             throw NativeTextErrors.BoundExceeded();
+        }
+        if (resources is not null)
+        {
+            NativeTextBoundedEnvelopeWriter.Write(path, bytes, resources, executionOptions);
+            return;
         }
         using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             executionOptions.Value.FileBufferBytes, FileOptions.WriteThrough);

@@ -49,6 +49,8 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<AstQueryRequest, QueryPage>(McpToolNames.QueryAst, McpToolRoutes.QueryAst, GrainReadKind.AstQuery),
         McpOperationFactory.Read<PartitionQueryRequestV1, PartitionQueryPageV1>(McpToolNames.QueryPartitions,
             McpToolRoutes.QueryPartitions, GrainReadKind.PartitionQuery),
+        McpOperationFactory.Read<DistributedSearchRequestV1, DistributedSearchPageV1>(DistributedSearchProtocol.Tool,
+            DistributedSearchProtocol.Route, GrainReadKind.DistributedSearch),
         McpOperationFactory.Read<QueryCapabilityManifest>(McpToolNames.QueryCapabilities, McpToolRoutes.QueryCapabilities, GrainReadKind.QueryCapabilities),
         McpOperationFactory.Read<ReadChangeFeedRequest, ChangeFeedPage>(McpToolNames.ChangesRead, McpToolRoutes.ChangesRead, GrainReadKind.ChangeFeed),
         McpOperationFactory.Read<StartLiveQueryRequest, LiveQuerySnapshot>(McpToolNames.QueryLiveStart, McpToolRoutes.QueryLiveStart, GrainReadKind.LiveQueryStart),

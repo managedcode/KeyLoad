@@ -45,12 +45,17 @@ internal static class McpMutationTestData
     private const string CancelScheduleKind = "cancelRecurringSchedule";
     private const string CompareExchangeSagaKind = "compareExchangeSaga";
     private const string ExpireSagaKind = "expireSaga";
+    private const string OpenChunkKind = "openSampleChunkWindow";
+    private const string SealChunkKind = "sealSampleChunkWindow";
+    private const string MergeChunkKind = "mergeSampleChunkWindow";
+    private const string DropChunkKind = "dropSampleChunkWindow";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
          EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
-         ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind];
+         ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind,
+         OpenChunkKind, SealChunkKind, MergeChunkKind, DropChunkKind];
 
     internal static ImmutableArray<Mutation> Create() =>
     [
@@ -84,7 +89,15 @@ internal static class McpMutationTestData
             DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1), 0),
         new DropSampleRollup(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1), Revision),
-        .. McpDerivedMutationTestData.Create()
+        .. McpDerivedMutationTestData.Create(),
+        new OpenSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            McpCanonicalTestData.StableId, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1)),
+        new SealSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            McpCanonicalTestData.StableId, Revision),
+        new MergeSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            McpCanonicalTestData.StableId, Revision),
+        new DropSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            McpCanonicalTestData.StableId, Revision)
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);

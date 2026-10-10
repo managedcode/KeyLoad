@@ -46,7 +46,8 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => RemoveOwnedLink(link, fixture.ExistingDestination), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        if (ancestor) { Directory.CreateDirectory(link); }
+        if (ancestor)
+        { Directory.CreateDirectory(link); }
         var healthy = await CliBackupRestoreProcess.RunAsync(options,
             [RestoreCommand, fixture.BackupDirectory, destination], cancellationToken).ConfigureAwait(false);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(healthy).ConfigureAwait(false);

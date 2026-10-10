@@ -1,9 +1,9 @@
-using KeyLoad.Orleans;
 using System.Security.Cryptography;
 using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.Orleans;
 using KeyLoad.Server;
 using ManagedCode.Communication;
 using ModelContextProtocol.Client;
@@ -25,13 +25,17 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
     internal PartitionMovementBlobWireCallers(PartitionMovementLateNativeSettings settings)
     {
         source = PartitionMovementLateNativeHttp.Create(new(settings.Origin(FirstOwner)));
-        try { target = PartitionMovementLateNativeHttp.Create(new(settings.Origin(PartitionMovementLateNativeSettings.GroupSize))); }
+        try
+        { target = PartitionMovementLateNativeHttp.Create(new(settings.Origin(PartitionMovementLateNativeSettings.GroupSize))); }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            try { source.Dispose(); } catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+            try
+            { source.Dispose(); }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
             catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-            ServerFailureObserver.ThrowIfAny(failures); throw;
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
         }
     }
 
@@ -52,12 +56,13 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
         transport = new(new HttpClientTransportOptions
         {
             Endpoint = new Uri(source.Client.BaseAddress!, McpCallerProtocol.Endpoint),
-            TransportMode = HttpTransportMode.StreamableHttp, EnableStandaloneGetStream = false,
+            TransportMode = HttpTransportMode.StreamableHttp,
+            EnableStandaloneGetStream = false,
             AdditionalHeaders = new Dictionary<string, string>(StringComparer.Ordinal)
             { [McpCallerProtocol.AuthorizationHeader] = McpCallerProtocol.BearerPrefix + credential }
         }, source.Client);
         official = await McpClient.CreateAsync(transport, new McpClientOptions
-            { ProtocolVersion = McpCallerProtocol.ProtocolVersion }, cancellationToken: token);
+        { ProtocolVersion = McpCallerProtocol.ProtocolVersion }, cancellationToken: token);
     }
 
     internal async Task RequireAsync<TRequest, TResult>(PartitionRef partition, string tool, TRequest request,
@@ -76,17 +81,23 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        if (official is { } client) { await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures); }
+        if (official is { } client)
+        { await ServerFailureObserver.ObserveAsync(() => client.DisposeAsync().AsTask(), failures); }
         if (transport is not null)
         {
-            try { await transport.DisposeAsync(); }
+            try
+            { await transport.DisposeAsync(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
-        try { target.Dispose(); } catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try { source.Dispose(); } catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        try
+        { target.Dispose(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        try
+        { source.Dispose(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

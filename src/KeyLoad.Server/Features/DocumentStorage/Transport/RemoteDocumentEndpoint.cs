@@ -1,6 +1,6 @@
-using KeyLoad.Server.Features.BlobStorage;
 using System.Globalization;
 using KeyLoad.Orleans;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -122,7 +122,12 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         RemoteDocumentReplyV1 reply;
         try
         {
-            if (call.QueryLeaf is not null)
+            if (call.SearchLeaf is not null)
+            {
+                var leaf = await receiver.ReadSearchLeafAsync(call, original.Token).ConfigureAwait(false);
+                reply = new(call.RequestId, call.Nonce, null, null, null, receiver.Discovery(), SearchLeaf: leaf);
+            }
+            else if (call.QueryLeaf is not null)
             {
                 var leaf = await receiver.ReadLeafAsync(call, original.Token).ConfigureAwait(false);
                 reply = new(call.RequestId, call.Nonce, null, null, null, receiver.Discovery(), leaf);

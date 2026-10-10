@@ -1,7 +1,7 @@
 using KeyLoad.Orleans;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
-using KeyLoad.Server.Features.BlobStorage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -17,12 +17,15 @@ namespace KeyLoad.Server;
 /// <param name="physicalOwnerWork">Borrowed configured proof work owner, joined before native silo shutdown.</param>
 /// <param name="sealedObserver">Optional explicitly borrowed in-process observation, never execution authority.</param>
 /// <param name="blobWireObserver">Optional fixture-owned signed-byte borrow, joined with the original request.</param>
+/// <param name="discoveryOmission"></param>
 internal sealed partial class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
     ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
     IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
-    IControlledBlobWireBorrowObserver? blobWireObserver = null) : IAsyncDisposable
+    IControlledBlobWireBorrowObserver? blobWireObserver = null,
+    NativeDiscoveryOmissionOwner? discoveryOmission = null) : IAsyncDisposable
 {
+    internal NativeDiscoveryOmissionOwner? DiscoveryOmission => discoveryOmission;
     private NodeOptions Options => nodeOptions.Value;
     private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
     private readonly Lock lifecycle = new();
@@ -50,6 +53,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
+
+    internal Task<KeyLoad.Orleans.ReplicaCohortAdmissionStatus> AcquireCohortAdmissionAsync(CancellationToken token)
+        => RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().AcquireCompatibleCohortAsync(token);
 
     internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
 
@@ -124,7 +130,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.CommandRouter, sealedObserver, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);

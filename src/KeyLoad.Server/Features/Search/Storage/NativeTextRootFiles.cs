@@ -3,7 +3,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextRootFiles
 {
-    internal static void InitializeReceipt(string root, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void InitializeReceipt(string root, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         var path = Path.Combine(root, NativeTextProtocol.RootReceiptFile);
         if (File.Exists(path))
@@ -16,10 +16,10 @@ internal static class NativeTextRootFiles
             throw NativeTextErrors.Ownership();
         }
         NativeTextFileIO.WriteEnvelope(path, new NativeTextOwnerReceipt(NativeTextProtocol.FormatVersion,
-            root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions);
+            root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 
-    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         const int FilesInitialValue = 0;
         const int BytesInitialValue = 0;
@@ -56,7 +56,11 @@ internal static class NativeTextRootFiles
         }
         foreach (var leaf in leaves)
         {
-            Directory.Delete(Path.Combine(root, leaf), recursive: true);
+            var path = Path.Combine(root, leaf);
+            if (resources is null)
+            { Directory.Delete(path, recursive: true); }
+            else
+            { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
         }
     }
 

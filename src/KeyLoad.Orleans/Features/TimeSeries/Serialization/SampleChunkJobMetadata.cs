@@ -13,10 +13,13 @@ internal static class SampleChunkJobMetadata
         { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted); }
         return new ScheduleJobRequest
         {
-            Target = target, JobName = SampleChunkJobProtocol.JobName, DueTime = dueAt,
+            Target = target,
+            JobName = SampleChunkJobProtocol.JobName,
+            DueTime = dueAt,
             Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
             { [SampleChunkJobProtocol.HintKey] = Convert.ToBase64String(NativeSerialization.Serialize(hint)) },
-            TraceParent = string.Empty, TraceState = string.Empty
+            TraceParent = string.Empty,
+            TraceState = string.Empty
         };
     }
 
@@ -30,7 +33,8 @@ internal static class SampleChunkJobMetadata
             || string.IsNullOrEmpty(encoded) || encoded.Length > checked(maximumBytes * MaximumBase64Expansion))
         { throw Errors.Fail(ErrorCode.Validation, SampleChunkJobProtocol.Invalid); }
         byte[] bytes;
-        try { bytes = Convert.FromBase64String(encoded); }
+        try
+        { bytes = Convert.FromBase64String(encoded); }
         catch (FormatException) { throw Errors.Fail(ErrorCode.Validation, SampleChunkJobProtocol.Invalid); }
         if (bytes.Length > maximumBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted); }

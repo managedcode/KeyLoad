@@ -20,23 +20,45 @@ internal sealed class NativeTextProjection : ITextProjection
     private readonly Func<string, ulong> tokenHash;
     private readonly Action<NativeTextFaultStage>? faultObserver;
     private readonly Lock disposeSync = new();
+    private readonly NativeTextResourceOwnership? resources;
 
-    internal NativeTextProjection(string directory, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<NativeTextFaultStage>? faultObserver = null)
+    internal NativeTextProjection(string directory, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<NativeTextFaultStage>? faultObserver = null, NativeTextResourceOwnership? resources = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         executionOptions.Value.Validate();
         this.executionOptions = executionOptions;
+        this.resources = resources;
         ArgumentNullException.ThrowIfNull(limitsOptions);
         limits = limitsOptions.Value;
         limits.Validate();
         state = new(executionOptions: executionOptions);
-        var root = NativeTextFiles.InitializeRoot(directory, sourceNodeId, limits, executionOptions: executionOptions);
+        var root = NativeTextFiles.InitializeRoot(directory, sourceNodeId, limits, executionOptions: executionOptions, resources: resources);
         this.tokenHash = tokenHash ?? NativeTextHash.Sha256;
         this.faultObserver = faultObserver;
-        lifecycle = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions);
+        lifecycle = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
     }
 
     public ITextProjectionLease Acquire(TextProjectionScope scope, ReadExecutionBudget budget)
+    {
+        if (resources is null)
+        { return AcquireNative(scope, budget); }
+        var retained = resources.ReserveLease(budget);
+        try
+        {
+            return new NativeTextResourceProjectionLease(() => AcquireNative(scope, budget), retained);
+        }
+        catch (Exception error)
+        {
+            if (error is AggregateException)
+            { throw; }
+            var failures = new List<Exception> { error };
+            ServerFailureObserver.Observe(retained.CompleteAfterJoinedCleanup, failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    private NativeTextProjectionLease AcquireNative(TextProjectionScope scope, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(scope);
         ArgumentNullException.ThrowIfNull(budget);

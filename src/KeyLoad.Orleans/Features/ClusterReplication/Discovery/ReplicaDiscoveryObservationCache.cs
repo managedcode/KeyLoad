@@ -45,22 +45,25 @@ internal sealed class ReplicaDiscoveryObservationCache
     internal SiloAddress ResolveLocal() => RequireCompatible(ReadLocal());
 
     internal bool TryFresh(string voterId, out ReplicaDiscoveryObservation? observation)
+        => ReadFresh(voterId, out observation) == ReplicaObservationFreshness.Fresh;
+
+    internal ReplicaObservationFreshness ReadFresh(string voterId, out ReplicaDiscoveryObservation? observation)
     {
         observation = null;
         if (!observations.TryGetValue(voterId, out var found))
         {
-            return false;
+            return ReplicaObservationFreshness.Missing;
         }
 
         if (clock.GetElapsedTime(found.ObservedTimestamp) >= configuration.LowerElectionTimeout)
         {
             ((ICollection<KeyValuePair<string, ReplicaDiscoveryObservation>>)observations)
                 .Remove(new(voterId, found));
-            return false;
+            return ReplicaObservationFreshness.Expired;
         }
 
         observation = found;
-        return true;
+        return ReplicaObservationFreshness.Fresh;
     }
 
     internal void Remove(string voterId) => observations.TryRemove(voterId, out _);

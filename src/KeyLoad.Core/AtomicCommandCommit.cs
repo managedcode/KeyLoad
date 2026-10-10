@@ -97,6 +97,7 @@ public sealed partial class DatabaseEngine
         persistOutcome = true;
         long policyEpoch = AtomicCommandCommitInitialSequence;
         BlobOutcomeAuthority? blobAuthority = null;
+        var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
         OperationResult result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
@@ -132,7 +133,7 @@ public sealed partial class DatabaseEngine
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
         persistOutcome = selection.Outcome is null;
-        return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope);
+        return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope, onlineTextAuthority);
     }
 
     private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
@@ -143,13 +144,15 @@ public sealed partial class DatabaseEngine
     private StoredOutcome BuildStoredOutcome(string fingerprint, long policyEpoch, OperationResult result,
         BlobOutcomeAuthority? blobAuthority,
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority,
-        CommandOutcomePartitionScope partitionScope)
+        CommandOutcomePartitionScope partitionScope,
+        global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority)
         => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
         {
             BlobAuthority = result.Error is null ? blobAuthority : null,
             CompositionAuthority = result.Error is null ? compositionAuthority : null,
             ScopeKind = partitionScope.Kind,
-            Partition = partitionScope.Partition
+            Partition = partitionScope.Partition,
+            OnlineTextAuthority = onlineTextAuthority
         };
 
     private OperationResult ReplayCommand(IAtomicTransaction transaction, PrincipalRecord principal,

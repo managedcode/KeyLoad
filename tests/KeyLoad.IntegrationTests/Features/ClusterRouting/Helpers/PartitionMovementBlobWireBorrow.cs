@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.BlobStorage;
+using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -16,7 +16,8 @@ internal sealed class PartitionMovementBlobWireBorrow : IControlledBlobWireBorro
 
     internal void Attach(PartitionMovementLateNativeOwners value)
     {
-        if (owners is not null) { throw new InvalidOperationException("The native wire owner was already attached."); }
+        if (owners is not null)
+        { throw new InvalidOperationException("The native wire owner was already attached."); }
         transport = PartitionMovementLateNativeHttp.Create(new(value.Settings.Origin(PartitionMovementLateNativeSettings.GroupSize)));
         owners = value;
     }
@@ -41,9 +42,11 @@ internal sealed class PartitionMovementBlobWireBorrow : IControlledBlobWireBorro
                 call, bytes, signature, cancellationToken), failures);
             var after = actual.Nodes.Select(PartitionMovementBlobWireNativeCut.Read).ToArray();
             for (var index = FirstVoter; index < actual.Nodes.Count; index++)
-            { var selected = index;
+            {
+                var selected = index;
                 await ServerFailureObserver.ObserveAsync(() => PartitionMovementBlobWireNativeCut.RequireAsync(
-                    actual.Nodes[selected], before[selected], after[selected]), failures); }
+                    actual.Nodes[selected], before[selected], after[selected]), failures);
+            }
             ServerFailureObserver.ThrowIfAny(failures);
         }
         await Assert.That(Convert.ToHexString(SHA256.HashData(envelope.Span))).IsEqualTo(Convert.ToHexString(digest));

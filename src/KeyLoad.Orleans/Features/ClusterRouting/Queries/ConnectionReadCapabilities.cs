@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Query;
+using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Orleans;
@@ -75,12 +76,22 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await remoteQueries.ReadAsync(request.Envelope, principal,
                 GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(request.Payload), cancellationToken).ConfigureAwait(true);
         }
-        return await ReadNativeCapabilityAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+        return await ReadNativeCapabilityAsync(kind, principal, request, requestId, cancellationToken).ConfigureAwait(true);
     }
 
     private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
-        DecodedGrainRequest request, CancellationToken cancellationToken)
+        DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
     {
+        if (kind == GrainReadKind.DistributedSearch)
+        {
+            return await DistributedSearchReadCapability.ExecuteAsync(services, principal, request, requestId,
+                codec, context, cancellationToken).ConfigureAwait(true);
+        }
+        if (kind == GrainReadKind.DistributedSearchLeaf)
+        {
+            return DistributedSearchLeafCapability.Execute(localDatabase, services, runtimeClock,
+                principal, request, cancellationToken);
+        }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
             return RuntimeJournalReadCapabilities.Execute(localDatabase, principal.Id, kind, request.Payload, cancellationToken);
@@ -101,6 +112,9 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
 
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
         {
+            using var observation = codec.HasPhaseObserver
+                ? NativeTextPostingObservation.Enter(token => codec.ObservePhaseAsync(request,
+                    GrainRequestPhase.NativeTextOriginalPostingRead, context, token)) : null;
             return await Query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
         }
 

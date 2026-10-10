@@ -13,7 +13,8 @@ internal static class MultiLaneReceiveExecution
 {
     private const int NoPrecedingOutcomes = 0;
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
-        IGrainFactory grains, IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
+        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
+        IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, CancellationToken token)
     {
@@ -38,7 +39,7 @@ internal static class MultiLaneReceiveExecution
                 outcomes.Add(new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted));
                 continue;
             }
-            var reply = await DispatchAsync(principal, leaf, grains, services, codec, clock,
+            var reply = await DispatchAsync(principal, leaf, executeChild, services, codec, clock,
                 serializer, routing, diagnostics, parent.Envelope.RequestId, token).ConfigureAwait(true);
             var outcome = Outcome(leaf, reply, diagnostics, parent.Envelope.RequestId);
             outcomes.Add(outcome);
@@ -49,7 +50,8 @@ internal static class MultiLaneReceiveExecution
     }
 
     private static async Task<GrainOperationReply> DispatchAsync(PrincipalRecord principal, ReceiveRequest leaf,
-        IGrainFactory grains, IServiceProvider services, GrainRequestCodec codec,
+        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
+        IServiceProvider services, GrainRequestCodec codec,
         TimeProvider clock, Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, Guid parentId, CancellationToken token)
     {
@@ -65,7 +67,7 @@ internal static class MultiLaneReceiveExecution
                 createStream: cancellation =>
                 {
                     invoked = true;
-                    return grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, cancellation);
+                    return executeChild(signed, cancellation);
                 },
                 serializer: serializer, requestId: actorId, clock: clock, options: routing,
                 cancellationToken: token).ConfigureAwait(true);

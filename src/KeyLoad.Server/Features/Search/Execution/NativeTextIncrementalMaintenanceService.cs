@@ -11,6 +11,8 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
     private const long ReleasedSequence = 0;
     private const int ReleasedRecords = 0;
     private readonly DatabaseEngine database;
+    private readonly NativeTextResourceOwnership? resources;
+    private readonly Dictionary<string, NativeTextResourceReservation> generationReservations = new(StringComparer.Ordinal);
     private readonly ServerRuntimeOptions configured;
     private readonly TimeProvider clock;
     private readonly string root;
@@ -26,16 +28,17 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
 
     internal NativeTextIncrementalMaintenanceService(DatabaseEngine database, string directory,
         Guid nodeId, ServerRuntimeOptions configured, TimeProvider clock,
-        Action<NativeTextFaultStage>? faultObserver = null)
+        Action<NativeTextFaultStage>? faultObserver = null, NativeTextResourceOwnership? resources = null)
     {
         this.database = database;
+        this.resources = resources;
         this.configured = configured;
         this.clock = clock;
         this.faultObserver = faultObserver;
         sessions = new(configured.NativeText.Value.MaximumActiveLeases);
         selectedAdmission = new(configured.NativeText.Value.MaximumActiveLeases);
         root = NativeTextIncrementalRoot.Initialize(Path.Combine(directory, NativeTextIncrementalProtocol.RootDirectory),
-            nodeId, configured.NativeText);
+            nodeId, configured.NativeText, resources);
     }
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
@@ -67,7 +70,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         {
             var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             NativeTextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
-                root, sessions, budget, configured.NativeText);
+                root, sessions, budget, configured.NativeText, resources, ReleaseGeneration);
             var released = new TextMaintenanceCapabilityResult(request.SessionId, null,
                 ReleasedSequence, ReleasedSequence, ReleasedRecords, null, null, ReleasedSequence);
             budget.CheckResult(released);
@@ -77,7 +80,7 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         {
             var budget = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
             var actual = NativeTextIncrementalBegin.Capture(database, root, request.SessionId, principal, request.Maintenance,
-                budget, limits.MaxScanRecords, limits.MaxScanRecords, configured.NativeText, faultObserver);
+                budget, limits.MaxScanRecords, limits.MaxScanRecords, configured.NativeText, faultObserver, resources, RetainGeneration);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => sessions.Add(actual), failures);
             if (failures.Count != EmptyFailures)
@@ -154,8 +157,22 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
     {
         database.Authorization.Require(principal, request.Partition, request.Collection, Capability.Query);
         database.Authorization.RequireFieldUse(principal, resource, request.TextField!);
-        return new NativeTextSelectedProjectionLease(selectedAdmission,
-            () => CaptureSelected(view, request, budget), budget, configured.Core.DatabaseLimits);
+        var reservation = resources?.ReserveLease(budget);
+        try
+        {
+            var actual = new NativeTextSelectedProjectionLease(selectedAdmission,
+                () => CaptureSelected(view, request, budget), budget, configured.Core.DatabaseLimits);
+            return reservation is null ? actual : new NativeTextResourceProjectionLease(actual, reservation);
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            // The native lease constructor joins its partial reader before a single original failure escapes.
+            if (primary is not AggregateException && reservation is not null)
+            { ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures); }
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
     }
 
     private (INativeTextSelectedIndexLeaseOwner Slot, NativeTextIncrementalManifest Manifest) CaptureSelected(
@@ -167,12 +184,28 @@ internal sealed class NativeTextIncrementalMaintenanceService : INativeTextMaint
         {
             if (!selectedSlots.TryGetValue(selected.Leaf, out slot!))
             {
-                slot = new(root, selected.Leaf, database.Store.Identity.NodeId, configured.NativeText);
+                slot = new(root, selected.Leaf, database.Store.Identity.NodeId, configured.NativeText, resources);
                 selectedSlots.Add(selected.Leaf, slot);
             }
             selectedWork[request.TextIndex!] = slot;
         }
         return (slot, selected.Manifest);
+    }
+
+    private void RetainGeneration(string leaf, NativeTextResourceReservation original)
+    {
+        // The worker owns this registry; every entry corresponds to prospective or actual retained files.
+        if (!generationReservations.TryAdd(leaf, original))
+        { throw NativeTextErrors.Ownership(); }
+    }
+
+    private void ReleaseGeneration(string leaf)
+    {
+        if (generationReservations.TryGetValue(leaf, out var original))
+        {
+            original.CompleteAfterJoinedCleanup();
+            generationReservations.Remove(leaf);
+        }
     }
 
     public ValueTask DisposeAsync()

@@ -31,7 +31,8 @@ internal static class SampleChunkRetentionRf3ReadOracle
         var call = SqlRf3Protocol.Call(request.Partition, SampleRollupProtocol.ReadTool, request);
         var sql = await SqlRf3Protocol.SdkAsync<SampleRollupResult>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlRf3Protocol.McpAsync<SampleRollupResult>(mcp, call, token).ConfigureAwait(false);
-        foreach (var actual in new[] { direct, official, sql, sqlOfficial }) { await EqualAsync(actual, expected); }
+        foreach (var actual in new[] { direct, official, sql, sqlOfficial })
+        { await EqualAsync(actual, expected); }
     }
 
     internal static async Task RawAsync(KeyLoadClient sdk, McpOfficialClient mcp, ReadSamplesRequest request,
@@ -43,7 +44,8 @@ internal static class SampleChunkRetentionRf3ReadOracle
         var call = SqlRf3Protocol.Call(request.Partition, McpCallerTools.SeriesRead, request);
         var sql = await SqlRf3Protocol.SdkAsync<SampleRecord[]>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlRf3Protocol.McpAsync<SampleRecord[]>(mcp, call, token).ConfigureAwait(false);
-        foreach (var actual in new[] { direct, official, sql, sqlOfficial }) { await EqualAsync(actual, expected); }
+        foreach (var actual in new[] { direct, official, sql, sqlOfficial })
+        { await EqualAsync(actual, expected); }
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)

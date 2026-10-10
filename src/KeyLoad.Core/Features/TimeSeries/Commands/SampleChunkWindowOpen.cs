@@ -42,6 +42,7 @@ internal static class SampleChunkWindowOpen
             checked((int)SampleChunkLifecycleProtocol.First), (_, _) => { found = true; return false; },
             SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, request.From),
             SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.Until), charge.Charge);
-        if (found) { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing); }
+        if (found)
+        { throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing); }
     }
 }

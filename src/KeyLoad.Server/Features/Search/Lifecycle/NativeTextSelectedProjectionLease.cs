@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
+internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease, IOriginalTextPostingObservation
 {
     private readonly INativeTextSelectedIndexLeaseOwner slot;
     private readonly NativeTextSelectedReadLease admission;
@@ -17,6 +17,8 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
     private readonly bool entered;
     private bool completed;
     private bool disposed;
+    private Func<CancellationToken, ValueTask>? postingObservation;
+    private bool postingObserved;
 
     internal NativeTextSelectedProjectionLease(NativeTextSelectedReadAdmission admissionOwner,
         Func<(INativeTextSelectedIndexLeaseOwner Slot, NativeTextIncrementalManifest Manifest)> capture,
@@ -29,7 +31,7 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
             admission = admissionOwner.EnterRead();
             var selected = capture();
             slot = selected.Slot;
-            slot.Enter(budget);
+            slot.Enter(budget, this);
             entered = true;
             byReference = NativeTextSelectedRecordMap.ByReference(selected.Manifest, budget);
             byId = NativeTextSelectedRecordMap.ById(selected.Manifest, budget);
@@ -44,6 +46,25 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
+    }
+
+    public void ObserveOriginalPosting(Func<CancellationToken, ValueTask> callback)
+    {
+        ArgumentNullException.ThrowIfNull(callback);
+        if (disposed || completed || postingObservation is not null)
+        { throw NativeTextErrors.Corrupt(); }
+        postingObservation = callback;
+    }
+
+    private void ObserveOriginalPosting()
+    {
+        var callback = postingObservation;
+        if (callback is null || postingObserved)
+        { return; }
+        postingObserved = true;
+        var failures = new List<Exception>();
+        ServerFailureObserver.ObserveAsync(() => callback(budget.Cancellation).AsTask(), failures).GetAwaiter().GetResult();
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public void BeginRecord(EntityRef reference, long revision)
@@ -101,6 +122,7 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
                     if (!iterator.Next())
                     { return; }
                     slot.ObserveOriginalPostingRead();
+                    ObserveOriginalPosting();
                     budget.Check();
                     budget.Cancellation.ThrowIfCancellationRequested();
                     if (iterator.CurrentKey.Token != token)
@@ -123,9 +145,12 @@ internal sealed class NativeTextSelectedProjectionLease : ITextProjectionLease
         if (disposed)
         { return; }
         disposed = true;
+        postingObservation = null;
         var failures = new List<Exception>();
         if (entered)
-        { ServerFailureObserver.Observe(slot.Exit, failures); }
+        { ServerFailureObserver.Observe(() => slot.Exit(this), failures); }
+        foreach (var failure in failures)
+        { admission?.RetainFailure(failure); }
         try
         { admission?.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }

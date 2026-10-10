@@ -21,7 +21,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var cut = fixture.Database.Store.Position;
         clock.Arm(() => fixture.Database.Store.Position, cut);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(2);
         await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
@@ -46,7 +46,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var position = fixture.Database.Store.Position;
         var retry = new MultiLaneReceiveRequest(Guid.NewGuid(), [request.Requests[0]]);
         var recovered = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, retry);
-        await Assert.That(recovered.Error).IsNull();
+        await Assert.That(recovered.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var expired = MultiLaneReceiveNativeFlow.Value(recovered);
         await Assert.That(expired.RequestId).IsEqualTo(retry.RequestId);
         await Assert.That(expired.Outcomes.Length).IsEqualTo(1);
@@ -86,7 +86,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
         var cut = fixture.Database.Store.Position;
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(2);
         await Assert.That(result.Outcomes[0].Status).IsEqualTo(QueueLaneReceiveStatus.Unknown);
@@ -124,7 +124,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var lane = MultiLaneReceiveNativeFlow.Seed(fixture, 1)[0];
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [new(Guid.NewGuid(), lane)]);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.StopError).IsNull();
         await Assert.That(result.Outcomes.Length).IsEqualTo(1);

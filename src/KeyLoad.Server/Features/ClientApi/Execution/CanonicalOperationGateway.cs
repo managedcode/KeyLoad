@@ -62,7 +62,7 @@ internal static class CanonicalOperationGateway
             return new(requestId, McpBoundedJson.Serialize(value.Value,
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
-        catch (Exception failure) when (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MovePartition
+        catch (Exception failure) when (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition
             && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException)
         {
             GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
@@ -75,6 +75,7 @@ internal static class CanonicalOperationGateway
     {
         OperationKind.MovePartition => PartitionMovePublicProtocol.Interrupted,
         OperationKind.MaintainTextIndex => TextIndexMaintenanceProtocol.Interrupted,
+        OperationKind.MaintainOnlineTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainAnnIndex => AnnMaintenanceProtocol.Interrupted,
         _ => MultiLaneReceiveProtocol.Interrupted
     };

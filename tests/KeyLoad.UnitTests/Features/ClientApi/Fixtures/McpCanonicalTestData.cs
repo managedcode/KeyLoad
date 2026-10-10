@@ -109,6 +109,8 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, Sql))),
         Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
+        Read(McpCatalogExpectations.QueryDistributedSearch,
+            new DistributedSearchRequestV1(ContractVersion, [Partition], new SearchRequest(Partition, Resource))),
         Read(McpCatalogExpectations.QueryAst, Ast()),
         Read(McpCatalogExpectations.ChangesRead, new ReadChangeFeedRequest(Partition, Resource)),
         Read(McpCatalogExpectations.QueryLiveStart, new StartLiveQueryRequest(Ast())),

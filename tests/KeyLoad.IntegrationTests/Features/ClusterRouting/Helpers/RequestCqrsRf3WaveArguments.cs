@@ -25,7 +25,8 @@ internal static class RequestCqrsRf3WaveArguments
             args.Add("--KeyLoadTests:RequestCqrsProbe:Root=" + controls.Root);
             args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
         }
-        if (selection is not null) { args.AddRange(selection.CreateWaveArguments()); }
+        if (selection is not null)
+        { args.AddRange(selection.CreateWaveArguments()); }
         return [.. args];
     }
 

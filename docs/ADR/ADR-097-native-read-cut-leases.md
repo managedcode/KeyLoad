@@ -72,3 +72,7 @@ flowchart TD
   Scan --> Drain[Close admission and join original traversal]
   Drain --> Dispose[Dispose iterator before tree shutdown]
 ```
+
+
+### Bounded read-only frozen lookup under the original one-slot ceiling
+The accepted public retained-reader successor maps original CUT-001..004 to TASK-KL039-PUBLIC-RETAINED-READER in [OnlineGenerationLifetime](../Features/Search/OnlineGenerationLifetime.md). Storage owns internal IScopedReadCapture and ZoneTreeCapturedReadBuilder/View/Lookup, not Query live-view emulation. Complete the admitted canonical lookup/range/metadata closure with original examined-work and separate retained-buffer/capacity admission, join that SAME snapshot before releasing its single slot, then retain the SAME independent selected FTS reader through actual posting/ranking. Public IAtomicStore/IKeyValueView are unchanged; no live view, snapshot iterator, span or missing-key fallback escapes. Scope completion/observed absence are exact, keys use bounded owned sorted lookup, and no unbounded database copy/new quota exists. All original native snapshot cancellation/disposal/InstallSnapshot rules remain mandatory. Source integration/rollback and real positive/denied/cancel/file/cold tests are defined in the linked feature contract; measured heap/resource/runtime gates remain open.

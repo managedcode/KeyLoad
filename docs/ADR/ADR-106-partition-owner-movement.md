@@ -1856,3 +1856,15 @@ flowchart LR
   E --> F[Real B failed Apply and A Observe ACK]
   F --> G[Cold retained failure then Abort and fresh healthy callers]
 ```
+
+
+## Claimed owner bytes RF3 fault, 2026-10-10
+
+TASK-KL036-CLAIMED-OWNER-BYTES-001; REQ/AC-MOVE-PARENT-CLAIMED-CLEANUP-001 and the existing ProducerDisposed cleanup contract under ADR-106.
+REQ-MOVE-PARENT-CLAIMED-BYTES-001: immutable bytes of the genuinely admitted claimed owner remain exact during ordinary snapshot and ProducerDisposed publication. AC-MOVE-PARENT-CLAIMED-BYTES-001: the original real SDK parent reaches its original Issue ACK/Observed Hold; replace ONLY CommandId of that original known arm, keeping ArmId/session/principal/phase/action and every other decoded field unchanged. All six exact node-owned copies use the existing bounded private staging/durable flush writer and atomic rename. Native ordinary CommitArmInventory and cleanup RequireBytes must refuse changed bytes, with original UnknownWriteOutcome/null SDK result and absent ProducerDisposed/Released/Cancelled; no forged marker/claim/result is created.
+
+The existing cleanup matrix whole scenario retains original producer cancellation/join, original failure/UnsettledGates evidence, complete business/native cut assertions, all six resource/reader/18-lock joins and private fault evidence copy. Only after actual stopped ownership restore the exact original bytes atomically, create a genuinely new observer session and RestartJoined over SAME DB roots/current persisted c1 authorization. Run the existing sameMove Abort, fresh full move, original receipt replay, complete linked models and SDK/official MCP/Q1/cold healthy continuation. Never retry/fabricate old failed ProducerDisposed or credit an earlier startup/timeout as this refusal.
+
+Ownership: existing test-only CleanupMatrix case/protocol/producer/fault, one new executable fault helper, existing test FileStore synchronous bounded writer, and append-only PartitionTransfer/ADR106. Append only typed test role4 and repair2; old enum values/Args and the four existing flows remain identical. New ReplaceExactArm operation accepts only known regular arm filenames with exact existing expected bytes, same-length bounded replacement, unchanged file/aggregate/private-mode checks; ordinary no-overwrite writer remains unchanged. No product APIs/hooks/schema/IDs, auth, budgets, timers, limits or source/read/apply semantics change.
+
+Source proof is native RequestCqrsProbeRecords.CommitArmInventory and RequestCqrsProbeCleanupInventory.RequireBytes plus ClaimedCleanup.Read. Existing actual RF3 fixture owns fault/repair, not authority. Root-only current-source compile/discovery/Linux normal/scalar/RF3 artifacts remain pending; no UID/count/PASS/status/selector edit or old CI causal claim. Unknown unfamiliar marker/release negatives and universal future detail bounds remain open separately.

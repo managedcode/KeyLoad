@@ -18,6 +18,8 @@ internal static class SelectedTextProjectionAdmission
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
             return selected.AcquireSelected(view, principal, resource, request, budget);
         }
+        if (provider is ICurrentTextProjection current)
+        { return current.AcquireCurrent(view, principal, resource, request, budget); }
         return provider?.Acquire(TextProjectionLifecycle.CreateScope(database, principal, resource, request), budget);
     }
 }

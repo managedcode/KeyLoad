@@ -16,7 +16,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture f
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(2);
         for (var index = 0; index < 2; index++)
@@ -37,7 +37,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture f
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         var retry = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request with { RequestId = Guid.NewGuid() });
-        await Assert.That(retry.Error).IsNull();
+        await Assert.That(retry.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         await Assert.That(NativeSerialization.Serialize(MultiLaneReceiveNativeFlow.Value(retry).Outcomes)
             .SequenceEqual(NativeSerialization.Serialize(result.Outcomes))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
@@ -48,7 +48,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture f
             var id = Guid.NewGuid();
             var ack = await MultiLaneReceiveNativeFlow.InvokeAsync(fixture, OperationKind.Delivery, id,
                 new DeliveryCommand(id, lanes[index], delivery.Token, DeliveryAction.Ack), "root", default);
-            await Assert.That(ack.Error).IsNull();
+            await Assert.That(ack.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
             await Assert.That(fixture.Database.Database.InspectMessage("root", lanes[index], "message")!.Metadata.State)
                 .IsEqualTo(MessageState.Acked);
         }
@@ -67,7 +67,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture f
         var beforeDenied = NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [.. lanes.Select(lane => new ReceiveRequest(Guid.NewGuid(), lane))]);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request, principal.Id);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(3);
         await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
@@ -143,7 +143,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture f
         var lane = MultiLaneReceiveNativeFlow.Seed(fixture, 1)[0];
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [new(Guid.NewGuid(), lane)]);
         var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull();
+        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveNativeFlow.Value(reply);
         await Assert.That(result.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(result.Outcomes.Length).IsEqualTo(1);

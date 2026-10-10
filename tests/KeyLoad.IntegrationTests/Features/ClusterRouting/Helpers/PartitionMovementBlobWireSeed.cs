@@ -1,6 +1,6 @@
 using System.Globalization;
-using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
 
@@ -28,8 +28,10 @@ internal sealed class PartitionMovementBlobWireSeed(PartitionMovementBlobWireCal
     {
         foreach (var definition in new[] { new ResourceDefinition(Resource, ResourceKind.BlobStore, Partition.TransactionDomainId),
             new ResourceDefinition(DocumentResource, ResourceKind.Collection, Partition.TransactionDomainId) })
-        { _ = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ConfigureResourceAsync(Guid.NewGuid(),
-            new(Partition.TenantId, Partition.DatabaseId, definition), token)); }
+        {
+            _ = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ConfigureResourceAsync(Guid.NewGuid(),
+            new(Partition.TenantId, Partition.DatabaseId, definition), token));
+        }
         var placement = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ReadAtomicPartitionPlacementAsync(new(CurrentProtocol, Partition), token));
         var command = new CommandRequest(Guid.NewGuid(), Partition,
             [new PutDocument(DocumentResource, DocumentId, DocumentJson)], placement.PlacementEpoch);
@@ -58,7 +60,8 @@ internal sealed class PartitionMovementBlobWireSeed(PartitionMovementBlobWireCal
 
     internal async Task RequireAsync(CancellationToken token)
     {
-        foreach (var replay in replays) { await replay(token); }
+        foreach (var replay in replays)
+        { await replay(token); }
         var document = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.GetAsync(new(Partition, DocumentResource, DocumentId), token));
         await Assert.That(document!.Json).IsEqualTo(DocumentJson);
         var bytes = Enumerable.Repeat(Content, Length).ToArray();

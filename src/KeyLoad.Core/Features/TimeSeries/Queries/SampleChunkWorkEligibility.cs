@@ -11,12 +11,14 @@ internal static class SampleChunkWorkEligibility
         budget.Check();
         var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var state = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id), charge);
-        if (state is null) { return null; }
+        if (state is null)
+        { return null; }
         SampleChunkWindowValidation.State(state, id, database.TimeSeriesOptions.Value.MaximumChunkWindowRecords,
             database.TimeSeriesOptions.Value.MaximumChunkCorrections);
         var seal = state.State == SampleChunkWindowState.Open && !state.OpenRecords.IsEmpty && now.UtcTicks >= state.UntilUtcTicks;
         var merge = state.State == SampleChunkWindowState.Sealed && !state.CorrectionSequences.IsEmpty;
-        if (!seal && !merge) { return null; }
+        if (!seal && !merge)
+        { return null; }
         var principal = database.Principal(view, state.CreatorPrincipalId, now);
         database.Authorization.Require(principal, partition, set, Capability.SeriesManage | Capability.SeriesRead);
         _ = database.Resource(view, partition, set, ResourceKind.TimeSeries);

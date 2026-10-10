@@ -17,7 +17,7 @@ internal static class NativeTextIncrementalGenerationFlow
         { throw NativeTextErrors.Corrupt(); }
         RequireRecords(intent, proposed, budget);
         NativeTextIncrementalReplayPreparation.Prepare(actual.Root, actual.Leaf, intent, maximumRecords,
-            maximumChanges, budget, options);
+            maximumChanges, budget, options, actual.Resources);
         var failures = new List<Exception>();
         NativeTextIncrementalManifest? completed = null;
         try
@@ -32,7 +32,7 @@ internal static class NativeTextIncrementalGenerationFlow
                 NativeTextIncrementalValidation.Manifest(completed, proposed.Scope, proposed.Consumer,
                     proposed.Generation, proposed.Placement, maximumRecords, budget, options);
                 NativeTextIncrementalMetadata.Publish(actual.Path, completed,
-                    options.Value.MaximumDiskBytes, budget, options);
+                    options.Value.MaximumDiskBytes, budget, options, actual.Resources);
                 actual.Observe(NativeTextFaultStage.ManifestPublished);
             }, failures);
         }

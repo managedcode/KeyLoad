@@ -5,7 +5,8 @@ internal static class SampleChunkWindowValidation
     internal static void Identity(string series, Guid id)
     {
         JsonData.Identifier(series);
-        if (id == Guid.Empty) { throw Errors.Fail(ErrorCode.Validation, SampleChunkLifecycleProtocol.Invalid); }
+        if (id == Guid.Empty)
+        { throw Errors.Fail(ErrorCode.Validation, SampleChunkLifecycleProtocol.Invalid); }
     }
 
     internal static void State(SampleChunkWindow window, Guid id, int recordLimit, int correctionLimit)

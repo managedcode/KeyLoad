@@ -3,7 +3,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextOwnerFiles
 {
-    internal static void TrackPath(string root, string leaf, Guid sourceNodeId, string path, bool directory, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void TrackPath(string root, string leaf, Guid sourceNodeId, string path, bool directory, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         var generation = Path.Combine(root, leaf);
         var ownerPath = Path.Combine(generation, NativeTextProtocol.OwnerFile);
@@ -26,7 +26,7 @@ internal static class NativeTextOwnerFiles
             .OrderBy(item => item.RelativePath, StringComparer.Ordinal).ToArray();
         NativeTextValidation.ValidateOwnedPaths(paths, executionOptions: executionOptions);
         var pending = Path.Combine(generation, NativeTextProtocol.OwnerPendingFile);
-        NativeTextFileIO.WriteEnvelope(pending, owner with { OwnedPaths = paths }, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions);
+        NativeTextFileIO.WriteEnvelope(pending, owner with { OwnedPaths = paths }, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
         File.Move(pending, ownerPath, true);
     }
 

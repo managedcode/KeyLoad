@@ -13,7 +13,8 @@ internal static class TwoRf3WaveArguments
     private const string ProbeSession = "--KeyLoadTests:RequestCqrsProbe:SessionId=";
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
-        RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null)
+        RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null,
+        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null)
     {
         var args = new List<string>
         {
@@ -40,6 +41,12 @@ internal static class TwoRf3WaveArguments
             args.Add(MovementFrameObservationFixtureProtocol.EnabledArgument);
             args.Add(MovementFrameObservationFixtureProtocol.RootArgument + frameObservation.Root);
             args.Add(MovementFrameObservationFixtureProtocol.SessionArgument + frameObservation.SessionId);
+        }
+        if (nativeDiscoveryOmission is not null)
+        {
+            args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.EnabledArgument);
+            args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.RootArgument + nativeDiscoveryOmission.Root);
+            args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.SessionArgument + nativeDiscoveryOmission.SessionId);
         }
         if (selection is not null)
         {

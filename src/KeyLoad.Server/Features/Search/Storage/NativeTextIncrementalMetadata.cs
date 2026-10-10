@@ -6,7 +6,8 @@ namespace KeyLoad.Server.Features.Search;
 internal static class NativeTextIncrementalMetadata
 {
     internal static void PersistIntent(string generationPath, NativeTextIncrementalIntent intent,
-        long maximumBytes, ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> executionOptions)
+        long maximumBytes, ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> executionOptions,
+        NativeTextResourceOwnership? resources = null)
     {
         budget.Check();
         NativeTextFileIO.VerifyDirectory(generationPath);
@@ -15,8 +16,11 @@ internal static class NativeTextIncrementalMetadata
         if (File.Exists(current) || File.Exists(pending))
         { throw NativeTextErrors.Ownership(); }
         budget.ChargeBytes(NativeSerialization.Measure(intent));
-        NativeTextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions);
-        File.Move(pending, current);
+        NativeTextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions, resources);
+        if (resources is null)
+        { File.Move(pending, current); }
+        else
+        { resources.MutatePhysical(() => File.Move(pending, current), budget); }
         budget.Check();
     }
 
@@ -33,7 +37,8 @@ internal static class NativeTextIncrementalMetadata
     }
 
     internal static void Publish(string generationPath, NativeTextIncrementalManifest manifest,
-        long maximumBytes, ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> executionOptions)
+        long maximumBytes, ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> executionOptions,
+        NativeTextResourceOwnership? resources = null)
     {
         budget.Check();
         NativeTextFileIO.VerifyDirectory(generationPath);
@@ -44,8 +49,11 @@ internal static class NativeTextIncrementalMetadata
         if (File.Exists(current))
         { NativeTextFileIO.VerifyRegularFile(current); }
         budget.ChargeBytes(NativeSerialization.Measure(manifest));
-        NativeTextFileIO.WriteEnvelope(pending, manifest, maximumBytes, executionOptions);
-        File.Move(pending, current, overwrite: true);
+        NativeTextFileIO.WriteEnvelope(pending, manifest, maximumBytes, executionOptions, resources);
+        if (resources is null)
+        { File.Move(pending, current, overwrite: true); }
+        else
+        { resources.MutatePhysical(() => File.Move(pending, current, overwrite: true), budget); }
         budget.Check();
     }
 

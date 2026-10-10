@@ -18,4 +18,9 @@ public sealed partial class GrainRequestCodec
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
         => Issue(GrainRequestCapabilityEnvelopes.RemoteRead(database, clock.GetUtcNow(),
             settings.RequestLifetime, requestId, principalId, GrainReadKind.PartitionQueryLeaf, payload, expiresAt));
+
+    internal string CreateDistributedSearchLeaf(Guid requestId, string principalId,
+        ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
+        => Issue(GrainRequestCapabilityEnvelopes.RemoteRead(database, clock.GetUtcNow(),
+            settings.RequestLifetime, requestId, principalId, GrainReadKind.DistributedSearchLeaf, payload, expiresAt));
 }

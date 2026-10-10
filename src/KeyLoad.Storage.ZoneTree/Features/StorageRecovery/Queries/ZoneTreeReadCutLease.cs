@@ -7,6 +7,8 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeReadCutLease : IDisposable
 {
     private const int ValueMarkerOffset = 0;
+    private const int ExaminedKeyRecordCount = 0;
+    private const int VisitedRecordCount = 1;
 
     private const string InvalidValueHeaderMessage = "A native read-cut contains an invalid value header.";
     private readonly Action<ZoneTreeReadCutLease> release;
@@ -30,6 +32,18 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     internal void CheckAfterCapture() => work.Check(CancellationToken);
 
     internal ZoneTreeReadCutVisitResult VisitPrefix(byte[] prefix, ZoneTreeReadCutVisitor visitor)
+        => VisitPrefix(prefix, visitor, null);
+
+    internal ZoneTreeReadCutVisitResult VisitPrefix(byte[] prefix, ZoneTreeReadCutVisitor visitor,
+        Action<long, int>? admitBeforeCopy)
+        => VisitPrefixCore(prefix, visitor, admitBeforeCopy, true);
+
+    internal ZoneTreeReadCutVisitResult VisitBorrowedPrefix(byte[] prefix, ZoneTreeReadCutVisitor visitor,
+        Action<long, int> admitBeforeCopy)
+        => VisitPrefixCore(prefix, visitor, admitBeforeCopy, false);
+
+    private ZoneTreeReadCutVisitResult VisitPrefixCore(byte[] prefix, ZoneTreeReadCutVisitor visitor,
+        Action<long, int>? admitBeforeCopy, bool copyNativeBytes)
     {
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(visitor);
@@ -39,7 +53,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             work.Check(CancellationToken);
             source.Seek(prefix);
             work.Check(CancellationToken);
-            return Visit(source, prefix, visitor);
+            return Visit(source, prefix, visitor, admitBeforeCopy, copyNativeBytes);
         }
         catch (Exception failure)
         {
@@ -50,6 +64,60 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         {
             state.FinishTraversal();
         }
+    }
+
+    internal bool ReadExact(byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(admitBeforeRead);
+        var source = state.BeginTraversal();
+        try
+        {
+            work.ChargeExaminedKey(key.Length, CancellationToken);
+            admitBeforeRead(key.Length, ExaminedKeyRecordCount);
+            source.Seek(key);
+            work.BeforeAdvance(CancellationToken);
+            var found = source.Next();
+            work.Check(CancellationToken);
+            if (!found)
+            { return false; }
+            if (!source.CurrentKey.Span.SequenceEqual(key))
+            {
+                work.ChargeExaminedKey(source.CurrentKey.Length, CancellationToken);
+                admitBeforeRead(source.CurrentKey.Length, ExaminedKeyRecordCount);
+                return false;
+            }
+            ReadExactValue(source, reader, admitBeforeRead);
+            return true;
+        }
+        catch (Exception failure)
+        {
+            state.RecordOperationFailure(failure);
+            throw;
+        }
+        finally
+        {
+            state.FinishTraversal();
+        }
+    }
+
+    private void ReadExactValue(IZoneTreeIterator<Memory<byte>, Memory<byte>> source,
+        StorageValueReader reader, Action<long, int> admitBeforeRead)
+    {
+        var raw = source.CurrentValue;
+        work.ChargeRecord(source.CurrentKey.Length, raw.Length, CancellationToken);
+        if (raw.IsEmpty || raw.Span[ValueMarkerOffset] != LiveValueMarker)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage); }
+        admitBeforeRead((long)source.CurrentKey.Length + raw.Length, VisitedRecordCount);
+        reader(raw.Span[StorageValueHeaderBytes..]);
+        work.Check(CancellationToken);
+    }
+
+    internal ZoneTreeReadCutVisitResult ObserveSettledWork()
+    {
+        state.EnsureTraversalSettled();
+        return Result(stoppedByVisitor: false);
     }
 
     internal void EnsureDisposalCanJoin() => state.EnsureDisposalCanJoin();
@@ -98,7 +166,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     private void ReleaseSlot() => release(this);
 
     private ZoneTreeReadCutVisitResult Visit(IZoneTreeIterator<Memory<byte>, Memory<byte>> source,
-        byte[] prefix, ZoneTreeReadCutVisitor visitor)
+        byte[] prefix, ZoneTreeReadCutVisitor visitor, Action<long, int>? admitBeforeCopy, bool copyNativeBytes)
     {
         while (true)
         {
@@ -114,6 +182,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             if (!key.Span.StartsWith(prefix))
             {
                 work.ChargeExaminedKey(key.Length, CancellationToken);
+                admitBeforeCopy?.Invoke(key.Length, ExaminedKeyRecordCount);
                 break;
             }
 
@@ -123,10 +192,11 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
             }
+            admitBeforeCopy?.Invoke((long)key.Length + rawValue.Length, VisitedRecordCount);
 
-            var ownedKey = key.ToArray();
-            var ownedValue = rawValue.Span[StorageValueHeaderBytes..].ToArray();
-            var keepGoing = visitor(ownedKey, ownedValue);
+            var keepGoing = copyNativeBytes
+                ? visitor(key.ToArray(), rawValue.Span[StorageValueHeaderBytes..].ToArray())
+                : visitor(key.Span, rawValue.Span[StorageValueHeaderBytes..]);
             work.Check(CancellationToken);
             if (!keepGoing)
             {

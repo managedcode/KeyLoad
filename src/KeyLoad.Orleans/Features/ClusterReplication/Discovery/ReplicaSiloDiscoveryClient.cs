@@ -4,24 +4,35 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Orleans;
 
 /// <summary>Discovers bounded authenticated runtime addresses without using the membership table.</summary>
-/// <param name="configurationOptions">The local voter set, incarnation and cache freshness bound.</param>
-/// <param name="options">The fixed HTTP peer endpoints and cluster signing settings.</param>
-/// <param name="local">The local actual runtime generation used for self-resolution.</param>
-/// <param name="authentication">The shared request/reply and discovery verifier.</param>
-/// <param name="clock">The system clock and monotonic cache timer.</param>
-/// <param name="peerOptions">The centrally validated discovery timing and replay limits.</param>
-public sealed class ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions,
-    IOptions<ReplicaPeerOptions> options, ReplicaSiloDiscoveryState local,
-    ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-    IOptions<PeerDiscoveryOptions> peerOptions) : IDisposable, IAsyncDisposable
+public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
 {
-    private readonly ReplicaCohortDiscovery cohort = new(
-        configurationOptions ?? throw new ArgumentNullException(nameof(configurationOptions)),
-        options ?? throw new ArgumentNullException(nameof(options)),
-        local ?? throw new ArgumentNullException(nameof(local)),
-        authentication ?? throw new ArgumentNullException(nameof(authentication)),
-        clock ?? throw new ArgumentNullException(nameof(clock)),
-        peerOptions ?? throw new ArgumentNullException(nameof(peerOptions)));
+    private readonly ReplicaCohortDiscovery cohort;
+
+    /// <summary>Retains the original configured discovery owner and native authentication lifetime.</summary>
+    /// <param name="configurationOptions">The local voter set, incarnation and cache freshness bound.</param>
+    /// <param name="options">The fixed HTTP peer endpoints and cluster signing settings.</param>
+    /// <param name="local">The local actual runtime generation used for self-resolution.</param>
+    /// <param name="authentication">The shared request/reply and discovery verifier.</param>
+    /// <param name="clock">The system clock and monotonic cache timer.</param>
+    /// <param name="peerOptions">The centrally validated discovery timing and replay limits.</param>
+    public ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions,
+        IOptions<ReplicaPeerOptions> options, ReplicaSiloDiscoveryState local,
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+        IOptions<PeerDiscoveryOptions> peerOptions)
+        : this(configurationOptions, options, local, authentication, clock, peerOptions, null) { }
+
+    internal ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions,
+        IOptions<ReplicaPeerOptions> options, ReplicaSiloDiscoveryState local,
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+        IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe)
+    {
+        cohort = new(configurationOptions ?? throw new ArgumentNullException(nameof(configurationOptions)),
+            options ?? throw new ArgumentNullException(nameof(options)),
+            local ?? throw new ArgumentNullException(nameof(local)),
+            authentication ?? throw new ArgumentNullException(nameof(authentication)),
+            clock ?? throw new ArgumentNullException(nameof(clock)),
+            peerOptions ?? throw new ArgumentNullException(nameof(peerOptions)), probe);
+    }
 
     /// <summary>Returns a current compatible silo generation, refreshing once under the caller's bounded deadline.</summary>
     /// <param name="voterId">The configured voter to resolve.</param>
@@ -41,6 +52,13 @@ public sealed class ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> co
 
     /// <summary>Whether fresh authenticated observations prove the compatible RF3 majority.</summary>
     public bool HasCompatibleCohort => cohort.HasCompatibleCohort;
+
+    /// <summary>Observes the same fixed-voter predicate without refreshing or authorizing discovery.</summary>
+    /// <returns>Native-local closed status and counts; it is never readiness authority.</returns>
+    public ReplicaCohortAdmissionStatus ObserveCompatibleCohort() => cohort.ObserveCompatibleCohort();
+
+    internal Task<ReplicaCohortAdmissionStatus> AcquireCompatibleCohortAsync(CancellationToken token)
+        => ReplicaCohortStartupAcquisition.AcquireAsync(this, token);
 
     /// <inheritdoc />
     public void Dispose() => cohort.Dispose();

@@ -47,8 +47,10 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         shutdown = null;
         stopped = false;
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
-        { nodes.Add(new(Settings.Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
-            index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null)); }
+        {
+            nodes.Add(new(Settings.Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
+            index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null));
+        }
         shutdownTimeout = nodes.First().ShutdownTimeout;
         shutdownClock = nodes.First().Clock;
         await Task.WhenAll(nodes.Select(node => node.StartAsync(cancellationToken))).ConfigureAwait(false);

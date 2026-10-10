@@ -10,7 +10,9 @@ internal static class SampleChunkJobValidation
         ArgumentNullException.ThrowIfNull(hint);
         ArgumentNullException.ThrowIfNull(hint.Partition);
         DatabaseEngine.ValidatePartition(hint.Partition);
-        JsonData.Identifier(hint.Set); JsonData.Identifier(hint.Series); JsonData.Identifier(hint.Creator);
+        JsonData.Identifier(hint.Set);
+        JsonData.Identifier(hint.Series);
+        JsonData.Identifier(hint.Creator);
         if (hint.Partition.AtomicPartitionId != partition || hint.WindowId == Guid.Empty
             || hint.Revision < SampleChunkLifecycleProtocol.First || hint.Generation < SampleChunkLifecycleProtocol.Absent
             || hint.CreatorPolicyEpoch < SampleChunkLifecycleProtocol.First

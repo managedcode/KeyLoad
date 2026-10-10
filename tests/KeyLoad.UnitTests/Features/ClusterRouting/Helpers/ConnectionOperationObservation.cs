@@ -49,6 +49,9 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         => operations.TryGetValue(requestId, out var result) ? result
             : throw new InvalidOperationException(ConnectionNativeProtocol.MissingObservation);
 
+    internal ConnectionObservedOperation ForCommand(Guid commandId)
+        => operations.Values.Single(observed => observed.Identity.CommandId == commandId);
+
     internal async Task JoinAsync(List<Exception> failures, CancellationToken cancellationToken)
     {
         foreach (var observed in operations.OrderBy(static pair => pair.Key))

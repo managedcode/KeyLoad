@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextGenerationFiles
 {
-    internal static void CreateOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, DatabaseLimits limits, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void CreateOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, DatabaseLimits limits, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         EnsureGenerationCapacity(root, sourceNodeId, limits, first, second, third, executionOptions: executionOptions);
         var path = Path.Combine(root, leaf);
@@ -14,12 +14,15 @@ internal static class NativeTextGenerationFiles
         {
             throw NativeTextErrors.Ownership();
         }
-        Directory.CreateDirectory(path);
+        if (resources is null)
+        { Directory.CreateDirectory(path); }
+        else
+        { resources.MutatePhysical(() => Directory.CreateDirectory(path)); }
         NativeTextFileIO.VerifyDirectory(path);
         NativeTextFileIO.SetPrivateDirectoryMode(path);
         NativeTextFileIO.WriteEnvelope(Path.Combine(path, NativeTextProtocol.OwnerFile),
             new NativeTextOwnerReceipt(NativeTextProtocol.FormatVersion, root, leaf, sourceNodeId, scope,
-                [new(NativeTextProtocol.NativeDirectory, true)]), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions);
+                [new(NativeTextProtocol.NativeDirectory, true)]), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 
     internal static NativeTextManifest ReadManifest(string path, TextProjectionScope scope, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
@@ -49,7 +52,7 @@ internal static class NativeTextGenerationFiles
         return manifest;
     }
 
-    internal static void DeleteOwned(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void DeleteOwned(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         var path = Path.Combine(root, leaf);
         if (!Directory.Exists(path))
@@ -57,10 +60,13 @@ internal static class NativeTextGenerationFiles
             return;
         }
         ValidateGeneration(path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
-        Directory.Delete(path, recursive: true);
+        if (resources is null)
+        { Directory.Delete(path, recursive: true); }
+        else
+        { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
     }
 
-    internal static void DeleteBuilding(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
+    internal static void DeleteBuilding(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
     {
         var path = Path.Combine(root, leaf);
         if (!Directory.Exists(path))
@@ -84,7 +90,10 @@ internal static class NativeTextGenerationFiles
         {
             NativeTextInventory.ValidateTrackedLayout(path, owner.OwnedPaths, allowMissingNative: true, executionOptions: executionOptions);
         }
-        Directory.Delete(path, recursive: true);
+        if (resources is null)
+        { Directory.Delete(path, recursive: true); }
+        else
+        { resources.DeleteOwnedDirectory(path, () => Directory.Delete(path, recursive: true)); }
     }
 
     internal static void ValidateGeneration(string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)

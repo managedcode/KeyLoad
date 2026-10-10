@@ -34,6 +34,16 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         grant.Complete();
     }
 
+    internal void CompleteSettledReadGrant(ReadExecutionBudgetReadGrant grant)
+    {
+        ArgumentNullException.ThrowIfNull(grant);
+        if (!grant.BelongsTo(budget) || grant.IsCompleted || ReferenceEquals(scopedReadGrant, grant))
+        { throw new ArgumentException(GrantOwnerMismatch, nameof(grant)); }
+        reservedReadGrantBytes -= grant.RemainingBytes;
+        reservedGrantRecords -= grant.RemainingRecords;
+        grant.Complete();
+    }
+
     internal ReadExecutionBudgetReadGrantLease EnterReadGrant(ReadExecutionBudgetReadGrant grant)
     {
         ArgumentNullException.ThrowIfNull(grant);
@@ -121,6 +131,11 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
     internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
     {
         budget.Check();
+        ImportSettledReadGrant(grant, count, records);
+    }
+
+    internal void ImportSettledReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
+    {
         ArgumentNullException.ThrowIfNull(grant);
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         ArgumentOutOfRangeException.ThrowIfNegative(records);

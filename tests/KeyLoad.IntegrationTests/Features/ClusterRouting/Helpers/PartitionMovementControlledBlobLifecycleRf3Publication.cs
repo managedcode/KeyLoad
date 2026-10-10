@@ -30,8 +30,16 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Publication
         proofs.Add(refused);
         var delete = new DeleteBlobRequest(Guid.NewGuid(), blob, metadata.Revision);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.DeleteBlobAsync(delete, token).ConfigureAwait(false));
-        var expected = metadata with { Revision = checked(PublishedRevision + PublishedRevision), VersionId = null,
-            Length = NoParts, PartCount = NoParts, IntegrityHash = null, Deleted = true, UpdatedAt = deleted.Value.UpdatedAt };
+        var expected = metadata with
+        {
+            Revision = checked(PublishedRevision + PublishedRevision),
+            VersionId = null,
+            Length = NoParts,
+            PartCount = NoParts,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = deleted.Value.UpdatedAt
+        };
         await SqlRf3Protocol.EqualAsync(expected, deleted.Value);
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.DeleteBlob, delete.CommandId,
             BlobToolNames.Delete, delete, deleted, null, false, ct => seed.Source.DeleteBlobAsync(delete, ct)));
@@ -53,17 +61,20 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Publication
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, PartLength, InitialRevision);
         var begun = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.BeginBlobUploadAsync(begin, token).ConfigureAwait(false));
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.BeginBlobUpload, begin.CommandId,
-            BlobToolNames.BeginUpload, begin, begun, null, true, ct => seed.Source.BeginBlobUploadAsync(begin, ct)) with { LifetimeRemoved = true });
+            BlobToolNames.BeginUpload, begin, begun, null, true, ct => seed.Source.BeginBlobUploadAsync(begin, ct)) with
+        { LifetimeRemoved = true });
         var bytes = new byte[PartLength];
         Array.Fill(bytes, PartByte);
         var part = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, FirstOrdinal, bytes, BlobIntegrity.PartHash(bytes));
         var written = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.WriteBlobPartAsync(part, token).ConfigureAwait(false));
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.WriteBlobPart, part.CommandId,
-            BlobToolNames.WritePart, part, written, null, true, ct => seed.Source.WriteBlobPartAsync(part, ct)) with { LifetimeRemoved = true });
+            BlobToolNames.WritePart, part, written, null, true, ct => seed.Source.WriteBlobPartAsync(part, ct)) with
+        { LifetimeRemoved = true });
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, written.Value.IntegrityHash);
         var completed = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CompleteBlobUploadAsync(complete, token).ConfigureAwait(false));
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.CompleteBlobUpload, complete.CommandId,
-            BlobToolNames.CompleteUpload, complete, completed, null, true, ct => seed.Source.CompleteBlobUploadAsync(complete, ct)) with { LifetimeRemoved = true });
+            BlobToolNames.CompleteUpload, complete, completed, null, true, ct => seed.Source.CompleteBlobUploadAsync(complete, ct)) with
+        { LifetimeRemoved = true });
         foreach (var proof in proofs.Where(value => NativeCommandUpload(value.Request) == upload && value.Error is null))
         { await PartitionMovementControlledBlobLifecycleRf3Calls.RequireAsync(seed, proof, null, token).ConfigureAwait(false); }
         return (upload, completed.Value);

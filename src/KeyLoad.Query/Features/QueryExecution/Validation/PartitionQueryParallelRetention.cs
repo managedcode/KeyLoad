@@ -11,8 +11,7 @@ internal static class PartitionQueryParallelRetention
 
     internal static PartitionQueryLeafPlanV1 Child(PartitionQueryLeafPlanV1 original, long requestBytes)
     {
-        var available = checked(original.MaxRetainedBytes - requestBytes - MetadataFrames * FrameBytes);
-        var retained = available / RetentionFrames;
+        var retained = RetainedBytes(original.MaxRetainedBytes, requestBytes);
         if (retained < checked(PartitionQueryRetention.LeafHeapReserve(original.MaxCandidates)
             + PartitionQueryRetention.CandidateArrayBytes(original.MaxCandidates)))
         { throw Errors.Fail(ErrorCode.BudgetExceeded, Bound); }
@@ -20,5 +19,22 @@ internal static class PartitionQueryParallelRetention
     }
 
     internal static long ReplyBytes(PartitionQueryLeafPlanV1 child)
-        => checked(ReplyFrames * child.MaxRetainedBytes + FrameBytes);
+        => ReplyBytes(child.MaxRetainedBytes);
+
+    internal static long ChildBytes(long originalBytes, long requestBytes, long minimumRetainedBytes)
+    {
+        var retained = RetainedBytes(originalBytes, requestBytes);
+        if (retained < minimumRetainedBytes)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bound); }
+        return retained;
+    }
+
+    internal static long ReplyBytes(long retainedBytes)
+        => checked(ReplyFrames * retainedBytes + FrameBytes);
+
+    private static long RetainedBytes(long originalBytes, long requestBytes)
+    {
+        var available = checked(originalBytes - requestBytes - MetadataFrames * FrameBytes);
+        return available / RetentionFrames;
+    }
 }

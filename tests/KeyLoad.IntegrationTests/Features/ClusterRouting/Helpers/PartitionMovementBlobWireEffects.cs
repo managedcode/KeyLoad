@@ -36,9 +36,16 @@ internal static class PartitionMovementBlobWireEffects
         await Assert.That(deleted.Value.Revision).IsEqualTo(TombstoneRevision);
         await Assert.That(deleted.Value.Length).IsEqualTo((long)FirstOrdinal);
         await Assert.That(deleted.Value.VersionId).IsNull();
-        await SqlRf3Protocol.EqualAsync(metadata with { Revision = TombstoneRevision, VersionId = null,
-            Length = InitialRevision, PartCount = FirstOrdinal, IntegrityHash = null, Deleted = true,
-            UpdatedAt = deleted.Value.UpdatedAt }, deleted.Value);
+        await SqlRf3Protocol.EqualAsync(metadata with
+        {
+            Revision = TombstoneRevision,
+            VersionId = null,
+            Length = InitialRevision,
+            PartCount = FirstOrdinal,
+            IntegrityHash = null,
+            Deleted = true,
+            UpdatedAt = deleted.Value.UpdatedAt
+        }, deleted.Value);
         await callers.RequireAsync(seed.Partition, BlobToolNames.Delete, delete,
             ct => callers.Source.DeleteBlobAsync(delete, ct), deleted, token);
         var cleanup = new ReclaimBlobRequest(Guid.NewGuid(), blob, published, OnePart);

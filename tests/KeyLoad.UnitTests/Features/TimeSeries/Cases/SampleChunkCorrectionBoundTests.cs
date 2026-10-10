@@ -18,7 +18,8 @@ internal sealed class SampleChunkCorrectionBoundTests
     public async Task AcChunk008012ExactCorrectionCapRejectsOneOverThenActualMergeFreesCapacity()
     {
         using var fixture = new SampleChunkCanonicalFixture();
-        fixture.Open(); fixture.AppendInitial();
+        fixture.Open();
+        fixture.AppendInitial();
         fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, AppendedRevision));
         var corrections = Enumerable.Range(FirstOrdinal, CorrectionBound).Select(ordinal =>
@@ -34,7 +35,8 @@ internal sealed class SampleChunkCorrectionBoundTests
         var overflow = new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             [new(ExtraId, SampleChunkCanonicalFixture.Start.AddTicks(CorrectionBound + FirstOrdinal), FirstOrdinal)],
             SampleChunkCanonicalFixture.Tags);
-        var raw = fixture.Raw(); var originalId = Guid.NewGuid();
+        var raw = fixture.Raw();
+        var originalId = Guid.NewGuid();
         var rejected = fixture.Commit(originalId, overflow);
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(rejected.Json).IsNull();

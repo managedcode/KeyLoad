@@ -7,7 +7,7 @@ internal static class NativeTextIncrementalReplayPreparation
 {
     internal static void Prepare(string root, string leaf, NativeTextIncrementalIntent expected,
         int maximumRecords, int maximumChanges, ReadExecutionBudget budget,
-        IOptions<NativeTextExecutionOptions> options)
+        IOptions<NativeTextExecutionOptions> options, NativeTextResourceOwnership? resources = null)
     {
         budget.Check();
         _ = NativeTextIncrementalRoot.CheckRoot(root, expected.Scope.NodeId, options, budget);
@@ -27,7 +27,10 @@ internal static class NativeTextIncrementalReplayPreparation
         {
             NativeTextFileIO.VerifyBoundedFile(pending, options);
             budget.Check();
-            File.Delete(pending);
+            if (resources is null)
+            { File.Delete(pending); }
+            else
+            { resources.DeleteOwnedFile(pending, () => File.Delete(pending)); }
         }
         budget.Check();
     }

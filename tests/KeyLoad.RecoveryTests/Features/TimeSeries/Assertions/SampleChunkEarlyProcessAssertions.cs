@@ -7,7 +7,8 @@ internal static class SampleChunkEarlyProcessAssertions
 {
     internal static async Task VerifyAsync(string root, string mode, SampleChunkEarlyCut cut, CancellationToken token)
     {
-        if (SampleChunkEarlyCrashProtocol.IsFault(mode)) { return; }
+        if (SampleChunkEarlyCrashProtocol.IsFault(mode))
+        { return; }
         var prepared = await ReadAsync(root, SampleChunkCrashContract.PreparedFile, token);
         if (SampleChunkEarlyCrashProtocol.IsPrepare(mode))
         {
@@ -31,7 +32,8 @@ internal static class SampleChunkEarlyProcessAssertions
         await Assert.That(healthy.Position > recovered.Position).IsTrue();
         await Assert.That(healthy.OriginalAcknowledgedResult).IsEqualTo(prepared.OriginalAcknowledgedResult);
         await Assert.That(healthy.OriginalInflightResult).IsEqualTo(recovered.OriginalInflightResult);
-        if (!SampleChunkEarlyCrashProtocol.IsVerify(mode)) { return; }
+        if (!SampleChunkEarlyCrashProtocol.IsVerify(mode))
+        { return; }
         var final = await ReadAsync(root, SampleChunkCrashContract.FinalFile, token);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(final)))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(healthy)));

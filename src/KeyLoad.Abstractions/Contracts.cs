@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 
 namespace KeyLoad;
 
@@ -90,98 +89,6 @@ public enum ErrorCode
     ClockUncertain,
     /// <summary>The operation was cancelled.</summary>
     Cancelled
-}
-
-/// <summary>Represents a safe, caller-visible KeyLoad failure with its domain code and HTTP status.</summary>
-[Orleans.GenerateSerializer]
-[Orleans.Alias(KeyLoadException.NativeAlias)]
-public sealed class KeyLoadException : Exception
-{
-    internal const string NativeAlias = "keyload.error.v1";
-    private const string DefaultSafeDetail = "A KeyLoad operation failed.";
-    /// <summary>Initializes a KeyLoad exception with the supplied domain code, safe detail, and HTTP status.</summary>
-    /// <param name="code">Identifies the domain error.</param>
-    /// <param name="safeDetail">Provides safe caller-visible detail.</param>
-    /// <param name="statusCode">Provides the HTTP status associated with the error.</param>
-    public KeyLoadException(ErrorCode code, string safeDetail, int statusCode)
-        : this(code, safeDetail, statusCode, null)
-    {
-    }
-
-    /// <summary>Initializes a validation exception with a standard safe detail.</summary>
-    public KeyLoadException() : this(ErrorCode.Validation, DefaultSafeDetail, Errors.Status(ErrorCode.Validation), null)
-    {
-    }
-
-    /// <summary>Initializes a validation exception with the supplied message.</summary>
-    /// <param name="message">Provides safe caller-visible failure detail.</param>
-    public KeyLoadException(string message) : this(ErrorCode.Validation, message, Errors.Status(ErrorCode.Validation), null)
-    {
-    }
-
-    /// <summary>Initializes a validation exception with the supplied message and cause.</summary>
-    /// <param name="message">Provides safe caller-visible failure detail.</param>
-    /// <param name="innerException">Provides the exception that caused this failure.</param>
-    public KeyLoadException(string message, Exception innerException)
-        : this(ErrorCode.Validation, message, Errors.Status(ErrorCode.Validation), innerException)
-    {
-    }
-
-    private KeyLoadException(ErrorCode code, string safeDetail, int statusCode, Exception? innerException)
-        : base(safeDetail, innerException)
-    {
-        Code = code;
-        StatusCode = statusCode;
-    }
-
-    /// <summary>Gets the domain error code.</summary>
-    [Orleans.Id(0)]
-    public ErrorCode Code { get; }
-
-    /// <summary>Gets the corresponding HTTP status code.</summary>
-    [Orleans.Id(1)]
-    public int StatusCode { get; }
-
-    /// <summary>Creates the safe problem detail for this failure.</summary>
-    /// <returns>The problem detail associated with this exception.</returns>
-    public Problem ToProblem() => Errors.Problem(Code, Message);
-}
-
-/// <summary>Creates standard status mappings, problem details, and KeyLoad exceptions.</summary>
-public static class Errors
-{
-    private const string ProblemTypePrefix = "urn:keyload:error:";
-    /// <summary>Returns the HTTP status code associated with an error code.</summary>
-    /// <param name="code">Specifies the code value.</param>
-    /// <returns>The requested value.</returns>
-    public static int Status(ErrorCode code) => code switch
-    {
-        ErrorCode.NotFound => (int)System.Net.HttpStatusCode.NotFound,
-        ErrorCode.PermissionDenied => (int)System.Net.HttpStatusCode.Forbidden,
-        ErrorCode.Unauthenticated => (int)System.Net.HttpStatusCode.Unauthorized,
-        ErrorCode.Conflict or ErrorCode.RevisionConflict or ErrorCode.DuplicateEventId or ErrorCode.StaleLease => (int)System.Net.HttpStatusCode.Conflict,
-        ErrorCode.ResourceExhausted or ErrorCode.BudgetExceeded => (int)System.Net.HttpStatusCode.TooManyRequests,
-        ErrorCode.UnsupportedCapability => (int)System.Net.HttpStatusCode.UnprocessableEntity,
-        ErrorCode.UnknownWriteOutcome or ErrorCode.RecoveryRequired or ErrorCode.OwnershipLost or ErrorCode.ClockUncertain => (int)System.Net.HttpStatusCode.ServiceUnavailable,
-        _ => (int)System.Net.HttpStatusCode.BadRequest
-    };
-    /// <summary>Creates a problem detail with the standard status for an error code.</summary>
-    /// <param name="code">Identifies the domain error code.</param>
-    /// <param name="detail">Provides safe caller-visible error detail.</param>
-    /// <returns>The standard problem details for the error code.</returns>
-    public static Problem Problem(ErrorCode code, string detail) => new()
-    {
-        Type = $"{ProblemTypePrefix}{code}",
-        Title = code.ToString(),
-        ErrorCode = code.ToString(),
-        Detail = detail,
-        StatusCode = Status(code)
-    };
-    /// <summary>Creates a KeyLoad exception with the status assigned to its error code.</summary>
-    /// <param name="code">Identifies the domain error code.</param>
-    /// <param name="detail">Provides safe caller-visible error detail.</param>
-    /// <returns>A KeyLoad exception with the matching HTTP status.</returns>
-    public static KeyLoadException Fail(ErrorCode code, string detail) => new(code, detail, Status(code));
 }
 
 /// <summary>Identifies an atomic partition by tenant, database, transaction domain, and partition key.</summary>
@@ -383,7 +290,11 @@ public enum OperationKind
     /// <summary>Applies one receiver-verified private physical movement phase through RF3.</summary>
     PartitionMovementPhase,
     /// <summary>Coordinates protected partition movement through separately authorized child requests.</summary>
-    MovePartition
+    MovePartition,
+    /// <summary>Maintains an administrator-authorized online text generation through separate request grains.</summary>
+    MaintainOnlineTextIndex = 34,
+    /// <summary>Commits one freshly verified private online text publication; excluded from public operation factories.</summary>
+    OnlineTextPublicationPhase = 35
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

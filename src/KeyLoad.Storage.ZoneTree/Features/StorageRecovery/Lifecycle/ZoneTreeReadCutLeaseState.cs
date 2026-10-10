@@ -87,6 +87,15 @@ internal sealed class ZoneTreeReadCutLeaseState
         }
     }
 
+    internal void EnsureTraversalSettled()
+    {
+        lock (sync)
+        {
+            if (traversing || !captureFinished.Task.IsCompleted)
+            { throw new InvalidOperationException(ConcurrentTraversalMessage); }
+        }
+    }
+
     internal void EnsureDisposalCanJoin()
     {
         lock (sync)

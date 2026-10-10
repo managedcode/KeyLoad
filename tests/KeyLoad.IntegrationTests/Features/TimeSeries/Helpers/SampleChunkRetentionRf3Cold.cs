@@ -13,7 +13,8 @@ internal static class SampleChunkRetentionRf3Cold
     {
         foreach (var node in Nodes)
         { await fixture.KillContainerAsync(node, SampleChunkRetentionRf3Protocol.ColdScenario, token).ConfigureAwait(false); }
-        foreach (var node in Nodes) { await fixture.RestartContainerAsync(node, token).ConfigureAwait(false); }
+        foreach (var node in Nodes)
+        { await fixture.RestartContainerAsync(node, token).ConfigureAwait(false); }
         foreach (var node in Nodes)
         { await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token).ConfigureAwait(false); }
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);

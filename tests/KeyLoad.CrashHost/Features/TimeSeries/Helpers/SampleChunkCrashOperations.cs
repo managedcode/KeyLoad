@@ -17,7 +17,8 @@ internal static class SampleChunkCrashOperations
         Commit(database, SampleChunkCrashContract.AcknowledgedId, new AppendSamples(SampleChunkCrashContract.Set,
             SampleChunkCrashContract.Series, [SampleChunkCrashContract.First, SampleChunkCrashContract.Equal],
             SampleChunkCrashContract.Tags)).Get<CommitReceipt>();
-        if (!merge) { return; }
+        if (!merge)
+        { return; }
         Commit(database, Guid.NewGuid(), new SealSampleChunkWindow(SampleChunkCrashContract.Set,
             SampleChunkCrashContract.Series, SampleChunkCrashContract.WindowId,
             SampleChunkCrashContract.AppendedRevision)).Get<CommitReceipt>();

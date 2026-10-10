@@ -5,7 +5,7 @@ namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
     IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
-    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null)
+    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -38,11 +38,17 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             stage = GrainFailureStage.CapabilityExecution;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,
                 operationToken).ConfigureAwait(true);
-            var result = kind == OperationKind.PartitionMovementPhase
-                ? await GrainPartitionMovementCommand.SubmitAsync(database, coordinator, request, principal,
-                    codec, context, sealedObserver, operationToken).ConfigureAwait(true)
-                : await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
-                    request.Payload, operationToken).ConfigureAwait(true);
+            var result = kind switch
+            {
+                OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
+                    database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),
+                OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
+                    operationToken).ConfigureAwait(true),
+                OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
+                    database, coordinator, request, principal, onlineText, operationToken).ConfigureAwait(true),
+                _ => await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
+                    request.Payload, operationToken).ConfigureAwait(true)
+            };
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
                 .ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
@@ -64,6 +70,13 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             NativeCapabilityWorkLifetime.Settle(primaryError, work, null, null);
         }
     }
+
+    private Task<OperationResult> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
+        CancellationToken cancellationToken)
+        => GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
+            onlineText, clock, cancellationToken)
+            ?? coordinator.SubmitNativeAsync(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
+                principal.Id, request.Payload, cancellationToken);
 
     private static Exception MarkFailure(Exception error, GrainFailureStage stage)
     {

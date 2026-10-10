@@ -42,7 +42,8 @@ internal static class SampleChunkPendingRf3Assertions
             token.ThrowIfCancellationRequested();
             var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadSampleChunkWindowAsync(item.Request, token)
                 .ConfigureAwait(false));
-            if (actual.Generation == SampleChunkRf3Protocol.MergedGeneration) { return; }
+            if (actual.Generation == SampleChunkRf3Protocol.MergedGeneration)
+            { return; }
             await PendingAsync(item, sdk, token).ConfigureAwait(false);
             await Task.Delay(SampleChunkRf3Protocol.PollInterval, token).ConfigureAwait(false);
         }

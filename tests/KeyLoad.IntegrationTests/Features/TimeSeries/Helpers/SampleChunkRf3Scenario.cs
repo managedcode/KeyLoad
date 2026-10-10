@@ -41,7 +41,8 @@ internal sealed record SampleChunkRf3Scenario(TimeSeriesRf3Scenario Native, Guid
             token.ThrowIfCancellationRequested();
             var result = await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.ReadSampleChunkWindowAsync(Request, token).ConfigureAwait(false));
-            if (result.Generation == SampleChunkRf3Protocol.MergedGeneration) { return result; }
+            if (result.Generation == SampleChunkRf3Protocol.MergedGeneration)
+            { return result; }
             await Assert.That(result.Generation).IsEqualTo(SampleChunkRf3Protocol.SealedGeneration);
             await Assert.That(result.Revision).IsEqualTo(SampleChunkRf3Protocol.CorrectedRevision);
             await Task.Delay(SampleChunkRf3Protocol.PollInterval, token).ConfigureAwait(false);

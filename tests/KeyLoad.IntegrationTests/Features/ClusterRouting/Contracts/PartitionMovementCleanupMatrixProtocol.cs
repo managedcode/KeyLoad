@@ -17,10 +17,12 @@ internal enum PartitionMovementCleanupMatrixFaultRole
     ClaimedOwnerArm,
     RetainedObservedControl,
     RetiredOtherResurrection,
+    ClaimedOwnerBytesChanged,
 }
 
 internal enum PartitionMovementCleanupMatrixFaultRepair
 {
     RenameBack,
     RemoveResurrection,
+    RestoreExactBytes,
 }

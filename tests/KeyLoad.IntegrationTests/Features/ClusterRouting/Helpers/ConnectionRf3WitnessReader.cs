@@ -24,8 +24,10 @@ internal static class ConnectionRf3WitnessReader
                 var owner = fixture.NodeFor(node);
                 RequestCqrsProbeFileStore.VerifyOwnerFile(owner.Directory, owner.OwnerBytes);
                 var path = Path.Combine(owner.Directory, name);
-                if (!File.Exists(path)) { continue; }
-                if (witness is not null) { throw Invalid(); }
+                if (!File.Exists(path))
+                { continue; }
+                if (witness is not null)
+                { throw Invalid(); }
                 witness = ConnectionProbeInventory.Read(RequestCqrsProbeFileStore.ReadRecord(path));
             }
             if (witness is not null)

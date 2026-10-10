@@ -84,6 +84,7 @@ internal static class McpToolDescriptions
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
             or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention or McpToolNames.SeriesRollup => SeriesDescription(name),
         SampleChunkProtocol.ReadTool => SeriesSampleChunkWindow,
+        DistributedSearchProtocol.Tool => DistributedSearchProtocol.Description,
         McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst
             or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead or McpToolNames.QueryPartitions
             => QueryDescription(name),
@@ -102,6 +103,7 @@ internal static class McpToolDescriptions
         McpToolNames.DocumentsCommit => DocumentsCommit,
         McpToolNames.SearchAnnMaintain => AnnMaintenanceProtocol.Description,
         McpToolNames.SearchTextMaintain => TextIndexMaintenanceProtocol.Description,
+        OnlineTextIndexMaintenanceProtocol.Tool => OnlineTextIndexMaintenanceProtocol.Description,
         McpToolNames.MessagesReceiveAcrossLanes => MessagesReceiveAcrossLanes,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,

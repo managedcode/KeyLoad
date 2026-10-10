@@ -8,10 +8,6 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3ClusterResources
 {
-    private const string ThirdVoterName = "node3";
-    private const string FourthVoterName = "node4";
-    private const string FifthVoterName = "node5";
-    private const string SixthVoterName = "node6";
     private const string SigningKeyParameterName = "signing-key";
     private const string AdminKeyParameterName = "admin-key";
     private const string MembershipPeerParameterName = "membership-peer-a";
@@ -26,8 +22,6 @@ internal static class TwoRf3ClusterResources
     private const string AuthorityEndpointsEnvironment = "AuthorityEndpoints";
 
     private const string PublicOriginTemplate = "http://{0}:8080";
-    private const string FirstVoterName = "node1";
-    private const string SecondVoterName = "node2";
 
     private const string ParameterIdentityFormat = "D";
     private const string ResourceIdentityFormat = "N";
@@ -53,7 +47,7 @@ internal static class TwoRf3ClusterResources
     private const string AuthorityHealth = "/health/membership-authority";
     private const string MembershipHealth = "/health/membership-ready";
     private const string True = "true";
-    private static readonly string[] Nodes = [FirstVoterName, SecondVoterName, ThirdVoterName, FourthVoterName, FifthVoterName, SixthVoterName];
+    private static readonly string[] Nodes = [TwoRf3ProfileProtocol.FirstVoterName, TwoRf3ProfileProtocol.SecondVoterName, TwoRf3ProfileProtocol.ThirdVoterName, TwoRf3ProfileProtocol.FourthVoterName, TwoRf3ProfileProtocol.FifthVoterName, TwoRf3ProfileProtocol.SixthVoterName];
 
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
         LocalProfile profile, string dataRoot)
@@ -85,10 +79,12 @@ internal static class TwoRf3ClusterResources
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
         var probe = TwoRf3QueryProbe.Create(builder, root, image, localImage);
         var frameObservation = MovementFrameObservationProfile.Create(builder, root, image, localImage);
+        var discoveryOmission = NativeDiscoveryOmissionProfile.Create(builder, root, image, localImage);
         var resources = AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
         TwoRf3QueryProbe.Apply(probe, resources, Nodes);
         frameObservation?.ApplyReceivers(resources, Nodes);
+        discoveryOmission?.Apply(resources);
         TwoRf3RemoteReadResources.Configure(AppHostOptionsRegistration.Get(builder).Control, resources, registerOwners);
         return resources;
     }

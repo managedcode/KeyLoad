@@ -1,7 +1,7 @@
 namespace KeyLoad.Server.Features.Search;
 
 /// <summary>Orders native reader ownership before maintenance canonical-view admission.</summary>
-internal sealed class NativeTextSelectedReadAdmission(int maximumReaders)
+internal sealed class NativeTextSelectedReadAdmission(int maximumReaders, NativeTextResourceOwnership? resources = null)
 {
     private const int Empty = 0;
     private readonly Lock gate = new();
@@ -20,10 +20,11 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders)
             { throw new AggregateException(retainedFailure); }
             if (writer || readers >= maximumReaders)
             { throw NativeTextErrors.BoundExceeded(); }
+            var reservation = resources?.ReserveLease();
             if (readers == Empty)
             { quiet = new(TaskCreationOptions.RunContinuationsAsynchronously); }
             readers++;
-            return new(this);
+            return new(this, reservation);
         }
     }
 
@@ -80,13 +81,15 @@ internal sealed class NativeTextSelectedReadAdmission(int maximumReaders)
         }
     }
 
-    internal void ExitRead()
+    internal void ExitRead(NativeTextResourceReservation? reservation)
     {
         lock (gate)
         {
             if (readers <= Empty)
             { throw NativeTextErrors.Corrupt(); }
             readers--;
+            if (retainedFailure is null)
+            { reservation?.CompleteAfterJoinedCleanup(); }
             if (readers == Empty)
             { quiet!.TrySetResult(); }
         }

@@ -19,7 +19,8 @@ internal static class SampleChunkNativeJobObservation
     private static string Digest(string originalMetadata, int maximumBytes)
     {
         var original = Convert.FromBase64String(originalMetadata);
-        if (original.Length > maximumBytes) { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted); }
+        if (original.Length > maximumBytes)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted); }
         return Convert.ToHexStringLower(SHA256.HashData(original));
     }
 }

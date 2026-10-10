@@ -48,9 +48,11 @@ internal static class SampleChunkSchedulingRf3Flow
         var controls = wave.QueryControls;
         var originalDiscovery = await SampleChunkSchedulingRf3Stages.DiscoveryAsync(wave, token).ConfigureAwait(false);
         SampleChunkJobRevocationScenario scenario;
-        Guid arm; Guid mergeArm;
+        Guid arm;
+        Guid mergeArm;
         SampleChunkNativeJobRf3Receipt originalJob;
-        RequestCqrsProbeMarkerRecord original; RequestCqrsProbeMarkerRecord heldMerge;
+        RequestCqrsProbeMarkerRecord original;
+        RequestCqrsProbeMarkerRecord heldMerge;
         await using (var administrator = await RequestCqrsRf3Callers.ConnectAsync(wave.Application,
             RequestCqrsRf3Protocol.Node1, wave.Profile.AdminKey, token).ConfigureAwait(false))
         {

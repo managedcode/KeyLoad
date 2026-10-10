@@ -8,12 +8,18 @@ internal static class PartitionQueryParallelBatch
     private const int FirstTaskIndex = 0;
     private const int SingleFailure = 1;
 
-    internal static async Task<PartitionQueryOwnedLeaf[]> RunAsync(PartitionQueryPreparedLeaf[] leaves,
+    internal static Task<PartitionQueryOwnedLeaf[]> RunAsync(PartitionQueryPreparedLeaf[] leaves,
         int offset, int count, CancellationTokenSource execution)
+        => RunAsync<PartitionQueryPreparedLeaf, PartitionQueryOwnedLeaf>(leaves, offset, count, execution,
+            static (leaf, token) => leaf.RunAsync(token));
+
+    internal static async Task<TResult[]> RunAsync<TLeaf, TResult>(TLeaf[] leaves,
+        int offset, int count, CancellationTokenSource execution,
+        Func<TLeaf, CancellationToken, Task<TResult>> run)
     {
-        var tasks = new Task<PartitionQueryOwnedLeaf>[count];
+        var tasks = new Task<TResult>[count];
         for (var index = FirstTaskIndex; index < count; index++)
-        { tasks[index] = RunLeafAsync(leaves[offset + index], execution); }
+        { tasks[index] = RunLeafAsync(leaves[offset + index], execution, run); }
         try
         { return await Task.WhenAll(tasks).ConfigureAwait(false); }
         catch (Exception primary)
@@ -29,13 +35,13 @@ internal static class PartitionQueryParallelBatch
         }
     }
 
-    private static async Task<PartitionQueryOwnedLeaf> RunLeafAsync(PartitionQueryPreparedLeaf leaf,
-        CancellationTokenSource execution)
+    private static async Task<TResult> RunLeafAsync<TLeaf, TResult>(TLeaf leaf,
+        CancellationTokenSource execution, Func<TLeaf, CancellationToken, Task<TResult>> run)
     {
         try
         {
             execution.Token.ThrowIfCancellationRequested();
-            return await leaf.RunAsync(execution.Token).ConfigureAwait(false);
+            return await run(leaf, execution.Token).ConfigureAwait(false);
         }
         catch (Exception primary)
         {

@@ -42,10 +42,12 @@ internal sealed class SampleChunkCanonicalFixture : IDisposable
     {
         Owner = new(timeSeriesExecution: execution, timeProvider: timeProvider,
             nativeReplicaAdmission: nativeReplicaAdmission);
-        try { SampleAggregateTestData.Configure(Owner); }
+        try
+        { SampleAggregateTestData.Configure(Owner); }
         catch (Exception original)
         {
-            try { Owner.Dispose(); }
+            try
+            { Owner.Dispose(); }
             catch (Exception cleanup) { throw new AggregateException(original, cleanup); }
             throw;
         }

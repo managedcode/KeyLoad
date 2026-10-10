@@ -22,5 +22,9 @@ internal enum NativeTextFaultStage
     /// <summary>The original canonical journal ACK passed complete current checkpoint validation.</summary>
     CanonicalCheckpointAcknowledged,
     /// <summary>The actual original pending intent file has been removed after its validated ACK.</summary>
-    PendingIntentRetired
+    PendingIntentRetired,
+    /// <summary>The actual retained original canonical35 receipt has joined.</summary>
+    CanonicalOnlinePublicationAcknowledged = 10,
+    /// <summary>The exact online catalog pending envelope has flushed and passed readback.</summary>
+    OnlineCatalogPendingFlushed = 11
 }

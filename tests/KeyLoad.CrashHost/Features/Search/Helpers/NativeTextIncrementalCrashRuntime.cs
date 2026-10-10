@@ -11,6 +11,7 @@ namespace KeyLoad.CrashHost.Features.Search;
 
 internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
 {
+    private const long ReplicaLogIndexStep = 1;
     private const int CanonicalDirectoryIndex = 0;
     private const long MaximumRetainedEntries = 16;
     private readonly ServiceProvider services;
@@ -93,6 +94,19 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
         materializer.Commit(index);
         await materializer.WaitForApplyAsync(index, token).ConfigureAwait(false);
         return Database.ResolveOutcome(operation).Get<T>();
+    }
+
+    internal async Task<OperationResult> CommitIssuedAsync(ReplicatedOperation operation, CancellationToken token)
+    {
+        if (operation.Kind != OperationKind.OnlineTextPublicationPhase || operation.Id == Guid.Empty)
+        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        var index = checked(Node.Log.State.LastIndex + ReplicaLogIndexStep);
+        if (index > MaximumRetainedEntries)
+        { throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid); }
+        Node.Log.Append([new ReplicaEntry(index, Node.Log.State.Term, operation)]);
+        materializer.Commit(index);
+        await materializer.WaitForApplyAsync(index, token).ConfigureAwait(false);
+        return Database.ResolveOutcome(operation);
     }
 
     internal Task<TextMaintenanceCapabilityResult> PhaseAsync(TextIndexMaintenanceRequest request,

@@ -23,7 +23,8 @@ internal sealed class ConnectionNativeCalls : IDisposable
     {
         foreach (var original in originals.Values)
         {
-            if (!original.IsCompleted) { unfinished.Add(original); }
+            if (!original.IsCompleted)
+            { unfinished.Add(original); }
         }
         return stopping.CancelAsync();
     }

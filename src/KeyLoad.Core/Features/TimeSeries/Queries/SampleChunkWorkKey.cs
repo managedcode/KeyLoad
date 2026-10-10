@@ -1,5 +1,5 @@
-using KeyLoad.Storage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.TimeSeries;
 
@@ -27,7 +27,9 @@ internal static class SampleChunkWorkKey
             || windowId == Guid.Empty || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
         { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
         var scope = new PartitionRef(tenant, database, domain, partition);
-        DatabaseEngine.ValidatePartition(scope); JsonData.Identifier(set); JsonData.Identifier(series);
+        DatabaseEngine.ValidatePartition(scope);
+        JsonData.Identifier(set);
+        JsonData.Identifier(series);
         return (scope, set, series, windowId);
     }
 }

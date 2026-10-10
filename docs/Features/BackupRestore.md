@@ -772,3 +772,14 @@ REQ/AC-BACKUP-002 and CLUSTER-002/003/004, TASK008: root native apply_code_fix(c
 Move ONLY existing file.Flush(true) calls to one private synchronous feature helper, invoking the same synchronous native FileStream.Flush(true); never FlushAsync, task relocation or weakened durability. In ArchiveMutationTrial reuse existing canonical ServerFailureObserver to collect original initiating/fatal failures, then await original target.StopAsync and set joined only on actual success; only joined permits exact original-byte RepairAsync. Record all actual cleanup/repair failures in same ordered original ledger and ThrowIfAny before healthy verification. No nested try/finally/if/try or broad catch/suppression. This remains original admitted owner/lifecycle, not a retry or fresh authority.
 
 Root compiler/analyzer/formatter and actual Linux complete whole flow remain OPEN. Existing semantics and immutable source packets retained; private current-guarded diagnostic prerequisite only. Feature+ADR123 append is additive and must preserve any concurrently reviewed TASK009/010 append union.
+
+
+## TASK-KL042-CANONICAL-OWNER-COLD-ADMISSION-014
+
+REQ-BACKUP-002 / AC-BACKUP-002 and REQ/AC-BACKUP-CAPTURE-ADMISSION-001; ADR123. Original R32 admission flow reaches native cold reopen after quota, four original held producer settlements, exact shutdown failures and complete unchanged image assertions. PartitionHost opens NativeTextHostResourceRoots, which creates the exact native-text-online directory and its native receipt; strict PartitionRootAdmission omits that directory. Successful ClusterBackupOwnerArchive additionally publishes cluster-backups under the same physical root, also omitted.
+
+Admit only the two exact canonical generated directory names via their owning constants. Preserve the reparse-point check before the directory whitelist and every wrong-kind, foreign-entry, file-lock and native current-format identity check. No recursive adoption, deletion, fallback, layout upgrade, schema, limits, deadline or producer changes. Archive leaf/receipt/checksum validation remains its original owner.
+
+Extend existing WrongKnownEntryKindsRejectBeforeMutation whole operation with exact-name file and symlink refusals for both directories, unchanged original content/link target, removal of only fixture-created invalid entry, real healthy native write and same-root cold reopen. Existing two original admission cases retain all full images/receipts/quota/shutdown assertions. Existing paired-identity cases retain native corruption-before-tail and healthy cold proof.
+
+Join docs first, then three source paths. Root owns fresh native build/discovery/normal+scalar executions and RF3 current-source proof. Source-only packet does not close KL042.

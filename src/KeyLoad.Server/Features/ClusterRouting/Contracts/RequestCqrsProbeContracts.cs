@@ -26,7 +26,10 @@ internal enum RequestCqrsProbePhase
     ParentFinalInstallPreflight,
     SampleChunkAdmissionPersisted,
     SampleChunkNativeJobReturned,
-    SampleChunkAdmissionRefused
+    SampleChunkAdmissionRefused,
+    NativeTextOriginalPostingRead,
+    DistributedSearchStatisticsCaptured,
+    OnlineTextCaptured
 }
 
 internal enum RequestCqrsProbeAction

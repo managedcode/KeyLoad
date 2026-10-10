@@ -19,6 +19,8 @@ internal static class CrashHostApplication
         _ = SerializationExecutionRegistration.Process.Value;
         if (await ClusterRestoreProcessCutScenario.TryRunAsync(args))
         { return; }
+        if (await NativeTextOnlineCrashScenario.TryRunAsync(args))
+        { return; }
         if (await NativeTextIncrementalCrashScenario.TryRunAsync(args) || await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;

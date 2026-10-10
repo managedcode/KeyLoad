@@ -3,6 +3,7 @@
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
+    <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />

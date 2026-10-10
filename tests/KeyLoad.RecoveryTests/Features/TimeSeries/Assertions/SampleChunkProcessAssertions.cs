@@ -12,7 +12,8 @@ internal static class SampleChunkProcessAssertions
 
     internal static async Task VerifyAsync(string root, string mode, bool merge, CancellationToken token)
     {
-        if (mode is SampleChunkCrashContract.FaultSeal or SampleChunkCrashContract.FaultMerge) { return; }
+        if (mode is SampleChunkCrashContract.FaultSeal or SampleChunkCrashContract.FaultMerge)
+        { return; }
         var prepared = await ReadAsync(root, SampleChunkCrashContract.PreparedFile, token);
         if (mode is SampleChunkCrashContract.PrepareSeal or SampleChunkCrashContract.PrepareMerge)
         {

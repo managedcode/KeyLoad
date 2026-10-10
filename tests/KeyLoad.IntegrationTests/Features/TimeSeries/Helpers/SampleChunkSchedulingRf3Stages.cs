@@ -11,8 +11,10 @@ internal static class SampleChunkSchedulingRf3Stages
         var result = new List<KeyLoad.Orleans.ReplicaSiloDiscovery>();
         foreach (var node in new[] { RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
             RequestCqrsRf3Protocol.Node3 })
-        { result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
-            node, wave.Profile, token).ConfigureAwait(false)); }
+        {
+            result.Add(await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
+            node, wave.Profile, token).ConfigureAwait(false));
+        }
         return result;
     }
 

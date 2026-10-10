@@ -15,7 +15,7 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
 
     internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-        IOptions<PeerDiscoveryOptions> peerOptions)
+        IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe = null)
     {
         var configuration = configurationOptions.Value;
         var options = peerSettings.Value;
@@ -27,13 +27,17 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         this.configuration = configurationOptions.Value;
         this.clock = clock;
         observations = new(configurationOptions, local, clock);
-        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, peerOptions);
+        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, peerOptions, probe);
         resources = new(ownedResources);
         admission = new(configurationOptions, observations, GetObservationAsync);
         lifetime = new(ownedResources);
     }
 
     internal bool HasCompatibleCohort => !lifetime.IsStopping && admission.HasCompatibleCohort;
+
+    internal ReplicaCohortAdmissionStatus ObserveCompatibleCohort()
+        => lifetime.IsStopping ? ReplicaCohortAdmissionStatus.Unavailable(ReplicaCohortAdmissionCode.DiscoveryStopping)
+            : admission.ObserveCompatibleCohort();
 
     internal async Task<SiloAddress> ResolveAsync(string voterId, bool refresh, CancellationToken cancellationToken)
     {

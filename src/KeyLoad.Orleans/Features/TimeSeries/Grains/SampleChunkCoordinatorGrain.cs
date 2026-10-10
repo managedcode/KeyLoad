@@ -32,10 +32,12 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     {
         var observed = new GrainRequestProbeIdentity(Guid.NewGuid(), hint.CommandId, hint.Creator, null,
             OperationKind.Batch);
-        try { await ScheduleCoreAsync(hint, observed, cancellationToken).ConfigureAwait(true); }
+        try
+        { await ScheduleCoreAsync(hint, observed, cancellationToken).ConfigureAwait(true); }
         catch (Exception primary)
         {
-            try { codec.ObserveProducerDisposed(observed, GrainContext); }
+            try
+            { codec.ObserveProducerDisposed(observed, GrainContext); }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -59,8 +61,10 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         var token = deadline.Token;
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         var current = SampleChunkWorkRead.Current(database, hint, token);
-        if (current is null || !SampleChunkWorkEligibility.SameOriginal(current, hint)) { return; }
-        if (admissions.TryGetValue(hint.CommandId, out _)) { return; }
+        if (current is null || !SampleChunkWorkEligibility.SameOriginal(current, hint))
+        { return; }
+        if (admissions.TryGetValue(hint.CommandId, out _))
+        { return; }
         await RetireSettledAsync(token).ConfigureAwait(true);
         if (admissions.Count >= database.TimeSeriesOptions.Value.MaximumPendingChunkWindows)
         {
@@ -77,8 +81,10 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
             database.Limits.MaxBatchBytes);
         var job = await jobs.ScheduleJobAsync(nativeRequest, token).ConfigureAwait(true);
         if (observation is not null)
-        { SampleChunkNativeJobObservation.Returned(services, hint.CommandId, job.Id,
-            nativeRequest.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes); }
+        {
+            SampleChunkNativeJobObservation.Returned(services, hint.CommandId, job.Id,
+            nativeRequest.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes);
+        }
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkNativeJobReturned, token)
             .ConfigureAwait(true);
         if (admissions.TryGetValue(hint.CommandId, out var retained) && retained == original)
@@ -113,20 +119,24 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     {
         var hint = SampleChunkJobMetadata.Read(context, this.GetGrainId(), database.Limits.MaxBatchBytes);
         RequireOpen(hint);
-        if (!admissions.TryGetValue(hint.CommandId, out var original)) { return; }
+        if (!admissions.TryGetValue(hint.CommandId, out var original))
+        { return; }
         if (!SampleChunkWorkEligibility.SameOriginal(original.Hint, hint)
             || original.JobId is { } actualId && actualId != context.Job.Id)
         { throw Errors.Fail(ErrorCode.Validation, SampleChunkJobProtocol.Invalid); }
         if (codec.PhaseObserver is not null)
-        { SampleChunkNativeJobObservation.Executing(services, hint.CommandId, context.Job.Id,
-            context.Job.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes); }
+        {
+            SampleChunkNativeJobObservation.Executing(services, hint.CommandId, context.Job.Id,
+            context.Job.Metadata![SampleChunkJobProtocol.HintKey], database.Limits.MaxBatchBytes);
+        }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
         using var timeout = new CancellationTokenSource(execution.Value.DispatchDeadline, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         SampleChunkWorkHint? current;
-        try { current = SampleChunkWorkRead.Current(database, hint, token); }
+        try
+        { current = SampleChunkWorkRead.Current(database, hint, token); }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated)
         {
             await BlockAsync(original, context.Job.Id, failure.Code, token).ConfigureAwait(true);
@@ -152,7 +162,8 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         foreach (var entry in admissions.ToDictionary())
         {
             SampleChunkWorkHint? current;
-            try { current = SampleChunkWorkRead.Current(database, entry.Value.Hint, token); }
+            try
+            { current = SampleChunkWorkRead.Current(database, entry.Value.Hint, token); }
             catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
             { continue; }
             if (current is null || current.Revision != entry.Value.Hint.Revision
@@ -163,8 +174,12 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
 
     private Task BlockAsync(SampleChunkJobAdmission original, string jobId, ErrorCode code, CancellationToken token)
     {
-        admissions[original.Hint.CommandId] = original with { JobId = jobId,
-            BlockedPolicyEpoch = original.Hint.CreatorPolicyEpoch, SettledError = code };
+        admissions[original.Hint.CommandId] = original with
+        {
+            JobId = jobId,
+            BlockedPolicyEpoch = original.Hint.CreatorPolicyEpoch,
+            SettledError = code
+        };
         return PersistAsync(token);
     }
 
@@ -173,13 +188,15 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
 
     private async Task PersistAsync(CancellationToken token)
     {
-        try { await state.WriteStateAsync(token).ConfigureAwait(true); }
+        try
+        { await state.WriteStateAsync(token).ConfigureAwait(true); }
         catch (Exception) { open = false; DeactivateOnIdle(); throw; }
     }
 
     private void RequireOpen(SampleChunkWorkHint hint)
     {
-        if (!open) { throw Errors.Fail(ErrorCode.RecoveryRequired, SampleChunkJobProtocol.Unresolved); }
+        if (!open)
+        { throw Errors.Fail(ErrorCode.RecoveryRequired, SampleChunkJobProtocol.Unresolved); }
         SampleChunkJobValidation.Require(hint, this.GetPrimaryKeyString());
     }
 }

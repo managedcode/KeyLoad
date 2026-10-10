@@ -5,9 +5,9 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Security;
+using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -119,10 +119,7 @@ internal static class ServerConfiguration
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         PhysicalOwnerRegistrationServices.Add(services);
-        if (blobWireObserver is null)
-        { services.AddSingleton<OrleansNode>(); }
-        else
-        { services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider, blobWireObserver)); }
+        services.AddSingleton(provider => NativeDiscoveryOmissionComposition.CreateNode(provider, blobWireObserver));
         services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
         services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(
             provider.GetRequiredService<IOptions<NodeOptions>>(),

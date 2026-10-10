@@ -13,7 +13,7 @@ internal static class NativeTextSettlement
             Refresh(root, limits, generation, completed ? budget : null, faultObserver, physicalGate, executionOptions: executionOptions);
             physicalGate.Run(() =>
             {
-                NativeTextFiles.DeleteOwnedGeneration(root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions);
+                NativeTextFiles.DeleteOwnedGeneration(root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: generation.Resources);
                 clearCurrent();
             });
             return;
@@ -23,7 +23,7 @@ internal static class NativeTextSettlement
             physicalGate.Run(generation.DisposeIndex);
             physicalGate.Run(() =>
             {
-                NativeTextFiles.DeleteBuildingGeneration(root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions);
+                NativeTextFiles.DeleteBuildingGeneration(root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: generation.Resources);
                 clearUnpublishedBuild();
             });
             return;
@@ -42,7 +42,7 @@ internal static class NativeTextSettlement
             physicalGate.Run(() => CheckForSettlement(generation, budget, executionOptions: executionOptions));
             physicalGate.Run(() => WriteManifest(root, limits, generation, files, budget, executionOptions: executionOptions));
             faultObserver?.Invoke(NativeTextFaultStage.NativeInventoryFlushed);
-            physicalGate.Run(() => NativeTextFiles.PublishManifest(root, generation.Leaf));
+            physicalGate.Run(() => NativeTextFiles.PublishManifest(root, generation.Leaf, generation.Resources));
             faultObserver?.Invoke(NativeTextFaultStage.ManifestPublished);
         }
         catch (Exception cleanupFailure) when (generation.DeferredBudgetFailure is { } primary)
@@ -91,18 +91,18 @@ internal static class NativeTextSettlement
         try
         {
             NativeTextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files,
-                limits, budget: generation.DeferredBudgetFailure is null ? budget : null, executionOptions: executionOptions);
+                limits, budget: generation.DeferredBudgetFailure is null ? budget : null, executionOptions: executionOptions, resources: generation.Resources);
         }
         catch (OperationCanceledException error) when (budget is not null)
         {
             generation.DeferBudgetFailure(error);
-            NativeTextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, limits, executionOptions: executionOptions);
+            NativeTextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, limits, executionOptions: executionOptions, resources: generation.Resources);
         }
         catch (KeyLoadException error) when (budget is not null
             && error.Code == KeyLoad.ErrorCode.BudgetExceeded)
         {
             generation.DeferBudgetFailure(error);
-            NativeTextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, limits, executionOptions: executionOptions);
+            NativeTextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, limits, executionOptions: executionOptions, resources: generation.Resources);
         }
     }
 }

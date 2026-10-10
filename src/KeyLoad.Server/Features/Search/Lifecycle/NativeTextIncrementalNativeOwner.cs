@@ -8,6 +8,7 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed class NativeTextIncrementalNativeOwner : IDisposable
 {
     private readonly string root;
+    private readonly NativeTextResourceOwnership? resources;
     private readonly string leaf;
     private readonly Guid sourceNodeId;
     private readonly IOptions<NativeTextExecutionOptions> executionOptions;
@@ -22,9 +23,11 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
     private bool additionObserved;
 
     internal NativeTextIncrementalNativeOwner(string root, string leaf, Guid sourceNodeId,
-        IOptions<NativeTextExecutionOptions> executionOptions, Action<NativeTextFaultStage>? faultObserver = null)
+        IOptions<NativeTextExecutionOptions> executionOptions, Action<NativeTextFaultStage>? faultObserver = null,
+        NativeTextResourceOwnership? resources = null)
     {
         this.root = root;
+        this.resources = resources;
         this.leaf = leaf;
         this.sourceNodeId = sourceNodeId;
         this.executionOptions = executionOptions;
@@ -34,6 +37,7 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         additionBoundary = faultObserver is null ? null : ObserveAddition;
     }
 
+    internal NativeTextResourceOwnership? Resources => resources;
     internal string Root => root;
     internal string Leaf => leaf;
     internal string Path => System.IO.Path.Combine(root, leaf);
@@ -49,7 +53,23 @@ internal sealed class NativeTextIncrementalNativeOwner : IDisposable
         NativeTextOwnedInventory.ValidateTrackedLayout(Path, owner.OwnedPaths, budget,
             allowMissingNative: true, executionOptions: executionOptions);
         index = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory),
-            new NativeTextFileStreamProvider(root, leaf, sourceNodeId, executionOptions), executionOptions);
+            new NativeTextFileStreamProvider(root, leaf, sourceNodeId, executionOptions, resources), executionOptions);
+        budget.Check();
+    }
+
+    internal void ApplyOnlineSeed(NativeTextIncrementalSeedPlan seed, ReadExecutionBudget budget)
+    {
+        budget.Check();
+        if (seed.Postings.Length != seed.Records.Length)
+        { throw NativeTextErrors.Corrupt(); }
+        var current = index ?? throw NativeTextErrors.Ownership();
+        foreach (var postings in seed.Postings)
+        {
+            budget.Check();
+            NativeTextIncrementalPostingWriter.Apply(current, [], postings, budget,
+                postingObserved ? null : postingBoundary, null,
+                additionObserved ? null : additionBoundary);
+        }
         budget.Check();
     }
 

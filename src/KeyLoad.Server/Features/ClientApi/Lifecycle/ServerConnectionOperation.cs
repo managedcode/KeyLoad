@@ -19,7 +19,8 @@ internal sealed class ServerConnectionOperation : IDisposable
     public void Dispose()
     {
         var original = Interlocked.Exchange(ref owner, null);
-        if (original is null) { return; }
+        if (original is null)
+        { return; }
         cancellation.Dispose();
         original.Release();
     }

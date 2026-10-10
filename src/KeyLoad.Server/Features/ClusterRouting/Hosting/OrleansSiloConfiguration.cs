@@ -20,13 +20,15 @@ internal static class OrleansSiloConfiguration
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, NativeConnectionOwnerIdentity connectionOwner, IPAddress address,
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
-        IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs, IRemotePartitionQueryRouter? remoteQueries,
+        IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs, IRemotePartitionQueryRouter? remoteQueries, IRemoteDistributedSearchRouter? distributedSearch,
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
-        CancellationToken startupCancellation)
+        NativeDiscoveryOmissionOwner? discoveryOmission, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
         builder.Services.AddSingleton(connectionOwner);
+        if (discoveryOmission is not null)
+        { builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe()); }
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
         if (options.MembershipAuthority.RemoteDocumentReads)
@@ -38,6 +40,8 @@ internal static class OrleansSiloConfiguration
             { builder.Services.AddSingleton(remoteBlobs); }
             if (remoteQueries is not null)
             { builder.Services.AddSingleton(remoteQueries); }
+            if (distributedSearch is not null)
+            { builder.Services.AddSingleton(distributedSearch); }
         }
         if (controlledDocuments is not null)
         { builder.Services.AddSingleton(controlledDocuments); }
@@ -70,6 +74,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ICacheMemoryBudget>(partition.CacheMemory);
         services.AddSingleton<INativeAnnMaintenance>(partition.AnnMaintenance);
         services.AddSingleton<INativeTextMaintenance>(partition.TextMaintenance);
+        services.AddSingleton<INativeOnlineTextMaintenance>(partition.OnlineTextMaintenance);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);
@@ -97,7 +102,7 @@ internal static class OrleansSiloConfiguration
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>()));
+            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>(), provider.GetService<ReplicaDiscoveryProbe>()));
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
         RegisterMembershipTable(services, partition, options, startupCancellation);

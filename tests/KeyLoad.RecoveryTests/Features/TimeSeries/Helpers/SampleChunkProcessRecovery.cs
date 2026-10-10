@@ -65,7 +65,8 @@ internal static class SampleChunkProcessRecovery
         else
         {
             await child.WaitAndJoinAsync(token);
-            if (child.ExitCode != SuccessExit) { throw new InvalidOperationException(FailedChild); }
+            if (child.ExitCode != SuccessExit)
+            { throw new InvalidOperationException(FailedChild); }
         }
         await KilledProcessFileReadiness.WaitAsync(root, token);
         RecoveryFileInventory.AssertNativeHandlesReleased(root);

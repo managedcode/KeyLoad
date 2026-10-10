@@ -19,7 +19,10 @@ internal enum GrainRequestPhase
     ParentFinalInstallPreflight,
     SampleChunkAdmissionPersisted,
     SampleChunkNativeJobReturned,
-    SampleChunkAdmissionRefused
+    SampleChunkAdmissionRefused,
+    NativeTextOriginalPostingRead,
+    DistributedSearchStatisticsCaptured,
+    OnlineTextCaptured
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

@@ -64,6 +64,7 @@ internal sealed class SampleChunkJobRevocationScenario(SampleChunkRf3Scenario wi
                 TimeSeriesRf3Scenario.Series, SampleChunkRf3Protocol.SealedRevision)], DurabilityProfile.QuorumProcessDurable);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(seal)))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected)));
-        OriginalSeal = original; OriginalReceipt = seal;
+        OriginalSeal = original;
+        OriginalReceipt = seal;
     }
 }

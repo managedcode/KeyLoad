@@ -16,7 +16,8 @@ internal static class RequestCqrsSampleChunkProbePair
     internal static void RequireDeclaredPair(RequestCqrsProbeArmRecord adjunct,
         IReadOnlyList<RequestCqrsProbeLoadedArm> all)
     {
-        if (adjunct.Phase != RequestCqrsProbePhase.AuthorizationReload || adjunct.SourceArmId is null) { return; }
+        if (adjunct.Phase != RequestCqrsProbePhase.AuthorizationReload || adjunct.SourceArmId is null)
+        { return; }
         var source = all.FirstOrDefault(arm => arm.Record.ArmId == adjunct.SourceArmId)?.Record;
         if (!ValidAdjunct(adjunct) || all.Count(arm => arm.Record.ArmId == adjunct.SourceArmId) != OneAdjunct
             || source is not { } original || !SameOriginal(original, adjunct)
@@ -27,13 +28,15 @@ internal static class RequestCqrsSampleChunkProbePair
 
     internal static RequestCqrsProbeLoadedArm Select(RequestCqrsProbeLoadedArm[] matches, GrainRequestPhase phase)
     {
-        if (matches.Length != PairCount) { throw Invalid(); }
+        if (matches.Length != PairCount)
+        { throw Invalid(); }
         var primary = matches.FirstOrDefault(arm => arm.Record.Phase == RequestCqrsProbePhase.SampleChunkNativeJobReturned);
         var adjunct = matches.FirstOrDefault(arm => arm.Record.Phase == RequestCqrsProbePhase.AuthorizationReload);
         if (matches.Count(arm => arm.Record.Phase == RequestCqrsProbePhase.SampleChunkNativeJobReturned) != OneAdjunct
             || matches.Count(arm => arm.Record.Phase == RequestCqrsProbePhase.AuthorizationReload) != OneAdjunct
             || primary is null || adjunct is null || !ValidAdjunct(adjunct.Record)
-            || !SameOriginal(primary.Record, adjunct.Record)) { throw Invalid(); }
+            || !SameOriginal(primary.Record, adjunct.Record))
+        { throw Invalid(); }
         return phase switch
         {
             GrainRequestPhase.SampleChunkAdmissionPersisted or GrainRequestPhase.SampleChunkNativeJobReturned

@@ -17,15 +17,18 @@ internal static class SampleChunkNativeJobRf3Message
     {
         var prefix = (executing ? Executing : Returned) + commandId.ToString(SampleChunkPendingRf3Protocol.GuidFormat) + Job;
         var start = actual.IndexOf(prefix, StringComparison.Ordinal);
-        if (start < 0) { return null; }
+        if (start < 0)
+        { return null; }
         if (Encoding.UTF8.GetByteCount(actual) > RequestCqrsProbeFixtureProtocol.MaximumRecordBytes)
         { throw Invalid(); }
         var body = actual.AsSpan(start + prefix.Length);
         var separator = body.LastIndexOf(Metadata.AsSpan(), StringComparison.Ordinal);
-        if (separator <= 0) { throw Invalid(); }
+        if (separator <= 0)
+        { throw Invalid(); }
         var digest = body[(separator + Metadata.Length)..];
         if (digest.Length != DigestCharacters + TerminatorCharacters || digest[^TerminatorCharacters] != Terminator
-            || !IsDigest(digest[..DigestCharacters])) { throw Invalid(); }
+            || !IsDigest(digest[..DigestCharacters]))
+        { throw Invalid(); }
         return new(commandId, body[..separator].ToString(), digest[..DigestCharacters].ToString());
     }
 

@@ -29,9 +29,12 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
         await ServerFailureObserver.ObserveAsync(next, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => feature.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => transport.Features.Set<ServerConnectionFeature>(null), failures);
-        lock (gate) { connections.Remove(feature.Id); }
-        if (failures.Count == ServerConnectionProtocol.NoFailures) { feature.Completion.TrySetResult(); }
-        else { feature.Completion.TrySetException(failures); }
+        lock (gate)
+        { connections.Remove(feature.Id); }
+        if (failures.Count == ServerConnectionProtocol.NoFailures)
+        { feature.Completion.TrySetResult(); }
+        else
+        { feature.Completion.TrySetException(failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -43,7 +46,8 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
             closing = true;
             owned = [.. connections.Values];
         }
-        foreach (var connection in owned) { connection.RequestClose(); }
+        foreach (var connection in owned)
+        { connection.RequestClose(); }
         await Task.WhenAll(owned.Select(connection => connection.Completion.Task))
             .WaitAsync(cancellationToken).ConfigureAwait(false);
     }

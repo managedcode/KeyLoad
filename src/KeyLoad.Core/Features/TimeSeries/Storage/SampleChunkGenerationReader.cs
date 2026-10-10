@@ -18,10 +18,12 @@ internal static class SampleChunkGenerationReader
                     SampleChunkEncodedDigest.Require(bytes, manifest.BlockDigests[ordinal].Span,
                         work, options.Value.HashChunkBytes);
                     var decoded = SampleChunkCodec.DecodeWithWork(bytes, work, options, SampleChunkCodec.MaximumEncodedBytes);
-                    foreach (var record in decoded) { work.Check(); SampleChunkWindowValidation.Record(record, window, series); }
+                    foreach (var record in decoded)
+                    { work.Check(); SampleChunkWindowValidation.Record(record, window, series); }
                     records.AddRange(decoded);
                 }, charge.Charge);
-            if (!present) { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+            if (!present)
+            { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
         }
         if (records.Count != manifest.RecordCount)
         { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }

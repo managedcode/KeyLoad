@@ -35,7 +35,8 @@ internal sealed class ConnectionRf3Caller : IAsyncDisposable
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
         };
         Sdk = new KeyLoadClient(http, key, IntegrationClientOptions.Execution());
-        if (multiplexed) { return; }
+        if (multiplexed)
+        { return; }
         transport = new HttpClientTransport(new HttpClientTransportOptions
         {
             Endpoint = new Uri(http.BaseAddress, McpCallerProtocol.Endpoint),
@@ -78,35 +79,42 @@ internal sealed class ConnectionRf3Caller : IAsyncDisposable
 
     internal void AbortTransport(List<Exception> failures)
     {
-        try { http.Dispose(); }
+        try
+        { http.Dispose(); }
         catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try { sockets.Dispose(); }
+        try
+        { sockets.Dispose(); }
         catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed) { return; }
+        if (disposed)
+        { return; }
         disposed = true;
         var failures = new List<Exception>();
         if (mcp is not null)
         {
-            try { await mcp.DisposeAsync().ConfigureAwait(false); }
+            try
+            { await mcp.DisposeAsync().ConfigureAwait(false); }
             catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
         if (transport is not null)
         {
-            try { await transport.DisposeAsync().ConfigureAwait(false); }
+            try
+            { await transport.DisposeAsync().ConfigureAwait(false); }
             catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
-        try { http.Dispose(); }
+        try
+        { http.Dispose(); }
         catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try { sockets.Dispose(); }
+        try
+        { sockets.Dispose(); }
         catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

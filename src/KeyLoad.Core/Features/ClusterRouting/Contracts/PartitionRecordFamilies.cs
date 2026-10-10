@@ -28,6 +28,7 @@ internal static class PartitionRecordFamilies
     internal const string Lease = "lease";
     internal const string MessageBody = "message-body";
     internal const string MessageMetadata = "message-meta";
+    internal const string OnlineTextCurrent = global::KeyLoad.Core.Features.Search.OnlineTextPublicationProtocol.CurrentFamily;
     internal const string Outbox = "outbox";
     internal const string OutboxHead = "outbox-head";
     internal const string OutcomeLocator = "outcome-locator-v1";
@@ -93,6 +94,7 @@ internal static class PartitionRecordFamilies
         Lease,
         MessageBody,
         MessageMetadata,
+        OnlineTextCurrent,
         Outbox,
         OutboxHead,
         OutcomeLocator,

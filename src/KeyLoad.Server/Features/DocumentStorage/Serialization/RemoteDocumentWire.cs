@@ -46,9 +46,11 @@ internal static class RemoteDocumentWire
     }
 
     internal static long ReplyMaximum(RemoteDocumentCallV1 call)
-        => call.QueryLeaf is { } leaf
-            ? Math.Min(RemoteDocumentProtocol.MaximumBodyBytes, PartitionQueryParallelRetention.ReplyBytes(leaf.Plan))
-            : RemoteDocumentProtocol.MaximumBodyBytes;
+        => call.SearchLeaf is { } search
+            ? Math.Min(RemoteDocumentProtocol.MaximumBodyBytes, PartitionQueryParallelRetention.ReplyBytes(search.MaxResultBytes))
+            : call.QueryLeaf is { } leaf
+                ? Math.Min(RemoteDocumentProtocol.MaximumBodyBytes, PartitionQueryParallelRetention.ReplyBytes(leaf.Plan))
+                : RemoteDocumentProtocol.MaximumBodyBytes;
 
     internal static RemoteDocumentTransportEnvelope DecodeCall(ReadOnlySpan<byte> body)
     {

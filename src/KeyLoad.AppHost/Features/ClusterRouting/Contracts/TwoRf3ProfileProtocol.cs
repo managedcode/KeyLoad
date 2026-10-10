@@ -2,6 +2,12 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3ProfileProtocol
 {
+    internal const string FirstVoterName = "node1";
+    internal const string SecondVoterName = "node2";
+    internal const string ThirdVoterName = "node3";
+    internal const string FourthVoterName = "node4";
+    internal const string FifthVoterName = "node5";
+    internal const string SixthVoterName = "node6";
     internal const string Section = "KeyLoadTests:ClusterRouting";
     internal const string Setting = Section + ":Profile";
     internal const string ProtectedDocumentMovementSetting = Section + ":ProtectedDocumentMovement";

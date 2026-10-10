@@ -48,7 +48,8 @@ public sealed partial class SearchEngine
             { throw Errors.Fail(ErrorCode.TokenInvalidated, WaitTokenFuture); }
             var provider = textProjection ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, WaitProviderUnavailable);
             var search = new SearchRequest(request.Partition, request.Collection, TextField: request.TextField);
-            var lease = provider.Acquire(TextProjectionLifecycle.CreateScope(database, principal, resource, search), budget);
+            var lease = SelectedTextProjectionAdmission.Acquire(database, provider, view, principal, resource, search, budget)
+                ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, WaitProviderUnavailable);
             Exception? primaryFailure = null;
             WaitForIndexResult result;
             try

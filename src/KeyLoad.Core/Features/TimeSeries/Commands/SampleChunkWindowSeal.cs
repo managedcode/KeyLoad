@@ -25,12 +25,18 @@ internal static class SampleChunkWindowSeal
     internal static SampleChunkWindow Seal(DatabaseEngine database, IAtomicTransaction tx, PartitionRef partition,
         string set, string series, SampleChunkWindow original, IOptions<TimeSeriesExecutionOptions> options)
     {
-        foreach (var record in original.OpenRecords) { SampleChunkWindowValidation.Record(record, original, series); }
+        foreach (var record in original.OpenRecords)
+        { SampleChunkWindowValidation.Record(record, original, series); }
         var records = original.OpenRecords.OrderBy(record => record.Sample.Timestamp.UtcTicks)
             .ThenBy(record => record.Sequence).ToArray();
-        var next = original with { Revision = checked(original.Revision + SampleChunkLifecycleProtocol.First),
-            Generation = SampleChunkLifecycleProtocol.First, State = SampleChunkWindowState.Sealed,
-            OpenRecords = ImmutableArray<SampleRecord>.Empty, MaintenanceCommandId = Guid.Empty };
+        var next = original with
+        {
+            Revision = checked(original.Revision + SampleChunkLifecycleProtocol.First),
+            Generation = SampleChunkLifecycleProtocol.First,
+            State = SampleChunkWindowState.Sealed,
+            OpenRecords = ImmutableArray<SampleRecord>.Empty,
+            MaintenanceCommandId = Guid.Empty
+        };
         SampleChunkGenerationWriter.Write(tx, partition, set, series, next, records, options, database.Limits.MaxBatchBytes);
         SampleChunkStorage.Write(tx, SampleChunkKeys.Window(partition, set, series, next.WindowId), next, database.Limits.MaxBatchBytes);
         return next;

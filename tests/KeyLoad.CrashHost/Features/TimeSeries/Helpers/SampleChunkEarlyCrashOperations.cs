@@ -13,9 +13,11 @@ internal static class SampleChunkEarlyCrashOperations
     internal static void Seed(DatabaseEngine database, SampleChunkEarlyCut cut)
     {
         Configure(database).Get<ResourceDefinition>();
-        if (cut == SampleChunkEarlyCut.Open) { return; }
+        if (cut == SampleChunkEarlyCut.Open)
+        { return; }
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Open()).Get<CommitReceipt>();
-        if (cut == SampleChunkEarlyCut.Append) { return; }
+        if (cut == SampleChunkEarlyCut.Append)
+        { return; }
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), Append()).Get<CommitReceipt>();
         SampleChunkCrashOperations.Commit(database, Guid.NewGuid(), SampleChunkCrashOperations.Intended(false))
             .Get<CommitReceipt>();

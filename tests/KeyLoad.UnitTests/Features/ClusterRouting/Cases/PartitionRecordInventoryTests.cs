@@ -6,7 +6,7 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    private const int ExpectedFamilyCount = 62;
+    private const int ExpectedFamilyCount = 63;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     private static readonly string[] ExpectedFamilies =
@@ -15,7 +15,7 @@ internal sealed class PartitionRecordInventoryTests
         "blob-state-v1", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
         "event-id", "event-sequence", "graph-cross-partition-capacity", "graph-cross-partition-intent",
         "graph-cross-reverse-adjacency", "graph-edge-owner-version", "inbox", "index", "lease", "message-body", "message-meta",
-        "outbox", "outbox-head", "outcome-locator-v1", "outcome-locator-v2", "outcome-v2", "projection-consumer", "projection-receipt", "queue-counters",
+        "online-text-current", "outbox", "outbox-head", "outcome-locator-v1", "outcome-locator-v2", "outcome-v2", "projection-consumer", "projection-receipt", "queue-counters",
         "queue-transfer-intent", "queue-transfer-source-capacity", "queue-transfer-target-capacity",
         "queue-transfer-target-receipt", "ready", "recurring-saga-capacity", "recurring-schedule",
         "saga-state", "sample", "sample-chunk-block", "sample-chunk-correction", "sample-chunk-manifest",

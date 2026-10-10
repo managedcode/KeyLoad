@@ -23,10 +23,16 @@ internal static class SampleChunkWindowDrop
             _ = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest, options, charge);
             SampleChunkRepresentationRetirement.Delete(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest);
         }
-        var next = previous with { State = SampleChunkWindowState.Dropped, SourceSequence = watermark.Sequence,
-            Revision = checked(previous.Revision + SampleChunkLifecycleProtocol.First), RetentionBeforeUtcTicks = floor,
-            OpenRecords = ImmutableArray<SampleRecord>.Empty, CorrectionSequences = ImmutableArray<long>.Empty,
-            MaintenanceCommandId = Guid.Empty };
+        var next = previous with
+        {
+            State = SampleChunkWindowState.Dropped,
+            SourceSequence = watermark.Sequence,
+            Revision = checked(previous.Revision + SampleChunkLifecycleProtocol.First),
+            RetentionBeforeUtcTicks = floor,
+            OpenRecords = ImmutableArray<SampleRecord>.Empty,
+            CorrectionSequences = ImmutableArray<long>.Empty,
+            MaintenanceCommandId = Guid.Empty
+        };
         SampleChunkStorage.Write(tx, SampleChunkKeys.Window(partition, request.SeriesSet, request.SeriesId, next.WindowId),
             next, database.Limits.MaxBatchBytes);
         return new(SampleChunkLifecycleProtocol.DropKind, request.SeriesSet, request.SeriesId, next.Revision);

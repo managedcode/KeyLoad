@@ -7,7 +7,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
 
-internal sealed class AnnMaintenanceChildCalls(DecodedGrainRequest parent, IGrainFactory grains,
+internal sealed class AnnMaintenanceChildCalls(DecodedGrainRequest parent, Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
     IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, ILogger diagnostics)
@@ -52,7 +52,7 @@ internal sealed class AnnMaintenanceChildCalls(DecodedGrainRequest parent, IGrai
             reply = await GrainRequestStreamConsumer.DrainAsync(cancellation =>
             {
                 invoked = true;
-                return grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, cancellation);
+                return executeChild(signed, cancellation);
             }, serializer, actorId, clock, routing, token).ConfigureAwait(true);
         }
         catch (KeyLoadException error) when (invoked && command is not null)

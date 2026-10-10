@@ -5,7 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>The atomic filename fault preserves the actual previously admitted control bytes.</summary>
 internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, string OriginalName,
     string FaultName, byte[] ExactBytes,
-    PartitionMovementCleanupMatrixFaultRepair Repair = PartitionMovementCleanupMatrixFaultRepair.RenameBack)
+    PartitionMovementCleanupMatrixFaultRepair Repair = PartitionMovementCleanupMatrixFaultRepair.RenameBack,
+    byte[]? OriginalBytes = null)
 {
     internal static void RenameAdmittedArm(RequestCqrsProbeFixture controls,
         Guid admittedArm, RequestCqrsProbeMarkerRecord actualPrimary, List<PartitionMovementCleanupMatrixRf3Fault> ownedFaults)
@@ -92,6 +93,13 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
         var owned = controls.NodeFor(Node);
         RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
         RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, FaultName, ExactBytes);
+        if (Repair == PartitionMovementCleanupMatrixFaultRepair.RestoreExactBytes)
+        {
+            if (OriginalName != FaultName || OriginalBytes is null)
+            { throw Invalid(); }
+            RequestCqrsProbeFileStore.ReplaceExactArm(owned.Directory, OriginalName, ExactBytes, OriginalBytes);
+            return;
+        }
         if (Repair == PartitionMovementCleanupMatrixFaultRepair.RemoveResurrection)
         {
             if (OriginalName != FaultName)

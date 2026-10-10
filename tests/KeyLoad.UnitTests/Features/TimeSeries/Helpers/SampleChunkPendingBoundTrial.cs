@@ -21,7 +21,8 @@ internal sealed class SampleChunkPendingBoundTrial(SampleChunkCanonicalFixture f
         fixture.Open();
         fixture.Commit(new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             SecondWindow, SecondStart, SecondEnd));
-        fixture.Commit(Append(First)); fixture.Commit(Append(Second));
+        fixture.Commit(Append(First));
+        fixture.Commit(Append(Second));
         fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             fixture.WindowId, SampleChunkPendingBoundProtocol.Appended));
         fixture.Commit(new SealSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,

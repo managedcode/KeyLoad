@@ -27,7 +27,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
             or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.SampleChunkWindow
             => new(true, true, false),
         GrainReadKind.Query => new(true, true, false),
-        GrainReadKind.AstQuery or GrainReadKind.PartitionQuery => new(true, true, false),
+        GrainReadKind.AstQuery or GrainReadKind.PartitionQuery or GrainReadKind.DistributedSearch => new(true, true, false),
         GrainReadKind.QueryCapabilities => new(true, true, false),
         GrainReadKind.ChangeFeed => new(true, true, false),
         GrainReadKind.LiveQueryStart => new(true, true, false),
@@ -56,6 +56,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.Batch => new(false, true, true),
         OperationKind.MovePartition => new(false, true, true),
         OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex => new(false, false, true),
+        OperationKind.MaintainOnlineTextIndex => new(false, true, true),
         OperationKind.ReceiveAcrossLanes => new(false, false, true),
         OperationKind.Receive => new(false, true, true),
         OperationKind.Delivery => new(false, true, true),

@@ -14,9 +14,10 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
     private readonly Dictionary<string, Uri> endpoints;
     private readonly PeerSecurity security;
     private readonly HttpClient http;
+    private readonly ReplicaDiscoveryProbe? probe;
 
     internal ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
-        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe = null)
     {
         var configuration = configurationOptions.Value;
         var options = peerSettings.Value;
@@ -28,9 +29,10 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
         this.options = peerSettings.Value;
         this.authentication = authentication;
         this.clock = clock;
+        this.probe = probe;
         endpoints = new(options.Endpoints, StringComparer.Ordinal);
         security = new PeerSecurity(options.Secret, clock, peerOptions);
-        http = new HttpClient(security.CreateHandler(), disposeHandler: true) { Timeout = Timeout.InfiniteTimeSpan };
+        http = new HttpClient(probe is null ? security.CreateHandler() : security.CreateProtectedHandler(probe.BeforeSend), disposeHandler: true) { Timeout = Timeout.InfiniteTimeSpan };
     }
 
     internal async Task<ReplicaDiscoveryObservation?> DiscoverAsync(string voterId, CancellationToken cancellationToken)
@@ -58,7 +60,9 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
 
             authentication.VerifyDiscovery(voterId, bytes, nonce, signature);
             var discovered = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(bytes);
-            return ReplicaDiscoveryIdentity.CreateObservation(voterId, discovered, configuration, options, clock);
+            var observation = ReplicaDiscoveryIdentity.CreateObservation(voterId, discovered, configuration, options, clock);
+            probe?.Verified(voterId, nonce, discovered, cancellationToken);
+            return observation;
         }
     }
 

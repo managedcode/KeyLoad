@@ -20,10 +20,15 @@ internal static class SampleChunkWindowMerge
         var records = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous,
             manifest, options, charge);
         var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
-        var next = previous with { Revision = checked(previous.Revision + SampleChunkLifecycleProtocol.First),
+        var next = previous with
+        {
+            Revision = checked(previous.Revision + SampleChunkLifecycleProtocol.First),
             Generation = checked(previous.Generation + SampleChunkLifecycleProtocol.First),
-            SourceSequence = watermark.Sequence, RetentionBeforeUtcTicks = watermark.Floor,
-            CorrectionSequences = ImmutableArray<long>.Empty, MaintenanceCommandId = Guid.Empty };
+            SourceSequence = watermark.Sequence,
+            RetentionBeforeUtcTicks = watermark.Floor,
+            CorrectionSequences = ImmutableArray<long>.Empty,
+            MaintenanceCommandId = Guid.Empty
+        };
         SampleChunkGenerationWriter.Write(tx, partition, request.SeriesSet, request.SeriesId, next, records,
             options, database.Limits.MaxBatchBytes);
         SampleChunkRepresentationRetirement.Delete(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest);

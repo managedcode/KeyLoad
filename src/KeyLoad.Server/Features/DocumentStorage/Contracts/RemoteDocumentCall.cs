@@ -14,7 +14,8 @@ internal sealed record RemoteDocumentCallV1(
     [property: global::Orleans.Id(6)] PhysicalShardRecord Source,
     [property: global::Orleans.Id(7)] RemoteDocumentReadFenceV1 Fence,
     [property: global::Orleans.Id(8)] GetDocumentRequest? Request,
-    [property: global::Orleans.Id(9)] PartitionQueryOwnedLeafRequest? QueryLeaf = null);
+    [property: global::Orleans.Id(9)] PartitionQueryOwnedLeafRequest? QueryLeaf = null,
+    [property: global::Orleans.Id(10)] KeyLoad.Query.Features.QueryExecution.DistributedSearchOwnedLeafV1? SearchLeaf = null);
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteDocumentProtocol.ReplyAlias)]
 internal sealed record RemoteDocumentReplyV1(
@@ -26,4 +27,5 @@ internal sealed record RemoteDocumentReplyV1(
     [property: global::Orleans.Id(5)] ReplicaSiloDiscovery EndpointDiscovery,
     [property: global::Orleans.Id(6)] PartitionQueryLeafResultV1? QueryLeaf = null,
     [property: global::Orleans.Id(7)] ControlledDocumentReadResult? Controlled = null,
-    [property: global::Orleans.Id(8)] ControlledBlobReadResult? ControlledBlob = null);
+    [property: global::Orleans.Id(8)] ControlledBlobReadResult? ControlledBlob = null,
+    [property: global::Orleans.Id(9)] KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1? SearchLeaf = null);

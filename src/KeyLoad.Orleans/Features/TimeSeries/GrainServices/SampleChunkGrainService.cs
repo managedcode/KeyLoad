@@ -33,8 +33,10 @@ public sealed class SampleChunkGrainService(GrainId id, Silo silo, ILoggerFactor
     public override async Task Stop()
     {
         var stopped = base.Stop();
-        if (loop is { } active) { await Task.WhenAll(stopped, active).ConfigureAwait(true); }
-        else { await stopped.ConfigureAwait(true); }
+        if (loop is { } active)
+        { await Task.WhenAll(stopped, active).ConfigureAwait(true); }
+        else
+        { await stopped.ConfigureAwait(true); }
     }
 
     private async Task RunAsync(CancellationToken stopped)
@@ -64,9 +66,11 @@ public sealed class SampleChunkGrainService(GrainId id, Silo silo, ILoggerFactor
     {
         try
         {
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true)) { return null; }
+            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
+            { return null; }
             await consensus.ReadBarrierAsync(token).ConfigureAwait(true);
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true)) { return null; }
+            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
+            { return null; }
             var page = SampleChunkWorkDiscovery.Read(database, after, token);
             foreach (var hint in page.Hints)
             {
@@ -85,10 +89,12 @@ public sealed class SampleChunkGrainService(GrainId id, Silo silo, ILoggerFactor
     {
         var coordinator = grains.GetGrain<ISampleChunkCoordinatorGrain>(hint.Partition.AtomicPartitionId);
         var original = coordinator.ScheduleAsync(hint, token);
-        try { await original.WaitAsync(token).ConfigureAwait(true); }
+        try
+        { await original.WaitAsync(token).ConfigureAwait(true); }
         catch (OperationCanceledException initiating) when (token.IsCancellationRequested)
         {
-            try { await original.ConfigureAwait(true); }
+            try
+            { await original.ConfigureAwait(true); }
             catch (Exception cleanup) { throw new AggregateException(initiating, cleanup); }
             throw;
         }

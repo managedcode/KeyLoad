@@ -39,6 +39,7 @@ internal sealed class NativeTextIncrementalSession
         budget.Check();
     }
 
+    internal NativeTextResourceReservation? OperationReservation { get; set; }
     internal Guid Id { get; }
     internal TextIndexMaintenanceRequest Request { get; }
     internal NativeTextSeedCapture Upper { get; }

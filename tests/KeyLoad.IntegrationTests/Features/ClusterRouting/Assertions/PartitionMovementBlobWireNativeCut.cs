@@ -32,8 +32,10 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
     {
         var entries = new List<ReplicaEntry>();
         for (var index = before.Applied + NextEntry; index <= after.Applied; index++)
-        { entries.Add(owner.Partition.Materializer.Log.ReadEntry(index)
-            ?? throw new InvalidOperationException("The real native wire cut entry was compacted or missing.")); }
+        {
+            entries.Add(owner.Partition.Materializer.Log.ReadEntry(index)
+            ?? throw new InvalidOperationException("The real native wire cut entry was compacted or missing."));
+        }
         await RequireEntriesAsync(before, after, entries.ToArray());
     }
 
@@ -52,7 +54,8 @@ internal sealed record PartitionMovementBlobWireNativeCut(PartitionMovementPubli
             count++;
         }
         await Assert.That(entries.Length).IsEqualTo(count);
-        if (count != EmptyCounter) { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
+        if (count != EmptyCounter)
+        { allowed.Add(Convert.ToHexString(KeySpace.AppliedBytes)); }
         await membership.RequireCompleteAsync();
         var left = PartitionMovementCapturePointerRf3Fault.Rows(before.Rows);
         var right = PartitionMovementCapturePointerRf3Fault.Rows(after.Rows);
