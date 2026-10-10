@@ -19,6 +19,16 @@ internal static class PhysicalOwnerRegistrationLog
         => Failure(logger, error is KeyLoadException known ? known.Code : ErrorCode.UnknownWriteOutcome,
             stage, Category(error), deadlineCancelled, stoppingCancelled, lastProbeHttpStatus, null);
 
+    internal const string ReceiverFailurePrefix = "Physical owner probe receiver refused";
+    private const string ReceiverFailureMessage = ReceiverFailurePrefix + " with {ErrorCode} at {Observation} (Domain); DeadlineCancelled={DeadlineCancelled}; StoppingCancelled={StoppingCancelled}; ResponseHttpStatus={ResponseHttpStatus}.";
+    private static readonly Action<ILogger, ErrorCode, PhysicalOwnerProbeTrace, bool, bool, int, Exception?> ReceiverFailure =
+        LoggerMessage.Define<ErrorCode, PhysicalOwnerProbeTrace, bool, bool, int>(LogLevel.Warning,
+            new EventId(FailureEvent), ReceiverFailureMessage);
+
+    internal static void ReceiverFailed(ILogger logger, ErrorCode code, PhysicalOwnerProbeTrace observation,
+        bool deadlineCancelled, bool stoppingCancelled, int responseStatus)
+        => ReceiverFailure(logger, code, observation, deadlineCancelled, stoppingCancelled, responseStatus, null);
+
     private static PhysicalOwnerRegistrationFailureCategory Category(Exception error) => error switch
     {
         KeyLoadException => PhysicalOwnerRegistrationFailureCategory.Domain,

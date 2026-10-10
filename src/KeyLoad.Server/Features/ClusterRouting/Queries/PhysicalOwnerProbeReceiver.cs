@@ -12,34 +12,48 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
     private const long EmptyApplied = 0;
 
     internal async Task<PhysicalOwnerProbeReplyV1> ReadAsync(PhysicalOwnerProbeCallV1 call,
-        CancellationToken cancellationToken)
+        PhysicalOwnerProbeTrace trace, CancellationToken cancellationToken)
     {
+        trace.Stage = PhysicalOwnerProbeStage.CallValidation;
         Validate(call, cancellationToken);
+        trace.Stage = PhysicalOwnerProbeStage.InitialMembership;
         var initial = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        trace.Stage = PhysicalOwnerProbeStage.Authentication;
         var administrator = await requests.AuthenticateAsync(cancellationToken).ConfigureAwait(false);
+        trace.Stage = PhysicalOwnerProbeStage.NativeStatus;
         var status = await requests.ReadStatusAsync(administrator, cancellationToken).ConfigureAwait(false);
-        if (status.Incarnation != partition.Configuration.Incarnation
-            || status.Voters != PhysicalOwnerDirectoryProtocol.VoterCount || !status.RoutingReady)
+        trace.Stage = PhysicalOwnerProbeStage.StatusGuard;
+        if (trace.Refused(PhysicalOwnerProbePredicate.StatusIncarnation, status.Incarnation != partition.Configuration.Incarnation)
+            || trace.Refused(PhysicalOwnerProbePredicate.StatusVoters, status.Voters != PhysicalOwnerDirectoryProtocol.VoterCount) || trace.Refused(PhysicalOwnerProbePredicate.StatusRoutingReady, !status.RoutingReady))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        trace.Stage = PhysicalOwnerProbeStage.ReadBarrier;
         await partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
+        trace.Stage = PhysicalOwnerProbeStage.CallValidation;
         Validate(call, cancellationToken);
+        trace.Stage = PhysicalOwnerProbeStage.Consensus;
         var local = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
+        trace.Stage = PhysicalOwnerProbeStage.Discovery;
         var discovery = node.Discovery?.Read()
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        trace.Stage = PhysicalOwnerProbeStage.FinalMembership;
         var final = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        trace.Stage = PhysicalOwnerProbeStage.CallValidation;
         Validate(call, cancellationToken);
-        if (initial.ActiveFingerprint != final.ActiveFingerprint || !discovery.TransportReady
-            || discovery.VoterId != partition.Configuration.LocalId
-            || discovery.Incarnation != partition.Configuration.Incarnation
-            || local.MaterializedPosition < EmptyApplied)
+        trace.Stage = PhysicalOwnerProbeStage.FinalGuard;
+        if (trace.Refused(PhysicalOwnerProbePredicate.Fingerprint, initial.ActiveFingerprint != final.ActiveFingerprint) || trace.Refused(PhysicalOwnerProbePredicate.TransportReady, !discovery.TransportReady)
+            || trace.Refused(PhysicalOwnerProbePredicate.LocalVoter, discovery.VoterId != partition.Configuration.LocalId)
+            || trace.Refused(PhysicalOwnerProbePredicate.DiscoveryIncarnation, discovery.Incarnation != partition.Configuration.Incarnation)
+            || trace.Refused(PhysicalOwnerProbePredicate.AppliedPosition, local.MaterializedPosition < EmptyApplied))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        trace.Stage = PhysicalOwnerProbeStage.CurrentAdministrator;
         partition.Database.Store.Read(view =>
         {
             GrainRequestAuthority.RequireAdministrator(partition.Database.Principal(view, administrator.Id, clock.GetUtcNow()));
             return true;
         });
+        trace.Stage = PhysicalOwnerProbeStage.Reply;
         return new(PhysicalOwnerProbeProtocol.Version, call.RequestId, call.Nonce,
             PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition), discovery,
             local.MaterializedPosition, final.ActiveFingerprint);

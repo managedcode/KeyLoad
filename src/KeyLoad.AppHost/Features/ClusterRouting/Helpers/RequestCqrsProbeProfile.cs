@@ -46,6 +46,14 @@ internal sealed class RequestCqrsProbeProfile
         return settings is null ? null : Create(builder, dataRoot, settings);
     }
 
+    internal static RequestCqrsProbeProfile? ReadCovered(IDistributedApplicationBuilder builder, string dataRoot,
+        bool ephemeral, int? benchmarkNodeCount, KeyLoad.AppHost.Features.CodeQuality.NativeCoverageRf3ClusterImage image)
+    {
+        ArgumentNullException.ThrowIfNull(image);
+        var settings = ReadSettings(builder, dataRoot, ephemeral, benchmarkNodeCount);
+        return settings is null ? null : Create(builder, dataRoot, settings);
+    }
+
     private static RequestCqrsProbeProfileSettings? ReadSettings(IDistributedApplicationBuilder builder,
         string dataRoot, bool ephemeral, int? benchmarkNodeCount)
     {

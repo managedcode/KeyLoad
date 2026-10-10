@@ -47,8 +47,7 @@ internal sealed class RemoteTransferStartupCapture : IAsyncDisposable
             : error is KeyLoadException ? DomainFailure : UnexpectedFailure;
         code = (error as KeyLoadException)?.Code;
         cancelled = callerCancelled;
-        if (window is { } original)
-        { RemoteTransferStartupArtifacts.Save(session, original, FailureBoundary, primary, code, cancelled, error); }
+        RemoteTransferStartupArtifacts.Save(session, window, FailureBoundary, primary, code, cancelled, error);
     }
 
     private Task ReadyAsync() => CloseAsync(ReadyBoundary);

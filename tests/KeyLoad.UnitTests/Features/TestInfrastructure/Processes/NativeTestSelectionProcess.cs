@@ -50,6 +50,8 @@ internal static class NativeTestSelectionProcess
             const rejection = nativeSelection(rejectionArgs, {});
             const connectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*", localArgs[2]];
             const connection = nativeSelection(connectionArgs, {});
+            const emptySnapshotArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/EmptyReplicaSnapshotRf3Tests/*", localArgs[2]];
+            const emptySnapshot = nativeSelection(emptySnapshotArgs, {});
             const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*", localArgs[2]];
             const nativeText = nativeSelection(nativeTextArgs, {});
             const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
@@ -69,7 +71,7 @@ internal static class NativeTestSelectionProcess
             }
             const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
             const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs]) {
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -127,6 +129,17 @@ internal static class NativeTestSelectionProcess
               }
               throw new Error('Unsupported native text RF3 filter was accepted.');
             }
+            let emptySnapshotUnsupportedCount = 0;
+            for (const badFilter of ['/*/*/EmptyReplicaSnapshotRf3Tests/* ', '/*/*/EmptyReplicaSnapshot*/*',
+              '/*/*/EmptyReplicaSnapshotRf3Tests/ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation',
+              '/*/*/EmptyReplicaSnapshotRf3Tests/*|/*/*/OtherCase/*']) {
+              try { nativeSelection([emptySnapshotArgs[0], '--KeyLoadTests:Filter='+badFilter, emptySnapshotArgs[2]], {}); }
+              catch (failure) {
+                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                emptySnapshotUnsupportedCount++; continue;
+              }
+              throw new Error('Unsupported native snapshot RF3 filter was accepted.');
+            }
             let remoteTransferUnsupportedCount = 0;
             for (const badFilter of ['/*/*/RemoteTransferDistinctOwnerTests/*',
               '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwners*',
@@ -139,7 +152,7 @@ internal static class NativeTestSelectionProcess
               throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
             }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

@@ -2118,3 +2118,21 @@ Stage46 final local checkpoint: canonical full verify-no-changes passed without 
 REQ-CQ-009 and AC-CQ-018/019/039 preserve the exact source/image qualification boundary for the guarded Stage47 owner repair. The owning physical-probe registration explicitly constructs the existing internal endpoint with the same validated native dependencies; the preceding existing-event discriminator preserves original diagnostic bounds and no credentials or caller payloads. The active-abort healthy oracle derives index166 from the independently fixed original source index165 and one genuine next Submit, retaining the complete literal receipt and cold state assertions. ClusterRouting/PartitionTransfer, RemoteTransfers and ADR-088/106/125 hold the feature contracts.
 
 Native compiler/analyzers report zero errors/warnings after all joined source edits. The isolated owning Server factory compilation passed0/0; the original six-owner R65 startup failure, exact native DI internal-constructor refusal and deliberately incomplete post-factory diagnosis retain separate original receipts. The local original active-abort test failed before the operation body on Darwin address binding; it is not receipt or operation proof. Stage46 full build/formatter, actual3297 census and ANN4+4 original local successes remain their own immutable source cohort. Stage47 changes no test declaration, classification, group or selector inventory, but its current full solution build/formatter, fresh compiled-image census and required Linux normal/scalar/process/SDK/MCP RF3 must run against delivered source through the existing canonical workflow. No gate is removed or promoted, no task closes, and numeric functional coverage remains unmeasured. Root owns the complete requested source commit/push and current evidence; the three independent feature workers continue implementation and complete operation tests.
+## Current Stage49 test identity binding
+
+TASK-CQ-STAGE49-CURRENT-TEST-IDENTITY-001 preserves REQ-CQ-009 and
+AC-CQ-018/019/039 while rebinding the 23 existing cases in
+CurrentStoragePreservationTests, CurrentWalRejectionTests,
+NativeMissingIdentityTests and NativeTUnitSelectionTests to their actual current
+source hashes and native declaration ranges. The full current Release build,
+normal/scalar discovery and independent portable-PDB/PE observation precede
+this metadata join. Both original discoveries contain the same 3297 identities;
+the native Unit image declares 1709 compiled sources without a missing PDB
+document. Preserve every UID, method/argument identity, classification,
+REQ/AC mapping, group, selector, exclusion and contributor decision. Retain the
+original strict validator refusal, update only sourceSha256/lineNumber/
+endLineNumber from the matching native declarations and current PDB-bound
+source, and rerun the unchanged canonical native-census validator. The existing
+ADR-033/125 contracts cover this source identity repair. Root owns the guarded
+join and delivery; scoped local execution does not establish numeric coverage,
+complete Linux/RF3 qualification or whole-task acceptance.

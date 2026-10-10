@@ -45,6 +45,7 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
         await Partition.Coordinator.StartAsync(cancellationToken).ConfigureAwait(false);
         await Application.StartAsync(cancellationToken).ConfigureAwait(false);
         await Silo.StartAsync(cancellationToken).ConfigureAwait(false);
+        await Silo.WaitForPhysicalOwnerRegistrationAsync(cancellationToken).ConfigureAwait(false);
     }
 
     internal Task StopAsync(CancellationToken cancellationToken) => shutdown ??= StopCoreAsync(cancellationToken);

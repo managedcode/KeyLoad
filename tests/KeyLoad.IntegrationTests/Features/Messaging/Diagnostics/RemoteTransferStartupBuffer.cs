@@ -12,6 +12,7 @@ internal sealed class RemoteTransferStartupBuffer(string name)
     private const string UnhandledPrefix = "Unhandled exception";
     private const string PrerequisitePrefix = "NativeReplicaPrerequisite failed";
     private const string RegistrationFailurePrefix = "PhysicalOwnerRegistrationWorker[1004]";
+    private const string ReceiverFailurePrefix = "Physical owner probe receiver refused";
     private const string Unobserved = "Unobserved";
     private readonly Lock gate = new();
     private readonly Queue<(long Ordinal, string Text)> tail = new();
@@ -39,7 +40,8 @@ internal sealed class RemoteTransferStartupBuffer(string name)
                 || original.Contains(CriticalPrefix, StringComparison.Ordinal)
                 || original.Contains(UnhandledPrefix, StringComparison.Ordinal)
                 || original.Contains(PrerequisitePrefix, StringComparison.Ordinal)
-                || original.Contains(RegistrationFailurePrefix, StringComparison.Ordinal);
+                || original.Contains(RegistrationFailurePrefix, StringComparison.Ordinal)
+                || original.Contains(ReceiverFailurePrefix, StringComparison.Ordinal);
             if (startedFailure && first.Count < FirstFailureRecords)
             { first.Add((observed, bounded)); }
             tail.Enqueue((observed, bounded));

@@ -12,7 +12,27 @@ internal static class ClusterFixtureComposition
 {
     private const string InvalidContainerModel = "The Aspire model must expose exactly the three named RF3 container resources.";
     private const int MinimumSnapshotThreshold = 1;
+    private const string NamespaceProfileConflict = "The native namespace fault cohort cannot mix local-image or covered selection.";
     private const string SnapshotProfileConflict = "Heavy load snapshot settings cannot mix qualification profiles.";
+
+    internal static (string Root, string[] Arguments, ClusterFixtureSnapshotReadiness? Readiness) PrepareArguments(
+        string root, KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageRf3FixtureOwner? coverage,
+        LocalRf3ImageSelection.Selection? localImage, bool isolateReplicaNamespace, int? snapshotThreshold, string? key)
+    {
+        var arguments = coverage?.CreateArguments() ??
+            [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
+                ClusterFixtureProtocol.SnapshotThresholdArgument];
+        if (coverage is not null)
+        { root = coverage.Root; }
+        if (localImage is not null)
+        { arguments = [.. arguments, .. localImage.CreateWaveArguments()]; }
+        if (isolateReplicaNamespace && (localImage is not null || coverage is not null))
+        { throw new InvalidOperationException(NamespaceProfileConflict); }
+        arguments = ApplySnapshotThreshold(arguments, snapshotThreshold,
+            coverage is not null || localImage is not null || isolateReplicaNamespace);
+        var readiness = ClusterFixtureSnapshotReadiness.Create(key, root);
+        return (root, readiness?.Apply(arguments) ?? arguments, readiness);
+    }
 
     internal static KeyLoadClient CreateClient(DistributedApplication application, string node, string key)
     {

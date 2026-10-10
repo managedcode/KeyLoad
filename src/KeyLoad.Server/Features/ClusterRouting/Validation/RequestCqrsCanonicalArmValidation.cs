@@ -4,6 +4,13 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness)
+        {
+            return arm.ReadKind == KeyLoad.Orleans.GrainReadKind.NodeStatus
+                && arm.Action == RequestCqrsProbeAction.Hold && arm.CommandId == Guid.Empty
+                && arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null
+                && arm.TargetVoter is { } target && RequestCqrsProbeActivationTargetValidation.Valid(target);
+        }
         if (arm.Phase == RequestCqrsProbePhase.AuthorizationReload && arm.SourceArmId is not null)
         { return RequestCqrsSampleChunkProbePair.ValidAdjunct(arm); }
         if (arm.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved)

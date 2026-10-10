@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -21,6 +22,8 @@ internal sealed class NativeMissingIdentityTests
     public async Task AcIs004And008MissingIdentityPreservesActualTreeAndJournal(bool checkpoint)
     {
         using var files = new WalFileFixture();
+        StoreIdentity originalIdentity;
+        long originalPosition;
         using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
@@ -28,10 +31,19 @@ internal sealed class NativeMissingIdentityTests
             {
                 store.Compact();
             }
+            originalIdentity = store.Identity;
+            originalPosition = store.Position;
         }
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath, token);
         File.Delete(files.IdentityPath);
 
         await AssertRejectedUnchangedAsync(files);
+        await File.WriteAllBytesAsync(files.IdentityPath, identityBytes, token);
+        await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath, token))
+            .IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
+        await CurrentCheckpointRepairContinuation.RequireCurrentAsync(files, originalIdentity, originalPosition,
+            token).ConfigureAwait(false);
     }
 
     [Test]

@@ -28,6 +28,7 @@ internal static class EmptyReplicaSnapshotScenario
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            await EmptyReplicaSnapshotReadiness.ProvisionAsync(fixture, timeout.Token);
             var state = await ConfigureAndProduceAsync(fixture, timeout.Token);
             var denied = await McpPersistedIdentity.CreateAsync(fixture, state.Partition, OtherResource,
                 Capability.DocumentsRead, timeout.Token);
@@ -39,8 +40,8 @@ internal static class EmptyReplicaSnapshotScenario
             var final = await ReplicateWhileStoppedAsync(fixture, state, index, timeout.Token);
             await fixture.RestartContainerAsync(node, timeout.Token);
             running = true;
-            var installed = await RequireAppliedAsync(state.Clients[index], state.InitialStatuses[index], final.Receipt, timeout.Token);
-            await Assert.That(installed.NodeId).IsNotEqualTo(state.InitialStatuses[index].NodeId);
+            var installed = await RequireInstalledReadinessAsync(fixture, state, index, node,
+                final.Receipt, timeout.Token);
             await fixture.KillContainerAsync(node, Fault, timeout.Token);
             running = false;
             var installedSnapshot = await RequireInstalledCutAsync(fixture, node, final.Receipt);
@@ -81,6 +82,15 @@ internal static class EmptyReplicaSnapshotScenario
             await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(stopped.Name, cleanup.Token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task<NodeStatus> RequireInstalledReadinessAsync(ClusterFixture fixture,
+        SnapshotState state, int index, string node, CommitReceipt final, CancellationToken token)
+    {
+        var installed = await RequireAppliedAsync(state.Clients[index], state.InitialStatuses[index], final, token);
+        await Assert.That(installed.NodeId).IsNotEqualTo(state.InitialStatuses[index].NodeId);
+        await EmptyReplicaSnapshotReadiness.RequireAsync(fixture, node, installed, final, token);
+        return installed;
     }
 
     private static async Task<(int Index, string Node, ChangeFeedPage Feed)> CaptureFollowerFeedAsync(

@@ -153,7 +153,6 @@ internal static class ClusterResources
             int? benchmarkNodeCount, NativeCoverageRf3ClusterImage? coverageImage)
     {
         const string MessageText = "Local RF3 image mode requires the ordinary ephemeral RF3 topology.";
-        const string ReadImagesAndProbesMessageText = "Local RF3 image mode cannot be combined with a protocol probe.";
 
         var localImage = LocalDevelopmentContainerImage.Read(builder);
         if (coverageImage is not null && localImage is not null)
@@ -170,9 +169,7 @@ internal static class ClusterResources
             ? RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral, benchmarkNodeCount, localImage)
             : coverageImage is null
                 ? RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images!)
-                : AppHostOptionsRegistration.Get(builder).Control.Value.RequestProbe is null
-                    ? null
-                    : throw new InvalidOperationException(ReadImagesAndProbesMessageText);
+                : RequestCqrsProbeProfile.ReadCovered(builder, root, ephemeral, benchmarkNodeCount, coverageImage);
         return (localImage, images, probes);
     }
 

@@ -8,7 +8,7 @@ internal static class RemoteTransferStartupArtifacts
     private const string IdentityFormat = "N";
     private const string InitiatingDirectory = "initiating";
 
-    internal static void Save(Guid session, RemoteTransferStartupWindow window, string boundary,
+    internal static void Save(Guid session, RemoteTransferStartupWindow? window, string boundary,
         string primary, ErrorCode? code, bool cancelled, Exception? originalFailure = null)
     {
         var root = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
@@ -21,6 +21,8 @@ internal static class RemoteTransferStartupArtifacts
             _ = ClusterFailureReceipts.SaveImmutable(initiating,
                 BoundedDiagnosticLog.Bound(RemoteTransferStartupFailureLines.Read(originalFailure)));
         }
+        if (window is null)
+        { return; }
         foreach (var item in window.Buffers)
         {
             var path = Path.Combine(root, item.Key);

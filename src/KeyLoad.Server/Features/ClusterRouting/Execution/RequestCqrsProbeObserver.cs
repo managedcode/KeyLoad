@@ -16,6 +16,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private Task? shutdown;
     private readonly RequestCqrsProbeHeldCallback hold;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
+    internal RequestCqrsReplicaSnapshotObserver ReplicaSnapshot { get; }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
     private readonly Lazy<ConnectionProbeCapture> connections;
 
@@ -28,6 +29,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         this.files = files;
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
+        ReplicaSnapshot = new(files, lifecycle, replicaOptions, executionOptions, clock ?? TimeProvider.System,
+            CreateMarker, HoldAsync, stopping.Token, applicationLifetime.ApplicationStopping);
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
         receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
         connections = new(() => new ConnectionProbeCapture(files, executionOptions));

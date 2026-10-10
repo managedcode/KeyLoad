@@ -147,7 +147,8 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
                 or RequestCqrsProbePhase.ParentReceiverIssueAcknowledged or RequestCqrsProbePhase.ParentReceiverIssueObserved
                 or RequestCqrsProbePhase.ParentFinalInstallPreflight
                 or RequestCqrsProbePhase.SampleChunkAdmissionPersisted or RequestCqrsProbePhase.SampleChunkNativeJobReturned
-                or RequestCqrsProbePhase.SampleChunkAdmissionRefused)
+                or RequestCqrsProbePhase.SampleChunkAdmissionRefused
+                or RequestCqrsProbePhase.ReplicaSnapshotReadiness)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
         { throw Invalid(); }
         var group = snapshot.Markers

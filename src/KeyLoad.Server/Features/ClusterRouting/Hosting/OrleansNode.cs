@@ -66,6 +66,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
 
     internal PhysicalOwnerRegistrationObservation? OwnerRegistration => Volatile.Read(ref ownerRegistration)?.Observe();
 
+    internal Task WaitForPhysicalOwnerRegistrationAsync(CancellationToken cancellationToken)
+        => PhysicalOwnerRegistrationRuntime.WaitForRegistrationAsync(Volatile.Read(ref ownerRegistration), Options, cancellationToken);
+
     internal bool SiloJoined => Volatile.Read(ref siloJoined) == OrleansNodeProtocol.JoinedSilo;
 
     internal Task<MembershipReadinessSnapshot?> MembershipReadyAsync(CancellationToken cancellationToken)
@@ -120,8 +123,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     private async Task StartCoreAsync(Task registered, CancellationToken cancellationToken)
     {
         await registered.ConfigureAwait(false);
-        if (Options.MembershipAuthority.RegisterPhysicalOwners && physicalOwnerWork is null)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+        PhysicalOwnerRegistrationRuntime.RequireProbeWork(Options, physicalOwnerWork);
         var address = await OrleansNodeAddressResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref remoteDocuments, await RemoteDocumentRuntime.CreateAsync(this, partition,
             runtimeOptions, runtimeClock, blobWireObserver).ConfigureAwait(false));
@@ -147,12 +149,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
             await RuntimeJournalStartup.InitializeAsync(built.Services, partition, administrator, Options,
                 runtimeOptions, cancellationToken).ConfigureAwait(false);
         }
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
-        {
-            membershipAuthority.Publish(built.Services.GetRequiredService<IMembershipTable>());
-            PhysicalOwnerRegistrationRuntime.Attach(ref ownerRegistration, this, partition, runtimeOptions,
-                built.Services, runtimeClock);
-        }
+        PhysicalOwnerRegistrationRuntime.PublishAndAttachAuthority(ref ownerRegistration, this, partition,
+            Options, runtimeOptions, membershipAuthority, built.Services, runtimeClock);
     }
 
     /// <summary>Executes one signed operation through the corresponding GUID request actor.</summary>

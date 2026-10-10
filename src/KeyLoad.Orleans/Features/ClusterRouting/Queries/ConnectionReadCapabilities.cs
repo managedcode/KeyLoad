@@ -148,8 +148,21 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         {
             GrainReadKind.Backup => await Administration.BackupAsync(cancellationToken).ConfigureAwait(true),
             GrainReadKind.Admission => Administration.Admission(),
-            GrainReadKind.NodeStatus => await Administration.StatusAsync(cancellationToken).ConfigureAwait(true),
+            GrainReadKind.NodeStatus => await ReadNodeStatusAsync(request, cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
+
+    private async Task<NodeStatus> ReadNodeStatusAsync(DecodedGrainRequest request, CancellationToken token)
+    {
+        var result = await Administration.StatusAsync(token).ConfigureAwait(true);
+        if (codec.HasPhaseObserver)
+        {
+            ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, token);
+            GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(localDatabase,
+                request.Envelope, runtimeClock));
+        }
+        return result;
+    }
+
 }

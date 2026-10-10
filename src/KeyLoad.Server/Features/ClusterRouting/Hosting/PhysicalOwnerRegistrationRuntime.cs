@@ -9,6 +9,7 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     private readonly PhysicalOwnerRegistrationWorker worker;
     private readonly Lock gate = new();
     private Task? disposal;
+    private Task? registration;
 
     internal PhysicalOwnerRegistrationRuntime(OrleansNode node, PartitionHost partition,
         ServerRuntimeOptions options, ISiloStatusOracle oracle, TimeProvider clock, ILogger logger)
@@ -32,6 +33,22 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
         }
     }
 
+    internal static void RequireProbeWork(NodeOptions options, PhysicalOwnerProbeWorkOwner? work)
+    {
+        if (options.MembershipAuthority.RegisterPhysicalOwners && work is null)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+    }
+
+    internal static void PublishAndAttachAuthority(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
+        PartitionHost partition, NodeOptions nodeOptions, ServerRuntimeOptions options,
+        ReplicaMembershipAuthorityOwner authority, IServiceProvider services, TimeProvider clock)
+    {
+        if (nodeOptions.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+        { return; }
+        authority.Publish(services.GetRequiredService<IMembershipTable>());
+        Attach(ref slot, node, partition, options, services, clock);
+    }
+
     internal static void Attach(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, IServiceProvider services, TimeProvider clock)
     {
@@ -53,7 +70,32 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
         { await ServerFailureObserver.ObserveAsync(probes.StopAsync, failures).ConfigureAwait(false); }
     }
 
-    internal void Start() => worker.Start();
+    internal void Start()
+    {
+        lock (gate)
+        { registration = worker.Start(); }
+    }
+
+    internal static Task WaitForRegistrationAsync(PhysicalOwnerRegistrationRuntime? registration,
+        NodeOptions options, CancellationToken cancellationToken)
+    {
+        if (!options.MembershipAuthority.RegisterPhysicalOwners
+            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+        { return Task.CompletedTask; }
+        return (registration ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable))
+            .WaitForRegistrationAsync(cancellationToken);
+    }
+
+    internal Task WaitForRegistrationAsync(CancellationToken cancellationToken)
+    {
+        Task original;
+        lock (gate)
+        {
+            original = registration
+                ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        }
+        return original.WaitAsync(cancellationToken);
+    }
     internal PhysicalOwnerRegistrationObservation Observe() => controller.Observe();
 
     public ValueTask DisposeAsync()

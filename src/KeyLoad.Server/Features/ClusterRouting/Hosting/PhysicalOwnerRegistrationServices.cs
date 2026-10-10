@@ -16,7 +16,8 @@ internal static class PhysicalOwnerRegistrationServices
             provider.GetRequiredService<PhysicalOwnerProbeWorkOwner>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
-            provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<ILogger<PhysicalOwnerProbeEndpoint>>()));
     }
 
     internal static void Map(WebApplication app)

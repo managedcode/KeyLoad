@@ -56,6 +56,9 @@ internal sealed class RequestCqrsProbeJson
                     || value.CommandId != Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || value.Phase == RequestCqrsProbePhase.OnlineTextCaptured
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
+            || value.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness
+                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.NodeStatus
+                    || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))
@@ -177,6 +180,9 @@ internal sealed class RequestCqrsProbeJson
         if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != fields.Length)
         { throw Invalid(); }
     }
+
+    internal System.Text.Json.Serialization.Metadata.JsonTypeInfo<RequestCqrsReplicaSnapshotRecord> ReplicaSnapshotTypeInfo
+        => Context.RequestCqrsReplicaSnapshotRecord;
 
     internal T Read<T>(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields, JsonTypeInfo<T> typeInfo) where T : struct
     {

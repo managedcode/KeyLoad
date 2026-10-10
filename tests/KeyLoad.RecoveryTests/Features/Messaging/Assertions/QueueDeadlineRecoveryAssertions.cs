@@ -13,6 +13,7 @@ internal static class QueueDeadlineRecoveryAssertions
             Path.Combine(root, QueueDeadlineCrashProtocol.OperationFile), token));
         var original = JsonDefaults.Deserialize<CommandRequest>(operation.PayloadJson);
         var condition = (AdvanceQueueDeadline)original.Mutations.Single();
+        await Assert.That(operation.EvaluatedAt >= condition.ExpectedDeadline).IsTrue();
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
         if (stage >= CommitStage.JournalFlushed)

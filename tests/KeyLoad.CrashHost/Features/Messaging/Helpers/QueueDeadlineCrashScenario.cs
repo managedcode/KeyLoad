@@ -17,8 +17,11 @@ internal static class QueueDeadlineCrashScenario
                 QueueDeadlineCrashProtocol.Payload, QueueDeadlineCrashProtocol.Headers, ExpiresAt: expiry)]);
         CrashDatabase.Submit(database, OperationKind.Batch, original, original.CommandId).Get<CommitReceipt>();
         var remaining = expiry - TimeProvider.System.GetUtcNow();
-        if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, TimeProvider.System); }
+        while (remaining > TimeSpan.Zero)
+        {
+            await Task.Delay(remaining, TimeProvider.System);
+            remaining = expiry - TimeProvider.System.GetUtcNow();
+        }
         var request = new CommandRequest(Guid.NewGuid(), QueueDeadlineCrashProtocol.Partition,
             [new AdvanceQueueDeadline(QueueDeadlineCrashProtocol.Queue, QueueDeadlineCrashProtocol.Message,
                 MessageState.Ready, QueueDeadlineCrashProtocol.First, QueueDeadlineCrashProtocol.Initial,

@@ -17,6 +17,10 @@ internal sealed class NativeTUnitSelectionTests
     private const string ConnectionUnsupportedCountProperty = "connectionUnsupportedCount";
     private const string ConnectionFilter = "/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*";
     private const int ExpectedConnectionRejectionCount = 4;
+    private const string EmptySnapshotProperty = "emptySnapshot";
+    private const string EmptySnapshotUnsupportedProperty = "emptySnapshotUnsupportedCount";
+    private const string EmptySnapshotFilter = "/*/*/EmptyReplicaSnapshotRf3Tests/*";
+    private const int ExpectedEmptySnapshotRejections = 4;
     private const string NativeTextProperty = "nativeText";
     private const string NativeTextUnsupportedCountProperty = "nativeTextUnsupportedCount";
     private const int ExpectedNativeTextRejectionCount = 4;
@@ -88,6 +92,7 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(ConnectionProperty), ConnectionFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
             await AssertNativeTextSdkAsync(selection.RootElement).ConfigureAwait(false);
+            await AssertEmptySnapshotAsync(selection.RootElement).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RemoteTransferProperty), RemoteTransferFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(RemoteTransferUnsupportedCountProperty).GetInt32())
                 .IsEqualTo(ExpectedRemoteTransferRejectionCount);
@@ -97,6 +102,13 @@ internal sealed class NativeTUnitSelectionTests
                 .IsEqualTo(ExpectedConnectionRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);
         }
+    }
+
+    private static async Task AssertEmptySnapshotAsync(JsonElement root)
+    {
+        await AssertLocalSelectorAsync(root.GetProperty(EmptySnapshotProperty), EmptySnapshotFilter).ConfigureAwait(false);
+        await Assert.That(root.GetProperty(EmptySnapshotUnsupportedProperty).GetInt32())
+            .IsEqualTo(ExpectedEmptySnapshotRejections);
     }
 
     private static async Task AssertNativeTextSdkAsync(JsonElement root)

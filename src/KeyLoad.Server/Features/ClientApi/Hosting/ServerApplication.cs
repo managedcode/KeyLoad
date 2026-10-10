@@ -23,6 +23,7 @@ internal static class ServerApplication
                 await partition.Coordinator.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await app.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await silo.StartAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
+                await silo.WaitForPhysicalOwnerRegistrationAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
                 await WaitForStopAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (app.Lifetime.ApplicationStopping.IsCancellationRequested) { }

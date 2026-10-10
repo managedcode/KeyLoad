@@ -15,7 +15,7 @@ using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixture
 namespace KeyLoad.IntegrationTests;
 
 /// <summary>Owns the real Aspire RF3 application shared by public SDK integration scenarios.</summary>
-internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
+internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKeyedDataSource
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
@@ -36,6 +36,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     private bool isolationCleanupIncomplete;
     private readonly string coverageFixtureId = Guid.NewGuid().ToString("D");
     private byte[] peerSecret = [];
+    internal ClusterFixtureSnapshotReadiness? SnapshotReadiness { get; private set; }
+    /// <summary>Receives the native keyed data-source identity before initialization.</summary>
+    public string Key { get; set; } = string.Empty;
 
     private const string RuntimeControllerUnavailable = "The Aspire container runtime controller is not initialized.";
     private const string DiagnosticsUnavailable = "The Aspire diagnostic capture is not initialized.";
@@ -107,21 +110,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
             coverage = await NativeCoverageRf3FixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
                 .ConfigureAwait(false);
-            var arguments = coverage?.CreateArguments() ??
-                [$"{ClusterFixtureProtocol.DataRootArgument}{Root}", ClusterFixtureProtocol.EphemeralArgument,
-                    ClusterFixtureProtocol.SnapshotThresholdArgument];
-            if (coverage is not null)
-            {
-                Root = coverage.Root;
-            }
-            if (localImageSession is not null)
-            {
-                arguments = [.. arguments, .. localImageSession.Selection.CreateWaveArguments()];
-            }
-            if (isolateReplicaNamespace && (localImageSession is not null || coverage is not null))
-            { throw new InvalidOperationException("The native namespace fault cohort cannot mix local-image or covered selection."); }
-            arguments = ClusterFixtureComposition.ApplySnapshotThreshold(arguments, snapshotThreshold,
-                coverage is not null || localImageSession is not null || isolateReplicaNamespace);
+            var selection = ClusterFixtureComposition.PrepareArguments(Root, coverage, localImageSession?.Selection,
+                isolateReplicaNamespace, snapshotThreshold, Key);
+            Root = selection.Root;
+            SnapshotReadiness = selection.Readiness;
+            var arguments = selection.Arguments;
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
@@ -245,6 +238,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             localImageSession = null;
         }
         localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
+        if (SnapshotReadiness is not null)
+        {
+            await SnapshotReadiness.JoinAfterStopAsync(appStopped, failures).ConfigureAwait(false);
+            localImageCleanupIncomplete |= failures.Count > 0 || !appStopped;
+        }
         if (!localImageCleanupIncomplete && !isolationCleanupIncomplete)
         { await DeleteOwnedRootAsync(coverage, Root, deadline, failures).ConfigureAwait(false); }
         if (coverage is not null && appStopped && failures.Count == 0 && stoppedNodes is not null)
@@ -259,6 +257,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             throw new AggregateException("Cluster fixture cleanup failed.", failures);
         }
     }
+
+    internal Task<KeyLoad.Orleans.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
+        => RequestCqrsRf3SignedDiscovery.ReadAsync(RequireApp(), node,
+            ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation, peerSecret, token);
 
     private void ReadPrivateProfile()
     {

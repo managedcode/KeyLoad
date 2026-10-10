@@ -15,6 +15,7 @@ internal sealed class CurrentStoragePreservationTests
     {
         using var fixture = new CurrentStorageFixture();
         StorageSnapshot snapshot;
+        StoreIdentity originalIdentity;
         using (var store = new ZoneTreeStore(fixture.SourceOptions, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
             store.Commit((transaction, position) =>
@@ -26,6 +27,7 @@ internal sealed class CurrentStoragePreservationTests
             });
             store.SetDispatchPaused(true);
             snapshot = store.CreateSnapshot(fixture.Snapshot);
+            originalIdentity = store.Identity;
             await AssertCurrentFormatAsync(store.Identity);
         }
 
@@ -38,14 +40,23 @@ internal sealed class CurrentStoragePreservationTests
             await Assert.That(installed.Position).IsEqualTo(SourcePosition);
             await AssertCurrentFormatAsync(store.Identity);
             await AssertValuesAsync(store, fixture);
-            store.CreateBackup(fixture.Backup);
+            await CurrentSnapshotAuthorityAssertions.RequireSourceAsync(store, fixture, originalIdentity, installed);
+            await CurrentSnapshotAuthorityAssertions.RequireSnapshotAsync(snapshot, originalIdentity);
+            await Assert.That(store.CreateBackup(fixture.Backup)).IsEqualTo((long)SourcePosition);
         }
 
-        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Restored, UnitExecutionOptions.StorageExecution());
+        var backup = await CurrentStorageSnapshot.CaptureAsync(fixture.Backup);
+        var incarnation = Guid.NewGuid();
+        var restoredIdentity = ZoneTreeStore.Restore(fixture.Backup, fixture.Restored, UnitExecutionOptions.StorageExecution(), incarnation);
         await AssertCurrentFormatAsync(restoredIdentity);
-        using var restored = new ZoneTreeStore(new(fixture.Restored), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        await AssertCurrentFormatAsync(restored.Identity);
-        await AssertValuesAsync(restored, fixture);
+        await CurrentSnapshotAuthorityAssertions.RequireRestoreIdentityAsync(originalIdentity, restoredIdentity, incarnation);
+        using (var restored = new ZoneTreeStore(new(fixture.Restored), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        {
+            await AssertCurrentFormatAsync(restored.Identity);
+            await AssertValuesAsync(restored, fixture);
+        }
+        await CurrentSnapshotAuthorityAssertions.CompleteColdAsync(fixture, originalIdentity, restoredIdentity, snapshot, backup,
+            TestContext.Current!.Execution.CancellationToken);
     }
 
     private static async Task AssertCurrentFormatAsync(StoreIdentity identity)

@@ -29,7 +29,8 @@ internal enum RequestCqrsProbePhase
     SampleChunkAdmissionRefused,
     NativeTextOriginalPostingRead,
     DistributedSearchStatisticsCaptured,
-    OnlineTextCaptured
+    OnlineTextCaptured,
+    ReplicaSnapshotReadiness
 }
 
 internal enum RequestCqrsProbeAction

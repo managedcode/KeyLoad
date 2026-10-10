@@ -18,7 +18,7 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
     private Task? shutdown;
     private bool subscribed;
 
-    internal void Start()
+    internal Task Start()
     {
         lock (gate)
         {
@@ -27,7 +27,7 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
             subscribed = oracle.SubscribeToSiloStatusEvents(this);
             if (!subscribed)
             { throw Errors.Fail(ErrorCode.OwnershipLost, SubscriptionUnavailable); }
-            worker = RunAsync();
+            return worker = RunAsync();
         }
     }
 
