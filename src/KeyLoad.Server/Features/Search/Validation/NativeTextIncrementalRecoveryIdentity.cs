@@ -31,6 +31,10 @@ internal static class NativeTextIncrementalRecoveryIdentity
         if (request.Mode == TextIndexMaintenanceMode.Build)
         {
             RequireBuild(enrollment, request, budget);
+            if (fresh.Checkpoint > fresh.UpperSequence)
+            { throw NativeTextErrors.Corrupt(); }
+            if (hasCompleteImage && fresh.Checkpoint > enrollment.SourceUpperSequence)
+            { throw NativeTextErrors.Mismatch(); }
             if (!hasCompleteImage && fresh.UpperSequence != enrollment.SourceUpperSequence)
             { throw NativeTextErrors.Mismatch(); }
             return enrollment.SourceUpperSequence;

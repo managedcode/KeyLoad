@@ -14,10 +14,10 @@ internal static class QueueLifecycleRestoredContinuation
             new CancelQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Parked, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One),
             new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One),
             new RedriveQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Four, QueueLifecycleTestProtocol.One)).Get<CommitReceipt>();
-        var delivery = await QueueLifecycleOperations.ClaimAsync(database, state, QueueLifecycleTestProtocol.Pending);
-        QueueLifecycleOperations.Complete(database, state, delivery, DeliveryAction.Ack).Get<CommitReceipt>();
         state.Batch(database, new CancelQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Held,
             QueueLifecycleTestProtocol.Two, QueueLifecycleTestProtocol.One)).Get<CommitReceipt>();
+        var delivery = await QueueLifecycleOperations.ClaimAsync(database, state, QueueLifecycleTestProtocol.Pending);
+        QueueLifecycleOperations.Complete(database, state, delivery, DeliveryAction.Ack).Get<CommitReceipt>();
         await QueueLifecycleImage.BodyAsync(database, state, QueueLifecycleTestProtocol.Parked, MessageState.Cancelled,
             QueueLifecycleTestProtocol.Four, QueueLifecycleTestProtocol.Two, QueueLifecycleTestProtocol.None);
         await QueueLifecycleImage.BodyAsync(database, state, QueueLifecycleTestProtocol.Pending, MessageState.Acked,

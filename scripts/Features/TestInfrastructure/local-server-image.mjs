@@ -85,16 +85,30 @@ async function prepare(root, tag, receiptPath) {
 }
 
 async function verify(root, tag, receiptPath) {
-  await ensureLocalDocker(root);
+  let phase = 'Unobserved';
+  const observe = value => { phase = value; };
+  const retainCancellation = () => process.stderr.write('KeyLoadLocalImageVerifierPhase=' + phase + '\n');
+  process.once('SIGTERM', retainCancellation);
+  try { return await verifyCurrent(root, tag, receiptPath, observe); }
+  finally { process.removeListener('SIGTERM', retainCancellation); }
+}
+
+async function verifyCurrent(root, tag, receiptPath, observe) {
+  await ensureLocalDocker(root, observe);
+  observe('Receipt');
   const receipt = await readReceipt(root, receiptPath, tag);
   if (receipt.state !== localImage.readyState) throw new Error(messages.invalidReceipt);
+  observe('BuildInputs');
   const inputs = await readBuildInputs(root);
   if (inputs.digest !== receipt.inputDigest || !sameArray(inputs.bases, receipt.pinnedBaseImages)) {
     throw new Error(messages.contextChanged);
   }
+  observe('ImageInspect');
   const actual = await inspectImage(root, imageReference(tag));
+  observe('Identity');
   validateImage(actual, inputs.digest, receipt.invocationId);
   if (actual.imageConfigId !== receipt.imageConfigId) throw new Error(messages.imageMismatch);
+  observe('Complete');
   return Object.freeze({ provenance: receipt.provenance, imageReference: receipt.imageReference,
     invocationId: receipt.invocationId, inputDigest: receipt.inputDigest, imageConfigId: receipt.imageConfigId });
 }
@@ -213,15 +227,18 @@ async function requireNoOwnedContainers(root, imageConfigId) {
   if (lines.length !== 0) throw new Error(messages.imageInUse);
 }
 
-async function ensureLocalDocker(root) {
+async function ensureLocalDocker(root, observe) {
+  observe?.('DockerContext');
   const contextName = ensureSuccess(await runDocker(root, ['context', 'show'], localImage.commandTimeoutMs),
     messages.dockerUnavailable).stdout.trim();
   if (!contextName || /[\r\n]/u.test(contextName)) throw new Error(messages.dockerIdentity);
+  observe?.('DockerEndpoint');
   const endpoint = ensureSuccess(await runDocker(root, ['context', 'inspect', contextName, '--format',
     '{{(index .Endpoints "docker").Host}}'], localImage.commandTimeoutMs), messages.dockerIdentity).stdout.trim();
   if (!unixSocketPattern.test(endpoint) || (process.env.DOCKER_HOST && process.env.DOCKER_HOST !== endpoint)) {
     throw new Error(messages.dockerIdentity);
   }
+  observe?.('DockerOs');
   const os = ensureSuccess(await runDocker(root, ['info', '--format', '{{.OSType}}'], localImage.commandTimeoutMs),
     messages.dockerUnavailable).stdout.trim();
   if (os !== 'linux') throw new Error(messages.dockerIdentity);

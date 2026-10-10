@@ -19,12 +19,16 @@ internal static class LocalRf3ImageIdentity
     private const int MaximumOutputBytes = 16_384;
     private static readonly TimeSpan VerifyTimeout = TimeSpan.FromSeconds(30);
 
-    internal sealed record Identity(string Reference, string Tag, string InvocationId, string ImageConfigId);
+    internal sealed record Identity(string Reference, string Tag, string InvocationId, string ImageConfigId, string InputDigest);
     internal static Task<Identity?> ReadVerifiedAsync(string root, CancellationToken cancellationToken)
         => ReadVerifiedAsync(root, LocalRf3ImageSelection.Read(), cancellationToken);
 
-    internal static async Task<Identity?> ReadVerifiedAsync(string root, LocalRf3ImageSelection.Selection? selection,
+    internal static Task<Identity?> ReadVerifiedAsync(string root, LocalRf3ImageSelection.Selection? selection,
         CancellationToken cancellationToken)
+        => ReadVerifiedAsync(root, selection, null, cancellationToken);
+
+    internal static async Task<Identity?> ReadVerifiedAsync(string root, LocalRf3ImageSelection.Selection? selection,
+        Action<LocalImageVerifierPhase>? observe, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
         if (selection is null)
@@ -32,7 +36,7 @@ internal static class LocalRf3ImageIdentity
             return null;
         }
         var script = Path.Combine(root, "scripts", "Features", "TestInfrastructure", "local-server-image.mjs");
-        var output = await RunVerifierAsync(root, script, selection.Tag, selection.Receipt, cancellationToken)
+        var output = await RunVerifierAsync(root, script, selection.Tag, selection.Receipt, observe, cancellationToken)
             .ConfigureAwait(false);
         return ParseIdentity(output, selection.Reference, selection.Tag);
     }
@@ -132,8 +136,12 @@ internal static class LocalRf3ImageIdentity
         => Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
             .Select(ClusterFixtureProtocol.NodeName).ToArray();
 
-    internal static async Task<string> RunVerifierAsync(string root, string script, string tag, string receipt,
+    internal static Task<string> RunVerifierAsync(string root, string script, string tag, string receipt,
         CancellationToken cancellationToken)
+        => RunVerifierAsync(root, script, tag, receipt, null, cancellationToken);
+
+    internal static async Task<string> RunVerifierAsync(string root, string script, string tag, string receipt,
+        Action<LocalImageVerifierPhase>? observe, CancellationToken cancellationToken)
     {
         using var timeoutTimeout = new CancellationTokenSource(VerifyTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
@@ -169,6 +177,7 @@ internal static class LocalRf3ImageIdentity
             var failures = new List<Exception> { primary };
             await LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures)
                 .ConfigureAwait(false);
+            await LocalImageVerifierFailurePhase.RecordAsync(exit, output, error, observe, failures).ConfigureAwait(false);
             if (failures.Count == 1)
             {
                 throw;
@@ -197,7 +206,8 @@ internal static class LocalRf3ImageIdentity
         {
             throw new InvalidOperationException("The local RF3 image receipt is invalid.");
         }
-        return new(reference, tag, invocation, root.GetProperty(ImageConfigIdField).GetString()!);
+        return new(reference, tag, invocation, root.GetProperty(ImageConfigIdField).GetString()!,
+            root.GetProperty(InputDigestField).GetString()!);
     }
 
     private static bool IsSha256(string? value) => value is { Length: 71 }

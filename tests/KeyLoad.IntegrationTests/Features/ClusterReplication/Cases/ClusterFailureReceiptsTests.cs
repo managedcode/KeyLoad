@@ -75,6 +75,42 @@ internal sealed class ClusterFailureReceiptsTests
         }
     }
 
+    [Test]
+    public async Task AcTest007SeparateNativeRunnerRootsRetainCompleteOriginalReceipts()
+    {
+        using var scope = new ReceiptDirectory();
+        var normal = System.IO.Path.Combine(scope.Path, "normal");
+        var scalar = System.IO.Path.Combine(scope.Path, "scalar");
+        var first = new ClusterFailureReceipts();
+        var second = new ClusterFailureReceipts();
+        var originalOutput = first.RequireRunOutput(normal);
+        var secondOutput = second.RequireRunOutput(scalar);
+        Directory.CreateDirectory(originalOutput);
+        Directory.CreateDirectory(secondOutput);
+        first.Save(originalOutput, [FirstLine, TailLine]);
+        second.Save(secondOutput, [SecondLine, TailLine]);
+        await Assert.That(() => first.RequireRunOutput(scalar)).Throws<InvalidOperationException>();
+        await ExactRunnerFilesAsync(originalOutput, FirstLine);
+        await ExactRunnerFilesAsync(secondOutput, SecondLine);
+        await Assert.That(first.RequireRunOutput(normal)).IsEqualTo(originalOutput);
+        first.Save(originalOutput, [TailLine, FirstLine]);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await Assert.That(await File.ReadAllLinesAsync(ReceiptPath(originalOutput, 1), token))
+            .IsEquivalentTo(new[] { FirstLine, TailLine }, CollectionOrdering.Matching);
+        await Assert.That(await File.ReadAllLinesAsync(ReceiptPath(originalOutput, 2), token))
+            .IsEquivalentTo(new[] { TailLine, FirstLine }, CollectionOrdering.Matching);
+        await ExactRunnerFilesAsync(secondOutput, SecondLine);
+    }
+
+    private static async Task ExactRunnerFilesAsync(string output, string line)
+    {
+        var expected = System.Text.Encoding.UTF8.GetBytes(line + Environment.NewLine + TailLine + Environment.NewLine);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        foreach (var path in new[] { ReceiptPath(output, 1),
+            System.IO.Path.Combine(output, ClusterFixtureProtocol.DiagnosticsFileName) })
+        { await Assert.That((await File.ReadAllBytesAsync(path, token)).SequenceEqual(expected)).IsTrue(); }
+    }
+
     private static string ReceiptPath(string directory, int number)
         => System.IO.Path.Combine(directory, FilePrefix + number.ToString("D4", CultureInfo.InvariantCulture) + FileSuffix);
 

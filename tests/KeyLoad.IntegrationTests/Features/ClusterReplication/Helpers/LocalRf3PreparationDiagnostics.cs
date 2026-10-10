@@ -14,6 +14,13 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
     private readonly CancellationTokenSource lifetime = new();
     private Task? observation;
     private DistributedApplication? app;
+    private LocalImageVerifierPhase verifierPhase;
+
+    internal void RecordVerifierPhase(LocalImageVerifierPhase phase)
+    {
+        lock (gate)
+        { verifierPhase = phase; }
+    }
 
     internal void Record(string record)
     {
@@ -40,6 +47,7 @@ internal sealed class LocalRf3PreparationDiagnostics : IAsyncDisposable
         {
             $"Preparation failure kind={LocalRf3PreparationLogger.FailureKind(primary)}",
             $"CallerCancelled={caller.IsCancellationRequested}; HostStopping={stopping}",
+            $"VerifierStage={verifierPhase}",
             "Stopping cause requires an original host event or resource exit; otherwise unobserved.",
             "Original prerequisite logs use the joined TestSuiteOutput stream; missing output is unobserved.",
             "Original producer build-output sidecar remains retained by its owning producer."

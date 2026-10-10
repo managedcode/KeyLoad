@@ -20,6 +20,8 @@ internal static class LocalImageVerifierProcessProof
     private const string EmptyText = "";
     private const string EarlyExit = "The native verifier child exited before its readiness marker.";
     private const string NativeError = "native-stderr";
+    private const string CancelledPhaseOutput = "terminal-stderr\n" + LocalImageVerifierFailurePhase.Marker
+        + nameof(LocalImageVerifierPhase.BuildInputs) + "\n";
 
     internal sealed record Files(string Script, string ProcessId, string Stopped);
 
@@ -32,7 +34,8 @@ internal static class LocalImageVerifierProcessProof
             + "const stoppedFile = " + JsonSerializer.Serialize(files.Stopped) + ";\n"
             + "const mode = " + JsonSerializer.Serialize(mode) + ";\n"
             + "process.on('SIGTERM', () => process.stdout.write('terminal-stdout', () => "
-            + "process.stderr.write('terminal-stderr', () => { writeFileSync(stoppedFile, 'SIGTERM'); process.exit(0); })));\n"
+            + "process.stderr.write(" + JsonSerializer.Serialize(CancelledPhaseOutput)
+            + ", () => { writeFileSync(stoppedFile, 'SIGTERM'); process.exit(0); })));\n"
             + "writeFileSync(pidFile, String(process.pid));\n"
             + "if (mode === 'wait') { setInterval(() => {}, 1000); }\n"
             + "else { process.stdout.write(" + JsonSerializer.Serialize(ExpectedOutput) + ", () => "

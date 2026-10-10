@@ -35,7 +35,8 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     internal static void Attach(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, IServiceProvider services, TimeProvider clock)
     {
-        if (!options.Node.Value.MembershipAuthority.RegisterPhysicalOwners)
+        if (!options.Node.Value.MembershipAuthority.RegisterPhysicalOwners
+            || options.Node.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
         { return; }
         slot = new PhysicalOwnerRegistrationRuntime(node, partition, options,
             services.GetRequiredService<ISiloStatusOracle>(), clock,

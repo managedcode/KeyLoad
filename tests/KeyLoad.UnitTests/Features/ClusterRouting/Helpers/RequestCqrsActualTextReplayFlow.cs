@@ -34,6 +34,20 @@ internal static class RequestCqrsActualTextReplayFlow
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
     }
 
+    internal static async Task OriginalBuildAsync(RequestCqrsClusterFixture fixture,
+        TextIndexMaintenanceRequest originalBuild, TextIndexMaintenanceRequest current,
+        TextIndexMaintenanceResult completed, CancellationToken token)
+    {
+        var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
+        var refused = await RequestCqrsActualTextMaintenanceFlow.InvokeAsync(fixture, originalBuild,
+            expectNativeWork: false, token);
+        await Assert.That(refused.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
+        await Assert.That(refused.Payload.IsEmpty).IsTrue();
+        await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
+        await ReplayAsync(fixture, current, completed, token);
+        await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, changed: true, token);
+    }
+
     internal static async Task PriorParentAsync(RequestCqrsClusterFixture fixture,
         TextIndexMaintenanceRequest previous, CancellationToken token)
     {

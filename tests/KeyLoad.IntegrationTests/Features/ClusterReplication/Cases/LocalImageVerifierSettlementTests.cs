@@ -42,10 +42,21 @@ internal sealed class LocalImageVerifierSettlementTests
         {
             var files = await LocalImageVerifierProcessProof.WriteAsync(root, LocalImageVerifierProcessProof.WaitMode)
                 .ConfigureAwait(false);
+            var phases = new List<LocalImageVerifierPhase>();
             var failure = await OwnedProcessFailureObserver.CaptureAsync(LocalRf3ImageIdentity.RunVerifierAsync(
-                root, files.Script, Tag, Receipt, CancellationToken.None)).ConfigureAwait(false);
+                root, files.Script, Tag, Receipt, phases.Add, CancellationToken.None)).ConfigureAwait(false);
             await Assert.That(LocalImageVerifierProcessProof.ContainsCancellation(failure)).IsTrue();
+            await Assert.That(failure is OperationCanceledException).IsTrue();
             await LocalImageVerifierProcessProof.AssertStoppedAsync(files, LocalImageVerifierProcessProof.Terminated)
+                .ConfigureAwait(false);
+            await Assert.That(phases.SequenceEqual([LocalImageVerifierPhase.BuildInputs])).IsTrue();
+            var healthy = await LocalImageVerifierProcessProof.WriteAsync(root, LocalImageVerifierProcessProof.SuccessMode)
+                .ConfigureAwait(false);
+            var output = await LocalRf3ImageIdentity.RunVerifierAsync(root, healthy.Script, Tag, Receipt, phases.Add,
+                TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+            await Assert.That(output).IsEqualTo(LocalImageVerifierProcessProof.ExpectedOutput);
+            await Assert.That(phases.SequenceEqual([LocalImageVerifierPhase.BuildInputs])).IsTrue();
+            await LocalImageVerifierProcessProof.AssertStoppedAsync(healthy, LocalImageVerifierProcessProof.Finished)
                 .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }

@@ -77,10 +77,11 @@ internal sealed class LocalRf3ImageTestSession : IAsyncDisposable
 
         builder.Resources.Remove(runner);
         VerifyPreparationResources(builder);
-        preparationDiagnostics = new();
-        builder.Services.AddSingleton<ILoggerProvider>(_ => new LocalRf3PreparationLogger(preparationDiagnostics));
+        var diagnostics = new LocalRf3PreparationDiagnostics();
+        preparationDiagnostics = diagnostics;
+        builder.Services.AddSingleton<ILoggerProvider>(_ => new LocalRf3PreparationLogger(diagnostics));
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
-        preparationDiagnostics.Attach(application);
+        diagnostics.Attach(application);
         imageCleanup = application.Services.GetRequiredService<LocalRf3ImageCleanup>();
         outputLifetime = new CancellationTokenSource();
         output = TestSuiteOutput.ForwardAsync(application, LocalRf3ImagePrerequisite.ResourceName,
@@ -91,7 +92,8 @@ internal sealed class LocalRf3ImageTestSession : IAsyncDisposable
         {
             throw new InvalidOperationException(PreparationFailure);
         }
-        _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repositoryRoot, Selection, cancellationToken)
+        _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repositoryRoot, Selection,
+            diagnostics.RecordVerifierPhase, cancellationToken)
             .ConfigureAwait(false) ?? throw new InvalidOperationException(PreparationFailure);
     }
 

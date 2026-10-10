@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 /// <summary>Retains the original actual CLI exit code and standard streams.</summary>
@@ -56,8 +58,14 @@ internal sealed record ContainerRuntimeKillReceipt(string Scenario, string Resou
 internal sealed record ContainerRuntimeRestartReceipt(string Scenario, string ResourceName, string ContainerName, string BeforeContainerId,
     string BeforeImage, string BeforeImageId, string BeforeState, int DockerKillExitCode, string KillOutput, string KillError, string StoppedState,
     string AfterContainerId, string AfterImage, string AfterImageId, string AfterState, string BeforeStartedAt,
-    string AfterStartedAt, bool NewRuntimeStartConfirmed, bool AspireStartSucceeded, string? AspireStartMessage, string SourceSha, string RepositoryRoot)
+    string AfterStartedAt, bool NewRuntimeStartConfirmed, bool AspireStartSucceeded, string? AspireStartMessage, string? SourceSha, string RepositoryRoot)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LocalBuildInputDigest { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LocalImageInvocationId { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LocalImageConfigId { get; init; }
     public DateTimeOffset KillStartedAtUtc { get; init; }
     public DateTimeOffset KillCompletedAtUtc { get; init; }
 }

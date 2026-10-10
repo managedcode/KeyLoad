@@ -9,10 +9,11 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 /// <param name="app">The actual fixture-owned distributed application.</param>
 /// <param name="containerNames">Explicit container names selected from the Aspire model.</param>
 /// <param name="repositoryRoot">The source checkout recorded with each restart receipt.</param>
+/// <param name="localImageSelection">The same verified fixture-owned local image selection, when present.</param>
 internal sealed class ContainerRuntimeControl(
     DistributedApplication app,
     IReadOnlyDictionary<string, string> containerNames,
-    string repositoryRoot)
+    string repositoryRoot, LocalRf3ImageSelection.Selection? localImageSelection = null)
 {
     private readonly Dictionary<string, ContainerRestartOwnership> restartOwners = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
@@ -98,14 +99,18 @@ internal sealed class ContainerRuntimeControl(
         }
 
         progress.Stage = ContainerRestartStage.SourceReceipt;
-        var sourceSha = await ContainerRuntimeReceiptStore.ReadSourceShaAsync(repositoryRoot, cancellationToken);
+        var source = await ContainerRuntimeReceiptStore.ReadSourceIdentityAsync(repositoryRoot, receipt.Before, after,
+            localImageSelection, cancellationToken);
         var completed = new ContainerRuntimeRestartReceipt(receipt.Scenario, resourceName, receipt.ContainerName, receipt.Before.Id,
             receipt.Before.ConfigImage, receipt.Before.ImageId, receipt.Before.State, receipt.KillExitCode, receipt.KillOutput, receipt.KillError,
             receipt.Stopped.State, after.Id, after.ConfigImage, after.ImageId, after.State, receipt.Before.StartedAt,
-            after.StartedAt, startedAtChanged, true, owner.StartMessage, sourceSha, repositoryRoot)
+            after.StartedAt, startedAtChanged, true, owner.StartMessage, source.SourceSha, repositoryRoot)
         {
             KillStartedAtUtc = receipt.KillStartedAtUtc,
-            KillCompletedAtUtc = receipt.KillCompletedAtUtc
+            KillCompletedAtUtc = receipt.KillCompletedAtUtc,
+            LocalBuildInputDigest = source.LocalBuildInputDigest,
+            LocalImageInvocationId = source.LocalImageInvocationId,
+            LocalImageConfigId = source.LocalImageConfigId
         };
         await ContainerRuntimeReceiptStore.WriteAsync(completed, cancellationToken);
     }

@@ -92,10 +92,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         }
 
         var bounded = BoundedDiagnosticLog.BoundNodes(nodeGroups);
-        var repository = FindRepositoryRoot();
-        var output = Path.Combine(repository.FullName, ClusterFixtureProtocol.ArtifactDirectory,
-            ClusterFixtureProtocol.QualificationDirectory);
-        Directory.CreateDirectory(output);
+        var output = ownedOutput ?? failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
+        if (ownedOutput is null)
+        { Directory.CreateDirectory(output); }
         var path = ownedOutput is null ? failureReceipts.Save(output, bounded)
             : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);

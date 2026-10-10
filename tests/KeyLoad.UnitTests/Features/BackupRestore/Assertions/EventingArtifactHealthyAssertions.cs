@@ -22,7 +22,16 @@ internal static class EventingArtifactHealthyAssertions
         await Assert.That(actual with { Token = string.Empty }).IsEqualTo(expected);
     }
 
-    internal static async Task CompletedAsync(EventingArtifactFixture fixture, DatabaseEngine database)
+    internal static Task CompletedAsync(EventingArtifactFixture fixture, DatabaseEngine database)
+        => CompletedAsync(fixture, database, new(new(EventingArtifactFixture.MessageId, MessageState.Leased, 1, 2, 1,
+            null, null, EventingArtifactFixture.Principal, 1, fixture.Time.AddSeconds(30)),
+            EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson));
+
+    internal static Task CompletedAfterNaturalExpiryAsync(EventingArtifactFixture fixture, DatabaseEngine database)
+        => CompletedAsync(fixture, database, new(new(EventingArtifactFixture.MessageId, MessageState.Ready, 1, 3, 3,
+            null, null, LeaseVersion: 1), EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson));
+
+    private static async Task CompletedAsync(EventingArtifactFixture fixture, DatabaseEngine database, MessageInspection original)
     {
         var acknowledged = database.InspectMessage(EventingArtifactFixture.Principal, fixture.Lane, HealthyId);
         var expected = new MessageInspection(new(HealthyId, MessageState.Acked, 1, 3, 2,
@@ -30,9 +39,6 @@ internal static class EventingArtifactHealthyAssertions
         await Assert.That(JsonSerializer.Serialize(acknowledged, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         var retained = database.InspectMessage(EventingArtifactFixture.Principal, fixture.Lane, EventingArtifactFixture.MessageId);
-        var original = new MessageInspection(new(EventingArtifactFixture.MessageId, MessageState.Leased, 1, 2, 1,
-            null, null, EventingArtifactFixture.Principal, 1, fixture.Time.AddSeconds(30)),
-            EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson);
         await Assert.That(JsonSerializer.Serialize(retained, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(original, JsonDefaults.Options));
     }

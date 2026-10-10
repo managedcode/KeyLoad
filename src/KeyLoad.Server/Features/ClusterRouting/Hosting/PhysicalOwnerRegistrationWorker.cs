@@ -57,7 +57,7 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
             var observation = controller.ObserveFailure(deadline, stopping);
             var failures = new List<Exception> { error };
             ServerFailureObserver.Observe(() => PhysicalOwnerRegistrationLog.Failed(logger, error,
-                observation.Stage, observation.DeadlineCancelled, observation.StoppingCancelled), failures);
+                observation.Stage, observation.DeadlineCancelled, observation.StoppingCancelled, observation.LastProbeHttpStatus), failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }

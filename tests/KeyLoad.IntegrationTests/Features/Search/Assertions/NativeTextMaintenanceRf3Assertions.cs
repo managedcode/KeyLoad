@@ -27,8 +27,13 @@ internal static class NativeTextMaintenanceRf3Assertions
         await Assert.That(result.ReleasedConsumer).IsNull();
     }
 
-    internal static async Task CanonicalAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+    internal static Task CanonicalAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         NativeTextMaintenanceRf3Scenario scenario, bool changed, CancellationToken token)
+        => CanonicalAsync(sdk, mcp, scenario, changed, null, token);
+
+    internal static async Task CanonicalAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        NativeTextMaintenanceRf3Scenario scenario, bool changed, NativeTextMaintenanceFlowObservation? observation,
+        CancellationToken token)
     {
         var reference = new EntityRef(scenario.Partition, NativeTextMaintenanceRf3Scenario.Collection,
             NativeTextMaintenanceRf3Scenario.Ukrainian);
@@ -49,8 +54,10 @@ internal static class NativeTextMaintenanceRf3Assertions
         await Assert.That(JsonDefaults.Serialize(officialRows).SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
         if (changed)
         {
-            await EmptyAsync(sdk, mcp, search with { Text = OriginalUkrainianQuery }, token);
-            await EmptyAsync(sdk, mcp, search with { Text = OriginalEnglishQuery }, token);
+            await EmptyAsync(sdk, mcp, search with { Text = OriginalUkrainianQuery }, observation,
+                NativeTextMaintenanceFlowPhase.FinalEmptyUkrainian, token);
+            await EmptyAsync(sdk, mcp, search with { Text = OriginalEnglishQuery }, observation,
+                NativeTextMaintenanceFlowPhase.FinalEmptyEnglish, token);
             var removed = new EntityRef(scenario.Partition, NativeTextMaintenanceRf3Scenario.Collection,
                 NativeTextMaintenanceRf3Scenario.English);
             await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(removed, token))).IsNull();
@@ -60,10 +67,13 @@ internal static class NativeTextMaintenanceRf3Assertions
     }
 
     private static async Task EmptyAsync(KeyLoadClient sdk, McpOfficialClient mcp, SearchRequest request,
-        CancellationToken token)
+        NativeTextMaintenanceFlowObservation? observation, NativeTextMaintenanceFlowPhase phase, CancellationToken token)
     {
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token))).IsEmpty();
+        var result = observation is null ? await sdk.SearchAsync(request, token)
+            : await observation.FinalSearchAsync(phase, () => sdk.SearchAsync(request, token), token);
+        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(result)).IsEmpty();
         await Assert.That((await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
             McpCallerTools.SearchExecute, request, token))).Value).IsEmpty();
+        observation?.CompleteFinalCall(phase);
     }
 }

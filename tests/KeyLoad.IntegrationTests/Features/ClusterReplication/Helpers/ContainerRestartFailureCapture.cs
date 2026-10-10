@@ -33,7 +33,6 @@ internal sealed class ContainerRestartFailureCapture
 
     private readonly DistributedApplication app;
     private readonly ContainerRuntimeKillReceipt receipt;
-    private readonly string repositoryRoot;
     private readonly ClusterFailureReceipts failureReceipts;
     private readonly List<string> lines = new();
     private int sampleSequence;
@@ -52,7 +51,6 @@ internal sealed class ContainerRestartFailureCapture
         ArgumentNullException.ThrowIfNull(failureReceipts);
         this.app = app;
         this.receipt = receipt;
-        this.repositoryRoot = repositoryRoot;
         this.failureReceipts = failureReceipts;
         AddSafeSample(ContainerRestartSampleStage.BeforeStart);
         lines.Add(ContainerRestartDiagnostics.FormatVerifiedKill(receipt.Before));
@@ -82,8 +80,7 @@ internal sealed class ContainerRestartFailureCapture
         lines.Add(ContainerRestartDiagnostics.FormatFailure(stage, failure));
         lines.Add(await ContainerRestartDockerInspection.ReadAsync(receipt.ContainerName).ConfigureAwait(false));
 
-        var output = Path.Combine(repositoryRoot, ClusterFixtureProtocol.ArtifactDirectory,
-            ClusterFixtureProtocol.QualificationDirectory);
+        var output = failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
         Directory.CreateDirectory(output);
         failureReceipts.Save(output, BoundedDiagnosticLog.Bound(lines));
     }

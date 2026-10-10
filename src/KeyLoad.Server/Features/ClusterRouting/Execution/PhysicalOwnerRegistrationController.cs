@@ -66,11 +66,11 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
         { stage = value; }
     }
 
-    internal (PhysicalOwnerRegistrationStage Stage, bool DeadlineCancelled, bool StoppingCancelled) ObserveFailure(
+    internal (PhysicalOwnerRegistrationStage Stage, bool DeadlineCancelled, bool StoppingCancelled, int LastProbeHttpStatus) ObserveFailure(
         CancellationTokenSource deadline, CancellationTokenSource stopping)
     {
         lock (state)
-        { return (stage, deadline.IsCancellationRequested, stopping.IsCancellationRequested); }
+        { return (stage, deadline.IsCancellationRequested, stopping.IsCancellationRequested, probes.LastHttpStatus); }
     }
 
     private const int FirstOwner = 0;

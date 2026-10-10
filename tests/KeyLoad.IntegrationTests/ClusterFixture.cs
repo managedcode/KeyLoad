@@ -140,7 +140,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             }
             App = isolationBuilder is null ? await builder.BuildAsync(timeout.Token)
                 : await isolationBuilder.BuildAsync(timeout.Token).ConfigureAwait(false);
-            containerRuntime = new(App, containerNames, repository.FullName);
+            containerRuntime = new(App, containerNames, repository.FullName, localImageSession?.Selection);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
             await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);

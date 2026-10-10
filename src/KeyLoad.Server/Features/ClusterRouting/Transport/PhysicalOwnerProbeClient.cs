@@ -9,10 +9,13 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal sealed class PhysicalOwnerProbeClient : IDisposable
 {
     private const int FirstVoter = 0;
+    private const int UnobservedHttpStatus = 0;
+    private int lastHttpStatus;
+
+    internal int LastHttpStatus => Volatile.Read(ref lastHttpStatus);
     private const int NoFailures = 0;
     private const long EmptyApplied = 0;
     private const int SingleSignature = 1;
-    private const string NonceFormat = "N";
     private readonly NodeOptions options;
     private readonly IOptions<OrleansMembershipOptions> membershipOptions;
     private readonly OrleansNode node;
@@ -67,7 +70,8 @@ internal sealed class PhysicalOwnerProbeClient : IDisposable
             cancellationToken.ThrowIfCancellationRequested();
             var call = new PhysicalOwnerProbeCallV1(PhysicalOwnerProbeProtocol.Version, Guid.NewGuid(),
                 control, destination, partition.Configuration.LocalId, discovery.SiloAddress,
-                Guid.NewGuid().ToString(NonceFormat), clock.GetUtcNow(), expiresAt);
+                Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(
+                    System.Security.Cryptography.RandomNumberGenerator.GetBytes(ReplicaMembershipAuthorityProtocol.NonceBytes)), clock.GetUtcNow(), expiresAt);
             var observed = await ReadAsync(index, call, cancellationToken).ConfigureAwait(false);
             if (fingerprint is not null && fingerprint != observed)
             { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
@@ -85,8 +89,10 @@ internal sealed class PhysicalOwnerProbeClient : IDisposable
         request.Content = new ByteArrayContent(body);
         request.Content.Headers.ContentType = new(PhysicalOwnerProbeProtocol.ContentType);
         request.Headers.Add(PhysicalOwnerProbeProtocol.SignatureHeader, sourceMac.Sign(body, reply: false));
+        Volatile.Write(ref lastHttpStatus, UnobservedHttpStatus);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
             cancellationToken).ConfigureAwait(false);
+        Volatile.Write(ref lastHttpStatus, (int)response.StatusCode);
         if (response.StatusCode != System.Net.HttpStatusCode.OK)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
         var encoded = await PhysicalOwnerProbeWire.ReadReplyAsync(response.Content, cancellationToken).ConfigureAwait(false);

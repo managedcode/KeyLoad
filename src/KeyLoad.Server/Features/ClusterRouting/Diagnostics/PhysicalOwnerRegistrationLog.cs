@@ -8,16 +8,16 @@ internal static class PhysicalOwnerRegistrationLog
         new EventId(CompletedEvent), CompletedMessage);
     internal static void Succeeded(ILogger logger) => Completed(logger, null);
     private const int FailureEvent = 1004;
-    private const string FailureMessage = "Physical owner registration stopped with {ErrorCode} at {Stage} ({Category}); DeadlineCancelled={DeadlineCancelled}; StoppingCancelled={StoppingCancelled}.";
+    private const string FailureMessage = "Physical owner registration stopped with {ErrorCode} at {Stage} ({Category}); DeadlineCancelled={DeadlineCancelled}; StoppingCancelled={StoppingCancelled}; LastProbeHttpStatus={LastProbeHttpStatus}.";
     private static readonly Action<ILogger, ErrorCode, PhysicalOwnerRegistrationStage,
-        PhysicalOwnerRegistrationFailureCategory, bool, bool, Exception?> Failure =
-        LoggerMessage.Define<ErrorCode, PhysicalOwnerRegistrationStage, PhysicalOwnerRegistrationFailureCategory, bool, bool>(
+        PhysicalOwnerRegistrationFailureCategory, bool, bool, int, Exception?> Failure =
+        LoggerMessage.Define<ErrorCode, PhysicalOwnerRegistrationStage, PhysicalOwnerRegistrationFailureCategory, bool, bool, int>(
             LogLevel.Warning, new EventId(FailureEvent), FailureMessage);
 
     internal static void Failed(ILogger logger, Exception error, PhysicalOwnerRegistrationStage stage,
-        bool deadlineCancelled, bool stoppingCancelled)
+        bool deadlineCancelled, bool stoppingCancelled, int lastProbeHttpStatus)
         => Failure(logger, error is KeyLoadException known ? known.Code : ErrorCode.UnknownWriteOutcome,
-            stage, Category(error), deadlineCancelled, stoppingCancelled, null);
+            stage, Category(error), deadlineCancelled, stoppingCancelled, lastProbeHttpStatus, null);
 
     private static PhysicalOwnerRegistrationFailureCategory Category(Exception error) => error switch
     {

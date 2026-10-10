@@ -14,6 +14,9 @@ internal sealed class ClusterFailureReceipts
     private readonly Lock writeGate = new();
     private readonly string filePrefix;
     private readonly string latestFileName;
+    private const string RunOwnerMismatch = "The native diagnostic receipt owner belongs to another results root.";
+    private string? runRoot;
+    private string? runOutput;
     private int savedReceipts;
 
     internal ClusterFailureReceipts(ClusterFailureReceiptKind kind = ClusterFailureReceiptKind.General)
@@ -24,6 +27,21 @@ internal sealed class ClusterFailureReceipts
             ClusterFailureReceiptKind.Restart => (RestartFilePrefix, RestartLatestFileName),
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
+    }
+
+    /// <summary>Retains one native runner result namespace for this original receipt owner.</summary>
+    internal string RequireRunOutput(string resultsDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(resultsDirectory);
+        var root = Path.GetFullPath(resultsDirectory);
+        lock (writeGate)
+        {
+            if (runRoot is not null && !string.Equals(runRoot, root, StringComparison.Ordinal))
+            { throw new InvalidOperationException(RunOwnerMismatch); }
+            runRoot ??= root;
+            return runOutput ??= Path.Combine(root, ClusterFixtureProtocol.QualificationDirectory,
+                Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
+        }
     }
 
     /// <summary>Serializes whole-file writes without retaining additional diagnostic text in memory.</summary>

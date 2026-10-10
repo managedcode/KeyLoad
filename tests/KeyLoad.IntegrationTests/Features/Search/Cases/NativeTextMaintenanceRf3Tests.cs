@@ -20,6 +20,7 @@ internal sealed class NativeTextMaintenanceRf3Tests(ClusterFixture fixture)
             nameof(ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths));
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;
+        NativeTextMaintenanceFlowObservation? observation = null;
         HttpClient? http = null;
         McpOfficialClient? mcp = null;
         try
@@ -27,15 +28,18 @@ internal sealed class NativeTextMaintenanceRf3Tests(ClusterFixture fixture)
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 deadline = McpCallerDeadline.Create();
+                observation = new NativeTextMaintenanceFlowObservation();
                 http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
                 var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-                mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
-                    fixture.AdminKey, deadline.Token);
-                await NativeTextMaintenanceRf3Flow.RunAsync(sdk, mcp, path, failures, deadline.Token);
+                mcp = await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.Connection, () =>
+                    McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, deadline.Token));
+                await NativeTextMaintenanceRf3Flow.RunAsync(fixture, sdk, mcp, path, observation, failures, deadline.Token);
             }, failures);
         }
         finally
         {
+            if (failures.Count != 0 && observation is not null)
+            { ServerFailureObserver.Observe(observation.Save, failures); }
             if (mcp is not null)
             { await ServerFailureObserver.ObserveAsync(() => mcp.DisposeAsync().AsTask(), failures); }
             if (http is not null)

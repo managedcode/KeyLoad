@@ -47,6 +47,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
             await Assert.That(restoredSource.ThroughSequence).IsGreaterThan(builtSource.ThroughSequence);
             await Assert.That(restored.IndexSha256).IsNotEqualTo(built.IndexSha256);
             await RequestCqrsActualTextAssertions.VerifyAsync(fixture, restore, changed: true, token);
+            await RequestCqrsActualTextReplayFlow.OriginalBuildAsync(fixture, request, restore, restored, token);
             await RequestCqrsActualTextReplayFlow.PriorParentAsync(fixture, restore, token);
         }
         await RequestCqrsActualTextReplayFlow.ReleaseAsync(fixture, request, token);

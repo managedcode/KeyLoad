@@ -26,7 +26,7 @@ internal static class MixedEventingRetentionBackupTrial
         await Assert.That(EventingArtifactState.FullBytes(fixture.Target)).IsEquivalentTo(finalPhysical, CollectionOrdering.Matching);
         await QueueLifecycleOperations.ReplayAsync(fixture.Database, state.RestoredQueue);
         await QueueLifecycleAccountingAssertions.TerminalAsync(fixture.Target, state.RestoredQueue, true);
-        await EventingArtifactHealthyAssertions.CompletedAsync(fixture, fixture.Database);
+        await EventingArtifactHealthyAssertions.CompletedAfterNaturalExpiryAsync(fixture, fixture.Database);
         await MixedEventingRetentionBackupTopic.RequireAsync(fixture.Database, state);
         await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.ReceiptCapacity);
         await Assert.That(TargetInboxNativeSetup.Apply(fixture.Database, state.Inbox, token).Error).IsEqualTo(ErrorCode.TokenInvalidated);

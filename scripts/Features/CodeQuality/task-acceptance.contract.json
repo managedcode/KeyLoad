@@ -791,6 +791,15 @@
             {
               "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
               "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
+              "nativeReportClassBasis": "original authenticated Linux MTP discovery: run38063879768/attempt1/source e92ca583a359e84b4a083912efe89c16eeee49eb; both profiles; current image must rebind",
+              "methodName": "OriginalGuardFailureSurvivesSuccessfulWaveJoinWithNativeEvidenceBeforeRootDeletion",
+              "instanceName": "OriginalGuardFailureSurvivesSuccessfulWaveJoinWithNativeEvidenceBeforeRootDeletion",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/RequestCqrsRf3McpGuardEvidenceTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
+              "nativeReportClassName": "KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3McpGuardEvidenceTests",
               "nativeReportClassBasis": "source-declared ClusterFixture suffix is provisional until original native discovery; do not claim observed",
               "methodName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
               "instanceName": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",

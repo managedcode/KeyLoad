@@ -9,6 +9,26 @@ internal static class ContainerRuntimeReceiptStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
+    private const string LocalImageMismatch = "The local restart image identity does not match its verified producer.";
+
+    internal sealed record SourceIdentity(string? SourceSha, string? LocalBuildInputDigest,
+        string? LocalImageInvocationId, string? LocalImageConfigId);
+
+    internal static async Task<SourceIdentity> ReadSourceIdentityAsync(string repositoryRoot,
+        ContainerRuntimeInspection before, ContainerRuntimeInspection after, LocalRf3ImageSelection.Selection? selection,
+        CancellationToken cancellationToken)
+    {
+        var local = await LocalRf3ImageIdentity.ReadVerifiedAsync(repositoryRoot, selection, cancellationToken);
+        if (local is null)
+        { return new(await ReadSourceShaAsync(repositoryRoot, cancellationToken), null, null, null); }
+        if (!string.Equals(before.ConfigImage, local.Reference, StringComparison.Ordinal)
+            || !string.Equals(after.ConfigImage, local.Reference, StringComparison.Ordinal)
+            || !string.Equals(before.ImageId, local.ImageConfigId, StringComparison.Ordinal)
+            || !string.Equals(after.ImageId, local.ImageConfigId, StringComparison.Ordinal))
+        { throw new InvalidOperationException(LocalImageMismatch); }
+        return new(null, local.InputDigest, local.InvocationId, local.ImageConfigId);
+    }
+
     internal static async Task<string> ReadSourceShaAsync(string repositoryRoot, CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo(ContainerRuntimeProtocol.GitExecutable)

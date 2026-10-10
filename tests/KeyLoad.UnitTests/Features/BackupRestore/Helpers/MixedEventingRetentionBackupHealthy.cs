@@ -41,7 +41,7 @@ internal static class MixedEventingRetentionBackupHealthy
             issuedReceive.EvaluatedAt.AddSeconds(30), 1, 1));
         var ack = new DeliveryCommand(Guid.NewGuid(), fixture.Lane, delivery.Token, DeliveryAction.Ack);
         _ = fixture.Apply(fixture.Database, OperationKind.Delivery, ack, ack.CommandId).Get<CommitReceipt>();
-        await EventingArtifactHealthyAssertions.CompletedAsync(fixture, fixture.Database);
+        await EventingArtifactHealthyAssertions.CompletedAfterNaturalExpiryAsync(fixture, fixture.Database);
         await QueueLifecycleHealthy.RunAsync(fixture.Database, state.RestoredQueue, token);
         await QueueLifecycleAccountingAssertions.TerminalAsync(fixture.Target, state.RestoredQueue, true);
         await MixedEventingRetentionBackupInbox.ContinueAsync(fixture, state, token);

@@ -17,6 +17,7 @@ internal static class MixedEventingRetentionBackupContinuation
             state.Purge.CommandId)).Error).IsEqualTo(ErrorCode.TokenInvalidated);
         await MixedEventingRetentionBackupOracle.InitialAsync(fixture, state, fixture.Database);
         await MixedEventingRetentionBackupPrivacy.RunAsync(fixture, state, token);
+        await MixedEventingRetentionBackupHeldLease.RequireNaturalExpiryAsync(fixture, state, token);
         state.RestoredQueue = new(state.Queue.Partition, state.Queue.Time)
         { NativeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token) };
         await QueueLifecycleRestoredContinuation.RunAsync(fixture.Database, fixture.Target, state.RestoredQueue, token);
