@@ -12,6 +12,7 @@ public static class RuntimeJournalIdentity
         ArgumentNullException.ThrowIfNull(principal);
         if (principal.Id != ProtectedPrincipalId || principal.TenantId != Contracts.RuntimeJournalProtocol.SystemTenant
             || !principal.Grants.IsDefaultOrEmpty || !principal.FieldGrants.IsDefaultOrEmpty || !principal.Projects.IsDefaultOrEmpty
+            || !principal.Teams.IsDefaultOrEmpty
             || principal.ClusterAdministrator || principal.PolicyEpoch != Contracts.RuntimeJournalProtocol.ProtectedPolicyEpoch || principal.Revoked
             || principal.ExpiresAt is not null || principal.OwnerId is not null || principal.RestrictRows)
         {

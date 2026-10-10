@@ -1,6 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
@@ -15,6 +16,8 @@ internal static class SampleChunkRf3Cold
         // Each kill/restart remains in the actual Aspire-owned runtime; all original volumes stay owned by this fixture.
         foreach (var node in Nodes)
         { await fixture.KillContainerAsync(node, SampleChunkRf3Protocol.ColdScenario, token).ConfigureAwait(false); }
+        foreach (var node in Nodes)
+        { await fixture.BeginContainerRestartAsync(node, token).ConfigureAwait(false); }
         foreach (var node in Nodes)
         { await fixture.RestartContainerAsync(node, token).ConfigureAwait(false); }
         foreach (var node in Nodes)

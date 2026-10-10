@@ -132,6 +132,9 @@ public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [prope
     /// <summary>Gets the principal policy epoch.</summary>
     [Orleans.Id(10)]
     public long PolicyEpoch { get; init; } = InitialPolicyEpoch;
+    /// <summary>Gets the tenant-scoped teams declared by persisted administration.</summary>
+    [Orleans.Id(11)]
+    public ImmutableArray<string> Teams { get; init; } = [];
 }
 
 /// <summary>Persists an API key verifier and its principal and lifecycle state.</summary>

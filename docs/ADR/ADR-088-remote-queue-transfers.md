@@ -563,3 +563,35 @@ Docs precede the two existing Hosting owners. Exact KLD0031 native code-fix look
 The same existing registration runtime also owns the original authority-only membership publication followed immediately by its existing Attach. PublishAndAttachAuthority receives the exact original OrleansNode.Options snapshot and the existing membership authority, services, clock, partition and runtime settings. It returns for the same non-authority modes BEFORE provider resolution/publication, then performs the same GetRequiredService<IMembershipTable>, Publish and unchanged Attach in their original order. Attach retains its original configured-enrollment guard, worker task and ownership. The call stays immediately after original catalog/journal initialization; the prerequisite RequireProbeWork stays after registered settles and before address/runtime/silo creation.
 
 This is one responsibility extraction into the existing Hosting owner, retaining every node/runtime declaration, authority exception, cancellation and joined shutdown path. It introduces no timer, wait, ready probe, task, provider, permission, state, transport or new observation. Related physical-owner registration REQ/AC and ADR-088 apply; verify unchanged enrolled, unenrolled, proxy and local startup/shutdown flows and genuine original distinct-owner SDK/official MCP/Q1/cold/lock operations. The exact native KLD0031 lookup returned NotFound; standing owner authority covers the native patch. Original R2 compiler/formatter cancellation and IMPORTS refusal remain immutable failed evidence; they are not acceptance. Whole task and delivered-source Linux gates remain open until their actual receipts exist. Rollback restores the same coherent original startup ownership without changing data or topology.
+
+
+## TASK-KL043-PROBE-STARTUP-021: retained native startup before fresh probe authentication
+
+REQ-KL043-PROBE-NATIVE-STARTUP-001 / AC-KL043-PROBE-NATIVE-STARTUP-001: the existing MAC/call/nonce/pinned physical-owner probe borrows the SAME actual B OrleansNode startup Task before its original fresh persisted administrator authentication. MembershipReady does not prove completion of the native catalog prerequisite, catalog bootstrap/verification and runtime-journal admission. Await under the original linked request cancellation only; cancellation does not cancel or detach the retained producer, which original StopCore still joins. Missing startup fails closed; actual startup fault retains its original exception. Revalidate the SAME original call expiry immediately after awaiting. Preserve all authentication/quorum/status/incarnation/placement/discovery/current-administrator predicates, original deadlines and response/error ledger.
+
+Native dependency audit: Proxy StartCore completes its native local catalog and runtime-journal work, while PublishAndAttachAuthority and WaitForRegistration return immediately for Proxy. Native journal cohort uses only its configured original three voters; it does not require A physical-owner publication or this probe. No new wait/poll/retry/timer/provider/readiness read or authority is introduced. Append only diagnostics-only PhysicalOwnerProbeStage.NativeStartup=21 after unchanged0..20. Source ownership: existing OrleansNode private retained lifecycle fields, the existing Connection partial forwarding and feature-owned OrleansNodeStartupWait, original PhysicalOwnerProbeReceiver and existing diagnostic enum. No public/persisted API/alias/field/format/default change. Rollback removes these exact source changes together.
+
+Original R158 SDK/MCP normal2FAIL remains failure: first immutable phase SixHealthy, timeout=true/caller=false and original cancellation plus cleanup. Actual active MCP B original logs independently show Authentication/OwnershipLost503 and QuorumRead/OwnershipLost; those observations do not prove the SDK cause or every underlying readiness cause. Full native normal/scalar controls and the SAME genuine SDK/MCP purpose-refusal/no-effects/exact repair/receipt/Q1/two-cold flow must verify a fresh candidate. Delivered Linux whole KL043/KL094 remains OPEN; no retrospective PASS or clock/health weakening.
+
+## TASK-KL043-STARTUP-CAPTURE-022: first original startup bounded evidence
+
+REQ-KL043-PUBLIC-STARTUP-OBSERVATION-001 / AC-KL043-PUBLIC-STARTUP-OBSERVATION-001: the existing capability/purpose Trial composes its immutable original phase failure with the existing RemoteTransferStartupCapture/Window/Buffer callbacks for ONLY the first original startup. Attach the six actual ResourceLoggerService/ResourceNotifications streams before original application start; preserve existing6 first failure records/12 tail records/1024-byte line bounds. Capture the immutable actual pre-Stop state/error snapshot on original failure, then separately capture joined terminal. Existing no-op later armed/healthy/cold Attach/Ready callbacks remain no-ops; no extra collector window or product telemetry is admitted. Retain original failure and logger/collector/cleanup failures through ServerFailureObserver; capture failure cannot replace initiating failure. Original resource/lock/root cleanup remains genuine, and uncertain joins retain ownership. Rollback removes only this test-owned adapter/composition; no case identity/Args/default50/deadline/assertion or protocol changes. Existing real public whole cases are the regression; diagnostics-only evidence never qualifies signed-purpose or RF3.
+
+```mermaid
+sequenceDiagram
+    participant P as Original A publisher
+    participant B as MAC-verified B probe
+    participant S as Same B startup Task
+    participant Q as Fresh native authentication and quorum
+    P->>B: Original bounded signed probe
+    B->>S: Await retained task with original request cancellation
+    S-->>B: Native catalog and journal startup complete
+    B->>B: Revalidate original call expiry
+    B->>Q: Unchanged authentication, barriers and status guards
+    Q-->>B: Actual current result
+    B-->>P: Unchanged signed reply or original refusal
+```
+
+Implementation responsibility extraction after original private SDK KLD0031: OrleansNode forwards to internal OrleansNodeStartupWait with the SAME lifecycle Lock and ref to its SAME retained startup field. The helper captures under that original lock, rejects missing Task, and only cancels the caller wait. No copied startup, ownership transfer, new producer or public surface.
+
+The forwarding method is colocated in the existing OrleansNode.Connection partial (no extra partial-class shell), with the retained Task capture owned by OrleansNodeStartupWait. Existing CloseConnection/ReplicaSnapshotObserver remain byte-exact. Original private build R2 KLD0031 202>200 is preserved; no analyzer policy or formatting-based suppression.

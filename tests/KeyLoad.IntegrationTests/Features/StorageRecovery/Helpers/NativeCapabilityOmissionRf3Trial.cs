@@ -21,15 +21,15 @@ internal static class NativeCapabilityOmissionRf3Trial
         LocalRf3ImageTestSession? localImage = null;
         TwoRf3MembershipWave? wave = null;
         PartitionMovementPublicParentRf3Seed? seed = null;
+        NativeCapabilityStartupCapture? startupCapture = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             localImage = await LocalRf3ImageTestSession.StartIfSelectedAsync(lifetime.Token).ConfigureAwait(false);
             phase = "WaveStart";
-            var startup = new KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks(
-                (_, _) => { }, () => Task.CompletedTask, (failure, _) => evidence.Original(phase, official, [failure],
-                    timeout.Token, lifetime.Token, callerCancellation), () => Task.CompletedTask);
+            startupCapture = new NativeCapabilityStartupCapture((failure, _) => evidence.Original(phase, official,
+                [failure], timeout.Token, lifetime.Token, callerCancellation));
             wave = await TwoRf3MembershipWave.StartNativeCapabilityOmissionAsync(lifetime.Token, localImage?.Selection,
-                value => phase = value, startup).ConfigureAwait(false);
+                value => phase = value, startupCapture.Callbacks).ConfigureAwait(false);
             phase = "SeedCreate";
             seed = await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, lifetime.Token).ConfigureAwait(false);
             await ExecuteAsync(wave, seed, official, purpose, value => phase = value, lifetime.Token).ConfigureAwait(false);
@@ -44,6 +44,8 @@ internal static class NativeCapabilityOmissionRf3Trial
         var beforeWaveCleanup = failures.Count;
         if (wave is { } ownedWave)
         { await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        if (startupCapture is { } ownedCapture)
+        { await ServerFailureObserver.ObserveAsync(() => ownedCapture.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
         if (localImage is { } ownedImage)
         { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false); }

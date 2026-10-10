@@ -1,6 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
@@ -13,6 +14,8 @@ internal static class SampleChunkRetentionRf3Cold
     {
         foreach (var node in Nodes)
         { await fixture.KillContainerAsync(node, SampleChunkRetentionRf3Protocol.ColdScenario, token).ConfigureAwait(false); }
+        foreach (var node in Nodes)
+        { await fixture.BeginContainerRestartAsync(node, token).ConfigureAwait(false); }
         foreach (var node in Nodes)
         { await fixture.RestartContainerAsync(node, token).ConfigureAwait(false); }
         foreach (var node in Nodes)

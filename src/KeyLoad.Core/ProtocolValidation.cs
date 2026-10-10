@@ -13,10 +13,11 @@ public sealed partial class DatabaseEngine
 
     private static void ValidatePrincipalStructure(PrincipalRecord principal)
     {
-        if (principal.Grants.IsDefault || principal.FieldGrants.IsDefault || principal.Projects.IsDefault
+        if (principal.Grants.IsDefault || principal.FieldGrants.IsDefault || principal.Projects.IsDefault || principal.Teams.IsDefault
             || principal.Grants.Length > PrincipalFormatMaximumGrants
             || principal.FieldGrants.Length > PrincipalFormatMaximumFieldGrants
-            || principal.Projects.Length > PrincipalFormatMaximumProjects
+            || principal.Teams.Length > PrincipalFormatMaximumProjects
+            || principal.Projects.Length > PrincipalFormatMaximumProjects - principal.Teams.Length
             || principal.Grants.Any(grant => grant is null || (grant.Capabilities & ~Capability.All) != ProtocolValidationEmptyElementCount))
         {
             throw Errors.Fail(ErrorCode.Validation, ProtocolValidationPrincipalScopeExceedsItsBudgetOrContainsAnInvalidGrantDetail);
@@ -32,6 +33,11 @@ public sealed partial class DatabaseEngine
         foreach (var project in principal.Projects)
         {
             JsonData.Identifier(project);
+        }
+
+        foreach (var team in principal.Teams)
+        {
+            JsonData.Identifier(team);
         }
 
         if (principal.OwnerId is { } owner)

@@ -2730,8 +2730,7 @@
               "parameterTypeFullNames": []
             }
           ]
-        }
-      ,
+        },
         {
           "selectionId": "rf3-partition-movement-receiver-issue-failover-rf3-tests",
           "suite": "rf3",
@@ -6021,6 +6020,562 @@
               "instanceName": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
               "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
               "parameterTypeFullNames": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "KL-065",
+      "selections": [],
+      "censusSelections": [
+        {
+          "selectionId": "unit-security-and-query-tests",
+          "suite": "unit",
+          "filter": "/*/*/SecurityAndQueryTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "RevocationInvalidatesCurrentPageAndNeverReturnsCachedPayload",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "RowScopeAndTenantCannotBeForged",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "CompactionPreservesCursorAndReplicaInstallInvalidatesItsGeneration",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "SqlUsesTypedParametersThreeValuedNullAndDeterministicOrdering",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SecurityAndQueryTests",
+              "methodName": "WorkerRequiredProtectedInputFailsBeforeClaim",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-document-row-tenant-mutation-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/DocumentRowTenantMutationAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.DocumentStorage.DocumentRowTenantMutationAuthorizationTests",
+              "methodName": "AcDstore003RowOwnerAndTenantCannotBeForgedByPutPatchOrDelete",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentRowTenantMutationAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-equality-access-path-security-tests",
+          "suite": "unit",
+          "filter": "/*/*/EqualityAccessPathSecurityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.EqualityAccessPathSecurityTests",
+              "methodName": "AcAisql008ProtectedReversedEqualityIsDeniedBeforeTheIndexReadBudget",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/EqualityAccessPathSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.EqualityAccessPathSecurityTests",
+              "methodName": "AcAisql008ReversedPointAndIndexPredicatesPreservePersistedRowOwnership",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/EqualityAccessPathSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean",
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false, false",
+                "false, true",
+                "true, false",
+                "true, true"
+              ],
+              "sourceInstances": 4
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.EqualityAccessPathSecurityTests",
+              "methodName": "AcAisql008MissingReversedParameterIsRejectedBeforeCandidateSelection",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/EqualityAccessPathSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-sql-inner-join-row-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/SqlInnerJoinRowAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinRowAuthorizationTests",
+              "methodName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlInnerJoinRowAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-partition-query-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/PartitionQueryAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
+              "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-partition-query-public-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/PartitionQueryPublicAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+              "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+              "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-graph-incoming-privacy-tests",
+          "suite": "unit",
+          "filter": "/*/*/GraphIncomingPrivacyTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.GraphTraversal.GraphIncomingPrivacyTests",
+              "methodName": "HiddenSourceEndpointIsOmittedFromIncomingProjection",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphIncomingPrivacyTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.GraphTraversal.GraphIncomingPrivacyTests",
+              "methodName": "HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphIncomingPrivacyTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-graph-traversal-tests",
+          "suite": "unit",
+          "filter": "/*/*/GraphTraversalTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.GraphTraversal.GraphTraversalTests",
+              "methodName": "TraversalStopsAtHiddenIntermediateVerticesAndHandlesCycles",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-graph-shortest-path-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/GraphShortestPathAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathAuthorizationTests",
+              "methodName": "AcGraph007OnlyNonemptyLabelsRequireUseAndAllLabelsProjectTheSamePath",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphShortestPathAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathAuthorizationTests",
+              "methodName": "AcGraph007MissingHiddenAndDeletedSourcesFailClosedWhileTargetsReturnNoPath",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphShortestPathAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-graph-search-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/GraphSearchAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GraphSearchAuthorizationTests",
+              "methodName": "HiddenIntermediateIsNeverExpandedAndAnExplicitHiddenSeedFails",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GraphSearchAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Search.GraphSearchAuthorizationTests",
+              "methodName": "RequestedLabelRequiresPersistedFieldUseAndAuthorizedGrantAllowsIt",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/GraphSearchAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-zone-tree-point-cache-authorization-tests",
+          "suite": "unit",
+          "filter": "/*/*/ZoneTreePointCacheAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheAuthorizationTests",
+              "methodName": "WarmRawPrincipalAndCredentialBytesNeverBypassExpiryOrRevocationChecks",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ZoneTreePointCacheAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-replica-transport-security-tests",
+          "suite": "unit",
+          "filter": "/*/*/ReplicaTransportSecurityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.ReplicaTransportSecurityTests",
+              "methodName": "RequestTamperOrWrongScopeCannotConsumeReservedCapacity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.ReplicaSecurityMutation"
+              ],
+              "sourceArgumentDeclarations": [
+                "ReplicaSecurityMutation.Payload",
+                "ReplicaSecurityMutation.Method",
+                "ReplicaSecurityMutation.Nonce",
+                "ReplicaSecurityMutation.Generation",
+                "ReplicaSecurityMutation.Incarnation",
+                "ReplicaSecurityMutation.Voter"
+              ],
+              "sourceInstances": 6
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaTransportSecurityTests",
+              "methodName": "SignedCapacityFailureIsBoundToItsOriginatingRequest",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.ReplicaSecurityMutation"
+              ],
+              "sourceArgumentDeclarations": [
+                "ReplicaSecurityMutation.Payload",
+                "ReplicaSecurityMutation.Method",
+                "ReplicaSecurityMutation.Nonce",
+                "ReplicaSecurityMutation.Generation",
+                "ReplicaSecurityMutation.Incarnation",
+                "ReplicaSecurityMutation.Voter",
+                "ReplicaSecurityMutation.Error"
+              ],
+              "sourceInstances": 7
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaTransportSecurityTests",
+              "methodName": "DiscoverySignatureBindsExactBytesExpectedVoterAndRequestNonce",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.ReplicaTransportSecurityTests",
+              "methodName": "DifferentCredentialOrClusterIdentityCannotVerifyRequest",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaTransportSecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "recovery-peer-discovery-security-tests",
+          "suite": "recovery",
+          "filter": "/*/*/PeerDiscoverySecurityTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "GenuineSignUsesCopiedCredentialAndReplayIsRejected",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
+              ],
+              "sourceArgumentDeclarations": [
+                "PeerDiscoveryMutation.Time",
+                "PeerDiscoveryMutation.Nonce",
+                "PeerDiscoveryMutation.Signature",
+                "PeerDiscoveryMutation.Method",
+                "PeerDiscoveryMutation.Path",
+                "PeerDiscoveryMutation.PathBase",
+                "PeerDiscoveryMutation.RawPath",
+                "PeerDiscoveryMutation.Query",
+                "PeerDiscoveryMutation.Recipient",
+                "PeerDiscoveryMutation.ContentType",
+                "PeerDiscoveryMutation.FramedBody",
+                "PeerDiscoveryMutation.UnframedBody",
+                "PeerDiscoveryMutation.TransferEncoding"
+              ],
+              "sourceInstances": 13
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ],
+              "sourceArgumentDeclarations": [
+                "PeerDiscoveryProtocol.TimeHeader",
+                "PeerDiscoveryProtocol.NonceHeader",
+                "PeerDiscoveryProtocol.SignatureHeader"
+              ],
+              "sourceInstances": 3
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "MissingAuthenticationHeadersDoNotConsumeCapacity",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "System.String"
+              ],
+              "sourceArgumentDeclarations": [
+                "PeerDiscoveryProtocol.TimeHeader",
+                "PeerDiscoveryProtocol.NonceHeader",
+                "PeerDiscoveryProtocol.SignatureHeader"
+              ],
+              "sourceInstances": 3
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "MalformedSignatureAndEmptyNonceDoNotConsumeCapacity",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "OutboundDiscoveryContractErrorsAreTypedBeforeTransport",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "RealHandlerUsesBoundedSocketsAndDisablesRedirects",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "ConfiguredHandlerUsesFrozenNativeTransportDurations",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "methodName": "InvalidConstructorConfigurationIsTyped",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-graph-incoming-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/GraphIncomingRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.GraphTraversal.GraphIncomingRf3Tests",
+              "methodName": "IncomingReadProjectsLocalAndDeliveredSameIdRowsThroughSdkAndOfficialMcp",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphIncomingRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.GraphTraversal.GraphIncomingRf3Tests",
+              "methodName": "PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphIncomingRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.GraphTraversal.GraphIncomingRf3Tests",
+              "methodName": "DeleteAndReinsertKeepRevisionedReverseProjectionFromResurrectingStaleRows",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphIncomingRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-graph-path-rf3-authorization-tests",
+          "suite": "rf3",
+          "filter": "/*/*/GraphPathRf3AuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.GraphTraversal.GraphPathRf3AuthorizationTests",
+              "methodName": "AcGraph007HiddenVerticesAndFieldUseGrantAreConsistentAcrossSdkAndOfficialMcp",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphPathRf3AuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.GraphTraversal.GraphPathRf3AuthorizationTests",
+              "methodName": "AcGraph007PersistedGraphCapabilityRevocationDeniesSdkAndMcpThenRestorationWorks",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphPathRf3AuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-cross-tenant-rf3-whole-flow-tests",
+          "suite": "rf3",
+          "filter": "/*/*/CrossTenantRf3WholeFlowTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.Authorization.CrossTenantRf3WholeFlowTests",
+              "methodName": "Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/Authorization/Cases/CrossTenantRf3WholeFlowTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-relational-sql-rf3-join-authorization-tests",
+          "suite": "rf3",
+          "filter": "/*/*/RelationalSqlRf3JoinAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinAuthorizationTests",
+              "methodName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/RelationalStorage/Cases/RelationalSqlRf3JoinAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-partition-query-public-authorization-tests",
+          "suite": "rf3",
+          "filter": "/*/*/PartitionQueryPublicAuthorizationTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+              "methodName": "AcPquery002LaterPersistedLeafDenialReturnsNoSdkOrMcpPageAndLeavesNextReadHealthy",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/PartitionQueryPublicAuthorizationTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-team-row-policy-tests",
+          "suite": "unit",
+          "filter": "/*/*/TeamRowPolicyTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.TeamRowPolicyTests",
+              "methodName": "PersistedTeamMembershipRemovalRevocationRepairReplayAndSameRootColdAreComplete",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/TeamRowPolicyTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
             }
           ]
         }

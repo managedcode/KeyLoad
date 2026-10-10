@@ -46,7 +46,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         ArgumentNullException.ThrowIfNull(access);
         return principal.ClusterAdministrator || !principal.RestrictRows
             || access.OwnerId is not null && access.OwnerId == principal.OwnerId
-            || access.ProjectId is not null && principal.Projects.Contains(access.ProjectId, StringComparer.Ordinal);
+            || access.ProjectId is not null && principal.Projects.Contains(access.ProjectId, StringComparer.Ordinal)
+            || access.TeamId is not null && principal.Teams.Contains(access.TeamId, StringComparer.Ordinal);
     }
     /// <inheritdoc />
     public void RequireWriteRow(PrincipalRecord principal, RowAccess access)

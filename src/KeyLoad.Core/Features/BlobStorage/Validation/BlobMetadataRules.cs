@@ -14,6 +14,8 @@ internal static class BlobMetadataRules
             { JsonData.Identifier(owner); }
             if (access.ProjectId is { } project)
             { JsonData.Identifier(project); }
+            if (access.TeamId is { } team)
+            { JsonData.Identifier(team); }
         }
         catch (KeyLoadException) when (persisted)
         { throw BlobErrors.Corruption(); }

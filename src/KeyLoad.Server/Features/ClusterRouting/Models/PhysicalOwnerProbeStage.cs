@@ -4,7 +4,7 @@ internal enum PhysicalOwnerProbeStage
 {
     Unobserved, Framing, Mac, Decoding, CallValidation, ReplayAdmission, CallerAddress, CallerPinning,
     InitialMembership, Authentication, NativeStatus, StatusGuard, ReadBarrier, Consensus, Discovery,
-    FinalMembership, FinalGuard, CurrentAdministrator, ReplyEncoding, ReplyWrite, Reply
+    FinalMembership, FinalGuard, CurrentAdministrator, ReplyEncoding, ReplyWrite, Reply, NativeStartup
 }
 
 [Flags]

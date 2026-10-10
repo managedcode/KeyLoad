@@ -1,4 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -13,6 +14,8 @@ internal static class QueueLeaseRf3Cold
             await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node,
                 QueueLeaseRf3Protocol.ColdScenario, token), failures).ConfigureAwait(false);
         }
+        foreach (var node in QueueLeaseRf3Protocol.Nodes)
+        { await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false); }
         foreach (var node in QueueLeaseRf3Protocol.Nodes)
         { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false); }
         foreach (var node in QueueLeaseRf3Protocol.Nodes)

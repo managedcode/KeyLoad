@@ -90,7 +90,7 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-The latest local checkpoint passed the full Release build, formatting, 220 focused Unit executions and 10 real process-recovery executions in normal/scalar profiles. The scoped persisted schedule-control authority correction reached the first RF3 cold cut; that cut failed because the fixture awaited one restarted node while the other two remained stopped. Its cold-start ordering repair and complete RF3 qualification remain open. All 3300 native test identities match the reviewed current-source inventory. The current package, source and original test receipts are recorded in the [implementation status](docs/implementation/status.json). Complete Linux/RF3 qualification and product functional coverage remain open.
+The current local checkpoint passed the full Release build, formatting and focused operation/recovery checks. Persisted team row policy is implemented; its complete public qualification remains open because initial RF3 startup exposed an incomplete native authentication decoder. Complete Linux/RF3 qualification and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for the current acceptance gates and original evidence.
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|

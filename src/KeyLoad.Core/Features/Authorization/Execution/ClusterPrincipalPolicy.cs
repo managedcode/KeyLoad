@@ -147,6 +147,7 @@ public static class ClusterPrincipalPolicy
            && principal.FieldGrants is { Length: IsProtectedPrincipalFieldGrantsEmptyCount }
            && principal.OwnerId is null
            && principal.Projects is { Length: IsProtectedPrincipalProjectsEmptyCount }
+           && principal.Teams is { Length: IsProtectedPrincipalProjectsEmptyCount }
            && !principal.RestrictRows
            && !principal.Revoked
            && principal.ExpiresAt is null
