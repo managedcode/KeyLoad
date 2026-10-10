@@ -45,6 +45,7 @@ internal static class McpToolRoutes
     internal const string MessagesReceiveAcrossLanes = MultiLaneReceiveProtocol.Route;
     internal const string MessagesReceive = "/v1/queues/receive";
     internal const string MessagesComplete = "/v1/queues/delivery";
+    internal const string InboxCommit = "/v1/inbox/commit";
     internal const string MessagesProcess = "/v1/queues/process";
     internal const string ResourcesConfigure = "/v1/admin/resources";
     internal const string PrincipalsConfigure = "/v1/admin/principals";

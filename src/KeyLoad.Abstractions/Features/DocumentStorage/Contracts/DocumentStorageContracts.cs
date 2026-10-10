@@ -111,6 +111,10 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     /// <summary>Gets immutable authoritative vector profiles for configured collection fields.</summary>
     [Orleans.Id(13)]
     public ImmutableArray<VectorFieldProfile> VectorProfiles { get; init; } = [];
+    /// <summary>Gets explicit retained target-inbox sublimits; null disables target processing.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [Orleans.Id(14)]
+    public InboxPolicy? InboxPolicy { get; init; }
 }
 
 /// <summary>Describes row ownership and project metadata used by row-level access policy.</summary>

@@ -32,6 +32,7 @@ internal static class CommandOutcomePartitionIdentity
             OperationKind.Receive => ForPayload<ReceiveRequest>(payload, static request => request.Lane?.Partition),
             OperationKind.Delivery => ForPayload<DeliveryCommand>(payload, static request => request.Lane?.Partition),
             OperationKind.Processing => ForPayload<ProcessingRequest>(payload, static request => request.Lane?.Partition),
+            OperationKind.CommitInbox => ForPayload<CommitInboxRequest>(payload, static request => request.Target?.Partition),
             OperationKind.PurgeOutbox => ForPayload<PurgeOutboxRequest>(payload, static request => request.Partition),
             OperationKind.ConfigureSubscription or OperationKind.SeekSubscription or OperationKind.ReceiveSubscription
                 or OperationKind.SubscriptionDelivery or OperationKind.SubscriptionProcessing or OperationKind.SetSubscriptionPaused

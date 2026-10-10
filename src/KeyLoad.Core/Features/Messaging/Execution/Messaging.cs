@@ -21,7 +21,18 @@ public sealed partial class DatabaseEngine
     private static byte[] QueueKey(string space, QueueLaneRef lane, params object?[] tail)
         => KeySpace.Partition(space, lane.Partition, new object?[] { lane.Queue }.Concat(tail).ToArray());
     private static QueueCounters Counters(IKeyValueView view, QueueLaneRef lane)
-        => view.GetRecord<QueueCounters>(QueueKey(MessagingQueueCountersKeySpace, lane)) ?? new(MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence);
+    {
+        var counters = view.GetRecord<QueueCounters>(QueueKey(MessagingQueueCountersKeySpace, lane));
+        if (counters is null)
+        {
+            if (!view.Scan(QueueKey(MessagingMessageMetadataKeySpace, lane), MessagingSingleElementCount).Records.IsEmpty
+                || !view.Scan(QueueKey(MessagingMessageBodyKeySpace, lane), MessagingSingleElementCount).Records.IsEmpty)
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter); }
+            counters = new(MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence);
+        }
+        RequireQueueDeadLetterAuthority(view, lane, counters);
+        return counters;
+    }
     private bool DispatchPaused(IKeyValueView view) => view.ReadOwnedValue(KeyCodec.Encode(MessagingSystemKeySpace, MessagingDispatchPausedKey)) is { } value
         ? NativeSerialization.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
     private MutationReceipt Enqueue(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, EnqueueMessage message, DateTimeOffset now)
@@ -202,9 +213,14 @@ public sealed partial class DatabaseEngine
             return null;
         }
 
-        if (metadata.State == MessageState.DeadLettered)
+        if (metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter)
         {
             Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead);
+            _ = RequireQueueLifecycleCounters(view, lane);
+            if (metadata.State == MessageState.DeadLettered)
+            { RequireQueueParkedAuthority(view, lane, metadata); }
+            else
+            { RequireQueuePendingAuthority(view, lane, metadata); }
         }
 
         var body = view.GetRecord<MessageBody>(QueueKey(MessagingMessageBodyKeySpace, lane, id));

@@ -46,6 +46,7 @@ internal static class NativeTextRf3ReplayAssertions
         CommandRequest command, CommitReceipt original, CancellationToken token)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
+        var history = await NativeTextRf3ReplayHistory.CaptureAsync(administrator, command.Partition, token);
         await using var official = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, token);
         var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await official.CallAsync(
             McpCallerTools.DocumentsCommit, command, token));
@@ -53,7 +54,8 @@ internal static class NativeTextRf3ReplayAssertions
         await Assert.That(NativeSerialization.Serialize(replay.Value).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
-        await Assert.That(after.Applied).IsEqualTo(before.Applied);
+        await NativeTextWaitRf3CutAssertions.OwnerAsync(before, after);
+        await NativeTextRf3ReplayHistory.RequireAsync(administrator, command.Partition, history, token);
         var first = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(
             new(command.Partition, NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.FirstId), token));
         await DocumentAsync(first, command.Partition, NativeTextRf3Scenario.FirstId,

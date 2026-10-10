@@ -26,6 +26,11 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
+        if (effect is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
+        {
+            AuthorizeQueueLifecycle(view, principal, partition, effect);
+            return;
+        }
         if (effect is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
         {
             ReauthorizeRecurringSagaEffect(view, principal, partition, effect);

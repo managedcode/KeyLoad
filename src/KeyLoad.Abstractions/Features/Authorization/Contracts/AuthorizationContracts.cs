@@ -84,8 +84,12 @@ public enum Capability : long
     EventsSnapshotsManage = 1L << 36,
     /// <summary>Allows managing and evaluating durable recurring schedules and saga timeouts.</summary>
     SchedulerManage = 1L << 37,
+    /// <summary>Allows conditionally cancelling queue messages.</summary>
+    QueueCancel = 1L << 38,
+    /// <summary>Allows target-only protected processing in a configured inbox namespace.</summary>
+    InboxWrite = 1L << 39,
     /// <summary>Combines every defined capability.</summary>
-    All = (1L << 38) - 1
+    All = (1L << 40) - 1
 }
 
 /// <summary>Grants capabilities for a database and resource scope.</summary>

@@ -33,6 +33,10 @@ internal static class McpEventStreamAssertions
         await Assert.That(mcpPage.CutPosition).IsGreaterThanOrEqualTo(previousCutPosition);
         await Assert.That(mcpPage.HasMore).IsEqualTo(hasMore);
         await Assert.That(mcpPage.HasMore).IsEqualTo(sdkPage.HasMore);
+        await Assert.That(sdkPage.SnapshotCutPosition).IsEqualTo(sdkPage.CutPosition);
+        await Assert.That(mcpPage.SnapshotCutPosition).IsEqualTo(mcpPage.CutPosition);
+        await Assert.That(sdkPage.Cursor is not null).IsEqualTo(hasMore);
+        await Assert.That(mcpPage.Cursor is not null).IsEqualTo(hasMore);
         await Assert.That(mcpPage.Events.Select(record => record.Data.EventId).SequenceEqual(
             expectedEvents.Select(data => data.EventId))).IsTrue();
         await Assert.That(mcpPage.Events.Select(record => record.Data).SequenceEqual(expectedEvents)).IsTrue();

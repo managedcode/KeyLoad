@@ -67,15 +67,7 @@ public sealed partial class DatabaseEngine
         }
         if (metadata.Attempts >= policy.MaxAttempts)
         {
-            tx.PutRecord(QueueKey(DeadLetterQueueSpace, lane, metadata.Id), metadata.Id);
-            return metadata with
-            {
-                State = MessageState.DeadLettered,
-                StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne,
-                LeaseOwner = null,
-                LeaseUntil = null,
-                SafeFailureCode = AttemptsExhausted
-            };
+            return AdmitQueueDeadLetter(tx, lane, policy, metadata, bodyBytes, ref counters);
         }
         var delay = Math.Min(policy.RetryMaxMilliseconds,
             policy.RetryBaseMilliseconds * Math.Pow(QueueDeliveryTransitionRetryExponentialBase, Math.Min(metadata.Attempts - QueueDeliveryTransitionAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));

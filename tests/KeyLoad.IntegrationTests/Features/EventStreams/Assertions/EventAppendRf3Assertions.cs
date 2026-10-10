@@ -33,6 +33,10 @@ internal static class EventAppendRf3Assertions
         await Assert.That(second.HasMore).IsFalse();
         await Assert.That(first.CutPosition).IsGreaterThanOrEqualTo(receipt.Token.Position);
         await Assert.That(second.CutPosition).IsGreaterThanOrEqualTo(first.CutPosition);
+        await Assert.That(first.SnapshotCutPosition).IsEqualTo(first.CutPosition);
+        await Assert.That(second.SnapshotCutPosition).IsEqualTo(second.CutPosition);
+        await Assert.That(first.Cursor).IsNull();
+        await Assert.That(second.Cursor).IsNull();
         await Assert.That(first.Events.Select(row => row.Data).SequenceEqual(expected)).IsTrue();
         await Assert.That(first.Events.All(row => row.Stream == scenario.Stream && row.RecordedAt != default)).IsTrue();
         var revisions = Enumerable.Range(McpEventStreamTokens.FirstEventRevision, expected.Length).Select(value => (long)value).ToArray();

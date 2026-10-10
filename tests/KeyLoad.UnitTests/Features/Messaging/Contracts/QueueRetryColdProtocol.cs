@@ -1,0 +1,55 @@
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal static class QueueRetryColdProtocol
+{
+    internal const string Queue = "retry-jobs";
+    internal const string Collection = "retry-orders";
+    internal const string Root = "root";
+    internal const string Inspector = "retry-inspector";
+    internal const string Retry = "pending-retry";
+    internal const string Expiry = "scheduled-expiry";
+    internal const string Healthy = "healthy-after-expiry";
+    internal const string Refused = "refused-producer";
+    internal const string Payload = "{\"work\":1,\"text\":\"повтор\"}";
+    internal const string CallerPayload = "{\"text\":\"\\u043F\\u043E\\u0432\\u0442\\u043E\\u0440\",\"work\":1}";
+    internal const string ExpiryPayload = "{\"work\":2}";
+    internal const string HealthyPayload = "{\"work\":3}";
+    internal const string Headers = "{\"kind\":\"bounded-retry\"}";
+    internal const string OrderingKey = "reference-only-key";
+    internal const string RetryCode = "RetryRequested";
+    internal const string ExhaustedCode = "AttemptsExhausted";
+    internal const string Body = "message-body";
+    internal const string Metadata = "message-meta";
+    internal const string Counters = "queue-counters";
+    internal const string Ready = "ready";
+    internal const string Scheduled = "scheduled";
+    internal const string Lease = "lease";
+    internal const string DeadLetter = "dead-letter";
+    internal const string Parked = "queue-dead-letter-order";
+    internal const string Pending = "queue-pending-dead-letter";
+    internal const string Inbox = "inbox";
+    internal const int MaximumAttempts = 3;
+    internal const int StoredCapacity = 2;
+    internal const int BaseDelayMilliseconds = 1000;
+    internal const int MaximumDelayMilliseconds = 1500;
+    internal const int BeforeDueMilliseconds = 500;
+    internal const int SecondDueMilliseconds = 2500;
+    internal const int ScheduledSeconds = 20;
+    internal const int ExpirySeconds = 40;
+    internal const int AfterExpirySeconds = 41;
+    internal const int LeaseSeconds = 30;
+    internal const int One = 1;
+    internal const int Two = 2;
+    internal const int Zero = 0;
+    internal const long FirstSequence = 1;
+    internal const long SecondSequence = 2;
+    internal const long LastSequence = 3;
+    internal const long HealthySequence = 4;
+    internal const long InitialVersion = 1;
+    internal const long FirstClaimVersion = 2;
+    internal const long FirstRetryVersion = 3;
+    internal const long SecondClaimVersion = 5;
+    internal const long SecondRetryVersion = 6;
+    internal const long LastClaimVersion = 8;
+    internal const long TerminalVersion = 9;
+}

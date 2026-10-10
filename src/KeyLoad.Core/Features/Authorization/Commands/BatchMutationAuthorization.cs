@@ -56,6 +56,8 @@ public sealed partial class DatabaseEngine
             PublishTopic => Capability.TopicsPublish,
             PurgeTopic => Capability.SchemaManage | Capability.TopicsRead,
             EnqueueMessage => Capability.QueuePublish,
+            RedriveQueueMessage or ParkPendingQueueMessage => Capability.DeadLettersRedrive,
+            CancelQueueMessage => Capability.QueueCancel,
             UpsertEdge or DeleteEdge or QueueToGraph or ApplyCrossPartitionReverseEdge
                 or CompleteCrossPartitionReverseEdge => Capability.GraphWrite,
             GraphToQueueMutation => Capability.QueuePublish,

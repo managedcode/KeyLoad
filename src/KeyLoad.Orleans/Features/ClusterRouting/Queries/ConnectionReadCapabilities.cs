@@ -107,7 +107,8 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {
-            return core.Execute(kind, principal.Id, request.Payload, cancellationToken);
+            return core.Execute(kind, principal.Id, request.Payload, cancellationToken,
+                kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
 
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))

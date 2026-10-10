@@ -50,8 +50,11 @@ internal static class CrashHostApplication
     private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch
         {
+            global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashProtocol.Mode
+                => global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
+            SubscriptionFilterCrashScenario.Mode => SubscriptionFilterCrashScenario.RunAsync(directory, store, boundary),
             DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
             AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
             EventAppendCrashContract.Mode => EventAppendCrashScenario.RunAsync(directory, store, boundary),
@@ -65,6 +68,7 @@ internal static class CrashHostApplication
                 => NativeAnnCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
+            QueueLifecycleCrashProtocol.Mode => QueueLifecycleCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),
             SagaTimeoutCrashScenario.Mode => SagaTimeoutCrashScenario.RunAsync(directory, store, boundary),
             CommandIdempotencyCrashContract.FirstMode => CommandIdempotencyCrashScenario.RunFirstAsync(directory, store),

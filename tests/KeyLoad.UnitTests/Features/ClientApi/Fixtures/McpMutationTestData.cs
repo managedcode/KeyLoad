@@ -25,6 +25,9 @@ internal static class McpMutationTestData
     private const string PublishKind = "publishTopic";
     private const string PurgeKind = "purgeTopic";
     private const string EnqueueKind = "enqueue";
+    private const string RedriveKind = "redriveQueueMessage";
+    private const string CancelKind = "cancelQueueMessage";
+    private const string ParkKind = "parkPendingQueueMessage";
     private const string UpsertEdgeKind = "upsertEdge";
     private const string DeleteEdgeKind = "deleteEdge";
     private const string ApplyReverseEdgeKind = "applyCrossPartitionReverseEdge";
@@ -51,7 +54,7 @@ internal static class McpMutationTestData
     private const string DropChunkKind = "dropSampleChunkWindow";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
-         EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
+         EnqueueKind, RedriveKind, CancelKind, ParkKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
          ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind,
@@ -68,6 +71,9 @@ internal static class McpMutationTestData
         new PublishTopic(McpCanonicalTestData.Resource, [Event()]),
         new PurgeTopic(McpCanonicalTestData.Resource, Revision),
         new EnqueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.EmptyJson),
+        new RedriveQueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, Revision, Revision),
+        new CancelQueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, Revision, Revision),
+        new ParkPendingQueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, Revision, Revision),
         new UpsertEdge(McpCanonicalTestData.Resource, EdgeId, McpCanonicalTestData.Reference, McpCanonicalTestData.Reference, Label),
         new DeleteEdge(McpCanonicalTestData.Resource, EdgeId),
         new ApplyCrossPartitionReverseEdge(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource,

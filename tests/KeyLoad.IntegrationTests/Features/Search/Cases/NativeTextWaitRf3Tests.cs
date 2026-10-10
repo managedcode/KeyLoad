@@ -50,12 +50,14 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
             ErrorCode.PermissionDenied, dispatched: true);
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         await Assert.That(after.Applied).IsEqualTo(cut.Applied);
-        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, request, token);
+        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, administrator, request,
+            scenario.Resource.SchemaVersion, identity.Principal.PolicyEpoch, token);
         await NativeTextWaitRf3Assertions.LiteralAsync(scenario, caller, official, false, token);
         var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
             [new DeleteDocument(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId, OriginalRevision)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(command, token));
-        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, request with { MinimumToken = receipt.Token }, token);
+        await NativeTextWaitRf3Assertions.WaitAsync(caller, official, administrator, request with { MinimumToken = receipt.Token },
+            scenario.Resource.SchemaVersion, identity.Principal.PolicyEpoch, token);
         await NativeTextWaitRf3Assertions.LiteralAsync(scenario, caller, official, true, token);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(
             new(scenario.Partition, NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId), token));

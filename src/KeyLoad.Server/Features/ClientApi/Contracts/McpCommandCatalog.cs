@@ -13,6 +13,7 @@ internal static class McpCommandCatalog
         McpOperationFactory.Command<MultiLaneReceiveRequest, MultiLaneReceiveResult>(McpToolNames.MessagesReceiveAcrossLanes, McpToolRoutes.MessagesReceiveAcrossLanes, OperationKind.ReceiveAcrossLanes, static request => request.RequestId),
         McpOperationFactory.Command<ReceiveRequest, ReceiveResult>(McpToolNames.MessagesReceive, McpToolRoutes.MessagesReceive, OperationKind.Receive, static request => request.RequestId),
         McpOperationFactory.Command<DeliveryCommand, CommitReceipt>(McpToolNames.MessagesComplete, McpToolRoutes.MessagesComplete, OperationKind.Delivery, static request => request.CommandId),
+        McpOperationFactory.Command<CommitInboxRequest, CommitInboxResult>(McpToolNames.InboxCommit, McpToolRoutes.InboxCommit, OperationKind.CommitInbox, static request => request.CommandId),
         McpOperationFactory.Command<ProcessingRequest, CommitReceipt>(McpToolNames.MessagesProcess, McpToolRoutes.MessagesProcess, OperationKind.Processing, static request => request.CommandId),
         McpOperationFactory.HeaderCommand<ConfigureResourceRequest, ResourceDefinition>(McpToolNames.ResourcesConfigure, McpToolRoutes.ResourcesConfigure, OperationKind.ConfigureResource),
         McpOperationFactory.HeaderCommand<ConfigurePrincipalRequest, PrincipalRecord>(McpToolNames.PrincipalsConfigure, McpToolRoutes.PrincipalsConfigure, OperationKind.ConfigurePrincipal),

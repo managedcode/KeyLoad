@@ -113,9 +113,5 @@ public sealed partial class DatabaseEngine
     /// <exception cref="KeyLoadException">Authorization, retention, generation, or read budgets reject the operation.</exception>
     public StreamPage ReadStream(string principalId, StreamRef stream, long afterRevision = DefaultStreamAfterRevision, int limit = DefaultStreamReadLimit,
         CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(stream);
-        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
-        return Store.Read(view => ReadStream(view, principalId, stream, afterRevision, limit, budget));
-    }
+        => ReadStream(principalId, new ReadStreamRequest(stream, afterRevision, limit), cancellationToken);
 }

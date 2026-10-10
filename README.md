@@ -90,6 +90,8 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
+Local focused checks on 2026-10-10 passed: full Release build and formatter, 116/116 unit, 116/116 scalar and 20/20 process-recovery tests. These checks cover the joined messaging, event traversal and native-contract work; complete Linux/RF3 qualification and product coverage remain open.
+
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|
 | **Records & indexes** | CRUD and revision checks keep records consistent | ✓ Accepted | [Recovery and fault gates](docs/Features/StorageRecovery.md) |

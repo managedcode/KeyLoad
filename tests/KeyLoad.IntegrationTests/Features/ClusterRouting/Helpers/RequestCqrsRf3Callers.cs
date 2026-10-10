@@ -68,6 +68,22 @@ internal sealed class RequestCqrsRf3Callers : IAsyncDisposable
         }
     }
 
+    internal static async Task<T> RunOwnedAsync<T>(DistributedApplication app,
+        string node, string adminKey, Func<RequestCqrsRf3Callers, Task<T>> operation,
+        CancellationToken cancellationToken)
+    {
+        var failures = new List<Exception>();
+        T result = default!;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var callers = await ConnectAsync(app, node, adminKey, cancellationToken);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            { result = await operation(callers); }, failures);
+        }, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return result;
+    }
+
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();

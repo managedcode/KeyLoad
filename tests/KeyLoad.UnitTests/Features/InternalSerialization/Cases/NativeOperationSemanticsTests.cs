@@ -60,7 +60,9 @@ internal sealed class NativeOperationSemanticsTests
     {
         foreach (var kind in Enum.GetValues<OperationKind>())
         {
-            if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MovePartition)
+            if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex
+                or OperationKind.MovePartition or OperationKind.MaintainOnlineTextIndex
+                or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase)
             {
                 await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
             }
@@ -72,7 +74,14 @@ internal sealed class NativeOperationSemanticsTests
     }
 
     [Test]
-    public async Task OrleansParentCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState()
+    [Arguments(OperationKind.ReceiveAcrossLanes)]
+    [Arguments(OperationKind.MaintainAnnIndex)]
+    [Arguments(OperationKind.MaintainTextIndex)]
+    [Arguments(OperationKind.MovePartition)]
+    [Arguments(OperationKind.MaintainOnlineTextIndex)]
+    [Arguments(OperationKind.EventFeedControl)]
+    [Arguments(OperationKind.EventFeedSourcePhase)]
+    public async Task GenericUnsupportedOperationCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState(OperationKind kind)
     {
         using var database = new TestDatabase();
         var before = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
@@ -80,7 +89,7 @@ internal sealed class NativeOperationSemanticsTests
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new ReceiveRequest(Guid.NewGuid(), new(database.Partition, "parent-boundary"))]);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateNativeOperation(
-            OperationKind.ReceiveAcrossLanes, request.RequestId, "root",
+            kind, request.RequestId, "root",
             database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(failure.Message).IsEqualTo("The operation is unsupported.");

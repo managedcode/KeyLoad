@@ -92,6 +92,7 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateResourcePolicies(ResourceDefinition definition)
     {
+        ValidateInboxPolicy(definition);
         var q = definition.QueuePolicy;
         if (definition.EventRetention.MaxEvents < ResourceConfigurationMinimumPositiveCount || definition.EventRetention.MaxBytes < ResourceConfigurationMinimumPositiveCount)
         {
@@ -99,7 +100,9 @@ public sealed partial class DatabaseEngine
         }
 
         if (q.MaxAttempts < ResourceConfigurationMinimumPositiveCount || q.MaxLeaseSeconds is < ResourceConfigurationMinimumPositiveCount or > MaxConfiguredQueueLeaseSeconds || q.MaxStoredMessages < ResourceConfigurationMinimumPositiveCount || q.MaxStoredBytes < ResourceConfigurationMinimumPositiveCount
-            || q.MaxInFlightMessages < ResourceConfigurationMinimumPositiveCount || q.MaxInFlightBytes < ResourceConfigurationMinimumPositiveCount || q.RetryBaseMilliseconds < ResourceConfigurationMinimumPositiveCount || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds)
+            || q.MaxInFlightMessages < ResourceConfigurationMinimumPositiveCount || q.MaxInFlightBytes < ResourceConfigurationMinimumPositiveCount || q.RetryBaseMilliseconds < ResourceConfigurationMinimumPositiveCount || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds
+            || q.MaxDeadLetterMessages is { } messages && (messages < ResourceConfigurationMinimumPositiveCount || messages > q.MaxStoredMessages)
+            || q.MaxDeadLetterBytes is { } bytes && (bytes < ResourceConfigurationMinimumPositiveCount || bytes > q.MaxStoredBytes))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidQueuePolicyMessage);
         }

@@ -34,9 +34,13 @@ internal static class PartitionRecordFamilies
     internal const string OutcomeLocator = "outcome-locator-v1";
     internal const string OutcomeV2 = "outcome-v2";
     internal const string OutcomeLocatorV2 = "outcome-locator-v2";
+    internal const string ProcessingInbox = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.RecordSpace;
+    internal const string ProcessingInboxCapacity = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.CapacitySpace;
     internal const string ProjectionConsumer = "projection-consumer";
     internal const string ProjectionReceipt = "projection-receipt";
     internal const string QueueCounters = "queue-counters";
+    internal const string QueueDeadLetterOrder = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.ParkedSpace;
+    internal const string QueuePendingDeadLetter = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.PendingSpace;
     internal const string QueueTransferIntent = "queue-transfer-intent";
     internal const string QueueTransferSourceCapacity = "queue-transfer-source-capacity";
     internal const string QueueTransferTargetCapacity = "queue-transfer-target-capacity";
@@ -100,9 +104,13 @@ internal static class PartitionRecordFamilies
         OutcomeLocator,
         OutcomeLocatorV2,
         OutcomeV2,
+        ProcessingInbox,
+        ProcessingInboxCapacity,
         ProjectionConsumer,
         ProjectionReceipt,
         QueueCounters,
+        QueueDeadLetterOrder,
+        QueuePendingDeadLetter,
         QueueTransferIntent,
         QueueTransferSourceCapacity,
         QueueTransferTargetCapacity,

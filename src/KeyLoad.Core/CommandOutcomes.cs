@@ -113,6 +113,11 @@ public sealed partial class DatabaseEngine
             var command = Payload<CommandRequest>(operation);
             ReauthorizeExtendedEffects(view, principal, command.Partition, command.Mutations);
         }
+        else if (operation.Kind == OperationKind.CommitInbox)
+        {
+            var inbox = Payload<CommitInboxRequest>(operation);
+            ReauthorizeEffects(view, principal, inbox.Target.Partition, inbox.Effects);
+        }
         else if (operation.Kind == OperationKind.Processing)
         {
             var processing = Payload<ProcessingRequest>(operation);
@@ -125,7 +130,8 @@ public sealed partial class DatabaseEngine
     {
         foreach (var effect in effects)
         {
-            if (effect is global::KeyLoad.ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer
+            if (effect is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage
+                or global::KeyLoad.ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer
                 or ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
             {
                 ReauthorizeEffect(view, principal, partition, effect);

@@ -13,19 +13,23 @@ internal static class NativeTextWaitRf3Assertions
     private const int FirstDenominator = 61;
     private const int SecondDenominator = 62;
 
-    internal static async Task WaitAsync(KeyLoadClient sdk, McpOfficialClient official, WaitForIndexRequest request,
-        CancellationToken token)
+    internal static async Task WaitAsync(KeyLoadClient sdk, McpOfficialClient official, KeyLoadClient administrator,
+        WaitForIndexRequest request, long schemaVersion, long policyEpoch, CancellationToken token)
     {
-        var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.WaitForIndexAsync(request, token));
-        await Assert.That(direct.AppliedToken.Incarnation).IsEqualTo(request.MinimumToken.Incarnation);
-        await Assert.That(direct.AppliedToken.AtomicPartitionId).IsEqualTo(request.Partition.AtomicPartitionId);
-        await Assert.That(direct.AppliedToken.OwnershipEpoch).IsEqualTo(request.MinimumToken.OwnershipEpoch);
-        await Assert.That(direct.AppliedToken.Position).IsGreaterThanOrEqualTo(request.MinimumToken.Position);
-        var mcp = await McpCallerAssertions.SuccessAsync<WaitForIndexResult>(await official.CallAsync(WaitForIndexProtocol.Tool, request, token));
-        await SqlRf3Protocol.EqualAsync(direct, mcp.Value);
+        await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.Sdk,
+            async () => await McpCallerAssertions.SdkSuccessAsync(await sdk.WaitForIndexAsync(request, token)),
+            administrator, request, schemaVersion, policyEpoch, token);
+        await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.Mcp,
+            async () => (await McpCallerAssertions.SuccessAsync<WaitForIndexResult>(
+                await official.CallAsync(WaitForIndexProtocol.Tool, request, token))).Value,
+            administrator, request, schemaVersion, policyEpoch, token);
         var call = SqlRf3Protocol.Call(request.Partition, WaitForIndexProtocol.Tool, request);
-        await SqlRf3Protocol.EqualAsync(direct, await SqlRf3Protocol.SdkAsync<WaitForIndexResult>(sdk, call, token));
-        await SqlRf3Protocol.EqualAsync(direct, await SqlRf3Protocol.McpAsync<WaitForIndexResult>(official, call, token));
+        await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.SdkSql,
+            () => SqlRf3Protocol.SdkAsync<WaitForIndexResult>(sdk, call, token),
+            administrator, request, schemaVersion, policyEpoch, token);
+        await NativeTextWaitRf3CutAssertions.RunAsync(NativeTextWaitRf3CutAssertions.McpSql,
+            () => SqlRf3Protocol.McpAsync<WaitForIndexResult>(official, call, token),
+            administrator, request, schemaVersion, policyEpoch, token);
     }
 
     internal static async Task LiteralAsync(NativeTextRf3Scenario scenario, KeyLoadClient sdk, McpOfficialClient official,

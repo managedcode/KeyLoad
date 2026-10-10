@@ -4,11 +4,13 @@ using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ClusterRouting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal sealed class StreamReadResourceFixture : IDisposable
 {
+    private const int PlacementReadVersion = 1;
     private const string AdministratorId = "root";
     private const string ReaderId = "event-reader";
     private const string TenantId = "tenant";
@@ -35,10 +37,12 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private const string PayloadJson = "{\"secret\":\"" + ProtectedValue + "\",\"public\":\"" + PublicValue + "\"}";
     private const string HeadersJson = "{\"secretHeader\":\"" + ProtectedHeaderValue + "\",\"kind\":\"created\"}";
     private readonly string directory;
+    private readonly TimeProvider clock;
+    private readonly IOptions<EventSourceExecutionOptions> eventSourceOptions = UnitExecutionOptions.EventSource();
     private ZoneTreeStore store = null!;
     private DatabaseEngine database = null!;
 
-    public StreamReadResourceFixture(int eventCount = 0, bool protectedFields = false, string? directory = null)
+    public StreamReadResourceFixture(int eventCount = 0, bool protectedFields = false, string? directory = null, TimeProvider? timeProvider = null)
     {
         var ownedDirectory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(ownedDirectory))
@@ -47,6 +51,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
         }
 
         this.directory = ownedDirectory;
+        clock = timeProvider ?? TimeProvider.System;
         try
         {
             Open(new());
@@ -73,6 +78,44 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     public StreamPage Read(long afterRevision = 0, long generation = 1, int limit = 100, CancellationToken cancellationToken = default)
         => database.ReadStream(ReaderId, new(Partition, StreamSetName, StreamId, generation), afterRevision, limit, cancellationToken);
+
+    internal StreamPage Traverse(ReadStreamRequest request, CancellationToken cancellationToken = default)
+        => database.ReadStream(ReaderId, request, cancellationToken);
+
+    internal ReadStreamRequest Traversal(StreamReadDirection direction = StreamReadDirection.Forward,
+        int limit = 100, int maxBytes = 0, string? cursor = null, long after = 0)
+        => new(new(Partition, StreamSetName, StreamId, 1), after, limit, direction, maxBytes, cursor);
+
+    internal (long Position, string[] Image) Cut()
+        => (store.Position, KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementRawImage.Bytes(store));
+
+    internal void SetReader(bool allowed)
+    {
+        const int PolicyEpochStep = 1;
+        var original = store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(ReaderId)))
+            ?? throw new InvalidOperationException();
+        Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(original with
+        {
+            Grants = allowed ? [new(Partition.DatabaseId, StreamSetName, Capability.EventsRead)] : [],
+            PolicyEpoch = checked(original.PolicyEpoch + PolicyEpochStep)
+        }));
+    }
+
+    internal void BindOriginalPlacement()
+    {
+        var original = database.ReadAtomicPartitionPlacement(AdministratorId, new(PlacementReadVersion, Partition));
+        Submit(OperationKind.BindAtomicPartitionPlacement,
+            new BindAtomicPartitionPlacementRequest(PlacementReadVersion, original.DirectoryRevision, Partition, original.PhysicalShardId));
+    }
+
+    internal AtomicPartitionPlacementResolution Placement
+        => database.ReadAtomicPartitionPlacement(AdministratorId, new(PlacementReadVersion, Partition));
+
+    internal StreamPage TraverseConfigured(ReadStreamRequest request, PhysicalShardRecord owner)
+        => (StreamPage)new KeyLoad.Orleans.GrainCoreReadCapabilities(database).Execute(
+            KeyLoad.Orleans.GrainReadKind.Stream, ReaderId, NativeSerialization.Serialize(request), default, owner)!;
+
+    internal TimeSpan CursorLifetime => eventSourceOptions.Value.CursorLifetime;
 
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
 
@@ -136,8 +179,8 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     private void Open(DatabaseLimits limits)
     {
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
     }
 
     private void ConfigureResource(bool protectedFields)

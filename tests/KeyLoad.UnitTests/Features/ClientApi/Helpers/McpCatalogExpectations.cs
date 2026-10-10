@@ -91,6 +91,8 @@ internal static class McpCatalogExpectations
     private const string MessagesReceiveRoute = "/v1/queues/receive";
     internal const string MessagesComplete = "keyload_messages_complete";
     private const string MessagesCompleteRoute = "/v1/queues/delivery";
+    internal const string InboxCommit = "keyload_inbox_commit";
+    private const string InboxCommitRoute = "/v1/inbox/commit";
     internal const string MessagesProcess = "keyload_messages_process";
     private const string MessagesProcessRoute = "/v1/queues/process";
     internal const string ResourcesConfigure = "keyload_resources_configure";
@@ -128,7 +130,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 81;
+    internal const int Count = 82;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
@@ -173,6 +175,7 @@ internal static class McpCatalogExpectations
         (WaitForIndexProtocol.Tool, WaitForIndexProtocol.Route, GrainReadKind.WaitForIndex, null),
         (ClusterBackupProtocol.Tool, ClusterBackupProtocol.Route, GrainReadKind.ClusterBackupOwner, null),
         (WaitForAnnIndexProtocol.Tool, WaitForAnnIndexProtocol.Route, GrainReadKind.WaitForAnnIndex, null),
+        (McpOnlineTextCatalogExpectations.OnlineTextMaintenance, McpOnlineTextCatalogExpectations.OnlineTextMaintenanceRoute, null, OperationKind.MaintainOnlineTextIndex),
         (AdminBackup, AdminBackupRoute, GrainReadKind.Backup, null),
         (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),
@@ -180,6 +183,7 @@ internal static class McpCatalogExpectations
         ("keyload_messages_receive_across_lanes", "/v1/queues/receive-across-lanes", null, OperationKind.ReceiveAcrossLanes),
         (MessagesReceive, MessagesReceiveRoute, null, OperationKind.Receive),
         (MessagesComplete, MessagesCompleteRoute, null, OperationKind.Delivery),
+        (InboxCommit, InboxCommitRoute, null, OperationKind.CommitInbox),
         (MessagesProcess, MessagesProcessRoute, null, OperationKind.Processing),
         (ResourcesConfigure, ResourcesConfigureRoute, null, OperationKind.ConfigureResource),
         (PrincipalsConfigure, PrincipalsConfigureRoute, null, OperationKind.ConfigurePrincipal),

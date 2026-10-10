@@ -73,7 +73,7 @@ internal static class CompositeIndexReplayAssertions
     private static void RequireEffectsUnchanged(DatabaseEngine database, CompositeIndexCrashSnapshot expected)
     {
         if (!JsonDefaults.Serialize(CompositeIndexCrashOperations.Capture(database)).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)) ||
-            database.ReadStream(CrashFixtureValues.Principal, new(CompositeIndexCrashContract.Partition, Stream, EventId)).Events.Length != NoStreamEvents ||
+            database.ReadStream(CrashFixtureValues.Principal, new StreamRef(CompositeIndexCrashContract.Partition, Stream, EventId)).Events.Length != NoStreamEvents ||
             database.InspectMessage(CrashFixtureValues.Principal, new(CompositeIndexCrashContract.Partition, Queue), MessageId) is not null)
         { throw new InvalidOperationException(Invalid); }
     }

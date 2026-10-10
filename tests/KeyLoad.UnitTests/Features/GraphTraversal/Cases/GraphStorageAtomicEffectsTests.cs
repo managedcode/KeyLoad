@@ -43,11 +43,11 @@ internal sealed class GraphStorageAtomicEffectsTests
         await Assert.That(database.Database.GetDocument(GraphStorageReferenceFixture.Root,
             new(database.Partition, GraphStorageReferenceFixture.Nodes, RejectedVertex))).IsNull();
         await Assert.That(database.Database.ReadStream(GraphStorageReferenceFixture.Root,
-            new(database.Partition, GraphStorageReferenceFixture.Events, RejectedStream)).Events).IsEmpty();
+            new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, RejectedStream)).Events).IsEmpty();
         await Assert.That(database.Database.InspectMessage(GraphStorageReferenceFixture.Root,
             new(database.Partition, GraphStorageReferenceFixture.Queue), RejectedMessage)).IsNull();
         var events = database.Database.ReadStream(GraphStorageReferenceFixture.Root,
-            new(database.Partition, GraphStorageReferenceFixture.Events, Stream)).Events;
+            new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, Stream)).Events;
         await Assert.That(events).HasSingleItem();
         await Assert.That(events[0].Data.EventId).IsEqualTo("created");
         await Assert.That(events[0].Data.EventType).IsEqualTo("Created");

@@ -47,6 +47,9 @@ public sealed partial class DatabaseEngine
                 Authorization.Require(principal, delivery.Lane.Partition, delivery.Lane.Queue,
                     delivery.Action == DeliveryAction.Renew ? Capability.QueueRenew : Capability.QueueAck);
                 break;
+            case OperationKind.CommitInbox:
+                AuthorizeInbox(view, principal, Payload<CommitInboxRequest>(operation));
+                break;
             case OperationKind.Processing:
                 var processing = Payload<ProcessingRequest>(operation);
                 Authorization.Require(principal, processing.Lane.Partition, processing.Lane.Queue, Capability.QueueAck);
@@ -108,6 +111,11 @@ public sealed partial class DatabaseEngine
 
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
+        if (mutation is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
+        {
+            AuthorizeQueueLifecycle(view, principal, partition, mutation);
+            return;
+        }
         if (mutation is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
         {
             AuthorizeRecurringSagaRequest(view, principal, partition, mutation);

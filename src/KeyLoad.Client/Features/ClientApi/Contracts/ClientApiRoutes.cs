@@ -15,6 +15,7 @@ internal static class ClientApiRoutes
     internal const string SubscriptionsStatus = "/v1/subscriptions/status";
     internal const string QueuesReceive = "/v1/queues/receive";
     internal const string QueuesDelivery = "/v1/queues/delivery";
+    internal const string InboxCommit = "/v1/inbox/commit";
     internal const string QueuesProcess = "/v1/queues/process";
     internal const string QueuesInspect = "/v1/queues/inspect";
     internal const string Query = "/v1/query";

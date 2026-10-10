@@ -178,6 +178,9 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(PublishTopic), MutationDiscriminatorNames.PublishTopic)]
 [JsonDerivedType(typeof(PurgeTopic), MutationDiscriminatorNames.PurgeTopic)]
 [JsonDerivedType(typeof(EnqueueMessage), MutationDiscriminatorNames.EnqueueMessage)]
+[JsonDerivedType(typeof(RedriveQueueMessage), QueueLifecycleContractProtocol.RedriveKind)]
+[JsonDerivedType(typeof(CancelQueueMessage), QueueLifecycleContractProtocol.CancelKind)]
+[JsonDerivedType(typeof(ParkPendingQueueMessage), QueueLifecycleContractProtocol.ParkKind)]
 [JsonDerivedType(typeof(UpsertEdge), MutationDiscriminatorNames.UpsertEdge)]
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
 [JsonDerivedType(typeof(ApplyCrossPartitionReverseEdge), MutationDiscriminatorNames.ApplyCrossPartitionReverseEdge)]
@@ -294,7 +297,13 @@ public enum OperationKind
     /// <summary>Maintains an administrator-authorized online text generation through separate request grains.</summary>
     MaintainOnlineTextIndex = 34,
     /// <summary>Commits one freshly verified private online text publication; excluded from public operation factories.</summary>
-    OnlineTextPublicationPhase = 35
+    OnlineTextPublicationPhase = 35,
+    /// <summary>Reserves verified event-feed control admission; unavailable until its owning implementation is joined.</summary>
+    EventFeedControl = 36,
+    /// <summary>Reserves private verified event-feed source phases; excluded from generic public operation factories.</summary>
+    EventFeedSourcePhase = 37,
+    /// <summary>Commits target-only inbox identity and effects without source acknowledgement.</summary>
+    CommitInbox = 38
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

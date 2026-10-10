@@ -121,6 +121,8 @@ public sealed partial class DatabaseEngine
         Authorization.Require(dataPrincipal, request.Subscription.Source.Partition, request.Subscription.Source.Resource, SourceReadCapability(request.Subscription.Source));
         Authorization.RequireWorkerInput(dataPrincipal, resource);
         var key = GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription);
+        if (request.ExpectedGeneration is not null)
+        { return UpdateSubscriptionDefinition(tx, request, definition, key); }
         if (tx.GetRecord<GroupState>(key) is { } existing)
         {
             if (JsonData.Fingerprint(existing.Definition) != JsonData.Fingerprint(definition))

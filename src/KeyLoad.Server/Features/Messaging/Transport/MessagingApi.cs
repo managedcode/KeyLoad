@@ -6,6 +6,7 @@ internal static class MessagingApi
 {
     private const string ReceivePath = "/v1/queues/receive";
     private const string DeliveryPath = "/v1/queues/delivery";
+    private const string InboxPath = "/v1/inbox/commit";
     private const string ProcessPath = "/v1/queues/process";
     private const string InspectPath = "/v1/queues/inspect";
     private const string TransferPath = "/v1/queues/transfers/inspect";
@@ -26,6 +27,8 @@ internal static class MessagingApi
             ApiGrainDispatch.SubmitAsync(context, OperationKind.Receive, request.RequestId, request));
         app.MapPost(DeliveryPath, (DeliveryCommand request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.Delivery, request.CommandId, request));
+        app.MapPost(InboxPath, (CommitInboxRequest request, HttpContext context) =>
+            ApiGrainDispatch.SubmitAsync(context, OperationKind.CommitInbox, request.CommandId, request));
         app.MapPost(ProcessPath, (ProcessingRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.Processing, request.CommandId, request));
         app.MapPost(InspectPath, (InspectMessageRequest request, HttpContext context) =>

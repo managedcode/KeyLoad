@@ -80,6 +80,9 @@ public sealed partial class DatabaseEngine
             PublishTopic topic => topic.Topic,
             PurgeTopic topic => topic.Topic,
             EnqueueMessage message => message.Queue,
+            RedriveQueueMessage message => message.Queue,
+            CancelQueueMessage message => message.Queue,
+            ParkPendingQueueMessage message => message.Queue,
             UpsertEdge edge => edge.Graph,
             DeleteEdge edge => edge.Graph,
             ApplyCrossPartitionReverseEdge edge => edge.Graph,
@@ -110,6 +113,11 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateExtendedMutationStructure(Mutation mutation)
     {
+        if (mutation is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
+        {
+            ValidateQueueLifecycleShape(mutation);
+            return;
+        }
         var invalid = mutation switch
         {
             CreateQueueTransfer transfer => HasInvalidTransferShape(transfer),

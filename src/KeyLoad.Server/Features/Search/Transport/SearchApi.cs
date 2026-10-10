@@ -7,6 +7,10 @@ internal static class SearchApi
 
     internal static void Map(WebApplication app)
     {
+        app.MapPost(AnnMaintenanceProtocol.Route, (AnnMaintenanceRequest request, HttpContext context) =>
+            ApiGrainDispatch.SubmitAsync(context, OperationKind.MaintainAnnIndex, request.CommandId, request));
+        app.MapPost(TextIndexMaintenanceProtocol.Route, (TextIndexMaintenanceRequest request, HttpContext context) =>
+            ApiGrainDispatch.SubmitAsync(context, OperationKind.MaintainTextIndex, request.CommandId, request));
         app.MapPost(OnlineTextIndexMaintenanceProtocol.Route, (OnlineTextIndexMaintenanceRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.MaintainOnlineTextIndex, request.CommandId, request));
         app.MapPost(AnnSearchProtocol.Route, (ApproximateSearchRequest request, HttpContext context) =>

@@ -19,7 +19,7 @@ internal sealed class TransactionTests
         var retry = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         await Assert.That(retry.Token).IsEqualTo(first.Token);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(1);
-        await Assert.That(db.Database.ReadStream("root", new(db.Partition, "events", "o1")).Events).HasSingleItem();
+        await Assert.That(db.Database.ReadStream("root", new StreamRef(db.Partition, "events", "o1")).Events).HasSingleItem();
         await Assert.That(db.Database.InspectMessage("root", new(db.Partition, "jobs"), "m1")!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(db.Submit(OperationKind.Batch, command with { Mutations = [new PutDocument("orders", "o2", "{}")] }, id: id).Error).IsEqualTo(ErrorCode.Conflict);
     }
@@ -37,7 +37,7 @@ internal sealed class TransactionTests
             new EnqueueMessage("jobs", "m2", "{}"), new PutDocument("orders", "o2", "{\"number\":1}")]), id: id);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o2"))).IsNull();
-        await Assert.That(db.Database.ReadStream("root", new(db.Partition, "events", "o2")).Events).IsEmpty();
+        await Assert.That(db.Database.ReadStream("root", new StreamRef(db.Partition, "events", "o2")).Events).IsEmpty();
         await Assert.That(db.Database.InspectMessage("root", new(db.Partition, "jobs"), "m2")).IsNull();
         await Assert.That(new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution()).Execute("root", new(db.Partition, "SELECT * FROM orders WHERE number = 1")).Rows).HasSingleItem();
     }

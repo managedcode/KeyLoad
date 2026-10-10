@@ -78,7 +78,7 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
             await Assert.That(document.Revision).IsEqualTo(1L);
             await Assert.That(document.Redacted).IsFalse();
             await Assert.That(document.RedactedFields).IsEmpty();
-            var page = fixture.Database.ReadStream("root", new(fixture.Partition, "events", "processed"));
+            var page = fixture.Database.ReadStream("root", new StreamRef(fixture.Partition, "events", "processed"));
             await Assert.That(page.Head).IsEqualTo(new StreamHead(1, 1, 1));
             await Assert.That(page.HasMore).IsFalse();
             var expected = new EventRecord(new(fixture.Partition, "events", "processed"), 1, 1,

@@ -41,7 +41,7 @@ internal sealed class RelationalAtomicityTests
         await Assert.That(failed.Error).IsEqualTo(uniqueConflict ? ErrorCode.Conflict : ErrorCode.Validation);
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root, new(database.Partition, Documents, RelationalTestData.Second))).IsNull();
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root, new(database.Partition, RelationalTestData.Table, RelationalTestData.Second))).IsNull();
-        await Assert.That(database.Database.ReadStream(RelationalTestData.Root, new(database.Partition, Events, RelationalTestData.Second)).Events).IsEmpty();
+        await Assert.That(database.Database.ReadStream(RelationalTestData.Root, new StreamRef(database.Partition, Events, RelationalTestData.Second)).Events).IsEmpty();
         await Assert.That(database.Database.InspectMessage(RelationalTestData.Root, new(database.Partition, Queue), RelationalTestData.Second)).IsNull();
         await Assert.That(database.Database.GetOutboxStatus(RelationalTestData.Root, database.Partition).Head.Tail).IsEqualTo(1);
         var query = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));

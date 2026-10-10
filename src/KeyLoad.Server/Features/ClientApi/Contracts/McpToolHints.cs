@@ -60,6 +60,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.ReceiveAcrossLanes => new(false, false, true),
         OperationKind.Receive => new(false, true, true),
         OperationKind.Delivery => new(false, true, true),
+        OperationKind.CommitInbox => new(false, true, true),
         OperationKind.Processing => new(false, true, true),
         OperationKind.ConfigureResource => new(false, true, false),
         OperationKind.ConfigurePrincipal => new(false, true, true),

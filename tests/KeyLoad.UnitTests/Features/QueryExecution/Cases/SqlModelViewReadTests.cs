@@ -14,7 +14,7 @@ internal sealed class SqlModelViewReadTests
         SqlModelViewTestSupport.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var eventBefore = database.Database.ReadStream("root",
-            new(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
+            new StreamRef(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
         var eventBeforeBytes = NativeSerialization.Serialize(eventBefore);
         var queueLane = new QueueLaneRef(database.Partition, SqlModelViewTestSupport.Queue);
         var queueBefore = database.Database.InspectMessage("root", queueLane, SqlModelViewTestSupport.MessageId);
@@ -52,7 +52,7 @@ internal sealed class SqlModelViewReadTests
         await Assert.That(queueSql.Cursor).IsNull();
 
         var eventAfter = database.Database.ReadStream("root",
-            new(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
+            new StreamRef(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
         var queueAfter = database.Database.InspectMessage("root", queueLane, SqlModelViewTestSupport.MessageId);
         await Assert.That(NativeSerialization.Serialize(eventAfter).SequenceEqual(eventBeforeBytes)).IsTrue();
         await Assert.That(queueAfter).IsEqualTo(queueBefore);

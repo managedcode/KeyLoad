@@ -47,10 +47,10 @@ internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDef
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
+        var persistedResource = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(SeedCommand(partition), cancellationToken));
-        return new(partition, resource, receipt.Token);
+        return new(partition, persistedResource, receipt.Token);
     }
 
     internal static CommandRequest SeedCommand(PartitionRef partition)
@@ -106,14 +106,14 @@ internal sealed record NativeTextRf3Scenario(PartitionRef Partition, ResourceDef
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
+        var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             principal, cancellationToken));
         var keyId = "native-text-key-" + Guid.NewGuid().ToString("N");
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var verifier = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(keyId, principal.Id, verifier), cancellationToken));
-        return new(principal, new(keyId, principal.Id, verifier), secret);
+        return new(persisted, new(keyId, principal.Id, verifier), secret);
     }
 
     internal static string Document(string text, string owner)

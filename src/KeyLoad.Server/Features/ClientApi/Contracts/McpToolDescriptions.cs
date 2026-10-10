@@ -46,6 +46,7 @@ internal static class McpToolDescriptions
     private const string MessagesReceiveAcrossLanes = "Receive ordered independent queue lane outcomes. Retain each original request.requests receive requestId and payload for retry; there is no group transaction, receipt or shared read cut. Unknown stops later dispatch; cancellation may leave committed leases.";
     private const string MessagesReceive = "Receive a bounded set of queue messages. request.requestId is the stable write identity; retain delivery tokens for completion.";
     private const string MessagesComplete = "Acknowledge, reject or renew a queue delivery using its signed token.";
+    private const string InboxCommit = "Commit authorized target inbox effects once for a declared input; source ACK is separate.";
     private const string MessagesProcess = "Atomically complete an idempotent queue handler and its declared mutation effects.";
     private const string ResourcesConfigure = "Configure a resource as an administrator. Supply a stable outer commandId together with the canonical request.";
     private const string PrincipalsConfigure = "Configure a persisted principal as an administrator. Supply a stable outer commandId; this request never establishes caller authority.";
@@ -107,6 +108,7 @@ internal static class McpToolDescriptions
         McpToolNames.MessagesReceiveAcrossLanes => MessagesReceiveAcrossLanes,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,
+        McpToolNames.InboxCommit => InboxCommit,
         McpToolNames.MessagesProcess => MessagesProcess,
         McpToolNames.ResourcesConfigure => ResourcesConfigure,
         McpToolNames.PrincipalsConfigure => PrincipalsConfigure,

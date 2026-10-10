@@ -269,7 +269,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current coherent Release build and canonical formatter pass; focused recovery7/7, normal72/74 and scalar72/74. Both original live-reader controls fail production hot WAL inventory sharing. Fresh exact-source Linux/full qualification and complete functional coverage remain open.",
+    "verificationStage": "Current coherent full Release build and canonical formatter pass; focused whole-operation normal116/116, scalar116/116 and real process-recovery20/20 pass at native configured50 slots. Fresh exact-source Linux full-suite/RF3/fault/endurance qualification and complete functional coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -349,24 +349,26 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "observedAtUtc": "2026-10-10T03:03:52.377131+00:00",
+      "observedAtUtc": "2026-10-10T04:53:22.696423+00:00",
       "passed": true,
       "sourceCoherent": true,
       "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-release-build-r44-20261010/original-build.json",
-      "evidenceSha256": "91b31fd6a28ebda9073abc6409a1ea2ce1534d307b19d9631fae6f485c22c2c8",
-      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
-      "logSha256": "7cf256bc2067ab022d93f0e7e30ab01b3f9d7835ce1fbb0730267ba3148a6c9a",
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
+      "evidenceSha256": "5e09680211a88aa2696ca4c12df3e84e3ee36ca1a55a11845c6b8ede43a4eef8",
+      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+      "actualCompiledInputCount": 6780,
+      "logSha256": "de30edb85c43dfa85f43af7f3c8ccd5095297e1a6675648301c0762af5f5237c",
       "qualificationClaim": false
     },
     "currentFormatter": {
-      "observedAtUtc": "2026-10-10T03:07:36.112750+00:00",
+      "observedAtUtc": "2026-10-10T04:55:37.751855+00:00",
       "passed": true,
       "sourceCoherent": true,
       "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-formatter-r44-20261010/original-formatter.json",
-      "evidenceSha256": "b4bfda0a3c793ed5819f9515d26dfaca4e90b9d85fea13e2f605cadf32a49f54",
-      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
+      "evidence": "/private/tmp/keyload-stage44-current-formatter-r60-20261010/original-formatter.json",
+      "evidenceSha256": "9b5159220e406c0ecc02fe641047d9f88a6c4adefc5412d6e0b4d55e90c74cb8",
+      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+      "actualCompiledInputCount": 6780,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "qualificationClaim": false
     },
@@ -42270,7 +42272,7 @@
         "Complete functional coverage, resource/performance, endurance and fault/power-loss qualification; original failed/partial local coverage is not current full coverage"
       ],
       "currentFullLocalBuildPassed": true,
-      "currentFullLocalBuildEvidence": "/private/tmp/keyload-stage44-current-release-build-r40-20261010/original-build.json",
+      "currentFullLocalBuildEvidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
       "focusedUnitOriginal": {
         "evidence": "/private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010/original-native-run.json",
         "exitCode": 2,
@@ -42410,7 +42412,7 @@
         "originalLogSha256": "7794d8e0422942ac4bee9cc29aa3bf7d6ceed84c94b67d0fe8638df0e88067b0",
         "qualificationClaim": false
       },
-      "currentFocusedNormalAndScalarAndRecoveryPassed": "R44 focused normal74/74 and scalar74/74; selected genuine recoveryR43 7/7; distinct source cohort explicit; no full-suite/Linux/coverage qualification",
+      "currentFocusedNormalAndScalarAndRecoveryPassed": true,
       "fullUnitOriginalAfterDeliveredCheckpoint": {
         "deliveredCommit": "b392e5238be31c5b347c75866b62e9f3817b445c",
         "evidence": "/private/tmp/keyload-stage44-full-unit-coverage-r1-20261010/original-native-run.json",
@@ -42836,6 +42838,293 @@
         },
         "runtimeQualified": false,
         "qualificationClaim": false
+      },
+      "currentJoinedMessagingCheckpoint": {
+        "build": {
+          "observedAtUtc": "2026-10-10T04:53:22.696423+00:00",
+          "passed": true,
+          "sourceCoherent": true,
+          "exitCode": 0,
+          "evidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
+          "evidenceSha256": "5e09680211a88aa2696ca4c12df3e84e3ee36ca1a55a11845c6b8ede43a4eef8",
+          "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+          "actualCompiledInputCount": 6780,
+          "logSha256": "de30edb85c43dfa85f43af7f3c8ccd5095297e1a6675648301c0762af5f5237c",
+          "qualificationClaim": false
+        },
+        "formatter": {
+          "observedAtUtc": "2026-10-10T04:55:37.751855+00:00",
+          "passed": true,
+          "sourceCoherent": true,
+          "exitCode": 0,
+          "evidence": "/private/tmp/keyload-stage44-current-formatter-r60-20261010/original-formatter.json",
+          "evidenceSha256": "9b5159220e406c0ecc02fe641047d9f88a6c4adefc5412d6e0b4d55e90c74cb8",
+          "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+          "actualCompiledInputCount": 6780,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "qualificationClaim": false
+        },
+        "unit": {
+          "observedAtUtc": "2026-10-10T04:56:28.201092+00:00",
+          "passed": true,
+          "exitCode": 0,
+          "suite": "unit",
+          "actualCaseCount": 116,
+          "counters": [
+            {
+              "total": "116",
+              "executed": "116",
+              "passed": "116",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "observedNativeTrxIntervalOverlap": 35,
+          "failedCases": [],
+          "evidence": "/private/tmp/keyload-stage44-current-messaging-unit-r60-20261010/original-native-run.json",
+          "evidenceSha256": "72c00aa3d99deae136f32d56bf85529607750b7f8631984b00551aa1a1547a56",
+          "sourceManifestSha256": "2a819404035e176c871867c0f8f5d60e32691b488de434c2f456b1abbf685342",
+          "binaryManifestSha256": "37cf1647fef3449278741ebcfe54920d02ae8e126d33e66ea4b9197bf8008cc6",
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage44-current-messaging-unit-r60-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "d70ea0d9d3d3b02f214f906da68e04305e490038a65d117e95d342b2c25208f4"
+            }
+          ],
+          "logSha256": "b08e33529b6eed1b09731122d3cf344f95b40d45e426d568a9cb63a6b92c45e6",
+          "coverageMeasured": false,
+          "scope": "Focused local whole-operation development only; complete Linux/full-suite/RF3/coverage qualification remains open",
+          "qualificationClaim": false
+        },
+        "scalar": {
+          "observedAtUtc": "2026-10-10T04:56:51.574137+00:00",
+          "passed": true,
+          "exitCode": 0,
+          "suite": "unit-scalar",
+          "actualCaseCount": 116,
+          "counters": [
+            {
+              "total": "116",
+              "executed": "116",
+              "passed": "116",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "observedNativeTrxIntervalOverlap": 18,
+          "failedCases": [],
+          "evidence": "/private/tmp/keyload-stage44-current-messaging-unit-scalar-r60-20261010/original-native-run.json",
+          "evidenceSha256": "17f86cd1ddcce784a2a9ed25863bfe1bbe4b12af15f491d773bbb64e54d84628",
+          "sourceManifestSha256": "2a819404035e176c871867c0f8f5d60e32691b488de434c2f456b1abbf685342",
+          "binaryManifestSha256": "37cf1647fef3449278741ebcfe54920d02ae8e126d33e66ea4b9197bf8008cc6",
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage44-current-messaging-unit-scalar-r60-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "fd66f4fb84b4834b181f3448cce7dd6f0e478d506e2defcb2ba99fa3b360c799"
+            }
+          ],
+          "logSha256": "3633889d1c6febefa37a4df2de4048833313398dbd4db12eba7b8bd4dff2fb34",
+          "coverageMeasured": false,
+          "scope": "Focused local whole-operation development only; complete Linux/full-suite/RF3/coverage qualification remains open",
+          "qualificationClaim": false
+        },
+        "processRecovery": {
+          "observedAtUtc": "2026-10-10T04:56:30.916710+00:00",
+          "passed": true,
+          "exitCode": 0,
+          "suite": "recovery",
+          "actualCaseCount": 20,
+          "counters": [
+            {
+              "total": "20",
+              "executed": "20",
+              "passed": "20",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "observedNativeTrxIntervalOverlap": 20,
+          "failedCases": [],
+          "evidence": "/private/tmp/keyload-stage44-current-messaging-recovery-r60-20261010/original-native-run.json",
+          "evidenceSha256": "b3044b38e647cc8268df2fca073e3dac5a048fddbbd6901d262a8ac4b7fe6be1",
+          "sourceManifestSha256": "2a819404035e176c871867c0f8f5d60e32691b488de434c2f456b1abbf685342",
+          "binaryManifestSha256": "b3cde813ad457bf355acede0c59902802552ab9ab712cbd197435a8a4c3cca2a",
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage44-current-messaging-recovery-r60-20261010/results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "e2e01e0c30e2549826f9b4fd70d76c758237b5ee42bada665552982c73af0cea"
+            }
+          ],
+          "logSha256": "52dc8659a1d665463c98911cf33b4428e386b347fa903a48053cc71b47f82322",
+          "coverageMeasured": false,
+          "scope": "Focused local whole-operation development only; complete Linux/full-suite/RF3/coverage qualification remains open",
+          "qualificationClaim": false
+        },
+        "originalFailuresBeforeFullResultRepairs": [
+          {
+            "observedAtUtc": "2026-10-10T04:40:00.663834+00:00",
+            "passed": false,
+            "exitCode": 2,
+            "suite": "unit",
+            "actualCaseCount": 116,
+            "counters": [
+              {
+                "total": "116",
+                "executed": "116",
+                "passed": "112",
+                "failed": "4",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            ],
+            "sourceCoherent": true,
+            "binariesCoherent": true,
+            "nativeParallelConfigured": 50,
+            "observedNativeTrxIntervalOverlap": 15,
+            "failedCases": [
+              {
+                "testName": "AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder",
+                "outcome": "Failed",
+                "testId": "ef795ec3-8ee3-1793-77da-b86ffff18ce3"
+              },
+              {
+                "testName": "ActualCappedRetryDeadLetterQuotaRefusalExpiryAndCancellationPreservePendingBodyThenHealthyAckAndColdReplay",
+                "outcome": "Failed",
+                "testId": "da229acd-77ff-f45a-99e4-5fab53f01e43"
+              },
+              {
+                "testName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(True)",
+                "outcome": "Failed",
+                "testId": "b1fbf5f4-bf6b-a81a-afc5-548abd9e5096"
+              },
+              {
+                "testName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(False)",
+                "outcome": "Failed",
+                "testId": "32ef5a31-0912-7d58-b054-b9b157223db2"
+              }
+            ],
+            "evidence": "/private/tmp/keyload-stage44-current-messaging-unit-r57-20261010/original-native-run.json",
+            "evidenceSha256": "1410bb97cdc504be9e0e91d8c92393448a45447d6da1b2e7ec9a8f6c62253bf9",
+            "sourceManifestSha256": "81573eea5a161d50ab8546a7d357d9faa6276639f73e86b4f3a25d6573c2bc6e",
+            "binaryManifestSha256": "d52c830733b7e90b811da8eca42fd40b32de11330e481b1b41e6b06d1884c52e",
+            "originalTrx": [
+              {
+                "path": "/private/tmp/keyload-stage44-current-messaging-unit-r57-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+                "sha256": "e14f189b531eb746b1de9d357b60f344718951fe44963a1620966ef4cc25e248"
+              }
+            ],
+            "logSha256": "0ed090e735473f1c24bffdde113e8051fd6cdc0e8fb3ad119d9fd1b64076ed50",
+            "coverageMeasured": false,
+            "scope": "Focused local whole-operation development only; complete Linux/full-suite/RF3/coverage qualification remains open",
+            "qualificationClaim": false
+          },
+          {
+            "observedAtUtc": "2026-10-10T04:48:10.433358+00:00",
+            "passed": false,
+            "exitCode": 2,
+            "suite": "unit",
+            "actualCaseCount": 116,
+            "counters": [
+              {
+                "total": "116",
+                "executed": "116",
+                "passed": "115",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            ],
+            "sourceCoherent": true,
+            "binariesCoherent": true,
+            "nativeParallelConfigured": 50,
+            "observedNativeTrxIntervalOverlap": 16,
+            "failedCases": [
+              {
+                "testName": "ActualCappedRetryDeadLetterQuotaRefusalExpiryAndCancellationPreservePendingBodyThenHealthyAckAndColdReplay",
+                "outcome": "Failed",
+                "testId": "da229acd-77ff-f45a-99e4-5fab53f01e43"
+              }
+            ],
+            "evidence": "/private/tmp/keyload-stage44-current-messaging-unit-r58-20261010/original-native-run.json",
+            "evidenceSha256": "59ab48077c8480f78465e16438421591eea25c13faedac2273f99064b620ec0b",
+            "sourceManifestSha256": "8fd59497292a3952a0245e1c505b3f62b9d5a7adc1ac706ebe7593478bcf6c12",
+            "binaryManifestSha256": "a9522ca4bbd2c752e23d19d0f711fa637beb09e5f8591978576aeb6d7ffa4bfd",
+            "originalTrx": [
+              {
+                "path": "/private/tmp/keyload-stage44-current-messaging-unit-r58-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+                "sha256": "eadec705d6a6c770b73f312dd3235b3e6cf678461399d8ddbac426d740119cbb"
+              }
+            ],
+            "logSha256": "41c70f00ea642846d47dcde537a3aa062fc6b94283e17e055c458a43da78b144",
+            "coverageMeasured": false,
+            "scope": "Focused local whole-operation development only; complete Linux/full-suite/RF3/coverage qualification remains open",
+            "qualificationClaim": false
+          }
+        ],
+        "coverageMeasured": false,
+        "qualificationClaim": false
       }
     },
     "currentGovernance": {
@@ -43101,6 +43390,28 @@
       "evidence": "/private/tmp/keyload-stage44-current-formatter-r41-20261010/original-formatter.json",
       "evidenceSha256": "96fdb095f9c422a9db93e8e9260573a453ac993b85f41df0d4839aa823b02ad8",
       "sourceManifestSha256": "76135acff466cc397365d6c7ecc8746fee53fdbefb873738402a3ba78b6f6d76",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualificationClaim": false
+    },
+    "previousCurrentBuildBeforeR60Checkpoint": {
+      "observedAtUtc": "2026-10-10T03:03:52.377131+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r44-20261010/original-build.json",
+      "evidenceSha256": "91b31fd6a28ebda9073abc6409a1ea2ce1534d307b19d9631fae6f485c22c2c8",
+      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
+      "logSha256": "7cf256bc2067ab022d93f0e7e30ab01b3f9d7835ce1fbb0730267ba3148a6c9a",
+      "qualificationClaim": false
+    },
+    "previousCurrentFormatterBeforeR60Checkpoint": {
+      "observedAtUtc": "2026-10-10T03:07:36.112750+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-formatter-r44-20261010/original-formatter.json",
+      "evidenceSha256": "b4bfda0a3c793ed5819f9515d26dfaca4e90b9d85fea13e2f605cadf32a49f54",
+      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "qualificationClaim": false
     }

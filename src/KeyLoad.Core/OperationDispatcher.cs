@@ -24,6 +24,7 @@ public sealed partial class DatabaseEngine
             OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),
             OperationKind.Receive => Result(Receive(transaction, principal, Payload<ReceiveRequest>(operation), operation.EvaluatedAt, position)),
             OperationKind.Delivery => Result(CompleteDelivery(transaction, principal, Payload<DeliveryCommand>(operation), operation.EvaluatedAt, position)),
+            OperationKind.CommitInbox => ExecuteTargetInbox(transaction, principal, operation, position),
             OperationKind.Processing => Result(CompleteProcessing(transaction, principal, Payload<ProcessingRequest>(operation), operation.EvaluatedAt, position)),
             OperationKind.ConfigureSubscription => ExecuteConfigureSubscription(transaction, principal, operation),
             OperationKind.SeekSubscription => ExecuteSeekSubscription(transaction, principal, operation),

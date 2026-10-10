@@ -32,6 +32,7 @@ public sealed partial class DatabaseEngine
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),
             OperationKind.Processing => Identity<ProcessingRequest>(payload),
+            OperationKind.CommitInbox => Identity<CommitInboxRequest>(payload),
             OperationKind.ConfigureResource => Identity<ConfigureResourceRequest>(payload),
             OperationKind.BootstrapPhysicalShardCatalog => Identity<BootstrapPhysicalShardCatalogRequest>(payload),
             OperationKind.BindAtomicPartitionPlacement => Identity<BindAtomicPartitionPlacementRequest>(payload),

@@ -12,12 +12,13 @@ internal static class EmptyReplicaSnapshotStorage
     private const string Canonical = "database";
     private const string NativeTextProjection = "search-indexes";
     private const string IncrementalTextProjection = "text-projections";
+    private const string OnlineTextProjection = "native-text-online";
     private const string NodeOwner = "node.owner.lock";
     private const string StoreOwner = "owner.lock";
     private const string Journal = "commands.wal";
     private const string Metadata = "tree/0.meta.wal";
     private static readonly string[] ErasedDirectories = [Canonical, ReplicaProtocol.ReplicaDirectory, ReplicaProtocol.SnapshotDirectory,
-        NativeTextProjection, IncrementalTextProjection];
+        NativeTextProjection, IncrementalTextProjection, OnlineTextProjection];
 
     internal static void Erase(ClusterFixture fixture, string node)
     {

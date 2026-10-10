@@ -4,13 +4,13 @@ namespace KeyLoad.Orleans;
 
 internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
 {
-    internal object? Execute(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    internal object? Execute(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken, PhysicalShardRecord? streamOwner = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
         {
             GrainReadKind.Document => Document(principal, GrainNativePayload.Read<GetDocumentRequest>(payload), cancellationToken),
-            GrainReadKind.Stream => Stream(principal, GrainNativePayload.Read<ReadStreamRequest>(payload), cancellationToken),
+            GrainReadKind.Stream => Stream(principal, GrainNativePayload.Read<ReadStreamRequest>(payload), streamOwner, cancellationToken),
             GrainReadKind.EventSource => database.ReadEventSource(principal, GrainNativePayload.Read<ReadEventSourceRequest>(payload), cancellationToken),
             GrainReadKind.Subscription => database.GetSubscription(principal, GrainNativePayload.Read<GetSubscriptionRequest>(payload).Subscription),
             GrainReadKind.Message => Message(principal, GrainNativePayload.Read<InspectMessageRequest>(payload)),
@@ -64,8 +64,10 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
     private DocumentResult? Document(string principal, GetDocumentRequest request, CancellationToken cancellationToken)
         => database.GetDocument(principal, request.Reference, request.MinimumToken, cancellationToken);
 
-    private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
-        => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);
+    private StreamPage Stream(string principal, ReadStreamRequest request, PhysicalShardRecord? streamOwner,
+        CancellationToken cancellationToken)
+        => streamOwner is null ? database.ReadStream(principal, request, cancellationToken)
+            : database.ReadStream(principal, request, streamOwner, cancellationToken);
 
     private MessageInspection? Message(string principal, InspectMessageRequest request)
         => database.InspectMessage(principal, request.Lane, request.Id);

@@ -56,6 +56,7 @@ internal static class McpCanonicalTestData
             [new ReceiveRequest(Guid.Parse("00000000-0000-0000-0000-000000000002"), Lane)]), ReceiveKey),
         Case(McpCatalogExpectations.MessagesReceive, new ReceiveRequest(StableId, Lane), ReceiveKey),
         Case(McpCatalogExpectations.MessagesComplete, new DeliveryCommand(StableId, Lane, Token, DeliveryAction.Ack), CommandKey),
+        Case(McpCatalogExpectations.InboxCommit, new CommitInboxRequest(StableId, Lane, Lane, Entity, Generation, Handler, Generation, Effects()), CommandKey),
         Case(McpCatalogExpectations.MessagesProcess, new ProcessingRequest(StableId, Lane, Token, Handler, Generation, Effects()), CommandKey),
         Case(McpCatalogExpectations.ResourcesConfigure, new ConfigureResourceRequest(Tenant, Database,
             new ResourceDefinition(Resource, ResourceKind.Collection, Domain)), null),

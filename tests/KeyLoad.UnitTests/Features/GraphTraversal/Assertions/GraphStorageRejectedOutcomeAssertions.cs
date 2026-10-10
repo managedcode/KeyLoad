@@ -37,14 +37,14 @@ internal static class GraphStorageRejectedOutcomeAssertions
     {
         await Assert.That(CaptureState(database, vertex, stream, message)).IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(database.Database.ReadStream(GraphStorageReferenceFixture.Root,
-            new(database.Partition, GraphStorageReferenceFixture.Events, stream)).CutPosition)
+            new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, stream)).CutPosition)
             .IsEqualTo(database.Store.Position);
     }
 
     private static byte[] CaptureStream(TestDatabase database, string stream)
     {
         var page = database.Database.ReadStream(GraphStorageReferenceFixture.Root,
-            new(database.Partition, GraphStorageReferenceFixture.Events, stream));
+            new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, stream));
         return JsonSerializer.SerializeToUtf8Bytes(new { page.Stream, page.Head, page.Events, page.HasMore }, JsonDefaults.Options);
     }
 

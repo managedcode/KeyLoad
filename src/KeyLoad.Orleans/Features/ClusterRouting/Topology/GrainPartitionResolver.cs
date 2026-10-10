@@ -12,6 +12,7 @@ internal static class GrainPartitionResolver
         OperationKind.Receive => Route<ReceiveRequest>(request, value => (value.RequestId, value.Lane.Partition)),
         OperationKind.Delivery => Route<DeliveryCommand>(request, value => (value.CommandId, value.Lane.Partition)),
         OperationKind.Processing => Route<ProcessingRequest>(request, value => (value.CommandId, value.Lane.Partition)),
+        OperationKind.CommitInbox => Route<CommitInboxRequest>(request, value => (value.CommandId, value.Target.Partition)),
         OperationKind.ConfigureSubscription => Route<ConfigureSubscriptionRequest>(request, value => (value.CommandId, value.Subscription.Source.Partition)),
         OperationKind.SeekSubscription => Route<SeekSubscriptionRequest>(request, value => (value.CommandId, value.Subscription.Source.Partition)),
         OperationKind.ReceiveSubscription => Route<ReceiveSubscriptionRequest>(request, value => (value.RequestId, value.Subscription.Source.Partition)),
