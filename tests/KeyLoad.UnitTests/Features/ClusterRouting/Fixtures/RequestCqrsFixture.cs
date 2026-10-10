@@ -79,12 +79,15 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal IOptions<GrainRoutingOptions> RoutingOptions { get; }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
+
+    internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(StartupSeconds), TimeProvider.System);
+        using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            await Cluster.DeployAsync(deadline.Token);
+            await Cluster.DeployAsync(startup.Token);
         }
         catch (Exception startupFailure)
         {

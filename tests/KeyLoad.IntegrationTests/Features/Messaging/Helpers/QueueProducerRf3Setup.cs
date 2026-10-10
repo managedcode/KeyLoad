@@ -20,12 +20,22 @@ internal static class QueueProducerRf3Setup
         await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, partition.DatabaseId, new ResourceDefinition(QueueProducerRf3Protocol.Collection,
                 ResourceKind.Collection, partition.TransactionDomainId)), token));
+        foreach (var resource in new[]
+        { new ResourceDefinition(QueueProducerRf3Protocol.StreamSet, ResourceKind.StreamSet, partition.TransactionDomainId),
+          new ResourceDefinition(QueueProducerRf3Protocol.ForeignStreamSet, ResourceKind.StreamSet, QueueProducerRf3Protocol.ForeignDomain) })
+        {
+            await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
+            new(tenant, partition.DatabaseId, resource), token));
+        }
         var identity = await MessagingRf3Identity.CreateAsync(fixture, tenant,
             [new(partition.DatabaseId, lane.Queue, QueueProducerRf3Protocol.Publisher),
-             new(partition.DatabaseId, QueueProducerRf3Protocol.Collection, Capability.DocumentsRead | Capability.DocumentsWrite)], [], false, token);
+             new(partition.DatabaseId, QueueProducerRf3Protocol.Collection, Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query),
+             new(partition.DatabaseId, QueueProducerRf3Protocol.StreamSet, Capability.EventsRead | Capability.EventsAppend | Capability.Query),
+             new(partition.DatabaseId, QueueProducerRf3Protocol.ForeignStreamSet, Capability.EventsRead | Capability.EventsAppend | Capability.Query)], [], false, token);
         var due = TimeProvider.System.GetUtcNow().AddHours(QueueProducerRf3Protocol.FutureHours);
         var original = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(QueueProducerRf3Protocol.Collection, QueueProducerRf3Protocol.Original, QueueProducerRf3Protocol.Payload),
+             Event(QueueProducerRf3Protocol.Original, QueueProducerRf3Protocol.Payload),
              new EnqueueMessage(lane.Queue, QueueProducerRf3Protocol.Original, QueueProducerRf3Protocol.Payload, QueueProducerRf3Protocol.Headers),
              new EnqueueMessage(lane.Queue, QueueProducerRf3Protocol.Scheduled, QueueProducerRf3Protocol.Payload, QueueProducerRf3Protocol.Headers, NotBefore: due)]);
         return new(lane, identity, original, due);
@@ -33,5 +43,9 @@ internal static class QueueProducerRf3Setup
     internal static CommandRequest Fresh(QueueProducerRf3Seed seed, string document, string message)
         => new(Guid.NewGuid(), seed.Lane.Partition,
             [new PutDocument(QueueProducerRf3Protocol.Collection, document, QueueProducerRf3Protocol.HealthyPayload),
+             Event(document, QueueProducerRf3Protocol.HealthyPayload),
              new EnqueueMessage(seed.Lane.Queue, message, QueueProducerRf3Protocol.HealthyPayload, QueueProducerRf3Protocol.Headers)]);
+    internal static AppendEvents Event(string id, string payload)
+        => new(QueueProducerRf3Protocol.StreamSet, id,
+            [new(id, QueueProducerRf3Protocol.EventType, payload, QueueProducerRf3Protocol.Headers)], ExpectedStreamRevision.NoStream);
 }

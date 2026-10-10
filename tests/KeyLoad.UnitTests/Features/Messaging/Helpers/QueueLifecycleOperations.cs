@@ -37,6 +37,8 @@ internal static class QueueLifecycleOperations
             var actual = database.Apply(operation);
             if (operation.Kind == OperationKind.SetDispatch)
             { await DispatchReplayAsync(actual, result); }
+            else if (operation.Kind == OperationKind.ConfigurePrincipal)
+            { await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, result); }
             else
             { await NativeReplayResultAssertions.Same<CommitReceipt>(actual, result); }
         }

@@ -28,6 +28,7 @@ public sealed partial class DatabaseEngine
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
+        RequireQueueDeliveryPolicyChange(transaction, request, previous);
         if (PartitionMoveGrantStorage.Outstanding(transaction,
             PartitionMoveGrantStorage.DatabaseKey(request.TenantId, request.DatabaseId)) > PartitionMoveProtocol.EmptyCount)
         { throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy); }
@@ -99,7 +100,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, InvalidEventQuotaMessage);
         }
 
-        if (q.MaxAttempts < ResourceConfigurationMinimumPositiveCount || q.MaxLeaseSeconds is < ResourceConfigurationMinimumPositiveCount or > MaxConfiguredQueueLeaseSeconds || q.MaxStoredMessages < ResourceConfigurationMinimumPositiveCount || q.MaxStoredBytes < ResourceConfigurationMinimumPositiveCount
+        if (!Enum.IsDefined(q.OrderingProfile) || !Enum.IsDefined(q.ParkedHeadPolicy) || !Enum.IsDefined(q.RetryJitter)
+            || q.RetryExponentialFactor < ResourceConfigurationMinimumPositiveCount
+            || q.OrderingProfile == QueueOrderingProfile.CompetingConsumers && q.ParkedHeadPolicy == QueueParkedHeadPolicy.Block
+            || q.MaxAttempts < ResourceConfigurationMinimumPositiveCount || q.MaxLeaseSeconds is < ResourceConfigurationMinimumPositiveCount or > MaxConfiguredQueueLeaseSeconds || q.MaxStoredMessages < ResourceConfigurationMinimumPositiveCount || q.MaxStoredBytes < ResourceConfigurationMinimumPositiveCount
             || q.MaxInFlightMessages < ResourceConfigurationMinimumPositiveCount || q.MaxInFlightBytes < ResourceConfigurationMinimumPositiveCount || q.RetryBaseMilliseconds < ResourceConfigurationMinimumPositiveCount || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds
             || q.MaxDeadLetterMessages is { } messages && (messages < ResourceConfigurationMinimumPositiveCount || messages > q.MaxStoredMessages)
             || q.MaxDeadLetterBytes is { } bytes && (bytes < ResourceConfigurationMinimumPositiveCount || bytes > q.MaxStoredBytes))

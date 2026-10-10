@@ -39,7 +39,7 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
 
     internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        await Fixture.InitializeAsync().WaitAsync(cancellationToken);
+        await Fixture.InitializeAsync(cancellationToken);
         initialized = true;
         Fixture.Database.Configure(ConnectionNativeProtocol.Collection, ResourceKind.Collection);
         await AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, cancellationToken);

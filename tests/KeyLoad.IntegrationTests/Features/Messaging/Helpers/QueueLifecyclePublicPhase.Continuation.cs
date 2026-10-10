@@ -1,11 +1,12 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static partial class QueueLifecyclePublicPhase
 {
-    internal static async Task ContinueAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task ContinueAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicAssertions.InitialAsync(callers, state, token);
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state, token);
@@ -13,6 +14,7 @@ internal static partial class QueueLifecyclePublicPhase
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, state, state.MixedRefusal!, ErrorCode.RevisionConflict, token);
         await BatchAsync(callers, state, [new CancelQueueMessage(state.Lane.Queue, QueueLifecyclePublicProtocol.Parked,
             QueueLifecyclePublicProtocol.Three, QueueLifecyclePublicProtocol.One)], token);
+        await SqlPendingQueuePublicFlow.RunAsync(fixture, callers, state, token);
         await BatchAsync(callers, state, [new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecyclePublicProtocol.Pending,
             QueueLifecyclePublicProtocol.Three, QueueLifecyclePublicProtocol.One)], token);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state, QueueLifecyclePublicProtocol.Pending,

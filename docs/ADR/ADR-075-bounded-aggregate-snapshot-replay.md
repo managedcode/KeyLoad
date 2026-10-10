@@ -146,3 +146,72 @@ events, ID receipts or journals. Roll back code only through a reviewed deployme
 change that preserves the current stored contract. UI N/A: programmable
 EventStreams/worker infrastructure. Process-kill evidence does not qualify
 power-loss durability; required fault/endurance gates remain.
+
+
+## KL-085 AC-EVENT-009 authorized recovery continuation (2026-10-10)
+
+The existing `AcEvent009RevocationReauthorizesReplayAndDurableSnapshotRetry` and
+`AcEvent009PersistedRawGrantsAuthorizeExactInputsAndRevocationDeniesBothClients`
+cases continue the original protected aggregate operation after persisted
+revocation. They retain the original snapshot command, complete receipt and
+complete snapshot/tail page; revocation refuses private reads and original-command
+retry, then a strictly higher persisted policy epoch restores the same principal
+and exact original grants. The repaired caller must receive the independently
+expected snapshot state, complete ordered event data/headers and pure reducer
+result, and the complete original full snapshot receipt remains an immutable local native authority oracle.
+The original command stays PermissionDenied after an epoch-changing grant repair;
+current authorization does not erase its captured policy-epoch fence. A NEW
+authorized snapshot CAS command uses the actual existing source revision and
+state, advances snapshot version exactly once and yields its independently
+expected current-epoch receipt. That new command alone may success-replay.
+
+Unit ownership reopens the same native store. RF3 ownership closes the original
+SDK/MCP connections, restarts all three existing Aspire-owned nodes on the same
+root, and acquires fresh SDK/official MCP callers. Direct SDK, official MCP, Q1
+SDK and Q1 MCP must each return complete protected replay data and the NEW current-epoch
+receipt before and after cold restart; the OLD epoch command remains denied
+without protected output or aggregate effects on every route. Each observed owner retains NodeId and
+incarnation, while read generation and applied authority may advance; every
+new replay page acquires its own current cut, which must not precede the retained
+original page. Full page equality excludes only that independently checked cut.
+No old cursor, connection or captured authority is reused after restart.
+
+This extends REQ-EVENT-007/008/009/010 and AC-EVENT-007/008/009/010 under TASK-085
+and ADR-075. Snapshot CAS/source revision, original JSON/checksum, persisted raw
+grants, strict stored outcome policy-epoch equality and pure bounded worker behavior
+remain unchanged. Refusal creates no aggregate input/snapshot effects; authority
+and command bookkeeping are not asserted to have an invariant physical cut.
+There is no application schema transformation, internal-format fallback, clock,
+quota, deadline, transport, serializer or product API change. Normal/scalar Unit,
+real process recovery and RF3 caller qualification remain authentic runtime gates.
+
+Ordered source ownership and join: (1) append this contract before source;
+(2) preserve both existing case declarations and their original deadline/fixture
+ownership; (3) retain original protected input, snapshot command/receipt/page;
+(4) exercise persisted revoke and all public refusal routes; (5) repair the same
+persisted principal at a higher epoch, require the OLD command denied and complete
+all four fresh reads plus NEW current-epoch snapshot CAS/receipt retry routes;
+(6) join old callers, capture actual owner statuses, restart the existing RF3
+resources, acquire fresh callers, repeat complete results and compare native
+owner identities. Root joins/tests this guarded proposal; rollback is source
+rollback only and introduces no persistent format change.
+
+Exact owning source map: Unit `Cases/AggregateReplayAuthorityTests.cs` and
+`Helpers/AggregateReplayAuthorizationContinuation.cs`; Integration
+`Cases/AggregateReplayRf3Tests.cs`, `Helpers/AggregateReplayRf3Scenario.cs`,
+`Helpers/AggregateReplayAuthorizationContinuation.cs`,
+`Contracts/AggregateReplayAuthorizationOriginal.cs` and
+`Assertions/AggregateReplayAuthorizationRoutes.cs`, all within their existing
+`Features/EventStreams` slices. The original process suite and independent
+schema/history/concurrency/cancel cases remain required; this additive flow
+closes no application schema transformation or endurance gate by source presence.
+
+R2 native source correction: `DatabaseEngine.ValidateCachedResult` in
+`CommandOutcomes.cs` rejects `previous.PolicyEpoch != principal.PolicyEpoch`.
+`SaveAggregateSnapshot` admits equal existing SourceRevision with the exact
+current ExpectedSnapshotVersion. This continuation preserves those production
+fences unchanged. Unit captures the actual original StoredOutcome native row
+bytes before revocation and checks them unchanged after repair, new CAS and
+reopen; RF3 retains the full original receipt as evidence without treating a
+reserialization as a persisted-node witness. The immutable R1 proposal is
+unqualified and superseded for join; no original execution failure is rewritten.

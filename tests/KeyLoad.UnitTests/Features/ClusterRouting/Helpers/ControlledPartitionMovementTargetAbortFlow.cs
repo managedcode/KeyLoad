@@ -22,6 +22,8 @@ internal static class ControlledPartitionMovementTargetAbortFlow
         var terminalOrdinal = PartitionMoveCleanupFamilies.All.Length;
         for (var family = FirstFamily; family <= terminalOrdinal; family += FamilyStep)
         {
+            var sourceIndex = source.Journal.Log.State.LastIndex;
+            var targetIndex = target.Journal.Log.State.LastIndex;
             var stage = PartitionMovePeerStage.Abort;
             var role = PartitionMoveCleanupRole.Target;
             var authorization = await ControlledPartitionMovementVerifiedSubmit.SubmitAsync(source, sourceRuntime,
@@ -40,6 +42,7 @@ internal static class ControlledPartitionMovementTargetAbortFlow
             await ControlledPartitionMovementAbortAcknowledgement.ExecuteAsync(source, sourceRuntime,
                 sourceAdmission, corpus, aborting, actual, role, family, callerAddress,
                 originalExpiry, cancellationToken);
+            await PartitionMovementCleanupCountAssertions.AbortAsync(source, target, sourceIndex, targetIndex);
             if (family == terminalOrdinal)
             {
                 return (actual, ControlledPartitionMovementAbortPhaseIds.Grant(stage, role, family),

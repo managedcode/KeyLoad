@@ -19,7 +19,16 @@ public sealed partial class DatabaseEngine
     private static MessageMetadata AdmitQueueDeadLetter(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         MessageMetadata metadata, long bodyBytes, ref QueueCounters counters)
     {
-        var updated = metadata with
+        var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
+            ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
+        if (metadata.State == MessageState.PendingDeadLetter && policy.OrderingProfile == QueueOrderingProfile.StrictPerKey
+            && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
+            && (metadata.EnqueueSequence <= QueueOrderProtocol.Initial || metadata.ActiveOrderSequence != QueueOrderProtocol.Initial))
+        { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority); }
+        var ordered = metadata.State == MessageState.PendingDeadLetter
+            && policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue
+            ? metadata : ParkQueueOrder(tx, lane, policy, body.Body, metadata);
+        var updated = ordered with
         {
             StateVersion = checked(metadata.StateVersion + QueueLifecycleProtocol.Increment),
             LeaseOwner = null,

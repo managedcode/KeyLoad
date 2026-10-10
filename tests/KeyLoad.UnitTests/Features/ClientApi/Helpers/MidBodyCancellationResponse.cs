@@ -58,6 +58,8 @@ internal sealed class MidBodyCancellationResponse(byte[] partialResponse, NodeSt
             return;
         }
 
+        using var abortRegistration = context.RequestAborted.Register(
+            static state => ((TaskCompletionSource)state!).TrySetResult(), RequestAborted);
         SetStage(FirstRequestStage.HandlerEntered);
         HandlerEntered.TrySetResult();
         try

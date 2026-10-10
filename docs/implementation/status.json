@@ -261,15 +261,15 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": true,
-    "canonicalFormatterPassed": true,
+    "canonicalBuildPassed": false,
+    "canonicalFormatterPassed": false,
     "preservedBenchmarkTestMethods": 566,
-    "localFocusedFunctionalTestsPassed": true,
+    "localFocusedFunctionalTestsPassed": false,
     "localServerOnlyImageRegressionPassed": 1,
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Current coherent full Release build and canonical formatter pass; focused whole-operation normal116/116, scalar116/116 and real process-recovery20/20 pass at native configured50 slots. Fresh exact-source Linux full-suite/RF3/fault/endurance qualification and complete functional coverage remain open.",
+    "verificationStage": "Current source-only checkpoint adopts published ZoneTree2.0.0 and joins queue ordered retry/DLQ, producer, snapshot/restore, privacy, PendingSQL, native cuts and lifecycle whole-flow source. Original last full local MSBuild returned1 without compiler diagnostics; fresh native Roslyn diagnostics0 errors/0 warnings and static governance pass. Coherent minimal-verbosity rebuild and current focused normal/scalar/process tests are pending; exact-source Linux/full-suite/RF3/coverage/fault/endurance qualification remains open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -349,27 +349,36 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "observedAtUtc": "2026-10-10T04:53:22.696423+00:00",
-      "passed": true,
+      "observedAtUtc": "2026-10-10T06:31:04.476736+00:00",
+      "passed": false,
+      "exitCode": 1,
       "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
-      "evidenceSha256": "5e09680211a88aa2696ca4c12df3e84e3ee36ca1a55a11845c6b8ede43a4eef8",
-      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
-      "actualCompiledInputCount": 6780,
-      "logSha256": "de30edb85c43dfa85f43af7f3c8ccd5095297e1a6675648301c0762af5f5237c",
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r68-20261010/original-build.json",
+      "evidenceSha256": "eaae24bcb33ca0a5077598eadaa167d7cb7e73505070a7eea141af9936eb8ed8",
+      "sourceManifestSha256": "e3a4624aa408cb24ee2ac989ee9a304d709446b8f654da0800294fb47e01e5cd",
+      "actualCompiledInputCount": 6908,
+      "logSha256": "518396496b2fda58346d2cd6a5ffbb83c43ceb16910c5efbdd97e10de8d5de6c",
+      "diagnostic": "MSBuild returned1 and printed Build FAILED with0 warnings/0 errors; root cause not proven",
+      "nativeDiagnostics": {
+        "errors": 0,
+        "warnings": 0,
+        "evidence": "/private/tmp/keyload-stage44-current-build-native-no-errors-r69-20261010.json",
+        "sha256": "2e8ead558c204c81092d218012e53a3a539ab111f54ded999a659fd031d7e0c1"
+      },
+      "unchangedRetry": {
+        "evidence": "/private/tmp/keyload-stage44-current-release-build-r69-20261010/original-build.json",
+        "sha256": "f10550769a255ba79dd443ee3e1718de8958d5bfba8ddf472fa15309fdbde63b",
+        "exitCode": 1,
+        "sourceCoherent": true,
+        "ended": "2026-10-10T06:36:55.626577+00:00",
+        "diagnostic": "Same opaque Build FAILED with zero warnings/errors; no causal claim"
+      },
       "qualificationClaim": false
     },
     "currentFormatter": {
-      "observedAtUtc": "2026-10-10T04:55:37.751855+00:00",
-      "passed": true,
-      "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-formatter-r60-20261010/original-formatter.json",
-      "evidenceSha256": "9b5159220e406c0ecc02fe641047d9f88a6c4adefc5412d6e0b4d55e90c74cb8",
-      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
-      "actualCompiledInputCount": 6780,
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": false,
+      "executedForCurrentSource": false,
+      "status": "pending_current_coherent_build",
       "qualificationClaim": false
     },
     "latestVerifiedNativeLinux": {
@@ -42271,8 +42280,8 @@
         "Fresh current-source full normal/scalar, process recovery and Aspire Docker RF3 SDK/official MCP/Q1 Linux qualification",
         "Complete functional coverage, resource/performance, endurance and fault/power-loss qualification; original failed/partial local coverage is not current full coverage"
       ],
-      "currentFullLocalBuildPassed": true,
-      "currentFullLocalBuildEvidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
+      "currentFullLocalBuildPassed": false,
+      "currentFullLocalBuildEvidence": "/private/tmp/keyload-stage44-current-release-build-r68-20261010/original-build.json",
       "focusedUnitOriginal": {
         "evidence": "/private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010/original-native-run.json",
         "exitCode": 2,
@@ -42412,7 +42421,7 @@
         "originalLogSha256": "7794d8e0422942ac4bee9cc29aa3bf7d6ceed84c94b67d0fe8638df0e88067b0",
         "qualificationClaim": false
       },
-      "currentFocusedNormalAndScalarAndRecoveryPassed": true,
+      "currentFocusedNormalAndScalarAndRecoveryPassed": false,
       "fullUnitOriginalAfterDeliveredCheckpoint": {
         "deliveredCommit": "b392e5238be31c5b347c75866b62e9f3817b445c",
         "evidence": "/private/tmp/keyload-stage44-full-unit-coverage-r1-20261010/original-native-run.json",
@@ -42449,13 +42458,7 @@
         "runExitCode": 2,
         "qualifiedProductCoverage": false
       },
-      "currentCompileBoundary": {
-        "observedAtUtc": "2026-10-10T02:30:44.866510+00:00",
-        "nativeReleaseBuild": "R40 full solution succeeded with0 warnings/errors and6600 unchanged compiled/configuration inputs",
-        "nativeFormatter": "R41 canonical full verify succeeded with unchanged source",
-        "freshJoinedRuntimeExecuted": true,
-        "wholeAcceptanceQualified": false
-      },
+      "currentCompileBoundary": "Current source coherent; native diagnostics0/0; full local MSBuild opaque failure retained; unchanged minimal retry and actual current tests pending",
       "onlineRetainSpanPrerequisiteJoined": true,
       "coverageInstrumentationWritersSerialized": true,
       "currentR40FunctionalCheckpoint": {
@@ -43125,6 +43128,176 @@
         ],
         "coverageMeasured": false,
         "qualificationClaim": false
+      },
+      "currentNativeChecksumSourceCheckpoint": {
+        "observedAtUtc": "2026-10-10T06:36:55.657864+00:00",
+        "sourceOnly": true,
+        "localRuntimeExecutedForCurrentImage": false,
+        "fullTaskAcceptanceQualified": false,
+        "qualificationClaim": false,
+        "build": {
+          "observedAtUtc": "2026-10-10T06:31:04.476736+00:00",
+          "passed": false,
+          "exitCode": 1,
+          "sourceCoherent": true,
+          "evidence": "/private/tmp/keyload-stage44-current-release-build-r68-20261010/original-build.json",
+          "evidenceSha256": "eaae24bcb33ca0a5077598eadaa167d7cb7e73505070a7eea141af9936eb8ed8",
+          "sourceManifestSha256": "e3a4624aa408cb24ee2ac989ee9a304d709446b8f654da0800294fb47e01e5cd",
+          "actualCompiledInputCount": 6908,
+          "logSha256": "518396496b2fda58346d2cd6a5ffbb83c43ceb16910c5efbdd97e10de8d5de6c",
+          "diagnostic": "MSBuild returned1 and printed Build FAILED with0 warnings/0 errors; root cause not proven",
+          "nativeDiagnostics": {
+            "errors": 0,
+            "warnings": 0,
+            "evidence": "/private/tmp/keyload-stage44-current-build-native-no-errors-r69-20261010.json",
+            "sha256": "2e8ead558c204c81092d218012e53a3a539ab111f54ded999a659fd031d7e0c1"
+          },
+          "unchangedRetry": {
+            "evidence": "/private/tmp/keyload-stage44-current-release-build-r69-20261010/original-build.json",
+            "sha256": "f10550769a255ba79dd443ee3e1718de8958d5bfba8ddf472fa15309fdbde63b",
+            "exitCode": 1,
+            "sourceCoherent": true,
+            "ended": "2026-10-10T06:36:55.626577+00:00",
+            "diagnostic": "Same opaque Build FAILED with zero warnings/errors; no causal claim"
+          },
+          "qualificationClaim": false
+        },
+        "publishedProvider": {
+          "version": "2.0.0",
+          "fullTextSearch": "1.0.9",
+          "hashing": "10.0.12",
+          "availabilityEvidence": "/private/tmp/keyload-stage44-zonetree-2.0.0-published-r66-20261010/original-availability-proof.json",
+          "availabilitySha256": "534a59c13b0df5337412e833eb6ea25d8b4bf47183fa675b0d75338f22a34f84",
+          "packageSha256": "f15bc8fc307f7ea7e123a42f8dfe788cbb02673c84c2bd9008fe7ac37ad81301",
+          "published": "2026-10-09T20:48:15.44+00:00",
+          "sha512Verified": true,
+          "currentOwnedProjects": 27,
+          "restoreEvidence": "/private/tmp/keyload-stage44-current-restore-r66-20261010/original-current-project-package-closure.json",
+          "restoreSha256": "1e90365d4a53b5ced3ca23e5a19394617cf54054cbf688656967971e4b72167b",
+          "decision": "docs/ADR/ADR-126-current-native-zonetree-checksums.md"
+        },
+        "sourceJoins": [
+          {
+            "proof": "/private/tmp/keyload-stage44-next-ready-native-joins-r61-20261010/pendingsql/actual-join-proof.json",
+            "sha256": "0e531adfa919cc9a6d77a1451f0814bf0365165a549ea0c9b506839538d0738c",
+            "observedAtUtc": "2026-10-10T05:03:47.329881+00:00",
+            "packet": "/private/tmp/keyload-kl095-pending-dlq-sql-whole-r1-20261010",
+            "actualJoinedPathCount": 10,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-ready-native-joins-r61-20261010/phase2/actual-join-proof.json",
+            "sha256": "109f77eecffe1a8eb781dd3a7e39581449b83bd0fa7580703333f12ef37b8f32",
+            "observedAtUtc": "2026-10-10T05:03:02.437587+00:00",
+            "packet": "/private/tmp/keyload-kl088-native-phase2-product-whole-sol61-20261010-r1",
+            "actualJoinedPathCount": 85,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-ready-native-joins-r61-20261010/privacy/actual-join-proof.json",
+            "sha256": "ef9fabf86f470a471b85cbc2a1082be9cf58d1364991cfe5ce4618d23cdc0408",
+            "observedAtUtc": "2026-10-10T05:03:59.088173+00:00",
+            "packet": "/private/tmp/keyload-kl096-current-delivery-privacy-source-sol61-r1-20261010",
+            "actualJoinedPathCount": 22,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-ready-native-joins-r61-20261010/producer/actual-join-proof.json",
+            "sha256": "0c9563508a7111e919069a7941c6f5c88225d2fa48916a826b1c00370540d989",
+            "observedAtUtc": "2026-10-10T05:03:22.726756+00:00",
+            "packet": "/private/tmp/keyload-kl091-public-triad-cold-r2-20261010",
+            "actualJoinedPathCount": 17,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-ready-native-joins-r61-20261010/snapshot/actual-join-proof.json",
+            "sha256": "5ade4e86cdb5f026249a0d37f502d8d7e0e9bcbc2abf5415f48776da855c2106",
+            "observedAtUtc": "2026-10-10T05:03:35.815610+00:00",
+            "packet": "/private/tmp/keyload-kl085-policy-fence-continuation-sol61-r2-20261010",
+            "actualJoinedPathCount": 9,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/checksum35/actual-join-proof.json",
+            "sha256": "65341a4596a2f15ec8795b94ae1f7a448c0e28d0d7a8d01c7e22735b796171a3",
+            "observedAtUtc": "2026-10-10T05:58:01.963464+00:00",
+            "packet": "/private/tmp/keyload-kl035-native-checksum-profile-source-sol61-r1-20261010",
+            "actualJoinedPathCount": 9,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/cold94/actual-join-proof.json",
+            "sha256": "7f6b7418cb853a8a2cae41afd8c85d48a3b95d5150b53ae539ffa6a0aa9d66eb",
+            "observedAtUtc": "2026-10-10T05:42:28.227681+00:00",
+            "packet": "/private/tmp/keyload-kl094-three-stage-cold-rf3-r2-20261010",
+            "actualJoinedPathCount": 12,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/cut98/actual-join-proof.json",
+            "sha256": "699f7ded55682f7d844392d387b9bef3db52877233e1f1aa91dfb0571f98fe19",
+            "observedAtUtc": "2026-10-10T05:39:02.296361+00:00",
+            "packet": "/private/tmp/keyload-kl098-rf3-canonical-cut-sol61-r1-20261010",
+            "actualJoinedPathCount": 6,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/mixedrf398/actual-join-proof.json",
+            "sha256": "7d7fc4a119df0e82e4d796d1f247cb67cecaa08d72b122b50c13093734f1f12e",
+            "observedAtUtc": "2026-10-10T05:42:34.682404+00:00",
+            "packet": "/private/tmp/keyload-kl098-mixed-rf3-source-sol61-r2-20261010",
+            "actualJoinedPathCount": 17,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/movement36/actual-join-proof.json",
+            "sha256": "e8f05a97374b4e2c031c9438c6a67e5049372169ee35939e8f16dbcd0f0784dc",
+            "observedAtUtc": "2026-10-10T05:42:25.217198+00:00",
+            "packet": "/private/tmp/keyload-059-movement-native-cleanup-count-r2-20261010",
+            "actualJoinedPathCount": 8,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/restore88/actual-join-proof.json",
+            "sha256": "43db636ee06a3967b9c3b353adbdda8d46fd692159a43291d376ef525ba889d7",
+            "observedAtUtc": "2026-10-10T05:42:02.817544+00:00",
+            "packet": "/private/tmp/keyload-kl088-ordered-restore-source-sol61-r1-20261010",
+            "actualJoinedPathCount": 11,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/schema85/actual-join-proof.json",
+            "sha256": "ee3a1a73b8aace78878b851dfb6b3046e7e927108fe1cc3524e299f9170a90b7",
+            "observedAtUtc": "2026-10-10T05:16:11.444778+00:00",
+            "packet": "/private/tmp/keyload-kl085-current-schema-architecture-sol61-r1-20261010",
+            "actualJoinedPathCount": 1,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/sdk21/actual-join-proof.json",
+            "sha256": "853c02c3218ede664eec9f6d04133cd90e3041635f16fe5e050f5f77479cdf8e",
+            "observedAtUtc": "2026-10-10T05:42:12.046948+00:00",
+            "packet": "/private/tmp/keyload-059-native-sdk-kestrel-request-lifecycle-r1-20261010",
+            "actualJoinedPathCount": 5,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-next-packet-native-joins-r63-20261010/startup21/actual-join-proof.json",
+            "sha256": "0a22382f6fc1e495472dd989d1ca0a17c0a66110d81e59c72d3cb3367344c42b",
+            "observedAtUtc": "2026-10-10T05:42:18.935720+00:00",
+            "packet": "/private/tmp/keyload-059-native-startup-caller-join-r1-20261010",
+            "actualJoinedPathCount": 4,
+            "sourceOnly": true
+          },
+          {
+            "proof": "/private/tmp/keyload-stage44-current-packet-native-joins-r66-20261010/checksumcfg/actual-join-proof.json",
+            "sha256": "add8e27f554cbebc4b98ea1a8eac5dd9d5c1ad07707359782773e0ee2590db03",
+            "observedAtUtc": "2026-10-10T06:09:26.398801+00:00",
+            "packet": "/private/tmp/keyload-checksum-child-configuration-source-r1-20261010",
+            "actualJoinedPathCount": 4,
+            "sourceOnly": true
+          }
+        ]
       }
     },
     "currentGovernance": {
@@ -43154,7 +43327,7 @@
       "logSha256": "212a64426591defebf93b060fc31f9a6113fcc701a16aab278d3a29cde42d698",
       "qualification": "Actual coherent full Release local build passed after joined source/analyzer repairs; no Linux/runtime acceptance or task closure."
     },
-    "stageXLIVDeliveredCommit": "8c3a9f340f0c02e15f65352d3b8a4b1a3944db34",
+    "stageXLIVDeliveredCommit": "64154088b8d9b51620dd78c977bf6a79c76b7799",
     "stageXLIVDeliveredRemoteVerified": true,
     "previousCurrentBuildBeforeOnlineNativeJoin": {
       "commandArgs": [
@@ -43178,6 +43351,480 @@
       "qualification": "Actual coherent full Release clean rebuild with analyzers passed; original R12 MSBuild child failure retained, no Linux/runtime qualification."
     },
     "latestDeliveredLinuxRun": {
+      "runId": 38026072274,
+      "sourceSha": "64154088b8d9b51620dd78c977bf6a79c76b7799",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/38026072274",
+      "status": "in_progress",
+      "conclusion": "",
+      "jobs": [
+        {
+          "databaseId": 114137063989,
+          "name": "Check repository rules",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:01:20Z"
+        },
+        {
+          "databaseId": 114137064087,
+          "name": "Qualify KL-008 (scalar caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:08:37Z"
+        },
+        {
+          "databaseId": 114137064103,
+          "name": "Qualify KL-011 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:12:18Z"
+        },
+        {
+          "databaseId": 114137064119,
+          "name": "Test code analyzers",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:07:36Z"
+        },
+        {
+          "databaseId": 114137064126,
+          "name": "Qualify KL-014 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:14:16Z"
+        },
+        {
+          "databaseId": 114137064132,
+          "name": "Qualify KL-036 (normal caller)",
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "0001-01-01T00:00:00Z"
+        },
+        {
+          "databaseId": 114137064149,
+          "name": "Test three-node database",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:08:53Z",
+          "completedAt": "2026-10-10T06:18:49Z"
+        },
+        {
+          "databaseId": 114137064151,
+          "name": "Qualify KL-015 (normal caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:18:17Z"
+        },
+        {
+          "databaseId": 114137064155,
+          "name": "Qualify KL-015 (scalar caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:19:06Z"
+        },
+        {
+          "databaseId": 114137064173,
+          "name": "Qualify KL-008 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:08:37Z"
+        },
+        {
+          "databaseId": 114137064181,
+          "name": "Qualify KL-027 (scalar caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:12:14Z"
+        },
+        {
+          "databaseId": 114137064184,
+          "name": "Qualify KL-014 (scalar caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:09:18Z",
+          "completedAt": "2026-10-10T05:21:42Z"
+        },
+        {
+          "databaseId": 114137064188,
+          "name": "Qualify KL-033 (scalar caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:10:18Z"
+        },
+        {
+          "databaseId": 114137064216,
+          "name": "Qualify KL-021 (scalar caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:01:22Z",
+          "completedAt": "2026-10-10T05:37:53Z"
+        },
+        {
+          "databaseId": 114137064224,
+          "name": "Qualify KL-035 (scalar caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:09:16Z"
+        },
+        {
+          "databaseId": 114137064225,
+          "name": "Qualify KL-021 (normal caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:07:38Z",
+          "completedAt": "2026-10-10T05:43:15Z"
+        },
+        {
+          "databaseId": 114137064230,
+          "name": "Qualify KL-034 (scalar caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:01:13Z",
+          "completedAt": "2026-10-10T05:14:53Z"
+        },
+        {
+          "databaseId": 114137064235,
+          "name": "Qualify KL-033 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:10:19Z",
+          "completedAt": "2026-10-10T05:21:39Z"
+        },
+        {
+          "databaseId": 114137064245,
+          "name": "Qualify KL-035 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:12:19Z",
+          "completedAt": "2026-10-10T05:21:03Z"
+        },
+        {
+          "databaseId": 114137064247,
+          "name": "Qualify KL-042 (scalar caller)",
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-10-10T05:01:19Z",
+          "completedAt": "0001-01-01T00:00:00Z"
+        },
+        {
+          "databaseId": 114137064250,
+          "name": "Qualify KL-029 (scalar caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:12:15Z",
+          "completedAt": "2026-10-10T05:24:57Z"
+        },
+        {
+          "databaseId": 114137064266,
+          "name": "Qualify KL-027 (normal caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:14:18Z",
+          "completedAt": "2026-10-10T05:22:31Z"
+        },
+        {
+          "databaseId": 114137064286,
+          "name": "Qualify KL-034 (normal caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:14:55Z",
+          "completedAt": "2026-10-10T05:23:47Z"
+        },
+        {
+          "databaseId": 114137064292,
+          "name": "Qualify KL-036 (scalar caller)",
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-10-10T05:18:19Z",
+          "completedAt": "0001-01-01T00:00:00Z"
+        },
+        {
+          "databaseId": 114137064307,
+          "name": "Qualify KL-029 (normal caller)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:21:40Z",
+          "completedAt": "2026-10-10T05:38:44Z"
+        },
+        {
+          "databaseId": 114137064492,
+          "name": "Qualify KL-011 (scalar caller)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-10T05:19:08Z",
+          "completedAt": "2026-10-10T05:30:19Z"
+        },
+        {
+          "databaseId": 114137064556,
+          "name": "Qualify KL-042 (normal caller)",
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-10-10T05:21:43Z",
+          "completedAt": "0001-01-01T00:00:00Z"
+        },
+        {
+          "databaseId": 114137093272,
+          "name": "Build and test KeyLoad (ubuntu-latest)",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-10-10T05:22:33Z",
+          "completedAt": "2026-10-10T06:05:24Z"
+        }
+      ],
+      "evidence": "/private/tmp/keyload-stage44-ci-641-current-read-r68-20261010/original-run.json",
+      "evidenceSha256": "db448fbf439dca2dfc9ef68305ffd3fad233bcf14f187ae71ac978606666c9f8",
+      "scope": "Original delivered641 provider1.9.9 cohort; current source-only successor adopts published2.0.0",
+      "originalNativeSourceImageUidBinding": {
+        "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/original-source-image-native-uid-binding.json",
+        "sha256": "b1866e915f67d29c5e277bc8e19ccb9b964335d0519837f8a6a2215acce1757a"
+      },
+      "nativeCounters": [
+        {
+          "artifact": "test-results-ubuntu-latest",
+          "reports": [
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/test-results-ubuntu-latest/original/TestResults/analyzers/KeyLoad.Analyzers.Tests_net10.0_x64.trx",
+              "sha256": "66085402b4350b09f548f7d65302ec1cffa6259a1506343f2b8149d0f8fdece6",
+              "counters": {
+                "total": "391",
+                "executed": "391",
+                "passed": "391",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 391
+            },
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/test-results-ubuntu-latest/original/TestResults/unit/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "cac1317444253f9ce28d7910b79ac03777d5ac0c90670b4077e070a24c06ab2f",
+              "counters": {
+                "total": "3261",
+                "executed": "3261",
+                "passed": "3217",
+                "failed": "44",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 3261
+            },
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/test-results-ubuntu-latest/original/TestResults/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+              "sha256": "0b9a4cf1f4ee51a284eb5a30c148982402e6c33ca87bcc9156fe7e4537fdf3d9",
+              "counters": {
+                "total": "308",
+                "executed": "308",
+                "passed": "308",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 308
+            },
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/test-results-ubuntu-latest/original/TestResults/native-source-ownership/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "9365b61c9d608c37cc8948c30a1b82478247f0353df20da1bd617c0327e3d3a6",
+              "counters": {
+                "total": "10",
+                "executed": "10",
+                "passed": "10",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 10
+            },
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/test-results-ubuntu-latest/original/TestResults/unit-scalar/KeyLoad.UnitTests_net10.0_x64.trx",
+              "sha256": "72285834731076884f53f4ced21d39da7e8afd8807c391d343c4f9f6e03244b6",
+              "counters": {
+                "total": "911",
+                "executed": "911",
+                "passed": "896",
+                "failed": "15",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 911
+            }
+          ]
+        },
+        {
+          "artifact": "docker-rf3-qualification",
+          "reports": [
+            {
+              "path": "/private/tmp/keyload-stage44-ci-641-completed-intake-r68-20261010/docker-rf3-qualification/original/TestResults/rf3-required/KeyLoad.IntegrationTests_net10.0_x64.trx",
+              "sha256": "c6987b4f0fd7c7ef1664d11314f87e8b50a4d4ad3ab75d9aa84247555186c86e",
+              "counters": {
+                "total": "59",
+                "executed": "59",
+                "passed": "49",
+                "failed": "10",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              },
+              "actualNativeInstances": 59
+            }
+          ]
+        }
+      ],
+      "coverageMeasured": false,
+      "qualificationClaim": false
+    },
+    "previousCurrentBuildBeforeR40Checkpoint": {
+      "observedAtUtc": "2026-10-10T00:45:00.847153+00:00",
+      "passed": false,
+      "sourceCoherent": true,
+      "exitCode": 1,
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r28-20261010/original-build.json",
+      "logSha256": "2b76d61581ecd4b1e2eb0714aee5eb32ee0f888f45d324235c7f8ac6570efe80",
+      "actualUniqueDiagnostics": 4,
+      "remaining": "Digest CA2000 and Host transfer CA1508/CA2219; owning finite repairs active; fresh joined tests not executed"
+    },
+    "previousCurrentFormatterBeforeR40Checkpoint": {
+      "status": "pending_after_current_source_joins",
+      "qualification": "Historical R2 formatter pass does not qualify the newly joined source."
+    },
+    "previousCurrentBuildBeforeR44Checkpoint": {
+      "observedAtUtc": "2026-10-10T02:26:14.978269+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r40-20261010/original-build.json",
+      "evidenceSha256": "1bf38819ff5ac504a8c6575876179d52571cc565a76dca25efe4aafa9161e182",
+      "sourceManifestSha256": "76135acff466cc397365d6c7ecc8746fee53fdbefb873738402a3ba78b6f6d76",
+      "logSha256": "e1fc7631c17daee64a20a350327de4c5fad53a7f101369b8c158e35cb8c58d02",
+      "qualificationClaim": false
+    },
+    "previousCurrentFormatterBeforeR44Checkpoint": {
+      "observedAtUtc": "2026-10-10T02:24:03.901866+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-formatter-r41-20261010/original-formatter.json",
+      "evidenceSha256": "96fdb095f9c422a9db93e8e9260573a453ac993b85f41df0d4839aa823b02ad8",
+      "sourceManifestSha256": "76135acff466cc397365d6c7ecc8746fee53fdbefb873738402a3ba78b6f6d76",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualificationClaim": false
+    },
+    "previousCurrentBuildBeforeR60Checkpoint": {
+      "observedAtUtc": "2026-10-10T03:03:52.377131+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r44-20261010/original-build.json",
+      "evidenceSha256": "91b31fd6a28ebda9073abc6409a1ea2ce1534d307b19d9631fae6f485c22c2c8",
+      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
+      "logSha256": "7cf256bc2067ab022d93f0e7e30ab01b3f9d7835ce1fbb0730267ba3148a6c9a",
+      "qualificationClaim": false
+    },
+    "previousCurrentFormatterBeforeR60Checkpoint": {
+      "observedAtUtc": "2026-10-10T03:07:36.112750+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-formatter-r44-20261010/original-formatter.json",
+      "evidenceSha256": "b4bfda0a3c793ed5819f9515d26dfaca4e90b9d85fea13e2f605cadf32a49f54",
+      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualificationClaim": false
+    },
+    "previousCurrentBuildBeforeNativeChecksumCheckpoint": {
+      "observedAtUtc": "2026-10-10T04:53:22.696423+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-release-build-r60-20261010/original-build.json",
+      "evidenceSha256": "5e09680211a88aa2696ca4c12df3e84e3ee36ca1a55a11845c6b8ede43a4eef8",
+      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+      "actualCompiledInputCount": 6780,
+      "logSha256": "de30edb85c43dfa85f43af7f3c8ccd5095297e1a6675648301c0762af5f5237c",
+      "qualificationClaim": false
+    },
+    "previousCurrentFormatterBeforeNativeChecksumCheckpoint": {
+      "observedAtUtc": "2026-10-10T04:55:37.751855+00:00",
+      "passed": true,
+      "sourceCoherent": true,
+      "exitCode": 0,
+      "evidence": "/private/tmp/keyload-stage44-current-formatter-r60-20261010/original-formatter.json",
+      "evidenceSha256": "9b5159220e406c0ecc02fe641047d9f88a6c4adefc5412d6e0b4d55e90c74cb8",
+      "sourceManifestSha256": "bf9f47ee666a1b5657760e32ebb8819f57e1ac6eca26de08f722ca729bd929dc",
+      "actualCompiledInputCount": 6780,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualificationClaim": false
+    },
+    "previousDeliveredLinuxBefore641CurrentSourceCheckpoint": {
       "runId": 38017420672,
       "sourceSha": "8c3a9f340f0c02e15f65352d3b8a4b1a3944db34",
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/38017420672",
@@ -43356,64 +44003,6 @@
       "qualificationClaim": false,
       "observedAtUtc": "2026-10-10T03:09:29.281451+00:00",
       "scope": "Original pushed8c3 cohort; completed scoped failures retained; current R44 local source is a distinct successor"
-    },
-    "previousCurrentBuildBeforeR40Checkpoint": {
-      "observedAtUtc": "2026-10-10T00:45:00.847153+00:00",
-      "passed": false,
-      "sourceCoherent": true,
-      "exitCode": 1,
-      "evidence": "/private/tmp/keyload-stage44-current-release-build-r28-20261010/original-build.json",
-      "logSha256": "2b76d61581ecd4b1e2eb0714aee5eb32ee0f888f45d324235c7f8ac6570efe80",
-      "actualUniqueDiagnostics": 4,
-      "remaining": "Digest CA2000 and Host transfer CA1508/CA2219; owning finite repairs active; fresh joined tests not executed"
-    },
-    "previousCurrentFormatterBeforeR40Checkpoint": {
-      "status": "pending_after_current_source_joins",
-      "qualification": "Historical R2 formatter pass does not qualify the newly joined source."
-    },
-    "previousCurrentBuildBeforeR44Checkpoint": {
-      "observedAtUtc": "2026-10-10T02:26:14.978269+00:00",
-      "passed": true,
-      "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-release-build-r40-20261010/original-build.json",
-      "evidenceSha256": "1bf38819ff5ac504a8c6575876179d52571cc565a76dca25efe4aafa9161e182",
-      "sourceManifestSha256": "76135acff466cc397365d6c7ecc8746fee53fdbefb873738402a3ba78b6f6d76",
-      "logSha256": "e1fc7631c17daee64a20a350327de4c5fad53a7f101369b8c158e35cb8c58d02",
-      "qualificationClaim": false
-    },
-    "previousCurrentFormatterBeforeR44Checkpoint": {
-      "observedAtUtc": "2026-10-10T02:24:03.901866+00:00",
-      "passed": true,
-      "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-formatter-r41-20261010/original-formatter.json",
-      "evidenceSha256": "96fdb095f9c422a9db93e8e9260573a453ac993b85f41df0d4839aa823b02ad8",
-      "sourceManifestSha256": "76135acff466cc397365d6c7ecc8746fee53fdbefb873738402a3ba78b6f6d76",
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "qualificationClaim": false
-    },
-    "previousCurrentBuildBeforeR60Checkpoint": {
-      "observedAtUtc": "2026-10-10T03:03:52.377131+00:00",
-      "passed": true,
-      "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-release-build-r44-20261010/original-build.json",
-      "evidenceSha256": "91b31fd6a28ebda9073abc6409a1ea2ce1534d307b19d9631fae6f485c22c2c8",
-      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
-      "logSha256": "7cf256bc2067ab022d93f0e7e30ab01b3f9d7835ce1fbb0730267ba3148a6c9a",
-      "qualificationClaim": false
-    },
-    "previousCurrentFormatterBeforeR60Checkpoint": {
-      "observedAtUtc": "2026-10-10T03:07:36.112750+00:00",
-      "passed": true,
-      "sourceCoherent": true,
-      "exitCode": 0,
-      "evidence": "/private/tmp/keyload-stage44-current-formatter-r44-20261010/original-formatter.json",
-      "evidenceSha256": "b4bfda0a3c793ed5819f9515d26dfaca4e90b9d85fea13e2f605cadf32a49f54",
-      "sourceManifestSha256": "d65c2dfb553437d3c403eaeb3ed7ad98ba518c39e086fb5297730ab6fcf9c50b",
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "qualificationClaim": false
     }
   },
   "TIME-PROVIDER-001": {
@@ -51399,6 +51988,19 @@
         "Original installed cut < original received tail, all receipt/body/image checks and actual cold cleanup",
         "Source/PDB/image/recovery/RF3 qualification"
       ]
+    },
+    "currentNativeChecksumProviderDevelopment20261010": {
+      "decision": "docs/ADR/ADR-126-current-native-zonetree-checksums.md",
+      "version": "2.0.0",
+      "publishedAndRestored": true,
+      "sourceCheckpoint": "TEST-PIPELINE-001.stageXLIVJoinedWave20261010.currentNativeChecksumSourceCheckpoint",
+      "runtimeQualified": false,
+      "taskComplete": false,
+      "remaining": [
+        "Current native normal/scalar/process and actual full FTS operations",
+        "Original Linux/full-suite/RF3 erased native snapshot and strictly later tail gates",
+        "Current-format fault/backup/restore and endurance scope"
+      ]
     }
   },
   "KL-036": {
@@ -52429,6 +53031,19 @@
           "path": "/private/tmp/keyload-stage44-discovery-omission-native-join-r1-20261010/actual-join-proof.json",
           "sha256": "87b1e7e5457fcc284a3895b5844171cc4a7737ea9e27baa768648d9ceeacb708"
         }
+      ]
+    },
+    "currentNativeChecksumProviderDevelopment20261010": {
+      "decision": "docs/ADR/ADR-126-current-native-zonetree-checksums.md",
+      "version": "2.0.0",
+      "publishedAndRestored": true,
+      "sourceCheckpoint": "TEST-PIPELINE-001.stageXLIVJoinedWave20261010.currentNativeChecksumSourceCheckpoint",
+      "runtimeQualified": false,
+      "taskComplete": false,
+      "remaining": [
+        "Current native normal/scalar/process and actual full FTS operations",
+        "Original Linux/full-suite/RF3 erased native snapshot and strictly later tail gates",
+        "Current-format fault/backup/restore and endurance scope"
       ]
     }
   },

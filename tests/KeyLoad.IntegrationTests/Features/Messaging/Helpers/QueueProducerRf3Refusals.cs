@@ -15,6 +15,7 @@ internal static class QueueProducerRf3Refusals
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, seed.Identity.Secret, token);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            await AtomicProducerRf3Boundary.RefuseAsync(publisher, mcp, seed, token);
             var changed = seed.Original with
             {
                 Mutations = [new PutDocument(QueueProducerRf3Protocol.Collection,
@@ -24,6 +25,7 @@ internal static class QueueProducerRf3Refusals
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), ErrorCode.Conflict, true);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
+            await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, changed, ErrorCode.Conflict, token);
             var duplicate = QueueProducerRf3Setup.Fresh(seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Original);
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(duplicate, token), ErrorCode.Conflict);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), ErrorCode.Conflict, true);
@@ -31,9 +33,12 @@ internal static class QueueProducerRf3Refusals
                 QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Refused), token))).IsNull();
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);
+            await AtomicProducerRf3EventAssertions.AbsentAsync(publisher, seed, QueueProducerRf3Protocol.Refused, token);
+            await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, duplicate, ErrorCode.Conflict, token);
             var quota = QueueProducerRf3Setup.Fresh(seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Refused);
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, quota, token), ErrorCode.ResourceExhausted, true);
             await QueueProducerRf3Assertions.DeniedAsync(await publisher.CommitAsync(quota, token), ErrorCode.ResourceExhausted);
+            await AtomicProducerRf3Routes.RefusedAsync(publisher, mcp, quota, ErrorCode.ResourceExhausted, token);
             await QueueProducerRf3Assertions.AbsentAsync(publisher, seed, QueueProducerRf3Protocol.Refused, QueueProducerRf3Protocol.Refused, token);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.ImageAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), original.Image);

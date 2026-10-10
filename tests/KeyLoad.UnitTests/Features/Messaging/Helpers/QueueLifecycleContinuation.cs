@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.QueryExecution;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -10,6 +11,7 @@ internal static class QueueLifecycleContinuation
         token.ThrowIfCancellationRequested();
         var resumed = state.CancelledCommand!;
         state.Execute(database, OperationKind.Batch, resumed, resumed.CommandId).Get<CommitReceipt>();
+        await SqlPendingQueueAuthorityFlow.RunAsync(database, store, state, token);
         state.Batch(database, new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending,
             QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One)).Get<CommitReceipt>();
         await QueueLifecycleImage.BodyAsync(database, state, QueueLifecycleTestProtocol.Pending, MessageState.DeadLettered,

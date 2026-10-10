@@ -34,6 +34,7 @@ public sealed partial class DatabaseEngine
             SafeFailureCode = null,
             ParkedSequence = QueueLifecycleProtocol.Initial
         };
+        updated = RedriveQueueOrder(tx, lane, resource.QueuePolicy, body.Body, metadata, updated, ref counters);
         tx.PutRecord(scheduled ? QueueKey(ScheduledQueueSpace, lane, request.NotBefore!.Value, metadata.Id)
             : QueueKey(ReadyQueueSpace, lane, sequence, metadata.Id), metadata.Id);
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, metadata.Id), updated);
@@ -41,11 +42,13 @@ public sealed partial class DatabaseEngine
         return new(QueueLifecycleProtocol.RedriveKind, lane.Queue, metadata.Id, updated.StateVersion);
     }
 
-    private static MutationReceipt ApplyCancelQueueMessage(IAtomicTransaction tx, PartitionRef partition, CancelQueueMessage request)
+    private MutationReceipt ApplyCancelQueueMessage(IAtomicTransaction tx, PartitionRef partition, CancelQueueMessage request)
     {
         var lane = new QueueLaneRef(partition, request.Queue);
         var (metadata, body) = RequireQueueLifecycleState(tx, lane, request);
         var counters = RemoveQueueLifecycleReferences(tx, lane, metadata, RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var resource = Resource(tx, partition, lane.Queue, ResourceKind.WorkQueue);
+        RemoveQueueOrder(tx, lane, resource.QueuePolicy, body.Body, metadata);
         counters = ReleaseQueueStored(counters, body.Bytes);
         var updated = metadata with
         {
@@ -56,7 +59,8 @@ public sealed partial class DatabaseEngine
             LeaseOwner = null,
             LeaseUntil = null,
             NotBefore = null,
-            ParkedSequence = QueueLifecycleProtocol.Initial
+            ParkedSequence = QueueLifecycleProtocol.Initial,
+            ActiveOrderSequence = QueueOrderProtocol.Initial
         };
         tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, metadata.Id), updated);

@@ -17,7 +17,9 @@ internal sealed class ReplicaNativeCommandInspectionCodec : ReplicaRecordInspect
             Authority = ReplicaInspectionFields.Read<ReadOnlyMemory<byte>, TInput>(ref reader,
                 NativeCommandContract.AuthorityId - NativeCommandContract.SafeDetailId),
             Signature = ReplicaInspectionFields.Read<ReadOnlyMemory<byte>, TInput>(ref reader,
-                NativeCommandContract.SignatureId - NativeCommandContract.AuthorityId)
+                NativeCommandContract.SignatureId - NativeCommandContract.AuthorityId),
+            RetryDecisions = ReplicaInspectionFields.Read<ReadOnlyMemory<byte>, TInput>(ref reader,
+                NativeCommandContract.RetryDecisionsId - NativeCommandContract.SignatureId)
         };
     }
 
@@ -28,5 +30,6 @@ internal sealed class ReplicaNativeCommandInspectionCodec : ReplicaRecordInspect
         ReplicaInspectionFields.Write(ref writer, NativeCommandContract.SafeDetailId - NativeCommandContract.ErrorId, value.SafeDetail);
         ReplicaInspectionFields.Write(ref writer, NativeCommandContract.AuthorityId - NativeCommandContract.SafeDetailId, value.Authority);
         ReplicaInspectionFields.Write(ref writer, NativeCommandContract.SignatureId - NativeCommandContract.AuthorityId, value.Signature);
+        ReplicaInspectionFields.Write(ref writer, NativeCommandContract.RetryDecisionsId - NativeCommandContract.SignatureId, value.RetryDecisions);
     }
 }

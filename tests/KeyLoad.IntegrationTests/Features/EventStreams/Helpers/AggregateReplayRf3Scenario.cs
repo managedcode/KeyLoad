@@ -100,6 +100,17 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
             revoked, cancellationToken));
     }
 
+    internal async Task RepairGrantAsync(ClusterFixture fixture, CancellationToken cancellationToken)
+    {
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        var repaired = Worker with { Revoked = false, PolicyEpoch = Worker.PolicyEpoch + RepairEpochAdvance };
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
+            repaired, cancellationToken));
+    }
+
+    private const long RepairEpochAdvance = 2;
+
     private static ImmutableArray<EventData> InitialEvents() =>
     [
         Event(AggregateReplayRf3Tokens.CreatedEventId, 1),

@@ -6,8 +6,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Preserves the complete source model and original receipts through real abort and both cold native owners.</summary>
 internal static class ControlledPartitionMovementAbortOperation
 {
-    private const long FinalSourceIndex = 145;
-    private const long FinalTargetIndex = 61;
+    private const long FinalSourceIndex = 165;
+    private const long FinalTargetIndex = 71;
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackCorpus corpus,
         ServerRuntimeOptions sourceRuntime, ServerRuntimeOptions targetRuntime,
@@ -15,6 +15,7 @@ internal static class ControlledPartitionMovementAbortOperation
         string callerAddress, byte[] originalReceipt, ControlledPartitionMovementOutcomeAuthority originalAuthority,
         BlobMetadata originalBlob, DateTimeOffset originalRecordedAt, long initialPosition, CancellationToken cancellationToken)
     {
+        await PartitionMovementCleanupCountAssertions.InventoryAsync();
         var prepared = await ControlledPartitionMovementPrepareFlow.ExecuteAsync(source, target, corpus,
             sourceRuntime, sourceAdmission, callerAddress, cancellationToken);
         var fence = await ControlledPartitionMovementGrantFlow.ExecuteAsync(source, sourceRuntime,

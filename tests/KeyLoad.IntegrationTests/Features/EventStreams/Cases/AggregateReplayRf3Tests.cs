@@ -53,19 +53,15 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await AggregateReplayRf3Scenario.CreateAsync(fixture, deadline.Token);
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, scenario.WorkerSecret, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            scenario.WorkerSecret, deadline.Token);
-        var request = await VerifyPersistedRawGrantsAsync(scenario, sdk, mcp, deadline.Token);
-        await scenario.RevokeAsync(fixture, deadline.Token);
-        await AssertRevokedPrincipalDeniedAsync(sdk, mcp, request, scenario.WorkerSecret, deadline.Token);
+        await AggregateReplayAuthorizationContinuation.RunAsync(fixture, scenario, this, deadline.Token);
     }
 
-    private async Task AssertRevokedPrincipalDeniedAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+    internal async Task AssertRevokedPrincipalDeniedAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         ReadAggregateReplayRequest request, string secret, CancellationToken cancellationToken)
     {
         var sdkResult = await sdk.ReadAggregateReplayAsync(request, cancellationToken);
+        await Assert.That(sdkResult.IsSuccess).IsFalse();
+        await Assert.That(sdkResult.Value).IsNull();
         await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
         var error = await Assert.ThrowsAsync<HttpRequestException>(() =>
             mcp.CallAsync(McpCallerTools.StreamsReplay, request, cancellationToken));
@@ -74,14 +70,15 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node3, secret, cancellationToken);
     }
 
-    private async Task<ReadAggregateReplayRequest> VerifyPersistedRawGrantsAsync(
+    internal async Task<AggregateReplayAuthorizationOriginal> VerifyPersistedRawGrantsAsync(
         AggregateReplayRf3Scenario scenario, KeyLoadClient sdk, McpOfficialClient mcp,
         CancellationToken cancellationToken)
     {
         var append = await scenario.AppendInitialAsync(sdk, Guid.NewGuid(), cancellationToken);
         await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        var snapshotCommand = scenario.InitialSnapshotCommand(Guid.NewGuid());
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
-            scenario.InitialSnapshotCommand(Guid.NewGuid()), cancellationToken));
+            snapshotCommand, cancellationToken));
         await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var request = scenario.ReadRequest();
         var sdkPage = McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAggregateReplayAsync(request, cancellationToken));
@@ -108,6 +105,6 @@ internal sealed class AggregateReplayRf3Tests(ClusterFixture fixture)
             request, ErrorCode.PermissionDenied, cancellationToken);
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, restricted.Secret, AggregateReplayRf3Tokens.Secret);
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, restricted.Secret, AggregateReplayRf3Tokens.PrivateHeader);
-        return request;
+        return new(request, snapshotCommand, snapshot, sdkValue);
     }
 }

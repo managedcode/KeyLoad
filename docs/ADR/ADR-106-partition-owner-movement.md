@@ -1868,3 +1868,25 @@ The existing cleanup matrix whole scenario retains original producer cancellatio
 Ownership: existing test-only CleanupMatrix case/protocol/producer/fault, one new executable fault helper, existing test FileStore synchronous bounded writer, and append-only PartitionTransfer/ADR106. Append only typed test role4 and repair2; old enum values/Args and the four existing flows remain identical. New ReplaceExactArm operation accepts only known regular arm filenames with exact existing expected bytes, same-length bounded replacement, unchanged file/aggregate/private-mode checks; ordinary no-overwrite writer remains unchanged. No product APIs/hooks/schema/IDs, auth, budgets, timers, limits or source/read/apply semantics change.
 
 Source proof is native RequestCqrsProbeRecords.CommitArmInventory and RequestCqrsProbeCleanupInventory.RequireBytes plus ClaimedCleanup.Read. Existing actual RF3 fixture owns fault/repair, not authority. Root-only current-source compile/discovery/Linux normal/scalar/RF3 artifacts remain pending; no UID/count/PASS/status/selector edit or old CI causal claim. Unknown unfamiliar marker/release negatives and universal future detail bounds remain open separately.
+
+
+## TASK-KL036-INDEPENDENT-CLEANUP-COUNT-001 — current closed-family native ledger
+
+REQ-PMOVE-001 / AC-PMOVE-001 and the complete retirement/abort cold-replay acceptance retain the independent literal68-family inventory in PartitionRecordInventoryTests. Cleanup adds the target-page family and a terminal ordinal: exactly69 cleanup families and70 iterations. Each genuine retire iteration admits3 source commits (authorize, Retire, ACK); each target Abort iteration admits2 source commits and1 target commit. Ordinary replay/rejection must admit no additional entry.
+
+The original58-family ledger remains immutable history. Five newly admitted families explain authenticated source059/run38019624472 terminal274→289 and abort145→155 failures; current68 inventory adds ten families in total. Current independently specified fixed totals are source terminal236 +4 per actual captured page, target3 +2 per page; abort source165 and target71. No expected count is taken from an observed index or production inventory length. The whole operations first match the current native cleanup order against the independent frozen family names; each cleanup iteration then asserts its exact committed source/target delta.
+
+Ownership: existing ControlledPartitionMovementTerminalOperation/AbortOperation/RetireFlow/TargetAbortFlow and new Helpers/PartitionMovementCleanupCountAssertions; existing PartitionRecordInventoryTests exposes only its unchanged test-private literal matrix. Preserve every original native command ID, receipt/outcome/raw image/store-position/business model assertion, child-cut argument, expiry/clock/limit, cold reopen and fresh healthy continuation. Product paths remain unchanged. Rollback is the guarded Unit/docs patch; reverting product family inventory is not a test repair.
+
+Automated mapping: original ControlledDocumentPublishedCommandTests/ReadTests, RetiredOutcomeMetadataAuthorizationTests, RetiredPartitionOutcomeAuthorizationTests and ControlledPartitionMovement* retirement/abort/install/child-cut cases remain complete operations; AcPmove001InventoryAndNativePageCoverEveryPartitionFamily still proves every literal native family. Root-only exact-source Linux normal/scalar plus original process/RF3 suites must qualify this correction. Source reconstruction/preview is not PASS or a native UID claim.
+
+```mermaid
+flowchart LR
+  F[Independent literal68 inventory] --> C[Exact cleanup69 order]
+  C --> R[70 genuine Retire or Abort iterations]
+  R --> D[Exact per-step native committed deltas]
+  D --> O[Original complete receipts and models]
+  O --> K[Cold reopen and healthy continuation]
+```
+
+Phase2 ancestry: the actual joined independent literal matrix now has68 families, including queue-order; cleanup has69 families plus its terminal iteration (70). This successor preserves Phase2 names exactly and uses strict fixed terminal236/abort source165/target71 totals. Historical source059 failed records remain unchanged evidence; they are not current qualification.

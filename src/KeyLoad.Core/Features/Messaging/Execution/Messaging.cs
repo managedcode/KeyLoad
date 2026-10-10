@@ -81,6 +81,7 @@ public sealed partial class DatabaseEngine
         var readySequence = scheduled ? MessagingInitialSequence : checked(counters.NextReadySequence + MessagingAdjacentElementOffset);
         var metadata = new MessageMetadata(message.MessageId, scheduled ? MessageState.Scheduled : MessageState.Ready,
             MessagingEmptyElementCount, MessagingSingleElementCount, readySequence, message.NotBefore, message.ExpiresAt);
+        (metadata, counters) = AdmitQueueOrder(tx, lane, resource.QueuePolicy, body, metadata, counters);
         tx.Put(QueueKey(MessageBodySpace, lane, message.MessageId), payload);
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, message.MessageId), metadata);
         tx.PutRecord(scheduled ? QueueKey(ScheduledQueueSpace, lane, message.NotBefore!.Value, message.MessageId)
@@ -93,10 +94,10 @@ public sealed partial class DatabaseEngine
         });
     }
 
-    private void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now)
-        => SweepDueEntries(tx, lane, policy, now);
+    private void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, ReplicatedOperation operation)
+        => SweepDueEntries(tx, lane, policy, now, operation);
 
-    private ReceiveResult Receive(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request, DateTimeOffset now, long position)
+    private ReceiveResult Receive(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request, DateTimeOffset now, long position, ReplicatedOperation operation)
     {
         var resource = Resource(tx, request.Lane.Partition, request.Lane.Queue, ResourceKind.WorkQueue);
         var policy = resource.QueuePolicy;
@@ -109,7 +110,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidReceiveBudget);
         }
-        Sweep(tx, request.Lane, policy, now);
+        Sweep(tx, request.Lane, policy, now, operation);
         return ClaimReadyMessages(tx, principal, request, resource, now, position);
     }
 
@@ -158,11 +159,11 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingLeasedBody);
         return new(claims, metadata, body.Bytes);
     }
-    private CommitReceipt CompleteDelivery(IAtomicTransaction tx, PrincipalRecord principal, DeliveryCommand command, DateTimeOffset now, long position)
+    private CommitReceipt CompleteDelivery(IAtomicTransaction tx, PrincipalRecord principal, DeliveryCommand command, DateTimeOffset now, long position, ReplicatedOperation operation)
     {
         var resource = Resource(tx, command.Lane.Partition, command.Lane.Queue, ResourceKind.WorkQueue);
         var lease = Lease(tx, principal, command.Lane, command.Token, now);
-        return ApplyDeliveryTransition(tx, command, resource, lease, now, position);
+        return ApplyDeliveryTransition(tx, command, resource, lease, now, position, operation);
     }
 
     private CommitReceipt CompleteProcessing(IAtomicTransaction tx, PrincipalRecord principal, ProcessingRequest request, DateTimeOffset now, long position)

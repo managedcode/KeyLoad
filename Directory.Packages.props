@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
     <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
-    <PackageVersion Include="ZoneTree" Version="1.9.9" />
+    <PackageVersion Include="ZoneTree" Version="2.0.0" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.0.9" />
     <PackageVersion Include="ManagedCode.Communication" Version="10.3.4" />
     <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.4" />
@@ -23,6 +23,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+    <PackageVersion Include="System.IO.Hashing" Version="10.0.12" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />

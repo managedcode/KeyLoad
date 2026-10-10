@@ -15,6 +15,9 @@ internal sealed record NativeCommandPayload(
     [Orleans.Id(NativeCommandContract.SignatureId)]
     public ReadOnlyMemory<byte> Signature { get; init; }
 
+    [Orleans.Id(NativeCommandContract.RetryDecisionsId)]
+    public ReadOnlyMemory<byte> RetryDecisions { get; init; }
+
     internal static T Read<T>(ReplicatedOperation operation)
     {
         var payload = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
@@ -37,6 +40,7 @@ internal static class NativeCommandContract
     internal const uint SafeDetailId = 2;
     internal const uint AuthorityId = 3;
     internal const uint SignatureId = 4;
+    internal const uint RetryDecisionsId = 5;
     internal const string MissingAuthority = "The native command authority is missing.";
     internal const string InvalidSignature = "The native command authority signature is invalid.";
     internal const string MismatchedAuthority = "The native command authority does not match its scope or payload.";

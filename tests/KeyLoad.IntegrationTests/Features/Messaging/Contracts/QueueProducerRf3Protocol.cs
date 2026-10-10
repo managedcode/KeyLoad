@@ -9,6 +9,17 @@ internal static class QueueProducerRf3Protocol
     internal const string Domain = "producer-work";
     internal const string Queue = "jobs";
     internal const string Collection = "producers";
+    internal const string StreamSet = "producer-events";
+    internal const string ForeignStreamSet = "foreign-events";
+    internal const string ForeignDomain = "foreign-producer-domain";
+    internal const string EventType = "Produced";
+    internal const long OriginalEventSequence = 1;
+    internal const long HealthyEventSequence = 2;
+    internal const long HealthyReadySequence = 2;
+    internal const long EmptyStreamRevision = 0;
+    internal const long InitialEventRevision = 1;
+    internal const long FirstAvailableEventRevision = 1;
+    internal const long InitialEventGeneration = 1;
     internal const string Original = "original";
     internal const string Scheduled = "scheduled";
     internal const string Refused = "refused";
@@ -26,14 +37,14 @@ internal static class QueueProducerRf3Protocol
     internal const long StateVersionAdvance = 1;
     internal const long StoredMessageCapacity = 2;
     internal const long InitialRevision = 1;
-    internal const int OriginalMutationCount = 3;
+    internal const int OriginalMutationCount = 4;
     internal const int InitialAttempts = 0;
     internal const long UnclaimedLeaseVersion = 0;
     internal const long InitialGeneration = 1;
     internal const long InitialReadySequence = 1;
     internal const long ScheduledReadySequence = 0;
     internal const Capability Publisher = Capability.QueuePublish | Capability.QueueInspect
-        | Capability.QueueConsume | Capability.QueueAck;
+        | Capability.QueueConsume | Capability.QueueAck | Capability.Query;
     internal static IReadOnlyList<string> Nodes { get; } =
         [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 }

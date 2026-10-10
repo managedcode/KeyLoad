@@ -61,6 +61,8 @@ internal sealed class KeyLoadClientNullWriteTests
                 { await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted); }
                 return;
             }
+            _ = await JsonSerializer.DeserializeAsync<GetDocumentRequest>(context.Request.Body,
+                JsonDefaults.Options, context.RequestAborted);
             if (Interlocked.Increment(ref readCount) == 1)
             { await context.Response.WriteAsync("null", context.RequestAborted); }
             else

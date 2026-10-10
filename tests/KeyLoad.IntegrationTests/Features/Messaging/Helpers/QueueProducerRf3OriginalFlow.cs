@@ -20,12 +20,15 @@ internal static class QueueProducerRf3OriginalFlow
         {
             var receipt = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.DocumentsCommit, seed.Original, token))).Value;
+            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
             await Assert.That(receipt.CommandId).IsEqualTo(seed.Original.CommandId);
             await Assert.That(receipt.Mutations.Length).IsEqualTo(QueueProducerRf3Protocol.OriginalMutationCount);
             if (returned is not null)
             { await QueueProducerRf3Assertions.EqualAsync(returned, receipt); }
             await QueueProducerRf3Assertions.ReplayAsync(publisher, mcp, seed.Original, receipt, token);
             var image = await QueueProducerRf3Assertions.ImageAsync(publisher, seed, QueueProducerRf3Protocol.Original, token);
+            await AtomicProducerRf3EventAssertions.LiteralAsync(image.Events, seed, QueueProducerRf3Protocol.Original,
+                QueueProducerRf3Protocol.Payload, QueueProducerRf3Protocol.OriginalEventSequence);
             await Assert.That(image.Document.Json).IsEqualTo(QueueProducerRf3Protocol.Payload);
             await Assert.That(image.Document.Revision).IsEqualTo(QueueProducerRf3Protocol.InitialRevision);
             await Assert.That(image.Document.Reference).IsEqualTo(QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Original));

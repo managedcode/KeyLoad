@@ -49,9 +49,12 @@ public sealed partial class DatabaseEngine
         state.Counters ??= Counters(tx, request.Lane);
         if (metadata.ExpiresAt <= now)
         {
-            AddExpiredReadyInput(key, bodyKey, metadataKey, metadata, body.Bytes, state);
+            AddExpiredReadyInput(tx, request.Lane, resource.QueuePolicy, body.Body, key, bodyKey, metadataKey, metadata, body.Bytes, state);
             return state.TransitionInputs.Count < messagingExecution.QueueScanPageSize;
         }
+
+        if (!RequireStrictQueueHead(tx, request.Lane, resource.QueuePolicy, body.Body, metadata))
+        { return state.TransitionInputs.Count < messagingExecution.QueueScanPageSize; }
 
         if (state.ReceivedBytes + body.Bytes > request.MaxBytes
             || state.Counters.InFlightMessages >= resource.QueuePolicy.MaxInFlightMessages
@@ -65,12 +68,20 @@ public sealed partial class DatabaseEngine
             && state.TransitionInputs.Count < messagingExecution.QueueScanPageSize;
     }
 
-    private static void AddExpiredReadyInput(ReadOnlySpan<byte> key, byte[] bodyKey, byte[] metadataKey,
+    private static void AddExpiredReadyInput(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageBody body,
+        ReadOnlySpan<byte> key, byte[] bodyKey, byte[] metadataKey,
         MessageMetadata metadata, long bodyBytes, ReadyClaimState state)
     {
-        var expired = metadata with { State = MessageState.Expired, StateVersion = metadata.StateVersion + QueueReadyClaimsVersionOne };
+        var orderKey = policy.OrderingProfile == QueueOrderingProfile.StrictPerKey
+            ? RequireQueueOrderReference(view, lane, RequireQueueOrderingKey(body), metadata) : null;
+        var expired = metadata with
+        {
+            State = MessageState.Expired,
+            StateVersion = metadata.StateVersion + QueueReadyClaimsVersionOne,
+            ActiveOrderSequence = QueueOrderProtocol.Initial
+        };
         state.TransitionInputs.Add(new(ReadyKey: key.ToArray(), MetadataKey: metadataKey, Metadata: expired,
-            TransitionKey: bodyKey, DeletesBody: true));
+            TransitionKey: bodyKey, DeletesBody: true, StrictOrderKey: orderKey));
         var counters = state.Counters!;
         state.Counters = counters with
         {
@@ -122,6 +133,8 @@ public sealed partial class DatabaseEngine
             if (input.DeletesBody)
             {
                 tx.Delete(input.TransitionKey);
+                if (input.StrictOrderKey is not null)
+                { tx.Delete(input.StrictOrderKey); }
                 tx.PutRecord(input.MetadataKey, input.Metadata);
             }
             else

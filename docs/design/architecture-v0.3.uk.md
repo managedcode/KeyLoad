@@ -2132,7 +2132,7 @@ Global feed v1 має стабільну EventSequence у межах AtomicParti
 
 Aggregate snapshot містить StreamRef, SourceRevision, ReducerVersion, StateSchemaVersion, checksum та state. Для rebuild вибирається сумісний snapshot і наступні events. Snapshot не відновлює довільні історичні запити до вже стертих payloads. Retention має окремо описувати, які варіанти replay ще підтримуються.
 
-Upcaster перетворює стару event schema у потрібну in-memory representation під час читання. Оригінальні bytes зберігаються до explicit retention/purge. Reducers та upcasters версіонуються і проходять deterministic fixtures. У першій версії application reducers виконуються у worker-процесі; довільні користувацькі assemblies усередині storage host не завантажуються.
+Current-schema replay приймає тільки точну EventData.SchemaVersion, задану caller reducer, і сумісні ReducerVersion/StateSchemaVersion snapshot. Несумісна schema відхиляється до callback; schema conversion, upcaster, resolver, automatic compatibility та fallback відсутні за чинним owner correction у root AGENTS.md і TASK-EVENT-CURRENT-028. Оригінальні event, snapshot та receipt bytes залишаються незмінними до explicit retention/purge. Версія reducer визначає точний поточний контракт і проходить deterministic fixtures. Application reducers виконуються як bounded pure worker поза storage host; cancellation, complete tail, JSON/state/input limits перевіряються до та між callback. Довільні користувацькі assemblies усередині storage host не завантажуються.
 
 Snapshot/projection write перевіряє очікувану попередню SourceRevision. Для асинхронних моделей зміну read model, inbox receipt і відповідний checkpoint потрібно координувати атомарно в цільовому scope або через idempotent transfer. Події під час rebuild обробляються generation-aware pipeline. Delivery зовнішніх повідомлень із replay вимкнена за замовчуванням; explicit redrive має окремий execution ID та audit.
 
@@ -2581,9 +2581,9 @@ RabbitMQ quorum queues додаються як specialized messaging arm, Kurren
 
 **Етап:** P3. **Залежності:** KL-084, KL-064.
 
-**Робота:** SourceRevision/ReducerVersion snapshots, versioned upcasting, pure external-worker replay і projection concurrency.
+**Робота:** SourceRevision/ReducerVersion snapshots, exact current-schema pure external-worker replay і projection concurrency без schema conversion або compatibility fallback.
 
-**Приймання:** Snapshot+tail відтворює reference state; incompatible reducer snapshot відхиляється; erased/missing history explicit; replay за замовчуванням не запускає external outputs.
+**Приймання:** Snapshot+tail відтворює reference state; incompatible reducer snapshot і неточна current event schema відхиляються до callback; erased/missing history explicit; bounded cancellable replay зберігає original event/snapshot/receipt bytes та за замовчуванням не запускає external outputs.
 
 ### KL-086 · Durable enqueue і queue-lane state
 

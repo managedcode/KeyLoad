@@ -158,3 +158,4 @@ flowchart LR
 
 | [ADR-122: Native comparable benchmark methodology](ADR-122-native-benchmark-methodology.md) | Accepted |
 | [ADR-125: Connection-owned parallel execution](ADR-125-connection-owned-execution.md) | Accepted |
+| [ADR-126: Current native ZoneTree checksum profile](ADR-126-current-native-zonetree-checksums.md) | Accepted; qualification pending |

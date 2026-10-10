@@ -40,6 +40,7 @@ internal static class PartitionRecordFamilies
     internal const string ProjectionReceipt = "projection-receipt";
     internal const string QueueCounters = "queue-counters";
     internal const string QueueDeadLetterOrder = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.ParkedSpace;
+    internal const string QueueOrder = global::KeyLoad.Core.Features.Messaging.QueueOrderProtocol.Space;
     internal const string QueuePendingDeadLetter = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.PendingSpace;
     internal const string QueueTransferIntent = "queue-transfer-intent";
     internal const string QueueTransferSourceCapacity = "queue-transfer-source-capacity";
@@ -110,6 +111,7 @@ internal static class PartitionRecordFamilies
         ProjectionReceipt,
         QueueCounters,
         QueueDeadLetterOrder,
+        QueueOrder,
         QueuePendingDeadLetter,
         QueueTransferIntent,
         QueueTransferSourceCapacity,

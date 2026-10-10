@@ -47,6 +47,8 @@ internal sealed class KeyLoadClientNullReadTests
             context.Response.ContentType = JsonContentType;
             if (context.Request.Path != StatusPath)
             {
+                _ = await JsonSerializer.DeserializeAsync<JsonElement>(context.Request.Body,
+                    JsonDefaults.Options, context.RequestAborted);
                 paths.Add(context.Request.Path.Value!);
                 await context.Response.WriteAsync("null", context.RequestAborted);
                 return;

@@ -6,7 +6,7 @@ internal static class ResourcePolicyUpdates
     private const string MissingResourceMessage = "The resource does not exist at the expected schema version.";
     private const string StaleVersionMessage = "The expected resource schema version is stale.";
     private const string InvalidVersionMessage = "A policy update must increment the resource schema version exactly once.";
-    private const string NoPolicyChangeMessage = "A policy update must change at least one field or header policy.";
+    private const string NoPolicyChangeMessage = "A policy update must change at least one supported policy.";
     private const string UnsupportedDefinitionChangeMessage =
         "The requested resource definition change is unsupported.";
     private const string VersionExhaustedMessage = "The resource schema version cannot be incremented.";
@@ -67,10 +67,24 @@ internal static class ResourcePolicyUpdates
 
         var previousShape = previous with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
         var replacementShape = replacement with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
+        if (previous.Kind == ResourceKind.WorkQueue)
+        {
+            replacementShape = replacementShape with
+            {
+                QueuePolicy = replacementShape.QueuePolicy with
+                {
+                    OrderingProfile = previous.QueuePolicy.OrderingProfile,
+                    ParkedHeadPolicy = previous.QueuePolicy.ParkedHeadPolicy,
+                    RetryJitter = previous.QueuePolicy.RetryJitter,
+                    RetryExponentialFactor = previous.QueuePolicy.RetryExponentialFactor
+                }
+            };
+        }
         return JsonData.Fingerprint(previousShape) == JsonData.Fingerprint(replacementShape);
     }
 
     private static bool SamePolicies(ResourceDefinition previous, ResourceDefinition replacement)
         => JsonData.Fingerprint(previous.FieldPolicies) == JsonData.Fingerprint(replacement.FieldPolicies)
-            && JsonData.Fingerprint(previous.HeaderPolicies) == JsonData.Fingerprint(replacement.HeaderPolicies);
+            && JsonData.Fingerprint(previous.HeaderPolicies) == JsonData.Fingerprint(replacement.HeaderPolicies)
+            && JsonData.Fingerprint(previous.QueuePolicy) == JsonData.Fingerprint(replacement.QueuePolicy);
 }

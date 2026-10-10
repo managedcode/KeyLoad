@@ -17,6 +17,8 @@ internal static class CrashHostApplication
         const int RunAsyncArgsComponentIndex = 3;
 
         _ = SerializationExecutionRegistration.Process.Value;
+        if (await NativeChecksumProfileScenario.TryRunAsync(args))
+        { return; }
         if (await ClusterRestoreProcessCutScenario.TryRunAsync(args))
         { return; }
         if (await NativeTextOnlineCrashScenario.TryRunAsync(args))
@@ -68,6 +70,7 @@ internal static class CrashHostApplication
                 => NativeAnnCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
+            QueueOrderedRetryCrashProtocol.Mode => QueueOrderedRetryCrashScenario.RunAsync(directory, store, boundary),
             QueueLifecycleCrashProtocol.Mode => QueueLifecycleCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),
             SagaTimeoutCrashScenario.Mode => SagaTimeoutCrashScenario.RunAsync(directory, store, boundary),

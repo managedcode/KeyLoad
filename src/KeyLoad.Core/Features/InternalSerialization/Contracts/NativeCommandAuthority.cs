@@ -14,6 +14,7 @@ internal static class NativeAuthorityContract
     internal const int ValueHashId = 6;
     internal const int ErrorId = 7;
     internal const int SafeDetailId = 8;
+    internal const uint RetryDecisionHashId = 9;
 }
 
 [Orleans.GenerateSerializer, Orleans.Alias(NativeAuthorityContract.Alias)]
@@ -26,4 +27,5 @@ internal sealed record NativeCommandAuthority(
     [property: Orleans.Id(NativeAuthorityContract.FingerprintId)] string Fingerprint,
     [property: Orleans.Id(NativeAuthorityContract.ValueHashId)] ReadOnlyMemory<byte> ValueHash,
     [property: Orleans.Id(NativeAuthorityContract.ErrorId)] ErrorCode? Error,
-    [property: Orleans.Id(NativeAuthorityContract.SafeDetailId)] string? SafeDetail);
+    [property: Orleans.Id(NativeAuthorityContract.SafeDetailId)] string? SafeDetail,
+    [property: Orleans.Id(NativeAuthorityContract.RetryDecisionHashId)] ReadOnlyMemory<byte> RetryDecisionHash = default);

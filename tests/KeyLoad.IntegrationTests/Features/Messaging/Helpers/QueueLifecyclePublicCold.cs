@@ -29,7 +29,7 @@ internal static class QueueLifecyclePublicCold
             await Assert.That(after.ReadGeneration).IsGreaterThanOrEqualTo(before.ReadGeneration);
             await Assert.That(after.Applied).IsGreaterThanOrEqualTo(before.Applied);
             if (continueOperation)
-            { await QueueLifecyclePublicPhase.ContinueAsync(callers, state, token); }
+            { await QueueLifecyclePublicPhase.ContinueAsync(fixture, callers, state, token); }
             else
             { await FinalAsync(callers, state, token); }
             after = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(token));

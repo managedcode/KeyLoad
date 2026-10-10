@@ -47,6 +47,8 @@ public sealed partial class DatabaseEngine
         {
             cancellationToken.ThrowIfCancellationRequested();
             var admitted = selectEmbeddedClock ? operation with { EvaluatedAt = EvaluationClock.GetUtcNow() } : operation;
+            if (selectEmbeddedClock)
+            { admitted = PrepareQueueRetryInView(transaction, admitted); }
             return ApplyCommittedCommand(transaction, admitted, position, replicationIndex);
         });
     }
@@ -114,6 +116,7 @@ public sealed partial class DatabaseEngine
             }
             RequireNoPartitionMovementFence(transaction, operation, partitionScope);
             ValidateCommandClock(transaction, operation.EvaluatedAt);
+            ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);

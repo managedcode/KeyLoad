@@ -88,7 +88,7 @@ internal static class ModelQueueQueryRows
         PartitionRef partition, ResourceDefinition resource, MessageMetadata metadata, ReadExecutionBudget budget,
         Action<DocumentRecord> accept)
     {
-        if (metadata.State == MessageState.DeadLettered)
+        if (metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter)
         {
             database.Authorization.Require(principal, partition, resource.Name, Capability.DeadLettersRead);
         }

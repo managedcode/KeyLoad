@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Executes genuine capture/install/finalize/publication/retirement and verifies both cold native owners.</summary>
 internal static class ControlledPartitionMovementTerminalOperation
 {
-    private const long FixedControlEntries = 206;
+    private const long FixedControlEntries = 236;
     private const long ControlEntriesPerPage = 4;
     private const long FixedTargetEntries = 3;
     private const long TargetEntriesPerPage = 2;
@@ -18,6 +18,7 @@ internal static class ControlledPartitionMovementTerminalOperation
         string callerAddress, byte[] originalReceipt, ControlledPartitionMovementOutcomeAuthority originalAuthority,
         DateTimeOffset originalRecordedAt, long initialPosition, DateTimeOffset wholeExpiresAt, TimeSpan issuedExpiryWindow, CancellationToken cancellationToken)
     {
+        await PartitionMovementCleanupCountAssertions.InventoryAsync();
         var installed = await ControlledPartitionMovementInstallationScenario.ExecuteAsync(source, target,
             corpus, sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, callerAddress,
             originalReceipt, initialPosition, wholeExpiresAt, cancellationToken);

@@ -8,12 +8,11 @@ public sealed partial class DatabaseEngine
     private const int QueueDeliveryTransitionMinimumPositiveCount = 1;
     private const int QueueDeliveryTransitionVersionOne = 1;
     private const int QueueDeliveryTransitionAdjacentElementOffset = 1;
-    private const int QueueDeliveryTransitionRetryExponentialBase = 2;
 
     private const int DefaultRenewalSeconds = 30;
 
     private CommitReceipt ApplyDeliveryTransition(IAtomicTransaction tx, DeliveryCommand command,
-        ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position)
+        ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position, ReplicatedOperation? operation = null)
     {
         var metadata = lease.Metadata;
         var counters = Counters(tx, command.Lane);
@@ -38,7 +37,7 @@ public sealed partial class DatabaseEngine
                 InFlightBytes = counters.InFlightBytes - lease.BodyBytes
             };
             updated = CompleteDeliveryAction(tx, command.Lane, resource.QueuePolicy, command.Action,
-                metadata, lease.BodyBytes, now, ref counters);
+                metadata, lease.BodyBytes, now, ref counters, operation);
         }
         tx.PutRecord(QueueKey(MessageMetadataSpace, command.Lane, metadata.Id), updated);
         tx.PutRecord(QueueKey(QueueCountersSpace, command.Lane), counters);
@@ -47,7 +46,7 @@ public sealed partial class DatabaseEngine
     }
 
     private MessageMetadata CompleteDeliveryAction(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
-        DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters)
+        DeliveryAction action, MessageMetadata metadata, long bodyBytes, DateTimeOffset now, ref QueueCounters counters, ReplicatedOperation? operation)
     {
         if (action == DeliveryAction.Ack)
         {
@@ -56,10 +55,14 @@ public sealed partial class DatabaseEngine
                 StoredMessages = counters.StoredMessages - QueueDeliveryTransitionAdjacentElementOffset,
                 StoredBytes = counters.StoredBytes - bodyBytes
             };
+            var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
+                ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
+            RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
             tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
             return metadata with
             {
                 State = MessageState.Acked,
+                ActiveOrderSequence = QueueOrderProtocol.Initial,
                 StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne,
                 LeaseOwner = null,
                 LeaseUntil = null
@@ -69,9 +72,10 @@ public sealed partial class DatabaseEngine
         {
             return AdmitQueueDeadLetter(tx, lane, policy, metadata, bodyBytes, ref counters);
         }
-        var delay = Math.Min(policy.RetryMaxMilliseconds,
-            policy.RetryBaseMilliseconds * Math.Pow(QueueDeliveryTransitionRetryExponentialBase, Math.Min(metadata.Attempts - QueueDeliveryTransitionAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));
-        var available = now.AddMilliseconds(delay);
+        var available = policy.RetryJitter == QueueRetryJitter.None
+            ? now.AddMilliseconds(QueueRetryCap(policy, metadata.Attempts))
+            : QueueRetryAt(operation ?? throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.MissingDecision),
+                lane, policy, metadata, ReadOnlySpan<byte>.Empty);
         tx.PutRecord(QueueKey(ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
         return metadata with
         {

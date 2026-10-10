@@ -24,6 +24,7 @@ internal static class ControlledPartitionMovementRetireFlow
         for (var family = FirstFamily; family <= familyCount; family += FamilyStep)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var originalIndex = source.Journal.Log.State.LastIndex;
             var (request, issued, outcome, expiry) = await ApplyFamilyAsync(source, runtime, admission,
                 corpus, finalized, publication, family, familyCount, callerAddress, wholeExpiresAt,
                 issuedExpiryWindow, cancellationToken);
@@ -39,6 +40,7 @@ internal static class ControlledPartitionMovementRetireFlow
             }
             await AcknowledgeAsync(source, runtime, admission, corpus, finalized, actual, family,
                 callerAddress, acknowledgmentExpiry, cancellationToken);
+            await PartitionMovementCleanupCountAssertions.RetireAsync(source, originalIndex);
             if (family == familyCount)
             {
                 await Assert.That(JsonDefaults.Serialize(cleanup.Completion)

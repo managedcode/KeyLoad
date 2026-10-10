@@ -152,6 +152,8 @@ public sealed partial class DatabaseEngine
         foreach (var delivery in deliveries)
         {
             Lease(view, principal, lane, delivery.Token, operation.EvaluatedAt);
+            var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+            RequireCachedDeliveryProjection(principal, resource, delivery.PayloadJson, delivery.HeadersJson);
         }
     }
 
@@ -168,7 +170,11 @@ public sealed partial class DatabaseEngine
 
         foreach (var delivery in cached.Deliveries)
         {
-            SubscriptionLease(view, principal, subscription, delivery.Token, operation.EvaluatedAt);
+            var lease = SubscriptionLease(view, principal, subscription, delivery.Token, operation.EvaluatedAt);
+            var resource = SourceResource(view, subscription.Source);
+            var dataPrincipal = Principal(view, lease.State.Definition.DataPrincipalId, operation.EvaluatedAt);
+            RequireCachedDeliveryProjection(dataPrincipal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
+            RequireCachedDeliveryProjection(principal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
         }
     }
 }

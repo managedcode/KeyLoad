@@ -108,7 +108,11 @@ internal sealed class AggregateReplayAuthorityTests
         fixture.Append(new EventData(PrivateEventId, AggregateReplayFixture.EventType,
             Payload(SecretPayload), Headers(SecretHeader)));
         _ = fixture.Read(maximumEvents: 1);
-        fixture.StoreSnapshot(1, commandId: Guid.Parse(RetryCommandId));
+        var originalReceipt = fixture.StoreSnapshot(1, commandId: Guid.Parse(RetryCommandId));
+        var originalPage = fixture.Read(maximumEvents: 1);
+        var originalEvent = fixture.Store.Read(view => view.ReadOwnedValue(fixture.EventKey(1)))!;
+        var originalOutcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(
+            fixture.Partition, AggregateReplayFixture.WorkerId, Guid.Parse(RetryCommandId))))!;
         fixture.ConfigurePrincipal(AggregateReplayFixture.WorkerId,
             Capability.EventsReplay | Capability.EventsRead | Capability.EventsSnapshotsManage,
             [AggregateReplayFixture.PayloadReadGrant, AggregateReplayFixture.PayloadUseGrant,
@@ -121,6 +125,13 @@ internal sealed class AggregateReplayAuthorityTests
 
         await Assert.That(read.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(retry.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        foreach (var failure in new[] { read, retry })
+        {
+            await Assert.That(failure.Message.Contains(SecretPayload, StringComparison.Ordinal)).IsFalse();
+            await Assert.That(failure.Message.Contains(SecretHeader, StringComparison.Ordinal)).IsFalse();
+        }
+        await AggregateReplayAuthorizationContinuation.RepairAndColdAsync(fixture,
+            Guid.Parse(RetryCommandId), originalReceipt, originalPage, (originalEvent, originalOutcome));
     }
 
     [Test]

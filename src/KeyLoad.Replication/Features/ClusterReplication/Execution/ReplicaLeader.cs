@@ -24,8 +24,9 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
             var entry = await state.LockedAsync(() =>
             {
                 state.RequireReadyLeader();
+                var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with { EvaluatedAt = state.Clock.GetUtcNow() });
                 var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term,
-                    operation with { EvaluatedAt = state.Clock.GetUtcNow() });
+                    admitted);
                 state.Log.Append([next]);
                 return next;
             }, cancellationToken).ConfigureAwait(false);

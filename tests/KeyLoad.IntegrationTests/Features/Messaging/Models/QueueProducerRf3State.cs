@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal sealed record QueueProducerRf3Seed(QueueLaneRef Lane, MessagingRf3Identity Identity,
     CommandRequest Original, DateTimeOffset Due);
 internal sealed record QueueProducerRf3Image(DocumentResult Document,
-    MessageInspection Ready, MessageInspection Scheduled);
+    MessageInspection Ready, MessageInspection Scheduled, AtomicProducerRf3Events Events);
 internal sealed record QueueProducerRf3Original(QueueProducerRf3Seed Seed, CommitReceipt Receipt,
     QueueProducerRf3Image Image);
 internal sealed record QueueProducerRf3Healthy(QueueProducerRf3Original Original,

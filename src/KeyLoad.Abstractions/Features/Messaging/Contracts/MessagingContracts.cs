@@ -22,6 +22,7 @@ public sealed record QueuePolicy
     private const int DefaultMaxLeaseSeconds = 300;
     private const int DefaultRetryBaseMilliseconds = 1_000;
     private const int DefaultRetryMaxMilliseconds = 300_000;
+    private const int DefaultRetryExponentialFactor = 2;
 
     /// <summary>Gets or sets the max attempts value.</summary>
     [Orleans.Id(0)]
@@ -53,6 +54,18 @@ public sealed record QueuePolicy
     /// <summary>Gets the optional dead-letter byte sublimit of the stored grant.</summary>
     [Orleans.Id(9)]
     public long? MaxDeadLetterBytes { get; init; }
+    /// <summary>Gets the canonical message ordering profile.</summary>
+    [Orleans.Id(10)]
+    public QueueOrderingProfile OrderingProfile { get; init; }
+    /// <summary>Gets whether a parked strict head blocks its successors.</summary>
+    [Orleans.Id(11)]
+    public QueueParkedHeadPolicy ParkedHeadPolicy { get; init; }
+    /// <summary>Gets the recorded retry jitter selection profile.</summary>
+    [Orleans.Id(12)]
+    public QueueRetryJitter RetryJitter { get; init; }
+    /// <summary>Gets the saturating retry exponential factor.</summary>
+    [Orleans.Id(13)]
+    public int RetryExponentialFactor { get; init; } = DefaultRetryExponentialFactor;
 }
 
 /// <summary>Adds a message to a work queue with scheduling and ordering metadata.</summary>
@@ -116,11 +129,15 @@ public sealed record MessageBody([property: Orleans.Id(0)] string Id, [property:
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
 /// <param name="SafeFailureCode">Specifies the safe failure code value.</param>
 /// <param name="ParkedSequence">The persisted dead-letter ordering sequence, or zero when not parked.</param>
+/// <param name="EnqueueSequence">The immutable strict-order sequence at original enqueue, or zero for competing consumers.</param>
+/// <param name="ActiveOrderSequence">The current strict-order position, or zero when the message has no active order entry.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.MessageMetadata)]
 public sealed record MessageMetadata([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] MessageState State, [property: Orleans.Id(2)] int Attempts, [property: Orleans.Id(3)] long StateVersion, [property: Orleans.Id(4)] long ReadySequence,
     [property: Orleans.Id(5)] DateTimeOffset? NotBefore, [property: Orleans.Id(6)] DateTimeOffset? ExpiresAt, [property: Orleans.Id(7)] string? LeaseOwner = null, [property: Orleans.Id(8)] long LeaseVersion = MessageMetadata.DefaultLeaseVersion,
-    [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = MessageMetadata.DefaultDeliveryGeneration, [property: Orleans.Id(11)] string? SafeFailureCode = null, [property: Orleans.Id(12)] long ParkedSequence = MessageMetadata.DefaultLeaseVersion)
+    [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = MessageMetadata.DefaultDeliveryGeneration, [property: Orleans.Id(11)] string? SafeFailureCode = null, [property: Orleans.Id(12)] long ParkedSequence = MessageMetadata.DefaultLeaseVersion,
+    [property: Orleans.Id(13)] long EnqueueSequence = MessageMetadata.DefaultLeaseVersion,
+    [property: Orleans.Id(14)] long ActiveOrderSequence = MessageMetadata.DefaultLeaseVersion)
 {
     private const int DefaultLeaseVersion = 0;
     private const int DefaultDeliveryGeneration = 1;
@@ -135,11 +152,13 @@ public sealed record MessageMetadata([property: Orleans.Id(0)] string Id, [prope
 /// <param name="DeadLetterMessages">The retained parked-message count charged to the dead-letter grant.</param>
 /// <param name="DeadLetterBytes">The retained parked-body bytes charged to the dead-letter grant.</param>
 /// <param name="NextParkedSequence">The next monotonically increasing dead-letter ordering sequence.</param>
+/// <param name="NextOrderSequence">The next monotonically increasing strict-order admission or redrive sequence.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.QueueCounters)]
 public sealed record QueueCounters([property: Orleans.Id(0)] long StoredMessages, [property: Orleans.Id(1)] long StoredBytes, [property: Orleans.Id(2)] long InFlightMessages, [property: Orleans.Id(3)] long InFlightBytes, [property: Orleans.Id(4)] long NextReadySequence,
     [property: Orleans.Id(5)] long DeadLetterMessages = QueueCounterDefaults.NoUsage, [property: Orleans.Id(6)] long DeadLetterBytes = QueueCounterDefaults.NoUsage,
-    [property: Orleans.Id(7)] long NextParkedSequence = QueueCounterDefaults.NoUsage);
+    [property: Orleans.Id(7)] long NextParkedSequence = QueueCounterDefaults.NoUsage,
+    [property: Orleans.Id(8)] long NextOrderSequence = QueueCounterDefaults.NoUsage);
 
 /// <summary>Returns a leased message and the token and generation needed to process it.</summary>
 /// <param name="Id">Identifies the entity, document, key, message, event, or operation.</param>
