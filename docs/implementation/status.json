@@ -269,7 +269,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R80 guarded search authority, native bounded advisory stream and complete transfer coordination-read integration finished; current native compiler/analyzers0 errors/0 warnings, canonical restore and governance PASS. Full current-source Release remains running and full formatter/focused normal/scalar/recovery follow-up pending. Every original R78 failure retained; exact-current-source Linux RF3, full coverage, fault and endurance qualification remain open.",
+    "verificationStage": "Stage46 full Release build/formatter and exact ANN4 normal plus4 scalar passed; actual3297 native census and1706 PDB/source declarations validated after guarded four-row inventory repair. Original all-three cold start ordering repaired in source; delivered-source Linux, complete RF3/recovery, numeric coverage and feature qualification remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -349,19 +349,23 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "scope": "Full Release solution after native import ordering",
       "passed": true,
       "errors": 0,
       "warnings": 0,
       "sourceInputs": 6835,
-      "originalReceiptSha256": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+      "sourceDrift": false,
+      "producerImages": 32,
+      "matchingUnitProductionCopies": 30,
+      "unitImages": 398,
+      "originalReceiptSha256": "edf48544978620a8142c73739aba4c7b5537406662d69b66190190b58a132654",
+      "scope": "Full current Stage46 Release solution",
       "developmentOnly": true
     },
     "currentFormatter": {
-      "scope": "Canonical full verify-no-changes after native import ordering",
       "passed": true,
       "sourceDrift": false,
-      "originalReceiptSha256": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+      "originalReceiptSha256": "724e9303ff8ce5bd90a5e5f39b083134751acca1803373b3490395c61b448f03",
+      "scope": "Full current Stage46 canonical verify-no-changes",
       "developmentOnly": true
     },
     "latestVerifiedNativeLinux": {
@@ -45014,6 +45018,96 @@
         "Source-bound full functional coverage and actual module/file/line/branch gap closure",
         "Required measured resource, endurance and fair performance qualification"
       ]
+    },
+    "currentStageXLVIDevelopment": {
+      "dateUtc": "2026-10-10",
+      "scope": "Current exact ANN physical-read oracle and original all-three cold voter startup order; local development",
+      "finalBuild": {
+        "passed": true,
+        "errors": 0,
+        "warnings": 0,
+        "sourceInputs": 6835,
+        "sourceDrift": false,
+        "producerImages": 32,
+        "matchingUnitProductionCopies": 30,
+        "unitImages": 398,
+        "originalReceiptSha256": "edf48544978620a8142c73739aba4c7b5537406662d69b66190190b58a132654"
+      },
+      "finalFormatter": {
+        "passed": true,
+        "sourceDrift": false,
+        "originalReceiptSha256": "724e9303ff8ce5bd90a5e5f39b083134751acca1803373b3490395c61b448f03"
+      },
+      "annOriginalWholeOperations": [
+        {
+          "profile": "unit",
+          "passed": 4,
+          "total": 4,
+          "failed": 0,
+          "skipped": 0,
+          "nativeMaximumParallelTests": 50,
+          "observedOverlap": 4,
+          "originalReceiptSha256": "24ebb265dd18efe707b72af4af8fa84497faa8a444a81516c74354924e812f85",
+          "originalTrxSha256": "b271fae355a4e1dd2629b0c8164764583db176ea4f2129e20c7a1685b95992c5",
+          "originalLogSha256": "ac2bdec6670ed30803e07ae112101303092fd98f9b4a47c7910f8c67898fa37b",
+          "sourceImageEntryDrift": false
+        },
+        {
+          "profile": "scalar",
+          "passed": 4,
+          "total": 4,
+          "failed": 0,
+          "skipped": 0,
+          "nativeMaximumParallelTests": 50,
+          "observedOverlap": 4,
+          "originalReceiptSha256": "45377c46856ca7a1002036e3b6b2d668a313ff27315df88d1fcdbdba2439f64e",
+          "originalTrxSha256": "a8fefb0bf4cfc29b03a5fcba586b1dfa3179b99f1fc12623b6616e1d884f83e1",
+          "originalLogSha256": "12a9e8070dcfd020785140f8f893d383db07d261d306867a8a50e133db797227",
+          "sourceImageEntryDrift": false
+        }
+      ],
+      "annPhysicalReadByteContractRelaxed": false,
+      "coldVoterStartupOrder": {
+        "sourcePresent": true,
+        "allThreeAcceptedStartsBeforeHealthBarrier": true,
+        "sameOriginalOwnersReceiptsImagesMembershipAndDeadline": true,
+        "wholeOriginalRf3RuntimePassed": false
+      },
+      "currentNativeCases": 3297,
+      "actualCompiledDeclarations": 1706,
+      "functionalCases": 2875,
+      "requiredNonContributors": 422,
+      "guardedInventorySha256": "6ce9df3553af4690458a95125696a4a775d860a76ab102910ef52ddb5edeecb9",
+      "changedOnlyOriginalAnnSourceRows": 4,
+      "caseMembershipOrSelectorsChanged": false,
+      "canonicalFullNativeCensusValidated": true,
+      "canonicalCensusReceiptSha256": "a7dab238f85a0c2a9c5fea93c405aa6d9873f8d1e872b34c83a85a9c5fcafb52",
+      "originalCensusSha256": "c6e395e0989e1975f496077432e525a6b624c8825a1ab57e9adcb86b11a29df9",
+      "originalNativeImageObservationSha256": "806ea1f16ac3a9a320d65cd27339800969139f992578fca1e5d582651eebdeac",
+      "wholeTaskAccepted": false,
+      "productCoveragePercent": null,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "remaining": [
+        "Actual delivered-source Linux complete normal/scalar, process and SDK/official-MCP RF3 gates",
+        "Both original complete cold feed/live RF3 operation flows and joined resource cleanup",
+        "Source-bound numeric functional coverage and complete feature fault/resource/endurance gates"
+      ]
+    },
+    "previousCurrentBuildBeforeStageXLVI": {
+      "scope": "Full Release solution after native import ordering",
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "sourceInputs": 6835,
+      "originalReceiptSha256": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+      "developmentOnly": true
+    },
+    "previousCurrentFormatterBeforeStageXLVI": {
+      "scope": "Canonical full verify-no-changes after native import ordering",
+      "passed": true,
+      "sourceDrift": false,
+      "originalReceiptSha256": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+      "developmentOnly": true
     }
   },
   "TIME-PROVIDER-001": {
@@ -52774,6 +52868,16 @@
       "allAcceptanceClosed": false,
       "productCoveragePercent": null,
       "remaining": "Required actual native build/format/normal/scalar/process/publicRF3/source-image/Linux/fault/resource gates remain open; no local source proof promoted."
+    },
+    "currentStageXLVISourceDevelopment": {
+      "stage": "TEST-PIPELINE-001.currentStageXLVIDevelopment",
+      "scope": "Exact native ANN physical-read budget oracle",
+      "sourcePresent": true,
+      "canonicalLocalBuildPassed": true,
+      "canonicalLocalFormatterPassed": true,
+      "allAcceptanceClosed": false,
+      "runtimeQualified": false,
+      "productCoveragePercent": null
     }
   },
   "KL-032": {
@@ -54923,6 +55027,16 @@
           "allAcceptanceClosed": false
         }
       }
+    },
+    "currentStageXLVISourceDevelopment": {
+      "stage": "TEST-PIPELINE-001.currentStageXLVIDevelopment",
+      "scope": "Original all-three cold voter start before health barrier",
+      "sourcePresent": true,
+      "canonicalLocalBuildPassed": true,
+      "canonicalLocalFormatterPassed": true,
+      "allAcceptanceClosed": false,
+      "runtimeQualified": false,
+      "productCoveragePercent": null
     }
   },
   "KL-080": {

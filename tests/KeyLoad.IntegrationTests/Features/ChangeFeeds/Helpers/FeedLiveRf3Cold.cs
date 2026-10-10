@@ -1,5 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
@@ -15,6 +16,11 @@ internal static class FeedLiveRf3Cold
         {
             await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node,
             FeedLiveRf3Protocol.ColdScenario, token), failures);
+        }
+        foreach (var node in Nodes)
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+                await fixture.BeginContainerRestartAsync(node, token), failures);
         }
         foreach (var node in Nodes)
         { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures); }
