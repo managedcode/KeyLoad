@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using global::Orleans.Serialization;
 using global::Orleans.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -34,7 +34,8 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
                 state.ETag = row.ETag;
                 state.RecordExists = true;
             }
-            else { state.ETag = null; state.RecordExists = false; }
+            else
+            { state.ETag = null; state.RecordExists = false; }
         }
         return Task.CompletedTask;
     }
@@ -52,7 +53,8 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
             RequireOpen(cancellationToken);
             entries.TryGetValue(grainId, out var before);
             RequireRevision(state.ETag, before);
-            if (before is not null) { RequireType<T>(before); }
+            if (before is not null)
+            { RequireType<T>(before); }
             var row = EventFeedPubSubRowEncoding.Create(originalServices, grainId, state.State!,
                 options, routing, cancellationToken);
             var nextBytes = checked(retainedBytes - (before?.EncodedBytes ?? EmptyBytes) + row.EncodedBytes);
@@ -118,7 +120,8 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
         lock (gate)
         {
             closed = true;
-            foreach (var row in entries.Values) { row.Value.AsSpan().Clear(); }
+            foreach (var row in entries.Values)
+            { row.Value.AsSpan().Clear(); }
             entries.Clear();
             retainedBytes = EmptyBytes;
         }

@@ -50,7 +50,11 @@ internal static class NativeTestSelectionProcess
             const rejection = nativeSelection(rejectionArgs, {});
             const connectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*", localArgs[2]];
             const connection = nativeSelection(connectionArgs, {});
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs]) {
+            const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*", localArgs[2]];
+            const nativeText = nativeSelection(nativeTextArgs, {});
+            const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
+            const remoteTransfer = nativeSelection(remoteTransferArgs, {});
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, nativeTextArgs, remoteTransferArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -98,8 +102,29 @@ internal static class NativeTestSelectionProcess
               }
               throw new Error('Unsupported connection RF3 filter was accepted.');
             }
+            let nativeTextUnsupportedCount = 0;
+            for (const badFilter of ['/*/*/NativeTextMaintenanceRf3Tests/*', '/*/*/NativeText*/*',
+              '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/* ', '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*|/*/*/OtherCase/*']) {
+              try { nativeSelection([nativeTextArgs[0], '--KeyLoadTests:Filter='+badFilter, nativeTextArgs[2]], {}); }
+              catch (failure) {
+                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                nativeTextUnsupportedCount++; continue;
+              }
+              throw new Error('Unsupported native text RF3 filter was accepted.');
+            }
+            let remoteTransferUnsupportedCount = 0;
+            for (const badFilter of ['/*/*/RemoteTransferDistinctOwnerTests/*',
+              '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwners*',
+              '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage|/*/*/OtherCase/*', '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage ']) {
+              try { nativeSelection([remoteTransferArgs[0], '--KeyLoadTests:Filter='+badFilter, remoteTransferArgs[2]], {}); }
+              catch (failure) {
+                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                remoteTransferUnsupportedCount++; continue;
+              }
+              throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
+            }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, remoteTransfer, remoteTransferUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

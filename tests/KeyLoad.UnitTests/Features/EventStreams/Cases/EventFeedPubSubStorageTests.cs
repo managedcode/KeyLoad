@@ -1,8 +1,8 @@
+using global::Orleans.Serialization;
+using global::Orleans.Storage;
 using KeyLoad.Orleans;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using global::Orleans.Serialization;
-using global::Orleans.Storage;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -75,8 +75,12 @@ internal sealed class EventFeedPubSubStorageTests
         var id = Id(FirstKey);
         var legalBytes = EventFeedPubSubRowEncoding.Create(services, id, Healthy, defaults,
             routing, CancellationToken.None).EncodedBytes;
-        var limits = new DatabaseLimits { MaxResults = SingleSlot,
-            MaxBatchBytes = checked((int)legalBytes), MaxQueryReadBytes = legalBytes };
+        var limits = new DatabaseLimits
+        {
+            MaxResults = SingleSlot,
+            MaxBatchBytes = checked((int)legalBytes),
+            MaxQueryReadBytes = legalBytes
+        };
         limits.Validate();
         var options = Options.Create(limits);
         using (var storage = new EventFeedPubSubStorage(services, options, routing))
@@ -129,28 +133,32 @@ internal sealed class EventFeedPubSubStorageTests
 
     private static async Task RequireCode(ErrorCode expected, Func<Task> operation)
     {
-        try { await operation(); }
+        try
+        { await operation(); }
         catch (KeyLoadException failure) when (failure.Code == expected) { return; }
         throw new InvalidOperationException("The native pubsub operation did not preserve its closed refusal.");
     }
 
     private static async Task RequireConflict(Func<Task> operation)
     {
-        try { await operation(); }
+        try
+        { await operation(); }
         catch (InconsistentStateException) { return; }
         throw new InvalidOperationException("The native pubsub operation accepted a stale state revision.");
     }
 
     private static async Task RequireCancelled(Func<Task> operation)
     {
-        try { await operation(); }
+        try
+        { await operation(); }
         catch (OperationCanceledException) { return; }
         throw new InvalidOperationException("The native pubsub operation ignored original cancellation.");
     }
 
     private static async Task RequireDisposed(Func<Task> operation)
     {
-        try { await operation(); }
+        try
+        { await operation(); }
         catch (ObjectDisposedException) { return; }
         throw new InvalidOperationException("The native pubsub operation entered after disposal.");
     }

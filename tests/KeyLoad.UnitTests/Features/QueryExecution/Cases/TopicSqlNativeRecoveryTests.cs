@@ -35,13 +35,15 @@ internal sealed class TopicSqlNativeRecoveryTests
         TopicSqlNativeSeed.Publish(database, TopicSqlNativeSeed.Command(database));
         await RefuseAsync(database, ErrorCode.BudgetExceeded);
         var engine = TopicSqlNativeSeed.Engine(database);
+        var bytes = QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(TopicSqlProtocol.Root,
             TopicSqlNativeSeed.Request(database), cancellationToken: cancelled.Token));
-        database.Commit(new PurgeTopic(TopicSqlProtocol.Topic, TopicSqlProtocol.FirstPosition));
-        await TopicSqlNativeAssertions.RecordsAsync(TopicSqlNativeSeed.Read(database),
-            engine.Execute(TopicSqlProtocol.Root, TopicSqlNativeSeed.Request(database)));
+        await TopicSqlNativeAssertions.UnchangedAsync(database, bytes, position);
+        await TopicSqlScanBudgetFlow.RunAsync();
+        await TopicSqlNativeAssertions.UnchangedAsync(database, bytes, position);
     }
 
     private static async Task RefuseAsync(TestDatabase database, ErrorCode code)

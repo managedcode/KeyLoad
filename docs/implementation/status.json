@@ -44427,33 +44427,421 @@
     },
     "currentWholeTaskOwners": {
       "availableTotalConcurrencySlots": 4,
-      "root": "integration, queue deadline and Topic SQL complete-flow fixes, Git and Linux census",
+      "root": "integration, CI manifest repair, Topic SQL and ordered-restore whole flows, current native diagnostics/Release/format/TUnit, full Git and exact-source Linux delivery",
       "workers": [
         {
           "owner": "sol61_read_finish",
           "task": "KL-029",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "original authority continuation joined; native9 RF3 and exact closed local-image scope work active"
+          "work": "native signed Build/Restore long-stream stage preservation, retained actual local RF3 restart selection, original9 RF3 complete flows; isolated implementation/build/tests active"
         },
         {
           "owner": "sol61_movement_finish",
           "task": "KL-094",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "complete-read repair joined; real distinct-owner F3B and independent outcome flow active"
+          "work": "genuine six-node distinct-owner transfer/revoke/repair/two cold/B-ACK/no resurrection/new healthy flow; isolated implementation/build/tests active; exact local admission packet ready"
         },
         {
           "owner": "sol61_session_finish",
           "task": "KL-084",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "bounded native provider joined; private original-public-result replay and genuine mixed four-envelope restore work active"
+          "work": "original-public-result replay and genuine mixed four-envelope restore/failed-entry settlement with same owner/journal; isolated implementation/build/tests active"
         }
       ],
       "ordinaryNativeTestSlots": 50,
       "idleWorkers": 0,
       "qualificationClaim": false
+    },
+    "stageXLIVR81CiPreparationAndWholeFlowJoin": {
+      "recordedAtUtc": "2026-10-10T10:21:55.344844+00:00",
+      "status": "checkpoint_scoped_format_and_two_test_assemblies_passed_nine_whole_flows_passed_both_profiles_delivery_pending",
+      "deliveredPredecessor": "da3e3f7406f038c4d29ff1d23592efb59e703364",
+      "originalDeliveredLinuxKl079": {
+        "runId": 38041208373,
+        "attempt": 1,
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/38041208373",
+        "sourceSha": "da3e3f7406f038c4d29ff1d23592efb59e703364",
+        "normalBuild": "passed; original Linux Release0 errors/0 warnings",
+        "scalarBuild": "passed; original Linux Release0 errors/0 warnings",
+        "acceptanceTestsStarted": false,
+        "conclusion": "failure before test invocation; exact Query source inventory103 omitted86 implemented sources",
+        "originalEvidenceRoot": "/private/tmp/keyload-stage44-delivered-da3e3-kl079-ci-read-r81-20261010",
+        "qualificationClaim": false
+      },
+      "currentCiPreparationRepair": {
+        "sourceInventory": "explicit sorted189 KeyLoad.Query paths; original103 retained",
+        "taskScriptAdmission": "exact task-acceptance.kl079-binding.ps1 only; unknown/case/path/partial variants remain refused",
+        "frozenContributors": "unchanged21 sources/10 classes/25 exact cases; collector/bounds/thresholds/requirements unchanged",
+        "boundedPowerShellSupportCheck": "passed; actual189-source inventory and exact4 script admissions/unknown refusals; not production manifest or test qualification",
+        "nativeWholeFlow": "Actual original ProductionSourceManifestOperationTests full prepare/tamper/refusal/exact restore/healthy verify and five settlement flows passed normal and scalar on coherent R82 production; changed test-only successor preserves those owning source bytes. Full delivered Linux CI remains mandatory."
+      },
+      "guardedJoins": [
+        {
+          "task": "KL-029",
+          "scope": "exact original9-case local RF3 NativeText filter; original native selector positive/rejection flows preserved",
+          "evidence": "/private/tmp/keyload-stage44-kl029-admission-join-r81-20261010/actual-join-proof.json"
+        },
+        {
+          "task": "KL-084",
+          "scope": "existing ordered signed request verification delegates feature-local helper; exact native signature/scope/payload order preserved",
+          "evidence": "/private/tmp/keyload-stage44-codec-verification-join-r81-20261010/actual-join-proof.json"
+        },
+        {
+          "task": "KL-095",
+          "scope": "original strict scan1 SQL/cancellation refusal retained; separate genuine scan32 owner proves33-record refusal, actual purge8, exact retained25 native/SQL rows and all3 original receipt replays",
+          "evidence": "/private/tmp/keyload-stage44-topic-strict-flow-r81-20261010/actual-join-proof.json",
+          "successorEnumEvidence": "/private/tmp/keyload-stage44-topic-strict-flow-r81-20261010/enum-successor-original.json"
+        },
+        {
+          "scope": "ordered restored-incarnation and current-policy refusal oracle preserves original stored outcome/applied cut/full model rows",
+          "evidence": "/private/tmp/keyload-stage44-ordered-restore-oracle-r81-20261010",
+          "slice": "Messaging",
+          "acceptanceScope": "original ordered retry restore authority full flow; task attribution requires canonical final binder"
+        },
+        {
+          "task": "KL-095",
+          "scope": "same original post-purge Topic wholeflow uses exact original AfterPosition for final retained native-vs-SQL comparison and repeats full no-effects oracle",
+          "evidence": "/private/tmp/keyload-stage44-root-topic-purge-native-read-r83-20261010/actual-join-proof.json",
+          "qualificationClaim": false
+        },
+        {
+          "task": "KL-094",
+          "scope": "exact one distinct-owner RF3 local method filter only; all original selectors and four wider-filter refusals retained",
+          "evidence": "/private/tmp/keyload-stage44-kl094-admission-join-r83-20261010/actual-join-proof.json",
+          "qualificationClaim": false
+        }
+      ],
+      "currentNativeDiagnostics": {
+        "status": "Ready27/27; errors0/warnings0; infos37548/hidden6768 are retained original informational diagnostics",
+        "original": "/private/tmp/keyload-stage44-current-native-r82-20261010/diagnostics-original.json",
+        "sha256": "50710d95510aff021e595e57e592005b2c481c0b34345d0ea8972fd8ea905553"
+      },
+      "formatting": {
+        "scopedOriginal21": "passed only imports order within exact21 paths, after exact per-path Roslynk NotFound",
+        "interruptedFullR81": "not passed; original actual whitespace/import findings retained",
+        "scopedProviderWhitespace5": "passed; SDK whitespace only within exact scoped8; actual diff reviewed; no other inputs changed",
+        "scopedProviderImports7": "passed; import multiset/header/body unchanged; no other paths changed",
+        "currentFullFormatter": {
+          "status": "passed",
+          "original": "/private/tmp/keyload-stage44-current-formatter-r82-20261010/original-formatter.json",
+          "sha256": "7393cf1ba40024a807d33f9e03886e76105a843092deb48a9af197870bf7002c",
+          "startedAtUtc": "2026-10-10T10:14:34.566556+00:00",
+          "endedAtUtc": "2026-10-10T10:23:11.050755+00:00",
+          "sourceCoherent": true,
+          "changedInputs": [],
+          "qualificationClaim": false
+        },
+        "successorExactFiveTestSources": {
+          "status": "passed",
+          "original": "/private/tmp/keyload-stage44-scoped-test-format-r83-20261010/original-formatter.json",
+          "sha256": "0096507f03bdf1be6361ac2cc5146136ef1e48c71e0aee5ca9a08b1ac0bacbe5",
+          "scope": "exact five changed test files; all remaining full R82 formatter inputs unchanged",
+          "qualificationClaim": false
+        }
+      },
+      "currentFullReleaseBuild": {
+        "status": "passed",
+        "original": "/private/tmp/keyload-stage44-current-release-build-r82-20261010/original-build.json",
+        "sha256": "1de17a5a2e08dd35fe2b3f11371211f3fbb56e867690acd9ccf118771b566693",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "changedInputs": [],
+        "warnings": 0,
+        "errors": 0,
+        "qualificationClaim": false
+      },
+      "currentFocusedNativeTests": {
+        "unit": {
+          "status": "failed",
+          "original": "/private/tmp/keyload-stage44-root-functional-unit-r82-20261010/original-native-run.json",
+          "sha256": "1d3b9a2f92306ba3015d3899137c8b36c94017d77cdc565c6b13deab75c0de0b",
+          "exitCode": 2,
+          "actualCaseCount": 45,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "observedNativeTrxIntervalOverlap": 22,
+          "nativeParallelConfigured": 50,
+          "counters": [
+            {
+              "total": "45",
+              "executed": "45",
+              "passed": "44",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "qualificationClaim": false,
+          "wholeFlowPassed": "actual production-manifest prepare/tamper/refuse/exact restore/healthy verify; selector5; codec16; native pubsub2; ordered retry2; native index1; deadline4; transfer/cold5; Topic3 of4",
+          "originalRemainingFailure": "Original Topic AfterPosition0 post-purge oracle failed; the explicit original retained-position correction is now separately joined and this complete flow passed in normal/scalar nine-case successor. Original failure retained."
+        },
+        "unit-scalar-r82": {
+          "status": "zero_tests_non_pass",
+          "original": "/private/tmp/keyload-stage44-root-functional-unit-scalar-r82-20261010/original-native-run.json",
+          "sha256": "41efa98df82963cfd3af1285dec4d08d9794266eb5ce2b862e5fa9d0c18e3aab",
+          "exitCode": 7,
+          "actualCaseCount": 0,
+          "sourceCoherent": true,
+          "binariesCoherent": false,
+          "observedNativeTrxIntervalOverlap": 0,
+          "nativeParallelConfigured": 50,
+          "counters": [
+            {
+              "total": "0",
+              "executed": "0",
+              "passed": "0",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "qualificationClaim": false,
+          "originalFailure": "normal coverage collector temporarily instrumented shared Unit DLL/PDB; zero actual tests, non-pass preserved; collector subsequently restored exact bytes (normal post-run binaries coherent)"
+        },
+        "recovery": {
+          "status": "passed",
+          "original": "/private/tmp/keyload-stage44-root-functional-recovery-r82-20261010/original-native-run.json",
+          "sha256": "5db87dcebf90e93f8fdc8fd13e3c54bcebff91fa8a5a977dd3c777201d231e4e",
+          "exitCode": 0,
+          "actualCaseCount": 11,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "observedNativeTrxIntervalOverlap": 11,
+          "nativeParallelConfigured": 50,
+          "counters": [
+            {
+              "total": "11",
+              "executed": "11",
+              "passed": "11",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "qualificationClaim": false
+        },
+        "unit-scalar-successor": {
+          "status": "failed_original_same_topic_oracle",
+          "original": "/private/tmp/keyload-stage44-root-functional-unit-scalar-r83-20261010/original-native-run.json",
+          "sha256": "6dc8139af7de5d2c1cf0a19aaeb1146b692e94b2892513d5f8abffa4122476b9",
+          "exitCode": 2,
+          "actualCaseCount": 45,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "observedNativeTrxIntervalOverlap": 19,
+          "nativeParallelConfigured": 50,
+          "counters": [
+            {
+              "total": "45",
+              "executed": "45",
+              "passed": "44",
+              "failed": "1",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "qualificationClaim": false
+        },
+        "successorSource": "Exact retained AfterPosition test correction and exact KL094 local method admission joined; scoped formatter, both affected test assemblies and all9 existing mapped whole flows passed normal/scalar. Earlier44/45 failures remain original evidence.",
+        "unit-nine-successor": {
+          "status": "passed",
+          "original": "/private/tmp/keyload-stage44-root-nine-unit-r83-20261010/original-native-run.json",
+          "sha256": "5879d653a3269cd7fe8201db6ccfea24003075e9d800d98e1d747333b518dada",
+          "actualCaseCount": 9,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "observedNativeTrxIntervalOverlap": 9,
+          "counters": [
+            {
+              "total": "9",
+              "executed": "9",
+              "passed": "9",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "scope": "nine existing whole-flow cases covering the exact five changed test files; full unchanged-production Release baseline plus two affected test assembly builds; complete final Linux qualification remains mandatory",
+          "qualificationClaim": false
+        },
+        "unit-scalar-nine-successor": {
+          "status": "passed",
+          "original": "/private/tmp/keyload-stage44-root-nine-scalar-r83-20261010/original-native-run.json",
+          "sha256": "b8b4c7dddc56e177443213562fca4e2bf348b15c0b6275060535e8cc513ba970",
+          "actualCaseCount": 9,
+          "sourceCoherent": true,
+          "binariesCoherent": true,
+          "nativeParallelConfigured": 50,
+          "observedNativeTrxIntervalOverlap": 9,
+          "counters": [
+            {
+              "total": "9",
+              "executed": "9",
+              "passed": "9",
+              "failed": "0",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            }
+          ],
+          "scope": "nine existing whole-flow cases covering the exact five changed test files; full unchanged-production Release baseline plus two affected test assembly builds; complete final Linux qualification remains mandatory",
+          "qualificationClaim": false
+        }
+      },
+      "coverage": {
+        "scope": "focused development functional only, actual selected45; not full production qualification, no load tests, no scalar union and duplicate identical output counted once",
+        "original": "/private/tmp/keyload-stage44-root-functional-unit-r82-20261010/coverage.cobertura.xml",
+        "sha256": "f232e3143a643e46e876fdb62c44db9ec02aa27ef7fb6baa56152379c1e8939b",
+        "linesCovered": 9689,
+        "linesValid": 74208,
+        "branchesCovered": 5010,
+        "branchesValid": 48339,
+        "lineRate": 0.13056543768865891,
+        "branchRate": 0.10364302116303606,
+        "testCohortPassed": false,
+        "qualificationClaim": false
+      },
+      "qualificationClaim": false,
+      "fullTaskCountsUnchanged": {
+        "done": 17,
+        "inProgress": 87,
+        "pending": 0
+      },
+      "remainingRequiredGates": "current normal/scalar Unit, actual process recovery, SDK/official MCP/Q1 Aspire RF3, Linux delivered-source artifacts, full coverage/endurance/fault/performance gates remain mandatory",
+      "latestEvidenceRecordedAtUtc": "2026-10-10T10:56:24.191586+00:00",
+      "originalDeliveredLinuxPush": {
+        "runId": 38041206082,
+        "attempt": 1,
+        "sourceSha": "da3e3f7406f038c4d29ff1d23592efb59e703364",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/38041206082",
+        "runConclusion": "failure",
+        "ordinaryOriginal": "/private/tmp/keyload-stage44-delivered-da3e3-push-ci-read-r82-20261010/ordinary-job-original-r2.analysis.json",
+        "ordinaryOriginalSha256": "f08f8098c2c3dc8c14bbbc1231f0da35cc2f017b09437be344e807d32793d3ea",
+        "ordinaryLogSha256": "d0a6d702ece0d82c01d7800475c1e2625dd88f39c042d4f327312c323b559749",
+        "sourcePreparation": "failed frozen Query103 inventory; current189 repair is separately implemented and locally whole-flow exercised",
+        "unit": {
+          "executed": 953,
+          "passed": 935,
+          "failed": 18,
+          "skipped": 0
+        },
+        "unit-scalar": {
+          "executed": 891,
+          "passed": 884,
+          "failed": 7,
+          "skipped": 0
+        },
+        "recovery": {
+          "executed": 329,
+          "passed": 329,
+          "failed": 0,
+          "skipped": 0
+        },
+        "moduleAndRf3": "original source preparation failed; no scoped acceptance pass inferred",
+        "qualificationClaim": false,
+        "providerVerifiedNativeTrx": {
+          "providerArtifactId": 11666650256,
+          "providerZipSha256": "11300962fac69e9e526653fa9b57529ee669c983dc5045a77f541746c4a23485",
+          "nativeAnalysis": "/private/tmp/keyload-stage44-delivered-da3e3-push-ci-read-r82-20261010/test-results-ubuntu-original.analysis.json",
+          "allNativeNoSkipCountersRetained": true,
+          "qualificationClaim": false
+        },
+        "actualNativeIntervalOverlap": {
+          "original": "/private/tmp/keyload-stage44-delivered-da3e3-push-ci-read-r82-20261010/test-results-ubuntu-original.overlap.json",
+          "sha256": "c88857ea9fbc2031b417434431378606088c16aac0d46c8b92b806c7689108f7",
+          "unit": 50,
+          "unit-scalar": 48,
+          "recovery": 50,
+          "scope": "authenticated original native TRX intervals; functional concurrency only, not performance qualification"
+        }
+      },
+      "successorAffectedTestBuilds": {
+        "status": "passed",
+        "original": "/private/tmp/keyload-stage44-root-test-project-build-r83-20261010/original-build.json",
+        "sha256": "f3a7a913d746f697c61aa6675a047451fa8167568c240530916d7a013003462d",
+        "sourceCoherent": true,
+        "projects": [
+          {
+            "project": "KeyLoad.UnitTests",
+            "exitCode": 0,
+            "started": "2026-10-10T10:49:58.732499+00:00",
+            "ended": "2026-10-10T10:51:26.191018+00:00",
+            "logSha256": "8c3b7ff7c86d537464c8fd73783174aef7d70d388d41854bc687cc0884d857c2"
+          },
+          {
+            "project": "KeyLoad.IntegrationTests",
+            "exitCode": 0,
+            "started": "2026-10-10T10:51:26.192039+00:00",
+            "ended": "2026-10-10T10:52:38.917188+00:00",
+            "logSha256": "ddd37bd4f278d4d97e30962dc4fc183f561a1c7fb9b5c51ea7a098292131879f"
+          }
+        ],
+        "scope": "two affected test assemblies only, against unchanged production dependencies from full R82 Release; full current solution build remains pending in Linux CI",
+        "qualificationClaim": false
+      }
     }
   },
   "TIME-PROVIDER-001": {

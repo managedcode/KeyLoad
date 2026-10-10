@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using global::Orleans.Providers;
 using global::Orleans.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 

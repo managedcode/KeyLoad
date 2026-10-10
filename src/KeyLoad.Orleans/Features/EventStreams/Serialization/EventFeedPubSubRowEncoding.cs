@@ -1,6 +1,6 @@
+using global::Orleans.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using global::Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
 
@@ -15,7 +15,8 @@ internal static class EventFeedPubSubRowEncoding
         ArgumentNullException.ThrowIfNull(originalServices);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(routing);
-        if (state is null) { throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid); }
+        if (state is null)
+        { throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid); }
         options.Value.Validate();
         var maximum = checked((int)Math.Min(options.Value.MaxBatchBytes, options.Value.MaxQueryReadBytes));
         var etag = Guid.NewGuid().ToString(ETagFormat);
@@ -27,7 +28,8 @@ internal static class EventFeedPubSubRowEncoding
         var etagBytes = Measure(stringSerializer, etag, maximum, routing, cancellationToken);
         var valueBytes = Measure(serializer, state, maximum, routing, cancellationToken);
         var bytes = checked(keyBytes + nameBytes + etagBytes + valueBytes);
-        if (bytes > maximum) { throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity); }
+        if (bytes > maximum)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity); }
         cancellationToken.ThrowIfCancellationRequested();
         var encodedKey = Encode(keySerializer, grainId, keyBytes);
         var encodedName = Encode(stringSerializer, EventFeedPubSubProtocol.StateName, nameBytes);

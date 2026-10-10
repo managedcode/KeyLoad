@@ -1,11 +1,11 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using global::Orleans.Configuration;
 using global::Orleans.Providers;
 using global::Orleans.Providers.Streams.Common;
 using global::Orleans.Serialization;
 using global::Orleans.Streams;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 

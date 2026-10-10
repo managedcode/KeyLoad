@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
-using Microsoft.Extensions.Options;
 using global::Orleans.Streams;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -56,6 +56,7 @@ internal sealed class EventFeedAdvisoryPublisher(IOptions<DatabaseLimits> databa
     private static void RestoreContext(List<KeyValuePair<string, object>> original)
     {
         RequestContext.Clear();
-        foreach (var entry in original) { RequestContext.Set(entry.Key, entry.Value); }
+        foreach (var entry in original)
+        { RequestContext.Set(entry.Key, entry.Value); }
     }
 }

@@ -1,6 +1,6 @@
+using System.Collections.Immutable;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

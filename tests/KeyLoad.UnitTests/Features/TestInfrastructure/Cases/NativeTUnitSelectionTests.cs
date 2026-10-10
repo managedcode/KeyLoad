@@ -17,6 +17,14 @@ internal sealed class NativeTUnitSelectionTests
     private const string ConnectionUnsupportedCountProperty = "connectionUnsupportedCount";
     private const string ConnectionFilter = "/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*";
     private const int ExpectedConnectionRejectionCount = 4;
+    private const string NativeTextProperty = "nativeText";
+    private const string NativeTextUnsupportedCountProperty = "nativeTextUnsupportedCount";
+    private const int ExpectedNativeTextRejectionCount = 4;
+    private const string NativeTextFilter = "/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*";
+    private const string RemoteTransferProperty = "remoteTransfer";
+    private const string RemoteTransferUnsupportedCountProperty = "remoteTransferUnsupportedCount";
+    private const int ExpectedRemoteTransferRejectionCount = 4;
+    private const string RemoteTransferFilter = "/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage";
     private const string LocalArgumentsEnvironment = "KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS";
     private const string LocalEnabledEnvironment = "KeyLoadTests__LocalRf3Image__Enabled";
     private const string LocalProvenanceEnvironment = "KEYLOAD_IMAGE_PROVENANCE";
@@ -71,6 +79,12 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(StandardProperty), StandardFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RejectionProperty), RejectionFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(ConnectionProperty), ConnectionFilter).ConfigureAwait(false);
+            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
+            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RemoteTransferProperty), RemoteTransferFilter).ConfigureAwait(false);
+            await Assert.That(selection.RootElement.GetProperty(RemoteTransferUnsupportedCountProperty).GetInt32())
+                .IsEqualTo(ExpectedRemoteTransferRejectionCount);
+            await Assert.That(selection.RootElement.GetProperty(NativeTextUnsupportedCountProperty).GetInt32())
+                .IsEqualTo(ExpectedNativeTextRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(ConnectionUnsupportedCountProperty).GetInt32())
                 .IsEqualTo(ExpectedConnectionRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);

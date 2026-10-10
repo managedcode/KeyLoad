@@ -1161,3 +1161,31 @@ The create-only private outputs are the exact observed KL079 strict-task object,
 Then root joins/rebuilds/pushes the exact-source proposals and the original normal/scalar task execution runs every declared Unit, process and fixture-owned Aspire RF3 SDK/official MCP/both Q1 operation. Full functional coverage runs with native contributors/collector and unchanged final verifier. Case execution alone cannot promote coverage. Missing native current census, partial scalar results, missing RF3 pages/receipts/cold results or failed/unsettled observations keep closure OPEN. Native50 ordinary/exclusive-heavy ownership and original timeouts/Args/authorization/bounds/cleanup stay exact.
 
 No public/persisted/product protocol or migration change is added. Root alone writes live sources/builds/tests/Git. Rollback removes only this proposal helper and appendices; native original archives/receipts and every existing strict contract remain immutable. This source packet is parser/preview/reconstruction only, with no compiler/runtime/coverage PASS.
+
+
+## TASK-KL029-NATIVE-LOCAL-RF3-ADMISSION-008
+
+REQ/AC-FTS-001..007 and the original KL029 projection/rebuild acceptance retain all mapped Unit/process and nine RF3 operation instances. The isolated native compiled discovery actually observes nine original cases, including four ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths arguments (Sdk/Mcp/SdkSql/McpSql); discovery is development evidence and cannot qualify Linux runtime or coverage.
+
+Ordered stages and ownership: this TestInfrastructure/ADR117 contract precedes the exact selected-filter append in scripts/TestInfrastructure/run-tests.mjs and Integration ClusterReplication/LocalRf3ImageSelection. Admit ONLY the existing canonical KL029 complete filter:
+
+`/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*`
+
+Keep every earlier selector and its rejection flow. The original NativeTUnitSelectionTests RF3 parameter now exercises this exact positive native argument/environment composition and all original ambient GitHub/image/coverage/benchmark/suite/missing/unsupported-filter refusals, plus explicit partial/wildcard/additional-class/trailing-space refusals. Its original native Node process and cleanup remain joined. No synthesized case, changed UID/Args or blanket Search filter.
+
+The original LocalRf3ImageTestSession still owns actual AppHost image preparation, bounded receipt/config/input verification, exact image identity on all three started containers, genuine RF3 startup/readiness, discovered SDK/official MCP/Q1 callers, original cancellation and shutdown, output tasks and exact-tag cleanup only after genuine settlement. AppHost LocalRf3ImageRequest already requires a nonempty explicit filter; no third product/transport policy changes. No ambient fake GitHub identity, unrelated image, provider or topology, increased deadline/budget, registry-receipt fallback or benchmark execution. Native50 ordinary and existing exclusive-heavy ownership stay unchanged.
+
+Root joins guarded source and original mapped positive/rejection tests; the KL029 owner then runs the same nine real operation cases in normal/scalar isolated local images, preserving initiating/cleanup failures and full original results/receipts/cold oracles. Exact-source Linux normal/scalar Unit/recovery/RF3, source/DLL/PDB/image/UID/process/cleanup and coverage remain mandatory and OPEN. Local scalar caller configuration is not proof of scalar Docker-server intrinsics. Rollback removes only this exact filter admission and its test additions/appendices; all prior selectors, original failures and native evidence remain immutable. No public/persisted/product contract changes.
+
+
+## TASK-KL094-NATIVE-LOCAL-DISTINCT-OWNER-ADMISSION-010
+
+REQ/AC-XFER-001..005 retain all original cross-owner, durable receipt, authorization, bounded retry, recovery and public-caller gates. This additive TestInfrastructure/ADR117 contract admits only the complete authored native case filter:
+
+`/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage`
+
+Ownership/order: these appendices precede the closed filter addition in scripts/Features/TestInfrastructure/run-tests.mjs and Integration ClusterReplication/Helpers/LocalRf3ImageSelection.cs. The existing NativeTUnitSelectionTests native RF3 argument verifies original Node selection, native argument/environment composition, every ambient GitHub/image/coverage/benchmark/suite/missing-filter refusal, and four distinct-owner partial/class-wildcard/additional-class/trailing-space refusals. Preserve all existing cases, Args, filters, counts and native50 ordinary admission. This is exact local development admission, not broad Messaging or wildcard catalog selection.
+
+The existing LocalRf3ImageTestSession owns genuine fixture AppHost image preparation, current immutable LocalRf3ImageIdentity/source digest/config/invocation/receipt validation, original linked cancellation and joined output/shutdown/exact-tag cleanup. The protected two-RF3 fixture borrows its actual prepared Selection for the same original six containers, owner roots/options/ports/current persisted subjects, real SDK/official MCP/Q1 operations and two joined same-volume cold restarts. All six image identities must validate against the same original prepared receipt. No old image, manual Docker, fabricated environment/GitHub identity, retry, clock/deadline/default/capacity change or new dispatcher.
+
+The original GitHub strict image/provenance branch is unchanged. Root integrates guarded source; private source/image builds and focused positive/negative native tests are development evidence only. Original exact-source Linux normal/scalar Unit/process/RF3, native discovery/UID/source/DLL/PDB/image/cleanup and complete qualification remain mandatory and OPEN. This authored filter is not a native UID or passing operation. Rollback removes only this closed admission, additive regression checks and appendices, retaining all earlier selectors/evidence and original failures.

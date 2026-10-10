@@ -43,7 +43,7 @@ internal sealed class TopicSqlNativeTests
         var stale = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(TopicSqlProtocol.Root,
             TopicSqlNativeSeed.Request(database, TopicSqlProtocol.StaleSql)));
         await Assert.That(stale.Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        await TopicSqlNativeBoundary.RunAsync(database, engine);
+        await TopicSqlNativeBoundary.RunAsync(database, engine, TopicSqlProtocol.FirstPosition);
     }
 
     [Test]

@@ -36,7 +36,7 @@ internal static class QueueOrderedRetryRestoreAuthority
              new RedriveQueueMessage(state.Lane.Queue, QueueOrderedRetryProtocol.First, QueueOrderedRetryProtocol.Six, QueueOrderedRetryProtocol.One)]);
         var operation = database.NormalizeOperation(new(id, OperationKind.Batch, state.Principal, state.Time,
             JsonSerializer.Serialize(request, JsonDefaults.Options)));
-        await RefusedAsync(database, state, operation, image);
+        await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
         var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, id);
         var rejectedBytes = database.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(HistoricalMissing);
@@ -45,12 +45,12 @@ internal static class QueueOrderedRetryRestoreAuthority
         { throw new InvalidOperationException(HistoricalBound); }
         state.HistoricalOutcomes.Add(id, rejectedBytes);
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
-        await RefusedAsync(database, state, operation, image);
+        await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
         foreach (var prior in original.Outcomes.Where(item => item.Operation.Kind == OperationKind.Batch && item.Result.Error is null))
         {
             await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
             var current = database.NormalizeOperation(prior.Operation with { NativePayload = ReadOnlyMemory<byte>.Empty });
-            await RefusedAsync(database, state, current, image);
+            await RefusedAsync(database, state, current, image, ErrorCode.TokenInvalidated);
         }
         await RequireAsync(database, state);
     }
@@ -92,13 +92,26 @@ internal static class QueueOrderedRetryRestoreAuthority
     }
 
     private static async Task RefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,
-        ReplicatedOperation operation, string[] image)
+        ReplicatedOperation operation, string[] image, ErrorCode expected)
     {
+        var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, operation.Id);
+        var before = database.Store.Position;
+        var prior = database.Store.Read(view => view.ReadOwnedValue(key));
         var result = database.Apply(operation);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(result.Error).IsEqualTo(expected);
         await Assert.That(result.NativeValue).IsNull();
         await Assert.That(result.Json).IsNull();
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
+        if (prior is null)
+        {
+            await Assert.That(database.Store.Position).IsEqualTo(before + QueueOrderedRetryProtocol.One);
+        }
+        else
+        {
+            await Assert.That(database.Store.Position).IsEqualTo(before);
+            var retained = database.Store.Read(view => view.ReadOwnedValue(key));
+            await Assert.That(retained).IsEquivalentTo(prior, CollectionOrdering.Matching);
+        }
     }
 
     private static async Task OriginalAuthorityRefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,

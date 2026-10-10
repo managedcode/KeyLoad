@@ -1,6 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Server;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

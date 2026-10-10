@@ -1,6 +1,6 @@
+using KeyLoad.Core.Features.QueryExecution;
 using KeyLoad.Query;
 using KeyLoad.Storage;
-using KeyLoad.Core.Features.QueryExecution;
 
 namespace KeyLoad.Core;
 

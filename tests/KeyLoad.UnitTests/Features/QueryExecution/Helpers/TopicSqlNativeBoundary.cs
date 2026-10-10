@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class TopicSqlNativeBoundary
 {
-    internal static async Task RunAsync(TestDatabase database, QueryEngine engine)
+    internal static async Task RunAsync(TestDatabase database, QueryEngine engine, long afterPosition)
     {
         database.Configure(TopicSqlProtocol.QuotedCollection, ResourceKind.Collection);
         database.Commit(new PutDocument(TopicSqlProtocol.QuotedCollection, TopicSqlProtocol.OrdinaryRow, TopicSqlProtocol.EmptyJson));
@@ -27,7 +27,8 @@ internal static class TopicSqlNativeBoundary
         await Assert.That(row.EntityId).IsEqualTo(TopicSqlProtocol.OrdinaryRow);
         await Assert.That(row.Json).IsEqualTo(TopicSqlProtocol.EmptyJson);
         await TopicSqlNativeAssertions.UnchangedAsync(database, before, position);
-        await TopicSqlNativeAssertions.RecordsAsync(TopicSqlNativeSeed.Read(database),
+        await TopicSqlNativeAssertions.RecordsAsync(TopicSqlNativeSeed.Read(database, afterPosition),
             engine.Execute(TopicSqlProtocol.Root, TopicSqlNativeSeed.Request(database)));
+        await TopicSqlNativeAssertions.UnchangedAsync(database, before, position);
     }
 }

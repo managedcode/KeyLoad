@@ -485,3 +485,34 @@ Root alone joins, builds/analyzes, discovers native identities and executes curr
 REQ-SQLVIEW-001/003/005 and AC-SQLVIEW-TOPIC-001 retain the original full publish, SQL/AST projection, replay/conflict, purge, stale-generation and healthy boundary flow. After genuine PurgeTopic through position1, the native default after-position0 MUST refuse HistoryUnavailable with the complete raw store image and commit position unchanged. The positive native oracle MUST explicitly start after position1 and return the sole retained position2 record before comparing the complete SQL result. Use the existing ReadEventSourceRequest.AfterPosition contract through a test-local overload; keep the original default reader unchanged. No production history fence, SQL limit, scan/read/result budget, deadline, generation, API or test identity changes.
 
 Root owns the two existing QueryExecution test files and these requirement/ADR records. Stages: contract first; guarded native preview/apply; coherent build/formatter; execute the same original complete cases in normal/scalar; retain original failed report and current source/DLL/PDB/native UID/result artifacts. Linux recovery and Aspire RF3 remain mandatory and unqualified by this local repair. Rollback only this explicit native oracle and its additional negative/no-effect assertions together. The separate strict one-record scan fixture failure is unresolved and is not hidden by this repair.
+
+
+### TASK-KL095-TOPIC-STRICT-SCAN-FLOW-081
+
+REQ-SQLVIEW-004/005 and AC-SQLVIEW-004/005/TOPIC-001 preserve the original one-record scan fixture, two genuinely published records, LIMIT 1 refusal and original cancellation token. Assert complete native bytes and cut after cancellation and again after the separate healthy flow. That original owner cannot perform a positive one-record purge: native purge validates the retained record, identity and purged-identity absence against the same global scan budget. Retain the original failed report; do not increase that owner's limit, change production budgets or describe its failed purge as success.
+
+The same original TUnit identity additionally drives a separate real ZoneTree owner with a fixed 32-record budget. Publish the original two-record command plus 31 independently identified native events, retain both complete command receipts, and require the genuine 33-record complete-history scan to refuse BudgetExceeded even with LIMIT 1, with every native byte and cut unchanged. Perform actual PurgeTopic through position 8 under that unchanged 32-record configuration. The exact retained positions 9..33 and complete literal EventData must agree with the native source page and complete ordered SQL output; default after-position 0 remains HistoryUnavailable. Reads and exact replay of all three original publish/append/purge commands preserve every post-purge byte, receipt and cut. Both owned stores are joined and disposed by their original fixture lifetimes. This 33-record correctness fixture is not scale/performance evidence.
+
+Root owns existing TopicSqlNativeRecoveryTests and feature-local Helpers/TopicSqlScanBudgetFlow.cs. Stages: this contract and ADR-072 first, fresh guarded native patch/new-file admission, coherent solution build/format/diagnostics, same original case in normal/scalar, original source/DLL/PDB/UID/TRX retention and exact-source Linux qualification. No public or persisted contract, deadline, quota/default, SQL limit semantics, authorization, topology or selector changes. Rollback the case extension/helper together; existing Topic RF3 and process-recovery gates remain mandatory and open.
+
+
+## TASK-KL095-TOPIC-RETAINED-BOUNDARY-082
+
+REQ-SQLVIEW-001..005 / AC-SQLVIEW-TOPIC-001 and ADR-072 retain the existing
+whole native publish/SQL/AST/purge/receipt scenario. Its final invalid-syntax,
+full-scan-consent, cursor-refusal and ordinary-collection continuation runs
+after the genuine purge of FirstPosition. Pass that exact original purged
+position explicitly to TopicSqlNativeBoundary.RunAsync and use the existing
+ReadEventSource AfterPosition API for its final retained native-versus-SQL
+comparison. The earlier original AfterPosition0 HistoryUnavailable refusal,
+complete unchanged native byte/cut oracle, one retained literal event, stale
+generation refusal and receipt/conflict checks remain unchanged. Recheck the
+complete storage bytes and cut after the final healthy retained SQL read too.
+
+Only the existing Unit QueryExecution helper and calling whole case change;
+no product, public, persistence, authorization, retention, budget, deadline,
+transport or topology contract changes. ADR-072 is sufficient for this test
+oracle correction. Preserve the original normal coverage failure and scalar
+result; execute both complete original Topic SQL classes on the successor
+compiled source. Native local checks are development evidence, and the
+original SDK/official MCP/Q1 RF3, process and delivered Linux gates stay open.

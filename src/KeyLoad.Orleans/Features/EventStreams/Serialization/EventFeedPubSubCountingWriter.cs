@@ -13,7 +13,8 @@ internal sealed class EventFeedPubSubCountingWriter(int maximum,
     public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint) => original.GetSpan(sizeHint);
     public void Advance(int count)
     {
-        try { original.Advance(count); }
+        try
+        { original.Advance(count); }
         catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity, error); }
     }

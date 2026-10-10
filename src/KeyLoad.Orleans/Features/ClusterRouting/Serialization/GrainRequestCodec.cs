@@ -61,22 +61,7 @@ public sealed partial class GrainRequestCodec
             principalId, kind, commandId, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
 
     internal DecodedGrainRequest Verify(string signedRequest)
-    {
-        if (string.IsNullOrEmpty(signedRequest) || signedRequest.Length > maximumTokenCharacters)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-
-        var request = database.Verify<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
-        ValidateScope(request);
-        if (request.Payload.Length > database.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
-        }
-
-        GrainNativePayload.Validate(request.Payload.Span);
-        return new(request, request.Payload);
-    }
+        => GrainRequestPayloadVerification.Verify(this, database, maximumTokenCharacters, signedRequest);
 
     internal DecodedGrainRequest VerifyRead(string signedRequest, Guid actorId)
     {
