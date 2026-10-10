@@ -25,19 +25,27 @@ internal sealed class OrleansWalCorruptionTests
     public async Task AcWal003ChecksummedInvalidBinaryFrameFailsWithoutApplyingAnyMutation(InvalidPayload scenario)
     {
         using var files = new WalFileFixture();
-        files.Initialize();
+        var originalIdentity = files.Initialize();
+        var originalJournal = await files.ReadJournalAsync();
+        var identity = await File.ReadAllBytesAsync(files.IdentityPath);
         using var serializer = new WalSerializerFixture();
         var payload = CreateInvalidPayload(serializer, scenario);
         var journal = WalFileFixture.CreateFrame(payload);
         await File.WriteAllBytesAsync(files.JournalPath, journal);
-        var identity = await File.ReadAllBytesAsync(files.IdentityPath);
 
+        var corruptedFiles = await files.CaptureFilesAsync();
         await files.AssertRejectedUnchanged(journal, identity, ErrorCode.Corruption);
-        await File.WriteAllBytesAsync(files.JournalPath, []);
-        using var recovered = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        await Assert.That(recovered.Position).IsEqualTo(0L);
-        await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x10]))).IsNull();
-        await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x20]))).IsNull();
+        await files.AssertFilesUnchangedAsync(corruptedFiles);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await File.WriteAllBytesAsync(files.JournalPath, originalJournal, token);
+        await Assert.That((await files.ReadJournalAsync()).SequenceEqual(originalJournal)).IsTrue();
+        using (var recovered = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        {
+            await Assert.That(recovered.Position).IsEqualTo(0L);
+            await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x10]))).IsNull();
+            await Assert.That(recovered.Read(view => view.ReadOwnedValue([0x20]))).IsNull();
+        }
+        await CurrentWalFrameRepairContinuation.RequireCurrentAsync(files, originalIdentity, identity, token);
     }
 
     [Test]
@@ -47,7 +55,9 @@ internal sealed class OrleansWalCorruptionTests
     public async Task AcWal003InvalidCurrentFrameOrUnsupportedSignatureLeavesFilesUnchanged(InvalidFrame scenario)
     {
         using var files = new WalFileFixture();
-        files.Initialize();
+        var originalIdentity = files.Initialize();
+        var originalJournal = await files.ReadJournalAsync();
+        var originalIdentityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
         using var serializer = new WalSerializerFixture();
         var payload = serializer.Serialize([Mutation([0x10], [0x30])]);
         var journal = scenario switch
@@ -63,7 +73,11 @@ internal sealed class OrleansWalCorruptionTests
 
         await File.WriteAllBytesAsync(files.JournalPath, journal);
         var expected = scenario == InvalidFrame.UnsupportedSignature ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
-        await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), expected);
+        var corruptedFiles = await files.CaptureFilesAsync();
+        await files.AssertRejectedUnchanged(journal, originalIdentityBytes, expected);
+        await files.AssertFilesUnchangedAsync(corruptedFiles);
+        await CurrentWalFrameRepairContinuation.RequireAsync(files, originalIdentity,
+            originalJournal, originalIdentityBytes, TestContext.Current!.Execution.CancellationToken);
     }
 
     [Test]

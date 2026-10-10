@@ -52,6 +52,7 @@ internal static class NativeTestSelectionProcess
             const connection = nativeSelection(connectionArgs, {});
             const emptySnapshotArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/EmptyReplicaSnapshotRf3Tests/*", localArgs[2]];
             const emptySnapshot = nativeSelection(emptySnapshotArgs, {});
+            """ + NativeRetainedSnapshotSelectionProgram.Source + """
             const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*", localArgs[2]];
             const nativeText = nativeSelection(nativeTextArgs, {});
             const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
@@ -71,7 +72,8 @@ internal static class NativeTestSelectionProcess
             }
             const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
             const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs]) {
+            """ + NativeCapabilitySelectionProgram.Declaration + """
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -152,7 +154,7 @@ internal static class NativeTestSelectionProcess
               throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
             }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

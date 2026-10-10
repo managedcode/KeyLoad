@@ -350,10 +350,10 @@
     },
     "currentBuild": {
       "passed": true,
-      "scope": "Stage49 exact current coherent full solution build; local development only, delivered-source Linux CI pending",
-      "originalReceipt": "/private/tmp/keyload-stage49-current-coherent-solution-r4-20261010/original.json",
-      "originalReceiptSha256": "f66a685fcfb1abbdba7cc676d16b1d33b6d8f8d45a5a4c9f5cd0d112864c5bc9",
-      "sourceInputs": 6853,
+      "scope": "Stage50 exact current coherent full solution build; local development only, delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage50-current-coherent-solution-r1-20261010/original.json",
+      "originalReceiptSha256": "54ae89e8f4ce5b855e61a424f984cf800a6b9c1bcbe16ab5d236107829831209",
+      "sourceInputs": 6856,
       "sourceDrift": 0,
       "developmentOnly": true,
       "errors": 0,
@@ -361,10 +361,10 @@
     },
     "currentFormatter": {
       "passed": true,
-      "scope": "Stage49 exact current coherent full solution formatter; local development only, delivered-source Linux CI pending",
-      "originalReceipt": "/private/tmp/keyload-stage49-current-coherent-format-r4-20261010/original.json",
-      "originalReceiptSha256": "701dca15d18b2e65d825cf34579249108aa5d15b89bca4cdc2299b52e822b862",
-      "sourceInputs": 6853,
+      "scope": "Stage50 exact current coherent full solution formatter; local development only, delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage50-current-coherent-format-r1-20261010/original.json",
+      "originalReceiptSha256": "14aae43296d87ab722131987504d8e319e18168bda564d2531e67078254225ec",
+      "sourceInputs": 6856,
       "sourceDrift": 0,
       "developmentOnly": true
     },
@@ -43405,21 +43405,22 @@
       "qualification": "Actual coherent full Release clean rebuild with analyzers passed; original R12 MSBuild child failure retained, no Linux/runtime qualification."
     },
     "latestDeliveredLinuxRun": {
-      "runId": 38031746813,
-      "sourceSha": "df75fe0a1de19562c89718ff009fb2a6bc8facf9",
-      "url": "https://github.com/managedcode/KeyLoad/actions/runs/38031746813",
-      "observedAtUtc": "2026-10-10T09:09:34.924747+00:00",
-      "status": "in_progress",
+      "runId": 38079674954,
+      "sourceSha": "98c5949b7a11d51d045700eaa761d9d0593b670c",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/38079674954",
+      "observedAtUtc": "2026-10-10T19:54:59.530641+00:00",
+      "status": "queued",
       "conclusion": "",
       "jobCounts": {
-        "success": 12,
-        "failure": 14,
-        "in_progress": 2
+        "queued": 29,
+        "in_progress": 0,
+        "completed": 0
       },
-      "originalReceipt": "/private/tmp/keyload-stage44-delivered-df75-ci-read-r80-20261010/original-run.json",
-      "sha256": "ece5a9907b4706893f1934408ff98d0c833f99067372da23f2d2c41a1fcd7b47",
+      "originalReceipt": "/private/tmp/keyload-stage50-original-delivered-stage49-linux-push-observation-r1-20261010.json",
+      "sha256": "ea526613b05c216d3625fe8ee39c0702f016f5a2a15ea88e01e7aebe3ecac345",
       "currentCheckoutMatchesRun": false,
-      "qualificationClaim": false
+      "qualificationClaim": false,
+      "scope": "Actual full-push Linux run on delivered Stage49 baseline; Stage50 working source is newer."
     },
     "previousCurrentBuildBeforeR40Checkpoint": {
       "observedAtUtc": "2026-10-10T00:45:00.847153+00:00",
@@ -44404,24 +44405,24 @@
       "workers": [
         {
           "owner": "sol61_read_finish",
-          "task": "KL-035",
+          "task": "KL-065; KL-035 Linux correction ownership",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "Original erased-follower genuine RF3 normal/scalar and native snapshot operations passed in private immutable images; exact retained-follower admission and actual46 process/recovery scope active. Full49 and delivered-source Linux remain open."
+          "work": "KL-035 retained-follower genuine private normal/scalar operations passed and joined cleanup completed; separate source-bound49 acceptance ledger preserves all required Linux gates. Active independent KL-065 two original ACL graph operations: persisted repair/revocation, full incoming-page oracle and same-root cold continuation."
         },
         {
           "owner": "sol61_movement_finish",
           "task": "KL-043",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "Current-format strict refusal/exact owned repair/healthy cold continuations joined and tested; immutable frame→payload and exact capability-method admission successors ready. Fresh current-source public SDK/MCP signed-capability RF3 scope active; whole task open."
+          "work": "Corrected exact capability local-image owner READY8 private build/controls passed; main profile join and genuine public RF3 execution pending. Active original omitted-capability full identity repair/backup/restore/two-cold continuation. Wrong-purpose/authentic Linux gates open."
         },
         {
           "owner": "sol61_session_finish",
           "task": "KL-084",
           "model": "gpt-6.1-sol",
           "reasoning": "medium",
-          "work": "Dependency-complete parent first-Open, Offer, ACK/Release and original public replay union isolated; owning builds/catalog controls passed. Actual reserved-owner barrier and authenticated first-cleanup whole flows active; main disconnected, no RF3/whole-task claim."
+          "work": "Dependency-complete R98/R103 original public first-Open/Offer/ACK/Release and reserved cleanup candidate executing in genuine private six-owner RF3. Main source join, complete original result/cold/replay and Linux gates remain open; no Unit trust bypass."
         }
       ],
       "ordinaryNativeTestSlots": 50,
@@ -45755,6 +45756,204 @@
         "path": "/private/tmp/keyload-stage49-current-final-original-checkpoint-r1-20261010.json",
         "sha256": "e6c1a6014db052c0b2fec35554204744099e6a14f55765133d2e5cceab98a96f"
       }
+    },
+    "stageXLIXDeliveredCommit": "98c5949b7a11d51d045700eaa761d9d0593b670c",
+    "stageXLIXDeliveredRemoteVerified": true,
+    "previousCurrentBuildBeforeStageL": {
+      "passed": true,
+      "scope": "Stage49 exact current coherent full solution build; local development only, delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage49-current-coherent-solution-r4-20261010/original.json",
+      "originalReceiptSha256": "f66a685fcfb1abbdba7cc676d16b1d33b6d8f8d45a5a4c9f5cd0d112864c5bc9",
+      "sourceInputs": 6853,
+      "sourceDrift": 0,
+      "developmentOnly": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "previousCurrentFormatterBeforeStageL": {
+      "passed": true,
+      "scope": "Stage49 exact current coherent full solution formatter; local development only, delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage49-current-coherent-format-r4-20261010/original.json",
+      "originalReceiptSha256": "701dca15d18b2e65d825cf34579249108aa5d15b89bca4cdc2299b52e822b862",
+      "sourceInputs": 6853,
+      "sourceDrift": 0,
+      "developmentOnly": true
+    },
+    "currentStageLDevelopment": {
+      "completedAtUtc": "2026-10-10T19:54:24.205137+00:00",
+      "baselineCommit": "98c5949b7a11d51d045700eaa761d9d0593b670c",
+      "qualification": "Current coherent local development checkpoint. Complete delivered-source Linux normal/scalar/process/SDK-MCP RF3/coverage/fault/resource/performance/endurance gates remain open.",
+      "build": {
+        "path": "/private/tmp/keyload-stage50-current-coherent-solution-r1-20261010/original.json",
+        "sha256": "54ae89e8f4ce5b855e61a424f984cf800a6b9c1bcbe16ab5d236107829831209"
+      },
+      "formatter": {
+        "path": "/private/tmp/keyload-stage50-current-coherent-format-r1-20261010/original.json",
+        "sha256": "14aae43296d87ab722131987504d8e319e18168bda564d2531e67078254225ec"
+      },
+      "nativeDiagnostics": {
+        "path": "/private/tmp/keyload-stage50-current-native-diagnostics-original-r1-20261010.json",
+        "sha256": "fa6273e1aea3ccd0b9f1379af4092eebf806cf54adb98c30971a4aa3c6d980df"
+      },
+      "sourceInputs": 6856,
+      "sourceGuardScope": "src/tests/tools C#/projects/root inputs; full canonical build includes the complete solution. This guard does not claim benchmark-source coverage.",
+      "errors": 0,
+      "warnings": 0,
+      "lanes": [
+        {
+          "kind": "unit",
+          "profile": "normal",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage50-current-unit-normal-r1-20261010/original-native-run.json",
+            "sha256": "13a5c5def53289353d0556bfe4eb37b0d2df193998c9572bc1949fd177d75fa0"
+          },
+          "startedAtUtc": "2026-10-10T19:46:50.973304+00:00",
+          "finishedAtUtc": "2026-10-10T19:47:04.454235+00:00",
+          "cases": 40,
+          "passed": 40,
+          "failed": 0,
+          "skipped": 0,
+          "nativeSlots": 50,
+          "observedOverlap": 21,
+          "sourceImageEntryDrift": 0,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage50-current-unit-normal-r1-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "07a1795a8c90c9eeb22751c40313d28549b93e34fb790f5cfa1f74a7b8da6f37"
+            }
+          ]
+        },
+        {
+          "kind": "unit",
+          "profile": "scalar",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage50-current-unit-scalar-r1-20261010/original-native-run.json",
+            "sha256": "2f32afd24b173a4ef4c62383ccfeeeb079582b5712eccfc92ca2d00654d332c1"
+          },
+          "startedAtUtc": "2026-10-10T19:46:47.725963+00:00",
+          "finishedAtUtc": "2026-10-10T19:47:04.454230+00:00",
+          "cases": 40,
+          "passed": 40,
+          "failed": 0,
+          "skipped": 0,
+          "nativeSlots": 50,
+          "observedOverlap": 19,
+          "sourceImageEntryDrift": 0,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage50-current-unit-scalar-r1-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "e03d0d1820539fab84d666c42340436c76f07844daca81073906777f9d49cae5"
+            }
+          ]
+        }
+      ],
+      "nativeSlotsPerRunner": 50,
+      "originalAggregateExecutionOverlap": 37,
+      "totalExecuted": 80,
+      "totalPassed": 80,
+      "totalFailed": 0,
+      "totalSkipped": 0,
+      "fullNativeCensus": [
+        {
+          "profile": "normal",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage50-current-unit-inventory-r1-20261010/original-discovery.json",
+            "sha256": "57109d4463fa4241ff1076aec8c7056d6bbe5db66f97c4fca140699a1f9f8f42"
+          },
+          "cases": 3297,
+          "stdoutSha256": "522fb5d8f991d0a14f6870a8288919fef4ee116aa4e2f77cb860926a7b4fcc74"
+        },
+        {
+          "profile": "scalar",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage50-current-unit-inventory-scalar-r1-20261010/original-discovery.json",
+            "sha256": "600a0c97649fecd101a6ef7eb38350a1302d9de7027d1654f767b40db9e775bd"
+          },
+          "cases": 3297,
+          "stdoutSha256": "522fb5d8f991d0a14f6870a8288919fef4ee116aa4e2f77cb860926a7b4fcc74"
+        }
+      ],
+      "nativeImageObservation": {
+        "path": "/private/tmp/keyload-stage50-current-independent-native-image-observation-r1-20261010.json",
+        "sha256": "4a27288813398c82e13591d543775b20e4ea7a00cf9417f3557b5ce3244bdf05"
+      },
+      "nativeUnitDeclaredSources": 1712,
+      "nativeUnitMvid": "69429b3b-7d72-447b-a41d-960939774b68",
+      "nativeUnitPdbGuid": "646a89b5-02e0-476a-857e-1806570f3a94",
+      "canonicalCensusValidation": {
+        "path": "/private/tmp/keyload-stage50-current-native-census-validation-r2-20261010/original-validation.json",
+        "sha256": "95805269ee9a6ede0815c1e522b282ade8639860f49a4bb1328df53a229846e4"
+      },
+      "originalStaleInventoryRefusal": {
+        "path": "/private/tmp/keyload-stage50-current-native-census-validation-r1-20261010/original-validation.json",
+        "sha256": "40bf23153ab66a2c5e0d067c25b5c62dc6a92646bace806d67877726b416560d"
+      },
+      "inventoryRebind": {
+        "path": "/private/tmp/keyload-stage50-reviewed-current-inventory-r2-20261010/reviewed-metadata-proof.json",
+        "sha256": "9e87a0ed5a12040601a3414434b2489bf1a47ccb5052753f753fe69486fc182d"
+      },
+      "currentInventory": {
+        "path": "/Users/ksemenenko/Developer/KeyLoad/scripts/Features/CodeQuality/functional-coverage.unit-test-inventory.json",
+        "sha256": "0451e4b35067a09ed73bb1669c286861135951f2893de7ea50d1f7f53b1a76c7"
+      },
+      "integrationAdmissionDiscoveryOnly": {
+        "originalReceipt": {
+          "path": "/private/tmp/keyload-stage50-current-integration-admission-inventory-r1-20261010/original-discovery.json",
+          "sha256": "af44a19bfa99282b33265219bbcedb19250a5543c4c25edbee7b49d5f666f2ad"
+        },
+        "cases": 3,
+        "executionClaim": false
+      },
+      "reviewedUnion": {
+        "path": "/private/tmp/keyload-stage50-reviewed-union-r1-20261010/reviewed-union-manifest.json",
+        "sha256": "18a30a9171f8ce313864616c1312992d9c05076acc4b3e62a53fdd4f20dd50c5"
+      },
+      "productCoveragePercent": null,
+      "wholeTaskAccepted": false,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "originalCheckpoint": {
+        "path": "/private/tmp/keyload-stage50-current-final-original-checkpoint-r1-20261010.json",
+        "sha256": "2da20d4034eb6b998882dd10e3ee9368816a5ff2c8d5371c20a3aba2f3c04ad7"
+      },
+      "deliveredStage49LinuxPushObservation": {
+        "runId": 38079674954,
+        "sourceSha": "98c5949b7a11d51d045700eaa761d9d0593b670c",
+        "url": "https://github.com/managedcode/KeyLoad/actions/runs/38079674954",
+        "observedAtUtc": "2026-10-10T19:54:59.530641+00:00",
+        "status": "queued",
+        "conclusion": "",
+        "jobCounts": {
+          "queued": 29,
+          "in_progress": 0,
+          "completed": 0
+        },
+        "originalReceipt": "/private/tmp/keyload-stage50-original-delivered-stage49-linux-push-observation-r1-20261010.json",
+        "sha256": "ea526613b05c216d3625fe8ee39c0702f016f5a2a15ea88e01e7aebe3ecac345",
+        "currentCheckoutMatchesRun": false,
+        "qualificationClaim": false,
+        "scope": "Actual full-push Linux run on delivered Stage49 baseline; Stage50 working source is newer."
+      }
+    },
+    "previousLatestDeliveredLinuxBeforeStageL": {
+      "runId": 38031746813,
+      "sourceSha": "df75fe0a1de19562c89718ff009fb2a6bc8facf9",
+      "url": "https://github.com/managedcode/KeyLoad/actions/runs/38031746813",
+      "observedAtUtc": "2026-10-10T09:09:34.924747+00:00",
+      "status": "in_progress",
+      "conclusion": "",
+      "jobCounts": {
+        "success": 12,
+        "failure": 14,
+        "in_progress": 2
+      },
+      "originalReceipt": "/private/tmp/keyload-stage44-delivered-df75-ci-read-r80-20261010/original-run.json",
+      "sha256": "ece5a9907b4706893f1934408ff98d0c833f99067372da23f2d2c41a1fcd7b47",
+      "currentCheckoutMatchesRun": false,
+      "qualificationClaim": false
     }
   },
   "TIME-PROVIDER-001": {
@@ -53911,6 +54110,22 @@
       ],
       "runtimeQualified": false,
       "wholeTaskComplete": false
+    },
+    "currentStageLDevelopment": {
+      "retainedFollowerNormal": {
+        "path": "/private/tmp/keyload-kl035-retained-private-sol61-r1-20261010/retained-r45-normal-original-whole-proof.json",
+        "sha256": "a01f4047ee90a68fedefe5a576a627277b68c37aaedb382fa1136d4f6a19bd36"
+      },
+      "retainedFollowerScalar": {
+        "path": "/private/tmp/keyload-kl035-retained-private-sol61-r1-20261010/retained-r45-scalar-original-whole-proof.json",
+        "sha256": "998725d0e9d7eb3002da08fd923fa6b2677eac71ea8ea62b36b005014130930c"
+      },
+      "wholeAcceptanceOpenGateLedger": {
+        "path": "/private/tmp/keyload-kl035-retained-private-sol61-r1-20261010/r45-whole-kl035-acceptance-current-main-open-gates.json",
+        "sha256": "e4aa7bda63a769dad204a3acd643a31f9104fa4084f613f2721d89fbd0740b9d"
+      },
+      "scope": "Separately rooted private original whole-operation development receipts; not one-image49 execution or delivered-source Linux qualification.",
+      "wholeTaskAccepted": false
     }
   },
   "KL-036": {
@@ -54831,91 +55046,6 @@
       "Retain real process recovery and current RF3 SDK/MCP operations, including incompatible signed-purpose/capability rejection and unchanged state.",
       "Run complete current-source build, formatter, analyzers, normal/scalar/recovery/RF3 and exact-source Linux qualification; no current acceptance is closed by this proposal."
     ],
-    "historicalSupersededScope": {
-      "title": "Upgrade і format compatibility",
-      "status": "in_progress",
-      "evidence": [
-        "docs/ADR/ADR-077-offline-native-data-epoch.md",
-        "docs/Features/StorageRecovery.md",
-        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
-        "scripts/Features/StorageRecovery/build-prior-probe.sh",
-        "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochUpgradeProcessRecoveryTests.cs",
-        "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochPriorAcceptanceTests.cs",
-        "Historical intermediate report removed from repository; no current qualification inferred",
-        "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerNodeFormatUpgrade.cs",
-        "src/KeyLoad.Replication/Features/StorageRecovery",
-        "src/KeyLoad.Storage.IO/Features/StorageRecovery",
-        "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
-        "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
-        "Historical intermediate report removed from repository; no current qualification inferred",
-        "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
-      ],
-      "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-      "sourceStage": "genuine_prior_image_built_and_cold_RF3_executed_exact_sample_conflict_oracle_corrected_renewed_RF3_pending",
-      "runtimeQualified": false,
-      "remaining": [
-        "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
-        "complete_exact_delivered_source_Linux_original_qualification"
-      ],
-      "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
-      "fullSuiteDevelopmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
-      "localDevelopment": {
-        "normalUnit": 2908,
-        "scalarUnit": 2908,
-        "recovery": 257,
-        "newNodeAndIoCases": 42,
-        "actualNodeStageProcessKills": 6,
-        "uniqueAtomicCrashTrials": 1000,
-        "unchangedSourceAndRuntime": true
-      },
-      "linux6e09Evidence": {
-        "path": "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
-        "completeGate": false,
-        "scalarFailed": 1,
-        "recoverySkipped": true,
-        "coldRf3Pending": true
-      },
-      "coldRf3DevelopmentEvidence": {
-        "path": "Historical intermediate report removed from repository; no current qualification inferred",
-        "normalPassed": 2918,
-        "normalTotal": 2919,
-        "normalFailed": 1,
-        "scalarPassed": 2919,
-        "scalarTotal": 2919,
-        "recoveryPassed": 257,
-        "recoveryTotal": 257,
-        "newCasesPassedInNormalAndScalar": 11,
-        "sourceAndStableExecutableInventoryUnchanged": true,
-        "completeRuntimeOutputInventoryUnchanged": false,
-        "genuineColdRf3Executed": false,
-        "completeGate": false
-      },
-      "linux0d78Evidence": {
-        "path": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629",
-        "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
-        "normalPassed": 2919,
-        "normalTotal": 2919,
-        "scalarPassed": 2919,
-        "scalarTotal": 2919,
-        "recoveryPassed": 257,
-        "recoveryTotal": 257,
-        "rf3Passed": 87,
-        "rf3Total": 88,
-        "rf3Failed": 1,
-        "actualPriorServingImageBuilt": true,
-        "actualColdRf3Executed": true,
-        "coldRf3Qualified": false,
-        "completeGate": false
-      },
-      "nextEpoch": {
-        "requirements": "docs/Features/StorageRecovery/Epoch7.md",
-        "decision": "docs/ADR/ADR-091-epoch7-interpretation-fence.md",
-        "stage": "strict_epoch7_checkpoint5_and_explicit_source5_or6_converter_implementation",
-        "owner": "query_wave",
-        "AppHostPriorProbePreparation": "source_implemented_not_runtime_verified",
-        "runtimeQualified": false
-      }
-    },
     "verificationStage": "R290 full Release and R294 format pass; current InternalSerialization/query/typed-row/scan owning normal/scalar606/606 and real indexed/idempotency process recovery2/2 pass. This is a subset, not the complete current-format recovery/RF3 or original Linux gate; no migration or legacy format path is added.",
     "coverage": "unmeasured",
     "crap": "unmeasured",
@@ -55004,6 +55134,29 @@
       ],
       "runtimeQualified": false,
       "wholeTaskComplete": false
+    },
+    "currentStageLDevelopment": {
+      "tasks": [
+        "TASK-KL043-CURRENT-FRAME-REPAIR-007",
+        "TASK-KL043-CURRENT-PAYLOAD-REPAIR-008",
+        "TASK-KL043-CAPABILITY-LOCAL-ADMISSION-009"
+      ],
+      "checkpoint": {
+        "path": "/private/tmp/keyload-stage50-current-final-original-checkpoint-r1-20261010.json",
+        "sha256": "2da20d4034eb6b998882dd10e3ee9368816a5ff2c8d5371c20a3aba2f3c04ad7"
+      },
+      "currentWalAndRequiredSelectorControlsPassedPerProfile": 40,
+      "scope": "Current main local complete WAL refusal, original-byte repair, healthy operation, cold/backup/restore continuations and native CLI selector controls. Public capability-profile/private-owner successor has not joined main or passed genuine execution.",
+      "wholeTaskAccepted": false
+    },
+    "obsoleteActiveFormatPlanRemoval": {
+      "removedField": "historicalSupersededScope",
+      "originalPreimage": {
+        "path": "/private/tmp/keyload-stage50-removed-obsolete-active-format-plan-original-r1-20261010.json",
+        "sha256": "f0d5f067c0c983b354c1d88840bfc4eba83d2ee73f9df27f83fac06830354490"
+      },
+      "reason": "Owner forbids migrations and legacy in this new product. Remove obsolete future epoch-converter tasks/deleted source plans from active status; immutable historical original receipts and run identities are preserved separately.",
+      "migrationImplemented": false
     }
   },
   "KL-044": {

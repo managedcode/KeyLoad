@@ -15,7 +15,8 @@ const projects = new Map([
   ['rf3', 'KeyLoad.IntegrationTests'], ['comparison', 'KeyLoad.ComparisonTests'], ['site', 'KeyLoad.SiteTests']
 ]);
 const localImageArgumentsEnvironment = 'KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS';
-const localImageFilters = new Set(['/*/*/EmptyReplicaSnapshotRf3Tests/*',
+const localImageFilters = new Set(['/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
+  '/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes',
   '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage',
   '/*/*/TwoRf3MembershipProfileTests/*',
   '/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*',

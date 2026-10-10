@@ -2136,3 +2136,18 @@ source, and rerun the unchanged canonical native-census validator. The existing
 ADR-033/125 contracts cover this source identity repair. Root owns the guarded
 join and delivery; scoped local execution does not establish numeric coverage,
 complete Linux/RF3 qualification or whole-task acceptance.
+
+### TASK-CQ-STAGE50-CURRENT-TEST-IDENTITY-001
+
+REQ-CQ-009 and AC-CQ-018/019/039 cover the Stage50 WAL frame/payload
+continuation and the union of the two exact local RF3 selectors. Preserve all
+original test identities and arguments. After the current full Release build,
+actual normal/scalar native discovery and independent PE/PDB source observation,
+rebind only sourceSha256/lineNumber/endLineNumber for the 17 existing
+OrleansWalCorruptionTests cases and five NativeTUnitSelectionTests cases.
+Retain all 3297 UIDs, classifications, REQ/AC links, group memberships, selectors
+and contributor decisions. The canonical census validator must admit the
+current inventory without any exception or relaxed identity check. ADR-033/125
+already define this metadata contract. Root owns the source join and delivery;
+the local selector controls and WAL flows do not establish complete Linux/RF3
+qualification, numeric functional coverage or whole-task acceptance.

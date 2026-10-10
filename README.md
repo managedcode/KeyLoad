@@ -90,7 +90,7 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-The latest local checkpoint passed the full Release build, formatting and 102 focused whole-operation test executions in normal/scalar profiles. The current package, source and original test receipts are recorded in the [implementation status](docs/implementation/status.json). Complete Linux/RF3 qualification and product functional coverage remain open.
+The latest local checkpoint passed the full Release build, formatting and 80 focused whole-operation test executions in normal/scalar profiles. All 3297 existing native test identities match the reviewed current-source inventory. The current package, source and original test receipts are recorded in the [implementation status](docs/implementation/status.json). Complete Linux/RF3 qualification and product functional coverage remain open.
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|
