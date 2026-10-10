@@ -7,10 +7,12 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextOnlineCatalogSource
 {
-    internal static void RequireOriginal(NativeTextOnlineGeneration generation,
+    internal static void RequireOriginal(NativeTextOnlineGenerationPin retained,
         OnlineTextCurrentPublication current, OnlineTextIndexMaintenanceResult result,
         int maximumRecords, ReadExecutionBudget budget, IOptions<NativeTextExecutionOptions> options)
     {
+        retained.RequireActive();
+        var generation = retained.Owner;
         var manifest = generation.Manifest;
         var baseCut = result.BaseCut;
         if (result.CommandId != current.CommandId || result.Consumer != current.Consumer
@@ -32,7 +34,7 @@ internal static class NativeTextOnlineCatalogSource
         { throw NativeTextErrors.Corrupt(); }
         using var actual = new NativeTextIncrementalNativeOwner(generation.Root, current.Authority.Leaf,
             current.PublishedCut.NodeId, options);
-        NativeTextIncrementalPublishedInventory.Require(actual, manifest, budget, options);
+        NativeTextIncrementalPublishedInventory.Require(actual, manifest, budget, options, retained);
         budget.ChargeBytes(NativeSerialization.Measure(manifest.Files));
         if (Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(manifest.Files))) != result.IndexSha256
             || manifest.Records.Length != result.TrackedRecords)

@@ -40,7 +40,7 @@ internal sealed class NativeTextSelectedIndexSlot(string root, string leaf, Guid
             try
             {
                 index ??= NativeTextIndex.Open(Path.Combine(root, leaf, NativeTextProtocol.NativeDirectory),
-                    new NativeTextFileStreamProvider(root, leaf, node, options, resources), options);
+                    new NativeTextFileStreamProvider(root, leaf, node, options, resources, allowReadOnlyInventory: true), options);
                 index.IsReadOnly = true;
             }
             catch (Exception error) { failure = error; throw; }

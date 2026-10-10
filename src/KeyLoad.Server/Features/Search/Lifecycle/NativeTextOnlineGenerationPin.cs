@@ -15,6 +15,13 @@ internal sealed class NativeTextOnlineGenerationPin(NativeTextOnlineGeneration o
         }
     }
 
+    internal void RequirePath(string generationPath)
+    {
+        RequireActive();
+        if (!StringComparer.Ordinal.Equals(generationPath, Path.Combine(owner.Root, owner.Original.Authority.Leaf)))
+        { throw NativeTextErrors.Ownership(); }
+    }
+
     public void Dispose()
     {
         lock (gate)

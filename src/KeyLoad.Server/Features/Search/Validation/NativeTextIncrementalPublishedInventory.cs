@@ -7,7 +7,7 @@ internal static class NativeTextIncrementalPublishedInventory
 {
     internal static void Require(NativeTextIncrementalNativeOwner actual,
         NativeTextIncrementalManifest manifest, ReadExecutionBudget budget,
-        IOptions<NativeTextExecutionOptions> options)
+        IOptions<NativeTextExecutionOptions> options, NativeTextOnlineGenerationPin? retained = null)
     {
         budget.Check();
         var original = NativeTextIncrementalMetadata.ReadManifest(actual.Path,
@@ -21,7 +21,7 @@ internal static class NativeTextIncrementalPublishedInventory
             actual.Root, actual.Leaf, manifest.Scope.NodeId, options);
         if (owner.Scope != manifest.Scope)
         { throw NativeTextErrors.Corrupt(); }
-        NativeTextInventory.Verify(actual.Path, owner.OwnedPaths, manifest.Files, options, budget);
+        NativeTextInventory.Verify(actual.Path, owner.OwnedPaths, manifest.Files, options, budget, retained);
         budget.Check();
     }
 }

@@ -6,19 +6,20 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextInventory
 {
-    internal static NativeTextFile[] Capture(string generationPath, NativeTextOwnedPath[] ownedPaths, IOptions<NativeTextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null)
+    internal static NativeTextFile[] Capture(string generationPath, NativeTextOwnedPath[] ownedPaths, IOptions<NativeTextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null, NativeTextOnlineGenerationPin? retained = null)
     {
+        retained?.RequirePath(generationPath);
         NativeTextOwnedInventory.ValidateTrackedLayout(generationPath, ownedPaths, budget,
             allowMissingNative: false, executionOptions: executionOptions);
-        return NativeTextOwnedInventory.CaptureFiles(generationPath, ownedPaths, budget, executionOptions: executionOptions);
+        return NativeTextOwnedInventory.CaptureFiles(generationPath, ownedPaths, budget, executionOptions: executionOptions, retained: retained);
     }
 
-    internal static void Verify(string generationPath, NativeTextOwnedPath[] ownedPaths, NativeTextFile[] expected, IOptions<NativeTextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null)
+    internal static void Verify(string generationPath, NativeTextOwnedPath[] ownedPaths, NativeTextFile[] expected, IOptions<NativeTextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null, NativeTextOnlineGenerationPin? retained = null)
     {
         const int IndexInitialValue = 0;
 
         budget?.Check();
-        var actual = Capture(generationPath, ownedPaths, budget: budget, executionOptions: executionOptions);
+        var actual = Capture(generationPath, ownedPaths, budget: budget, executionOptions: executionOptions, retained: retained);
         if (expected is null || actual.Length != expected.Length)
         {
             throw NativeTextErrors.Corrupt();

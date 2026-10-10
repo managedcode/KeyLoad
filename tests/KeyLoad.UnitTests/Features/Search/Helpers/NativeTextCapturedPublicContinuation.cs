@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class NativeTextCapturedPublicContinuation
 {
-    private const long TrackedBilingualRecords = 2;
+    private const int TrackedBilingualRecords = 2;
     internal static async Task<OnlineTextIndexMaintenanceResult> SwapAsync(TestDatabase fixture,
         NativeTextOnlineTestRuntime runtime, OnlineTextIndexMaintenanceRequest original, CancellationToken token)
     {

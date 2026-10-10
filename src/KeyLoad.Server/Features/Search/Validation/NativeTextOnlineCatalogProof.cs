@@ -42,7 +42,7 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
             var original = database.ReadOnlineTextOriginalOutcome(principalId, request, budget)
                 ?? throw NativeTextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
-            NativeTextOnlineCatalogSource.RequireOriginal(generation, current, result, database.Limits.MaxScanRecords, budget, options);
+            NativeTextOnlineCatalogSource.RequireOriginal(retained, current, result, database.Limits.MaxScanRecords, budget, options);
             var fresh = CaptureSeed(database, principalId, request, budget);
             NativeTextOnlineCatalogSource.RequireFresh(current, result, generation.Manifest, fresh, budget);
             var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.DataEpoch,
@@ -81,7 +81,7 @@ internal sealed class NativeTextOnlineCatalogProof : IDisposable
             var original = database.ReadOnlineTextOriginalOutcome(view, principal, request, budget)
                 ?? throw NativeTextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
-            NativeTextOnlineCatalogSource.RequireOriginal(generation, current, result,
+            NativeTextOnlineCatalogSource.RequireOriginal(retained, current, result,
                 database.Limits.MaxScanRecords, budget, options);
             var fresh = NativeTextSeedCollector.CaptureOnlineQueryView(database, raw, principal.Id,
                 new(request.Consumer, request.ConsumerGeneration, request.Collection, request.Field,

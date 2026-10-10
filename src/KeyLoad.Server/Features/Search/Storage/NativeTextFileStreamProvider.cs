@@ -3,7 +3,7 @@ using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed partial class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null)
+internal sealed partial class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, NativeTextResourceOwnership? resources = null, bool allowReadOnlyInventory = false)
     : IFileStreamProvider
 {
     private const int NativeDefaultStreamBufferBytes = 4_096;
@@ -15,6 +15,8 @@ internal sealed partial class NativeTextFileStreamProvider(string root, string l
         int bufferSize = NativeDefaultStreamBufferBytes, FileOptions options = FileOptions.None)
     {
         var full = pathAccess.Resolve(path);
+        if (allowReadOnlyInventory && share == FileShare.None)
+        { share = FileShare.Read; }
         if (resources is null)
         { return OpenOwned(full, mode, access, share, bufferSize, options); }
         return resources.MutatePhysical(() => OpenOwned(full, mode, access, share, bufferSize, options));

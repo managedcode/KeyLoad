@@ -12,4 +12,3 @@ public static class OnlineTextIndexMaintenanceProtocol
     /// <summary>Bounded native discovery guidance without caller data or credentials.</summary>
     public const string Description = "Publish a bounded online text generation for an already administrator-configured consumer under fresh persisted administrator, data and field authority. Existing implicit search remains read-only. Old derived files retire only after original reader leases join; retain the same command ID and payload for original-result replay.";
 }
-

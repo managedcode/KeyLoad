@@ -333,6 +333,14 @@ Before source: implement the R27 native acquisition correction in Search/OnlineG
 
 Join docs before these owning source changes; root alone compiles and runs the original whole public A/B→swap→cancel/healthy/replay/cold flows. Rollback requires the coherent guarded source cohort, never removal of an owned unsettled pin/grant. This appendix is source-only and does not close actual native compiler or runtime gates.
 
+### Retained online inventory access contract, 2026-10-10
+
+Adopt TASK-KL039-RETAINED-INVENTORY and REQ/AC-SEARCH-RETAINED-INVENTORY-001 in OnlineGenerationLifetime. Original catalog proof's actual live generation pin must bind the same root/leaf and survive complete inventory verification. Only that pin-bound read may share the original native WAL's existing write handle with FileShare.ReadWrite; all pin-free capture remains FileShare.Read. Preserve every original exact manifest/roster/length/hash/owner/budget check and refusal, and join the same original pin on failure. No additional owner, index, storage write, public contract or persisted format is introduced.
+
+Root owns the six existing Search validation/lifecycle files and the join/build/test boundary. Ordered stages are specification, native semantic edits, coherent full build/format, original two public A/B whole flows in normal and scalar profiles plus corruption/ownership/recovery regressions, then original Linux RF3 evidence. The R40 IOException is an own consumer-access defect and remains original failed evidence. Source or a focused pass does not complete KL039. Rollback follows the existing joined generation shutdown contract; no migration or compatibility path exists.
+
+R42 proves the inventory read also needs compatible original-handle admission. The existing SelectedIndexSlot alone selects the existing file provider's internal read-only-inventory purpose: requested FileShare.None becomes FileShare.Read, which continues excluding writers. Its native index becomes IsReadOnly before posting use. Mutable generation providers preserve original sharing. Add these two existing owning files to the same coherent internal chain; preserve actual owner lock, exact path/roster/digest/budget checks and original failures. Native API behavior is verified against the NuGet repository commits, not inferred from a new provider or hidden fallback.
+
 
 ## TASK-KL039-R32-WHOLE-ORACLES: retained tombstones, complete literals and actual admission
 
