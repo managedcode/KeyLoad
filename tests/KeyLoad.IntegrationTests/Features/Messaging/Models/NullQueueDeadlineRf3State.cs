@@ -9,4 +9,7 @@ internal sealed record NullQueueDeadlineRf3State(
     MessageInspection Future,
     AdminQueuePage OriginalPage,
     RecurringScheduleDefinition SchedulerControl,
+    MessagingRf3Identity SchedulerIdentity,
+    CommandRequest SchedulerConfiguration,
+    CommitReceipt SchedulerConfigurationReceipt,
     CommandRequest StopSchedulerControl);

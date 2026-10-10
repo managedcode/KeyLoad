@@ -57,6 +57,7 @@ internal sealed class EqualityAccessPathSecurityTests
         {
             await Assert.That(reversed.Rows).IsEmpty();
         }
+        await RowVisibilityEqualityContinuation.RunAsync(db, engine, Owner, OtherOwner, indexed, parameterized);
     }
 
     [Test]

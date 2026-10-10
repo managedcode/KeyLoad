@@ -15,16 +15,17 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal IConnectionGrain Connection => Fixture.Cluster.Client.GetGrain<IConnectionGrain>(Fixture.ConnectionId);
 
-    internal ConnectionNativeScenario(GrainRoutingOptions? routing = null)
-        => Fixture = new(routing: routing, observer: Observation);
+    internal ConnectionNativeScenario(GrainRoutingOptions? routing = null,
+        IGrainRequestPurposeObserver? purposeObserver = null)
+        => Fixture = new(routing: routing, observer: Observation, purposeObserver: purposeObserver);
 
     internal static async Task RunAsync(Func<ConnectionNativeScenario, Task> execute,
-        GrainRoutingOptions? routing = null)
+        GrainRoutingOptions? routing = null, IGrainRequestPurposeObserver? purposeObserver = null)
     {
         var failures = new List<Exception>();
         try
         {
-            await using var scenario = new ConnectionNativeScenario(routing);
+            await using var scenario = new ConnectionNativeScenario(routing, purposeObserver);
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => execute(scenario), failures);
             if (failures.Count > ConnectionNativeProtocol.EmptyFailures)
             {

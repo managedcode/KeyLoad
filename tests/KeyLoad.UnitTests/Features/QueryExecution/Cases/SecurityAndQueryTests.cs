@@ -58,6 +58,7 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(db.Database.GetDocument("alice", new(db.Partition, "orders", "hidden"))).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument("alice",
             new(db.Partition with { TenantId = "other" }, "orders", "mine"))).Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await ProjectRowAuthorityContinuation.RunAsync(db, TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task CompactionPreservesCursorAndReplicaInstallInvalidatesItsGeneration()

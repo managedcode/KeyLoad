@@ -48,19 +48,22 @@ internal sealed class GraphIncomingRf3Tests(ClusterFixture fixture)
         var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         await SeedAndDeliverAsync(admin, seed, deadline.Token);
         var request = GraphIncomingRf3Scenario.Request(seed);
-        using var sourceRestrictedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sourceRestricted = new KeyLoadClient(sourceRestrictedHttp, seed.TargetOnlyReader.Secret, IntegrationClientOptions.Execution());
-        await using var sourceMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
-            seed.TargetOnlyReader.Secret, deadline.Token);
+        {
+            using var sourceRestrictedHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+            var sourceRestricted = new KeyLoadClient(sourceRestrictedHttp, seed.TargetOnlyReader.Secret, IntegrationClientOptions.Execution());
+            await using var sourceMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
+                seed.TargetOnlyReader.Secret, deadline.Token);
 
-        var sdkPage = await McpCallerAssertions.SdkSuccessAsync(await sourceRestricted.IncomingEdgesAsync(
-            request, deadline.Token));
-        var hiddenReply = await sourceMcp.CallAsync(GraphIncomingRf3Scenario.Tool, request, deadline.Token);
-        var hiddenPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(hiddenReply);
-        await GraphIncomingRf3Assertions.AssertSourceHiddenAsync(sdkPage, seed);
-        await GraphIncomingRf3Assertions.AssertEquivalentAsync(sdkPage, hiddenPage.Value);
-        await GraphIncomingRf3Assertions.AssertNoPrivatePayloadAsync(hiddenReply, seed.TargetOnlyReader.Secret);
-        await AssertTargetGraphDeniedAsync(fixture, admin, seed, request, deadline.Token);
+            var sdkPage = await McpCallerAssertions.SdkSuccessAsync(await sourceRestricted.IncomingEdgesAsync(
+                request, deadline.Token));
+            var hiddenReply = await sourceMcp.CallAsync(GraphIncomingRf3Scenario.Tool, request, deadline.Token);
+            var hiddenPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(hiddenReply);
+            await GraphIncomingRf3Assertions.AssertSourceHiddenAsync(sdkPage, seed);
+            await GraphIncomingRf3Assertions.AssertEquivalentAsync(sdkPage, hiddenPage.Value);
+            await GraphIncomingRf3Assertions.AssertNoPrivatePayloadAsync(hiddenReply, seed.TargetOnlyReader.Secret);
+            await AssertTargetGraphDeniedAsync(fixture, admin, seed, request, deadline.Token);
+        }
+        await GraphIncomingPublicContinuation.RunAsync(fixture, admin, seed, deadline.Token);
     }
 
     [Test]

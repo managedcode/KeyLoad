@@ -19,6 +19,18 @@ internal sealed class NativeDiscoveryOmissionOwner
         localVoter = node.Value.PublicEndpoint;
         files = new(node, options);
     }
+    internal IGrainRequestPurposeObserver? PurposeObserver { get; private set; }
+    internal void AttachPurposeObserver(IOptions<RequestProbeExecutionOptions> options)
+    {
+        PurposeObserver = files.Locked(() =>
+        {
+            if (files.PurposeRecord(NativeSignedPurposeProtocol.ArmFile) is null)
+            { return null; }
+            var observer = new NativeSignedPurposeObserver(files, accessor, localVoter, options);
+            observer.RequireEnrollment();
+            return observer;
+        });
+    }
     internal ReplicaDiscoveryProbe CreateBorrowedProbe() => new(BeforeSend, Verified);
     private void BeforeSend(HttpRequestMessage request, CancellationToken token)
     {

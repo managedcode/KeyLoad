@@ -39,10 +39,18 @@ internal sealed class NativeTUnitSelectionTests
     private const string RemoteTransferUnsupportedCountProperty = "remoteTransferUnsupportedCount";
     private const int ExpectedRemoteTransferRejectionCount = 4;
     private const string RemoteTransferFilter = "/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage";
+    private const string PurposeProperty = "purpose";
+    private const string PurposeUnsupportedProperty = "purposeUnsupportedCount";
+    private const string PurposeFilter = "/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts";
+    private const int ExpectedPurposeRejections = 4;
     private const string CapabilityProperty = "capability";
     private const string CapabilityUnsupportedProperty = "capabilityUnsupportedCount";
     private const string CapabilityFilter = "/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay";
     private const int ExpectedCapabilityRejections = 4;
+    private const string GraphIncomingProperty = "graphIncoming";
+    private const string GraphIncomingUnsupportedProperty = "graphIncomingUnsupportedCount";
+    private const string GraphIncomingFilter = "/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
+    private const int ExpectedGraphIncomingRejections = 4;
     private const string LocalArgumentsEnvironment = "KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS";
     private const string LocalEnabledEnvironment = "KeyLoadTests__LocalRf3Image__Enabled";
     private const string LocalProvenanceEnvironment = "KEYLOAD_IMAGE_PROVENANCE";
@@ -100,6 +108,9 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
             await AssertNativeTextSdkAsync(selection.RootElement).ConfigureAwait(false);
             await AssertEmptySnapshotAsync(selection.RootElement).ConfigureAwait(false);
+            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(GraphIncomingProperty), GraphIncomingFilter).ConfigureAwait(false);
+            await Assert.That(selection.RootElement.GetProperty(GraphIncomingUnsupportedProperty).GetInt32())
+                .IsEqualTo(ExpectedGraphIncomingRejections);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(CapabilityProperty), CapabilityFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(CapabilityUnsupportedProperty).GetInt32())
                 .IsEqualTo(ExpectedCapabilityRejections);
@@ -116,12 +127,19 @@ internal sealed class NativeTUnitSelectionTests
 
     private static async Task AssertEmptySnapshotAsync(JsonElement root)
     {
+        await AssertPurposeAsync(root).ConfigureAwait(false);
         await AssertLocalSelectorAsync(root.GetProperty(EmptySnapshotProperty), EmptySnapshotFilter).ConfigureAwait(false);
         await Assert.That(root.GetProperty(EmptySnapshotUnsupportedProperty).GetInt32())
             .IsEqualTo(ExpectedEmptySnapshotRejections);
         await AssertLocalSelectorAsync(root.GetProperty(RetainedSnapshotProperty), RetainedSnapshotFilter).ConfigureAwait(false);
         await Assert.That(root.GetProperty(RetainedSnapshotUnsupportedProperty).GetInt32())
             .IsEqualTo(ExpectedEmptySnapshotRejections);
+    }
+
+    private static async Task AssertPurposeAsync(JsonElement root)
+    {
+        await AssertLocalSelectorAsync(root.GetProperty(PurposeProperty), PurposeFilter).ConfigureAwait(false);
+        await Assert.That(root.GetProperty(PurposeUnsupportedProperty).GetInt32()).IsEqualTo(ExpectedPurposeRejections);
     }
 
     private static async Task AssertNativeTextSdkAsync(JsonElement root)

@@ -68,9 +68,40 @@ internal sealed class NativeDiscoveryOmissionFiles
     internal void Write(string name, NativeDiscoveryOmissionWitness value)
         => RequestCqrsProbeAtomicFiles.Write(root, Path.Combine(root, name), json.Write(value), options, Snapshot);
 
+    internal byte[]? PurposeRecord(string name)
+    {
+        if (name is not (NativeSignedPurposeProtocol.ArmFile or NativeSignedPurposeProtocol.IssuedFile
+            or NativeSignedPurposeProtocol.RejectedFile))
+        { throw Invalid(); }
+        var path = Path.Combine(root, name);
+        return File.Exists(path) ? Read(path) : null;
+    }
+    internal void RequirePurposeArm(NativeSignedPurposeArm arm)
+    {
+        if (arm.SessionId != session || !voters.Contains(arm.SourceVoter, StringComparer.Ordinal))
+        { throw Invalid(); }
+    }
+    internal void RequirePurposeReceiver(string voter)
+    {
+        if (!voters.Contains(voter, StringComparer.Ordinal))
+        { throw Invalid(); }
+    }
+    internal void WritePurpose(string name, byte[] bytes)
+    {
+        if (name is not (NativeSignedPurposeProtocol.IssuedFile or NativeSignedPurposeProtocol.RejectedFile))
+        { throw Invalid(); }
+        RequestCqrsProbeAtomicFiles.Write(root, Path.Combine(root, name), bytes, options, Snapshot);
+    }
     private RequestCqrsProbeSnapshot Snapshot()
     {
         RequestCqrsProbePaths.RequireDirectory(root, root);
+        if (File.Exists(Path.Combine(root, NativeDiscoveryOmissionProtocol.ArmFile))
+            && File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.ArmFile)))
+        { throw Invalid(); }
+        if (!File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.ArmFile))
+            && (File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.IssuedFile))
+                || File.Exists(Path.Combine(root, NativeSignedPurposeProtocol.RejectedFile))))
+        { throw Invalid(); }
         var entries = Directory.EnumerateFileSystemEntries(root)
             .Take(options.Value.MaximumFiles + NativeDiscoveryOmissionProtocol.ExcessEntry).ToArray();
         if (entries.Length > options.Value.MaximumFiles)
@@ -130,6 +161,7 @@ internal sealed class NativeDiscoveryOmissionFiles
     private static bool Known(string name) => name is NativeDiscoveryOmissionProtocol.ArmFile
         or NativeDiscoveryOmissionProtocol.RequestFile or NativeDiscoveryOmissionProtocol.OmittedFile
         or NativeDiscoveryOmissionProtocol.VerifiedFile or NativeDiscoveryOmissionProtocol.LockFile
+        or NativeSignedPurposeProtocol.ArmFile or NativeSignedPurposeProtocol.IssuedFile or NativeSignedPurposeProtocol.RejectedFile
         || name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal)
             && name.EndsWith(TemporarySuffix, StringComparison.Ordinal)
             && Guid.TryParseExact(name.AsSpan(RequestCqrsProbeProtocol.TemporaryFilePrefix.Length,

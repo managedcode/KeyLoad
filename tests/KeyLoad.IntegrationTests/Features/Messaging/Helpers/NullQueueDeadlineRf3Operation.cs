@@ -18,6 +18,9 @@ internal static class NullQueueDeadlineRf3Operation
             var controlLane = NullQueueDeadlineRf3Observation.ControlLane(lane);
             await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                 new(tenant, partition.DatabaseId, new(controlLane.Queue, ResourceKind.WorkQueue, partition.TransactionDomainId)), token));
+            var controlIdentity = await MessagingRf3Identity.CreateAsync(fixture, tenant,
+                [new(partition.DatabaseId, controlLane.Queue,
+                    Capability.SchedulerManage | Capability.QueuePublish | Capability.QueueInspect)], [], false, token);
             var now = TimeProvider.System.GetUtcNow();
             var due = now.AddSeconds(QueueDeadlineRf3Protocol.LeadSeconds);
             var control = NullQueueDeadlineRf3Observation.Definition(lane, due);
@@ -27,9 +30,18 @@ internal static class NullQueueDeadlineRf3Operation
                 [new EnqueueMessage(lane.Queue, QueueDeadlineRf3Protocol.Original, QueueDeadlineRf3Protocol.Payload,
                     QueueDeadlineRf3Protocol.Headers, NotBefore: due),
                  new EnqueueMessage(lane.Queue, QueueDeadlineRf3Protocol.Future, QueueDeadlineRf3Protocol.Payload,
-                    QueueDeadlineRf3Protocol.Headers, NotBefore: now.AddHours(QueueDeadlineRf3Protocol.FutureHours)),
-                 new ConfigureRecurringSchedule(control, QueueDeadlineRf3Protocol.Initial)]);
+                    QueueDeadlineRf3Protocol.Headers, NotBefore: now.AddHours(QueueDeadlineRf3Protocol.FutureHours))]);
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(original, token));
+            var controlCommand = new CommandRequest(Guid.NewGuid(), partition,
+                [new ConfigureRecurringSchedule(control, QueueDeadlineRf3Protocol.Initial)]);
+            var controlReceipt = await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1,
+                controlIdentity.Secret, async scheduler =>
+                {
+                    var configured = await McpCallerAssertions.SdkSuccessAsync(
+                        await scheduler.Sdk.CommitAsync(controlCommand, token));
+                    await QueueScheduledClockRf3Replay.EnqueueAsync(scheduler, controlCommand, configured, token);
+                    return configured;
+                }, token);
             var scheduled = new MessageInspection(new(QueueDeadlineRf3Protocol.Original, MessageState.Scheduled,
                 (int)QueueDeadlineRf3Protocol.Initial, QueueDeadlineRf3Protocol.First, QueueDeadlineRf3Protocol.Initial, due, null),
                 QueueDeadlineRf3Protocol.Payload, QueueDeadlineRf3Protocol.Headers);
@@ -46,7 +58,8 @@ internal static class NullQueueDeadlineRf3Operation
             await Assert.That(page.Counters.InFlightMessages).IsEqualTo(QueueDeadlineRf3Protocol.Initial);
             await Assert.That(page.Counters.NextReadySequence).IsEqualTo(QueueDeadlineRf3Protocol.Initial);
             await Assert.That(TimeProvider.System.GetUtcNow() < due).IsTrue();
-            return new NullQueueDeadlineRf3State(lane, identity, original, receipt, scheduled, future, page, control, stopControl);
+            return new NullQueueDeadlineRf3State(lane, identity, original, receipt, scheduled, future, page,
+                control, controlIdentity, controlCommand, controlReceipt, stopControl);
         }, token);
 
     internal static Task<bool> RequireUnchangedAsync(ClusterFixture fixture, string node,

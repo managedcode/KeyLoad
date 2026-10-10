@@ -28,7 +28,11 @@ internal static class OrleansSiloConfiguration
         builder.Services.AddSingleton(loggerFactory);
         builder.Services.AddSingleton(connectionOwner);
         if (discoveryOmission is not null)
-        { builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe()); }
+        {
+            builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe());
+            if (discoveryOmission.PurposeObserver is { } purposeObserver)
+            { builder.Services.AddSingleton(purposeObserver); }
+        }
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
         if (options.MembershipAuthority.RemoteDocumentReads)
@@ -169,7 +173,8 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
         {
-            PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>()
+            PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>(),
+            PurposeObserver = provider.GetService<IGrainRequestPurposeObserver>()
         });
     }
 

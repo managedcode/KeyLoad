@@ -27,28 +27,34 @@ internal static class SnapshotInstallFeedAssertions
     }
 
     internal static async Task RequireAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        PartitionRef partition, ChangeFeedPage original, CommitReceipt final, CommitReceipt tail, CancellationToken token)
+        PartitionRef partition, ChangeFeedPage original, NodeStatus originalOwner, NodeStatus installed,
+        CommitReceipt final, CommitReceipt tail, CancellationToken token)
     {
         var request = new ReadChangeFeedRequest(partition, Collection, original.Cursor);
-        await RouteAsync(request, original, final, tail,
+        await Assert.That(originalOwner.Incarnation).IsEqualTo(tail.Token.Incarnation);
+        Task<long> ObserveCut() => SnapshotInstallFeedCutAssertions.ObserveAsync(sdk, partition, tail, installed, token);
+        await RouteAsync(request, original, originalOwner.Applied, final, tail, ObserveCut,
             async next => await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadChangesAsync(next, token)));
-        await RouteAsync(request, original, final, tail,
+        await RouteAsync(request, original, originalOwner.Applied, final, tail, ObserveCut,
             async next => (await McpCallerAssertions.SuccessAsync<ChangeFeedPage>(
                 await mcp.CallAsync(Tool, next, token))).Value);
-        await RouteAsync(request, original, final, tail,
+        await RouteAsync(request, original, originalOwner.Applied, final, tail, ObserveCut,
             next => SqlRf3Protocol.SdkAsync<ChangeFeedPage>(sdk,
                 SqlRf3Protocol.Call(request.Partition, Tool, next), token));
-        await RouteAsync(request, original, final, tail,
+        await RouteAsync(request, original, originalOwner.Applied, final, tail, ObserveCut,
             next => SqlRf3Protocol.McpAsync<ChangeFeedPage>(mcp,
                 SqlRf3Protocol.Call(request.Partition, Tool, next), token));
     }
 
-    private static async Task RouteAsync(ReadChangeFeedRequest request, ChangeFeedPage original,
-        CommitReceipt final, CommitReceipt tail, Func<ReadChangeFeedRequest, Task<ChangeFeedPage>> read)
+    private static async Task RouteAsync(ReadChangeFeedRequest request, ChangeFeedPage original, long originalApplied,
+        CommitReceipt final, CommitReceipt tail, Func<Task<long>> observeCut,
+        Func<ReadChangeFeedRequest, Task<ChangeFeedPage>> read)
     {
+        var before = await observeCut();
         var page = await read(request);
+        var after = await observeCut();
         await Assert.That(page.Changes.Length).IsEqualTo(DocumentCount + TailCount);
-        var position = original.CutPosition;
+        var position = originalApplied;
         for (var index = 0; index < page.Changes.Length; index++)
         {
             var actual = page.Changes[index];
@@ -71,13 +77,17 @@ internal static class SnapshotInstallFeedAssertions
         await SqlRf3Protocol.EqualAsync(final.Token, page.Changes[DocumentCount - TailCount].Commit);
         await SqlRf3Protocol.EqualAsync(tail.Token, page.Changes[^TailCount].Commit);
         var through = checked(original.ThroughSequence + DocumentCount + TailCount);
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(tail.Token.Position);
+        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(before);
+        await Assert.That(page.CutPosition).IsLessThanOrEqualTo(after);
         await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse();
         await SqlRf3Protocol.EqualAsync(new ChangeFeedPage(page.Changes, page.Cursor, through,
             through, original.FirstAvailable, false, page.CutPosition), page);
+        var continuationBefore = await observeCut();
         var continuation = await read(request with { Cursor = page.Cursor });
+        var continuationAfter = await observeCut();
         await Assert.That(string.IsNullOrEmpty(continuation.Cursor)).IsFalse();
-        await Assert.That(continuation.CutPosition).IsGreaterThanOrEqualTo(tail.Token.Position);
+        await Assert.That(continuation.CutPosition).IsGreaterThanOrEqualTo(continuationBefore);
+        await Assert.That(continuation.CutPosition).IsLessThanOrEqualTo(continuationAfter);
         await SqlRf3Protocol.EqualAsync(new ChangeFeedPage([], continuation.Cursor, through,
             through, original.FirstAvailable, false, continuation.CutPosition), continuation);
     }

@@ -15,7 +15,7 @@ const projects = new Map([
   ['rf3', 'KeyLoad.IntegrationTests'], ['comparison', 'KeyLoad.ComparisonTests'], ['site', 'KeyLoad.SiteTests']
 ]);
 const localImageArgumentsEnvironment = 'KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS';
-const localImageFilters = new Set(['/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
+const localImageFilters = new Set(['/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit', '/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts', '/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
   '/*/*/QueueDeadlineAutonomousRf3Tests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck',
   '/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes',
   '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage',

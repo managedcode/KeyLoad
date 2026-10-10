@@ -32,7 +32,7 @@ internal static class EmptyReplicaSnapshotScenario
             var state = await ConfigureAndProduceAsync(fixture, timeout.Token);
             var denied = await McpPersistedIdentity.CreateAsync(fixture, state.Partition, OtherResource,
                 Capability.DocumentsRead, timeout.Token);
-            var (index, node, originalFeed) = await CaptureFollowerFeedAsync(state, timeout.Token);
+            var (index, node, originalFeed, originalOwner) = await CaptureFollowerFeedAsync(state, timeout.Token);
             stopped = new(index, node, Path.Combine(fixture.Root, node));
             await fixture.KillContainerAsync(node, Fault, timeout.Token);
             running = false;
@@ -58,7 +58,7 @@ internal static class EmptyReplicaSnapshotScenario
             await Assert.That(reopened.NodeId).IsEqualTo(installed.NodeId);
             mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
             await SnapshotInstallFeedAssertions.RequireAsync(state.Clients[index], mcp,
-                state.Partition, originalFeed, final.Receipt, tail, timeout.Token);
+                state.Partition, originalFeed, originalOwner, reopened, final.Receipt, tail, timeout.Token);
             await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
                 baseline, timeout.Token);
             await EmptyReplicaSnapshotPolicyAssertions.DeniedThenHealthyAsync(fixture, node, denied.Secret,
@@ -93,14 +93,23 @@ internal static class EmptyReplicaSnapshotScenario
         return installed;
     }
 
-    private static async Task<(int Index, string Node, ChangeFeedPage Feed)> CaptureFollowerFeedAsync(
+    private static async Task<(int Index, string Node, ChangeFeedPage Feed, NodeStatus Owner)> CaptureFollowerFeedAsync(
         SnapshotState state, CancellationToken token)
     {
         var leader = new Uri(state.InitialStatuses[0].Leader!).Host;
         var index = Enumerable.Range(0, NodeCount).First(i => NodeName(i + 1) != leader);
         var node = NodeName(index + 1);
         var originalFeed = await SnapshotInstallFeedAssertions.CaptureAsync(state.Clients[index], state.Partition, token);
-        return (index, node, originalFeed);
+        var owner = Success(await state.Clients[index].StatusAsync(token));
+        var previous = state.InitialStatuses[index];
+        await Assert.That(owner.NodeId).IsEqualTo(previous.NodeId);
+        await Assert.That(owner.Incarnation).IsEqualTo(previous.Incarnation);
+        await Assert.That(owner.RoutingReady).IsTrue();
+        await Assert.That(owner.Voters).IsEqualTo(NodeCount);
+        await Assert.That(owner.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(owner.Applied).IsGreaterThanOrEqualTo(previous.Applied);
+        await Assert.That(owner.ReadGeneration).IsGreaterThanOrEqualTo(previous.ReadGeneration);
+        return (index, node, originalFeed, owner);
     }
 
     private static async Task<long> RequireInstalledCutAsync(ClusterFixture fixture, string node, CommitReceipt final)

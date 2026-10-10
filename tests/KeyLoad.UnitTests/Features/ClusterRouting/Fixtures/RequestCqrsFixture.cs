@@ -47,7 +47,8 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
 
     internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null,
-        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null)
+        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null,
+        IGrainRequestPurposeObserver? purposeObserver = null)
     {
         nativeFactory = nativeMaintenance;
         Clock = clock ?? TimeProvider.System;
@@ -61,7 +62,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             builder.AddSiloBuilderConfigurator<RequestCqrsSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RequestCqrsClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, Clock, RoutingOptions) { PhaseObserver = observer };
+            Codec = new GrainRequestCodec(Database.Database, Clock, RoutingOptions) { PhaseObserver = observer, PurposeObserver = purposeObserver };
         }
         catch (Exception startupFailure)
         {

@@ -13,7 +13,7 @@ internal static class GrainRequestPayloadVerification
         }
 
         var request = database.Verify<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
-        originalCodec.ValidateScope(request);
+        originalCodec.ValidateVerifiedScope(request);
         if (request.Payload.Length > database.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);

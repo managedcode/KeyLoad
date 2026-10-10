@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.StorageRecovery;
 
 namespace KeyLoad.UnitTests;
 
@@ -61,19 +62,27 @@ internal sealed class CheckpointTests
             source.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 7L); tx.PutRecord(KeyCodec.Encode("new"), "value"); return true; });
             var snapshot = Path.Combine(root, "snapshot");
             source.CreateSnapshot(snapshot, 7);
-            using var target = new ZoneTreeStore(new(Path.Combine(root, "target")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("obsolete"), "old"); return true; });
-            var identity = target.Identity;
-            var installed = target.InstallSnapshot(snapshot, 7);
-            await Assert.That(installed.AppliedPosition).IsEqualTo(7);
-            await Assert.That(target.Identity.NodeId).IsEqualTo(identity.NodeId);
-            await Assert.That(target.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration + 1);
-            await Assert.That(target.Read(view => view.ReadOwnedValue(KeyCodec.Encode("obsolete")))).IsNull();
-            await Assert.That(target.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("new"))!))).IsEqualTo("value");
-            target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 8L); return true; });
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => target.InstallSnapshot(snapshot, 7)).Code).IsEqualTo(ErrorCode.OwnershipLost);
-            using var outsider = new ZoneTreeStore(new(Path.Combine(root, "outsider")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => outsider.InstallSnapshot(snapshot, 7)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
+            StoreIdentity retained;
+            using (var target = new ZoneTreeStore(new(Path.Combine(root, "target")) { Incarnation = incarnation, SigningKey = signing }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            {
+                target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("obsolete"), "old"); return true; });
+                var identity = target.Identity;
+                var installed = target.InstallSnapshot(snapshot, 7);
+                await Assert.That(installed.AppliedPosition).IsEqualTo(7);
+                await Assert.That(target.Identity.NodeId).IsEqualTo(identity.NodeId);
+                await Assert.That(target.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration + 1);
+                await Assert.That(target.Read(view => view.ReadOwnedValue(KeyCodec.Encode("obsolete")))).IsNull();
+                await Assert.That(target.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("new"))!))).IsEqualTo("value");
+                target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 8L); return true; });
+                await CurrentSnapshotFenceAssertions.RejectAsync(target, Path.Combine(root, "target"), snapshot, 7,
+                    ErrorCode.OwnershipLost, installed: true);
+                retained = target.Identity;
+                using var outsider = new ZoneTreeStore(new(Path.Combine(root, "outsider")), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                await CurrentSnapshotFenceAssertions.RejectAsync(outsider, Path.Combine(root, "outsider"), snapshot, 7,
+                    ErrorCode.TokenInvalidated, installed: false);
+            }
+            await CurrentSnapshotFenceContinuation.CompleteAsync(Path.Combine(root, "target"), retained,
+                TestContext.Current!.Execution.CancellationToken);
         }
         finally { Directory.Delete(root, true); }
     }

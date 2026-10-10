@@ -26,8 +26,10 @@ internal static class NullQueueDeadlineRf3Observation
 
     internal static Task<CommitReceipt> WaitAsync(ClusterFixture fixture, NullQueueDeadlineRf3State state,
         CancellationToken token)
-        => QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, async admin =>
+        => QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, state.SchedulerIdentity.Secret, async admin =>
         {
+            await QueueScheduledClockRf3Replay.EnqueueAsync(admin, state.SchedulerConfiguration,
+                state.SchedulerConfigurationReceipt, token);
             await WaitForOccurrenceAsync(admin, state.SchedulerControl, token);
             await RequireScheduleAsync(admin, state.SchedulerControl, false, token);
             await RequireOccurrenceAsync(admin, state.SchedulerControl, token);
@@ -40,8 +42,10 @@ internal static class NullQueueDeadlineRf3Observation
 
     internal static Task<bool> RequireCancelledAsync(ClusterFixture fixture, NullQueueDeadlineRf3State state,
         CommitReceipt receipt, CancellationToken token)
-        => QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, async admin =>
+        => QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, state.SchedulerIdentity.Secret, async admin =>
         {
+            await QueueScheduledClockRf3Replay.EnqueueAsync(admin, state.SchedulerConfiguration,
+                state.SchedulerConfigurationReceipt, token);
             await RequireScheduleAsync(admin, state.SchedulerControl, true, token);
             await RequireOccurrenceAsync(admin, state.SchedulerControl, token);
             await QueueScheduledClockRf3Replay.EnqueueAsync(admin, state.StopSchedulerControl, receipt, token);

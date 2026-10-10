@@ -30,6 +30,45 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         RequestCqrsProbeFileStore.WriteAtomic(Root, NativeDiscoveryOmissionProtocol.ArmFile, bytes);
         originals.Add(NativeDiscoveryOmissionProtocol.ArmFile, bytes);
     }
+    internal void ArmPurpose(bool official, Guid commandId)
+    {
+        var arm = new NativeSignedPurposeArm(NativeDiscoveryOmissionProtocol.Version, SessionId, Guid.NewGuid(),
+            RequestCqrsProbeFixtureProtocol.Node1Origin,
+            official ? NativeDiscoveryOmissionProtocol.McpRoute : NativeDiscoveryOmissionProtocol.SdkRoute, commandId);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(arm, NativeSignedPurposeJsonContext.Default.NativeSignedPurposeArm);
+        _ = new NativeSignedPurposeJson(IntegrationRoutingOptions.ProbeExecution()).Arm(bytes);
+        RequestCqrsProbeFileStore.WriteAtomic(Root, NativeSignedPurposeProtocol.ArmFile, bytes);
+        originals.Add(NativeSignedPurposeProtocol.ArmFile, bytes);
+    }
+    internal async Task RequirePurposeCausalRefusalAsync()
+    {
+        var purposeJson = new NativeSignedPurposeJson(IntegrationRoutingOptions.ProbeExecution());
+        var arm = purposeJson.Arm(originals[NativeSignedPurposeProtocol.ArmFile]);
+        var issued = ReadPurpose(purposeJson, NativeSignedPurposeProtocol.IssuedFile);
+        var refused = ReadPurpose(purposeJson, NativeSignedPurposeProtocol.RejectedFile);
+        await Assert.That(issued.Version).IsEqualTo(arm.Version);
+        await Assert.That(issued.SessionId).IsEqualTo(arm.SessionId);
+        await Assert.That(issued.ArmId).IsEqualTo(arm.ArmId);
+        await Assert.That(issued.SourceVoter).IsEqualTo(arm.SourceVoter);
+        await Assert.That(issued.Route).IsEqualTo(arm.Route);
+        await Assert.That(issued.CommandId).IsEqualTo(arm.CommandId);
+        await Assert.That(issued.ConnectionId).IsNotEqualTo(Guid.Empty);
+        await Assert.That(issued.RequestId).IsNotEqualTo(Guid.Empty);
+        await Assert.That(issued.Incarnation).IsNotEqualTo(Guid.Empty);
+        await Assert.That(issued.PrincipalId).IsNotNullOrEmpty();
+        await Assert.That(issued.Stage).IsEqualTo(NativeSignedPurposeProtocol.Issued);
+        await Assert.That(issued.ReceiverVoter).IsNull();
+        await Assert.That(refused.ReceiverVoter is RequestCqrsProbeFixtureProtocol.Node1Origin
+            or RequestCqrsProbeFixtureProtocol.Node2Origin or RequestCqrsProbeFixtureProtocol.Node3Origin).IsTrue();
+        await Assert.That(refused).IsEqualTo(issued with
+        { Stage = NativeSignedPurposeProtocol.Rejected, ReceiverVoter = refused.ReceiverVoter });
+    }
+    private NativeSignedPurposeWitness ReadPurpose(NativeSignedPurposeJson purposeJson, string name)
+    {
+        var bytes = RequestCqrsProbeFiles.ReadRecord(Path.Combine(Root, name), IntegrationRoutingOptions.ProbeExecution());
+        originals.Add(name, bytes);
+        return purposeJson.Witness(bytes);
+    }
     internal async Task RequireCausalRefusalAsync()
     {
         var arm = json.ReadArm(originals[NativeDiscoveryOmissionProtocol.ArmFile]);

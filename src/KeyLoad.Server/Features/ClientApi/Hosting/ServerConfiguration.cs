@@ -127,7 +127,11 @@ internal static class ServerConfiguration
             provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>()));
-        services.AddSingleton<GrainRequestCodec>();
+        services.AddSingleton(provider => new GrainRequestCodec(provider.GetRequiredService<DatabaseEngine>(),
+            provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
+        {
+            PurposeObserver = provider.GetRequiredService<OrleansNode>().DiscoveryOmission?.PurposeObserver
+        });
         services.AddSingleton(provider => CreatePeerSecurity(
             provider.GetRequiredService<IOptions<NodeOptions>>().Value, provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>()));

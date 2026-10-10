@@ -12,10 +12,10 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class TwoRf3MembershipWaveStartup
 {
-    internal static async Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    internal static async Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken, Action<string>? observe = null)
     {
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(wave, cancellationToken), failures)
+        await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(wave, cancellationToken, observe), failures)
             .ConfigureAwait(false);
         if (failures.Count == 0)
         { return wave; }
@@ -26,21 +26,23 @@ internal static class TwoRf3MembershipWaveStartup
         throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }
 
-    internal static async Task StartCoreAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    internal static async Task StartCoreAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken, Action<string>? observe = null)
     {
         var firstStart = wave.dataRoot is null;
         var root = wave.dataRoot ?? wave.CreateOwnedRoot();
         if (firstStart)
-        { wave.Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile; }
+        { observe?.Invoke("ProfileCreate"); wave.Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile; }
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         string? githubReference = null;
         if (wave.localImageSelection is null)
         {
+            observe?.Invoke("VerifiedImageRead");
             githubReference = await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
         else
         {
+            observe?.Invoke("VerifiedImageRead");
             _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repository, wave.localImageSelection, cancellationToken)
                 .ConfigureAwait(false) ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
         }
@@ -49,35 +51,41 @@ internal static class TwoRf3MembershipWaveStartup
         if (wave.nativeDiscoveryOmissionSelected && wave.nativeDiscoveryOmission is null)
         { wave.nativeDiscoveryOmission = KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture.Create(root, cancellationToken); }
         var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission);
+        observe?.Invoke("BuilderCreate");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             (_, settings) => wave.capacity.BindOriginalParameters(settings), cancellationToken).ConfigureAwait(false);
+        observe?.Invoke("OriginalParameters");
         await wave.capacity.RequireOriginalParametersAsync(builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         wave.capacity.RestoreOriginalEndpoints(builder.Resources.OfType<ContainerResource>());
         KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferRf3Enrollment.Configure(builder,
             wave.remoteTransferPrincipalId, cancellationToken);
         if (wave.protectedDocuments)
         {
+            observe?.Invoke("OriginalPeerKey");
             wave.MovementTargetPeerKey = await builder.Resources.OfType<ParameterResource>()
                 .Single(resource => resource.Name == "membership-peer-b").GetValueAsync(cancellationToken).ConfigureAwait(false);
         }
         var containerNames = TwoRf3MembershipContainerNames.Read(builder.Resources.OfType<ContainerResource>());
         if (wave.activationIsolation)
         {
+            observe?.Invoke("IsolationPrepare");
             wave.IsolationOwner = await ReplicaIsolationOwner.PrepareSixAsync(builder, root, repository,
             containerNames, wave, cancellationToken).ConfigureAwait(false);
         }
+        observe?.Invoke("BuildApplication");
         wave.application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         wave.applicationDisposed = false;
         wave.nodeLocksReleased = false;
         if (wave.remoteDocumentReads)
         { wave.RemoteRuntimeOwner = new ContainerRuntimeControl(wave.application, containerNames, repository); }
+        observe?.Invoke("VerifyImageBeforeStart");
         await VerifyBeforeStartAsync(wave, wave.application, repository, githubReference, cancellationToken)
             .ConfigureAwait(false);
         wave.startupCallbacks?.Attach(wave.application, builder.Resources.OfType<ContainerResource>()
             .Where(resource => TwoRf3MembershipProtocol.Nodes.Contains(resource.Name, StringComparer.Ordinal)).ToArray());
-        await StartAndVerifyReadyAsync(wave, wave.application, containerNames, cancellationToken).ConfigureAwait(false);
+        await StartAndVerifyReadyAsync(wave, wave.application, containerNames, cancellationToken, observe).ConfigureAwait(false);
         if (wave.startupCallbacks is { } capture)
-        { await capture.Ready().ConfigureAwait(false); }
+        { observe?.Invoke("StartupReady"); await capture.Ready().ConfigureAwait(false); }
     }
 
     private static async Task VerifyBeforeStartAsync(TwoRf3MembershipWave wave,
@@ -101,22 +109,26 @@ internal static class TwoRf3MembershipWaveStartup
     }
 
     private static async Task StartAndVerifyReadyAsync(TwoRf3MembershipWave wave,
-        DistributedApplication application, Dictionary<string, string> containerNames, CancellationToken cancellationToken)
+        DistributedApplication application, Dictionary<string, string> containerNames, CancellationToken cancellationToken, Action<string>? observe = null)
     {
         wave.startAttempted = true;
+        observe?.Invoke("ApplicationStart");
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
+        observe?.Invoke("SixHealthy");
         await wave.WaitForSixHealthyAsync(cancellationToken).ConfigureAwait(false);
         if (wave.IsolationOwner is { } startedIsolation)
         { await startedIsolation.VerifyStartedAsync(application, cancellationToken).ConfigureAwait(false); }
         wave.capacity.CaptureOriginalEndpoints(wave);
         if (wave.remoteDocumentReads)
         {
+            observe?.Invoke("DataReadiness");
             await TwoRf3MembershipDataReadiness.WaitAsync(application,
                 application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(),
                 application.Services.GetRequiredService<TimeProvider>(), cancellationToken).ConfigureAwait(false);
         }
         if (wave.localImageIdentity is { } identity)
         {
+            observe?.Invoke("VerifyStartedImages");
             await LocalRf3ImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
                 TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
         }

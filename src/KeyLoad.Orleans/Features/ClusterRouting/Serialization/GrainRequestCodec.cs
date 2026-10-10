@@ -21,6 +21,8 @@ public sealed partial class GrainRequestCodec
 
     internal bool HasPhaseObserver => PhaseObserver is not null;
 
+    internal IGrainRequestPurposeObserver? PurposeObserver { get; init; }
+
     /// <summary>Uses the shared durable signing key and incarnation, with the runtime system clock.</summary>
     /// <param name="database">Borrowed canonical database with immutable cluster signing scope.</param>
     /// <param name="clock">System clock for issuance and expiry checks.</param>
@@ -95,11 +97,21 @@ public sealed partial class GrainRequestCodec
     internal string Issue(GrainRequestEnvelope request)
     {
         ValidateScope(request);
-        return database.Sign(request);
+        return database.Sign(GrainRequestPurposeObservation.BeforeSign(PurposeObserver, request));
     }
 
     internal void ValidateScope(GrainRequestEnvelope request)
-        => GrainRequestScope.Validate(request, database.Store.Identity.Incarnation, clock.GetUtcNow(), settings.MaximumFuture);
+        => ValidateScope(request, null);
+
+    internal void ValidateVerifiedScope(GrainRequestEnvelope request)
+        => ValidateScope(request, PurposeObserver);
+
+    private void ValidateScope(GrainRequestEnvelope request, IGrainRequestPurposeObserver? observer)
+    {
+        var cut = new GrainRequestScopeCut(database.Store.Identity.Incarnation,
+            clock.GetUtcNow(), settings.MaximumFuture);
+        GrainRequestPurposeObservation.Validate(request, cut, observer);
+    }
 }
 
 internal readonly record struct DecodedGrainRequest(GrainRequestEnvelope Envelope, ReadOnlyMemory<byte> Payload);

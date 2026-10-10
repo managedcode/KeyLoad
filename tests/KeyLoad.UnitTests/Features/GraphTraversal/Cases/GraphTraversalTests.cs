@@ -43,5 +43,6 @@ internal sealed class GraphTraversalTests
         await Assert.That(hidden.Edges).IsEmpty();
         await Assert.That(database.Database.Traverse(RootIdentity, database.Partition, Links, Vertex(VertexA), maxDepth: MaximumDepth,
             cancellationToken: TestContext.Current!.Execution.CancellationToken).Vertices.Length).IsEqualTo(3);
+        await GraphTraversalRowContinuation.RunAsync(database, TestContext.Current!.Execution.CancellationToken);
     }
 }

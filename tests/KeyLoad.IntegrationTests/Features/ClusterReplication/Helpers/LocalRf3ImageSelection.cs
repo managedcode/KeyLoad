@@ -24,6 +24,8 @@ internal static class LocalRf3ImageSelection
     private const string NativeTextFilterArgument = "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*";
     private const string RemoteTransferFilterArgument = "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage";
     private const string CapabilityOmissionFilterArgument = "--KeyLoadTests:Filter=/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay";
+    private const string GraphIncomingFilterArgument = "--KeyLoadTests:Filter=/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
+    private const string SignedPurposeFilterArgument = "--KeyLoadTests:Filter=/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts";
     private const string NullQueueDeadlineFilterArgument = "--KeyLoadTests:Filter=/*/*/QueueDeadlineAutonomousRf3Tests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
@@ -69,7 +71,7 @@ internal static class LocalRf3ImageSelection
         }
         var arguments = JsonSerializer.Deserialize<string[]>(value);
         if (arguments is not [Rf3SuiteArgument, MembershipFilterArgument or StandardFilterArgument or RejectionFilterArgument or ConnectionFilterArgument or NativeTextFilterArgument or RemoteTransferFilterArgument or EmptySnapshotFilterArgument or CapabilityOmissionFilterArgument
-                or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument, EnabledArgument]
+                or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument or GraphIncomingFilterArgument or SignedPurposeFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

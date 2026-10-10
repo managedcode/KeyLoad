@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
 internal static class NativeCapabilityOmissionRf3Healthy
 {
     internal static async Task CompleteAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        CommandRequest command, CancellationToken token)
+        CommandRequest command, CancellationToken token, int coldCuts = 1)
     {
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(command, token).ConfigureAwait(false));
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
@@ -22,11 +22,14 @@ internal static class NativeCapabilityOmissionRf3Healthy
         await RequireReceiptAsync(seed, command, receipt, token).ConfigureAwait(false);
         await RequireDocumentAsync(seed, token).ConfigureAwait(false);
         await seed.VerifyAsync(token).ConfigureAwait(false);
-        _ = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token).ConfigureAwait(false);
-        await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false);
-        await RequireReceiptAsync(seed, command, receipt, token).ConfigureAwait(false);
-        await RequireDocumentAsync(seed, token).ConfigureAwait(false);
-        await seed.VerifyAsync(token).ConfigureAwait(false);
+        for (var cut = 0; cut < coldCuts; cut++)
+        {
+            _ = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token).ConfigureAwait(false);
+            await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false);
+            await RequireReceiptAsync(seed, command, receipt, token).ConfigureAwait(false);
+            await RequireDocumentAsync(seed, token).ConfigureAwait(false);
+            await seed.VerifyAsync(token).ConfigureAwait(false);
+        }
     }
     private static async Task RequireReceiptAsync(PartitionMovementPublicParentRf3Seed seed,
         CommandRequest command, CommitReceipt receipt, CancellationToken token)

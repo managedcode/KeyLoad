@@ -71,10 +71,11 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
 
-    internal static Task<TwoRf3MembershipWave> StartNativeCapabilityOmissionAsync(CancellationToken token, LocalRf3ImageSelection.Selection? selection = null)
-        => StartOwnedAsync(new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
+    internal static Task<TwoRf3MembershipWave> StartNativeCapabilityOmissionAsync(CancellationToken token, LocalRf3ImageSelection.Selection? selection = null,
+        Action<string>? observe = null, KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? callbacks = null)
+        => TwoRf3MembershipWaveStartup.StartOwnedAsync(new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
             probe: true, protectedDocument: true)
-        { nativeDiscoveryOmissionSelected = true }, token);
+        { nativeDiscoveryOmissionSelected = true, startupCallbacks = callbacks }, token, observe);
 
     internal static Task<TwoRf3MembershipWave> StartActivationIsolationAsync(CancellationToken token)
         => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,

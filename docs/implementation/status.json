@@ -350,21 +350,23 @@
     },
     "currentBuild": {
       "passed": true,
-      "scope": "Stage51 exact current coherent full solution local development only; delivered-source Linux CI pending",
-      "originalReceipt": "/private/tmp/keyload-stage51-current-coherent-solution-r3-20261010/original.json",
-      "originalReceiptSha256": "355451d9252c610b370cd6b7347216ad84345f15e7f01bba99700da342578e10",
-      "sourceInputs": 6867,
+      "scope": "Stage52 exact current coherent full solution local development only; complete delivered-source Linux/RF3 pending",
+      "originalReceipt": "/private/tmp/keyload-stage52-current-coherent-solution-r2-20261010/original.json",
+      "originalReceiptSha256": "9a3bef8fba965d3de5b5e44592c19898d42bf2b400d8bccff8c4cd3f6c43320f",
+      "sourceInputs": 6901,
       "sourceDrift": 0,
       "developmentOnly": true,
       "errors": 0,
-      "warnings": 0
+      "warnings": 0,
+      "actualMatchingProducerCopies": 30,
+      "actualProducerImages": 32
     },
     "currentFormatter": {
       "passed": true,
-      "scope": "Stage51 exact current coherent full solution local development only; delivered-source Linux CI pending",
-      "originalReceipt": "/private/tmp/keyload-stage51-current-coherent-format-r3-20261010/original.json",
-      "originalReceiptSha256": "6649d4819b42b5cd0f2f387554313b53231601abbaef6282ee1f27e27d714099",
-      "sourceInputs": 6867,
+      "scope": "Stage52 exact current coherent full solution local development only; complete delivered-source Linux/RF3 pending",
+      "originalReceipt": "/private/tmp/keyload-stage52-current-coherent-format-r2-20261010/original.json",
+      "originalReceiptSha256": "d4c013073169a00991b9a6749d9735963244ac3b67558e8f086573ba652b3b02",
+      "sourceInputs": 6901,
       "sourceDrift": 0,
       "developmentOnly": true
     },
@@ -43353,13 +43355,10 @@
       }
     },
     "currentGovernance": {
-      "observedAtUtc": "2026-10-10T09:13:55.832448+00:00",
       "passed": true,
-      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
-      "receipt": "/private/tmp/keyload-stage44-current-governance-r80-20261010/original-governance.json",
-      "logSha256": "9f2e6fce971c91fe39e70cbd3474beb57e8c04429f2016ec731ecc1f4592bce0",
-      "scope": "Static repository policy/inventory only",
-      "qualificationClaim": false
+      "projects": 27,
+      "modules": 4,
+      "scope": "Original post-fixture-cleanup governance passed. Earlier concurrent check found16 copied project paths in the live ignored local-image context; original failure is retained and no rules changed."
     },
     "previousCurrentBuildBeforePairedPreflight": {
       "commandArgs": [
@@ -46190,6 +46189,308 @@
       "originalCheckpoint": {
         "path": "/private/tmp/keyload-stage51-current-final-original-checkpoint-r4-20261010.json",
         "sha256": "71f744cfae0c72b857ada9e91f5d96460992494ee4a926390cb73f4f75378f22"
+      }
+    },
+    "previousCurrentBuildBeforeStageLII": {
+      "passed": true,
+      "scope": "Stage51 exact current coherent full solution local development only; delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage51-current-coherent-solution-r3-20261010/original.json",
+      "originalReceiptSha256": "355451d9252c610b370cd6b7347216ad84345f15e7f01bba99700da342578e10",
+      "sourceInputs": 6867,
+      "sourceDrift": 0,
+      "developmentOnly": true,
+      "errors": 0,
+      "warnings": 0
+    },
+    "previousCurrentFormatterBeforeStageLII": {
+      "passed": true,
+      "scope": "Stage51 exact current coherent full solution local development only; delivered-source Linux CI pending",
+      "originalReceipt": "/private/tmp/keyload-stage51-current-coherent-format-r3-20261010/original.json",
+      "originalReceiptSha256": "6649d4819b42b5cd0f2f387554313b53231601abbaef6282ee1f27e27d714099",
+      "sourceInputs": 6867,
+      "sourceDrift": 0,
+      "developmentOnly": true
+    },
+    "currentStageLIIDevelopment": {
+      "completedAtUtc": "2026-10-10T22:07:04.656037+00:00",
+      "baselineCommit": "fb08dd3ae8d469cb26cb002ac2c0fab91624d5e1",
+      "qualification": "Exact current coherent local development checkpoint only. Current delivered-source complete Linux, RF3, functional coverage, leadership/migration, fault/resource/performance/endurance and power-loss gates remain open. Original failures remain failures.",
+      "build": {
+        "path": "/private/tmp/keyload-stage52-current-coherent-solution-r2-20261010/original.json",
+        "sha256": "9a3bef8fba965d3de5b5e44592c19898d42bf2b400d8bccff8c4cd3f6c43320f"
+      },
+      "formatter": {
+        "path": "/private/tmp/keyload-stage52-current-coherent-format-r2-20261010/original.json",
+        "sha256": "d4c013073169a00991b9a6749d9735963244ac3b67558e8f086573ba652b3b02"
+      },
+      "sourceInputs": 6901,
+      "errors": 0,
+      "warnings": 0,
+      "lanes": [
+        {
+          "suite": "unit",
+          "profile": "normal",
+          "cases": 110,
+          "sourceInputs": 6901,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 38,
+          "intrinsics": null,
+          "sourceDrift": [],
+          "imageDrift": [],
+          "entryDrift": [],
+          "stdoutSha256": "e6345697b2bf7a80306544d4a688498ff9f6a89365dd0bd7c668f7136a598533",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "startedAtUtc": "2026-10-10T21:53:34.021892+00:00",
+          "finishedAtUtc": "2026-10-10T21:53:48.396936+00:00",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage52-current-unit-normal-r2-20261010/original-native-run.json",
+            "sha256": "843f6ac95500bd544482009cecb0a8463b9f841e71b859adfcf8df8129e23763"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage52-current-unit-normal-r2-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "deab951b84e7ff195d8450224ade3a663255fb11e70e06640fb572c1b5758c1c",
+              "counters": {
+                "total": "110",
+                "executed": "110",
+                "passed": "110",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "suite": "unit",
+          "profile": "scalar",
+          "cases": 110,
+          "sourceInputs": 6901,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 42,
+          "intrinsics": "0",
+          "sourceDrift": [],
+          "imageDrift": [],
+          "entryDrift": [],
+          "stdoutSha256": "ef54de7ea891bd94a298848aee5a9641b87c5885bb5a87e79f879655e800f44e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "startedAtUtc": "2026-10-10T21:53:35.024537+00:00",
+          "finishedAtUtc": "2026-10-10T21:53:49.449272+00:00",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage52-current-unit-scalar-r2-20261010/original-native-run.json",
+            "sha256": "c27d8c14c2a73830c5061acd0930909cf5b03eb3bdb3485aa1aa54141d60ad76"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage52-current-unit-scalar-r2-20261010/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "57f419115aca8a41fb0588ddbc12bc7db6169d40e4851e126effc0b76efe3c91",
+              "counters": {
+                "total": "110",
+                "executed": "110",
+                "passed": "110",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "suite": "recovery",
+          "profile": "normal",
+          "cases": 5,
+          "sourceInputs": 6901,
+          "imageInputs": 290,
+          "matchingProducerCopies": 28,
+          "nativeSlots": 50,
+          "observedOverlap": 5,
+          "intrinsics": null,
+          "sourceDrift": [],
+          "imageDrift": [],
+          "entryDrift": [],
+          "stdoutSha256": "747f11303a4b03208def8d60eb6257956d7fe5143b0c0591f30fed1d771f153e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "startedAtUtc": "2026-10-10T22:00:34.286249+00:00",
+          "finishedAtUtc": "2026-10-10T22:01:41.241770+00:00",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage52-current-queue-deadline-process-normal-r1-20261010/original-native-run.json",
+            "sha256": "695074f4bd357f4a747377f904f29b05b7e3d426992b9c0529b1282446d8986d"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage52-current-queue-deadline-process-normal-r1-20261010/results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "84c7b825d7a682c7a382e04869334e0ebadffc9f272e2dda2592a49bf8a11957",
+              "counters": {
+                "total": "5",
+                "executed": "5",
+                "passed": "5",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        {
+          "suite": "recovery",
+          "profile": "scalar",
+          "cases": 5,
+          "sourceInputs": 6901,
+          "imageInputs": 290,
+          "matchingProducerCopies": 28,
+          "nativeSlots": 50,
+          "observedOverlap": 5,
+          "intrinsics": "0",
+          "sourceDrift": [],
+          "imageDrift": [],
+          "entryDrift": [],
+          "stdoutSha256": "c1b6e2c1dc7884cc0220a16293efde319eb58f89f652a424bd85a9ae43f6befa",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "startedAtUtc": "2026-10-10T22:00:35.305114+00:00",
+          "finishedAtUtc": "2026-10-10T22:01:43.897298+00:00",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage52-current-queue-deadline-process-scalar-r1-20261010/original-native-run.json",
+            "sha256": "499820eb18e5f1e29fea195632da0ea22a7c21bf53926e1ffba1a89b70a95bfc"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage52-current-queue-deadline-process-scalar-r1-20261010/results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "e44a1a43602b1cc9bebb79e50f10965b1c4f1a5717f9ffcb3b9d12d8ef7606e0",
+              "counters": {
+                "total": "5",
+                "executed": "5",
+                "passed": "5",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        }
+      ],
+      "nativeSlotsPerRunner": 50,
+      "originalAggregateUnitRecoveryExecutionOverlap": 56,
+      "unitExecuted": 220,
+      "realProcessRecoveryExecuted": 10,
+      "unitRecoveryExecuted": 230,
+      "unitRecoveryPassed": 230,
+      "unitRecoveryFailed": 0,
+      "unitRecoverySkipped": 0,
+      "focusedLocalRf3": {
+        "path": "/private/tmp/keyload-stage52-current-null-service-rf3-normal-r1-20261010/original-native-run.json",
+        "sha256": "e038e52e42b90e52b55df13b6959d0d1b7af6a9368e6c16cbc7ef5daec49d688"
+      },
+      "focusedLocalRf3Passed": 0,
+      "focusedLocalRf3Failed": 1,
+      "focusedLocalRf3ScalarExecuted": false,
+      "currentOriginalRf3FirstColdFailure": {
+        "path": "/private/tmp/keyload-stage52-original-null-first-cold-failure-r1-20261011.json",
+        "sha256": "8af76bfc3ac8c7cf6e6bd5fd630219d07c9a4f1df2694f17d52438dfa1404503"
+      },
+      "currentOriginalRf3FirstColdFailureCause": "Original scoped persisted schedule configure/occurrence/cancellation and unchanged subject-state checks reached ContinueAsync first cold. QueueLeaseRf3Cold killed all three nodes then awaited RestartContainerAsync/HealthWait serially while the other two remained stopped; native readiness stays HTTP503 without RF3 quorum. Six original cancellation causes are retained. No startup/quorum/time limit is weakened and no scalar successor is inferred.",
+      "originalCoherentR1Preparation": {
+        "path": "/private/tmp/keyload-stage52-current-coherent-solution-r1-20261010/original.json",
+        "sha256": "471db85e96f56dae2a66e60fa1548ebe941c518c1f9037c15c426fba14311997"
+      },
+      "originalCoherentR1Qualified": false,
+      "originalCoherentR1Cause": "Nominal child exit0 was refused by the unchanged producer-copy guard: Diagnostics.dll differed; no current-image-binding was published. Only R2 fully matching producer/test copies qualifies the current local build.",
+      "originalFormatterImportsRefusal": {
+        "path": "/private/tmp/keyload-stage52-current-coherent-format-r1-20261010/original.json",
+        "sha256": "2a0a8a2d4f67398c517c0ca77b0b64dc52a1d2d6891b25e8dd738aef32b19732"
+      },
+      "fullNativeCensus": {
+        "normal": {
+          "path": "/private/tmp/keyload-stage52-current-unit-inventory-r2-20261010/stdout.json",
+          "sha256": "7c91504381c13c8de741c705a0c4245b125365cfcb296167985e67c2b179b55d"
+        },
+        "scalar": {
+          "path": "/private/tmp/keyload-stage52-current-unit-scalar-inventory-r2-20261010/stdout.json",
+          "sha256": "7c91504381c13c8de741c705a0c4245b125365cfcb296167985e67c2b179b55d"
+        },
+        "casesEach": 3300,
+        "functionalContributors": 2876,
+        "requiredNonContributors": 424,
+        "groups": 5,
+        "executionsInferred": false
+      },
+      "nativeImageObservation": {
+        "path": "/private/tmp/keyload-stage52-current-independent-native-image-observation-r2-20261010.json",
+        "sha256": "45bf39fda30ab5bf3019a95cb82e2e509274e1476a21b4e029212bf4da01245e"
+      },
+      "nativeUnitDeclaredSources": 1735,
+      "nativeUnitMvid": "be39f9c1-27f8-43fb-a9d3-4372182dc289",
+      "nativeUnitPdbGuid": "eba3e4dd-1a51-457d-b461-08bcf1932021",
+      "canonicalCensusValidation": {
+        "path": "/private/tmp/keyload-stage52-current-native-census-final-r2-20261010/original-validation.json",
+        "sha256": "88f147c4debc27087d676c4641c78d46eb1f8dc6de463cfe96cf69f981237973"
+      },
+      "originalStaleInventoryRefusal": {
+        "path": "/private/tmp/keyload-stage52-current-native-census-stale-original-r1-20261010/original-validation.json",
+        "sha256": "f48db8a0e8d17b33f235261b6d659a93baf023dec56f3e0ca907b760ab0be6aa"
+      },
+      "inventoryRebind": {
+        "path": "/private/tmp/keyload-stage52-purpose-unit-census-enrollment-r2-20261010/final-native-range-binding-original.json",
+        "sha256": "4de8e3f1a0a47f7cae6d7daa6b223011f0d842d30ad34d852cee10781585a3a7"
+      },
+      "currentInventory": {
+        "path": "/Users/ksemenenko/Developer/KeyLoad/scripts/Features/CodeQuality/functional-coverage.unit-test-inventory.json",
+        "sha256": "b8e42e5241c1f1854e50ef19a9f11ed97933bd62a1b219ad9d39a3447da1b9e7"
+      },
+      "currentFiniteSourceProof": {
+        "path": "/private/tmp/keyload-stage52-current-finite-source-final-proof-r2-20261011.json",
+        "sha256": "05dbb096824180437486cc07b6e44527eee02151cd4837ef6f4910e27650dd64"
+      },
+      "currentGovernance": "PASS after owned fixture image-context join: preserved root prefix,27 projects,4 modules,local policies,unchanged empty skill inventory. Original concurrent check found16 transient duplicate copied project paths while the image preparation context was alive; no validator rule was relaxed.",
+      "productCoveragePercent": null,
+      "wholeTaskAccepted": false,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "whole104TaskCounts": {
+        "in_progress": 87,
+        "done": 17
       }
     }
   },
@@ -54363,6 +54664,20 @@
       },
       "scope": "Separately rooted private original whole-operation development receipts; not one-image49 execution or delivered-source Linux qualification.",
       "wholeTaskAccepted": false
+    },
+    "currentStageLIIDevelopment": {
+      "source": "Native empty-follower install/feed assertions now compare feed continuations only with independently observed local query-cut coordinates, retaining replica authority separately and all original event/result/receipt/cold gates.",
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage52-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "ab5cce1cc9d8c38b5b07506aa9c762cd3da782c66f2ffd3f2074184d6e8f8861"
+      },
+      "currentSourceCompiled": true,
+      "currentCompleteLinuxTaskQualification": "pending new delivered-source run",
+      "originalLinuxRunId": 38079749196,
+      "originalLinuxConclusion": "failure",
+      "originalNormal": "48passed/1failed; original local feed cut30 was incorrectly compared with replica commit31",
+      "originalScalar": "49passed; separate original receipt retained",
+      "wholeTaskAccepted": false
     }
   },
   "KL-036": {
@@ -55406,6 +55721,18 @@
       ],
       "scope": "Exact source-bound supporting whole local operations only; full original task acceptance remains open.",
       "wholeTaskAccepted": false
+    },
+    "currentStageLIIDevelopment": {
+      "source": "Joined genuine signed-purpose observer/codec same-cut witness, official SDK/MCP foreground whole-method source and unchanged native local admission; current snapshot fence continuation preserves existing UID.",
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage52-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "ab5cce1cc9d8c38b5b07506aa9c762cd3da782c66f2ffd3f2074184d6e8f8861"
+      },
+      "currentWholeLocalUnitNormalScalarPassed": true,
+      "currentSignedPurposeUnitExecutions": 2,
+      "publicMainSignedPurposeRf3": "not_executed",
+      "requiredGates": "Actual SDK/MCP wrong-purpose causal observation, leadership/migration/cold recovery, complete delivered Linux/RF3 and functional coverage remain open. Private original failed executions are not borrowed as current-main success.",
+      "wholeTaskAccepted": false
     }
   },
   "KL-044": {
@@ -55711,6 +56038,18 @@
         "AC-GRAPH-002"
       ],
       "scope": "Exact source-bound supporting whole local operations only; full original task acceptance remains open.",
+      "wholeTaskAccepted": false
+    },
+    "currentStageLIIDevelopment": {
+      "source": "Original owner/project/equality/traversal operations now include real policy removal/revoke/higher-epoch repair, exact no-effect/receipt/replay/native storage/cold/healthy continuations. Incoming public SDK/MCP/Q1 source and original native local admission are joined.",
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage52-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "ab5cce1cc9d8c38b5b07506aa9c762cd3da782c66f2ffd3f2074184d6e8f8861"
+      },
+      "currentWholeAffectedUnitNormalScalarPassed": true,
+      "privateIncomingPublicEvidenceScope": "Separate private source cohort previously passed normal/scalar; this is not current-main or delivered Linux RF3 evidence.",
+      "teamProduct": "Private native implementation and whole normal/scalar controls prepared for next finite main join; not yet joined or Linux-qualified.",
+      "generationVisibilityIdSet": "Native shared-budget/current-cut cache contract frozen; implementation and qualification open.",
       "wholeTaskAccepted": false
     }
   },
@@ -56615,6 +56954,23 @@
         "TASK-KL092-NULL-SERVICE-CONTROL-AUTHORITY-003"
       ],
       "scope": "Exact source-bound supporting whole local operations only; full original task acceptance remains open.",
+      "wholeTaskAccepted": false
+    },
+    "currentStageLIIDevelopment": {
+      "source": "Control recurring schedule now uses its distinct explicitly persisted SchedulerManage/QueuePublish/QueueInspect principal on the existing control lane. Subject deadline-null configuration and original worker scope are unchanged.",
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage52-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "ab5cce1cc9d8c38b5b07506aa9c762cd3da782c66f2ffd3f2074184d6e8f8861"
+      },
+      "currentControlScenarioReachedFirstCold": true,
+      "currentPublicWholeRf3Passed": false,
+      "originalFirstColdFailure": {
+        "path": "/private/tmp/keyload-stage52-original-null-first-cold-failure-r1-20261011.json",
+        "sha256": "8af76bfc3ac8c7cf6e6bd5fd630219d07c9a4f1df2694f17d52438dfa1404503"
+      },
+      "failureCause": "Original scoped persisted schedule configure/occurrence/cancellation and unchanged subject-state checks reached ContinueAsync first cold. QueueLeaseRf3Cold killed all three nodes then awaited RestartContainerAsync/HealthWait serially while the other two remained stopped; native readiness stays HTTP503 without RF3 quorum. Six original cancellation causes are retained. No startup/quorum/time limit is weakened and no scalar successor is inferred.",
+      "currentScalarRf3Executed": false,
+      "nextRequiredRepair": "Native Aspire start all three stopped owners before awaiting unchanged RF3 readiness, with original token and joined failure ledger.",
       "wholeTaskAccepted": false
     }
   },
@@ -58360,7 +58716,23 @@
           }
         }
       }
-    ]
+    ],
+    "currentStageLIIDevelopment": {
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage52-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "ab5cce1cc9d8c38b5b07506aa9c762cd3da782c66f2ffd3f2074184d6e8f8861"
+      },
+      "nativeCurrentUnitCensus": 3300,
+      "functionalContributors": 2876,
+      "requiredNonContributors": 424,
+      "coverageGroups": 5,
+      "allOriginalReviewedCasesPreserved": 3299,
+      "sourceBoundDeclaredUnitSources": 1735,
+      "sourceBindingComplete": true,
+      "actualWholeLocalUnitAndProcessExecutionsPassed": 230,
+      "functionalCoveragePercent": null,
+      "wholeTaskAccepted": false
+    }
   },
   "AdminDashboard": {
     "title": "Read-only адміністративна панель бази даних",

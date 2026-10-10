@@ -516,3 +516,13 @@ oracle correction. Preserve the original normal coverage failure and scalar
 result; execute both complete original Topic SQL classes on the successor
 compiled source. Native local checks are development evidence, and the
 original SDK/official MCP/Q1 RF3, process and delivered Linux gates stay open.
+
+
+## TASK-KL065-ROW-CANDIDATE-SWAP-001
+
+Architecture KL065/29.3 and REQ/AC-AUTH-005/007 + REQ/AC-QUERY-004/005 under ADR014 map to the same four `AcAisql008ReversedPointAndIndexPredicatesPreservePersistedRowOwnership` arguments. Preserve first point/index ownership refusals, then real acknowledged two-document owner swap with exact original bodies/revision CAS, same-engine normal/reversed current row filtering, independently literal full row/plan/current-cut, whole native no-effect images, exact original receipt/outcome replay, and joined same-root cold/current-policy healthy work. This does not claim a cache hit or add cache/public/store contracts.
+
+Ordered implementation: existing spec/ADR appendix → original case invokes feature-owned continuation → literal query/receipt/no-effect helper → original factory/cold cleanup helper. Native preflight all existing APIs and per-new-path creation refusal precede private code. Original typed limits, clocks, deadlines, four Args/UIDs and native50 remain. Rollback removes only this case extension/helpers and appendix, preserving every original case/assertion. Root joins main and runs required complete solution/Linux gates; local development controls are not RF3 or complete KL065 closure.
+
+
+Embedded durability clarification: actual ZoneTreeIdentityFile.Open creates ProcessDurable; DatabaseEngine constructor retains that identity profile and ExecuteBatch writes it into the complete original receipt. The four Unit cases independently require literal ProcessDurable, preserving true synchronous native process durability and never manufacturing RF3 acknowledgement proof. Original R4 normal4 failures from an erroneous QuorumProcessDurable fixture oracle are retained; scalar was not executed on that failed oracle. Full original request/receipt/native bytes/read cut/row/plan/replay/cold invariants remain exact. The native discovery child completed before four runtime results, but the runner was launched before waiting its pending process result; preserve that original orchestration ordering mistake separately and use sequential completed discovery before the corrected run. No durability options/product/timeouts/defaults changed.

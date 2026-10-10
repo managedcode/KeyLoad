@@ -13,6 +13,7 @@ internal static class NativeDiscoveryOmissionComposition
             var owner = new NativeDiscoveryOmissionOwner(options,
                 provider.GetRequiredService<IOptions<KeyLoad.Server.Features.ClusterRouting.RequestProbeExecutionOptions>>(),
                 provider.GetRequiredService<IHttpContextAccessor>());
+            owner.AttachPurposeObserver(provider.GetRequiredService<IOptions<KeyLoad.Server.Features.ClusterRouting.RequestProbeExecutionOptions>>());
             return blobObserver is null ? ActivatorUtilities.CreateInstance<OrleansNode>(provider, owner)
                 : ActivatorUtilities.CreateInstance<OrleansNode>(provider, owner, blobObserver);
         }
