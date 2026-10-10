@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Publishes one genuine new original-scope batch after abort, then checks literal receipt, replay and cold visibility.</summary>
 internal static class ControlledPartitionMovementAbortHealthy
 {
-    private const long HealthyReplicaIndex = 146;
+    private const long HealthyReplicaIndex = 166;
     private const long OwnershipEpoch = 1;
     private const long Revision = 1;
     private const string DocumentId = "post-abort-1";

@@ -54,7 +54,11 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
         { }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            PhysicalOwnerRegistrationLog.Failed(logger, error);
+            var observation = controller.ObserveFailure(deadline, stopping);
+            var failures = new List<Exception> { error };
+            ServerFailureObserver.Observe(() => PhysicalOwnerRegistrationLog.Failed(logger, error,
+                observation.Stage, observation.DeadlineCancelled, observation.StoppingCancelled), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }

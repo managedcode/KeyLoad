@@ -261,15 +261,15 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": true,
-    "canonicalFormatterPassed": true,
+    "canonicalBuildPassed": false,
+    "canonicalFormatterPassed": false,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": false,
     "localServerOnlyImageRegressionPassed": 1,
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage46 full Release build/formatter and exact ANN4 normal plus4 scalar passed; actual3297 native census and1706 PDB/source declarations validated after guarded four-row inventory repair. Original all-three cold start ordering repaired in source; delivered-source Linux, complete RF3/recovery, numeric coverage and feature qualification remain open.",
+    "verificationStage": "Stage47 guarded native source joined; compiler/analyzers0/0 and isolated owning Server factory build0/0. Original six-owner startup failure and Darwin pre-body abort failure retained. Current full solution build/formatter, complete Linux normal/scalar/process/RF3, fresh native-image census and numeric coverage remain pending; Stage46 original local PASS receipts remain historical.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -349,23 +349,17 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "passed": true,
-      "errors": 0,
-      "warnings": 0,
-      "sourceInputs": 6835,
-      "sourceDrift": false,
-      "producerImages": 32,
-      "matchingUnitProductionCopies": 30,
-      "unitImages": 398,
-      "originalReceiptSha256": "edf48544978620a8142c73739aba4c7b5537406662d69b66190190b58a132654",
-      "scope": "Full current Stage46 Release solution",
+      "passed": false,
+      "scope": "Stage47 current integrated full solution; mandatory exact-source Linux CI pending",
+      "previousLocalPassedSourceCommit": "ae1dbc843cf27d3b4733d877bbbb10ffa6fd4eae",
+      "nativeErrors": 0,
+      "nativeWarnings": 0,
       "developmentOnly": true
     },
     "currentFormatter": {
-      "passed": true,
-      "sourceDrift": false,
-      "originalReceiptSha256": "724e9303ff8ce5bd90a5e5f39b083134751acca1803373b3490395c61b448f03",
-      "scope": "Full current Stage46 canonical verify-no-changes",
+      "passed": false,
+      "scope": "Stage47 current integrated canonical formatter; mandatory exact-source Linux CI pending",
+      "previousLocalPassedSourceCommit": "ae1dbc843cf27d3b4733d877bbbb10ffa6fd4eae",
       "developmentOnly": true
     },
     "latestVerifiedNativeLinux": {
@@ -44400,7 +44394,7 @@
     },
     "currentWholeTaskOwners": {
       "availableTotalConcurrencySlots": 4,
-      "root": "document non-retry native preflight full-flow repair, authentic KL079 normal/scalar48 native case binding and actual Linux acceptance, integration/build/format/coverage/full Git delivery",
+      "root": "Guarded owning source integration, autonomous native fixes, original Linux failure evidence, current build/format/coverage gates and complete requested Git delivery",
       "workers": [
         {
           "owner": "sol61_read_finish",
@@ -45108,6 +45102,120 @@
       "sourceDrift": false,
       "originalReceiptSha256": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
       "developmentOnly": true
+    },
+    "previousCurrentBuildBeforeStageXLVII": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "sourceInputs": 6835,
+      "sourceDrift": false,
+      "producerImages": 32,
+      "matchingUnitProductionCopies": 30,
+      "unitImages": 398,
+      "originalReceiptSha256": "edf48544978620a8142c73739aba4c7b5537406662d69b66190190b58a132654",
+      "scope": "Full current Stage46 Release solution",
+      "developmentOnly": true
+    },
+    "previousCurrentFormatterBeforeStageXLVII": {
+      "passed": true,
+      "sourceDrift": false,
+      "originalReceiptSha256": "724e9303ff8ce5bd90a5e5f39b083134751acca1803373b3490395c61b448f03",
+      "scope": "Full current Stage46 canonical verify-no-changes",
+      "developmentOnly": true
+    },
+    "currentStageXLVIIDevelopment": {
+      "dateUtc": "2026-10-10T16:15:32.632707+00:00",
+      "scope": "Native owning physical-owner probe DI factory, original closed first-cause registration diagnostics and independently fixed active-abort healthy journal oracle",
+      "sourceJoined": true,
+      "nativeCompilerAndAnalyzers": {
+        "errors": 0,
+        "warnings": 0,
+        "originalReceipt": "/private/tmp/keyload-stage47-final-native-diagnostic-r1-20261010.json",
+        "originalReceiptSha256": "4af2caaa2f375b414b6c8a754e35a93c23e155ff7e6faa4883de5fe7d7dd2807",
+        "fullSdkBuildEquivalent": false
+      },
+      "sourcePostimages": [
+        {
+          "path": "src/KeyLoad.Server/Features/ClusterRouting/Diagnostics/PhysicalOwnerRegistrationLog.cs",
+          "sha256": "ed6d659f0349362a29c3a4bc9a6e83a6895661388b57dfb9786f871bc5d99dec"
+        },
+        {
+          "path": "src/KeyLoad.Server/Features/ClusterRouting/Execution/PhysicalOwnerRegistrationController.cs",
+          "sha256": "6674cf6574cee4ff8e2c2679691d806df26cc59156ecae7cb971a55e3167b4dc"
+        },
+        {
+          "path": "src/KeyLoad.Server/Features/ClusterRouting/Hosting/PhysicalOwnerRegistrationServices.cs",
+          "sha256": "8dd6c4e7ad322892d4b15e1184bbac0d3db81641e145f9ee1e88ec7df2e315b8"
+        },
+        {
+          "path": "src/KeyLoad.Server/Features/ClusterRouting/Hosting/PhysicalOwnerRegistrationWorker.cs",
+          "sha256": "8ff80753ec325457ba6f4548d08625256ca1668d67ac2402d1cfb8df21bd605f"
+        },
+        {
+          "path": "src/KeyLoad.Server/Features/ClusterRouting/Models/PhysicalOwnerRegistrationStage.cs",
+          "sha256": "69ffd04903e224e2ab1c459209422f7a2ae1dbdff3724f5585dd9fafcb50ec62"
+        },
+        {
+          "path": "tests/KeyLoad.IntegrationTests/Features/Messaging/Diagnostics/RemoteTransferStartupBuffer.cs",
+          "sha256": "d2bdeadaaa2d8fb32885462336ff1883bf8ed6b23eea2f1e18edce5ca2ca1067"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementAbortHealthy.cs",
+          "sha256": "08ba49fea07ce589fb3914a03b2d11f848bd320944650ae1dae958a22bd38349"
+        }
+      ],
+      "registrationFirstCause": {
+        "manifestSha256": "0ef3c1bc739198c04e61c9c227195a1c3a3633c1bd801c4e5cfb29151b0c4e3c",
+        "originalSixOwnerFailed": 1,
+        "originalSixOwnerPassed": 0,
+        "originalR65ProofSha256": "6202e8a7a051a4b4656686a22de7086e2d450a4deb39949b302b3084aa0e7a5d",
+        "directOriginalMiddlewareExceptionChainObtained": false,
+        "existingEventOnly": true,
+        "originalDiagnosticBoundsPreserved": true
+      },
+      "probeOwningFactory": {
+        "manifestSha256": "68d37bcd0af97a587a4c404ae309668d802c27b86ad307258ab8c8c70f380b3d",
+        "originalDiRejectedInternalOnlyConstructor": true,
+        "originalDiLogSha256": "7bb466d5bcee7b2f4230fa63f32b644f8e59afe742842b058b4b0e2f2432630a",
+        "sameExistingConstructorAndDependencies": true,
+        "isolatedServerBuildErrors": 0,
+        "isolatedServerBuildWarnings": 0,
+        "originalIsolatedBuildProofSha256": "4a003fd4d5b52355261735cd2e5feef46114b09fa3b4ffa972dbcb33b45c949e",
+        "wholeSixOwnerRf3Passed": false
+      },
+      "activeAbortHealthyOracle": {
+        "expectedLastIndex": 166,
+        "independentOriginalAbortSourceLastIndex": 165,
+        "freshSubmitCount": 1,
+        "sourceDerivedFromObservedOutcome": false,
+        "originalLiteralReceiptAndColdAssertionsPreserved": true,
+        "localOriginalSelectedTotal": 1,
+        "localOriginalSelectedFailed": 1,
+        "localOriginalSelectedPassed": 0,
+        "failure": "Darwin loopback SocketException before the operation body: Can't assign requested address",
+        "sourceImageEntryDrift": false,
+        "originalReceiptSha256": "82538dfa543f12a0073a53d5de38e06bf7e702180fab099b61edf20fc68c3a95",
+        "originalLogSha256": "ef2d94414bdaf2b2b694261b22590b1ef1a03d841cf95ba353c821a57fd4a7d4",
+        "wholeOriginalLinuxOperationPassed": false
+      },
+      "previousFullyVerifiedLocalSourceCommit": "ae1dbc843cf27d3b4733d877bbbb10ffa6fd4eae",
+      "currentFullSolutionBuildPassed": false,
+      "currentFullCanonicalFormatterPassed": false,
+      "nativeCaseInventorySha256": "6ce9df3553af4690458a95125696a4a775d860a76ab102910ef52ddb5edeecb9",
+      "nativeCaseInventoryChanged": false,
+      "currentFreshCompiledImageNativeCensusPassed": false,
+      "ordinaryNativeTestSlots": 50,
+      "requiredChecksEntryPoint": ".github/workflows/build-and-tests.yml; native run-tests.mjs and Aspire-owned real RF3 fixtures",
+      "fullRequiredChecksDelegatedToDeliveredSourceLinuxCi": true,
+      "wholeTaskAccepted": false,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "productCoveragePercent": null,
+      "remaining": [
+        "Current full solution Release build and canonical formatter",
+        "Current original complete normal/scalar Unit, genuine process recovery and SDK/official-MCP RF3 with original source/image/PDB/UID and joined cleanup evidence",
+        "Original six-owner two-cold/ACK/no-resurrection operation and Linux active-abort/healthy continuation",
+        "Numeric functional coverage, resource/fault/endurance and complete 104-task acceptance gates"
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -53490,6 +53598,16 @@
         "Numeric nested error +1 and universal future embedded SafeDetail bound",
         "Required recovery, durability/endurance and measured resource/performance gates"
       ]
+    },
+    "currentStageXLVIIAbortHealthyOracleDevelopment": {
+      "stage": "TEST-PIPELINE-001.currentStageXLVIIDevelopment",
+      "sourceJoined": true,
+      "fullLiteralOriginalReceiptPreserved": true,
+      "expectedHealthyLastIndex": 166,
+      "localSetupFailedBeforeOperation": true,
+      "linuxOriginalWholeOperationPassed": false,
+      "runtimeQualified": false,
+      "wholeTaskAccepted": false
     }
   },
   "KL-037": {
@@ -55454,6 +55572,18 @@
         "Source-bound full functional coverage and actual module/file/line/branch gap closure",
         "Required measured resource, endurance and fair performance qualification"
       ]
+    },
+    "currentStageXLVIIProbeOwnerDevelopment": {
+      "stage": "TEST-PIPELINE-001.currentStageXLVIIDevelopment",
+      "sourceJoined": true,
+      "owningNativeDiFactoryRepaired": true,
+      "privateServerBuildErrors": 0,
+      "privateServerBuildWarnings": 0,
+      "originalSixOwnerFirstCauseRetained": true,
+      "exactOriginalMiddlewareChainObtained": false,
+      "wholeSixOwnerRf3Passed": false,
+      "runtimeQualified": false,
+      "wholeTaskAccepted": false
     }
   },
   "KL-095": {

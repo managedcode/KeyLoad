@@ -1905,3 +1905,9 @@ flowchart LR
 ```
 
 Phase2 ancestry: the actual joined independent literal matrix now has68 families, including queue-order; cleanup has69 families plus its terminal iteration (70). This successor preserves Phase2 names exactly and uses strict fixed terminal236/abort source165/target71 totals. Historical source059 failed records remain unchanged evidence; they are not current qualification.
+
+### TASK-KL036-ABORT-HEALTHY-RECEIPT-001
+
+REQ-PMOVE-001 / AC-PMOVE-001 retain the complete independently specified abort ledger and healthy continuation. After the existing fixed source165/target71 assertions and genuine cold reopen, one previously unseen healthy command occupies native replica index166. ControlledPartitionMovementAbortHealthy's old146 oracle belongs to the retired smaller cleanup ledger. The same constant drives both the complete expected CommitReceipt and unchanged native LastIndex assertion; neither expected value may come from the actual outcome or production family count.
+
+Implementation order: freeze this ADR and the PartitionTransfer feature append; root native preview/apply of only the existing HealthyReplicaIndex literal; native compiler/analyzers and unchanged source/identity inventory review; canonical delivered-source Linux normal/scalar whole original active-abort and child-cut cases, then the existing process/RF3/coverage gates. Preserve every full receipt/image/model/authority check, original argument, cancellation/deadline and joined resource/reader cleanup. The original Linux1c28e false receipt assertions and local macOS pre-body loopback refusal remain original failed cohorts. No production implementation, public contract, storage format, family, topology, limit, selector or legacy compatibility changes. This test-oracle amendment is source-present until authentic whole-flow results exist; it cannot mark the ADR or KL036 fully qualified.

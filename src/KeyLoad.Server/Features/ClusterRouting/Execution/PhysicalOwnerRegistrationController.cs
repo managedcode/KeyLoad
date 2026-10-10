@@ -12,6 +12,7 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
     private readonly Lock state = new();
     private Guid? invokedCommand;
     private bool verified;
+    private PhysicalOwnerRegistrationStage stage = PhysicalOwnerRegistrationStage.MembershipPrerequisite;
 
     internal async Task RegisterAsync(DateTimeOffset expiresAt, CancellationToken cancellationToken)
     {
@@ -22,8 +23,11 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
         var initial = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        SetStage(PhysicalOwnerRegistrationStage.TargetProbes);
         var fingerprint = await probes.VerifyAllAsync(expiresAt, cancellationToken).ConfigureAwait(false);
+        SetStage(PhysicalOwnerRegistrationStage.Authentication);
         var administrator = await requests.AuthenticateAsync(cancellationToken).ConfigureAwait(false);
+        SetStage(PhysicalOwnerRegistrationStage.MembershipRevalidation);
         var final = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
         if (initial.ActiveFingerprint != final.ActiveFingerprint || fingerprint != final.ActiveFingerprint)
@@ -35,9 +39,10 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
         var commandId = PhysicalOwnerRegistrationIdentity.Create(request);
         cancellationToken.ThrowIfCancellationRequested();
         lock (state)
-        { invokedCommand = commandId; }
+        { invokedCommand = commandId; stage = PhysicalOwnerRegistrationStage.Registration; }
         var reply = await requests.RegisterAsync(administrator, request, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
+        SetStage(PhysicalOwnerRegistrationStage.DirectoryVerification);
         var directory = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PhysicalOwnerDirectoryV1
             ?? throw Errors.Fail(ErrorCode.Corruption, PhysicalOwnerDirectoryProtocol.Malformed);
         PhysicalOwnerDirectoryValidation.Validate(directory);
@@ -53,6 +58,19 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
         lock (state)
         { verified = true; }
+    }
+
+    private void SetStage(PhysicalOwnerRegistrationStage value)
+    {
+        lock (state)
+        { stage = value; }
+    }
+
+    internal (PhysicalOwnerRegistrationStage Stage, bool DeadlineCancelled, bool StoppingCancelled) ObserveFailure(
+        CancellationTokenSource deadline, CancellationTokenSource stopping)
+    {
+        lock (state)
+        { return (stage, deadline.IsCancellationRequested, stopping.IsCancellationRequested); }
     }
 
     private const int FirstOwner = 0;

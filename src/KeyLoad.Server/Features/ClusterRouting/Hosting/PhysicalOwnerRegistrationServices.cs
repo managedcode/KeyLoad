@@ -1,3 +1,4 @@
+using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -9,7 +10,13 @@ internal static class PhysicalOwnerRegistrationServices
         services.AddSingleton<PhysicalOwnerProbeWorkOwner>();
         services.AddSingleton<PhysicalOwnerStartupRequests>();
         services.AddSingleton<PhysicalOwnerProbeReceiver>();
-        services.AddSingleton<PhysicalOwnerProbeEndpoint>();
+        services.AddSingleton(static provider => new PhysicalOwnerProbeEndpoint(
+            provider.GetRequiredService<IOptions<NodeOptions>>(),
+            provider.GetRequiredService<PhysicalOwnerProbeReceiver>(),
+            provider.GetRequiredService<PhysicalOwnerProbeWorkOwner>(),
+            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
+            provider.GetRequiredService<TimeProvider>()));
     }
 
     internal static void Map(WebApplication app)
