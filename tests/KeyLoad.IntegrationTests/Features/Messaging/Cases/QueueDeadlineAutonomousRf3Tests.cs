@@ -5,4 +5,8 @@ internal sealed class QueueDeadlineAutonomousRf3Tests
     [Test]
     public Task ExistingScopedPrincipalRevokeColdRefusesDueThenRestoresAutonomousReadyAndOfficialClaimReceiptColdHealthy()
         => QueueDeadlineRf3Trial.RunAsync(TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck()
+        => NullQueueDeadlineRf3Trial.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

@@ -49,12 +49,14 @@ internal sealed class RuntimeJournalReaderFenceTests
     public async Task AcNative002OmittedCurrentCapabilityRejectsWithoutMutationAndRecovers()
     {
         using var fixture = new RuntimeJournalReaderFixture();
-        Guid nodeId;
+        StoreIdentity originalIdentity;
+        long originalPosition;
         using (var created = fixture.Open(fixture.CanonicalPath))
         {
-            nodeId = created.Identity.NodeId;
             RuntimeJournalReaderFixture.WriteRuntimeRecord(created, RuntimeJournalReaderFixture.RuntimeJournalKey,
                 RuntimeJournalReaderFixture.RuntimeJournalValue);
+            originalIdentity = created.Identity;
+            originalPosition = created.Position;
         }
 
         var identityPath = RuntimeJournalReaderFixture.IdentityPath(fixture.CanonicalPath);
@@ -68,22 +70,8 @@ internal sealed class RuntimeJournalReaderFenceTests
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await AssertInventoryUnchangedAsync(fixture.CanonicalPath, before);
-        await File.WriteAllBytesAsync(identityPath, currentIdentity);
-        using (var restored = fixture.Open(fixture.CanonicalPath))
-        {
-            await Assert.That(restored.Identity.NodeId).IsEqualTo(nodeId);
-            await Assert.That(restored.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
-            await Assert.That(RuntimeJournalReaderFixture.Read(restored, RuntimeJournalReaderFixture.RuntimeJournalKey))
-                .IsEquivalentTo(RuntimeJournalReaderFixture.RuntimeJournalValue);
-            RuntimeJournalReaderFixture.WriteRuntimeRecord(restored, RuntimeJournalReaderFixture.FollowupKey,
-                RuntimeJournalReaderFixture.FollowupValue);
-        }
-        using var reopened = fixture.Open(fixture.CanonicalPath);
-        await Assert.That(reopened.Identity.NodeId).IsEqualTo(nodeId);
-        await Assert.That(RuntimeJournalReaderFixture.Read(reopened, RuntimeJournalReaderFixture.RuntimeJournalKey))
-            .IsEquivalentTo(RuntimeJournalReaderFixture.RuntimeJournalValue);
-        await Assert.That(RuntimeJournalReaderFixture.Read(reopened, RuntimeJournalReaderFixture.FollowupKey))
-            .IsEquivalentTo(RuntimeJournalReaderFixture.FollowupValue);
+        await RuntimeJournalReaderRepairContinuation.RequireAsync(fixture, originalIdentity, originalPosition,
+            currentIdentity, TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 
     private static async Task AssertInventoryUnchangedAsync(string directory,

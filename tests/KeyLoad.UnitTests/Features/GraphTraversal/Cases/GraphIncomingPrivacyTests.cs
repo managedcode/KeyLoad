@@ -28,11 +28,12 @@ internal sealed class GraphIncomingPrivacyTests
         GraphCrossPartitionTestSupport.Commit(database, sourcePartition,
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, source, target, Label));
         GraphCrossPartitionTestSupport.Deliver(database, sourcePartition, target, EdgeId, 1);
-        GraphCrossPartitionTestSupport.CreateRowRestrictedReader(database, Reader);
+        var principal = GraphCrossPartitionTestSupport.CreateRowRestrictedReader(database, Reader);
 
         var page = GraphCrossPartitionTestSupport.ReadIncoming(database, target, principal: Reader);
 
         await Assert.That(page.Rows.IsEmpty).IsTrue();
+        await GraphIncomingRowAuthorityContinuation.RunAsync(database, source, target, principal, repairTarget: false);
     }
 
     [Test]
@@ -50,11 +51,12 @@ internal sealed class GraphIncomingPrivacyTests
         GraphCrossPartitionTestSupport.Commit(database, sourcePartition,
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, source, target, Label));
         GraphCrossPartitionTestSupport.Deliver(database, sourcePartition, target, EdgeId, 1);
-        GraphCrossPartitionTestSupport.CreateRowRestrictedReader(database, Reader);
+        var principal = GraphCrossPartitionTestSupport.CreateRowRestrictedReader(database, Reader);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             GraphCrossPartitionTestSupport.ReadIncoming(database, target, principal: Reader));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.NotFound);
+        await GraphIncomingRowAuthorityContinuation.RunAsync(database, source, target, principal, repairTarget: true);
     }
 }

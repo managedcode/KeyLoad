@@ -16,6 +16,7 @@ const projects = new Map([
 ]);
 const localImageArgumentsEnvironment = 'KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS';
 const localImageFilters = new Set(['/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
+  '/*/*/QueueDeadlineAutonomousRf3Tests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck',
   '/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes',
   '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage',
   '/*/*/TwoRf3MembershipProfileTests/*',

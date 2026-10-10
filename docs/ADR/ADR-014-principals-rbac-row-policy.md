@@ -32,3 +32,11 @@ flowchart LR
     Row --> Operation[Authorized read mutation delivery or query]
     Operation --> Audit[Safe outcome without protected payload]
 ```
+
+## KL-065 test-only implementation tranche, 2026-10-10
+
+Ordered stages: preserve the two original incoming privacy refusals; revision-fenced persisted row-owner repair; independent complete healthy page; persisted reduced scoped grant refusal/no effects; persisted revocation refusal/no effects; higher-epoch exact grant repair; original store join and same-root reopen; current-authority full page; exact original root repair receipts/outcome bytes and unchanged document revisions on replay; joined cold disposal. Ownership: existing GraphIncomingPrivacyTests plus GraphIncomingRowAuthorityContinuation, GraphIncomingRowAuthorityAssertions and GraphIncomingRowAuthorityCold under Unit GraphTraversal. Dependencies reuse GraphCrossPartitionTestSupport, GraphShortestPathFullStoreImage, the original embedded TestDatabaseEngineFactory.Capture composition and native ZoneTree. No public, persisted, resource, clock or topology change and no migration; rollback removes only the additive test extension. Root integrates guarded docs before source and runs complete solution/native Linux gates. Local normal/scalar original-case results are development evidence, not all-interface qualification.
+
+The source-proven embedded same-ID repair replay also retains the complete bounded native key/value image and physical cut: the cached path reauthorizes and returns before clock/effects, with no positive replicated apply index. Lexical cold-store ownership retains both the initiating operation failure and any distinct real disposal failure, emitted after cleanup.
+
+The two original graph cases use the embedded null physical-owner composition, distinct from the native configured-owner fixture. Cold reopen reuses exactly that existing centrally validated engine factory/default profiles and original clock; it does not call the configured-owner constructor with the graph catalog fixture incarnation, change that constructor guard, bootstrap or rewrite owner/store identity.

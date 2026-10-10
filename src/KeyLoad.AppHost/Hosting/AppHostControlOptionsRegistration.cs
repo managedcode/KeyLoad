@@ -53,6 +53,7 @@ internal static class AppHostControlOptionsRegistration
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
                 value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
                 value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
+                value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;

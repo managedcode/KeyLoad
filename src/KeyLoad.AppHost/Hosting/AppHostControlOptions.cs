@@ -11,6 +11,7 @@ internal sealed class AppHostControlOptions
     internal RequestCqrsProbeProfileSettings? RequestProbe { get; set; }
     internal RequestCqrsProbeProfileSettings? NativeDiscoveryOmission { get; set; }
     internal MovementFrameObservationProfileSettings? MovementFrameObservation { get; set; }
+    internal bool EventVectorReservedProbe { get; set; }
     internal bool RemoteDocumentReads { get; set; }
     internal bool RemotePartitionQueries { get; set; }
     internal bool ProtectedDocumentMovement { get; set; }

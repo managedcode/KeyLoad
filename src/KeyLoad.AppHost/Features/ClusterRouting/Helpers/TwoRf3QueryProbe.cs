@@ -17,6 +17,16 @@ internal static class TwoRf3QueryProbe
         var control = AppHostOptionsRegistration.Get(builder).Control.Value;
         if (control.RequestProbe is null)
         { return null; }
+        if (local is not null && image is null && control.NativeDiscoveryOmission is not null)
+        {
+            return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
+                benchmarkNodeCount: null, local);
+        }
+        if (local is not null && image is null && control.EventVectorReservedProbe)
+        {
+            return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
+                benchmarkNodeCount: null, local);
+        }
         if (!control.TwoRf3 || local is not null || image is null
             || !control.RemoteDocumentReads
             || !control.RemotePartitionQueries)

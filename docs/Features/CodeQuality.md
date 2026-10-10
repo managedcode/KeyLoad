@@ -2151,3 +2151,33 @@ current inventory without any exception or relaxed identity check. ADR-033/125
 already define this metadata contract. Root owns the source join and delivery;
 the local selector controls and WAL flows do not establish complete Linux/RF3
 qualification, numeric functional coverage or whole-task acceptance.
+
+### TASK-CQ-STAGE51-CURRENT-TEST-IDENTITY-001
+
+REQ-CQ-009 and AC-CQ-018/019/039 cover the guarded Stage51 current-capability
+repair/backup/cold continuations and exact typed local AppHost enrollment.
+Preserve the four original RuntimeJournalReaderFenceTests case identities and
+the original UnsupportedWalHeaderTests whole-operation identity,
+arguments, functional classification, REQ/AC links and coverage groups; rebind
+only their current source hash and native method ranges after the full current
+Release build, normal/scalar discovery and independent PE/PDB observation.
+The new NativeCapabilityLocalProfileTests and EventVectorReservedLocalProfileTests
+whole enrollment/refusal/repair operations are infrastructure required-controls,
+recorded as two required non-contributors from their actual native declarations
+and discovered identities.
+It does not contribute product coverage or establish a Docker/RF3 operation.
+Retain every other inventory entry and all 3297 existing identities; the actual
+controls make the expected reviewed census 3299. Verify that count through
+the actual native discovery before claiming a census. Preserve the original strict
+refusal, then require the unchanged native-census validator to match the complete
+current source-bound inventory. ADR-033/117/125 cover this join. Root owns the
+finite metadata review and delivery; complete Linux, genuine public RF3,
+numeric functional coverage and whole-task gates remain mandatory.
+
+The GraphIncomingPrivacyTests continuation preserves its two original hidden-source
+and hidden-target identities, arguments, REQ-GRAPH-XPART-003 / AC-GRAPH-XPART-003
+inventory links and coverage groups. Its added persisted row/grant/revoke/repair,
+full native image, original-mode cold reopen and exact receipt/outcome continuation
+does not add cases. Rebind only current source hash and actual native method ranges
+after the same coherent build/PE-PDB and original normal/scalar discovery. Preserve
+the initial strict metadata refusal and every other inventory identity and field.

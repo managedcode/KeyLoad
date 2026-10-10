@@ -20616,9 +20616,9 @@
       "methodName": "HiddenSourceEndpointIsOmittedFromIncomingProjection",
       "instanceName": "HiddenSourceEndpointIsOmittedFromIncomingProjection",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphIncomingPrivacyTests.cs",
-      "sourceSha256": "560da3426979e4c8fbc0f1fe59caabd42ac01087faa9f341f2d54c1b22b3440f",
+      "sourceSha256": "754db15d383a41d1c76038f86f657dbf9b05df8674df53d041c5b4cfccd6a80c",
       "lineNumber": 14,
-      "endLineNumber": 36,
+      "endLineNumber": 37,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -20634,9 +20634,9 @@
       "methodName": "HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
       "instanceName": "HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphIncomingPrivacyTests.cs",
-      "sourceSha256": "560da3426979e4c8fbc0f1fe59caabd42ac01087faa9f341f2d54c1b22b3440f",
-      "lineNumber": 38,
-      "endLineNumber": 59,
+      "sourceSha256": "754db15d383a41d1c76038f86f657dbf9b05df8674df53d041c5b4cfccd6a80c",
+      "lineNumber": 39,
+      "endLineNumber": 61,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -49838,9 +49838,9 @@
       "methodName": "AcNative002OmittedCurrentCapabilityRejectsWithoutMutationAndRecovers",
       "instanceName": "AcNative002OmittedCurrentCapabilityRejectsWithoutMutationAndRecovers",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs",
-      "sourceSha256": "68326335883fa082b41f464f1a287a131396aafcdb0e128776a2898adc7c0c74",
+      "sourceSha256": "fcfd272df2b1e20f77581255cacb0002f5bb45d010f63c8eb8567ddeca8c4aec",
       "lineNumber": 48,
-      "endLineNumber": 87,
+      "endLineNumber": 75,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -49856,9 +49856,9 @@
       "methodName": "AcNative002UnsupportedIdentityMagicRejectsWithoutChangingNativeFiles",
       "instanceName": "AcNative002UnsupportedIdentityMagicRejectsWithoutChangingNativeFiles",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs",
-      "sourceSha256": "68326335883fa082b41f464f1a287a131396aafcdb0e128776a2898adc7c0c74",
-      "lineNumber": 108,
-      "endLineNumber": 141,
+      "sourceSha256": "fcfd272df2b1e20f77581255cacb0002f5bb45d010f63c8eb8567ddeca8c4aec",
+      "lineNumber": 96,
+      "endLineNumber": 129,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -49874,7 +49874,7 @@
       "methodName": "AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation",
       "instanceName": "AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(0)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs",
-      "sourceSha256": "68326335883fa082b41f464f1a287a131396aafcdb0e128776a2898adc7c0c74",
+      "sourceSha256": "fcfd272df2b1e20f77581255cacb0002f5bb45d010f63c8eb8567ddeca8c4aec",
       "lineNumber": 10,
       "endLineNumber": 46,
       "classification": "functional",
@@ -49892,7 +49892,7 @@
       "methodName": "AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation",
       "instanceName": "AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(2)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs",
-      "sourceSha256": "68326335883fa082b41f464f1a287a131396aafcdb0e128776a2898adc7c0c74",
+      "sourceSha256": "fcfd272df2b1e20f77581255cacb0002f5bb45d010f63c8eb8567ddeca8c4aec",
       "lineNumber": 10,
       "endLineNumber": 46,
       "classification": "functional",
@@ -50278,9 +50278,9 @@
       "methodName": "UnsupportedJournalMagicOnCurrentIdentityIsRejectedWithoutTruncation",
       "instanceName": "UnsupportedJournalMagicOnCurrentIdentityIsRejectedWithoutTruncation",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/UnsupportedWalHeaderTests.cs",
-      "sourceSha256": "993b546b47f3f13cb26a26399ef2552e364a3cd2ea64f44d607bcb1b0c5df8b0",
+      "sourceSha256": "e72f22fdea0da861e06c2c7f08152fdd62ad71daefeab4a17e5d2ec62bed2374",
       "lineNumber": 8,
-      "endLineNumber": 19,
+      "endLineNumber": 23,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -65169,6 +65169,51 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Existing case-specific source review witness in immutable R27 classification; current source hash comparison recorded separately."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.EventVectorReservedLocalProfileTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.EventVectorReservedLocalProfileTests",
+      "methodName": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+      "instanceName": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/EventVectorReservedLocalProfileTests.cs",
+      "sourceSha256": "e8b8f6957045d165110dfa2c292631aecacb96fced95f8e67a0693ee8e73327a",
+      "lineNumber": 25,
+      "endLineNumber": 56,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-EVENTS-FIRST-OPEN-ORDERED-001",
+        "REQ-CRS-004"
+      ],
+      "acceptance": [
+        "AC-EVENTS-FIRST-OPEN-ORDERED-001",
+        "AC-CRS-004"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Whole exact AppHost reserved-profile enrollment, foreign/missing/false/nested enrollment refusal with unchanged owned files and modes, and same-profile repair; infrastructure control only, no signed reserved barrier, first-open, database operation, RF3 or product-coverage claim."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ClusterRouting.NativeCapabilityLocalProfileTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ClusterRouting.NativeCapabilityLocalProfileTests",
+      "methodName": "ExactLocalCapabilityProfileRejectsMissingEnrollmentWithoutChangingOwnedFilesThenAdmitsRepair",
+      "instanceName": "ExactLocalCapabilityProfileRejectsMissingEnrollmentWithoutChangingOwnedFilesThenAdmitsRepair",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/NativeCapabilityLocalProfileTests.cs",
+      "sourceSha256": "44ce339561c0d8fd5d58e0fa9267ccf321086dad9d9135585a99c322b87f2f51",
+      "lineNumber": 25,
+      "endLineNumber": 59,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-024",
+        "REQ-CRS-004"
+      ],
+      "acceptance": [
+        "AC-NATIVE-003",
+        "AC-NATIVE-006",
+        "AC-CRS-004"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Whole exact AppHost capability-profile enrollment, missing-configuration refusal with unchanged owned files and modes, and repaired enrollment; infrastructure control only, no image existence, signed omission, database operation, RF3 or product-coverage claim."
     }
   ],
   "coverageGroups": [

@@ -48,7 +48,7 @@ internal sealed class NativeDiscoveryOmissionProfile
         var selected = AppHostOptionsRegistration.Get(builder).Control.Value.NativeDiscoveryOmission;
         if (selected is null)
         { return null; }
-        if (image is null || local is not null)
+        if ((image is null) == (local is null))
         { throw Invalid(); }
         _ = RequestCqrsProbeProfilePaths.Validate(selected.Root, selected.SessionId, dataRoot,
             AppHostOptionsRegistration.Get(builder).RequestProbeFiles);

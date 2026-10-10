@@ -180,3 +180,9 @@ Authored source requires original native normal/scalar and Linux reruns; preserv
 original failure receipt.
 
 R2 full-image correction: unchanged4096edge corpus exceeds one4096record page. A feature-owned native Scan helper uses unchanged4096record pages, at most16pages under one Store.Read cut, strictly increasing original native keys as exclusive afterKey, no empty continuation and final HasMorefalse required. Every page is synchronous/joined before image returns. Full bytes are compared without dropping records; no query quota/deadline/corpus change.
+
+## KL-065 incoming projection negative to cold healthy flow, 2026-10-10
+
+REQ/AC-GRAPH-002/004 and REQ/AC-AUTH-005/007 map to the unchanged HiddenSourceEndpointIsOmittedFromIncomingProjection and HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows. The latter original source has no owner: genuine healthy continuation repairs its owner as well as the hidden target, rather than trusting a caller role. Full literal edge, delivered revision, projection and call-current cut follow row/grant repair; grant refusal and revocation preserve the full bounded canonical image. Same-root native close/open preserves node/incarnation and original outcomes; original row-repair command replay returns each complete receipt without a second document revision. Original declarations, limits and initial assertions remain.
+
+The source-proven embedded same-ID repair replay also retains the complete bounded native key/value image and physical cut: the cached path reauthorizes and returns before clock/effects, with no positive replicated apply index. Lexical cold-store ownership retains both the initiating operation failure and any distinct real disposal failure, emitted after cleanup.

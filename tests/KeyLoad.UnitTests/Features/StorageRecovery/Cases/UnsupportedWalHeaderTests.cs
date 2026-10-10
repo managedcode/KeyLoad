@@ -9,12 +9,16 @@ internal sealed class UnsupportedWalHeaderTests
     public async Task UnsupportedJournalMagicOnCurrentIdentityIsRejectedWithoutTruncation()
     {
         using var files = new WalFileFixture();
-        files.Initialize();
+        var originalIdentity = files.Initialize();
+        var originalJournal = await files.ReadJournalAsync();
+        var originalIdentityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
         var journal = WalFileFixture.CreateFrame([FirstPayloadByte], magic: UnsupportedJournalMagic);
         await File.WriteAllBytesAsync(files.JournalPath, journal);
         var before = await files.CaptureFilesAsync();
 
         await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), ErrorCode.FormatUnsupported);
         await files.AssertFilesUnchangedAsync(before);
+        await CurrentWalFrameRepairContinuation.RequireAsync(files, originalIdentity, originalJournal,
+            originalIdentityBytes, TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 }

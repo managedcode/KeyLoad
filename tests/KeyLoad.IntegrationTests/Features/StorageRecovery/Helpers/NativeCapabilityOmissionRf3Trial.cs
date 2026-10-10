@@ -1,3 +1,4 @@
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
 using KeyLoad.Server;
@@ -11,11 +12,13 @@ internal static class NativeCapabilityOmissionRf3Trial
         using var timeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(callerCancellation, timeout.Token);
         var failures = new List<Exception>();
+        LocalRf3ImageTestSession? localImage = null;
         TwoRf3MembershipWave? wave = null;
         PartitionMovementPublicParentRf3Seed? seed = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            wave = await TwoRf3MembershipWave.StartNativeCapabilityOmissionAsync(lifetime.Token).ConfigureAwait(false);
+            localImage = await LocalRf3ImageTestSession.StartIfSelectedAsync(lifetime.Token).ConfigureAwait(false);
+            wave = await TwoRf3MembershipWave.StartNativeCapabilityOmissionAsync(lifetime.Token, localImage?.Selection).ConfigureAwait(false);
             seed = await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, lifetime.Token).ConfigureAwait(false);
             await ExecuteAsync(wave, seed, official, lifetime.Token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -23,8 +26,12 @@ internal static class NativeCapabilityOmissionRf3Trial
         { wave?.RetainRoots(); }
         if (seed is { } ownedSeed)
         { await ServerFailureObserver.ObserveAsync(() => ownedSeed.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        var beforeWaveCleanup = failures.Count;
         if (wave is { } ownedWave)
         { await ServerFailureObserver.ObserveAsync(() => ownedWave.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        var waveCleanupSucceeded = wave is not null && failures.Count == beforeWaveCleanup;
+        if (localImage is { } ownedImage)
+        { await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(removeImage: waveCleanupSucceeded).AsTask(), failures).ConfigureAwait(false); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task ExecuteAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,

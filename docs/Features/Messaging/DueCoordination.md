@@ -425,3 +425,85 @@ Owned files: Core Messaging Queries/QueueDeadlineDiscovery; Unit Messaging Helpe
 Related REQ-MSG-004 / AC-MSG-004 and AC-MSG-092-DEADLINE: the existing five QueueDeadlineProcessRecoveryTests.ExpiredReadyDeadlineProcessCutRecoversWholeBodyCountersReceiptThenSameRootHealthy CommitStage instances must fault an actual due expiration, with the original native operation evaluated at or after its exact persisted BUSINESS ExpiresAt. A completed duration timer alone does not establish that absolute-clock precondition. In the existing QueueDeadlineCrashScenario, recompute the remaining duration from the same TimeProvider.System after each awaited timer completion and continue only until the unchanged original expiry is reached. Then seal the same native signed operation, persist its original operation file and arm the same position/stage fault boundary. This is a finite prerequisite wait under the original MessagingCrashTrial ninety-second lifetime and thirty-second joined cleanup; it adds no deadline, clock rounding, fake time, database retry or extra mutation.
 
 The original recovery assertion independently requires the sealed operation EvaluatedAt to reach its exact AdvanceQueueDeadline.ExpectedDeadline before checking canonical state. Preserve complete metadata/body/index/counters, successful receipt bytes, same-operation replay, second cold reopen and healthy work. The original Linux e92 MutationApplied case observed Ready rather than Expired; the original operation timestamp and failure outcome were not retained in the extracted log, so this source-proven missing precondition is not asserted as that historical failure's established cause. Root owns joined application, canonical build/formatter, the original five process-cut cases in normal/scalar profiles and exact-source Linux delivery. Existing Unit not-due/stale/revoked/paused and public RF3 deadline gates remain mandatory; no new native UID or acceptance/PASS count is inferred from this source change. Rollback reverts this fixture precondition and witness together while retaining the original product clock and persisted recovery contracts.
+### TASK-KL092-NULL-SERVICE-PUBLIC-OPERATION-001
+
+REQ-MSG-004 / AC-MSG-004 and AC-MSG-092-DEADLINE require an actual null-selected
+disabled queue branch with no queue effects. Preserve the existing selected-principal
+case and all original assertions. The additive
+QueueDeadlineAutonomousRf3Tests.NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck
+owns a fresh standard ClusterFixture, whose QueueDeadlinePrincipalId remains
+null, three actual Aspire Docker nodes, discovered SDK/official MCP endpoints
+and original caller/cleanup deadlines. Configure an ordinary scoped persisted
+worker through the administrator SDK; its existence never selects it as the
+service principal.
+
+Seed independently authored due/future messages and their complete inspection
+models. Retain the actual original commit receipt and public queue counters/items.
+The native null option disables queue turns; do not wait for an UnsupportedCapability
+dispatch log from a branch which never runs. In the same real RF3 fixture, configure
+a distinct control queue and one ordinary recurring schedule in the original
+atomic seed command. Its due instant equals the scheduled message's due instant;
+its original one-day interval keeps the next occurrence outside this flow.
+Require the complete independently literal autonomous first occurrence and schedule
+inspection through SDK, official MCP and both Q1 routes. No manual Emit or Receive
+may produce this witness. Then cancel the control through the real original
+revision-fenced command and replay its complete receipt. BEFORE any Receive of the
+subject queue, require both original message models, exact counters/items and
+the original seed receipt on all four routes. The recurring effect proves a real
+scheduler operation; it does not grant success to the disabled queue branch.
+
+Reopen the same owned volumes and repeat the full no-effects/receipt oracle.
+Then exercise the ordinary authorized official Receive and SDK ACK with all four
+replay routes, a second cold terminal/receipt check and fresh healthy enqueue,
+claim and ACK. Receive may itself promote due work; this proves ordinary caller
+health, never autonomous null-service success. No product logger, principal,
+clock, role, diagnostic endpoint, dispatcher, storage format or timeout changes.
+
+Ownership: Messaging Cases keeps the original case and adds this operation;
+Messaging Helpers owns the trial, public operations and genuine recurring control;
+Messaging Models owns only immutable operation observations. Existing fixture,
+native due service, SDK/MCP/Q1 and cold helpers are reused unchanged. Root joins
+these finite sources, exact local-filter enrollment and required native inventory,
+then builds/formats and runs the actual normal/scalar operation after heavy-owner
+settlement. Root commits/pushes the completed stage and retains exact delivered
+Linux evidence. Rollback removes only this added test/enrollment. Null service,
+leadership/migration, physical drift/lateness and whole KL092 remain OPEN until
+their separate genuine gates pass; no new UID or PASS is inferred from source.
+
+### TASK-KL092-NULL-SERVICE-OBSERVATION-002
+
+The original local normal R2 retained a timeout in NullQueueDeadlineRf3Observation:
+the observer incorrectly required Event2203, while DueCoordinationOptions and
+RecurringDueTurnState explicitly skip a null queue selection. Preserve that failed
+source/image/TRX receipt. Correct the test within the existing product contract,
+without enabling the branch, changing diagnostics or increasing deadlines.
+The bounded positive recurring control replaces the impossible log subscription;
+all caller lifetimes remain lexical and joined. Original control cancellation,
+complete occurrence/schedule/receipt and subject queue no-effects survive both
+same-volume cold cuts, followed by ordinary authorized subject claim/ACK and
+healthy work. Preserve the original test declaration/native identity and original
+public SDK/MCP/Q1 routes. Root owns canonical build, format, actual normal/scalar
+execution, exact Linux delivery and cleanup. This correction does not close
+leadership/migration, physical drift/lateness or complete KL092 acceptance.
+
+### TASK-KL092-NULL-SERVICE-CONTROL-AUTHORITY-003
+
+The original genuine local normal R3 failed with PermissionDenied at the new
+ConfigureRecurringSchedule mutation, with original source/image/TRX and successful
+owned-resource settlement retained. Native RequireScheduleCapability explicitly
+clears ClusterAdministrator before checking persisted SchedulerManage and
+QueuePublish grants. The fixture bootstrap administrator is not a data-authority
+substitute for this operation.
+
+Before capturing the unchanged original business due time, configure one separate
+persisted control principal with only SchedulerManage, QueuePublish and QueueInspect
+for the distinct scheduler-control queue. Keep the original subject worker grants
+unchanged. Commit the original two subject enqueue mutations under their original
+administrator caller and configure the independent recurring schedule through its
+scoped control credential. Retain both complete original receipts and replay them
+through the original SDK, official MCP and both Q1 routes; schedule inspect/cancel
+and replay use that same scoped creator. Recheck the control configure receipt,
+cancel receipt and full schedule/occurrence after each real same-volume cold cut.
+No production authorization, capability bypass, clock, deadline, role, native
+identity or quorum changes are permitted. Normal/scalar RF3 and whole KL092
+acceptance remain open until actual original evidence exists.

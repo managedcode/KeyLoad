@@ -31,6 +31,8 @@ internal static class RuntimeJournalReaderRepairContinuation
         await RequireOriginalAsync(reopened).ConfigureAwait(false);
         await Assert.That(RuntimeJournalReaderFixture.Read(reopened, RuntimeJournalReaderFixture.FollowupKey))
             .IsEquivalentTo(RuntimeJournalReaderFixture.FollowupValue, CollectionOrdering.Matching);
+        await RuntimeJournalReaderRepairBackupContinuation.RequireAsync(fixture, reopened,
+            originalIdentity, originalPosition + FollowupCommitCount, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task RequireOriginalAsync(ZoneTreeStore store)

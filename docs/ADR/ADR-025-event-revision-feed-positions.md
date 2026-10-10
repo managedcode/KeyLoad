@@ -121,3 +121,10 @@ The same registered serializer measures and admits the complete native row befor
 ### TASK-EVENT-VECTOR-CODEC-RESPONSIBILITY-033
 
 The bounded event-vector phase additions retain the original GrainRequestCodec API. Its exact native payload verification responsibility moves to feature-local `ClusterRouting/Serialization/GrainRequestPayloadVerification`; the façade borrows the same codec, engine and captured maximum token length. Evaluation remains token-length → native signature verification → original scope validation → configured MaxBatchBytes → native payload validation → DecodedGrainRequest. No new authority, configuration capture, allocation, alias, field ID, fallback or exception order is introduced. Existing signed-request negative/healthy operation tests remain the verification gate; source extraction and private compilation are not Linux/RF3 qualification.
+
+
+## TASK-KL084-RESERVED-LOCAL-PROFILE-001
+
+Traceability: existing REQ-EVENTS-FIRST-OPEN-ORDERED-001 / AC-EVENTS-FIRST-OPEN-ORDERED-001 and TASK-EVENTFEED-FIRST-RESERVED-OWNER-001, plus the R22 immutable failed-replay/abandonment/cleanup chain.
+
+The fixture-only EventVector reserved-phase enrollment explicitly selects the genuine two-RF3 protected query profile under a validated local image. It preserves the independent NativeDiscoveryOmission branch and ordinary local-profile refusal. The existing signed first-dispatch reserved barrier, original expiry, all six source/image/StartedAt identities and joined all18 locks remain required. R104 was a pre-operation profile rejection; profile admission, compilation and native provider Unit controls do not qualify FirstOpen or Linux RF3 acceptance. See the finite EventVectorReservedProbeProfile owner and original EventFeedFirstOpenRf3Tests whole-operation gate.
