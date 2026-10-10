@@ -43,10 +43,12 @@ internal static class LiveTailRf3Trial
         await SqlRf3Protocol.EqualAsync(new[] { new LiveQueryChange(FeedLiveRf3Protocol.DeletedSequence,
             deletion.Token, LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveRf3Protocol.DeletedRevision, null) }, deleted.Changes.ToArray());
         await LiveTailRf3Assertions.AllPathsAsync(reader, scenario, deletedRequest, deleted, token);
-        await RevokeAndRestoreAsync(administrator, reader, scenario, deletedRequest, token);
+        var repaired = await RevokeAndRestoreAsync(administrator, reader, scenario, deletedRequest, token);
+        await LiveRepairedRf3Continuation.RunAsync(owner, administrator, reader, scenario,
+            deletedRequest, repaired, token);
     }
 
-    private static async Task RevokeAndRestoreAsync(RequestCqrsRf3Callers administrator,
+    private static async Task<LiveQuerySnapshot> RevokeAndRestoreAsync(RequestCqrsRf3Callers administrator,
         RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest original, CancellationToken token)
     {
         var revoked = scenario.Identity.Principal with
@@ -69,5 +71,6 @@ internal static class LiveTailRf3Trial
         await Assert.That(healthy.HasMore).IsFalse();
         await Assert.That(healthy.ThroughSequence).IsEqualTo(FeedLiveRf3Protocol.DeletedSequence);
         await LiveTailRf3Assertions.AllPathsAsync(reader, scenario, new(scenario.Query, fresh.Cursor), healthy, token);
+        return fresh;
     }
 }

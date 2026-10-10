@@ -22,6 +22,12 @@ internal sealed class DocumentSessionIsolationRf3Tests
                 using var deadline = McpCallerDeadline.Create();
                 await ReplicaIsolationFlow.RunAsync(fixture, deadline.Token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
+            if (failures.Count > ReplicaIsolationFlowProtocol.Zero)
+            {
+                await ServerFailureObserver.ObserveAsync(() => fixture.SaveReplicaIsolationFailureDiagnosticsAsync(
+                    nameof(Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm)), failures)
+                    .ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         if (failures.Count == ReplicaIsolationFlowProtocol.Zero)
         { await Assert.That(Directory.Exists(root)).IsFalse(); }

@@ -90,4 +90,21 @@ internal static class RequestCqrsAuthorityFaultAssertions
         await Assert.That(actual.CommandId).IsEqualTo(expected.CommandId);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
+    internal static async Task JoinOriginalAndAssertDeniedAsync(bool useMcp,
+        Task<Result<CommitReceipt>>? sdkCall, Task<RequestCqrsFaultMcpObservation>? mcpCall,
+        RequestCqrsProbeMarkerRecord? heldMarker, string missingOwner)
+    {
+        if (useMcp)
+        {
+            var observation = await (mcpCall ?? throw new InvalidOperationException(missingOwner)).ConfigureAwait(false);
+            var requestId = await RequestCqrsAuthorityFaultAssertions.VerifyMcpUnauthorizedAsync(observation)
+                .ConfigureAwait(false);
+            await Assert.That(requestId).IsEqualTo((heldMarker
+                ?? throw new InvalidOperationException(missingOwner)).RequestId);
+            return;
+        }
+        await RequestCqrsAuthorityFaultAssertions.VerifySdkUnauthorizedAsync(
+            await (sdkCall ?? throw new InvalidOperationException(missingOwner)).ConfigureAwait(false)).ConfigureAwait(false);
+    }
+
 }

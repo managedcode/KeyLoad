@@ -47,6 +47,15 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         return new(result.Error);
     }
 
+    public Task<DueDispatchResult> ProcessQueueDeadlineAsync(QueueDeadlineHint hint, CancellationToken cancellationToken)
+        => QueueDeadlineCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), database, coordinator,
+            clock, options, runtimeJournalAdmission, DispatchWithOneUncertaintyRetry, cancellationToken);
+
+    public Task<DueDispatchResult> ProcessQueueTransferAsync(RemoteTransferCoordinationHint hint, CancellationToken cancellationToken)
+        => RemoteTransferCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), database, coordinator,
+            new(codec, database, services, GrainFactory, clock, chunkSerializer, routingOptions),
+            clock, options, runtimeJournalAdmission, cancellationToken);
+
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(RecurringDueCoordinatorGrain).FullName!,
             nameof(IDurableJobHandler.ExecuteJobAsync),

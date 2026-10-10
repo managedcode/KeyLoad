@@ -14,6 +14,5 @@ internal static class SearchMcpCatalogEntries
         (AnnRead, AnnReadRoute, KeyLoad.Orleans.GrainReadKind.ApproximateSearch, null),
         (AnnMaintain, AnnMaintainRoute, null, OperationKind.MaintainAnnIndex),
         (TextMaintain, TextMaintainRoute, null, OperationKind.MaintainTextIndex),
-        ("keyload_search_text_online_maintain", "/v1/search/text/online/maintain", null, OperationKind.MaintainOnlineTextIndex),
     ];
 }

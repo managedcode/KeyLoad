@@ -10,6 +10,7 @@ internal static class SqlSyntax
     internal const string Join = "JOIN";
     internal const string On = "ON";
     internal const string Events = "EVENTS";
+    internal const string TopicEvents = "TOPIC_EVENTS";
     internal const string QueueMessages = "QUEUE_MESSAGES";
     internal const string As = "AS";
     internal const string Where = "WHERE";

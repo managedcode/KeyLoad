@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
-    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042')][string] $Task,
+    [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079')][string] $Task,
     [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
 )
 Set-StrictMode -Version Latest
@@ -229,7 +229,7 @@ $taskContract = @($contract.tasks | Where-Object { $_.taskId -ceq $Task })
 if ($taskContract.Count -ne 1) { throw 'Task contract is absent or ambiguous.' }
 $censusOnly = $taskContract[0].Contains('censusSelections')
 if ($censusOnly) {
-    if ($Task -cnotin @('KL-034','KL-042') -or $taskContract[0].selections.Count -ne 0 -or
+    if ($Task -cnotin @('KL-034','KL-042','KL-079') -or $taskContract[0].selections.Count -ne 0 -or
         $taskContract[0].censusSelections -isnot [array] -or $taskContract[0].censusSelections.Count -eq 0 -or
         $taskContract[0].censusSelections.Count -gt 32) { throw 'Invalid census-only task admission.' }
     $selected = $taskContract[0].censusSelections

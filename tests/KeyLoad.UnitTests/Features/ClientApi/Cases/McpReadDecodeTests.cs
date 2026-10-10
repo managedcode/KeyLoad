@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-003: every body-bearing read DTO and exact no-body contracts.</summary>
 internal sealed class McpReadDecodeTests
 {
-    private const int BodyReadCount = 31;
+    private const int BodyReadCount = 32;
     private const string WrongCaseRequestKey = "Request";
     private const string ReferenceKey = "reference";
     private const string PrivateMarker = "private-value-that-must-not-appear-in-an-error";
@@ -31,7 +31,8 @@ internal sealed class McpReadDecodeTests
             await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
             await Assert.That(decoded.CommandKind).IsNull();
             await Assert.That(decoded.ReadKind).IsEqualTo(Find(item.Name).ReadKind);
-            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            var native = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            await McpNativePayloadAssertions.AssertNativeWritersAgree(item, native);
             await Assert.That(arguments.Count).IsEqualTo(count);
             await Assert.That(arguments[McpCanonicalTestData.RequestKey].GetRawText()).IsEqualTo(requestJson);
         }

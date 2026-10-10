@@ -5504,6 +5504,454 @@
           ]
         }
       ]
+    },
+    {
+      "taskId": "KL-079",
+      "selections": [],
+      "censusSelections": [
+        {
+          "selectionId": "unit-change-feed-tests",
+          "suite": "unit",
+          "filter": "/*/*/ChangeFeedTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "EveryCanonicalMutationAndItsCommitShareThePartitionOutbox",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "FailedBatchAndSameCommandRetryCannotPublishPartialOrDuplicateChanges",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "FailedProjectionEffectsDoNotAdvanceTheCheckpointAndDuplicateDeliveryIsSafe",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "RetentionPinsProtectUnprocessedAndRebuildHistory",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "AReleasedGenerationRejectsOldBatchesAndCachedCommandReceipts",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "FilteredProjectionPositionsAdvanceContiguouslyWithoutPublishingForeignResources",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTests",
+              "methodName": "FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-change-feed-read-tests",
+          "suite": "unit",
+          "filter": "/*/*/ChangeFeedReadTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "OutboxQuotaRollsBackTheEntireProducerAndPurgeReleasesCapacity",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "FeedResumesAnEmptyTailProjectsPiiAndRetainsDeletionMetadata",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "FeedNeverReturnsFormerOwnersDataAndAclChangesFenceOldCursors",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "FeedRevocationHistoryLossAndScopeMismatchAreExplicit",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "PublicFeedRequiresItsGrantAndCannotReadSystemProjectionPayloads",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedReadTests",
+              "methodName": "OutboxAndConsumerReceiptsRecoverAfterReopenAndCompaction",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedReadTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-change-feed-observed-work-tests",
+          "suite": "unit",
+          "filter": "/*/*/ChangeFeedObservedWorkTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedObservedWorkTests",
+              "methodName": "OriginalObservedNativeFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ChangeFeedObservedWorkTests.cs",
+              "parameterTypeFullNames": [
+                "System.Boolean"
+              ],
+              "sourceArgumentDeclarations": [
+                "false",
+                "true"
+              ],
+              "sourceInstances": 2
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-native-change-feed-cursor-tests",
+          "suite": "unit",
+          "filter": "/*/*/NativeChangeFeedCursorTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.NativeChangeFeedCursorTests",
+              "methodName": "NativeClaimsContinueRealChangesAndTamperingCannotReplaceTheCursor",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/NativeChangeFeedCursorTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-projection-progress-tests",
+          "suite": "unit",
+          "filter": "/*/*/ProjectionProgressTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "AFullOutboxAllowsProjectionProgressButStillStopsOrdinaryProducers",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "EachPinnedConsumerCanAdvanceIndependentlyAndCleanupUnblocksThePartition",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "AConsumerCannotSpendTheReserveAgainUntilTheRetainedPrefixAdvances",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "TheHardRecordCeilingRollsBackEffectsCheckpointAndReservationTogether",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "ReservedBytesAreAlsoBoundedAndAFailedEffectDoesNotConsumeThem",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "OneByteShortProjectionReserveRollsBackEffectsCheckpointAndReservation",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionProgressTests",
+              "methodName": "TheProgressFenceAndOriginalReceiptSurviveCheckpointCompactionAndReopen",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionProgressTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-projection-read-work-tests",
+          "suite": "unit",
+          "filter": "/*/*/ProjectionReadWorkTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.ProjectionReadWorkTests",
+              "methodName": "AcMp006ProjectionBatchReusesHeadAndStoredEntryBytes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/ProjectionReadWorkTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-outbox-purge-tests",
+          "suite": "unit",
+          "filter": "/*/*/OutboxPurgeTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.OutboxPurgeTests",
+              "methodName": "PurgeSubtractsExactUnicodePayloadBytesAndHonorsPinsAndPartialLimits",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.OutboxPurgeTests",
+              "methodName": "CorruptOutboxPointReadRollsBackPurgeAndAllowsHealthySubsequentWrite",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.OutboxPurgeTests",
+              "methodName": "MissingAndWrongSequencePointsCannotPartiallyPurge",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.OutboxPurgeTests",
+              "methodName": "PartialPurgeCountersSurviveReopenAndAcceptAnotherProducer",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ChangeFeeds.OutboxPurgeTests",
+              "methodName": "PurgeDoesNotReadEntriesBeyondRequestedCutAndNextEntryRemainsConsumable",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-live-query-tests",
+          "suite": "unit",
+          "filter": "/*/*/LiveQueryTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "ScalarLiveDeltasMatchTheSharedQueryOracleAcrossSeededMutationsAndReplay",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "ConcurrentInitialSnapshotAndTailNeverLoseACommittedDocument",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "ProtectedPredicateCanUseItsGrantWhileAllReturnedRowsRemainProjected",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "PolicyChangeAndRowAclChangeRequireANewSnapshot",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "UnsupportedRankingIncompleteSnapshotsAndDifferentQueryCursorsAreRejected",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryTests",
+              "methodName": "NonMatchingChangesAdvanceTheCursorAndHistoryLossRequiresResynchronization",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "unit-live-query-result-composition-tests",
+          "suite": "unit",
+          "filter": "/*/*/LiveQueryResultCompositionTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryResultCompositionTests",
+              "methodName": "LiveDeltaCumulativeCeilingRejectsBeforeRetentionAndOriginalPageBoundaryStillResumes",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryResultCompositionTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "recovery-projection-process-recovery-tests",
+          "suite": "recovery",
+          "filter": "/*/*/ProjectionProcessRecoveryTests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.RecoveryTests.ProjectionProcessRecoveryTests",
+              "methodName": "ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.Storage.ZoneTree.CommitStage",
+                "System.Int32"
+              ],
+              "sourceArgumentDeclarations": [
+                "CommitStage.HeaderWritten, 0",
+                "CommitStage.PayloadWritten, 0",
+                "CommitStage.JournalFlushed, 0",
+                "CommitStage.MutationApplied, 0",
+                "CommitStage.MutationApplied, 3",
+                "CommitStage.MutationApplied, 6",
+                "CommitStage.ApplyCompleted, 0"
+              ],
+              "sourceInstances": 7
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-feed-live-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/FeedLiveRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ChangeFeeds.FeedLiveRf3Tests",
+              "methodName": "OriginalCursorReconnectsAcrossColdRf3AndRechecksRevokedPersistedAccess",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Cases/FeedLiveRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            },
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ChangeFeeds.FeedLiveRf3Tests",
+              "methodName": "ConcurrentSnapshotAndCommittedTailRemainGapFreePrivateAndRevocable",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Cases/FeedLiveRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-empty-replica-snapshot-rf3-tests",
+          "suite": "rf3",
+          "filter": "/*/*/EmptyReplicaSnapshotRf3Tests/*",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.Features.ClusterReplication.EmptyReplicaSnapshotRf3Tests",
+              "methodName": "ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/EmptyReplicaSnapshotRf3Tests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-leader-loss-projection",
+          "suite": "rf3",
+          "filter": "/*/*/ClusterTests/ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.ClusterTests",
+              "methodName": "ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        },
+        {
+          "selectionId": "rf3-retained-follower-projection",
+          "suite": "rf3",
+          "filter": "/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+          "candidates": [
+            {
+              "className": "KeyLoad.IntegrationTests.ClusterTests",
+              "methodName": "RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes",
+              "sourcePath": "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+              "parameterTypeFullNames": [],
+              "sourceArgumentDeclarations": [],
+              "sourceInstances": 1
+            }
+          ]
+        }
+      ]
     }
   ],
   "maximumParallelTests": 50

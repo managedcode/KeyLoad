@@ -21,7 +21,12 @@ internal static class QueueProducerRf3Trial
                 ArgumentNullException.ThrowIfNull(original);
                 await QueueProducerRf3Refusals.ExecuteAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
+                var documentRefusal = AtomicProducerRf3DocumentRefusal.Create(seed);
+                var refusalProblem = await AtomicProducerRf3DocumentRefusal.ExecuteAsync(fixture, original,
+                    documentRefusal, null, failures, deadline.Token);
                 await QueueProducerRf3Cold.RestartAsync(fixture, deadline.Token);
+                _ = await AtomicProducerRf3DocumentRefusal.ExecuteAsync(fixture, original,
+                    documentRefusal, refusalProblem, failures, deadline.Token);
                 await QueueProducerRf3Replay.ExecuteAsync(fixture, original, failures, deadline.Token);
                 ServerFailureObserver.ThrowIfAny(failures);
                 await QueueProducerRf3Policy.RestoreAsync(fixture, original, failures, deadline.Token);

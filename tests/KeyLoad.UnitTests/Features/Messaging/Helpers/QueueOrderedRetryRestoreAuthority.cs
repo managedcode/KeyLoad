@@ -47,7 +47,11 @@ internal static class QueueOrderedRetryRestoreAuthority
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
         await RefusedAsync(database, state, operation, image);
         foreach (var prior in original.Outcomes.Where(item => item.Operation.Kind == OperationKind.Batch && item.Result.Error is null))
-        { await RefusedAsync(database, state, prior.Operation, image); }
+        {
+            await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
+            var current = database.NormalizeOperation(prior.Operation with { NativePayload = ReadOnlyMemory<byte>.Empty });
+            await RefusedAsync(database, state, current, image);
+        }
         await RequireAsync(database, state);
     }
 
@@ -94,6 +98,18 @@ internal static class QueueOrderedRetryRestoreAuthority
         await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.NativeValue).IsNull();
         await Assert.That(result.Json).IsNull();
+        await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
+    }
+
+    private static async Task OriginalAuthorityRefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,
+        ReplicatedOperation operation, string[] image)
+    {
+        var before = database.Store.Position;
+        var apply = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
+        var resolve = Assert.ThrowsExactly<KeyLoadException>(() => database.ResolveOutcome(operation));
+        await Assert.That(apply.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(resolve.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(database.Store.Position).IsEqualTo(before);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
     }
 

@@ -100,6 +100,15 @@ internal sealed record PartitionMovementCleanupMatrixRf3Fault(string Node, strin
             RequestCqrsProbeFileStore.ReplaceExactArm(owned.Directory, OriginalName, ExactBytes, OriginalBytes);
             return;
         }
+        if (Repair == PartitionMovementCleanupMatrixFaultRepair.RemoveUnfamiliarCopy)
+        {
+            if (OriginalName == FaultName)
+            { throw Invalid(); }
+            RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, OriginalName, ExactBytes);
+            RequestCqrsProbeFileStore.DeleteExactFile(owned.Directory, FaultName, ExactBytes);
+            RequestCqrsProbeFileStore.VerifyExactFile(owned.Directory, OriginalName, ExactBytes);
+            return;
+        }
         if (Repair == PartitionMovementCleanupMatrixFaultRepair.RemoveResurrection)
         {
             if (OriginalName != FaultName)

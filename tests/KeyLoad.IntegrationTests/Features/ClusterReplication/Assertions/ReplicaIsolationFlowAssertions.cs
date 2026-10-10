@@ -1,5 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 using static KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionReadRf3Protocol;
 using static KeyLoad.IntegrationTests.Features.ClusterReplication.ReplicaIsolationFlowProtocol;
 
@@ -46,10 +47,23 @@ internal static class ReplicaIsolationFlowAssertions
         { await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken); }
     }
 
-    internal static async Task ReplayedAsync(KeyLoadClient client, CommandRequest command, CommitReceipt receipt,
-        CancellationToken cancellationToken)
+    internal static async Task ReplayedAsync(KeyLoadClient client, McpOfficialClient official,
+        CommandRequest command, CommitReceipt receipt, CancellationToken cancellationToken)
     {
-        var replay = await McpCallerAssertions.SdkSuccessAsync(await client.CommitAsync(command, cancellationToken));
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        var before = await McpCallerAssertions.SdkSuccessAsync(
+            await client.OutboxStatusAsync(command.Partition, cancellationToken));
+        await EqualReceiptAsync(receipt,
+            await McpCallerAssertions.SdkSuccessAsync(await client.CommitAsync(command, cancellationToken)));
+        await EqualReceiptAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await official.CallAsync(McpCallerTools.DocumentsCommit, command, cancellationToken))).Value);
+        var call = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
+        await EqualReceiptAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(client, call, cancellationToken));
+        await EqualReceiptAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(official, call, cancellationToken));
+        await SqlRf3Protocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
+            await client.OutboxStatusAsync(command.Partition, cancellationToken)));
     }
+
+    private static async Task EqualReceiptAsync(CommitReceipt original, CommitReceipt actual)
+        => await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(
+            NativeSerialization.Serialize(original))).IsTrue();
 }

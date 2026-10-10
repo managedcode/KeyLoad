@@ -27,7 +27,10 @@ internal static class BlobCurrentFormatFixture
         + "\"indexes\":[],\"fieldPolicies\":[],\"headerPolicies\":[],"
         + "\"queuePolicy\":{\"maxAttempts\":5,\"maxStoredMessages\":100000,\"maxStoredBytes\":1073741824,"
         + "\"maxInFlightMessages\":1000,\"maxInFlightBytes\":67108864,\"maxLeaseSeconds\":300,"
-        + "\"retryBaseMilliseconds\":1000,\"retryMaxMilliseconds\":300000},"
+        + "\"retryBaseMilliseconds\":1000,\"retryMaxMilliseconds\":300000,"
+        + "\"maxDeadLetterMessages\":null,\"maxDeadLetterBytes\":null,"
+        + "\"orderingProfile\":\"CompetingConsumers\",\"parkedHeadPolicy\":\"Continue\","
+        + "\"retryJitter\":\"None\",\"retryExponentialFactor\":2},"
         + "\"eventRetention\":{\"maxEvents\":100000,\"maxBytes\":1073741824},"
         + "\"authority\":\"Document\",\"schemaVersion\":1,\"paused\":false,\"vectorProfiles\":[]}";
 

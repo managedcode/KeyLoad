@@ -57,7 +57,7 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     {
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(stopped, journalAdmission.SchedulingToken);
         var cancellationToken = lifetime.Token;
-        DueSweepCursor? cursor = null;
+        var turns = new RecurringDueTurnState();
         try
         {
             await consensus.TransportReady.WaitAsync(cancellationToken).ConfigureAwait(true);
@@ -66,7 +66,8 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
                 cancellationToken.ThrowIfCancellationRequested();
                 var cycleStarted = clock.GetTimestamp();
                 var observedPosition = consensus.AppliedPosition;
-                cursor = await RunCycleAsync(cursor, cancellationToken).ConfigureAwait(true);
+                await turns.RunAsync(options, RunCycleAsync, RunQueueCycleAsync, RunTransferCycleAsync,
+                    cancellationToken).ConfigureAwait(true);
                 await RecurringDueWait.WaitForChangeOrFallbackAsync(consensus, observedPosition,
                     options.Value.PollInterval, clock, cancellationToken).ConfigureAwait(true);
                 await RecurringDueWait.WaitForMinimumCadenceAsync(cycleStarted, options.Value.MinimumCycleCadence,
@@ -90,6 +91,12 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
             RecurringDueDiagnostics.ServiceFault(diagnostics, ErrorCode.OwnershipLost);
         }
     }
+
+    private Task<RemoteTransferPendingCursor?> RunTransferCycleAsync(RemoteTransferPendingCursor? cursor, CancellationToken token)
+        => RemoteTransferServiceCycle.RunAsync(database, consensus, grainFactory, clock, diagnostics, options, cursor, token);
+
+    private Task<QueueDeadlineCursor?> RunQueueCycleAsync(QueueDeadlineCursor? cursor, CancellationToken cancellationToken)
+        => QueueDeadlineServiceCycle.RunAsync(database, consensus, grainFactory, clock, diagnostics, options, cursor, cancellationToken);
 
     private async Task<DueSweepCursor?> RunCycleAsync(DueSweepCursor? cursor,
         CancellationToken cancellationToken)

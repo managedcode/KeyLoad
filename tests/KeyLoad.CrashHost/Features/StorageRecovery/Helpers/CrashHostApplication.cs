@@ -52,6 +52,12 @@ internal static class CrashHostApplication
     private static Task RunScenarioAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch
         {
+            global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferRepairCrashProtocol.AcceptMode
+                => global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Accept),
+            global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferRepairCrashProtocol.CompleteMode
+                => global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Complete),
+            global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferAttemptCrashProtocol.Mode
+                => global::KeyLoad.CrashHost.Features.Messaging.RemoteTransferAttemptCrashScenario.RunAsync(directory, store, boundary),
             global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashProtocol.Mode
                 => global::KeyLoad.CrashHost.Features.Messaging.TargetInboxCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
@@ -70,6 +76,7 @@ internal static class CrashHostApplication
                 => NativeAnnCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
+            QueueDeadlineCrashProtocol.Mode => QueueDeadlineCrashScenario.RunAsync(directory, store, boundary),
             QueueOrderedRetryCrashProtocol.Mode => QueueOrderedRetryCrashScenario.RunAsync(directory, store, boundary),
             QueueLifecycleCrashProtocol.Mode => QueueLifecycleCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),

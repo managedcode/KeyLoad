@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
+using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -17,8 +18,14 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
     internal static async Task<MessagingRf3Identity> CreateAsync(ClusterFixture fixture,
         string tenantId, IReadOnlyCollection<ScopeGrant> grants, ImmutableArray<string> fieldGrants,
         bool clusterAdministrator, CancellationToken cancellationToken)
+        => await CreateSelectedAsync(fixture, PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+            tenantId, grants, fieldGrants, clusterAdministrator, cancellationToken);
+
+    internal static async Task<MessagingRf3Identity> CreateSelectedAsync(ClusterFixture fixture, string principalId,
+        string tenantId, IReadOnlyCollection<ScopeGrant> grants, ImmutableArray<string> fieldGrants,
+        bool clusterAdministrator, CancellationToken cancellationToken)
     {
-        var principalId = PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
+        JsonData.Identifier(principalId);
         var principal = new PrincipalRecord(principalId, tenantId,
             [.. grants], fieldGrants)
         { ClusterAdministrator = clusterAdministrator };

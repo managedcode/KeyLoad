@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <KeyLoadNativeCoverageToolVersion>18.11.2</KeyLoadNativeCoverageToolVersion>
+    <KeyLoadNativeCoverageToolVersion>18.12.0</KeyLoadNativeCoverageToolVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
@@ -14,7 +14,7 @@
     <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.4" />
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.1" />
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.2" />
-    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.3" />
+    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.4" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.0" />
     <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.17" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.10" />
@@ -27,6 +27,7 @@
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.0" />
     <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.0-alpha.1" />
     <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.0-alpha.1" />
     <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.0" />

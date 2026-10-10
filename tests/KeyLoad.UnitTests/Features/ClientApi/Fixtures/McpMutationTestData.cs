@@ -28,6 +28,10 @@ internal static class McpMutationTestData
     private const string RedriveKind = "redriveQueueMessage";
     private const string CancelKind = "cancelQueueMessage";
     private const string ParkKind = "parkPendingQueueMessage";
+    private const string AdvanceTransferKind = "advanceQueueTransferAttempt";
+    private const string SchemaWitness = "invalid-schema-witness";
+    private const string DeadlineKind = "advanceQueueDeadline";
+    private const long NoLeaseVersion = 0;
     private const string UpsertEdgeKind = "upsertEdge";
     private const string DeleteEdgeKind = "deleteEdge";
     private const string ApplyReverseEdgeKind = "applyCrossPartitionReverseEdge";
@@ -52,13 +56,14 @@ internal static class McpMutationTestData
     private const string SealChunkKind = "sealSampleChunkWindow";
     private const string MergeChunkKind = "mergeSampleChunkWindow";
     private const string DropChunkKind = "dropSampleChunkWindow";
+    private const string AdvanceRepairKind = "advanceQueueTransferRepair";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
          EnqueueKind, RedriveKind, CancelKind, ParkKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
          ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind,
-         OpenChunkKind, SealChunkKind, MergeChunkKind, DropChunkKind];
+         OpenChunkKind, SealChunkKind, MergeChunkKind, DropChunkKind, DeadlineKind, AdvanceTransferKind, AdvanceRepairKind];
 
     internal static ImmutableArray<Mutation> Create() =>
     [
@@ -103,7 +108,13 @@ internal static class McpMutationTestData
         new MergeSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             McpCanonicalTestData.StableId, Revision),
         new DropSampleChunkWindow(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
-            McpCanonicalTestData.StableId, Revision)
+            McpCanonicalTestData.StableId, Revision),
+        new AdvanceQueueDeadline(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            MessageState.Scheduled, Revision, NoLeaseVersion, DateTimeOffset.UnixEpoch, QueueDeadlineKind.PromoteScheduled),
+        new AdvanceQueueTransferAttempt(new(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource),
+            McpCanonicalTestData.StableId, Revision, SchemaWitness),
+        new AdvanceQueueTransferRepair(new(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource),
+            McpCanonicalTestData.StableId, QueueTransferRepairStage.Accept, Revision, Revision, Revision, SchemaWitness)
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);

@@ -7,9 +7,9 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-002/003/005: canonical write identity and strict adapter arguments.</summary>
 internal sealed class McpCommandDecodeTests
 {
-    private const int CommandCount = 20;
+    private const int CommandCount = 21;
 
-    /// <summary>Exercises all twenty actual command DTOs with their original identities and complete public fields.</summary>
+    /// <summary>Exercises the twenty-one canonical command corpus DTOs with their original identities and complete public fields.</summary>
     [Test]
     public async Task AcMcp002EveryCommandPreservesItsCallerIdAndFullTypedPayload()
     {
@@ -23,7 +23,8 @@ internal sealed class McpCommandDecodeTests
             await Assert.That(decoded.CommandId).IsEqualTo(item.CommandId);
             await Assert.That(decoded.ReadKind).IsNull();
             await Assert.That(decoded.CommandKind).IsEqualTo(Find(item.Name).CommandKind);
-            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            var native = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            await McpNativePayloadAssertions.AssertNativeWritersAgree(item, native);
             await Assert.That(arguments.Count).IsEqualTo(count);
             await Assert.That(arguments[McpCanonicalTestData.RequestKey].GetRawText()).IsEqualTo(item.Request.GetRawText());
         }

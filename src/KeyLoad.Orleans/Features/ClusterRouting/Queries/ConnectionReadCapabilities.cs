@@ -82,6 +82,10 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
     {
+        if (EventVectorRequestScope.HandlesRead(kind))
+        {
+            return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, cancellationToken);
+        }
         if (kind == GrainReadKind.DistributedSearch)
         {
             return await DistributedSearchReadCapability.ExecuteAsync(services, principal, request, requestId,

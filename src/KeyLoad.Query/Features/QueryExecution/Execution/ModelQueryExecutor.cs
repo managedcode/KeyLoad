@@ -10,6 +10,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
 {
     private const string EventModelScanPath = "model-scan:events";
     private const string QueueModelScanPath = "model-scan:queue-messages";
+    private const string TopicModelScanPath = "model-scan:topic-events";
     private const int EmptyElementCount = 0;
     private const int InitialSequence = 0;
     private const long NoRetainedBytesLong = 0L;
@@ -30,8 +31,12 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var source = query.ModelSource!;
         var modelResource = ModelQueryPolicies.Rebase(resource);
         queries.Bind(principal, modelResource, request);
-        var accessPath = source.Kind == ModelQuerySourceKind.Events
-            ? EventModelScanPath : QueueModelScanPath;
+        var accessPath = source.Kind switch
+        {
+            ModelQuerySourceKind.Events => EventModelScanPath,
+            ModelQuerySourceKind.TopicEvents => TopicModelScanPath,
+            _ => QueueModelScanPath
+        };
         if (query.Explain)
         {
             return BuildModelExplain(view, principal, request, source, modelResource, budget, accessPath);

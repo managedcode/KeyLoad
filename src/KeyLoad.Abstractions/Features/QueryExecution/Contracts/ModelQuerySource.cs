@@ -6,13 +6,15 @@ public enum ModelQuerySourceKind
     /// <summary>Reads retained records of one event stream generation.</summary>
     Events,
     /// <summary>Inspects retained metadata and bodies of one queue lane.</summary>
-    QueueMessages
+    QueueMessages,
+    /// <summary>Reads retained records of one topic generation.</summary>
+    TopicEvents
 }
 
 /// <summary>Binds a model source within the query's partition and configured resource.</summary>
 /// <param name="Kind">The read-only source model.</param>
-/// <param name="Item">The event stream identifier or the query's same queue resource name.</param>
-/// <param name="Generation">The event generation; queue sources require one.</param>
+/// <param name="Item">The event stream identifier or the query's same queue/topic resource name.</param>
+/// <param name="Generation">The stream/topic generation; queue sources require one.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ModelQuerySource)]
 public sealed record ModelQuerySource([property: Orleans.Id(0)] ModelQuerySourceKind Kind,

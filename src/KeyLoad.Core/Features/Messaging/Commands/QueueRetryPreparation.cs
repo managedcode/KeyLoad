@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
 
     private ReplicatedOperation PrepareQueueRetryInView(IKeyValueView view, ReplicatedOperation operation)
     {
-        if (operation.Kind is not (OperationKind.Delivery or OperationKind.Receive))
+        if (operation.Kind is not (OperationKind.Delivery or OperationKind.Receive or OperationKind.Batch))
         { return operation; }
         var original = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         if (!original.RetryDecisions.IsEmpty)

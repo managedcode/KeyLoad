@@ -89,7 +89,15 @@ internal enum RequestCqrsLifecycleStage
     DueStatus,
     DueDiscovery,
     DueOutcomes,
-    DueConsume
+    DueConsume,
+    PersistRevocationAck,
+    RevocationAckAssert,
+    RevocationNoEffects,
+    ReleaseHeld,
+    ReleaseAndProducerObserved,
+    JoinOriginalDenied,
+    RetireRevocationArm,
+    FinalRevocationNoEffects
 }
 
 internal enum RequestCqrsNodeReadinessOutcome

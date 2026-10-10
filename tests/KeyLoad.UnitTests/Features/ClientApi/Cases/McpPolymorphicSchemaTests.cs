@@ -15,7 +15,7 @@ internal sealed class McpPolymorphicSchemaTests
     private const string Equal = "=";
     private const string And = "and";
     private const string UnknownKind = "unsupported-mutation";
-    private const int MutationCount = 35;
+    private const int MutationCount = 38;
     private const int QueryLimit = 10;
     private const string ComparisonKind = "comparison";
     private const string LogicalKind = "logical";

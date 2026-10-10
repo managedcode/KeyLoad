@@ -67,7 +67,7 @@ internal static class EmptyReplicaSnapshotStorage
         });
     }
 
-    internal static EmptyReplicaSnapshotCut ReadReplicaState(ClusterFixture fixture, string node, long tailPosition)
+    internal static EmptyReplicaSnapshotCut ReadReplicaState(ClusterFixture fixture, string node, long tailPosition, long installedSnapshot)
     {
         var root = RequireRoot(fixture, node);
         NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, NodeOwner));
@@ -82,23 +82,28 @@ internal static class EmptyReplicaSnapshotStorage
             if (entry is null)
             {
                 var failure = new InvalidOperationException("The actual ordered tail entry is absent.");
-                try
-                {
-                    Console.Error.WriteLine(System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        snapshot = state.Snapshot?.Index ?? 0L,
-                        commit = state.CommittedIndex,
-                        last = state.LastIndex,
-                        tail = tailPosition,
-                        hasEntry = false
-                    }));
-                }
-                catch (Exception diagnostic)
-                { throw new AggregateException(failure, diagnostic); }
+                RetainCutFailure(failure, installedSnapshot, state, tailPosition, hasEntry: false);
                 throw failure;
             }
             return new EmptyReplicaSnapshotCut(state, ReplicaProtocolCodec.Deserialize<ReplicaEntry>(entry));
         });
+    }
+
+    internal static void RetainCutFailure(Exception failure, long installedSnapshot, ReplicaHardState state,
+        long tailPosition, bool hasEntry)
+    {
+        var failures = new List<Exception> { failure };
+        KeyLoad.Server.ServerFailureObserver.Observe(() =>
+            Console.Error.WriteLine(System.Text.Json.JsonSerializer.Serialize(new
+            {
+                originalSnapshot = installedSnapshot,
+                snapshot = state.Snapshot?.Index ?? 0L,
+                commit = state.CommittedIndex,
+                last = state.LastIndex,
+                tail = tailPosition,
+                hasEntry
+            })), failures);
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal static void RequireImage(ClusterFixture fixture, string node, ReplicaSnapshot snapshot)

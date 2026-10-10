@@ -26,6 +26,11 @@ public sealed partial class DatabaseEngine
 
     private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
+        if (effect is AdvanceQueueDeadline deadline)
+        {
+            AuthorizeQueueDeadline(view, principal, partition, deadline);
+            return;
+        }
         if (effect is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
         {
             AuthorizeQueueLifecycle(view, principal, partition, effect);
@@ -41,7 +46,7 @@ public sealed partial class DatabaseEngine
             ReauthorizeVectorProjection(view, principal, partition, projection);
             return;
         }
-        if (effect is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
+        if (effect is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer or AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair)
         {
             ReauthorizeQueueTransfer(view, principal, partition, effect);
             return;

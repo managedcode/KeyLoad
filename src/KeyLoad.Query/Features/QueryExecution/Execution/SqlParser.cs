@@ -10,7 +10,6 @@ namespace KeyLoad.Query;
 public sealed class SqlParser
 {
     private const int MinimumPositiveCount = 1;
-    private const long FirstOrdinalLong = 1L;
     private const int DefaultDialectVersion = 1;
     private const int JoinDialectVersion = 2;
 
@@ -61,7 +60,7 @@ public sealed class SqlParser
         cursor.Need(SqlSyntax.Select);
         var projection = ReadProjection();
         cursor.Need(SqlSyntax.From);
-        var (collection, modelSource) = ReadSource();
+        var (collection, modelSource) = new ModelSqlSourceParser(cursor).Read();
         ReadAlias();
         var joinSyntax = new SqlJoinSyntax(cursor, dialectVersion);
         var join = joinSyntax.ReadJoin(alias);
@@ -86,62 +85,6 @@ public sealed class SqlParser
             throw SqlSyntax.Invalid();
         }
         return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource, join);
-    }
-
-    private (string Collection, ModelQuerySource? Source) ReadSource()
-    {
-        if (!cursor.Current.Quoted && cursor.Is(SqlSyntax.Events))
-        {
-            var collection = cursor.Current.Text;
-            cursor.Advance();
-            if (!cursor.Eat(SqlSyntax.OpenParen))
-            {
-                return (collection, null);
-            }
-            var streamSet = StringArgument();
-            cursor.Need(SqlSyntax.Comma);
-            var streamId = StringArgument();
-            var generation = FirstOrdinalLong;
-            if (cursor.Eat(SqlSyntax.Comma))
-            {
-                if (cursor.Current.Kind != SqlTokenKind.Number
-                    || !long.TryParse(cursor.Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out generation)
-                    || generation < MinimumPositiveCount)
-                {
-                    throw SqlSyntax.Invalid();
-                }
-                cursor.Advance();
-            }
-            cursor.Need(SqlSyntax.CloseParen);
-            return (streamSet, new(ModelQuerySourceKind.Events, streamId, generation));
-        }
-
-        if (!cursor.Current.Quoted && cursor.Is(SqlSyntax.QueueMessages))
-        {
-            var collection = cursor.Current.Text;
-            cursor.Advance();
-            if (!cursor.Eat(SqlSyntax.OpenParen))
-            {
-                return (collection, null);
-            }
-            var queue = StringArgument();
-            cursor.Need(SqlSyntax.CloseParen);
-            return (queue, new(ModelQuerySourceKind.QueueMessages, queue));
-        }
-
-        return (cursor.Identifier(), null);
-    }
-
-    private string StringArgument()
-    {
-        if (cursor.Current.Kind != SqlTokenKind.String)
-        {
-            throw SqlSyntax.Invalid();
-        }
-        var value = cursor.Current.Text;
-        cursor.Advance();
-        JsonData.Identifier(value);
-        return value;
     }
 
     private List<Selection> ReadProjection()

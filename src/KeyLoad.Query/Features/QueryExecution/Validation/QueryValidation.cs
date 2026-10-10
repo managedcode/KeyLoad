@@ -132,7 +132,9 @@ internal static class QueryValidation
         }
         if (source.Kind == ModelQuerySourceKind.Events && source.Generation < MinimumPositiveCount
             || source.Kind == ModelQuerySourceKind.QueueMessages
-            && (source.Generation != AdjacentElementOffset || source.Item != query.Collection))
+            && (source.Generation != AdjacentElementOffset || source.Item != query.Collection)
+            || source.Kind == ModelQuerySourceKind.TopicEvents
+            && (source.Generation < MinimumPositiveCount || source.Item != query.Collection))
         {
             throw Errors.Fail(ErrorCode.Validation, ModelQuerySourceArgumentsAreInvalidDetail);
         }

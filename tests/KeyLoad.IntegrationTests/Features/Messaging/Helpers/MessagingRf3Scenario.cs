@@ -23,22 +23,26 @@ internal sealed record MessagingRf3Scenario(PartitionRef SourcePartition, Partit
     internal QueueLaneRef DestinationQueue => new(DestinationPartition, DestinationQueueName);
     internal QueueLaneRef TimeoutQueue => new(SourcePartition, TimeoutQueueName);
 
-    internal static async Task<MessagingRf3Scenario> CreateAsync(ClusterFixture fixture,
+    internal static Task<MessagingRf3Scenario> CreateAsync(ClusterFixture fixture,
         CancellationToken cancellationToken)
+        => CreateAsync(fixture, null, cancellationToken);
+
+    internal static async Task<MessagingRf3Scenario> CreateAsync(ClusterFixture fixture,
+        QueuePolicy? destinationPolicy, CancellationToken cancellationToken)
     {
         var tenant = TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var source = new PartitionRef(tenant, Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var destination = new PartitionRef(tenant, Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureQueueAsync(administrator, new(source, SourceQueueName), cancellationToken);
-        await ConfigureQueueAsync(administrator, new(source, TimeoutQueueName), cancellationToken);
-        await ConfigureQueueAsync(administrator, new(destination, DestinationQueueName), cancellationToken);
+        await ConfigureQueueAsync(administrator, new(source, SourceQueueName), null, cancellationToken);
+        await ConfigureQueueAsync(administrator, new(source, TimeoutQueueName), null, cancellationToken);
+        await ConfigureQueueAsync(administrator, new(destination, DestinationQueueName), destinationPolicy, cancellationToken);
         return new(source, destination);
     }
 
     private static Task<ResourceDefinition> ConfigureQueueAsync(KeyLoadClient administrator, QueueLaneRef lane,
-        CancellationToken cancellationToken)
+        QueuePolicy? queuePolicy, CancellationToken cancellationToken)
     {
         var policy = new SensitiveFieldPolicy(SecretField, "messaging-private",
             RawReadGrant: string.Concat(SensitiveGrant, ".read"),
@@ -49,6 +53,8 @@ internal sealed record MessagingRf3Scenario(PartitionRef SourcePartition, Partit
             FieldPolicies = [policy],
             HeaderPolicies = [policy]
         };
+        if (queuePolicy is not null)
+        { resource = resource with { QueuePolicy = queuePolicy }; }
         var request = new ConfigureResourceRequest(lane.Partition.TenantId, lane.Partition.DatabaseId, resource);
         return CompleteConfigurationAsync(administrator, request, cancellationToken);
     }

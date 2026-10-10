@@ -48,7 +48,11 @@ public sealed partial class DatabaseEngine
         var reservationBytes = ReceiptReservationBytes(tx, request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint);
         RequireTokenBound(intentToken);
         var record = new RemoteTransferIntentRecord(request.SourceQueue, request.TransferId, request.Destination, principal.Id,
-            request.Message, fingerprint, QueueTransferState.OutputPending, intentToken, null, reservationBytes);
+            request.Message, fingerprint, QueueTransferState.OutputPending, intentToken, null, reservationBytes)
+        {
+            Attempts = RemoteTransferAttemptStateValidation.Initial(Limits.MaxQueueTransferAcceptAttempts),
+            Repairs = RemoteTransferRepairStateValidation.Initial(Limits.MaxQueueTransferRepairAttempts)
+        };
         var recordBytes = RemoteTransferStorage.SourceAccountedBytes(record);
         var capacity = RemoteTransferStorage.SourceCapacity(tx, request.SourceQueue);
         RemoteTransferStorage.RequireCapacity(capacity, recordBytes, Limits);
@@ -300,7 +304,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
         ValidateStoredIntentClaims(claims, record);
+        RequireRemoteTransferAttemptHistory(record, claims);
+        RequireRemoteTransferRepairHistory(view, record, claims);
         ValidateIntentRecordState(record);
+        RemoteTransferAttemptStateValidation.Require(record.Attempts);
         ValidateReceiptToken(view, record);
     }
 

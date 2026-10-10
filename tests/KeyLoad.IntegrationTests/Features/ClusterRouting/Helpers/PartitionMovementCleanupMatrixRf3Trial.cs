@@ -33,8 +33,8 @@ internal static class PartitionMovementCleanupMatrixRf3Trial
             cancellationToken).ConfigureAwait(false);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken).ConfigureAwait(false);
         var original = wave.QueryControls;
-        var faults = role == PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection
-            ? await PartitionMovementCleanupMatrixRetiredRf3Producer.ExecuteAsync(wave, seed, cancellationToken).ConfigureAwait(false)
+        var faults = HasObservedIssue(role)
+            ? await PartitionMovementCleanupMatrixRetiredRf3Producer.ExecuteAsync(wave, seed, role, cancellationToken).ConfigureAwait(false)
             : await PartitionMovementCleanupMatrixRf3Producer.ExecuteAsync(wave, seed, role, cancellationToken).ConfigureAwait(false);
         var failed = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest,
             PartitionMovementReceiverIssueFailoverRf3NativeCut.StageId(seed), cancellationToken).ConfigureAwait(false);
@@ -51,8 +51,12 @@ internal static class PartitionMovementCleanupMatrixRf3Trial
     private static Task RequireCutAsync(PartitionMovementPublicParentRf3Seed seed,
         PartitionMovementPublicParentRf3NativeCut[] before, PartitionMovementPublicParentRf3NativeCut[] after,
         PartitionMovementCleanupMatrixFaultRole role)
-        => role == PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection
+        => HasObservedIssue(role)
             ? PartitionMovementCleanupMatrixRetiredRf3Cut.RequireAsync(seed, before, after)
             : PartitionMovementActiveAdjunctRf3Assertions.RequireBusinessUnchangedAsync(seed, before, after);
 
+    private static bool HasObservedIssue(PartitionMovementCleanupMatrixFaultRole role)
+        => role is PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection
+            or PartitionMovementCleanupMatrixFaultRole.UnfamiliarMarker
+            or PartitionMovementCleanupMatrixFaultRole.UnfamiliarRelease;
 }

@@ -67,7 +67,7 @@ public sealed partial class DatabaseEngine
             placement.PlacementEpoch);
         return Result(new CommitReceipt(batch.CommandId, token,
             ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position,
-                commitToken: token), Durability));
+                commitToken: token, operation: operation), Durability));
     }
 
     private static OperationResult ExecuteMembership(IAtomicTransaction transaction, ReplicatedOperation operation)

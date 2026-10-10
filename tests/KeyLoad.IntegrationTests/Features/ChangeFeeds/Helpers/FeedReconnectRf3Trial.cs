@@ -16,6 +16,10 @@ internal static class FeedReconnectRf3Trial
         var scenario = await FeedLiveRf3Scenario.CreateAsync(fixture, administrator, token);
         string cursor;
         var reader = await owner.ConnectAsync(scenario.Identity.Secret, token);
+        await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            () => FeedLiveRf3Assertions.DeniedAsync(reader,
+                scenario.Feed with { MaxBytes = FeedLiveRf3Protocol.RejectedFirstEntryBytes },
+                ErrorCode.BudgetExceeded, token), token);
         {
             var initial = await FeedLiveRf3Assertions.FeedAsync(reader, scenario, scenario.Feed,
                 scenario.Receipt.Token, FeedLiveRf3Protocol.FirstSequence, FeedLiveRf3Protocol.FirstRevision,

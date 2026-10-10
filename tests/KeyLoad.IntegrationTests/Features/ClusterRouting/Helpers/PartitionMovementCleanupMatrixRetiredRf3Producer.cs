@@ -7,8 +7,13 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Only real released and linked observed predecessors establish the native retirement boundary.</summary>
 internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
 {
-    internal static async Task<PartitionMovementCleanupMatrixRf3Fault[]> ExecuteAsync(TwoRf3MembershipWave wave,
+    internal static Task<PartitionMovementCleanupMatrixRf3Fault[]> ExecuteAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, CancellationToken cancellationToken)
+        => ExecuteAsync(wave, seed, PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection, cancellationToken);
+
+    internal static async Task<PartitionMovementCleanupMatrixRf3Fault[]> ExecuteAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, PartitionMovementCleanupMatrixFaultRole role,
+        CancellationToken cancellationToken)
     {
         var controls = wave.QueryControls;
         var discovery = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave,
@@ -46,7 +51,7 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
             await RequireOriginalAbsenceSnapshotAsync(controls, other);
             if (original.IsCompleted)
             { throw new InvalidOperationException(PartitionMovementActiveAdjunctProtocol.EarlyTerminal); }
-            PartitionMovementCleanupMatrixRf3Fault.ResurrectRetired(controls, other, actualAdjunct, faults);
+            PublishFault(controls, other, primary, actualRelease, actualAdjunct, role, faults);
             var refused = await original.ConfigureAwait(false);
             await Assert.That(refused.IsFailed).IsTrue();
             await Assert.That(refused.Value).IsNull();
@@ -54,16 +59,33 @@ internal static class PartitionMovementCleanupMatrixRetiredRf3Producer
             await PartitionMovementCleanupMatrixRf3Assertions.RequireNoOriginalDisposalAsync(controls, actualAdjunct);
             await RequirePrimaryRefusalAsync(controls, primary);
         }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false);
-        foreach (var wait in waits)
-        { await ServerFailureObserver.ObserveAsync(() => JoinWaitAsync(wait, caller.Token), failures).ConfigureAwait(false); }
-        await ServerFailureObserver.ObserveAsync(async () => { _ = await original.ConfigureAwait(false); }, failures).ConfigureAwait(false);
+        await JoinOriginalAsync(caller, waits, original, failures).ConfigureAwait(false);
         controls.StopAdmission();
         controls.RetainEvidence();
         ServerFailureObserver.ThrowIfAny(failures);
         if (faults.Count != PartitionMovementCleanupMatrixProtocol.SelectedControlVoterCount)
         { throw new InvalidOperationException(PartitionMovementCleanupMatrixProtocol.MissingRefusal); }
         return faults.ToArray();
+    }
+
+    private static void PublishFault(RequestCqrsProbeFixture controls, Guid other,
+        RequestCqrsProbeMarkerRecord primary, RequestCqrsProbeMarkerRecord released,
+        RequestCqrsProbeMarkerRecord adjunct, PartitionMovementCleanupMatrixFaultRole role,
+        List<PartitionMovementCleanupMatrixRf3Fault> faults)
+    {
+        if (role == PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection)
+        { PartitionMovementCleanupMatrixRf3Fault.ResurrectRetired(controls, other, adjunct, faults); }
+        else
+        { PartitionMovementCleanupMatrixUnfamiliarFault.CopyActual(controls, other, primary, released, adjunct, role, faults); }
+    }
+
+    private static async Task JoinOriginalAsync(CancellationTokenSource caller,
+        IReadOnlyList<Task<RequestCqrsProbeMarkerRecord>> waits, Task original, List<Exception> failures)
+    {
+        await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures).ConfigureAwait(false);
+        foreach (var wait in waits)
+        { await ServerFailureObserver.ObserveAsync(() => JoinWaitAsync(wait, caller.Token), failures).ConfigureAwait(false); }
+        await ServerFailureObserver.ObserveAsync(async () => { await original.ConfigureAwait(false); }, failures).ConfigureAwait(false);
     }
 
     private static async Task<RequestCqrsProbeMarkerRecord> RequireMarkerAsync(

@@ -12,6 +12,12 @@ public sealed partial class DatabaseEngine
     {
         switch (mutation)
         {
+            case AdvanceQueueTransferAttempt advance:
+                AuthorizeAdvanceQueueTransferAttempt(view, principal, partition, advance);
+                break;
+            case AdvanceQueueTransferRepair repair:
+                AuthorizeAdvanceQueueTransferRepair(view, principal, partition, repair);
+                break;
             case CreateQueueTransfer create:
                 AuthorizeCreateQueueTransfer(view, principal, partition, create);
                 break;
@@ -31,6 +37,12 @@ public sealed partial class DatabaseEngine
     {
         switch (mutation)
         {
+            case AdvanceQueueTransferAttempt advance:
+                ReauthorizeAdvanceQueueTransferAttempt(view, principal, partition, advance);
+                break;
+            case AdvanceQueueTransferRepair repair:
+                ReauthorizeAdvanceQueueTransferRepair(view, principal, partition, repair);
+                break;
             case CreateQueueTransfer create:
                 ReauthorizeCreateQueueTransfer(view, principal, partition, create);
                 break;

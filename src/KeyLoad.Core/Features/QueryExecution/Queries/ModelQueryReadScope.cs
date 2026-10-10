@@ -15,6 +15,7 @@ public sealed partial class DatabaseEngine
     {
         const string WithModelQueryViewDetailText = "The model query source is unsupported.";
         const string QueueResourceNameMismatchDetail = "A queue model source must use its configured resource name.";
+        const string TopicResourceNameMismatchDetail = "A topic model source must use its configured resource name.";
         const int FirstSourceGeneration = 1;
 
         ArgumentNullException.ThrowIfNull(partition);
@@ -33,14 +34,26 @@ public sealed partial class DatabaseEngine
             budget.Check();
             var budgetedView = budget.CreateView(rawView);
             var principal = Principal(budgetedView, principalId, Clock.GetUtcNow());
-            var kind = source.Kind == ModelQuerySourceKind.Events ? ResourceKind.StreamSet : ResourceKind.WorkQueue;
-            var capability = source.Kind == ModelQuerySourceKind.Events ? Capability.EventsRead : Capability.QueueInspect;
+            var kind = source.Kind switch
+            {
+                ModelQuerySourceKind.Events => ResourceKind.StreamSet,
+                ModelQuerySourceKind.TopicEvents => ResourceKind.Topic,
+                _ => ResourceKind.WorkQueue
+            };
+            var capability = source.Kind switch
+            {
+                ModelQuerySourceKind.Events => Capability.EventsRead,
+                ModelQuerySourceKind.TopicEvents => Capability.TopicsRead,
+                _ => Capability.QueueInspect
+            };
             if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Item != resourceName)
             {
                 throw Errors.Fail(ErrorCode.Validation, QueueResourceNameMismatchDetail);
             }
+            if (source.Kind == ModelQuerySourceKind.TopicEvents && source.Item != resourceName)
+            { throw Errors.Fail(ErrorCode.Validation, TopicResourceNameMismatchDetail); }
             JsonData.Identifier(source.Item);
-            if (source.Kind == ModelQuerySourceKind.Events && source.Generation < FirstSourceGeneration)
+            if (source.Kind != ModelQuerySourceKind.QueueMessages && source.Generation < FirstSourceGeneration)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidEventSourceGenerationDetail);
             }
@@ -60,6 +73,16 @@ public sealed partial class DatabaseEngine
     public void VisitModelQueryRows(IKeyValueView view, PrincipalRecord principal, PartitionRef partition,
         ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, bool explain,
         Action<DocumentRecord> accept)
-        => Features.QueryExecution.ModelQueryReadRows.Visit(this, view, principal, partition, resource,
+    {
+        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(budget);
+        if (source.Kind == ModelQuerySourceKind.TopicEvents)
+        {
+            VisitTopicModelRows(view, partition, resource, source, budget, explain, accept);
+            return;
+        }
+        Features.QueryExecution.ModelQueryReadRows.Visit(this, view, principal, partition, resource,
             source, budget, explain, accept);
+    }
 }

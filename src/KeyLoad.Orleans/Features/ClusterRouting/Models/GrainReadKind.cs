@@ -140,5 +140,13 @@ public enum GrainReadKind
     /// <summary>Read complete globally ranked canonical text/vector results over explicit authorized physical owners.</summary>
     DistributedSearch,
     /// <summary>Execute one privately signed bounded phase under its original owner, statistics witness and expiry.</summary>
-    DistributedSearchLeaf
+    DistributedSearchLeaf,
+    /// <summary>Private authenticated complete native event-vector coverage capture.</summary>
+    EventVectorCoverage = 69,
+    /// <summary>Private authenticated immutable original event-vector outcome observation.</summary>
+    EventVectorOriginalOutcome = 70,
+    /// <summary>Private authenticated complete bounded source-page read.</summary>
+    EventVectorSources = 71,
+    /// <summary>Privately observes source attempt state or an authenticated actual target capacity failure.</summary>
+    QueueTransferCoordination = 72
 }

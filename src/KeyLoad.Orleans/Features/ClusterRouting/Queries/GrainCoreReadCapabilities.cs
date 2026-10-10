@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Core;
 
 namespace KeyLoad.Orleans;
@@ -14,6 +15,8 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
             GrainReadKind.EventSource => database.ReadEventSource(principal, GrainNativePayload.Read<ReadEventSourceRequest>(payload), cancellationToken),
             GrainReadKind.Subscription => database.GetSubscription(principal, GrainNativePayload.Read<GetSubscriptionRequest>(payload).Subscription),
             GrainReadKind.Message => Message(principal, GrainNativePayload.Read<InspectMessageRequest>(payload)),
+            GrainReadKind.QueueTransferCoordination => database.ReadRemoteTransferCoordination(principal,
+                GrainNativePayload.Read<RemoteTransferCoordinationReadRequest>(payload), cancellationToken),
             GrainReadKind.QueueTransfer => Transfer(principal, GrainNativePayload.Read<InspectQueueTransferRequest>(payload), cancellationToken),
             GrainReadKind.QueueTransferReceipt => TransferReceipt(principal,
                 GrainNativePayload.Read<InspectQueueTransferReceiptRequest>(payload), cancellationToken),
@@ -53,7 +56,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.ChangeFeed or GrainReadKind.OutboxStatus or GrainReadKind.ProjectionBatch
         or GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows
         or GrainReadKind.SampleRetention or GrainReadKind.SampleRollup or GrainReadKind.SampleChunkWindow or GrainReadKind.AggregateReplay
-        or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
+        or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt or GrainReadKind.QueueTransferCoordination
         or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
         or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges or GrainReadKind.OwnedDocument;
 

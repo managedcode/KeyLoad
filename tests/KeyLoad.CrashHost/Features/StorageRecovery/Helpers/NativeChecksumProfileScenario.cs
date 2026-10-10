@@ -5,7 +5,6 @@ using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.Security;
 using KeyLoad.Server;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.CrashHost;
@@ -28,6 +27,8 @@ internal static class NativeChecksumProfileScenario
         Console.WriteLine(NativeChecksumProfileProtocol.CompletionSignalPrefix + phase + NativeChecksumProfileProtocol.SignalSeparator + profile);
         Console.WriteLine($"{NativeChecksumProfileProtocol.CapabilitySignalPrefix}{phase}{NativeChecksumProfileProtocol.SignalSeparator}{profile}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.VectorCapability}{Vector.IsHardwareAccelerated}"
+            + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.Sse2Capability}{Sse2.IsSupported}"
+            + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.Avx2Capability}{Avx2.IsSupported}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.Sse42Capability}{Sse42.IsSupported}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.AdvSimdCapability}{AdvSimd.IsSupported}");
         return true;
@@ -43,7 +44,8 @@ internal static class NativeChecksumProfileScenario
     private static Task RunPhaseAsync(string root, ZoneTreeStore store, string phase) => phase switch
     {
         NativeChecksumProfileProtocol.Seed => SeedAsync(root, store),
-        NativeChecksumProfileProtocol.Extend => ContinueAsync(root, store),
+        NativeChecksumProfileProtocol.FirstAppend => ContinueAsync(root, store, NativeChecksumProfileProtocol.OneAppend),
+        NativeChecksumProfileProtocol.SecondAppend => ContinueAsync(root, store, NativeChecksumProfileProtocol.TwoAppends),
         NativeChecksumProfileProtocol.Cold => ColdAsync(root, store),
         _ => throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid)
     };
@@ -54,12 +56,14 @@ internal static class NativeChecksumProfileScenario
         if (profile is not (NativeChecksumProfileProtocol.Enabled or NativeChecksumProfileProtocol.Disabled)
             || settings.DotnetIntrinsics != profile
             || settings.ComPlusIntrinsics != profile
-            || profile == NativeChecksumProfileProtocol.Disabled && (Vector.IsHardwareAccelerated || Sse42.IsSupported || AdvSimd.IsSupported))
+            || profile == NativeChecksumProfileProtocol.Disabled && (Vector.IsHardwareAccelerated || Sse2.IsSupported || Avx2.IsSupported || Sse42.IsSupported || AdvSimd.IsSupported)
+            || profile == NativeChecksumProfileProtocol.Enabled && !(Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)))
         { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
     }
 
     private static async Task SeedAsync(string root, ZoneTreeStore store)
     {
+        NativeChecksumProfileCorpus.Seed(store);
         var database = CrashDatabase.Create(store);
         CommandIdempotencyCrashData.ConfigureResources(database);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, CommandIdempotencyCrashContract.Partition).Head.Tail;
@@ -73,60 +77,33 @@ internal static class NativeChecksumProfileScenario
         await NativeChecksumProfileEvidence.SaveAsync(root, store);
     }
 
-    private static async Task ContinueAsync(string root, ZoneTreeStore store)
+    private static async Task ContinueAsync(string root, ZoneTreeStore store, int append)
     {
         await NativeChecksumProfileEvidence.RequireAsync(root, store);
+        var previous = append - NativeChecksumProfileProtocol.OneAppend;
+        NativeChecksumProfileCorpus.Require(store, previous);
         var database = Open(store);
-        var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, CommandIdempotencyCrashContract.CommandEvidenceFile);
-        var receipt = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root, CommandIdempotencyCrashContract.ReceiptEvidenceFile);
-        var tail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile);
-        CommandIdempotencyCrashAssertions.RequireSameReceipt(database.ResolveOutcome(operation).Get<CommitReceipt>(), receipt);
-        CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, receipt, tail + NativeChecksumProfileProtocol.OriginalEffects, tail);
-        CommandIdempotencyCrashAssertions.AssertRetriesAndConflict(database, store, operation, receipt, tail + NativeChecksumProfileProtocol.OriginalEffects, tail);
-        var followUpOperation = CreateFollowUp();
-        var followUp = database.Apply(followUpOperation).Get<CommitReceipt>();
-        CommandIdempotencyCrashAssertions.RequireSameReceipt(database.Apply(followUpOperation).Get<CommitReceipt>(), followUp);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(root, NativeChecksumProfileProtocol.FollowUpCommandFile, followUpOperation);
-        CommandIdempotencyCrashAssertions.RequireFollowUp(followUp);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(root, NativeChecksumProfileProtocol.FollowUpReceiptFile, followUp);
-        await ColdModelsAsync(root, database, store);
+        await RequireModelsAsync(root, database, store, previous, replay: true);
+        await NativeChecksumProfileOperations.AppendAsync(root, database, store, append);
+        NativeChecksumProfileCorpus.Append(store, append);
+        await RequireModelsAsync(root, database, store, append, replay: false);
         await NativeChecksumProfileEvidence.SaveAsync(root, store);
     }
 
     private static async Task ColdAsync(string root, ZoneTreeStore store)
     {
         await NativeChecksumProfileEvidence.RequireAsync(root, store);
-        await ColdModelsAsync(root, Open(store), store);
+        NativeChecksumProfileCorpus.Require(store, NativeChecksumProfileProtocol.TwoAppends);
+        await RequireModelsAsync(root, Open(store), store, NativeChecksumProfileProtocol.TwoAppends, replay: false);
         await NativeChecksumProfileEvidence.RequireAsync(root, store);
     }
 
-    private static async Task ColdModelsAsync(string root, DatabaseEngine database, ZoneTreeStore store)
+    private static async Task RequireModelsAsync(string root, DatabaseEngine database, ZoneTreeStore store,
+        int appends, bool replay)
     {
-        var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, CommandIdempotencyCrashContract.CommandEvidenceFile);
-        var receipt = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root, CommandIdempotencyCrashContract.ReceiptEvidenceFile);
-        var followUp = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root, NativeChecksumProfileProtocol.FollowUpReceiptFile);
-        var followUpOperation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root, NativeChecksumProfileProtocol.FollowUpCommandFile);
-        CommandIdempotencyCrashAssertions.RequireSameReceipt(database.ResolveOutcome(followUpOperation).Get<CommitReceipt>(), followUp);
-        var tail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile);
-        CommandIdempotencyCrashAssertions.RequireSameReceipt(database.ResolveOutcome(original).Get<CommitReceipt>(), receipt);
-        var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(CommandIdempotencyCrashContract.Partition,
-            CrashFixtureValues.Principal, CommandIdempotencyCrashContract.FollowUpCommandId)))?.Result.Get<CommitReceipt>()
-            ?? throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid);
-        CommandIdempotencyCrashAssertions.RequireSameReceipt(retained, followUp);
-        CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, receipt, tail + NativeChecksumProfileProtocol.HealthyEffects, tail);
-        CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal,
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId)),
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId),
-            NativeChecksumProfileProtocol.InitialRevision, CommandIdempotencyCrashContract.FollowUpJson);
-    }
-
-    private static ReplicatedOperation CreateFollowUp()
-    {
-        var id = CommandIdempotencyCrashContract.FollowUpCommandId;
-        var request = new CommandRequest(id, CommandIdempotencyCrashContract.Partition,
-            [new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId,
-                CommandIdempotencyCrashContract.FollowUpJson, NativeChecksumProfileProtocol.EmptyRevision)]);
-        return CrashDatabase.Operation(OperationKind.Batch, request, id);
+        await NativeChecksumProfileOperations.RequireOriginalAsync(root, database, store, appends, replay);
+        for (var append = NativeChecksumProfileProtocol.OneAppend; append <= appends; append++)
+        { await NativeChecksumProfileOperations.RequireAppendAsync(root, database, store, append); }
     }
 
     private static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),

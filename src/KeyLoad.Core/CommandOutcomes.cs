@@ -131,7 +131,7 @@ public sealed partial class DatabaseEngine
         foreach (var effect in effects)
         {
             if (effect is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage
-                or global::KeyLoad.ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer
+                or global::KeyLoad.ApplyVectorProjection or CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer or AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair
                 or ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
             {
                 ReauthorizeEffect(view, principal, partition, effect);

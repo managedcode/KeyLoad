@@ -29,7 +29,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeFailures = new(StringComparer.Ordinal);
     private const string RequestFailureMarker = "Database request failed";
-    private const string RpcFailureMarker = "Initial Orleans RPC failed";
+    private const string RpcFailureMarker = "Orleans request stream failed";
     private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
     private const int FailureLinesPerNode = 3;
     private const int MaximumCapturedLineBytes = 1_024;
@@ -60,6 +60,12 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     /// <param name="peerSecret">The fixture's private shared discovery credential.</param>
     /// <param name="cancellationToken">The caller's test deadline, linked to the diagnostic request bound.</param>
     internal async Task SaveAsync(ReadOnlyMemory<byte> peerSecret, CancellationToken cancellationToken)
+        => await SaveCoreAsync(peerSecret, null, cancellationToken).ConfigureAwait(false);
+
+    internal Task SaveOwnedAsync(ReadOnlyMemory<byte> peerSecret, string output, CancellationToken cancellationToken)
+        => SaveCoreAsync(peerSecret, output, cancellationToken);
+
+    private async Task SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string? ownedOutput, CancellationToken cancellationToken)
     {
         var nodeGroups = new List<IEnumerable<string>>();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
@@ -90,7 +96,8 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var output = Path.Combine(repository.FullName, ClusterFixtureProtocol.ArtifactDirectory,
             ClusterFixtureProtocol.QualificationDirectory);
         Directory.CreateDirectory(output);
-        var path = failureReceipts.Save(output, bounded);
+        var path = ownedOutput is null ? failureReceipts.Save(output, bounded)
+            : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
     }
 

@@ -30,6 +30,16 @@ internal sealed class ClusterFailureReceipts
     /// <param name="output">The fixture-owned diagnostic directory.</param>
     /// <param name="bounded">Lines already clipped to the existing privacy, line and byte budgets.</param>
     /// <returns>The unchanged last-failure artifact path.</returns>
+    internal static string SaveImmutable(string output, string[] bounded)
+    {
+        var path = Path.Combine(output, ClusterFixtureProtocol.DiagnosticsFileName);
+        using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        using var writer = new StreamWriter(stream, leaveOpen: true);
+        foreach (var line in bounded)
+        { writer.WriteLine(line); }
+        return path;
+    }
+
     internal string Save(string output, string[] bounded)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(output);

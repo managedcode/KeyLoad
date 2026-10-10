@@ -8,6 +8,8 @@ internal static class DueCoordinatorAliases
     internal const string Coordinator = "keyload.orleans.messaging.due-coordinator.v1";
     internal const string Result = "keyload.orleans.messaging.due-dispatch-result.v1";
     internal const string Process = nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync);
+    internal const string ProcessQueue = nameof(IRecurringDueCoordinatorGrain.ProcessQueueDeadlineAsync);
+    internal const string ProcessTransfer = nameof(IRecurringDueCoordinatorGrain.ProcessQueueTransferAsync);
     internal const int CoordinatorInterfaceVersion = 1;
 }
 
@@ -33,6 +35,12 @@ internal interface IRecurringDueCoordinatorGrain : global::Orleans.IGrainWithStr
 {
     [global::Orleans.Alias(DueCoordinatorAliases.Process)]
     Task<DueDispatchResult> ProcessDueAsync(DueWorkHint hint, CancellationToken cancellationToken);
+
+    [global::Orleans.Alias(DueCoordinatorAliases.ProcessQueue)]
+    Task<DueDispatchResult> ProcessQueueDeadlineAsync(QueueDeadlineHint hint, CancellationToken cancellationToken);
+
+    [global::Orleans.Alias(DueCoordinatorAliases.ProcessTransfer)]
+    Task<DueDispatchResult> ProcessQueueTransferAsync(RemoteTransferCoordinationHint hint, CancellationToken cancellationToken);
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(DueCoordinatorAliases.Result)]

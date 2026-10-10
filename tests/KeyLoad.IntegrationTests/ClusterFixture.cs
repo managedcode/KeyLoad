@@ -6,6 +6,7 @@ using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.TestInfrastructure;
+using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
@@ -17,7 +18,9 @@ namespace KeyLoad.IntegrationTests;
 internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
+    private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
+    private readonly Features.Messaging.QueueDeadlineRf3Selection? queueDeadline;
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly int? snapshotThreshold;
@@ -39,6 +42,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
 
     /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
     public ClusterFixture() { }
+
+    internal ClusterFixture(RemoteTransferCoordinatorFixtureSelection selection)
+        => transferCoordinator = RemoteTransferCoordinatorFixtureConfiguration.Validate(selection);
+
+    internal ClusterFixture(Features.Messaging.QueueDeadlineRf3Selection queueDeadline)
+        => this.queueDeadline = queueDeadline;
 
     /// <summary>Creates only the explicitly selected Linux native namespace fault cohort.</summary>
     internal ClusterFixture(ReplicaIsolationProfile profile)
@@ -113,12 +122,14 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             { throw new InvalidOperationException("The native namespace fault cohort cannot mix local-image or covered selection."); }
             arguments = ClusterFixtureComposition.ApplySnapshotThreshold(arguments, snapshotThreshold,
                 coverage is not null || localImageSession is not null || isolateReplicaNamespace);
-            ObserveColdStart();
+            ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
             if (isolateReplicaNamespace)
             { isolationBuilder = new(builder); }
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
+            queueDeadline?.Configure(builder);
+            RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);
@@ -144,8 +155,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
         }
     }
 
-    private void ObserveColdStart() => ColdStartObservation = new(Root, Directory.Exists(Root), File.Exists(Root));
-
     private Task StartApplicationAsync(IReadOnlyDictionary<string, string> containerNames,
         string repository, CancellationToken token)
         => isolationOwner is null
@@ -167,6 +176,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     /// <summary>Writes bounded RF3 state, signed discovery and recent node-log diagnostics.</summary>
     /// <returns>A task that completes after the diagnostic artifact is written.</returns>
     public Task SaveFailureDiagnosticsAsync() => SaveFailureDiagnosticsAsync(RequireDiagnostics().LifetimeToken);
+
+    internal Task SaveReplicaIsolationFailureDiagnosticsAsync(string nativeCase)
+        => RequireDiagnostics().SaveOwnedAsync(peerSecret, RequireReplicaIsolation().CreateFailureDirectory(nativeCase),
+            RequireDiagnostics().LifetimeToken);
 
     /// <summary>Kills the inspected Aspire-managed Docker container for a named test scenario.</summary>
     /// <param name="resourceName">The Aspire resource name to stop.</param>

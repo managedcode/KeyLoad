@@ -16,7 +16,7 @@ public sealed partial class DatabaseEngine
         foreach (var mutation in request.Mutations)
         {
             ValidateMutationStructure(mutation);
-            if (allowEmpty && mutation is QueueToGraph or GraphToQueueMutation)
+            if (allowEmpty && mutation is QueueToGraph or GraphToQueueMutation or AdvanceQueueDeadline)
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, CompositionBatchRequiredMessage);
             }
@@ -56,12 +56,14 @@ public sealed partial class DatabaseEngine
             PublishTopic => Capability.TopicsPublish,
             PurgeTopic => Capability.SchemaManage | Capability.TopicsRead,
             EnqueueMessage => Capability.QueuePublish,
+            AdvanceQueueDeadline => Capability.QueueConsume,
             RedriveQueueMessage or ParkPendingQueueMessage => Capability.DeadLettersRedrive,
             CancelQueueMessage => Capability.QueueCancel,
             UpsertEdge or DeleteEdge or QueueToGraph or ApplyCrossPartitionReverseEdge
                 or CompleteCrossPartitionReverseEdge => Capability.GraphWrite,
             GraphToQueueMutation => Capability.QueuePublish,
             CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer => Capability.QueuePublish,
+            AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair => Capability.QueuePublish | Capability.QueueInspect,
             ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule
                 or CompareExchangeSaga or ExpireSaga => Capability.SchedulerManage | Capability.QueuePublish,
             AppendSamples => Capability.SeriesAppend,

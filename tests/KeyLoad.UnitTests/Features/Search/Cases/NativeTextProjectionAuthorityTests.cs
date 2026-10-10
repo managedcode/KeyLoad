@@ -57,10 +57,14 @@ internal sealed class NativeTextProjectionAuthorityTests
         await Assert.That(policyGeneration).IsNotEqualTo(deletedGeneration);
 
         RevokeReader(database);
+        var revokedImage = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var revokedCut = database.Store.Position;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             search.Search(ReaderId, request with { Text = "changed" }, token)).Code)
             .IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(database.Store.Position).IsGreaterThan(0L);
+        await NativeTextAuthorityContinuation.RunAsync(database, projection, search, request,
+            revokedImage, revokedCut, () => UpdateReader(database, principal => principal with { Revoked = false }), token);
     }
 
     private static void ConfigureProtectedCollection(TestDatabase database)

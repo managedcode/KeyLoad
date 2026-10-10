@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
     private const string DocumentEpochSpace = "document-epoch";
 
     private ImmutableArray<MutationReceipt> ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations,
-        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null)
+        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null, ReplicatedOperation? operation = null)
     {
         var token = commitToken ?? Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
@@ -35,7 +35,7 @@ public sealed partial class DatabaseEngine
             };
             if (mutation is PurgeTopic)
             { purgeBudget ??= new TopicPurgeReadBudget(OperationLimitsOptions); }
-            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget);
+            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget, operation);
             if (derived)
             {
                 receipt = receipt with { CompositionReferences = CompositionMutationReferences(mutation) };
@@ -88,12 +88,13 @@ public sealed partial class DatabaseEngine
     }
 
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget) => mutation switch
+        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget, ReplicatedOperation? operation) => mutation switch
         {
             AppendEvents events => Append(tx, principal, partition, events, now),
             PublishTopic topic => Publish(tx, principal, partition, topic, now),
             PurgeTopic topic => PurgeTopicHistory(tx, partition, topic, purgeBudget),
             EnqueueMessage message => Enqueue(tx, principal, partition, message, now),
+            AdvanceQueueDeadline message => ApplyQueueDeadline(tx, partition, message, now, operation),
             RedriveQueueMessage message => ApplyRedriveQueueMessage(tx, partition, message, now),
             CancelQueueMessage message => ApplyCancelQueueMessage(tx, partition, message),
             ParkPendingQueueMessage message => ApplyParkPendingQueueMessage(tx, partition, message, now),
@@ -120,6 +121,8 @@ public sealed partial class DatabaseEngine
             CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now),
             AcceptQueueTransfer transfer => ApplyAcceptQueueTransfer(tx, principal, partition, transfer, now, position),
             CompleteQueueTransfer transfer => ApplyCompleteQueueTransfer(tx, principal, partition, transfer),
+            AdvanceQueueTransferAttempt transfer => ApplyAdvanceQueueTransferAttempt(tx, principal, partition, transfer),
+            AdvanceQueueTransferRepair transfer => ApplyAdvanceQueueTransferRepair(tx, principal, partition, transfer),
             ApplyVectorProjection projection => ApplyVectorProjection(tx, principal, partition, projection),
             ConfigureRecurringSchedule schedule => ApplyConfigureRecurringSchedule(tx, principal, partition, schedule, now),
             EmitRecurringOccurrences schedule => ApplyEmitRecurringOccurrences(tx, principal, partition, schedule, now),

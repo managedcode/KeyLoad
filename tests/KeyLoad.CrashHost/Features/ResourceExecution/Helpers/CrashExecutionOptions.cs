@@ -98,6 +98,16 @@ internal static class CrashExecutionOptions
         return Compose(settings, static value => value.Validate());
     }
 
+    internal static DatabaseLimits RemoteTransferRepairLimits()
+        => DatabaseLimits(new DatabaseLimits
+        { MaxQueueTransferRepairAttempts = Features.Messaging.RemoteTransferRepairCrashProtocol.Ceiling }).Value;
+
+    internal static DatabaseLimits RemoteTransferAttemptLimits()
+        => DatabaseLimits(new DatabaseLimits
+        {
+            MaxQueueTransferAcceptAttempts = Features.Messaging.RemoteTransferAttemptCrashProtocol.Ceiling
+        }).Value;
+
     internal static IOptions<DueWorkExecutionOptions> DueWork()
     {
         var settings = new DueWorkExecutionOptions();

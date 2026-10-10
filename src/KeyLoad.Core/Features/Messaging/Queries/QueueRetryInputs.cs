@@ -27,6 +27,8 @@ public sealed partial class DatabaseEngine
             RequireQueueRetryReceive(request, resource.QueuePolicy);
             ReadQueueLeaseRetryInputs(view, request.Lane, resource.QueuePolicy, operation.EvaluatedAt, inputs);
         }
+        if (operation.Kind == OperationKind.Batch)
+        { ReadQueueDeadlineRetryInputs(view, operation, inputs); }
         return inputs;
     }
 

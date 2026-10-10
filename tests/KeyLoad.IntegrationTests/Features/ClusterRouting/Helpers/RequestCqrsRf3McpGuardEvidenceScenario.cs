@@ -25,6 +25,42 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
         return joined.SaveDiagnosticsEvidence();
     }
 
+    internal static async Task<string> ExecuteFailureCleanupAsync(string root, NodeEpochRf3Profile profile,
+        string currentImage, RequestCqrsLifecycleEvidence lifecycle, CancellationToken cancellationToken)
+    {
+        RequestCqrsRf3Wave? wave = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            wave = await RequestCqrsRf3Wave.StartAsync(root, All(currentImage), false, true, cancellationToken)
+                .ConfigureAwait(false);
+            var workload = await RequestCqrsRf3Workload.SeedAsync(wave.App, profile, cancellationToken).ConfigureAwait(false);
+            await RequestCqrsRf3McpGuardEvidenceCall.SendFailureAfterHealthyAsync(wave.App, Node1, profile.AdminKey,
+                lifecycle, () => VerifyWarningAndHealthyAsync(wave, workload, profile, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        var original = failures.FirstOrDefault();
+        await RequestCqrsPhaseFaultCleanup.RunAsync(root, true, null, wave, true, null, null, null,
+            null, null, null, null, Guid.Empty, failures).ConfigureAwait(false);
+        await Assert.That(original is HttpRequestException { StatusCode: System.Net.HttpStatusCode.BadRequest }).IsTrue();
+        await Assert.That(failures.Count).IsEqualTo(1);
+        await Assert.That(ReferenceEquals(failures[0], original)).IsTrue();
+        var joined = wave ?? throw new InvalidOperationException(MissingWaveMessage);
+        await Assert.That(joined.NativeAdmissionOwnersJoined).IsTrue();
+        await Assert.That(Directory.Exists(root)).IsFalse();
+        var path = joined.SaveDiagnosticsEvidence();
+        await Assert.That(original!.Data.Values.OfType<string>().Contains(path, StringComparer.Ordinal)).IsTrue();
+        return path;
+    }
+
+    private static async Task VerifyWarningAndHealthyAsync(RequestCqrsRf3Wave wave,
+        RequestCqrsRf3Workload workload, NodeEpochRf3Profile profile, CancellationToken cancellationToken)
+    {
+        await wave.WaitForRejectionAsync(Node1, McpTransportStage.BodyMethodMismatch,
+            McpTransportMethodCategory.ToolsCall, cancellationToken).ConfigureAwait(false);
+        await workload.VerifyPreservedAsync(wave.App, profile, cancellationToken).ConfigureAwait(false);
+    }
+
     internal static string CreatePrivateRoot()
     {
         var path = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,

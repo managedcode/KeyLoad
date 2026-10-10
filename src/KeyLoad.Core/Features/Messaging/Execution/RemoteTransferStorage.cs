@@ -12,6 +12,9 @@ internal static class RemoteTransferStorage
 
     private const string CorruptCapacityMessage = "Persisted queue transfer capacity is inconsistent.";
 
+    internal static bool IsCapacityFailure(OperationResult result)
+        => result.Error == ErrorCode.ResourceExhausted && result.SafeDetail == RetainedQueueTransferCapacityIsExhaustedDetail;
+
     internal static byte[] IntentKey(QueueLaneRef source, Guid transferId)
         => KeySpace.Partition(RemoteTransferProtocol.IntentSpace, source.Partition, source.Queue,
             transferId.ToString(RemoteTransferProtocol.TransferIdFormat));

@@ -40,6 +40,8 @@ internal static class RemoteTransferFields
     internal const int ReceiptReservationBytes = 12;
     internal const int StoredBytes = 13;
     internal const int StoredRecords = 14;
+    internal const int AcceptAttempts = 15;
+    internal const int Repairs = 16;
 }
 
 [global::Orleans.GenerateSerializer]
@@ -78,7 +80,14 @@ internal sealed record RemoteTransferIntentRecord(
     [property: global::Orleans.Id(RemoteTransferFields.State)] QueueTransferState State,
     [property: global::Orleans.Id(RemoteTransferFields.IntentToken)] string IntentToken,
     [property: global::Orleans.Id(RemoteTransferFields.ReceiptToken)] string? ReceiptToken,
-    [property: global::Orleans.Id(RemoteTransferFields.ReceiptReservationBytes)] int ReceiptReservationBytes);
+    [property: global::Orleans.Id(RemoteTransferFields.ReceiptReservationBytes)] int ReceiptReservationBytes)
+{
+    [global::Orleans.Id(RemoteTransferFields.AcceptAttempts)]
+    public RemoteTransferAcceptAttemptState? Attempts { get; init; }
+
+    [global::Orleans.Id(RemoteTransferFields.Repairs)]
+    public RemoteTransferRepairState? Repairs { get; init; }
+}
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(RemoteTransferAliases.TargetReceiptRecord)]

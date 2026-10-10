@@ -39,9 +39,13 @@ cohort is not converted or presented as this current-format evidence.
 ## Requirements and measurable acceptance
 
 - REQ-NATIVE-WAL-PROFILE-001 -> AC-NATIVE-WAL-PROFILE-001: a genuinely committed
-  mixed document/event/queue cut survives actual graceful close and a different
-  intrinsics profile. Both enabled-disabled-enabled and the reverse use actual
-  child processes. Before replay, compare every bounded native key/value row,
+  mixed document/event/queue cut plus257 variable-length UTF8 native records
+  survives four actual graceful-close child processes: enabled seed, disabled
+  verify/append, enabled verify/append, disabled final verify, and the reverse.
+  Both append operations have distinct full receipts and exact document effects.
+  Require actual hardware eligibility for enabled children and disabled
+  intrinsics for scalar children before storage opens. Before replay, compare
+  every bounded native key/value row and every original corpus record,
   exact position, node/incarnation and current generation; afterwards verify
   full original/fresh receipts, changed-body Conflict and cold healthy effects.
   NativeChecksumProfileRecoveryTests owns these whole operations.
@@ -62,14 +66,17 @@ cohort is not converted or presented as this current-format evidence.
    contract and the owning StorageRecovery criteria before changing central pins.
    Directory.Packages.props and this ADR/index are root-owned.
 2. CrashHost StorageRecovery Contracts/Helpers/Assertions and RecoveryTests
-   StorageRecovery Cases/Processes add the bounded current-only profile operation
+   StorageRecovery Cases/Processes strengthen the bounded current-only profile operation
    through the existing child/StorageTrialLease/failure/cleanup owners.
    Existing budgets, 50 native TUnit slots and test-owned Aspire remain unchanged.
+   The regression worker owns only NativeChecksumProfile helpers/contracts/cases;
+   root owns dependency pins, shared documentation and integrated verification.
 3. Root restores the actual NuGet closure, builds the complete Release solution,
    runs canonical formatter and targeted normal/scalar/process regressions,
    retaining original native UID/TRX/source/package/profile and cleanup evidence.
    Independent agents continue private source work while root serializes writers.
-4. Commit/push the full authorized current checkout stage. Original Linux CI then
+4. Commit/push the scoped dependency and regression stage, preserving unrelated
+   working-tree changes. Original Linux CI then
    exercises all required normal/scalar/recovery/RF3 and full-text gates. Update
    canonical task qualification only from those exact original artifacts.
 
@@ -77,6 +84,41 @@ Integration joins: the closed CrashHost mode dispatch, original native child pip
 owner, central transitive dependency resolution, full current-image Docker build
 and existing snapshot/backup/restore qualification. No new application endpoint,
 server SIMD setting, database policy or storage authority is introduced.
+
+```mermaid
+flowchart LR
+  Seed[257 native rows and mixed committed batch] --> First[Opposite profile verifies and appends]
+  First --> Second[Original profile verifies and appends]
+  Second --> Final[Opposite profile verifies both receipts and complete cut]
+```
+
+The 2026-10-10 public NuGet audit covers every central package and native coverage
+tool plus Aspire.AppHost.Sdk and the local Roslynk tool (already current 2.1.0).
+Update only available published versions:
+ManagedCode.Orleans.Graph10.4.4, native dotnet-coverage18.12.0 (matching the MTP
+coverage extension), and Aspire.AppHost.Sdk13.6.1. The other central packages are
+already current; alpha-only dependencies retain their selected published profile.
+No dependency fork, new package or .NET target change is selected.
+
+## Local development verification, 2026-10-10
+
+The published dependency closure restores successfully. Focused canonical formatting
+passes for the changed checksum fixtures. The complete R76 Release build passed
+with zero warnings and errors. After the approved `AdvanceQueueDeadline.Kind`
+JSON collision repair (`deadlineKind`, preserving the discriminator and Orleans
+field IDs), the fresh RecoveryTests Release build also passed with zero warnings
+and errors. The four-process regression now passes both directions: 2/2 cases,
+zero failures and skips, on local macOS arm64. Each case verifies all 257 native
+rows, both independent appends, complete original receipts and the final native cut.
+Evidence: `TestResults/zonetree182/checksum/KeyLoad.RecoveryTests_net10.0_arm64.trx`.
+
+The analyzer test suite passed 391/391 with no skips. Selected native-storage tests
+passed 32/32 in both normal and scalar profiles with an owned non-symlinked root;
+the earlier backup-path refusal came from the macOS default temporary-directory
+symlink, and its policy remains unchanged. Complete formatting verification still
+reports 281 diagnostics in unrelated current-checkout files, with none in the
+checksum fixtures. A fresh complete build after the JSON repair, public JSON/MCP
+round trips, Linux, complete recovery, RF3 and full-text qualification remain open.
 
 ## Failure, rollout and rollback
 

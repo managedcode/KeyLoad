@@ -21,7 +21,8 @@ internal static class NativeChecksumProfileProcess
         try
         {
             foreach (var (phase, scalar) in new[] { (NativeChecksumProfileProtocol.Seed, firstScalar),
-                (NativeChecksumProfileProtocol.Extend, !firstScalar), (NativeChecksumProfileProtocol.Cold, firstScalar) })
+                (NativeChecksumProfileProtocol.FirstAppend, !firstScalar),
+                (NativeChecksumProfileProtocol.SecondAppend, firstScalar), (NativeChecksumProfileProtocol.Cold, !firstScalar) })
             {
                 active = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
                     NativeChecksumProfileProtocol.CompletionSignalPrefix + phase + ":"

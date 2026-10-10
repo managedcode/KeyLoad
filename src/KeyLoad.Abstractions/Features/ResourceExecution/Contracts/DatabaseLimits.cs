@@ -11,6 +11,8 @@ public sealed record DatabaseLimits
     public const string SectionName = "KeyLoad:DatabaseLimits";
     /// <summary>Safe startup rejection for invalid operation budgets.</summary>
     public const string ValidationMessage = "Database execution limits must be positive; reserved outbox budgets cannot be negative.";
+    private const uint QueueTransferAttemptCeilingField = 20;
+    private const uint QueueTransferRepairCeilingField = 21;
     private const int MinimumExecutionBudget = 1;
     private const int NoReservedBudget = 0;
     private const int DefaultMaxDocumentBytes = 1_048_576;
@@ -95,6 +97,14 @@ public sealed record DatabaseLimits
     [Orleans.Id(19)]
     public int MaxProjectionBatchBytes { get; init; } = DefaultMaxProjectionBatchBytes;
 
+    /// <summary>Optional finite source transfer Accept ceiling, including its original attempt; null disables advancement.</summary>
+    [Orleans.Id(QueueTransferAttemptCeilingField)]
+    public int? MaxQueueTransferAcceptAttempts { get; init; }
+
+    /// <summary>Optional bounded transfer policy-repair attempts; null disables automatic repair.</summary>
+    [Orleans.Id(QueueTransferRepairCeilingField)]
+    public int? MaxQueueTransferRepairAttempts { get; init; }
+
     /// <summary>Checks that execution budgets are positive and optional reserved budgets are nonnegative.</summary>
     /// <returns>Whether the configured budgets are valid.</returns>
     public bool IsValid() => MaxDocumentBytes >= MinimumExecutionBudget
@@ -116,7 +126,11 @@ public sealed record DatabaseLimits
         && ReservedOutboxRecords >= NoReservedBudget
         && ReservedOutboxBytes >= NoReservedBudget
         && MaxProjectionConsumers >= MinimumExecutionBudget
-        && MaxProjectionBatchBytes >= MinimumExecutionBudget;
+        && MaxProjectionBatchBytes >= MinimumExecutionBudget
+        && (MaxQueueTransferAcceptAttempts is null || MaxQueueTransferAcceptAttempts >= MinimumExecutionBudget
+            && MaxQueueTransferAcceptAttempts <= MaxScanRecords)
+        && (MaxQueueTransferRepairAttempts is null || MaxQueueTransferRepairAttempts >= MinimumExecutionBudget
+            && MaxQueueTransferRepairAttempts <= MaxScanRecords);
 
     /// <summary>Rejects invalid budgets before database operations are admitted.</summary>
     /// <exception cref="InvalidOperationException">A configured operation budget is invalid.</exception>

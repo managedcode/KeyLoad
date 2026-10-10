@@ -90,8 +90,9 @@ internal static class ReplicaIsolationFlow
         using var adminHttp = fixture.App.CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
         adminHttp.Timeout = ClusterFixtureProtocol.ClientTimeout;
         var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, originalCommand, original, cancellationToken);
-        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, nextCommand, next, cancellationToken);
+        await using var adminMcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, cancellationToken);
+        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, adminMcp, originalCommand, original, cancellationToken);
+        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, adminMcp, nextCommand, next, cancellationToken);
         await DocumentSessionReadRf3Assertions.HealthyAsync(sdk, mcp, reference, next.Token, SecondJson, Second, cancellationToken);
     }
 }

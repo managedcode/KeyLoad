@@ -95,6 +95,9 @@ internal sealed class ReplicaIsolationOwner
 
     internal IReadOnlyList<string> Resources => plan.Targets.Select(target => target.ResourceName).ToArray();
 
+    internal string CreateFailureDirectory(string nativeCase)
+        => ReplicaIsolationEvidence.CreateFailureDirectory(root, nativeCase, source);
+
     internal Task RecordAuthorityAsync(IReadOnlyList<ReplicaIsolationAuthorityObservation> observations,
         CancellationToken cancellationToken) => ReplicaIsolationEvidence.WriteAuthorityAsync(root, observations, cancellationToken);
 

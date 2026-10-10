@@ -17,4 +17,11 @@ internal sealed class PartitionMovementCleanupMatrixRf3Tests
         => PartitionMovementCleanupMatrixRf3Trial.RunAsync(PartitionMovementCleanupMatrixFaultRole.RetiredOtherResurrection,
             TestContext.Current!.Execution.CancellationToken);
 
+    [Test]
+    [Arguments(PartitionMovementCleanupMatrixFaultRole.UnfamiliarMarker)]
+    [Arguments(PartitionMovementCleanupMatrixFaultRole.UnfamiliarRelease)]
+    public Task ActualUnfamiliarControlRefusesPublicationAfterReleasedAndLinkedObservedThenSameDatabaseColdHealthy(
+        PartitionMovementCleanupMatrixFaultRole role)
+        => PartitionMovementCleanupMatrixRf3Trial.RunAsync(role, TestContext.Current!.Execution.CancellationToken);
+
 }

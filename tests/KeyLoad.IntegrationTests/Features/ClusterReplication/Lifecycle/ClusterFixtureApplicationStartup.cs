@@ -6,6 +6,9 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureApplicationStartup
 {
+    internal static ClusterFixtureColdStartObservation ObserveColdStart(string root)
+        => new(root, Directory.Exists(root), File.Exists(root));
+
     internal static async Task StartAsync(DistributedApplication application, string repository,
         IReadOnlyDictionary<string, string> containerNames, NativeCoverageRf3FixtureOwner? coverage,
         LocalRf3ImageSelection.Selection? selection, CancellationToken token)

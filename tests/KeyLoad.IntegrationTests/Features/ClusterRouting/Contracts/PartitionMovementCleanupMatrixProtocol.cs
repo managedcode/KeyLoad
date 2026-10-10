@@ -18,6 +18,8 @@ internal enum PartitionMovementCleanupMatrixFaultRole
     RetainedObservedControl,
     RetiredOtherResurrection,
     ClaimedOwnerBytesChanged,
+    UnfamiliarMarker,
+    UnfamiliarRelease,
 }
 
 internal enum PartitionMovementCleanupMatrixFaultRepair
@@ -25,4 +27,5 @@ internal enum PartitionMovementCleanupMatrixFaultRepair
     RenameBack,
     RemoveResurrection,
     RestoreExactBytes,
+    RemoveUnfamiliarCopy,
 }

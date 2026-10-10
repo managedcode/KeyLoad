@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.ChangeFeeds;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
@@ -30,9 +31,7 @@ internal static class EmptyReplicaSnapshotScenario
             var state = await ConfigureAndProduceAsync(fixture, timeout.Token);
             var denied = await McpPersistedIdentity.CreateAsync(fixture, state.Partition, OtherResource,
                 Capability.DocumentsRead, timeout.Token);
-            var leader = new Uri(state.InitialStatuses[0].Leader!).Host;
-            var index = Enumerable.Range(0, NodeCount).First(i => NodeName(i + 1) != leader);
-            var node = NodeName(index + 1);
+            var (index, node, originalFeed) = await CaptureFollowerFeedAsync(state, timeout.Token);
             stopped = new(index, node, Path.Combine(fixture.Root, node));
             await fixture.KillContainerAsync(node, Fault, timeout.Token);
             running = false;
@@ -48,15 +47,17 @@ internal static class EmptyReplicaSnapshotScenario
             await fixture.RestartContainerAsync(node, timeout.Token);
             running = true;
             var (tailCommand, tail, baseline) = await CreatePostInstallTailAsync(state, index, installed,
-                final.Receipt, installedSnapshot, timeout.Token);
+                final.Receipt, timeout.Token);
             await fixture.KillContainerAsync(node, Fault, timeout.Token);
             running = false;
-            await RequireNativeCutAsync(fixture, node, tailCommand, tail);
+            await RequireNativeCutAsync(fixture, node, tailCommand, tail, installedSnapshot);
             await fixture.RestartContainerAsync(node, timeout.Token);
             running = true;
             var reopened = await RequireAppliedAsync(state.Clients[index], installed, tail, timeout.Token);
             await Assert.That(reopened.NodeId).IsEqualTo(installed.NodeId);
             mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, timeout.Token);
+            await SnapshotInstallFeedAssertions.RequireAsync(state.Clients[index], mcp,
+                state.Partition, originalFeed, final.Receipt, tail, timeout.Token);
             await EmptyReplicaSnapshotAssertions.VerifyAsync(state.Clients[index], mcp, state, final, tailCommand, tail,
                 baseline, timeout.Token);
             await EmptyReplicaSnapshotPolicyAssertions.DeniedThenHealthyAsync(fixture, node, denied.Secret,
@@ -82,6 +83,16 @@ internal static class EmptyReplicaSnapshotScenario
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
+    private static async Task<(int Index, string Node, ChangeFeedPage Feed)> CaptureFollowerFeedAsync(
+        SnapshotState state, CancellationToken token)
+    {
+        var leader = new Uri(state.InitialStatuses[0].Leader!).Host;
+        var index = Enumerable.Range(0, NodeCount).First(i => NodeName(i + 1) != leader);
+        var node = NodeName(index + 1);
+        var originalFeed = await SnapshotInstallFeedAssertions.CaptureAsync(state.Clients[index], state.Partition, token);
+        return (index, node, originalFeed);
+    }
+
     private static async Task<long> RequireInstalledCutAsync(ClusterFixture fixture, string node, CommitReceipt final)
     {
         var actual = EmptyReplicaSnapshotStorage.ReadInstalledState(fixture, node);
@@ -96,21 +107,36 @@ internal static class EmptyReplicaSnapshotScenario
     }
 
     private static async Task RequireNativeCutAsync(ClusterFixture fixture, string node,
-        CommandRequest tailCommand, CommitReceipt tail)
+        CommandRequest tailCommand, CommitReceipt tail, long installedSnapshot)
     {
-        var actual = EmptyReplicaSnapshotStorage.ReadReplicaState(fixture, node, tail.Token.Position);
+        var actual = EmptyReplicaSnapshotStorage.ReadReplicaState(fixture, node, tail.Token.Position, installedSnapshot);
         var recovered = actual.State;
-        await Assert.That(recovered.Incarnation).IsEqualTo(tail.Token.Incarnation);
-        await Assert.That(recovered.Snapshot).IsNotNull();
-        await Assert.That(recovered.Snapshot!.Index).IsGreaterThan(0L);
-        await Assert.That(recovered.Snapshot.Index).IsLessThan(tail.Token.Position);
-        EmptyReplicaSnapshotStorage.RequireImage(fixture, node, recovered.Snapshot);
-        await Assert.That(recovered.CommittedIndex).IsGreaterThanOrEqualTo(tail.Token.Position);
-        await Assert.That(recovered.LastIndex).IsGreaterThanOrEqualTo(recovered.CommittedIndex);
-        await Assert.That(actual.Tail.Index).IsEqualTo(tail.Token.Position);
-        await Assert.That(actual.Tail.Operation).IsNotNull();
-        await Assert.That(actual.Tail.Operation!.Id).IsEqualTo(tailCommand.CommandId);
-        await Assert.That(actual.Tail.Term).IsGreaterThanOrEqualTo(recovered.Snapshot.Term);
+        try
+        {
+            await Assert.That(recovered.Incarnation).IsEqualTo(tail.Token.Incarnation);
+            await Assert.That(recovered.Snapshot).IsNotNull();
+            await Assert.That(recovered.Snapshot!.Index).IsGreaterThan(0L);
+            await Assert.That(recovered.Snapshot.Index).IsGreaterThanOrEqualTo(installedSnapshot);
+            await Assert.That(recovered.Snapshot.Index).IsLessThan(tail.Token.Position);
+            await Assert.That(checked(recovered.LastIndex - recovered.Snapshot.Index)).IsLessThan(NativeSnapshotThreshold);
+            EmptyReplicaSnapshotStorage.RequireImage(fixture, node, recovered.Snapshot);
+            await Assert.That(recovered.CommittedIndex).IsGreaterThanOrEqualTo(tail.Token.Position);
+            await Assert.That(recovered.LastIndex).IsGreaterThanOrEqualTo(recovered.CommittedIndex);
+            await Assert.That(actual.Tail.Index).IsEqualTo(tail.Token.Position);
+            await Assert.That(actual.Tail.Operation).IsNotNull();
+            await Assert.That(actual.Tail.Operation!.Id).IsEqualTo(tailCommand.CommandId);
+            await Assert.That(actual.Tail.Term).IsGreaterThanOrEqualTo(recovered.Snapshot.Term);
+        }
+        catch (Exception failure) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            EmptyReplicaSnapshotStorage.RetainCutFailure(failure, installedSnapshot, recovered, tail.Token.Position, hasEntry: true);
+            throw;
+        }
+        catch (Exception failure) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            EmptyReplicaSnapshotStorage.RetainCutFailure(failure, installedSnapshot, recovered, tail.Token.Position, hasEntry: true);
+            throw;
+        }
     }
 
     private static async Task<NodeStatus> RequireAppliedAsync(KeyLoadClient client, NodeStatus original, CommitReceipt tail,
@@ -132,7 +158,7 @@ internal static class EmptyReplicaSnapshotScenario
     }
     private static async Task<(CommandRequest Command, CommitReceipt Receipt, EmptyReplicaSnapshotBaseline Baseline)>
         CreatePostInstallTailAsync(SnapshotState state, int index, NodeStatus installed,
-            CommitReceipt finalReceipt, long installedSnapshot, CancellationToken token)
+            CommitReceipt finalReceipt, CancellationToken token)
     {
         var beforeTail = await RequireAppliedAsync(state.Clients[index], installed, finalReceipt, token);
         await Assert.That(beforeTail.NodeId).IsEqualTo(installed.NodeId);
@@ -143,7 +169,7 @@ internal static class EmptyReplicaSnapshotScenario
         var baseline = await EmptyReplicaSnapshotAssertions.CaptureAsync(state.Clients[(index + 1) % NodeCount], state, token);
         var afterTail = await RequireAppliedAsync(state.Clients[index], beforeTail, tail, token);
         await Assert.That(afterTail.NodeId).IsEqualTo(installed.NodeId);
-        await Assert.That(checked(afterTail.Applied - installedSnapshot)).IsLessThan(NativeSnapshotThreshold);
+        await Assert.That(afterTail.ReadGeneration).IsGreaterThanOrEqualTo(beforeTail.ReadGeneration);
         return (tailCommand, tail, baseline);
     }
 

@@ -30,6 +30,11 @@ internal static class RequestCqrsAuthorityFaultCleanup
             await DisposeCallersAsync(caller, administrator, cleanup, failureObserver).ConfigureAwait(false);
             var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup, failureObserver)
                 .ConfigureAwait(false);
+            if (waveStopped && wave is not null && failures.Count > 0)
+            {
+                RequestCqrsLifecycleFailureObserver.Observe(() => wave.SaveFailureEvidence(failures[0]), cleanup,
+                    failureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
+            }
             await DisposeControlsAsync(controls, waveStopped, cleanup, failureObserver).ConfigureAwait(false);
             var oracle = outcomeOracle;
             if (waveStopped && cleanup.Count == 0 && oracle is not null)

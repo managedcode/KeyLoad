@@ -1,0 +1,53 @@
+namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+
+internal static class TopicSqlRf3Protocol
+{
+    internal const string TenantPrefix = "topic-sql-";
+    internal const string Database = "topic-sql-database";
+    internal const string Domain = "topic-sql-domain";
+    internal const string Queue = "topic-unmodified-queue";
+    internal const string Message = "untouched-message";
+    internal const string QueuePayload = "{\"untouched\":true}";
+    internal const string ColdScenario = "topic-sql-original-cold";
+    internal static readonly string[] Nodes = ["node1", "node2", "node3"];
+    internal const string Topic = "topic-events";
+    internal const string Empty = "empty-topic";
+    internal const string First = "topic-first";
+    internal const string Second = "topic-second";
+    internal const string Created = "Created";
+    internal const string Updated = "Updated";
+    internal const string Reader = "topic-reader";
+    internal const string Root = "root";
+    internal const string Star = "*";
+    internal const string Payload = "{\"score\":1,\"secret\":\"TOPIC_PAYLOAD_CANARY\"}";
+    internal const string NextPayload = "{\"score\":2,\"secret\":\"TOPIC_PAYLOAD_CANARY\"}";
+    internal const string Headers = "{\"privateHeader\":\"TOPIC_HEADER_CANARY\",\"trace\":\"native-trace\"}";
+    internal const string Secret = "TOPIC_PAYLOAD_CANARY";
+    internal const string HeaderSecret = "TOPIC_HEADER_CANARY";
+    internal const string Sql = "SELECT * FROM TOPIC_EVENTS('topic-events') ORDER BY position";
+    internal const string EmptySql = "SELECT * FROM TOPIC_EVENTS('empty-topic')";
+    internal const string Predicate = "SELECT t.payload.score AS score FROM TOPIC_EVENTS('topic-events') AS t WHERE t.payload.score > 1 ORDER BY t.position DESC LIMIT 1";
+    internal const string PrivatePredicate = "SELECT * FROM TOPIC_EVENTS('topic-events') WHERE payload.secret = 'TOPIC_PAYLOAD_CANARY'";
+    internal const string PrivateOrder = "SELECT * FROM TOPIC_EVENTS('topic-events') ORDER BY headers.privateHeader";
+    internal const string StaleSql = "SELECT * FROM TOPIC_EVENTS('topic-events', 2)";
+    internal const string LimitedSql = "SELECT * FROM TOPIC_EVENTS('topic-events') LIMIT 1";
+    internal const string ScoreRow = "{\"score\":2}";
+    internal const string PayloadField = "payload";
+    internal const string HeadersField = "headers";
+    internal const string SecretField = "secret";
+    internal const string PrivateHeaderField = "privateHeader";
+    internal const string PayloadPath = "/secret";
+    internal const string HeaderPath = "/privateHeader";
+    internal const string Classification = "private";
+    internal const string ReadGrant = "secret.read";
+    internal const string UseGrant = "secret.use";
+    internal const string HeaderRead = "header.read";
+    internal const string HeaderUse = "header.use";
+    internal const string TopicEventSpace = "topic-event";
+    internal const string PositionPath = "/position";
+    internal const string AccessPath = "model-scan:topic-events";
+    internal const int FirstPosition = 1;
+    internal const int SecondPosition = 2;
+    internal const int PageLimit = 10;
+    internal const long EpochIncrement = 1L;
+}

@@ -31,7 +31,11 @@ internal static class FeedLiveRf3Protocol
     internal const long HiddenSequence = 2;
     internal const long UpdatedSequence = 3;
     internal const long DeletedSequence = 4;
+    internal const string RepairedMutationKind = "putDocument";
+    internal const long RepairedRevision = 4;
+    internal const long RepairedSequence = 5;
     internal const int PageLimit = 1;
+    internal const int RejectedFirstEntryBytes = 1;
     internal const long EpochStep = 1;
     internal const string ColdScenario = "feed-live-cold-owner";
 }

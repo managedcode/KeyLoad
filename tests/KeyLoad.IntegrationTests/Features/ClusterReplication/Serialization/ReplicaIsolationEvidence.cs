@@ -31,6 +31,31 @@ internal static class ReplicaIsolationEvidence
     internal static Task WriteAuthorityAsync(string root, IReadOnlyList<ReplicaIsolationAuthorityObservation> observations,
         CancellationToken cancellationToken) => WriteAsync(root, AuthoritySuffix, observations, cancellationToken);
 
+    private const string FailureSuffix = "-original-failure";
+    private const string FailureIdentityName = "identity.json";
+    private const string SourceSetting = "GITHUB_SHA";
+    private const string RunSetting = "GITHUB_RUN_ID";
+    private const string AttemptSetting = "GITHUB_RUN_ATTEMPT";
+
+    internal static string CreateFailureDirectory(string root, string nativeCase, ClusterFixtureSourceImage source)
+    {
+        var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
+        var directory = Path.Combine(repository, ContainerRuntimeProtocol.ArtifactsDirectory,
+            ContainerRuntimeProtocol.QualificationDirectory, Prefix + Path.GetFileName(root) + FailureSuffix, nativeCase);
+        if (Directory.Exists(directory))
+        { throw new InvalidOperationException("The original owned failure receipt already exists."); }
+        var revision = Environment.GetEnvironmentVariable(SourceSetting)
+            ?? throw new InvalidOperationException("The original source revision is absent.");
+        var run = long.Parse(Environment.GetEnvironmentVariable(RunSetting)!, System.Globalization.CultureInfo.InvariantCulture);
+        var attempt = long.Parse(Environment.GetEnvironmentVariable(AttemptSetting)!, System.Globalization.CultureInfo.InvariantCulture);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new { root = Path.GetFileName(root), nativeCase, revision, run, attempt, source }, Options);
+        Directory.CreateDirectory(directory);
+        using var stream = new FileStream(Path.Combine(directory, FailureIdentityName), FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        stream.Write(bytes);
+        stream.Flush();
+        return directory;
+    }
+
     internal static Task WriteCountersAsync(string root, ContainerRuntimeProcessResult input,
         ContainerRuntimeProcessResult output, CancellationToken cancellationToken)
         => WriteAsync(root, CountersSuffix, new { input, output }, cancellationToken);

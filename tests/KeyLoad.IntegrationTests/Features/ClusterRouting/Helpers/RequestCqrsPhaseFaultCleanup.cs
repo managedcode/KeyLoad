@@ -24,6 +24,8 @@ internal static class RequestCqrsPhaseFaultCleanup
         { await JoinProducerDisposalAsync(controls, discovery, additional, cleanup, deadline.Token).ConfigureAwait(false); }
         await DisposeClientsAsync(caller, administrator, cleanup).ConfigureAwait(false);
         var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
+        if (waveStopped && wave is not null && failures.Count > 0)
+        { ServerFailureObserver.Observe(() => wave.SaveFailureEvidence(failures[0]), cleanup); }
         await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
         ServerFailureObserver.Observe(() => callerCancellation?.Dispose(), cleanup);
         ServerFailureObserver.Observe(() => scenarioDeadline?.Dispose(), cleanup);

@@ -22,26 +22,32 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
     public async Task AC_COMP_007_SqlReadsQueuedLinksAndWritesGraphThenOfficialMcpEnqueuesGraphActions()
     {
         using var deadline = McpCallerDeadline.Create();
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
-        var link = new QueueGraphLink(scenario.First, scenario.Second, RelationalSqlRf3Tokens.EdgeLabel);
-        var payload = JsonSerializer.Serialize(link, JsonDefaults.Options);
-        var command = scenario.Command(
-            new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow),
-            new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.SecondId, RelationalSqlRf3Tokens.SecondRow),
-            new EnqueueMessage(RelationalSqlRf3Tokens.Queue, Message, payload),
-            new QueueToGraph(RelationalSqlRf3Tokens.Graph, RelationalSqlRf3Tokens.Queue, EdgePrefix));
-        var sql = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
-        var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, deadline.Token);
-        await Assert.That(receipt.Mutations.Length).IsEqualTo(ExpectedEffects);
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            fixture.AdminKey, deadline.Token);
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, sql, deadline.Token));
-        await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(
-            await sdk.CommitAsync(command, deadline.Token)));
-        await VerifyForwardAsync(sdk, mcp, scenario, link, deadline.Token);
-        await VerifyReverseAsync(sdk, mcp, scenario, link, deadline.Token);
+        CompositionSqlColdState state;
+        {
+            using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+            var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+            var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
+            var link = new QueueGraphLink(scenario.First, scenario.Second, RelationalSqlRf3Tokens.EdgeLabel);
+            var payload = JsonSerializer.Serialize(link, JsonDefaults.Options);
+            var command = scenario.Command(
+                new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow),
+                new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.SecondId, RelationalSqlRf3Tokens.SecondRow),
+                new EnqueueMessage(RelationalSqlRf3Tokens.Queue, Message, payload),
+                new QueueToGraph(RelationalSqlRf3Tokens.Graph, RelationalSqlRf3Tokens.Queue, EdgePrefix));
+            var sql = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
+            var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, deadline.Token);
+            await Assert.That(receipt.Mutations.Length).IsEqualTo(ExpectedEffects);
+            await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+                fixture.AdminKey, deadline.Token);
+            await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, sql, deadline.Token));
+            await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(
+                await sdk.CommitAsync(command, deadline.Token)));
+            await VerifyForwardAsync(sdk, mcp, scenario, link, deadline.Token);
+            var reverse = await VerifyReverseAsync(sdk, mcp, scenario, link, deadline.Token);
+            state = await CompositionSqlColdCapture.CaptureAsync(sdk, scenario, link, command, receipt,
+                reverse.Command, reverse.Receipt, deadline.Token);
+        }
+        await CompositionSqlColdTrial.RunAsync(fixture, state, deadline.Token);
     }
 
     [Test]
@@ -90,7 +96,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(source.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
     }
 
-    private static async Task VerifyReverseAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+    private static async Task<(CommandRequest Command, CommitReceipt Receipt)> VerifyReverseAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         RelationalSqlRf3Scenario scenario, QueueGraphLink link, CancellationToken cancellationToken)
     {
         var command = scenario.Command(new GraphToQueueMutation(RelationalSqlRf3Tokens.Queue,
@@ -105,5 +111,6 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
         await SqlRf3Protocol.EqualAsync(derived, await SqlRf3Protocol.McpAsync<MessageInspection>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, request), cancellationToken));
+        return (command, receipt);
     }
 }

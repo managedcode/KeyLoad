@@ -1,3 +1,5 @@
+using KeyLoad.Core;
+
 namespace KeyLoad.Orleans;
 
 /// <summary>Centrally configured deadlines and discovery cadence for per-silo due coordination.</summary>
@@ -36,11 +38,36 @@ public sealed class DueCoordinationOptions
     /// <summary>Gets or sets the bounded retry count for an uncertain outcome, preserving command identity.</summary>
     public int UncertaintyRetryCount { get; set; } = MaximumUncertaintyRetries;
 
+    /// <summary>Gets or sets an existing persisted principal for queue deadline dispatch; null disables that branch.</summary>
+    public string? QueueDeadlinePrincipalId { get; set; }
+
+    /// <summary>Gets the explicitly selected existing transfer creator; null disables automatic transfer turns.</summary>
+    public string? TransferCoordinatorPrincipalId { get; set; }
+
     /// <summary>Checks that configured scheduling durations are positive and no greater than one minute.</summary>
     /// <returns>Whether all durations are within the accepted startup bounds.</returns>
     public bool IsValid() => IsBounded(DispatchDeadline) && IsBounded(PollInterval) && IsBounded(MinimumCycleCadence)
         && PollInterval <= MaximumPollInterval && MinimumCycleCadence >= MinimumPermittedCycleCadence
-        && UncertaintyRetryCount is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries;
+        && UncertaintyRetryCount is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries
+        && IsQueuePrincipalValid() && IsTransferSubjectValid();
+
+    private bool IsQueuePrincipalValid()
+    {
+        if (QueueDeadlinePrincipalId is null)
+        { return true; }
+        try
+        { JsonData.Identifier(QueueDeadlinePrincipalId); return true; }
+        catch (KeyLoadException) { return false; }
+    }
+
+    private bool IsTransferSubjectValid()
+    {
+        if (TransferCoordinatorPrincipalId is null)
+        { return true; }
+        try
+        { KeyLoad.Core.JsonData.Identifier(TransferCoordinatorPrincipalId); return true; }
+        catch (KeyLoadException) { return false; }
+    }
 
     private static bool IsBounded(TimeSpan duration) => duration > TimeSpan.Zero && duration <= MaximumDuration;
 }

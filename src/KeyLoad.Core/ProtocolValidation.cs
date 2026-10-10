@@ -80,6 +80,7 @@ public sealed partial class DatabaseEngine
             PublishTopic topic => topic.Topic,
             PurgeTopic topic => topic.Topic,
             EnqueueMessage message => message.Queue,
+            AdvanceQueueDeadline message => message.Queue,
             RedriveQueueMessage message => message.Queue,
             CancelQueueMessage message => message.Queue,
             ParkPendingQueueMessage message => message.Queue,
@@ -102,6 +103,8 @@ public sealed partial class DatabaseEngine
             CreateQueueTransfer transfer => transfer.SourceQueue.Queue,
             AcceptQueueTransfer transfer => transfer.DestinationQueue.Queue,
             CompleteQueueTransfer transfer => transfer.SourceQueue.Queue,
+            AdvanceQueueTransferAttempt transfer => transfer.SourceQueue.Queue,
+            AdvanceQueueTransferRepair transfer => transfer.SourceQueue.Queue,
             ApplyVectorProjection projection => projection.Target.Collection,
             ConfigureRecurringSchedule schedule => schedule.Definition.Lane.Queue,
             EmitRecurringOccurrences schedule => schedule.Lane.Queue,
@@ -113,6 +116,11 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateExtendedMutationStructure(Mutation mutation)
     {
+        if (mutation is AdvanceQueueDeadline deadline)
+        {
+            ValidateQueueDeadlineShape(deadline);
+            return;
+        }
         if (mutation is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
         {
             ValidateQueueLifecycleShape(mutation);
@@ -123,6 +131,8 @@ public sealed partial class DatabaseEngine
             CreateQueueTransfer transfer => HasInvalidTransferShape(transfer),
             AcceptQueueTransfer transfer => transfer.DestinationQueue?.Partition is null,
             CompleteQueueTransfer transfer => transfer.SourceQueue?.Partition is null,
+            AdvanceQueueTransferAttempt transfer => transfer.SourceQueue?.Partition is null,
+            AdvanceQueueTransferRepair transfer => transfer.SourceQueue?.Partition is null,
             ApplyVectorProjection projection => HasInvalidProjectionShape(projection),
             ApplyCrossPartitionReverseEdge edge => HasInvalidReverseEdgeShape(edge.SourcePartition, edge.Destination),
             CompleteCrossPartitionReverseEdge edge => HasInvalidReverseEdgeShape(edge.SourcePartition, edge.Destination),

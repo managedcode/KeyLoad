@@ -111,6 +111,11 @@ public sealed partial class DatabaseEngine
 
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
+        if (mutation is AdvanceQueueDeadline deadline)
+        {
+            AuthorizeQueueDeadline(view, principal, partition, deadline);
+            return;
+        }
         if (mutation is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
         {
             AuthorizeQueueLifecycle(view, principal, partition, mutation);
@@ -126,7 +131,7 @@ public sealed partial class DatabaseEngine
             ReauthorizeVectorProjection(view, principal, partition, projection);
             return;
         }
-        if (mutation is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
+        if (mutation is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer or AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair)
         {
             AuthorizeQueueTransferRequest(view, principal, partition, mutation);
             return;

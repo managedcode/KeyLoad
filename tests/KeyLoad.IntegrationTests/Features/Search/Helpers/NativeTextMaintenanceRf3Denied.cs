@@ -7,6 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class NativeTextMaintenanceRf3Denied
 {
     private const string InvalidRequest = "The internal request has an invalid scope, key, expiry or operation.";
+    private const string SafeMcpDetail = "The database operation could not be completed.";
 
     internal static async Task<bool> OwnerAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         NativeTextMaintenanceRf3Scenario scenario, TextIndexMaintenanceRequest request, List<Exception> failures, CancellationToken token)
@@ -33,7 +34,7 @@ internal static class NativeTextMaintenanceRf3Denied
             var official = await mcp.CallAsync(TextIndexMaintenanceProtocol.ToolName, wrong, token);
             _ = await McpCallerAssertions.ErrorAsync(official, ErrorCode.OwnershipLost, dispatched: true);
             await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-                .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(InvalidRequest);
+                .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(SafeMcpDetail);
         }, failures);
         await original.RequireAsync(sdk, mcp, scenario, failures, token);
         if (failures.Count != failureCount)

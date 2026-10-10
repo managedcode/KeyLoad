@@ -100,6 +100,7 @@ public sealed partial class DatabaseEngine
         long policyEpoch = AtomicCommandCommitInitialSequence;
         BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
+        global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
         OperationResult result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
@@ -118,6 +119,7 @@ public sealed partial class DatabaseEngine
             ValidateCommandClock(transaction, operation.EvaluatedAt);
             ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
+            transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);
             compositionAuthority = CaptureCompositionOutcome(operation, result);
@@ -136,7 +138,8 @@ public sealed partial class DatabaseEngine
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
         persistOutcome = selection.Outcome is null;
-        return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope, onlineTextAuthority);
+        return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope, onlineTextAuthority) with
+        { RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null };
     }
 
     private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
@@ -236,7 +239,7 @@ public sealed partial class DatabaseEngine
             transaction.Reset();
             var failure = new OperationResult(null, exception.Code, exception.Message);
             PersistCommandOutcome(transaction, operation, resultKey, outcome with
-            { Result = failure, BlobAuthority = null, CompositionAuthority = null }, replicationIndex, persistOutcome);
+            { Result = failure, BlobAuthority = null, CompositionAuthority = null, RemoteTransferFailureAuthority = null }, replicationIndex, persistOutcome);
             transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();
             return failure;

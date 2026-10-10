@@ -138,38 +138,32 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         lifecycle.MarkPersistedRevocationEntered();
         var activeIdentity = identity ?? throw new InvalidOperationException(MissingOwner);
         var expected = RequestCqrsAuthorityFaultProvisioning.Revoke(activeIdentity.Principal);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.PersistRevocationAck);
         var saved = await McpCallerAssertions.SdkSuccessAsync(await (administrator
             ?? throw new InvalidOperationException(MissingOwner)).Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.RevocationAckAssert);
         await RequestCqrsAuthorityFaultAssertions.VerifyRevocationAckAsync(saved, expected).ConfigureAwait(false);
         identity = activeIdentity with { Principal = saved };
+        lifecycle.SetStage(RequestCqrsLifecycleStage.RevocationNoEffects);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
         var marker = heldMarker ?? throw new InvalidOperationException(MissingOwner);
         var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ReleaseHeld);
         activeControls.WriteRelease(armId, marker.RequestId);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ReleaseAndProducerObserved);
         await RequestCqrsAuthorityFaultLifecycleAssertions.VerifyReleasedAndDisposedAsync(
             activeControls,
             discovery ?? throw new InvalidOperationException(MissingOwner), armId, commandId, marker,
             cancellationToken).ConfigureAwait(false);
-        await JoinOriginalAndAssertDeniedAsync().ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.JoinOriginalDenied);
+        await RequestCqrsAuthorityFaultAssertions.JoinOriginalAndAssertDeniedAsync(useMcp,
+            sdkCall, mcpCall, heldMarker, MissingOwner).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.RetireRevocationArm);
         await activeControls.RetireArmAsync(armId,
             cancellationToken).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.FinalRevocationNoEffects);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task JoinOriginalAndAssertDeniedAsync()
-    {
-        if (useMcp)
-        {
-            var observation = await (mcpCall ?? throw new InvalidOperationException(MissingOwner)).ConfigureAwait(false);
-            var requestId = await RequestCqrsAuthorityFaultAssertions.VerifyMcpUnauthorizedAsync(observation)
-                .ConfigureAwait(false);
-            await Assert.That(requestId).IsEqualTo((heldMarker
-                ?? throw new InvalidOperationException(MissingOwner)).RequestId);
-            return;
-        }
-        await RequestCqrsAuthorityFaultAssertions.VerifySdkUnauthorizedAsync(
-            await (sdkCall ?? throw new InvalidOperationException(MissingOwner)).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     private async Task VerifyAdminAndRevokedCallerAsync(CancellationToken cancellationToken)

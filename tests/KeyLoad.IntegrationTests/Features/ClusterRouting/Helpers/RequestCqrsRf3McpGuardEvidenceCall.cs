@@ -26,6 +26,20 @@ internal static class RequestCqrsRf3McpGuardEvidenceCall
         lifecycle.SetStage(RequestCqrsLifecycleStage.GuardResponseOwnerDispose);
     }
 
+    internal static async Task SendFailureAfterHealthyAsync(DistributedApplication app, string node, string persistedKey,
+        RequestCqrsLifecycleEvidence lifecycle, Func<Task> verifyHealthy, CancellationToken cancellationToken)
+    {
+        using var client = McpCallerHttp.Create(app, node);
+        using var request = CreateRequest(persistedKey);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardHeaders);
+        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+            .ConfigureAwait(false);
+        await RequestCqrsRf3McpGuardEvidenceCallAssertions.VerifyValidationAsync(response, lifecycle, cancellationToken)
+            .ConfigureAwait(false);
+        await verifyHealthy().ConfigureAwait(false);
+        _ = response.EnsureSuccessStatusCode();
+    }
+
     private static HttpRequestMessage CreateRequest(string persistedKey)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, McpCallerProtocol.Endpoint);
