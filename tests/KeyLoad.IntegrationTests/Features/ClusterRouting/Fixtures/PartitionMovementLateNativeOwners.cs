@@ -3,6 +3,7 @@ using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.BlobStorage;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -25,10 +26,15 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     private TimeProvider? shutdownClock;
     private readonly List<PartitionMovementLateNativeNode> coldNodes = [];
     private readonly IControlledBlobWireBorrowObserver? blobWireObserver;
+    private readonly Action<int, List<string>>? configureArguments;
+    private readonly Action<int, WebApplication>? configureApplication;
 
-    internal PartitionMovementLateNativeOwners(IControlledBlobWireBorrowObserver? blobWireObserver = null)
+    internal PartitionMovementLateNativeOwners(IControlledBlobWireBorrowObserver? blobWireObserver = null,
+        Action<int, List<string>>? configureArguments = null, Action<int, WebApplication>? configureApplication = null)
     {
         this.blobWireObserver = blobWireObserver;
+        this.configureArguments = configureArguments;
+        this.configureApplication = configureApplication;
         var root = Path.Combine(Path.GetTempPath(), "keyload-late-native-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         if (!OperatingSystem.IsWindows())
@@ -48,8 +54,9 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         stopped = false;
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
         {
-            nodes.Add(new(Settings.Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
-            index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null));
+            nodes.Add(new(Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
+                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null));
+            configureApplication?.Invoke(index, nodes[index].Application);
         }
         shutdownTimeout = nodes.First().ShutdownTimeout;
         shutdownClock = nodes.First().Clock;
@@ -59,6 +66,16 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         var clock = services.GetRequiredService<TimeProvider>();
         while (nodes.Any(node => !node.Silo.DatabaseReady))
         { await Task.Delay(runtime.Membership.Value.StartupRetryDelay, clock, cancellationToken).ConfigureAwait(false); }
+    }
+
+    private string[] Arguments(int index)
+    {
+        var original = Settings.Arguments(index);
+        if (configureArguments is null)
+        { return original; }
+        var configured = original.ToList();
+        configureArguments(index, configured);
+        return configured.ToArray();
     }
 
     internal void TrackProducer(Task original) => producers.Add(original);
@@ -103,7 +120,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     {
         if (!stopped)
         { throw new InvalidOperationException("Native locks remain owned by the live cohort."); }
-        var owned = new PartitionMovementLateNativeNode(Settings.Arguments(index), null);
+        var owned = new PartitionMovementLateNativeNode(Arguments(index), null);
         coldNodes.Add(owned);
         return owned;
     }

@@ -261,8 +261,8 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": false,
-    "canonicalFormatterPassed": false,
+    "canonicalBuildPassed": true,
+    "canonicalFormatterPassed": true,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": false,
     "localServerOnlyImageRegressionPassed": 1,
@@ -349,70 +349,20 @@
       "qualification": "Authenticated original completed failed Linux cohort. Full original current-stage build, normal/scalar, recovery, RF3 and coverage qualification remain open."
     },
     "currentBuild": {
-      "passed": false,
-      "fullReleaseCompleted": false,
-      "status": "actual_current_unit_production_references_and_recovery_image_passed_full_current_solution_gate_pending_linux",
-      "currentNativeUnitProducer": {
-        "receipt": "/private/tmp/keyload-stage44-root-document-unit-build-r85-20261010/original-build.json",
-        "receiptSha256": "3928c5cf4e73b7cd6f6a84e7f559b1ed20a65b686019f0e934616914b07c5337",
-        "exitCode": 0,
-        "sourceCoherent": true,
-        "binariesCoherent": null,
-        "actualCaseCount": null,
-        "logSha256": null,
-        "started": "2026-10-10T11:08:51.855072+00:00",
-        "ended": "2026-10-10T11:16:10.813930+00:00"
-      },
-      "currentRecoveryImageProducer": {
-        "receipt": "/private/tmp/keyload-stage44-root-document-recovery-build-r85-20261010/original-build.json",
-        "receiptSha256": "112729d8db8cc3ad5bb8ee444ac282405d732754f4cef78a689a60ca20282928",
-        "exitCode": 0,
-        "sourceCoherent": true,
-        "binariesCoherent": null,
-        "actualCaseCount": null,
-        "logSha256": "8ae8c9604fdced2dbc406602c7a93aae1e904f2c9eef57bcab27d537c660ea07",
-        "started": "2026-10-10T11:19:46.530865+00:00",
-        "ended": "2026-10-10T11:19:59.124440+00:00"
-      },
-      "latestCompletePredecessorBuild": {
-        "receipt": "/private/tmp/keyload-stage44-current-release-build-r82-20261010/original-build.json",
-        "receiptSha256": "1de17a5a2e08dd35fe2b3f11371211f3fbb56e867690acd9ccf118771b566693",
-        "exitCode": 0,
-        "sourceCoherent": true,
-        "binariesCoherent": null,
-        "actualCaseCount": null,
-        "logSha256": "0165f6ba312e0081b5aa01644573c8d3fe480609cac86dc2fd9f6bfa481e19ea",
-        "started": "2026-10-10T10:23:21.147526+00:00",
-        "ended": "2026-10-10T10:32:30.497045+00:00"
-      },
-      "qualificationClaim": false
+      "scope": "Full Release solution after native import ordering",
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "sourceInputs": 6835,
+      "originalReceiptSha256": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+      "developmentOnly": true
     },
     "currentFormatter": {
-      "passed": false,
-      "status": "one_changed_Core_owner_scoped_formatter_passed_complete_predecessor_passed_full_current_linux_pending",
-      "currentScopedFormatter": {
-        "receipt": "/private/tmp/keyload-stage44-root-document-format-r85-20261010/original-formatter.json",
-        "receiptSha256": "ad3ddbad7b321c6c2ed8091da8921806552e451061f59bccfbcc56d63b6bdc3d",
-        "exitCode": 0,
-        "sourceCoherent": true,
-        "binariesCoherent": null,
-        "actualCaseCount": null,
-        "logSha256": "22a3093fd749bf0f79a1359555de08e73572b54ae328137eedd536c7bc0c08c9",
-        "started": "2026-10-10T11:21:03.307348+00:00",
-        "ended": "2026-10-10T11:21:34.171047+00:00"
-      },
-      "latestCompletePredecessorFormatter": {
-        "receipt": "/private/tmp/keyload-stage44-current-formatter-r82-20261010/original-formatter.json",
-        "receiptSha256": "7393cf1ba40024a807d33f9e03886e76105a843092deb48a9af197870bf7002c",
-        "exitCode": 0,
-        "sourceCoherent": true,
-        "binariesCoherent": null,
-        "actualCaseCount": null,
-        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "started": "2026-10-10T10:14:34.566556+00:00",
-        "ended": "2026-10-10T10:23:11.050755+00:00"
-      },
-      "qualificationClaim": false
+      "scope": "Canonical full verify-no-changes after native import ordering",
+      "passed": true,
+      "sourceDrift": false,
+      "originalReceiptSha256": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+      "developmentOnly": true
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -45021,6 +44971,49 @@
         "scope": "Exact21 absolute include paths; no changes observed, full formatter PASS not inferred"
       },
       "qualificationClaim": false
+    },
+    "currentStageXLVCoherentDevelopment": {
+      "dateUtc": "2026-10-10",
+      "scope": "Coherent signed text maintenance and distinct-owner remote transfer implementation; local development",
+      "normalOperationCasesPassed": 66,
+      "normalRequiredControlsPassed": 5,
+      "scalarOperationAndControlCasesPassed": 71,
+      "nativeMaximumParallelTests": 50,
+      "observedNormalOperationOverlap": 15,
+      "observedScalarOverlap": 22,
+      "executionCohort": "Original successful semantic build before native import ordering; unchanged source/image during each native execution",
+      "finalBuild": "Actual full Release solution passed with 0 errors and 0 warnings after 17 native Sort Usings actions",
+      "finalFormatter": "Actual canonical full verify-no-changes passed against unchanged final compiled source",
+      "postExecutionSourceDelta": "Exactly 17 native Sort Usings actions; no Unit test source changes; original 66/5/71 selections not rerun after sorting",
+      "finalImageConnectionOperationCasesPassed": {
+        "normal": 8,
+        "scalar": 8
+      },
+      "currentNativeCases": 3297,
+      "actualCompiledDeclarations": 1706,
+      "functionalCases": 2875,
+      "requiredNonContributors": 422,
+      "fullAndAllFiveGroupNormalScalarNativeDiscovery": "All 12 original native discoveries passed in the pre-sort execution cohort; 574/580/574/574/573 functional cases",
+      "originalReceiptsSha256": {
+        "semanticBuild": "d83a7ac3116a4e0ec066a4863983163988abac2c49a9dea5c4e6d3d91e9df718",
+        "finalBuild": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+        "formatter": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+        "normal": "a688d84a3195395077d392cbe6ea97a90ea528cac195be96d915a2ff81c87418",
+        "requiredControls": "649f0aed5507539ffdc640cfdffe4fa1132e7f871a4bd02b1e565e2be30b4867",
+        "scalar": "25553c61c1d2bf6790716c9f7869da11eb6f91285e3be62a4271da807a413123",
+        "finalConnectionNormal": "6f41831272dc4e79a0244fd42550e04a6772551e53899059cb9912a4360da851",
+        "finalConnectionScalar": "30c1e9f945c66ce4824fce1f10fdb6d70b088d90f33e29d3896b13007cd5afb0",
+        "nativeImportActions": "a92dc4316cfb0f2bd31747889c4ce48e3d14c503433ff273d0ba6c383aecf4b7"
+      },
+      "wholeTaskAccepted": false,
+      "productCoveragePercent": null,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "remaining": [
+        "Actual delivered-source Linux complete normal/scalar unit, process recovery and SDK/official-MCP RF3 suites",
+        "Whole-task literal results, durable receipts, persisted authority, cold/fault and joined cleanup criteria",
+        "Source-bound full functional coverage and actual module/file/line/branch gap closure",
+        "Required measured resource, endurance and fair performance qualification"
+      ]
     }
   },
   "TIME-PROVIDER-001": {
@@ -52597,6 +52590,49 @@
         }
       },
       "linuxRf3NormalAndScalarPending": true
+    },
+    "currentStageXLVCoherentDevelopment": {
+      "dateUtc": "2026-10-10",
+      "scope": "Coherent signed text maintenance and distinct-owner remote transfer implementation; local development",
+      "normalOperationCasesPassed": 66,
+      "normalRequiredControlsPassed": 5,
+      "scalarOperationAndControlCasesPassed": 71,
+      "nativeMaximumParallelTests": 50,
+      "observedNormalOperationOverlap": 15,
+      "observedScalarOverlap": 22,
+      "executionCohort": "Original successful semantic build before native import ordering; unchanged source/image during each native execution",
+      "finalBuild": "Actual full Release solution passed with 0 errors and 0 warnings after 17 native Sort Usings actions",
+      "finalFormatter": "Actual canonical full verify-no-changes passed against unchanged final compiled source",
+      "postExecutionSourceDelta": "Exactly 17 native Sort Usings actions; no Unit test source changes; original 66/5/71 selections not rerun after sorting",
+      "finalImageConnectionOperationCasesPassed": {
+        "normal": 8,
+        "scalar": 8
+      },
+      "currentNativeCases": 3297,
+      "actualCompiledDeclarations": 1706,
+      "functionalCases": 2875,
+      "requiredNonContributors": 422,
+      "fullAndAllFiveGroupNormalScalarNativeDiscovery": "All 12 original native discoveries passed in the pre-sort execution cohort; 574/580/574/574/573 functional cases",
+      "originalReceiptsSha256": {
+        "semanticBuild": "d83a7ac3116a4e0ec066a4863983163988abac2c49a9dea5c4e6d3d91e9df718",
+        "finalBuild": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+        "formatter": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+        "normal": "a688d84a3195395077d392cbe6ea97a90ea528cac195be96d915a2ff81c87418",
+        "requiredControls": "649f0aed5507539ffdc640cfdffe4fa1132e7f871a4bd02b1e565e2be30b4867",
+        "scalar": "25553c61c1d2bf6790716c9f7869da11eb6f91285e3be62a4271da807a413123",
+        "finalConnectionNormal": "6f41831272dc4e79a0244fd42550e04a6772551e53899059cb9912a4360da851",
+        "finalConnectionScalar": "30c1e9f945c66ce4824fce1f10fdb6d70b088d90f33e29d3896b13007cd5afb0",
+        "nativeImportActions": "a92dc4316cfb0f2bd31747889c4ce48e3d14c503433ff273d0ba6c383aecf4b7"
+      },
+      "wholeTaskAccepted": false,
+      "productCoveragePercent": null,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "remaining": [
+        "Actual delivered-source Linux complete normal/scalar unit, process recovery and SDK/official-MCP RF3 suites",
+        "Whole-task literal results, durable receipts, persisted authority, cold/fault and joined cleanup criteria",
+        "Source-bound full functional coverage and actual module/file/line/branch gap closure",
+        "Required measured resource, endurance and fair performance qualification"
+      ]
     }
   },
   "KL-030": {
@@ -55261,6 +55297,49 @@
       "f3bSealed": false,
       "automaticRemoteRetryQualified": false,
       "qualification": "Actual isolated development complete operations only; current integrated Linux, distinct physical-owner RF3 and all acceptance gates remain open."
+    },
+    "currentStageXLVCoherentDevelopment": {
+      "dateUtc": "2026-10-10",
+      "scope": "Coherent signed text maintenance and distinct-owner remote transfer implementation; local development",
+      "normalOperationCasesPassed": 66,
+      "normalRequiredControlsPassed": 5,
+      "scalarOperationAndControlCasesPassed": 71,
+      "nativeMaximumParallelTests": 50,
+      "observedNormalOperationOverlap": 15,
+      "observedScalarOverlap": 22,
+      "executionCohort": "Original successful semantic build before native import ordering; unchanged source/image during each native execution",
+      "finalBuild": "Actual full Release solution passed with 0 errors and 0 warnings after 17 native Sort Usings actions",
+      "finalFormatter": "Actual canonical full verify-no-changes passed against unchanged final compiled source",
+      "postExecutionSourceDelta": "Exactly 17 native Sort Usings actions; no Unit test source changes; original 66/5/71 selections not rerun after sorting",
+      "finalImageConnectionOperationCasesPassed": {
+        "normal": 8,
+        "scalar": 8
+      },
+      "currentNativeCases": 3297,
+      "actualCompiledDeclarations": 1706,
+      "functionalCases": 2875,
+      "requiredNonContributors": 422,
+      "fullAndAllFiveGroupNormalScalarNativeDiscovery": "All 12 original native discoveries passed in the pre-sort execution cohort; 574/580/574/574/573 functional cases",
+      "originalReceiptsSha256": {
+        "semanticBuild": "d83a7ac3116a4e0ec066a4863983163988abac2c49a9dea5c4e6d3d91e9df718",
+        "finalBuild": "6f722da7ca8649e7aa62ce81f153ac75d88bfe30805fc1e45eccdd6086af0250",
+        "formatter": "ffe76ca0b9c5b64a92e4b1f3d5d9b77334a5ee213dc8579720b53e8d635aef35",
+        "normal": "a688d84a3195395077d392cbe6ea97a90ea528cac195be96d915a2ff81c87418",
+        "requiredControls": "649f0aed5507539ffdc640cfdffe4fa1132e7f871a4bd02b1e565e2be30b4867",
+        "scalar": "25553c61c1d2bf6790716c9f7869da11eb6f91285e3be62a4271da807a413123",
+        "finalConnectionNormal": "6f41831272dc4e79a0244fd42550e04a6772551e53899059cb9912a4360da851",
+        "finalConnectionScalar": "30c1e9f945c66ce4824fce1f10fdb6d70b088d90f33e29d3896b13007cd5afb0",
+        "nativeImportActions": "a92dc4316cfb0f2bd31747889c4ce48e3d14c503433ff273d0ba6c383aecf4b7"
+      },
+      "wholeTaskAccepted": false,
+      "productCoveragePercent": null,
+      "deliveredSourceLinuxRf3Qualified": false,
+      "remaining": [
+        "Actual delivered-source Linux complete normal/scalar unit, process recovery and SDK/official-MCP RF3 suites",
+        "Whole-task literal results, durable receipts, persisted authority, cold/fault and joined cleanup criteria",
+        "Source-bound full functional coverage and actual module/file/line/branch gap closure",
+        "Required measured resource, endurance and fair performance qualification"
+      ]
     }
   },
   "KL-095": {

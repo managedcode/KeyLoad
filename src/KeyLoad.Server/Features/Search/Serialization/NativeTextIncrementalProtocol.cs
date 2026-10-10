@@ -3,6 +3,7 @@ namespace KeyLoad.Server.Features.Search;
 internal static class NativeTextIncrementalProtocol
 {
     internal const int FormatVersion = 1;
+    internal const int ManifestFormatVersion = 2;
     internal const string RootDirectory = "text-projections";
     internal const string EnrollmentFile = "generation.bin";
     internal const string ManifestFile = "incremental.bin";

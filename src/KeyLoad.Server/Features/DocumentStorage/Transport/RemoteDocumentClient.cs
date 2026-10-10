@@ -81,6 +81,10 @@ internal sealed class RemoteDocumentClient : IDisposable
         CancellationToken cancellationToken)
         => RemoteControlledBlobExchange.ReadAsync(http, pins, options, membership, clock, call, wireObserver, cancellationToken);
 
+    internal Task<KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerResult> TransferAsync(
+        KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerCall call, CancellationToken token)
+        => KeyLoad.Server.Features.Messaging.RemoteTransferPeerExchange.SendAsync(http, pins, options, membership, clock, call, token);
+
     private async Task<RemoteDocumentReplyV1> ReadReplyAsync(RemoteDocumentCallV1 call,
         CancellationToken cancellationToken)
     {
@@ -126,7 +130,7 @@ internal sealed class RemoteDocumentClient : IDisposable
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership)
             || SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort
-            || reply.Controlled is not null || reply.ControlledBlob is not null
+            || reply.Controlled is not null || reply.ControlledBlob is not null || reply.QueueTransfer is not null
             || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
             || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
             || reply.QueryLeaf is not null && (call.QueryLeaf is null || reply.SearchLeaf is not null)

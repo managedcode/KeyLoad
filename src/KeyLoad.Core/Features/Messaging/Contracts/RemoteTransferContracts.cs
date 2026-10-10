@@ -42,6 +42,8 @@ internal static class RemoteTransferFields
     internal const int StoredRecords = 14;
     internal const int AcceptAttempts = 15;
     internal const int Repairs = 16;
+    internal const int RemoteTarget = 17;
+    internal const int RemoteOrigin = 17;
 }
 
 [global::Orleans.GenerateSerializer]
@@ -87,6 +89,9 @@ internal sealed record RemoteTransferIntentRecord(
 
     [global::Orleans.Id(RemoteTransferFields.Repairs)]
     public RemoteTransferRepairState? Repairs { get; init; }
+
+    [global::Orleans.Id(RemoteTransferFields.RemoteTarget)]
+    public RemoteTransferRemoteTarget? RemoteTarget { get; init; }
 }
 
 [global::Orleans.GenerateSerializer]
@@ -98,7 +103,11 @@ internal sealed record RemoteTransferTargetReceiptRecord(
     [property: global::Orleans.Id(RemoteTransferFields.PrincipalId)] string PrincipalId,
     [property: global::Orleans.Id(RemoteTransferFields.Fingerprint)] string Fingerprint,
     [property: global::Orleans.Id(RemoteTransferFields.ReceiptToken)] string ReceiptToken,
-    [property: global::Orleans.Id(RemoteTransferFields.TargetCommit)] CommitToken TargetCommit);
+    [property: global::Orleans.Id(RemoteTransferFields.TargetCommit)] CommitToken TargetCommit)
+{
+    [global::Orleans.Id(RemoteTransferFields.RemoteOrigin)]
+    public RemoteTransferRemoteOrigin? RemoteOrigin { get; init; }
+}
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(RemoteTransferAliases.Capacity)]

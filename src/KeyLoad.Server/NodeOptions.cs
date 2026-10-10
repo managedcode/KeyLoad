@@ -58,6 +58,8 @@ internal sealed record NodeOptions
     internal MovementFrameObservationOptions MovementFrameObservation { get; set; } = MovementFrameObservationOptions.Disabled;
     /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
     public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
+    /// <summary>Optional existing persisted technical subject for distinct-owner queue transfer admission; null is unavailable.</summary>
+    public string? RemoteTransferPrincipalId { get; init; }
 
     /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
     public void Validate()
@@ -83,6 +85,8 @@ internal sealed record NodeOptions
         var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
         configuration.Validate();
         MembershipAuthoritySettingsValidator.Validate(MembershipAuthority, this);
+        if (RemoteTransferPrincipalId is not null)
+        { global::KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId); }
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
         MovementFrameObservationOptionsReader.Validate(MovementFrameObservation, this);
         NativeDiscoveryOmissionOptionsReader.Validate(NativeDiscoveryOmission, this);

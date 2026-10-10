@@ -7,7 +7,7 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost partition,
     IOptions<NodeOptions> nodeOptions, IOptions<DatabaseLimits> limits, RemoteDocumentClient client,
-    RemoteDocumentWorkOwner owner, TimeProvider clock) : IRemoteDocumentReadRouter
+    RemoteDocumentWorkOwner owner, TimeProvider clock) : IRemoteDocumentReadRouter, IRemoteQueueTransferReceiptRouter
 {
     private const string NonceFormat = "N";
 
@@ -51,6 +51,11 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
         ServerFailureObserver.ThrowIfAny(failures);
         return document;
     }
+
+    public Task<RemoteQueueTransferReceiptRead> InspectTransferAsync(GrainRequestEnvelope envelope,
+        PrincipalRecord principal, InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken)
+        => new KeyLoad.Server.Features.Messaging.RemoteTransferReceiptRouter(node, partition, nodeOptions,
+            limits, client, owner, clock).ReadAsync(envelope, principal, request, cancellationToken);
 
     private CancellationTokenSource OriginalExpiry(DateTimeOffset expiresAt)
     {

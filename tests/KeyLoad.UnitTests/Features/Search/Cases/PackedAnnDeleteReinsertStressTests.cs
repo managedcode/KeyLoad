@@ -1,5 +1,6 @@
 namespace KeyLoad.UnitTests.Features.Search;
 
+[NotInParallel]
 internal sealed class PackedAnnDeleteReinsertStressTests
 {
     [Test]

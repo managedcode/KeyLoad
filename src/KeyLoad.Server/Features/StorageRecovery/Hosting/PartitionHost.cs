@@ -16,6 +16,14 @@ internal sealed class PartitionHost : IAsyncDisposable
     private readonly Lock lifecycle = new();
     private Task? shutdown;
 
+    internal Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification { get; }
+
+    private void RequireTransferVerifierClosed()
+    {
+        if (TransferVerification is { IsDisposed: false })
+        { throw Errors.Fail(ErrorCode.OwnershipLost, Core.Features.Messaging.RemoteTransferPeerProtocol.Unavailable); }
+    }
+
     /// <summary>Opens the private node directory and recovers durable state before exposing the protocol.</summary>
     /// <param name="runtimeOptions">Shared validated native options for physical ownership and execution.</param>
     /// <param name="authorization">Domain authorization against persisted principals.</param>
@@ -46,6 +54,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         {
             CacheMemory = openedCacheMemory = new(runtimeOptions.Core.CacheMemory);
             Database = OpenCanonicalDatabase(runtimeOptions, authorization, clock);
+            TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
@@ -87,8 +96,14 @@ internal sealed class PartitionHost : IAsyncDisposable
         { ServerFailureObserver.Observe(() => openedCoordinator.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
         if (openedConsensus is not null)
         { ServerFailureObserver.Observe(() => openedConsensus.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        Task? joiningMaterializer = null;
         if (applying is not null)
-        { ServerFailureObserver.Observe(() => applying.DisposeAsync().AsTask().GetAwaiter().GetResult(), failures); }
+        {
+            joiningMaterializer = applying.DisposeAsync().AsTask();
+            ServerFailureObserver.Observe(() => joiningMaterializer.GetAwaiter().GetResult(), failures);
+        }
+        if (TransferVerification is not null && (joiningMaterializer is null || joiningMaterializer.IsCompletedSuccessfully))
+        { ServerFailureObserver.Observe(TransferVerification.Dispose, failures); }
         ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
         if (openedText is not null)
         { ServerFailureObserver.Observe(openedText.Dispose, failures); }
@@ -96,7 +111,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         { ServerFailureObserver.Observe(openedLog.Dispose, failures); }
         if (openedCacheMemory is not null)
         { ServerFailureObserver.Observe(openedCacheMemory.Dispose, failures); }
-        ServerFailureObserver.Observe(stores.Dispose, failures);
+        ServerFailureObserver.Observe(() => { RequireTransferVerifierClosed(); stores.Dispose(); }, failures);
         if (failures.Count > FailuresCountValidationBoundary)
         { throw new AggregateException(failures); }
     }
@@ -179,6 +194,7 @@ internal sealed class PartitionHost : IAsyncDisposable
 
     private async Task DisposeCoreAsync()
     {
+        TransferVerification?.RequireJoined();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => OnlineTextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => TextMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
@@ -187,6 +203,14 @@ internal sealed class PartitionHost : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         var applying = Materializer.DisposeAsync().AsTask();
         await ServerFailureObserver.ObserveAsync(() => applying, failures).ConfigureAwait(false);
+        if (TransferVerification is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await applying.ConfigureAwait(false);
+                TransferVerification.Dispose();
+            }, failures).ConfigureAwait(false);
+        }
         ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
         var closingLog = CloseLogAsync(applying);
         await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
@@ -206,6 +230,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private async Task CloseStoresAsync(Task closingLog)
     {
         await closingLog.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        RequireTransferVerifierClosed();
         stores.Dispose();
     }
 }

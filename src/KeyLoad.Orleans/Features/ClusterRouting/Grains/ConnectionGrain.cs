@@ -32,13 +32,14 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         string signedRequest, CancellationToken cancellationToken)
     {
         var requestId = OperationRequestId(signedRequest);
+        var purpose = new NativeCqrsStreamPurpose();
         var phaseSettlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
         Action settled = phaseSettlement is null ? static () => { }
         : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext);
-        return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.Run(
+        return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.RunWithPurpose(
             createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
-            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: workOwner), cancellationToken);
+                writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement, purpose), token),
+            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: workOwner, purpose: purpose), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -76,7 +77,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
 
     private async ValueTask<Result<GrainOperationReply>> ExecuteCapabilityAsync(string signedRequest, Guid requestId,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
-        GrainRequestPhaseSettlement? phaseSettlement)
+        GrainRequestPhaseSettlement? phaseSettlement, NativeCqrsStreamPurpose purpose)
     {
         var command = false;
         var stage = GrainFailureStage.EnvelopeVerification;
@@ -86,6 +87,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             var request = codec.VerifyRequest(signedRequest, requestId);
             GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
             phaseSettlement?.SetIdentity(request);
+            purpose.Bind(request);
             stage = GrainFailureStage.CapabilityExecution;
             command = request.Envelope.CommandKind is not null;
             await writer.StartedAsync(new GrainRequestProgress(requestId)).ConfigureAwait(true);
@@ -101,7 +103,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
             if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
-            { reply = await ExecuteParentAsync(request, writer).ConfigureAwait(true); }
+            { reply = await ExecuteParentAsync(request, writer, purpose).ConfigureAwait(true); }
             else if (command)
             {
                 stage = GrainFailureStage.PartitionResolution;
@@ -151,7 +153,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
     }
 
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
     {
         if (request.Envelope.CommandKind == OperationKind.MovePartition)
         {
@@ -168,7 +170,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
         {
             var result = await TextMaintenanceExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
-                clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
+                clock, chunkSerializer, options, diagnostics, writer, purpose).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)

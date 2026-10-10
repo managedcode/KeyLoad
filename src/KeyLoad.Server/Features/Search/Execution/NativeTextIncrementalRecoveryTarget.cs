@@ -11,11 +11,11 @@ internal static class NativeTextIncrementalRecoveryTarget
     {
         budget.Check();
         var through = original.Bootstrap ? original.SourceUpperSequence : original.ThroughSequence;
-        var target = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.FormatVersion,
+        var target = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.ManifestFormatVersion,
             original.Scope, original.Consumer, original.Generation, original.Placement, through,
             original.AppliedPosition, original.NextRecord, original.Records, published?.Files ?? [],
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion,
-            original.ResourceSha256, original.Bootstrap);
+            original.ResourceSha256, original.Bootstrap, published?.LastSettledCheckpointRequest);
         budget.Check();
         return target;
     }

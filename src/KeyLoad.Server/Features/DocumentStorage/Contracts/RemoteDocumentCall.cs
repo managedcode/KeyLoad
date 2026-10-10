@@ -28,4 +28,6 @@ internal sealed record RemoteDocumentReplyV1(
     [property: global::Orleans.Id(6)] PartitionQueryLeafResultV1? QueryLeaf = null,
     [property: global::Orleans.Id(7)] ControlledDocumentReadResult? Controlled = null,
     [property: global::Orleans.Id(8)] ControlledBlobReadResult? ControlledBlob = null,
-    [property: global::Orleans.Id(9)] KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1? SearchLeaf = null);
+    [property: global::Orleans.Id(9)] KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1? SearchLeaf = null,
+    [property: global::Orleans.Id(KeyLoad.Core.Features.Messaging.RemoteTransferPeerProtocol.ReplyField)]
+    KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerResult? QueueTransfer = null);

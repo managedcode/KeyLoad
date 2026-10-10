@@ -15,14 +15,19 @@ using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 [AttributeUsage(AttributeTargets.Class)]
-internal sealed class RequestCqrsDataSourceAttribute : DataSourceGeneratorAttribute<RequestCqrsClusterFixture>
+internal sealed class RequestCqrsDataSourceAttribute(bool nativeTextMaintenance = false)
+    : DataSourceGeneratorAttribute<RequestCqrsClusterFixture>
 {
-    public RequestCqrsDataSourceAttribute()
-    {
-    }
+    public bool NativeTextMaintenance { get; } = nativeTextMaintenance;
 
     protected override IEnumerable<Func<RequestCqrsClusterFixture>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
+        if (NativeTextMaintenance)
+        {
+            yield return static () => new RequestCqrsClusterFixture(nativeMaintenance:
+                static database => new KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime(database));
+            yield break;
+        }
         yield return () => SharedDataSources.GetOrCreate<RequestCqrsClusterFixture>(
             SharedType.PerTestSession, metadata, null, static () => new RequestCqrsClusterFixture());
     }
@@ -35,15 +40,19 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private const string RequestWorkNotJoined = "The fixture request work has not joined.";
     private readonly System.Threading.Lock disposalGate = new();
     private Task? disposal;
+    private readonly Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeFactory;
+    private bool clusterStopped;
     private NativeRequestWorkOwner? requestWork;
     private readonly string ownerId = Guid.NewGuid().ToString("N");
 
     internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
-        IGrainRequestPhaseObserver? observer = null)
+        IGrainRequestPhaseObserver? observer = null,
+        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null)
     {
+        nativeFactory = nativeMaintenance;
         Clock = clock ?? TimeProvider.System;
         RoutingOptions = UnitRoutingOptions.Routing(routing);
-        Database = new TestDatabase(timeProvider: Clock);
+        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: nativeFactory is not null);
         try
         {
             RequestCqrsFixtureOwners.Register(ownerId, this);
@@ -77,6 +86,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal TestDatabase Database { get; }
     internal TimeProvider Clock { get; }
     internal IOptions<GrainRoutingOptions> RoutingOptions { get; }
+    internal KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime? NativeMaintenance { get; private set; }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
@@ -87,6 +97,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
+            NativeMaintenance = nativeFactory?.Invoke(Database);
             await Cluster.DeployAsync(startup.Token);
         }
         catch (Exception startupFailure)
@@ -165,7 +176,11 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         }
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ShutdownSeconds), TimeProvider.System);
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-            () => Cluster.StopAllSilosAsync(deadline.Token), failures);
+            async () =>
+            {
+                await Cluster.StopAllSilosAsync(deadline.Token);
+                clusterStopped = true;
+            }, failures);
     }
 
     private async Task DisposeOwnedResourcesAsync(List<Exception> failures)
@@ -174,6 +189,15 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         if (requestWork is not null)
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
+        }
+        if (NativeMaintenance is not null)
+        {
+            if (!clusterStopped)
+            { return; }
+            var before = failures.Count;
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeMaintenance.DisposeAsync().AsTask(), failures);
+            if (failures.Count != before)
+            { return; }
         }
         try
         {
@@ -196,12 +220,23 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
     {
         var fixture = RequestCqrsFixtureOwners.Resolve(siloBuilder.Configuration);
         siloBuilder.AddActivityPropagation();
+        if (fixture.NativeMaintenance is { } native)
+        {
+            siloBuilder.Services.AddOptions<TextIndexMaintenanceOptions>()
+                .Bind(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()
+                    .GetSection(TextIndexMaintenanceOptions.SectionName))
+                .Validate(options => options.IsValid(), TextIndexMaintenanceOptions.ValidationMessage)
+                .ValidateOnStart();
+            siloBuilder.Services.AddSingleton<INativeTextMaintenance>(native.Owner);
+        }
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(new EmbeddedCoordinator(fixture.Database.Database));
+        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.NativeMaintenance is not null
+            ? new RequestCqrsNativeCommitCoordinator(fixture.Database)
+            : new EmbeddedCoordinator(fixture.Database.Database));
         siloBuilder.Services.AddSingleton(fixture.Clock);
         siloBuilder.Services.AddSingleton(fixture.RoutingOptions);
         siloBuilder.Services.AddSingleton(UnitExecutionOptions.Messaging());

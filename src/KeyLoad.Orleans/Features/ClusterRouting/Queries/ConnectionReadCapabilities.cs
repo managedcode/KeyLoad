@@ -109,6 +109,18 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         {
             return await blobs.ExecuteAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
         }
+        if (ConnectionRemoteTransferReadCapabilities.HandlesPeer(kind, request.Envelope))
+        {
+            return ConnectionRemoteTransferReadCapabilities.ExecutePeer(localDatabase, services,
+                runtimeClock, principal, request, cancellationToken);
+        }
+        if (kind == GrainReadKind.QueueTransferReceipt)
+        {
+            var result = await ConnectionRemoteTransferReadCapabilities.TryReceiptAsync(services,
+                principal, request, cancellationToken).ConfigureAwait(true);
+            if (result.Routed)
+            { return result.Receipt; }
+        }
         if (GrainCoreReadCapabilities.Handles(kind))
         {
             return core.Execute(kind, principal.Id, request.Payload, cancellationToken,
@@ -123,6 +135,12 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await Query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
         }
 
+        return await ReadAdministrationAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task<object?> ReadAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
+        DecodedGrainRequest request, CancellationToken cancellationToken)
+    {
         GrainNativePayload.RequireNoDto(request.Payload);
         GrainRequestAuthority.RequireAdministrator(principal);
         cancellationToken.ThrowIfCancellationRequested();

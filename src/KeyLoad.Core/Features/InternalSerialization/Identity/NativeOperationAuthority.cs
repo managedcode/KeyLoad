@@ -28,9 +28,9 @@ public sealed partial class DatabaseEngine
     // Only small metadata/authority is decoded; no JSON string or typed command body is materialized.
     internal void VerifyNativeAuthority(Guid id, OperationKind kind, string principalId, ReadOnlySpan<byte> payloadJsonUtf8,
         ReadOnlyMemory<byte> value, ErrorCode? error, string? safeDetail,
-        ReadOnlyMemory<byte> authority, ReadOnlyMemory<byte> signature, ReadOnlyMemory<byte> retryDecisions = default)
+        ReadOnlyMemory<byte> authority, ReadOnlyMemory<byte> signature, ReadOnlyMemory<byte> retryDecisions = default, ReadOnlyMemory<byte> transferProof = default)
     {
-        var payload = new NativeCommandPayload(value, error, safeDetail) { Authority = authority, Signature = signature, RetryDecisions = retryDecisions };
+        var payload = new NativeCommandPayload(value, error, safeDetail) { Authority = authority, Signature = signature, RetryDecisions = retryDecisions, TransferProof = transferProof };
         var identity = Store.Identity;
         var claims = ReadNativeAuthority(identity, payload);
         VerifyNativeAuthority(identity, claims, id, kind, principalId,
@@ -47,6 +47,7 @@ public sealed partial class DatabaseEngine
             || claims.Fingerprint != fingerprint || claims.Error != payload.Error || claims.SafeDetail != payload.SafeDetail
             || claims.ValueHash.Length != valueHash.Length || !CryptographicOperations.FixedTimeEquals(claims.ValueHash.Span, valueHash)
             || !MatchesQueueRetryHash(payload.RetryDecisions.Span, claims.RetryDecisionHash.Span)
+            || !MatchesRemoteTransferProofHash(payload.TransferProof.Span, claims.TransferProofHash.Span)
             || !ValidNativeMarker(payload))
         { throw Errors.Fail(ErrorCode.Corruption, NativeCommandContract.MismatchedAuthority); }
     }
@@ -74,7 +75,8 @@ public sealed partial class DatabaseEngine
         var claims = new NativeCommandAuthority(KeyLoad.Core.Features.Search.OnlineTextNativeAuthorityPurpose.For(operation.Kind), identity.Incarnation,
             operation.Id, operation.Kind, operation.PrincipalId, NativeOperationFingerprint.Compute(operation),
             SHA256.HashData(payload.Value.Span), payload.Error, payload.SafeDetail,
-            payload.RetryDecisions.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.RetryDecisions.Span));
+            payload.RetryDecisions.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.RetryDecisions.Span),
+            payload.TransferProof.IsEmpty ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(payload.TransferProof.Span));
         var authority = NativeSerialization.Serialize(claims);
         var signed = payload with { Authority = authority, Signature = HMACSHA256.HashData(identity.SigningKey.Span, authority) };
         var native = NativeSerialization.Serialize(signed);

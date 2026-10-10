@@ -92,7 +92,7 @@ public sealed partial class GrainRequestCodec
     private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
         => GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes);
 
-    private string Issue(GrainRequestEnvelope request)
+    internal string Issue(GrainRequestEnvelope request)
     {
         ValidateScope(request);
         return database.Sign(request);

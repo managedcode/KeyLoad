@@ -9,6 +9,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 {
     internal readonly TwoRf3MembershipCapacity capacity = new();
     internal DistributedApplication? application;
+    internal KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? startupCallbacks;
     internal ContainerRuntimeControl? RemoteRuntimeOwner { get; set; }
     internal string? dataRoot;
     private bool dataRootOwned;
@@ -24,6 +25,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool protectedDocuments;
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
+    internal string? remoteTransferPrincipalId;
     internal int? movementMaxBatchBytes;
     internal int? movementMaxFrameBytes;
     internal RequestCqrsProbeFixture? queryControls;
@@ -33,7 +35,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    private TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false)
+    internal TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false)
     { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; movementMaxBatchBytes = maximumBatchBytes; activationIsolation = isolateActivation; }
 
     internal string OwnedDataRoot => dataRoot
@@ -103,20 +105,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal RequestCqrsProbeFixture QueryControls => queryControls
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
-    private static async Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
-    {
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => wave.StartCoreAsync(cancellationToken), failures)
-            .ConfigureAwait(false);
-        if (failures.Count == 0)
-        { return wave; }
-        await ServerFailureObserver.ObserveAsync(() => wave.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
-        throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
-    }
-
-    private Task StartCoreAsync(CancellationToken cancellationToken)
-        => TwoRf3MembershipWaveStartup.StartCoreAsync(this, cancellationToken);
+    internal static Task<TwoRf3MembershipWave> StartOwnedAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+        => TwoRf3MembershipWaveStartup.StartOwnedAsync(wave, cancellationToken);
 
     internal async Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
     {
@@ -185,6 +175,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { application = null; applicationDisposed = true; }
         else
         { cleanupFailed = true; }
+        if (startupCallbacks is { } capture)
+        { await ServerFailureObserver.ObserveAsync(capture.Join, failures).ConfigureAwait(false); }
     }
 
     internal bool CanCheckLocks => startAttempted && applicationDisposed && !nodeLocksReleased

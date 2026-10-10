@@ -26,7 +26,8 @@ internal static class GrainRequestScope
         }
 
         if (!EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
-            && !ControlledDocumentReadScope.Validate(request) && !ControlledBlobReadScope.Validate(request))
+            && !ControlledDocumentReadScope.Validate(request) && !ControlledBlobReadScope.Validate(request)
+            && !RemoteTransferRequestScope.Validate(request))
         { RuntimeJournalRequestScope.Validate(request); }
 
         if (request.CommandKind == OperationKind.Membership || request.PrincipalId == ClusterPrincipalPolicy.InternalPrincipalId)

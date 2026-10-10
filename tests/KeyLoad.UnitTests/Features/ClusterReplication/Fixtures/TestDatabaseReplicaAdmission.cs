@@ -96,6 +96,21 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
         }
     }
 
+    internal void ReadBarrier(CancellationToken cancellationToken)
+    {
+        lock (admission)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var contextToken = TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
+            using var caller = cancellationToken.CanBeCanceled
+                ? CancellationTokenSource.CreateLinkedTokenSource(contextToken, cancellationToken) : null;
+            using var timeout = new CancellationTokenSource(execution.CommandTimeout, TimeProvider.System);
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                caller?.Token ?? contextToken, timeout.Token);
+            RequireMaterializer().WaitForApplyAsync(log.State.CommittedIndex, cancellation.Token).GetAwaiter().GetResult();
+        }
+    }
+
     internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
     {
         lock (admission)

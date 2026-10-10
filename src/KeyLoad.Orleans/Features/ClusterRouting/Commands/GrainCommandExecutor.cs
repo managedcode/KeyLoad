@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Messaging;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
@@ -42,6 +43,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             {
                 OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
                     database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),
+                OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
                 OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
                     operationToken).ConfigureAwait(true),
                 OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
@@ -70,6 +72,13 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             NativeCapabilityWorkLifetime.Settle(primaryError, work, null, null);
         }
     }
+
+    private Task<OperationResult> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
+        CancellationToken token)
+        => request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
+            ? GrainRemoteTransferCommand.SubmitAsync(database, coordinator, request, principal, token)
+            : coordinator.SubmitNativeAsync(OperationKind.Batch, request.Envelope.CommandId,
+                principal.Id, request.Payload, token);
 
     private Task<OperationResult> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)

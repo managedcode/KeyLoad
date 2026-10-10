@@ -17,4 +17,5 @@ internal sealed record NativeTextIncrementalManifest(
     [property: global::Orleans.Id(10)] string TokenizerVersion,
     [property: global::Orleans.Id(11)] string HashVersion,
     [property: global::Orleans.Id(12)] string ResourceSha256,
-    [property: global::Orleans.Id(13)] bool Bootstrap);
+    [property: global::Orleans.Id(13)] bool Bootstrap,
+    [property: global::Orleans.Id(14)] CommitProjectionBatchRequest? LastSettledCheckpointRequest = null);

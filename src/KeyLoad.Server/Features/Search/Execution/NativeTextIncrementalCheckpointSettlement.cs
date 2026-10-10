@@ -42,13 +42,14 @@ internal static class NativeTextIncrementalCheckpointSettlement
         NativeTextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, options, budget);
         budget.Check();
         observer?.Invoke(NativeTextFaultStage.CanonicalCheckpointAcknowledged);
-        var completed = manifest;
-        if (manifest.Bootstrap && acknowledged.Checkpoint == intent.SourceUpperSequence)
+        NativeTextIncrementalValidation.SettledRequest(intent.CheckpointCommand, manifest.Consumer, budget);
+        var completed = manifest with
         {
-            completed = manifest with { Bootstrap = false };
-            NativeTextIncrementalMetadata.Publish(generationPath, completed,
-                options.Value.MaximumDiskBytes, budget, options, resources);
-        }
+            Bootstrap = manifest.Bootstrap && acknowledged.Checkpoint != intent.SourceUpperSequence,
+            LastSettledCheckpointRequest = intent.CheckpointCommand
+        };
+        NativeTextIncrementalMetadata.Publish(generationPath, completed,
+            options.Value.MaximumDiskBytes, budget, options, resources);
         budget.Check();
         var retiredIntent = Path.Combine(generationPath, NativeTextIncrementalProtocol.IntentFile);
         if (resources is null)

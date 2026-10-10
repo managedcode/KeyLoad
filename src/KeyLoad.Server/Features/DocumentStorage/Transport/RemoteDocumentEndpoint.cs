@@ -1,7 +1,9 @@
 using System.Globalization;
+using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.Messaging;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
@@ -15,6 +17,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private readonly RemoteDocumentReceiver receiver;
     private readonly RemoteControlledDocumentReceiver controlled;
     private readonly RemoteControlledBlobReceiver controlledBlob;
+    private readonly RemoteTransferPeerReceiver? queueTransfer;
     private readonly RemoteDocumentWorkOwner owner;
     private readonly ReplicaMembershipAuthorityAddressPins pins;
     private readonly ReplicaMembershipAuthorityReplayCache replay;
@@ -24,12 +27,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     internal RemoteDocumentEndpoint(IOptions<NodeOptions> nodeOptions, RemoteDocumentReceiver receiver,
         RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled, RemoteControlledBlobReceiver controlledBlob,
         IOptions<OrleansMembershipOptions> membershipOptions,
-        IOptions<GrainRoutingOptions> routingOptions, TimeProvider clock)
+        IOptions<GrainRoutingOptions> routingOptions, TimeProvider clock,
+        RemoteTransferPeerReceiver? queueTransfer = null)
     {
         options = nodeOptions.Value;
         this.receiver = receiver;
         this.controlled = controlled;
         this.controlledBlob = controlledBlob;
+        this.queueTransfer = queueTransfer;
         this.owner = owner;
         this.clock = clock;
         routing = routingOptions.Value;
@@ -84,6 +89,17 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             if (!callerMac.Verify(body, RemoteDocumentWire.Signature(context.Request.Headers), reply: false))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
             var transport = RemoteDocumentWire.DecodeCall(body);
+            if (transport.QueueTransfer is { } transferCall)
+            {
+                if (transport.Document is not null || transport.Controlled is not null || transport.ControlledBlob is not null)
+                { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+                var transferReceiver = queueTransfer
+                    ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferPeerProtocol.Unavailable);
+                await RemoteTransferPeerEndpointExecution.ExecuteAsync(context, transferCall, body,
+                    RemoteDocumentWire.Signature(context.Request.Headers), transferReceiver, options,
+                    pins, replay, clock, token).ConfigureAwait(false);
+                return;
+            }
             if (transport.ControlledBlob is { } blobCall)
             {
                 if (transport.Document is not null || transport.Controlled is not null)

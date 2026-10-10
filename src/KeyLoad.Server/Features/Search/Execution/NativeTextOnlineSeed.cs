@@ -43,7 +43,7 @@ internal static class NativeTextOnlineSeed
         }, failures);
         ServerFailureObserver.Observe(owner.CloseAfterOperation, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        var manifest = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.FormatVersion,
+        var manifest = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.ManifestFormatVersion,
             scope, session.Request.Consumer, session.Request.ConsumerGeneration, session.Request.Placement,
             seed.UpperSequence, seed.AppliedPosition, plan.NextRecord, plan.Records, files,
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, seed.ResourceSha256, true);

@@ -100,6 +100,13 @@ internal sealed class TestDatabase : IDisposable
         => replicaAdmission is { } native ? native.Submit(operation, explicitTime: true)
             : throw new InvalidOperationException(NativeOperationRequired);
 
+    internal void JoinNativeReadBarrier(CancellationToken cancellationToken)
+    {
+        if (replicaAdmission is not { } native)
+        { throw new InvalidOperationException(NativeOperationRequired); }
+        native.ReadBarrier(cancellationToken);
+    }
+
     internal OperationResult SubmitIssuedEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
         => replicaAdmission is { } native ? native.Submit(operation, explicitTime: false, cancellationToken)
             : throw new InvalidOperationException(NativeOperationRequired);

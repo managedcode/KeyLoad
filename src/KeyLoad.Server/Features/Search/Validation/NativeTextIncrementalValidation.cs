@@ -17,7 +17,7 @@ internal static class NativeTextIncrementalValidation
         IOptions<NativeTextExecutionOptions> executionOptions)
     {
         budget.Check();
-        if (manifest is null || manifest.FormatVersion != NativeTextIncrementalProtocol.FormatVersion
+        if (manifest is null || manifest.FormatVersion != NativeTextIncrementalProtocol.ManifestFormatVersion
             || manifest.Scope != scope || manifest.Consumer != consumer || manifest.Generation != generation
             || manifest.Placement is null || manifest.Placement.PhysicalShardId != placement.PhysicalShardId
             || manifest.Placement.Incarnation != placement.Incarnation
@@ -32,6 +32,7 @@ internal static class NativeTextIncrementalValidation
             || manifest.Files.Length == EmptyFiles || manifest.Files.Length > executionOptions.Value.MaximumFiles)
         { throw NativeTextErrors.Corrupt(); }
         NativeTextValidation.ValidateScope(scope, scope.NodeId);
+        SettledRequest(manifest.LastSettledCheckpointRequest, consumer, budget);
         Records(manifest.Records, manifest.NextRecord, scope, maximumRecords, budget);
         NativeTextValidation.ValidateFiles(manifest.Files, executionOptions);
         budget.Check();
@@ -58,4 +59,18 @@ internal static class NativeTextIncrementalValidation
         }
         budget.Check();
     }
+
+    internal static void SettledRequest(CommitProjectionBatchRequest? original,
+        ProjectionConsumerRef consumer, ReadExecutionBudget budget)
+    {
+        if (original is null)
+        { return; }
+        budget.Check();
+        budget.ChargeBytes(NativeSerialization.Measure(original));
+        if (original.CommandId == Guid.Empty || original.Consumer != consumer
+            || string.IsNullOrEmpty(original.Token) || original.Effects.IsDefault || !original.Effects.IsEmpty)
+        { throw NativeTextErrors.Corrupt(); }
+        budget.Check();
+    }
+
 }

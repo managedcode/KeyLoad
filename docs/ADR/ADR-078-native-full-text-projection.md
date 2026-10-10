@@ -582,3 +582,129 @@ REQ/AC-FTS-002/004/005 retain the SAME original NativeTextProjectionAuthorityTes
 A fresh authorized root Batch inserts one independently literal protected healthy row. Require full original command identity, partition/cut and exact sole putDocument MutationReceipt, full binary same-ID receipt replay and unchanged complete canonical bytes/cut. The repaired original reader must return the complete independent redacted JSON/reference/revision/rank/ordered-field page and no deleted or hidden old terms. Dispose/join the actual original native projection and canonical store; reopen the same physical directory through the existing native ZoneTreeStore/DatabaseEngine APIs. Persisted NodeId/incarnation stay exact, read generation may only advance, original repaired receipt bytes and cut remain exact. Fresh current persisted authorization supplies the same complete literal healthy result after cold.
 
 Ordered stages: this feature/ADR078 appendix, unchanged original-case call plus feature-owned NativeTextAuthorityContinuation helper, native guarded preview, isolated normal/scalar original full-case execution and complete mapped KL029 Unit/recovery; root integration and genuine Linux normal/scalar/RF3/coverage gates. No product, schema/alias/Id, storage format, quota, deadline, grant promotion, fake clock or caller authority change. Original failures/cleanup are retained by the existing native failure ledger. Local results are development evidence only; historical df75 failures and current public RF3 qualification remain separate. Rollback removes only this test continuation/helper and appendix; all original assertions and persisted contracts remain.
+
+
+### KL029 signed long-maintenance stream admission correction (2026-10-10)
+
+REQ-FTS-002/004/005 and AC-FTS-002/004/005 retain exact source U, current persisted administrator and independent SDK/official MCP/Q1 result, receipt, replay, cold and resource oracles. Actual Build/Restore emits Configure, Capture, repeated NativeIndex/Publish/Checkpoint and Completed progress. The short-only native admission previously rejected its first Progress before yielding it; this source defect does not classify unrelated unknown outcomes.
+
+Ordered integration: a call-local purpose binds the original verified signed request immediately after existing connection validation; the independent consumer verifies that same signed request only on first Started. Only typed MaintainTextIndex Build/Restore enables the long profile. Release, early Failed and ordinary requests retain their existing two-frame contract. No public alias, field ID, option, quota, deadline, policy, read cut or storage format changes. Full progress identity/sequence/event/message/typed phase and terminal validation precedes native serialization admission. Each progress uses MaximumStartedBytes; every frame contributes to existing MaximumTotalFrames and MaximumAggregateBytes. Successful final requires Completed, while failure may terminate an admitted phase. Existing producer/enumerator cancellation and joined cleanup preserve initiating/fatal/cleanup failures.
+
+Owning source: ClusterRouting Streaming purpose/admission/lifetime/consumer, ConnectionGrain and Server OrleansNodeRequestExecutor, Search TextMaintenanceProgress and phase validation. Ordinary malformed two-frame tests remain; real native CQRS producer regressions exercise Configure through Final and malformed/extra/after-final refusal followed by joined healthy work. Original nine Aspire RF3 cases and both profiles remain mandatory. Source and local development proof do not qualify Linux coverage, RF3 durability or performance. Rollback reverts this coherent profile together, without persisted-data migration.
+
+
+### Original typed-validation boundary correction (2026-10-10)
+
+The pre-Started call-local purpose binds only the same successfully verified signed envelope kind and operation. It does not deserialize an additional typed command. The producer enables the Build/Restore profile only after the existing TextMaintenanceExecution typed payload, current administrator, request identity, node and mode checks, before its original Configure progress. The consumer may resolve Build/Restore lazily on the first Progress from the same original verified payload; no frame field or ambient mode selects the profile. Release and every other operation retain exactly Started/Final. Early Failed performs no additional typed validation. A signed malformed maintenance payload preserves the original Started→Failed shape, safe error, no effects and joined cleanup, followed by a fresh healthy operation. Unexpected Progress refuses without fallback. Wire aliases, IDs, limits and original execution authorization remain unchanged.
+
+
+## KL029 settled checkpoint / prior parent current-format contract
+
+# KL029 last-settled checkpoint replay contract
+
+Status: approved owning direction; exact serializer/current-format proposal frozen before production edits; source/runtime qualification OPEN.
+
+## Proven original failure and native APIs
+
+R8 original normal and scalar each 1/9 pass, 8/9 fail. First original SDK maintenance case retains its original Build checkpoint; same-command replay returns null at NativeTextMaintenanceRf3OriginalPrefix line18. Later BudgetExceeded cases remain unclassified shared-fixture outcomes. No limits/deadlines/retry/assertions change.
+
+TextMaintenanceParentFlow starts checkpoint=null; TextMaintenanceReplay returns it when original prefix is already complete. NativeTextIncrementalSessionOperations.Settle clears pending Intent/Target after successful acknowledged native checkpoint. NativeTextIncrementalCheckpointSettlement deletes intent.bin after exact acknowledged receipt validation. NativeTextIncrementalManifest has no settled request. ResolveOutcome/ValidateCachedResult require complete original operation, current persisted authorization/policy/incarnation/fingerprint/scope and original projection claims; CommandOutcome alone contains only CommitReceipt, not full ProjectionBatchResult. Reuse the actual existing signed CommitProjectionBatch child path, not a new lookup endpoint or invented receipt.
+
+## Frozen fields and current native format
+
+- Existing NativeTextIncrementalManifest alias and Id0..13 remain exact. Append nullable LastSettledCheckpointRequest at Id14, type CommitProjectionBatchRequest. It stores only the exact last successfully acknowledged original request, not result bytes or an arbitrary caller receipt.
+- Existing TextMaintenanceCapabilityResult alias and Id0..7 remain exact. Append nullable LastSettledCheckpointRequest at Id8. Existing pending OriginalCheckpointIntent at Id5 is unchanged and has distinct recovery semantics.
+- Existing enrollment/intent format1 and aliases/IDs remain unchanged. Introduce named ManifestFormatVersion=2 for the manifest only; every genuine constructor and strict validator uses it. Manifest version1/unknown/missing mandatory settled evidence refuses; no legacy reader, JSON fallback, conversion, migration, newest-directory fallback or automatic repair.
+- Bootstrap and a genuine currently pending intent may legitimately have no settled request. A settled non-bootstrap manifest with no pending intent requires the exact last settled request, matching consumer/generation and through-prefix. Do not interpret missing evidence as absence of canonical outcome or permission to retire files.
+
+## Ordered settlement and resource/privacy ownership
+
+1. Preserve all actual current receipt/token/incarnation/partition/placement/policy/schema/resource/corpus checks and current owner/inventory proof.
+2. Verify the original pending intent bytes/checksum against the actual original request.
+3. Only after genuine canonical acknowledgement, form completed manifest with the exact original CheckpointCommand at Id14, Bootstrap=false when originally justified. Charge the additional retained typed command/index/buffer work under the same original ReadExecutionBudget and native resource grant before retention/serialization; retain limits unchanged.
+4. Always publish this completed manifest through existing checksummed generated envelope, same incremental.pending write/flush and owning rename path. Retain pending intent until this publication succeeds.
+5. Only then delete the original pending intent through owning resources. Publication/delete faults preserve original failures, pending recovery evidence, charges and original owned files; no uncertain success.
+6. Cold acquisition validates manifest version, generated envelope checksum, full current native inventory, same owner/read-cut/consumer authority and last original request before returning it through the bounded capability result. No public errors, logs, schema or discovery export token/body fields.
+
+## Original replay, admission and authority
+
+Parent pending recovery remains first and unchanged. If no pending recovery supplied a checkpoint, and settled evidence matches the exact deterministic TextMaintenanceChildIdentity(parent CommandId, Checkpoint, original ThroughSequence), replay ONLY that original existing signed CommitProjectionBatch request. Do not call ApplyIntent or PreparePage; do not construct a fresh token/cut/checkpoint, choose another parent, or synthesize receipt. The existing native ordered command/replay gate and persisted current projection authorization yield the exact canonical full ProjectionBatchResult, preserving its original receipt/mutations/token/AlreadyProcessed/checkpoint bytes. Genuine ordered replay may advance physical Applied; logical original index prefix and index digest remain immutable.
+
+A different fresh parent does not borrow the old request; its genuine replay/checkpoint behavior remains unchanged. Policy/incarnation/generation/current source refusal produces no protected result or new index effects. Missing/corrupt settled authority fails closed and preserves pending/owned evidence; repair is restoration of the fixture's exact originally retained current-format bytes or a genuine newly authorized operation, never compatibility.
+
+## Source ownership and complete tests
+
+REQ/AC-FTS-002/004/005; docs/Features/Search/NativeFullTextProjection.md and ADR-078 append current-format/checkpoint replay traceability before source. Owners: NativeTextIncrementalManifest/Protocol and all actual constructor/strict validator sites; NativeTextIncrementalCheckpointSettlement; NativeTextIncrementalSession/CapabilityResult and TextMaintenanceCapabilityResult; TextMaintenanceParentFlow/Replay exact child recovery; existing Core/ResolveOutcome checks unchanged.
+
+Retain original nine RF3 declarations/Args/UIDs and full literals/receipts/source-prefix/revoke/cold/Release assertions. First execute only the authentic initiating SDK Arg by current native discovery to prove complete successful stream, original same-ID full checkpoint equality, healthy operation and genuine Release/owner cleanup. Then all original9 normal/scalar. Extend actual signed Unit Build/Restore cases with full original same-ID checkpoint value and read-only literal model/no-effect brackets; actual cold Build/Restore plus missing/corrupt refusal→exact repair→healthy, changed/revoked current policy denial/no protected result and new authorized healthy generation. Preserve original real-process checkpoint fault stages and exact native cold cut/bytes. Qualification requires canonical source/DLL/PDB/image/UID receipts and original Linux profiles; local proof is development only.
+
+## Join and rollback
+
+READY17 remains immutable and unjoined; this successor explicitly depends on its reviewed purpose/frame implementation plus actual-maintenance test composition successor. Root alone joins live source/build/test/Git. Original R7/R8 failure reports and prior packet hashes remain immutable. Rollback removes only unjoined proposal; no runtime migration/rewrite of stored metadata and no source-only PASS claim.
+
+# R4 preserve the genuine successful empty-prefix contract
+
+R3 is retained as an unaccepted broad-refusal proposal for its fresh no-op paragraph. The approved corrective branch retains the existing Configure full canonical result and compares its original checkpoint with fresh Begin checkpoint. Lower original checkpoint is positive prior-parent evidence: unless the exact deterministic child for this parent is present in the real pending intent or last settled request, refuse HistoryUnavailable before index effects. Higher original checkpoint refuses corrupt/mismatched current authority. Exact matching pending/settled original child preserves full canonical recovery/replay.
+
+When original Configure.Checkpoint equals fresh Begin.Checkpoint, the unchanged consumer cut plus the actual existing empty-prefix branch proves no new source prefix was committed by this invocation. A genuine completed no-op Build/Restore with no matching original child preserves its original successful nullable checkpoint result; it does not manufacture a receipt or new checkpoint. An existing matching last child is replayed to recover its original full non-null checkpoint, even at an empty original cut. No broad no-op refusal, new capability phase/wire field/history or outcome absence proof is added.
+
+Whole control: original nonempty Restore B → genuine later Restore C advances consumer cut → old B same ID must HistoryUnavailable/full no-effects before and after cold; C exact full checkpoint replay remains healthy. Fresh no-op D at unchanged C cut returns the existing nullable checkpoint and complete original literal page; D same-ID retry remains nullable with unchanged complete image/cut. Original Build/Restore same-ID checkpoint equality and all existing API/Args/deadline/privacy/index inventory oracles remain mandatory.
+
+Other R2 shared-online format/charged-field closure and approved original Id14/Id8/publish-before-retire/native canonical checkpoint request contract remain unchanged. Runtime gates OPEN.
+
+# R5 actual online checkpoint settlement closure
+
+The R2 statement that online maintenance never executes a ProjectionBatch checkpoint is incorrect and is superseded by this source-proven closure. NativeTextOnlineCheckpointSettlement.ExecuteAsync joins session.RequireOriginalCheckpointAsync, then calls the same NativeTextIncrementalCheckpointSettlement.Complete before its actual subsequent manifest publication. Thus online also retains the exact acknowledged original checkpoint request when that actual shared settlement occurs. Canonical online publication35 and original checkpoint completion remain separate authorities; the new metadata does not replace either.
+
+NativeTextOnlineSeed initially constructs its genuine bootstrap manifest before a checkpoint exists, so the nullable field is legitimately absent there. Every shared manifest constructor and common validator uses ManifestFormatVersion2. Common validation checks any present original request's consumer/nonempty command/token/empty effects and original budget; it does not require an explicit op29 parent identity or checkpoint at an online phase before one exists. Explicit incremental Begin requires the field only for its own actual completed non-bootstrap/no-pending generation. Online acquisition/pointer reconciliation keeps its existing original35/checksum/corpus/current-authority/pin/lease/fence rules, including actual checkpoint15 settlement when present. No inference from freshness, no new lookup/cached authority or synthesized receipt.
+
+Both callers of Complete preserve the same publish-last-original-before-intent-retire ordering and initiating/cleanup failures. The later online AppliedPosition publication keeps its exact native current-source meaning and must preserve the appended original request rather than drop it. Original online full-flow regression suite remains a required compiler/runtime gate for this shared change; no source-only PASS.
+
+Native proof: native-online-settlement-current-r1.original.json (both actual callers plus full online settlement body), native-production-fresh-r1.original.json (shared constructors/validator/Complete), native-production-validators-r1.original.json (online page checkpoint intent/current phase and original request shape).
+
+
+## Actual native signed-maintenance fixture composition and qualified local scope
+
+# KL029 actual signed maintenance regression successor
+
+Root-reviewed test-only composition. Existing NativeTextMaintenanceTestRuntime owns actual NativeTextIncrementalMaintenanceService over TestDatabase.ZoneTreeStore; that service already implements INativeTextMaintenance/ISelectedTextProjection. RequestCqrsClusterFixture/SiloConfigurator optionally register that SAME instance; default services/graph/options/deadlines unchanged. No new provider/adapter, role cache or public/persisted ID.
+
+REQ-FTS-002/004/005; existing ADR078/native-CQRS ADR082; exact source owners: RequestCqrsFixture.cs fixture and configurator own optional factory/runtime initialization and disposal; RequestCqrsTextMaintenanceTests retains every existing declared case/Arguments; RequestCqrsTextMaintenanceFlow owns actual signed Build/Restore/full result/literal index/unchanged refusal-cut/healthy sequence; RequestCqrsTextProducer remains bounded malformed-frame validator support, never original maintenance receipt proof. Existing malformed signed-payload helper retains its actual Started→Failed path and receives actual typed healthy maintenance if applicable.
+
+Initialize runtime from the SAME fixture database before original silo deployment; DI registers externally owned native instance under its original interface, no duplicate owner. The actual signed current-admin envelope uses the original codec/ConnectionGrain/independently signed child operations and fresh persisted authorization. Capture genuine emitted frames without manufacturing progress; validate complete typed maintenance result/current source/consumer/generation/index digest and independently literal projected documents/revisions/expected ranks. Build and Restore execute actual native indexing; Restore has genuine authorized update/delete inputs and original receipt replay. Malformed controlled frames remain only shape-failure support, followed by real signed healthy maintenance over the same operation fixture/store/current principal.
+
+Lifetime: actual stream/producer/connection work joined → original cluster stopped → same native runtime disposed successfully → original Store disposed/root deleted. Original initiating/fatal and cleanup failures retained; uncertain native cleanup must retain database root/owner charges rather than delete them. No limits/clocks/timeouts/default graph change. TUnit/AppHost original native50 and exact source/DLL/PDB/UID observations; local proof separate from mandatory Linux/RF3/coverage. Old READY17/56+56 remains immutable validator support, unjoined/unqualified for maintenance.
+
+
+# Optional actual-maintenance fixture registration closure
+
+R2 normal/scalar each executed nine authentic declared cases and failed during TestCluster deployment with native NodeOptions origins validation, before any maintenance operation. The demonstrated cause is fixture composition: AddRuntimeOptions registers all production node/RF3 projections inside this original in-process CQRS fixture. NativeTextMaintenanceTestRuntime already owns its separate native owner options/validated grants; the actual ConnectionGrain parent needs only TextIndexMaintenanceOptions. Replace the optional silo registration with that exact centrally defined typed section, native IsValid/ValidationMessage and ValidateOnStart; leave every default fixture graph/options/deadline and original service/runtime ownership unchanged. This is test-only narrowing of optional DI, not a product origin/authority fallback. Original startup failures remain immutable. Subsequent genuine maintenance cases must still complete full typed result/literal page and joined cleanup.
+
+
+# KL029 optional real maintenance fixture native admission
+
+Native get_symbol_body TestDatabase proves SubmitIssuedEmbedded requires its actual fixture-owned TestDatabaseReplicaAdmission; false throws before any operation. NativeTextMaintenanceSeed/Commit uses that existing path. The optional native-enabled RequestCqrs composition therefore passes nativeReplicaAdmission=true to its original TestDatabase constructor. The ordinary shared fixture passes false exactly as before. This creates the existing canonical catalog-configured DatabaseEngine and native ordered admission, not a substitute/forged owner. Original options/default limits/clock/connection/caller/deadlines remain unchanged; the original fixture owns and joins those existing resources before deletion. R4 image is immutable and has the prior false input; this correction requires a distinct image with exact overlay/source/DLL evidence before operation proof.
+
+
+# KL029 optional signed-maintenance fixture coordinator
+
+Source-linked REQ/AC FTS002/004/005 and ADR078/ADR082: the optional actual native text maintenance fixture must share its existing TestDatabase ordered replica admission with all original signed checkpoint children. Ordinary RequestCqrs fixture composition remains EmbeddedCoordinator. This is test-only; production RF3 coordinator, current public/persisted IDs, original options and deadlines are unchanged.
+
+The observed primary Corruption remains unqualified until the same failed original ResolveOutcome/applied-cut observation proves the actual predicate. No failure is reclassified from phases alone.
+
+Ordered composition: (1) existing optional nativeFactory creates the same TestDatabaseReplicaAdmission; (2) native child submission creates/validates the original native authority through DatabaseEngine then submits through SubmitIssuedEmbedded; (3) the same existing log appends, commits and waits for the actual ReplicaMaterializer under its original CommandTimeout/caller token; (4) read barrier holds the existing admission lock and waits for the actual current committed index, with the same original timeout and caller token; (5) original connection/request work joins before cluster shutdown, native projection disposal and TestDatabase replica/store close. No fabricated applied marker, new coordinator quota or new physical owner.
+
+The optional coordinator supplies only ICommitCoordinator's four existing methods. SubmitVerifiedAsync retains VerifyOperationAuthority before the owning log; SubmitNativeAsync retains CreateNativeOperation; ordinary JSON submission retains the existing ReplicatedOperation/public JSON representation. ReadBarrier must observe genuine materializer completion and retain cancellation/apply faults.
+
+Verification: the SAME original two Build/Restore cases and six malformed-progress controls must terminate in actual signed Configure/Capture/native index/publication/checkpoint full ProjectionBatchResult, independent bilingual literals, exact same-ID original result/no effects, newer parent/current replay/older HistoryUnavailable, fresh nullable no-op replay, genuine Release and joined ownership. Native normal/scalar controls remain mandatory. Actual RF3 SDK1 then full9 profiles and Linux image/UID/coverage remain open.
+
+Rollback: remove only optional coordinator registration and this test-only adapter; original fixture defaults/product persistence remain unchanged. Private source must be guarded against actual live ancestors at final seal; diagnostic-only observation is not acceptance closure.
+
+## Original numeric gate and corrected execution
+
+R10 normal/scalar each ran the two original parameterized case instances through the canonical Aspire-owned Unit entry. All four failed at their initial actual signed Build. The bounded original retained outcome read showed checkpoint=2, canonical acknowledged physical position=7 and captured replication Applied=3, with error null and complete native key/value bytes unchanged before/after observation. This proves the optional fixture violates the existing settlement predicate; it does not prove a Linux/RF3/transport cause.
+
+Correction ownership is restricted to the optional coordinator adapter, TestDatabase native read barrier delegate, existing replica admission's genuine WaitForApply barrier, and optional fixture registration. Main proposals preserve the current TestDatabase engine factory/mixed-restore/recovery/fatal-cleanup bodies; isolated earlier-source overlays are separately recorded and cannot overwrite them. The corrected image must execute the SAME original two full cases normal/scalar first, then all nine signed-maintenance full flows; malformed validator support alone is not acceptance. Physical store position and replication applied index remain distinct; counters, receipts and production settlement predicates are unchanged.
+
+
+Actual coherent private R11 execution: original two signed Build/Restore instances passed normal2/2 and scalar2/2; every original RequestCqrsTextMaintenanceTests case passed normal9/9 and scalar9/9. This is local development evidence only. The original R10 ACK physical position7 versus replication Applied3 failures remain immutable. Delivered Linux, actual process/cold and public RF3 SDK/MCP/Q1 qualification remain OPEN. The main fixture overlay preserves current mixed restore and ordinary EmbeddedCoordinator defaults; only explicit native maintenance composition selects the same native replica admission coordinator and joined committed-index read barrier.

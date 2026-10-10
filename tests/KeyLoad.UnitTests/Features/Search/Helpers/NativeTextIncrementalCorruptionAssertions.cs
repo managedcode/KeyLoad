@@ -42,6 +42,7 @@ internal static class NativeTextIncrementalCorruptionAssertions
             await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(path, original, token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+        await NativeTextMissingSettledAuthorityFlow.RejectAndRepairAsync(database, restore, path, original, token);
         await ServerFailureObserver.ObserveAsync(() => HealthyAsync(database, restore, failures, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -71,6 +72,7 @@ internal static class NativeTextIncrementalCorruptionAssertions
             var completed = await NativeTextMaintenancePhaseFlow.FinishAsync(database, healthy, restore, token);
             await Assert.That(completed.TrackedRecords).IsEqualTo(TrackedRecords);
             await Assert.That(completed.Checkpoint).IsEqualTo(completed.ThroughSequence);
+            await NativeTextMissingSettledAuthorityFlow.HealthyAsync(database, healthy, restore, token);
         }, failures);
     }
 }

@@ -101,6 +101,7 @@ public sealed partial class DatabaseEngine
         BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
+        global::KeyLoad.Core.Features.Messaging.RemoteTransferOutcomeAuthority? remoteTransferAuthority = null;
         OperationResult result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
@@ -120,6 +121,7 @@ public sealed partial class DatabaseEngine
             ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
+            remoteTransferAuthority = CaptureRemoteTransferOutcomeAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);
             compositionAuthority = CaptureCompositionOutcome(operation, result);
@@ -139,7 +141,10 @@ public sealed partial class DatabaseEngine
         }
         persistOutcome = selection.Outcome is null;
         return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope, onlineTextAuthority) with
-        { RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null };
+        {
+            RemoteTransferFailureAuthority = HasRemoteTransferCapacityFailure(result) ? transferFailure : null,
+            RemoteTransferAuthority = result.Error is null ? remoteTransferAuthority : null
+        };
     }
 
     private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
@@ -239,7 +244,13 @@ public sealed partial class DatabaseEngine
             transaction.Reset();
             var failure = new OperationResult(null, exception.Code, exception.Message);
             PersistCommandOutcome(transaction, operation, resultKey, outcome with
-            { Result = failure, BlobAuthority = null, CompositionAuthority = null, RemoteTransferFailureAuthority = null }, replicationIndex, persistOutcome);
+            {
+                Result = failure,
+                BlobAuthority = null,
+                CompositionAuthority = null,
+                RemoteTransferFailureAuthority = null,
+                RemoteTransferAuthority = null
+            }, replicationIndex, persistOutcome);
             transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();
             return failure;

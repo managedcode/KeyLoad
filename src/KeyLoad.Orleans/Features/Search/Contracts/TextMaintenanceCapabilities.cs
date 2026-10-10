@@ -28,4 +28,5 @@ internal sealed record TextMaintenanceCapabilityResult(
     [property: global::Orleans.Id(4)] int TrackedRecords,
     [property: global::Orleans.Id(5)] CommitProjectionBatchRequest? OriginalCheckpointIntent,
     [property: global::Orleans.Id(6)] string? IndexSha256,
-    [property: global::Orleans.Id(7)] long ReplayUpperSequence);
+    [property: global::Orleans.Id(7)] long ReplayUpperSequence,
+    [property: global::Orleans.Id(8)] CommitProjectionBatchRequest? LastSettledCheckpointRequest = null);

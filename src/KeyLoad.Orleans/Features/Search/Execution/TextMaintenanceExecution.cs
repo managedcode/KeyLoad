@@ -13,7 +13,7 @@ internal static class TextMaintenanceExecution
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
     {
         var request = GrainNativePayload.ReadCommand<TextIndexMaintenanceRequest>(parent.Payload);
         var database = services.GetRequiredService<DatabaseEngine>();
@@ -22,6 +22,7 @@ internal static class TextMaintenanceExecution
         if (request.CommandId != parent.Envelope.CommandId || request.CommandId == Guid.Empty
             || request.NodeId != database.Store.Identity.NodeId || !Enum.IsDefined(request.Mode))
         { throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest); }
+        purpose.EnableTextMaintenance(request.Mode);
         var children = new TextMaintenanceChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics);
         TextIndexMaintenanceResult result;
         try

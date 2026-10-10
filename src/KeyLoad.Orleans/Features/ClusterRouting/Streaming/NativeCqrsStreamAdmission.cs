@@ -7,11 +7,13 @@ namespace KeyLoad.Orleans;
 
 /// <summary>Validates the fixed producer shape and admits its native encoded bytes before yield.</summary>
 internal sealed class NativeCqrsStreamAdmission(
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, Guid requestId, IOptions<GrainRoutingOptions> options)
+    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, Guid requestId, IOptions<GrainRoutingOptions> options, NativeCqrsStreamPurpose? purpose = null)
 {
+    private const int EmptyCount = 0;
     private long aggregateBytes;
     private int count;
     private bool terminal;
+    private readonly TextMaintenanceStreamShape text = new(requestId);
 
     internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         CancellationToken cancellationToken)
@@ -23,8 +25,10 @@ internal sealed class NativeCqrsStreamAdmission(
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
 
+        if (count > EmptyCount && chunk.Kind == CqrsStreamChunkKind.Progress)
+        { purpose?.ResolveProgress(); }
         var nextCount = checked(count + CountStep);
-        if (nextCount > GrainRequestStreamProtocol.MaximumChunks)
+        if (nextCount > (purpose?.IsTextMaintenance == true ? options.Value.MaximumTotalFrames : GrainRequestStreamProtocol.MaximumChunks))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }
@@ -32,7 +36,7 @@ internal sealed class NativeCqrsStreamAdmission(
         ValidateShape(chunk, nextCount);
         var maximumBytes = chunk.Kind switch
         {
-            CqrsStreamChunkKind.Started => options.Value.MaximumStartedBytes,
+            CqrsStreamChunkKind.Started or CqrsStreamChunkKind.Progress => options.Value.MaximumStartedBytes,
             CqrsStreamChunkKind.Completed => options.Value.MaximumCompletedBytes,
             CqrsStreamChunkKind.Failed => options.Value.MaximumFailedBytes,
             _ => throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest)
@@ -66,9 +70,12 @@ internal sealed class NativeCqrsStreamAdmission(
         if (chunk.Kind == CqrsStreamChunkKind.Started)
         {
             ValidateStartedShape(chunk, nextCount);
+            purpose?.Started();
             return;
         }
 
+        if (chunk.Kind == CqrsStreamChunkKind.Progress && purpose?.IsTextMaintenance == true && count > EmptyCount)
+        { text.Admit(chunk, nextCount); return; }
         ValidateFinalShape(chunk, nextCount);
     }
 
@@ -80,7 +87,9 @@ internal sealed class NativeCqrsStreamAdmission(
 
         if (nextCount != EmptyNextCount || chunk.Sequence != EmptySequence || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
             || chunk.ProgressResult.Value.Problem is not null
-            || chunk.ProgressResult.Value.Value.RequestId != requestId || chunk.Final is not null
+            || chunk.ProgressResult.Value.Value.RequestId != requestId
+            || chunk.ProgressResult.Value.Value is { AnnPhase: not null } or { TextPhase: not null } or { MovePhase: not null } or { OnlineTextPhase: not null }
+            || chunk.Final is not null
             || chunk.Message is not null || chunk.EventId is not null
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
         {
@@ -91,22 +100,16 @@ internal sealed class NativeCqrsStreamAdmission(
     private void ValidateFinalShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         int nextCount)
     {
-        const int EmptyNextCount = 1;
-        const int ValidateFinalShapePresentCount = 1;
-        const int StartedAndTerminalChunkCount = 2;
-        const int NextCountFirstCount = 1;
-        const int NextCountValidationBound = 2;
-        const int ValidateFinalShapeEmptyNextCount = 2;
-
-        var earlyFailure = chunk.Kind == CqrsStreamChunkKind.Failed && nextCount == EmptyNextCount;
-        var expectedSequence = earlyFailure ? ValidateFinalShapePresentCount : StartedAndTerminalChunkCount;
-        if (nextCount is < NextCountFirstCount or > NextCountValidationBound || (!earlyFailure && nextCount != ValidateFinalShapeEmptyNextCount)
-            || chunk.Sequence != expectedSequence || chunk.ProgressResult is not null
+        const int FirstCount = 1;
+        const int TerminalCount = 2;
+        var earlyFailure = chunk.Kind == CqrsStreamChunkKind.Failed && nextCount == FirstCount;
+        var longProfile = purpose?.IsTextMaintenance == true;
+        if ((!earlyFailure && (count == EmptyCount || (!longProfile && nextCount != TerminalCount)))
+            || chunk.Sequence != nextCount || chunk.ProgressResult is not null
             || chunk.Final is not { } final || chunk.Message is not null || chunk.EventId is not null
-            || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
-        }
+            || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind)
+            || (chunk.Kind == CqrsStreamChunkKind.Completed && longProfile && !text.Completed))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest); }
 
         ValidateTerminal(chunk.Kind, final);
     }

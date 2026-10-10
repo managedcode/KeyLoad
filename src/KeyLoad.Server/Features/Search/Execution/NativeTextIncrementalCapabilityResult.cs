@@ -19,7 +19,7 @@ internal static class NativeTextIncrementalCapabilityResult
             session.Manifest?.ThroughSequence ?? session.Checkpoint,
             session.Manifest?.Records.Length ?? observed.Documents.Length, session.Intent?.CheckpointCommand,
             session.Manifest is { } complete ? Digest(complete, budget) : null,
-            session.CurrentReplayUpperSequence);
+            session.CurrentReplayUpperSequence, session.Manifest?.LastSettledCheckpointRequest);
         budget.CheckResult(result);
         budget.Check();
         return result;

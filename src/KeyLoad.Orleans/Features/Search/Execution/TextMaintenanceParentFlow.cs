@@ -22,7 +22,7 @@ internal static class TextMaintenanceParentFlow
         { return await TextMaintenanceRelease.RunAsync(children, request, token).ConfigureAwait(true); }
         var configureId = TextMaintenanceChildIdentity.Create(request.CommandId,
             TextIndexMaintenancePhase.Configure, InitialSequence);
-        _ = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(
+        var configured = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(
             OperationKind.ConfigureProjectionConsumer,
             new(configureId, request.Consumer, new(request.IndexGeneration, [request.Collection], [.. MutationKinds])),
             configureId, token).ConfigureAwait(true);
@@ -31,6 +31,7 @@ internal static class TextMaintenanceParentFlow
         var state = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.Begin, token).ConfigureAwait(true);
         await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Capture)
             .ConfigureAwait(true);
+        TextMaintenanceReplay.RequireOriginalParent(request, configured, state);
         ProjectionBatchResult? checkpoint = null;
         if (state.OriginalCheckpointIntent is { } original)
         {

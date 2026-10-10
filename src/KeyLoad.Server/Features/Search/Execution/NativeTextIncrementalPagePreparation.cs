@@ -23,11 +23,12 @@ internal static class NativeTextIncrementalPagePreparation
         var bootstrap = session.Manifest is null || session.Manifest.Bootstrap;
         var plan = Plan(session, page, bootstrap, maximumRecords, budget, query);
         var through = bootstrap ? session.CurrentReplayUpperSequence : page.ThroughSequence;
-        var target = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.FormatVersion,
+        var target = new NativeTextIncrementalManifest(NativeTextIncrementalProtocol.ManifestFormatVersion,
             session.Scope, session.Request.Consumer, session.Request.IndexGeneration, session.Request.Placement,
             through, session.Upper.AppliedPosition, plan.NextRecord, plan.Records,
             session.Manifest?.Files ?? [], TextProjectionProtocol.TokenizerVersion,
-            TextProjectionProtocol.HashVersion, session.Upper.ResourceSha256, bootstrap);
+            TextProjectionProtocol.HashVersion, session.Upper.ResourceSha256, bootstrap,
+            session.Manifest?.LastSettledCheckpointRequest);
         var intent = new NativeTextIncrementalIntent(NativeTextIncrementalProtocol.FormatVersion,
             session.Request.CommandId, session.Scope, session.Request.Consumer, session.Request.IndexGeneration,
             session.Request.Placement, page.Consumer.Checkpoint, page.ThroughSequence, command,

@@ -112,10 +112,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         {
             if (startup is not null || shutdown is not null)
             { throw new InvalidOperationException(OrleansNodeProtocol.SiloAlreadyStarted); }
-            var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            startup = StartCoreAsync(registered.Task, cancellationToken);
-            registered.SetResult();
-            return startup;
+            return startup = Features.Messaging.RemoteTransferNativeStartup.Start(
+                partition.TransferVerification, requestWork, StartCoreAsync, cancellationToken);
         }
     }
 

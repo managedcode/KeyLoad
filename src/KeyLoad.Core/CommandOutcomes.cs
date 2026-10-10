@@ -76,7 +76,8 @@ public sealed partial class DatabaseEngine
         }
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
-        ReauthorizeExtendedOutcome(view, principal, operation, previous);
+        if (!ValidateRemoteTransferCachedOutcome(view, principal, operation, previous))
+        { ReauthorizeExtendedOutcome(view, principal, operation, previous); }
 
         if (operation.Kind == OperationKind.Receive && previous.Result.Error is null)
         {

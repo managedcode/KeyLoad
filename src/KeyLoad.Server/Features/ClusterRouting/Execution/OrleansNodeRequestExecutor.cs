@@ -52,10 +52,11 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
     {
         try
         {
-            return await GrainRequestStreamConsumer.DrainAsync(
+            return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
                 createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token),
                 serializer: services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId: requestId, clock: clock, cancellationToken: executionToken, options: routingOptions).ConfigureAwait(false);
+                requestId: requestId, clock: clock, cancellationToken: executionToken, options: routingOptions,
+                purpose: new NativeCqrsStreamPurpose(() => services.GetRequiredService<GrainRequestCodec>().VerifyRequest(signedRequest, requestId))).ConfigureAwait(false);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {

@@ -23,6 +23,18 @@ internal static class CoreNativeClaims
         return Prefix + Base64Url(bytes) + Separator + Base64Url(Signature(key, bytes));
     }
 
+    // Exact owner-native framing count only: no signature or admission is created.
+    internal static int MeasureCharacters<T>(T claims)
+    {
+        const long Base64InputQuantum = 3;
+        const long QuantumRoundingAdjustment = 2;
+        const int SeparatorCharacters = 1;
+        var bytes = NativeSerialization.Measure(claims);
+        var payload = checked((bytes * Base64Quantum + QuantumRoundingAdjustment) / Base64InputQuantum);
+        var signature = (SHA256.HashSizeInBytes * Base64Quantum + QuantumRoundingAdjustment) / Base64InputQuantum;
+        return checked((int)(Prefix.Length + payload + SeparatorCharacters + signature));
+    }
+
     internal static T Verify<T>(ReadOnlySpan<byte> key, string token, int maximumCharacters)
     {
         const int MinimumTokenCharacters = 1;

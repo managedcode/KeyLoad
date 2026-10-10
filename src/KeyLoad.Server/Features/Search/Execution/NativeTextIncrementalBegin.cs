@@ -109,6 +109,8 @@ internal static class NativeTextIncrementalBegin
         }
         if (!hasIntent && session.Manifest is { } complete)
         {
+            if (!complete.Bootstrap && complete.LastSettledCheckpointRequest is null)
+            { throw NativeTextErrors.Corrupt(); }
             NativeTextIncrementalPublishedInventory.Require(session.NativeOwner, complete, budget, options);
         }
         budget.Check();

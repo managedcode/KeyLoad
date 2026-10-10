@@ -36,7 +36,10 @@ public sealed partial class DatabaseEngine
         switch (operation.Kind)
         {
             case OperationKind.Batch:
-                return AuthorizeBatch(view, principal, Payload<CommandRequest>(operation));
+                var transferProof = ReadRemoteTransferNativeProof(operation);
+                return transferProof is null
+                    ? AuthorizeBatch(view, principal, Payload<CommandRequest>(operation))
+                    : AuthorizeRemoteTransferNativeProof(view, principal, operation, transferProof);
             case OperationKind.Receive:
                 var receive = Payload<ReceiveRequest>(operation);
                 Authorization.Require(principal, receive.Lane.Partition, receive.Lane.Queue, Capability.QueueConsume);

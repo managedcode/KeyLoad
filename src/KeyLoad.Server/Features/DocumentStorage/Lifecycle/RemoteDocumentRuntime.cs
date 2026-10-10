@@ -1,6 +1,7 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.Messaging;
 using KeyLoad.Server.Features.QueryExecution;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
@@ -33,6 +34,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         var runtime = new RemoteDocumentRuntime(options);
         try
         {
+            partition.TransferVerification?.AttachRuntime(runtime);
             runtime.Initialize(node, partition, options, clock, wireObserver);
             return runtime;
         }
@@ -63,6 +65,8 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
                 options.Core.DatabaseLimits,
                 new ControlledBlobSourceRead(node, partition, options.Node, options.Core.DatabaseLimits, client, clock), clock);
             }
+            CommandRouter = new RemoteTransferCommandRouter(node, partition, options.Node,
+                options.Core.DatabaseLimits, client, work, clock, CommandRouter);
             if (settings.RemotePartitionQueries)
             {
                 QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock);
@@ -78,7 +82,10 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
                 options.Membership, options.GrainRouting, clock);
             var controlledBlob = new RemoteControlledBlobReceiver(node, partition, options.Node,
                 options.Membership, options.GrainRouting, clock);
-            Endpoint = new(options.Node, receiver, work, controlled, controlledBlob, options.Membership, options.GrainRouting, clock);
+            var transfer = partition.TransferVerification is null ? null
+                : new RemoteTransferPeerReceiver(node, partition, options.GrainRouting, clock);
+            Endpoint = new(options.Node, receiver, work, controlled, controlledBlob,
+                options.Membership, options.GrainRouting, clock, transfer);
         }
     }
 

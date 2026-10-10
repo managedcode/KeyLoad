@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.Orleans;
 
@@ -8,6 +9,8 @@ internal static class GrainPartitionResolver
     {
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
+        OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
+            => GrainRemoteTransferCommand.Resolve(request),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),
         OperationKind.Receive => Route<ReceiveRequest>(request, value => (value.RequestId, value.Lane.Partition)),
         OperationKind.Delivery => Route<DeliveryCommand>(request, value => (value.CommandId, value.Lane.Partition)),

@@ -2,6 +2,8 @@
 
 Status: Accepted; implementation and complete qualification remain pending. Related requirements, acceptance criteria and current slice ownership are canonical in [CodeQuality](../Features/CodeQuality.md).
 
+The current native Unit inventory amendment follows TASK-CQ-CURRENT-NATIVE-UNIT-INVENTORY-083 under REQ-CQ-009 and AC-CQ-018/019/039. Root preserves existing classifications and sparse module anchors, reviews real operation bodies, adds only current-image native identities, refreshes actual source/PDB binding and derives all five selectors against the complete functional/control universe. The three genuine packed-ANN stress arguments remain required and execute exclusively through native TUnit scheduling; their results cannot contribute ordinary product coverage or performance figures. Ordered join, original census, focused runtime and complete Linux qualification precede any acceptance claim. No provider, public or persisted contract, threshold or exclusion is changed.
+
 ## Native failure constructor classification, 2026-10-09
 
 REQ/AC-CQ-NATIVE-EXCEPTION-001 and TASK-CLIENT-CONNECTION under ADR-125
