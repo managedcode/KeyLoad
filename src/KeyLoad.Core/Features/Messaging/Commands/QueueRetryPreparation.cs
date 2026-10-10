@@ -20,6 +20,12 @@ public sealed partial class DatabaseEngine
         var original = NativeSerialization.Deserialize<NativeCommandPayload>(operation.NativePayload.Span);
         if (!original.RetryDecisions.IsEmpty)
         { return operation; }
+        if (operation.Kind == OperationKind.Batch && original.Error is null)
+        {
+            var batch = Payload<CommandRequest>(operation);
+            if (!batch.Mutations.IsDefault && !batch.Mutations.Any(static mutation => mutation is AdvanceQueueDeadline))
+            { return operation; }
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         if (CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope).Outcome is not null)
         { return operation; }

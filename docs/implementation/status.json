@@ -350,48 +350,67 @@
     },
     "currentBuild": {
       "passed": false,
-      "executedForCurrentSource": true,
-      "status": "r80_full_release_running_native_current_compiler_analyzers_passed",
-      "predecessorFullRelease": {
-        "passed": true,
-        "sourceCoherent": true,
-        "errors": 0,
-        "warnings": 0,
-        "sourceInputs": 7205,
-        "receipt": "/private/tmp/keyload-stage44-current-release-build-r77-20261010/original-build.json",
-        "logSha256": "a5ea0b3a9a5b4f3f8ba6d3f204b5701dc11ed46bbddc0974dabd49476f4d46d5"
-      },
-      "qualificationClaim": false,
       "fullReleaseCompleted": false,
-      "sourceInputs": 7220,
-      "lastNativeDiagnosticObservation": {
-        "errors": 0,
-        "warnings": 0,
-        "infos": 37549,
-        "hidden": 6767,
-        "ready": true,
-        "receipt": "/private/tmp/keyload-r80-current-native-diagnostics-original.json",
-        "sha256": "852f50bbe091c0acaa2f512e62e44459d7933820df1d1819558577dab66fac65",
-        "qualificationClaim": false
-      }
+      "status": "actual_current_unit_production_references_and_recovery_image_passed_full_current_solution_gate_pending_linux",
+      "currentNativeUnitProducer": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-unit-build-r85-20261010/original-build.json",
+        "receiptSha256": "3928c5cf4e73b7cd6f6a84e7f559b1ed20a65b686019f0e934616914b07c5337",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": null,
+        "started": "2026-10-10T11:08:51.855072+00:00",
+        "ended": "2026-10-10T11:16:10.813930+00:00"
+      },
+      "currentRecoveryImageProducer": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-recovery-build-r85-20261010/original-build.json",
+        "receiptSha256": "112729d8db8cc3ad5bb8ee444ac282405d732754f4cef78a689a60ca20282928",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "8ae8c9604fdced2dbc406602c7a93aae1e904f2c9eef57bcab27d537c660ea07",
+        "started": "2026-10-10T11:19:46.530865+00:00",
+        "ended": "2026-10-10T11:19:59.124440+00:00"
+      },
+      "latestCompletePredecessorBuild": {
+        "receipt": "/private/tmp/keyload-stage44-current-release-build-r82-20261010/original-build.json",
+        "receiptSha256": "1de17a5a2e08dd35fe2b3f11371211f3fbb56e867690acd9ccf118771b566693",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "0165f6ba312e0081b5aa01644573c8d3fe480609cac86dc2fd9f6bfa481e19ea",
+        "started": "2026-10-10T10:23:21.147526+00:00",
+        "ended": "2026-10-10T10:32:30.497045+00:00"
+      },
+      "qualificationClaim": false
     },
     "currentFormatter": {
       "passed": false,
-      "executedForCurrentSource": false,
-      "status": "r80_full_verification_pending_after_native_joins",
-      "predecessorR78": {
-        "exitCode": 2,
-        "sourceCoherent": true,
-        "importsDiagnostics": 21,
-        "receipt": "/private/tmp/keyload-stage44-current-formatter-r78-20261010/original-formatter.json",
-        "logSha256": "a6f1891377a428b5cc0a03f424bb6e84c985fc4bdb702e387fa3efc6bdc3460f"
-      },
-      "scopedSdkAttempt": {
+      "status": "one_changed_Core_owner_scoped_formatter_passed_complete_predecessor_passed_full_current_linux_pending",
+      "currentScopedFormatter": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-format-r85-20261010/original-formatter.json",
+        "receiptSha256": "ad3ddbad7b321c6c2ed8091da8921806552e451061f59bccfbcc56d63b6bdc3d",
         "exitCode": 0,
-        "changedInputs": 0,
-        "nativeNotFoundPreflightCount": 21,
-        "receipt": "/private/tmp/keyload-stage44-scoped-imports-r80-20261010/original-formatter.json",
-        "scope": "Exact21 absolute include paths; no changes observed, full formatter PASS not inferred"
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "22a3093fd749bf0f79a1359555de08e73572b54ae328137eedd536c7bc0c08c9",
+        "started": "2026-10-10T11:21:03.307348+00:00",
+        "ended": "2026-10-10T11:21:34.171047+00:00"
+      },
+      "latestCompletePredecessorFormatter": {
+        "receipt": "/private/tmp/keyload-stage44-current-formatter-r82-20261010/original-formatter.json",
+        "receiptSha256": "7393cf1ba40024a807d33f9e03886e76105a843092deb48a9af197870bf7002c",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "started": "2026-10-10T10:14:34.566556+00:00",
+        "ended": "2026-10-10T10:23:11.050755+00:00"
       },
       "qualificationClaim": false
     },
@@ -43408,7 +43427,7 @@
       "logSha256": "212a64426591defebf93b060fc31f9a6113fcc701a16aab278d3a29cde42d698",
       "qualification": "Actual coherent full Release local build passed after joined source/analyzer repairs; no Linux/runtime acceptance or task closure."
     },
-    "stageXLIVDeliveredCommit": "64154088b8d9b51620dd78c977bf6a79c76b7799",
+    "stageXLIVDeliveredCommit": "c67d4dac7600d9e314b169970e2cfb1934208c0e",
     "stageXLIVDeliveredRemoteVerified": true,
     "previousCurrentBuildBeforeOnlineNativeJoin": {
       "commandArgs": [
@@ -44427,7 +44446,7 @@
     },
     "currentWholeTaskOwners": {
       "availableTotalConcurrencySlots": 4,
-      "root": "integration, CI manifest repair, Topic SQL and ordered-restore whole flows, current native diagnostics/Release/format/TUnit, full Git and exact-source Linux delivery",
+      "root": "document non-retry native preflight full-flow repair, authentic KL079 normal/scalar48 native case binding and actual Linux acceptance, integration/build/format/coverage/full Git delivery",
       "workers": [
         {
           "owner": "sol61_read_finish",
@@ -44842,6 +44861,166 @@
         "scope": "two affected test assemblies only, against unchanged production dependencies from full R82 Release; full current solution build remains pending in Linux CI",
         "qualificationClaim": false
       }
+    },
+    "stageXLIVR85DocumentRetryPreflight": {
+      "recordedAtUtc": "2026-10-10T11:24:50.421415+00:00",
+      "status": "focused_native_development_passed_delivery_checkpoint_prepared",
+      "task": "TASK-DSTORE-NONRETRY-BATCH-PREFLIGHT-001",
+      "criteria": [
+        "REQ-DSTORE-005",
+        "AC-DSTORE-005",
+        "existing signed queue deadline/retry and ordered apply contracts"
+      ],
+      "deliveredPredecessor": "c67d4dac7600d9e314b169970e2cfb1934208c0e",
+      "change": "State-free native Batch mutation inspection omits only redundant retry preflight when no AdvanceQueueDeadline exists; original ordered outcome, current persisted principal/policy/physical placement, original9/10 document image counters and all deadline/jitter/native retry paths retained.",
+      "sourceOwner": "src/KeyLoad.Core/Features/Messaging/Commands/QueueRetryPreparation.cs",
+      "sourceSha256": "92a90e3b1acc92d1d9d4c30f404aba210e647a72e5cb862a699fa032cf26e6db",
+      "originalInitiatingFailure": {
+        "sourceRevision": "c67d4dac7600d9e314b169970e2cfb1934208c0e",
+        "nativeNormal": "/private/tmp/keyload-stage44-root-document-normal-r83-20261010/original-native-run.json",
+        "actualCases": 2,
+        "passed": 0,
+        "failed": 2,
+        "exactOriginalNewPutExpected": 9,
+        "originalActualNewPut": 15,
+        "exactOriginalExistingMutationExpected": 10,
+        "originalActualExistingMutation": 16
+      },
+      "currentActualUnitProductionBuild": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-unit-build-r85-20261010/original-build.json",
+        "receiptSha256": "3928c5cf4e73b7cd6f6a84e7f559b1ed20a65b686019f0e934616914b07c5337",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": null,
+        "started": "2026-10-10T11:08:51.855072+00:00",
+        "ended": "2026-10-10T11:16:10.813930+00:00"
+      },
+      "currentActualRecoveryImageBuild": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-recovery-build-r85-20261010/original-build.json",
+        "receiptSha256": "112729d8db8cc3ad5bb8ee444ac282405d732754f4cef78a689a60ca20282928",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "8ae8c9604fdced2dbc406602c7a93aae1e904f2c9eef57bcab27d537c660ea07",
+        "started": "2026-10-10T11:19:46.530865+00:00",
+        "ended": "2026-10-10T11:19:59.124440+00:00"
+      },
+      "normal": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-unit-r85-20261010/original-native-run.json",
+        "receiptSha256": "9403cc444093f451f7bfa3ef375762b7b75a895ac4e8e918f10d41cac7ff2027",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "actualCaseCount": 38,
+        "logSha256": "86c685b3af051d48de729b3248cc60c8abd3474e30752d6078e79a7c1f6b147d",
+        "started": "2026-10-10T11:18:24.140132+00:00",
+        "ended": "2026-10-10T11:18:37.959463+00:00"
+      },
+      "scalar": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-scalar-r85-20261010/original-native-run.json",
+        "receiptSha256": "8027333f037491e3b525257c6270cf0b77b4ab27c3e56986db5b430e56703a7f",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "actualCaseCount": 38,
+        "logSha256": "2c4423b3f81a1c7591492cb0f825fe93ef12a3012e605c0ab6759ef618f6aab6",
+        "started": "2026-10-10T11:18:22.057115+00:00",
+        "ended": "2026-10-10T11:18:37.959499+00:00"
+      },
+      "processRecovery": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-recovery-r85-20261010/original-native-run.json",
+        "receiptSha256": "fa39fe9d217e4280fa19a9bbe8306830f39def78bfed04ca20055598d7ea62b8",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": true,
+        "actualCaseCount": 11,
+        "logSha256": "9051af85432b3613eda5ed15a6fb3804dcba22745758ebec7e7b5aa9678b2fa6",
+        "started": "2026-10-10T11:21:05.830398+00:00",
+        "ended": "2026-10-10T11:22:12.793625+00:00"
+      },
+      "scopedFormatter": {
+        "receipt": "/private/tmp/keyload-stage44-root-document-format-r85-20261010/original-formatter.json",
+        "receiptSha256": "ad3ddbad7b321c6c2ed8091da8921806552e451061f59bccfbcc56d63b6bdc3d",
+        "exitCode": 0,
+        "sourceCoherent": true,
+        "binariesCoherent": null,
+        "actualCaseCount": null,
+        "logSha256": "22a3093fd749bf0f79a1359555de08e73572b54ae328137eedd536c7bc0c08c9",
+        "started": "2026-10-10T11:21:03.307348+00:00",
+        "ended": "2026-10-10T11:21:34.171047+00:00"
+      },
+      "fullCurrentLinuxBuildFormatAndRf3": "pending next exact delivered source; prior complete R82 solution build/format and original current c67 Linux gates are retained separately",
+      "coverage": "not collected for this focused scope; complete functional production coverage remains unqualified",
+      "qualificationClaim": false,
+      "fullTaskCountsUnchanged": {
+        "done": 17,
+        "inProgress": 87,
+        "pending": 0
+      },
+      "remainingRequiredGates": [
+        "exact-source Linux full build/formatter/native ordinary/scalar/process recovery",
+        "real fixture-owned Aspire RF3 via SDK and official MCP",
+        "complete native functional production coverage and unchanged final source/image verifier",
+        "original full per-task acceptance, endurance/fault/performance gates"
+      ],
+      "currentNativeSolution": {
+        "state": "Ready",
+        "projectsReady": 27,
+        "projectsTotal": 27,
+        "original": "/private/tmp/keyload-stage44-root-document-retry-preflight-r84-20261010/current-status-read-original-r85.json",
+        "sha256": "05c6422a90606f25ac8fbb284383821b0c0df7cd067c1cf13aca0b391527a0ad",
+        "qualificationClaim": false
+      }
+    },
+    "previousCurrentBuildBeforeR85DocumentOwner": {
+      "passed": false,
+      "executedForCurrentSource": true,
+      "status": "r80_full_release_running_native_current_compiler_analyzers_passed",
+      "predecessorFullRelease": {
+        "passed": true,
+        "sourceCoherent": true,
+        "errors": 0,
+        "warnings": 0,
+        "sourceInputs": 7205,
+        "receipt": "/private/tmp/keyload-stage44-current-release-build-r77-20261010/original-build.json",
+        "logSha256": "a5ea0b3a9a5b4f3f8ba6d3f204b5701dc11ed46bbddc0974dabd49476f4d46d5"
+      },
+      "qualificationClaim": false,
+      "fullReleaseCompleted": false,
+      "sourceInputs": 7220,
+      "lastNativeDiagnosticObservation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 37549,
+        "hidden": 6767,
+        "ready": true,
+        "receipt": "/private/tmp/keyload-r80-current-native-diagnostics-original.json",
+        "sha256": "852f50bbe091c0acaa2f512e62e44459d7933820df1d1819558577dab66fac65",
+        "qualificationClaim": false
+      }
+    },
+    "previousCurrentFormatterBeforeR85DocumentOwner": {
+      "passed": false,
+      "executedForCurrentSource": false,
+      "status": "r80_full_verification_pending_after_native_joins",
+      "predecessorR78": {
+        "exitCode": 2,
+        "sourceCoherent": true,
+        "importsDiagnostics": 21,
+        "receipt": "/private/tmp/keyload-stage44-current-formatter-r78-20261010/original-formatter.json",
+        "logSha256": "a6f1891377a428b5cc0a03f424bb6e84c985fc4bdb702e387fa3efc6bdc3460f"
+      },
+      "scopedSdkAttempt": {
+        "exitCode": 0,
+        "changedInputs": 0,
+        "nativeNotFoundPreflightCount": 21,
+        "receipt": "/private/tmp/keyload-stage44-scoped-imports-r80-20261010/original-formatter.json",
+        "scope": "Exact21 absolute include paths; no changes observed, full formatter PASS not inferred"
+      },
+      "qualificationClaim": false
     }
   },
   "TIME-PROVIDER-001": {
