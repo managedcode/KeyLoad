@@ -17,10 +17,11 @@ internal static class MixedEventingRetentionBackupContinuation
             state.Purge.CommandId)).Error).IsEqualTo(ErrorCode.TokenInvalidated);
         await MixedEventingRetentionBackupOracle.InitialAsync(fixture, state, fixture.Database);
         await MixedEventingRetentionBackupPrivacy.RunAsync(fixture, state, token);
-        state.RestoredQueue = new(state.Queue.Partition, state.Queue.Time);
+        state.RestoredQueue = new(state.Queue.Partition, state.Queue.Time)
+        { NativeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token) };
         await QueueLifecycleRestoredContinuation.RunAsync(fixture.Database, fixture.Target, state.RestoredQueue, token);
         await GroupsAsync(fixture);
-        var current = TargetInboxNativeSetup.Apply(fixture.Database,
+        var current = fixture.ApplyInbox(fixture.Database,
             state.Inbox with { CommandId = Guid.NewGuid() }, token).Get<CommitInboxResult>();
         await Assert.That(current.AlreadyProcessed).IsTrue();
         await Assert.That(current.OriginalEffectsToken).IsEqualTo(state.InboxResult.OriginalEffectsToken);

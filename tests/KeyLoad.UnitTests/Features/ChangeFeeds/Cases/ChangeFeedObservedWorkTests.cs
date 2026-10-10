@@ -57,5 +57,6 @@ internal sealed class ChangeFeedObservedWorkTests
         await ChangeFeedLiteralOracle.RequireAsync(database, healthy, receipt, committedAt, position);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await ChangeFeedReadCutAssertions.RequireFreshContinuationAsync(database, healthy);
     }
 }

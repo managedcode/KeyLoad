@@ -13,23 +13,24 @@ internal static class MixedEventingRetentionBackupPrivacy
         var worker = new PrincipalRecord(Inspector, state.Queue.Partition.TenantId,
             [new(state.Queue.Partition.DatabaseId, state.Queue.Lane.Queue,
                 Capability.QueueInspect | Capability.DeadLettersRead)], []);
-        Configure(fixture.Database, worker, token);
+        Configure(fixture, worker, token);
         await RequireAsync(fixture.Database, state);
         var original = MixedEventingRetentionBackupOracle.Rows(fixture.Target!, state.Queue.Partition, includeOutcomes: false);
-        Configure(fixture.Database, worker with { PolicyEpoch = 2, Revoked = true }, token);
+        Configure(fixture, worker with { PolicyEpoch = 2, Revoked = true }, token);
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.InspectMessage(Inspector,
             state.Queue.Lane, QueueLifecycleTestProtocol.Pending));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(MixedEventingRetentionBackupOracle.Rows(fixture.Target!, state.Queue.Partition, includeOutcomes: false))
             .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        Configure(fixture.Database, worker with { PolicyEpoch = 3 }, token);
+        Configure(fixture, worker with { PolicyEpoch = 3 }, token);
         await RequireAsync(fixture.Database, state);
     }
 
-    private static void Configure(DatabaseEngine database, PrincipalRecord principal, CancellationToken token)
-        => database.ApplyEmbedded(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, EventingArtifactFixture.Principal,
-            default, System.Text.Json.JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)), token)
-            .Get<PrincipalRecord>();
+    private static void Configure(EventingArtifactFixture fixture, PrincipalRecord principal, CancellationToken token)
+    {
+        var operation = fixture.Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal), Guid.NewGuid());
+        fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token).Get<PrincipalRecord>();
+    }
 
     internal static async Task RequireAsync(DatabaseEngine database, MixedEventingRetentionBackupState state)
     {

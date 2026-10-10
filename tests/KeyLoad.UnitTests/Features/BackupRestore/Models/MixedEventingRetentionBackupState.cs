@@ -4,6 +4,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class MixedEventingRetentionBackupState
 {
+    internal IReadOnlyList<Exception> OriginalJournalFailures { get; set; } = [];
     internal QueueLifecycleTestState Queue { get; set; } = null!;
     internal QueueLifecycleTestState RestoredQueue { get; set; } = null!;
     internal CommitInboxRequest Inbox { get; set; } = null!;

@@ -210,7 +210,6 @@ function Test-FcTaskAcceptanceScriptName([string] $Name) {
         'task-acceptance.ps1' { return $true }
         'task-acceptance.verify.ps1' { return $true }
         'task-acceptance.contract.json' { return $true }
-        'task-acceptance.kl079-binding.ps1' { return $true }
     }
     if ($Name.StartsWith('task-acceptance', [StringComparison]::Ordinal)) {
         throw $script:FunctionalCoverage.ErrorInventory

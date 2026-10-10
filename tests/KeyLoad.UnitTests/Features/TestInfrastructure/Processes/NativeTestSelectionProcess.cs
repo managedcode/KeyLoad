@@ -52,9 +52,24 @@ internal static class NativeTestSelectionProcess
             const connection = nativeSelection(connectionArgs, {});
             const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*", localArgs[2]];
             const nativeText = nativeSelection(nativeTextArgs, {});
+            const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
+            const nativeTextSdk = nativeSelection([...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], {});
+            let nativeTextSdkRejectedCount = 0;
+            for (const bad of [
+              [nativeTextArgs[0], "--KeyLoadTests:FilterUid="+nativeTextSdkUid, nativeTextArgs[2]],
+              [...nativeTextArgs, "--KeyLoadTests:FilterUid=unknown"],
+              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid+" "],
+              [...localArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
+              [nativeTextArgs[0], nativeTextArgs[1], "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
+              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid, "--KeyLoadTests:CoverageSettings=settings.xml"],
+              [...nativeTextArgs.map(value => value.replace("Suite=rf3", "Suite=unit")), "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
+              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid, "--Benchmarks:Scenario=read"]]) {
+              try { nativeSelection(bad, {}); } catch { nativeTextSdkRejectedCount++; continue; }
+              throw new Error("Unsupported focused native text UID was accepted.");
+            }
             const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
             const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, nativeTextArgs, remoteTransferArgs]) {
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -124,7 +139,7 @@ internal static class NativeTestSelectionProcess
               throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
             }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, remoteTransfer, remoteTransferUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

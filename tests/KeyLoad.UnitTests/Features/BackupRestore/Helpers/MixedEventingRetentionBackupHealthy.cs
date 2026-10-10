@@ -12,6 +12,10 @@ internal static class MixedEventingRetentionBackupHealthy
             [new PublishTopic(EventingArtifactFixture.Topic, [new(Healthy, EventingArtifactFixture.EventType, EventingArtifactFixture.Json)]),
              new EnqueueMessage(EventingArtifactFixture.Queue, Healthy, EventingArtifactFixture.Json)]);
         var receipt = fixture.Apply(fixture.Database, OperationKind.Batch, command, command.CommandId).Get<CommitReceipt>();
+        var issuedPublish = fixture.ReadTargetIssuedOperation(command.CommandId);
+        await Assert.That(issuedPublish.Id).IsEqualTo(command.CommandId);
+        await Assert.That(issuedPublish.Kind).IsEqualTo(OperationKind.Batch);
+        await Assert.That(issuedPublish.PrincipalId).IsEqualTo(EventingArtifactFixture.Principal);
         var cut = fixture.Target!.Position;
         await MixedEventingRetentionBackupTopic.EqualAsync(receipt,
             fixture.Apply(fixture.Database, OperationKind.Batch, command, command.CommandId).Get<CommitReceipt>());
@@ -21,13 +25,20 @@ internal static class MixedEventingRetentionBackupHealthy
         var eventDelivery = await Assert.That(group.Deliveries).HasSingleItem();
         await Assert.That(eventDelivery.Event).IsEqualTo(new SourceEventRecord(fixture.Events, 4,
             MixedEventingRetentionBackupProtocol.HealthySequence,
-            new(Healthy, EventingArtifactFixture.EventType, EventingArtifactFixture.Json), fixture.Time));
+            new(Healthy, EventingArtifactFixture.EventType, EventingArtifactFixture.Json), issuedPublish.EvaluatedAt));
         var groupAck = new SubscriptionDeliveryCommand(Guid.NewGuid(), fixture.Group, eventDelivery.Token, DeliveryAction.Ack);
         _ = fixture.Apply(fixture.Database, OperationKind.SubscriptionDelivery, groupAck, groupAck.CommandId).Get<CommitReceipt>();
         var receive = new ReceiveRequest(Guid.NewGuid(), fixture.Lane);
         var message = fixture.Apply(fixture.Database, OperationKind.Receive, receive, receive.RequestId).Get<ReceiveResult>();
         var delivery = await Assert.That(message.Deliveries).HasSingleItem();
-        await EventingArtifactHealthyAssertions.DeliveryAsync(fixture, delivery);
+        var issuedReceive = fixture.ReadTargetIssuedOperation(receive.RequestId);
+        await Assert.That(issuedReceive.Id).IsEqualTo(receive.RequestId);
+        await Assert.That(issuedReceive.Kind).IsEqualTo(OperationKind.Receive);
+        await Assert.That(issuedReceive.PrincipalId).IsEqualTo(EventingArtifactFixture.Principal);
+        await Assert.That(delivery.Token).IsNotEmpty();
+        await Assert.That(delivery with { Token = string.Empty }).IsEqualTo(new Delivery(Healthy,
+            EventingArtifactFixture.Json, EventingArtifactFixture.EmptyJson, string.Empty, 1,
+            issuedReceive.EvaluatedAt.AddSeconds(30), 1, 1));
         var ack = new DeliveryCommand(Guid.NewGuid(), fixture.Lane, delivery.Token, DeliveryAction.Ack);
         _ = fixture.Apply(fixture.Database, OperationKind.Delivery, ack, ack.CommandId).Get<CommitReceipt>();
         await EventingArtifactHealthyAssertions.CompletedAsync(fixture, fixture.Database);

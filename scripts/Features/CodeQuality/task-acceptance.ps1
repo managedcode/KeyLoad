@@ -229,7 +229,7 @@ $taskContract = @($contract.tasks | Where-Object { $_.taskId -ceq $Task })
 if ($taskContract.Count -ne 1) { throw 'Task contract is absent or ambiguous.' }
 $censusOnly = $taskContract[0].Contains('censusSelections')
 if ($censusOnly) {
-    if ($Task -cnotin @('KL-034','KL-042','KL-079') -or $taskContract[0].selections.Count -ne 0 -or
+    if ($Task -cnotin @('KL-034','KL-042') -or $taskContract[0].selections.Count -ne 0 -or
         $taskContract[0].censusSelections -isnot [array] -or $taskContract[0].censusSelections.Count -eq 0 -or
         $taskContract[0].censusSelections.Count -gt 32) { throw 'Invalid census-only task admission.' }
     $selected = $taskContract[0].censusSelections

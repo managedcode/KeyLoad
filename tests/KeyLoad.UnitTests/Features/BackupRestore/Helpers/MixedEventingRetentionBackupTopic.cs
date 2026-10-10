@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class MixedEventingRetentionBackupTopic
 {
+    private const long OriginalApplyStep = 1;
     internal static async Task SeedAsync(TestDatabase owner, MixedEventingRetentionBackupState state, CancellationToken token)
     {
         owner.Configure(MixedEventingRetentionBackupProtocol.Topic, ResourceKind.Topic);
@@ -32,12 +33,18 @@ internal static class MixedEventingRetentionBackupTopic
         await Assert.That(sought.Checkpoint).IsEqualTo(MixedEventingRetentionBackupProtocol.LastPosition);
         await Assert.That(sought.Paused).IsTrue();
         state.Purge = refused with { CommandId = Guid.NewGuid() };
+        var physicalBefore = owner.Store.Position;
+        var journalBefore = owner.ReadJournalCut();
         state.PurgeReceipt = owner.Submit(OperationKind.Batch, state.Purge, id: state.Purge.CommandId).Get<CommitReceipt>();
         await Assert.That(state.PurgeReceipt.CommandId).IsEqualTo(state.Purge.CommandId);
         await EqualAsync(new[] { new MutationReceipt("purgeTopic", state.Topic.Resource, "2", 2) },
             state.PurgeReceipt.Mutations.ToArray());
         await Assert.That(state.PurgeReceipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
-        await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(owner.Store.Position);
+        var originalPurge = owner.ReadRetainedEntry(state.Purge.CommandId);
+        await Assert.That(originalPurge.Index).IsEqualTo(checked(journalBefore.CommittedIndex + OriginalApplyStep));
+        await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(originalPurge.Index);
+        await Assert.That(owner.Database.LastApplied).IsEqualTo(originalPurge.Index);
+        await Assert.That(owner.Store.Position).IsEqualTo(checked(physicalBefore + OriginalApplyStep));
         await RequireAsync(owner.Database, state);
         var rows = QueueWholeFlowStorage.Bytes(owner.Store);
         var cut = owner.Store.Position;

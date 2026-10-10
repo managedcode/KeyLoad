@@ -1,6 +1,8 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Security;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
@@ -21,30 +23,45 @@ internal sealed class TestDatabase : IDisposable
     private const string Wildcard = "*";
     private const string RootCredential = "root.unit-test-credential-32-characters";
 
+    private const string NativeOperationRequired = "This operation requires the fixture-owned native ordered apply path.";
+    private const string NativeObservationRequired = "This observation requires the fixture-owned native ordered apply path.";
+    private const string CatalogOwnerRequired = "The owned fixture requires its actual native catalog owner.";
+    private const string UnexpectedReplicaDirectory = "A native fixture replica directory requires native admission.";
+    private const string OriginalOwnerRequired = "The original native owner is required.";
+
     private readonly TestDatabaseReplicaAdmission? replicaAdmission;
+    private readonly Func<ZoneTreeStore, PhysicalShardRecord?, DatabaseEngine> createDatabase;
+    private readonly IOptions<DatabaseLimits> limits;
     public string Directory { get; }
     public ZoneTreeStore Store { get; }
+    internal IOptions<ZoneTreeStorageExecutionOptions> StorageExecution { get; } = UnitExecutionOptions.StorageExecution();
     public DatabaseEngine Database { get; }
     internal IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints { get; } = UnitExecutionOptions.MovementCheckpoints();
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
         NativeClaimsExecutionOptions? claimsExecution = null, TimeProvider? timeProvider = null,
-        bool nativeReplicaAdmission = false, TimeSeriesExecutionOptions? timeSeriesExecution = null)
+        bool nativeReplicaAdmission = false, TimeSeriesExecutionOptions? timeSeriesExecution = null,
+        string? nativeReplicaDirectory = null)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
         {
             throw new ArgumentException(FreshDirectoryRequired, nameof(directory));
         }
+        if (!nativeReplicaAdmission && nativeReplicaDirectory is not null)
+        { throw new ArgumentException(UnexpectedReplicaDirectory, nameof(nativeReplicaDirectory)); }
         ZoneTreeStore? acquired = null;
         var blobOptions = UnitExecutionOptions.BlobExecution(blobExecution);
         var claimsOptions = UnitExecutionOptions.NativeClaimsExecution(claimsExecution);
         try
         {
             var clock = timeProvider ?? TimeProvider.System;
-            Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(timeSeriesExecution), MovementCheckpoints, UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
+            Store = acquired = new(new(Directory), StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+            this.limits = UnitExecutionOptions.DatabaseLimits(limits);
+            createDatabase = TestDatabaseEngineFactory.Capture(this.limits, blobOptions, claimsOptions,
+                timeSeriesExecution, MovementCheckpoints, clock);
+            Database = createDatabase(Store, null);
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)
@@ -52,7 +69,10 @@ internal sealed class TestDatabase : IDisposable
                 PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipalId);
             }
             if (nativeReplicaAdmission)
-            { replicaAdmission = new(this); }
+            {
+                Database = CreateConfiguredDatabase(Store);
+                replicaAdmission = new(this, nativeReplicaDirectory);
+            }
         }
         catch (Exception)
         {
@@ -78,7 +98,47 @@ internal sealed class TestDatabase : IDisposable
 
     internal OperationResult SubmitIssued(ReplicatedOperation operation)
         => replicaAdmission is { } native ? native.Submit(operation, explicitTime: true)
-            : throw new InvalidOperationException("This operation requires the fixture-owned native ordered apply path.");
+            : throw new InvalidOperationException(NativeOperationRequired);
+
+    internal OperationResult SubmitIssuedEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => replicaAdmission is { } native ? native.Submit(operation, explicitTime: false, cancellationToken)
+            : throw new InvalidOperationException(NativeOperationRequired);
+
+    internal DatabaseEngine CreateConfiguredDatabase(ZoneTreeStore ownedStore)
+    {
+        var owner = ownedStore.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
+            ?? throw new InvalidOperationException(CatalogOwnerRequired);
+        return createDatabase(ownedStore, owner);
+    }
+
+    internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
+        => new(limits, Database.EvaluationClock, cancellationToken);
+
+    internal void ReconcileCatalogRestore(IAtomicTransaction transaction, StoreIdentity identity,
+        long position, ReadOnlyMemory<byte> metadata, ImmutableArray<ClusterBackupOwnerCut> cuts,
+        ImmutableArray<ClusterRestoreOwnerMapping> mappings, ReadExecutionBudget work)
+        => ClusterRestoreCatalogReconciliation.Reconcile(transaction, identity, position, metadata,
+            RootCredential, cuts, mappings, limits, Database.EvaluationClock, work);
+
+    internal TestDatabaseReplicaAdmission CreateTargetAdmission(DatabaseEngine targetDatabase, ZoneTreeStore target,
+        string directory, string replicaDirectory, Guid? originalNodeId) => new(targetDatabase, target, directory,
+            replicaAdmission?.ExecutionOptions ?? throw new InvalidOperationException(OriginalOwnerRequired), replicaDirectory, originalNodeId);
+
+    internal void JoinOwnedResources() => TestDatabaseJoinedLifetime.DisposeInOrder(replicaAdmission, Store);
+
+    internal (long LastIndex, long CommittedIndex, long Term) ReadJournalCut()
+        => replicaAdmission is { } native ? native.ReadJournalCut()
+            : throw new InvalidOperationException(NativeObservationRequired);
+
+    internal KeyLoad.Replication.ReplicaEntry ReadRetainedEntry(Guid originalId)
+        => replicaAdmission is { } native ? native.ReadRetainedEntry(originalId)
+            : throw new InvalidOperationException(NativeObservationRequired);
+
+    internal KeyLoad.Replication.ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original,
+        Action restoreFaultOwnedRow, List<Exception> failures, CancellationToken cancellationToken)
+        => replicaAdmission is { } native
+            ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken)
+            : throw new InvalidOperationException(NativeOperationRequired);
 
     private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,

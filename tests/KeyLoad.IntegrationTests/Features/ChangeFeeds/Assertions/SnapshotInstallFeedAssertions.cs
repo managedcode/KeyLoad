@@ -77,7 +77,8 @@ internal static class SnapshotInstallFeedAssertions
             through, original.FirstAvailable, false, page.CutPosition), page);
         var continuation = await read(request with { Cursor = page.Cursor });
         await Assert.That(string.IsNullOrEmpty(continuation.Cursor)).IsFalse();
+        await Assert.That(continuation.CutPosition).IsGreaterThanOrEqualTo(tail.Token.Position);
         await SqlRf3Protocol.EqualAsync(new ChangeFeedPage([], continuation.Cursor, through,
-            through, original.FirstAvailable, false, page.CutPosition), continuation);
+            through, original.FirstAvailable, false, continuation.CutPosition), continuation);
     }
 }

@@ -26,7 +26,7 @@ internal static class QueueLifecycleOperations
     {
         foreach (var (operation, result) in state.Failures)
         {
-            var actual = database.Apply(operation);
+            var actual = state.SubmitOriginal(database, operation);
             await Assert.That(actual.Error).IsEqualTo(result.Error);
             await Assert.That(actual.SafeDetail).IsEqualTo(result.SafeDetail);
             await Assert.That(actual.Json).IsEqualTo(result.Json);
@@ -34,7 +34,7 @@ internal static class QueueLifecycleOperations
         }
         foreach (var (operation, result) in state.Successes.Where(item => item.Operation.Kind != OperationKind.Receive))
         {
-            var actual = database.Apply(operation);
+            var actual = state.SubmitOriginal(database, operation);
             if (operation.Kind == OperationKind.SetDispatch)
             { await DispatchReplayAsync(actual, result); }
             else if (operation.Kind == OperationKind.ConfigurePrincipal)

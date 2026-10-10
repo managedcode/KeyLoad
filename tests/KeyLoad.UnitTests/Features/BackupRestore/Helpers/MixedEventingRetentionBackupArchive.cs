@@ -1,5 +1,4 @@
 using KeyLoad.Artifacts;
-using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -12,18 +11,18 @@ internal static class MixedEventingRetentionBackupArchive
         var backup = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Backup);
         var archive = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Archive);
         var unpacked = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Unpacked);
-        state.Cut = fixture.Source.Store.CreateBackup(backup);
+        var capture = MixedEventingCatalogRestore.Capture(fixture.Source, backup, token);
+        state.Cut = capture.Position;
         var manifest = await MetadataTestFiles.ReadManifestAsync(backup);
         await Assert.That(manifest.Position).IsEqualTo(state.Cut);
-        BackupArtifact.Pack(backup, archive, pieceBytes: MixedEventingRetentionBackupProtocol.PieceBytes);
+        BackupArtifact.PackCatalogBackup(backup, archive, MixedEventingRetentionBackupProtocol.PieceBytes,
+            capture.ManifestDigest, fixture.Source.StorageExecution, fixture.Source.Database.EvaluationClock, token);
         state.ArchiveBytes = await File.ReadAllBytesAsync(archive, token);
-        BackupArtifact.Unpack(archive, unpacked);
+        BackupArtifact.UnpackCatalogBackup(archive, unpacked, capture.ManifestDigest, fixture.Source.StorageExecution, token);
         var target = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Target);
-        var identity = ZoneTreeStore.Restore(unpacked, target, UnitExecutionOptions.StorageExecution());
-        await Assert.That(identity.Incarnation).IsNotEqualTo(fixture.Source.Store.Identity.Incarnation);
-        await Assert.That(identity.DispatchPaused).IsTrue();
+        var expectedPosition = await MixedEventingCatalogRestore.RestoreAsync(fixture.Source, capture, unpacked, target, token);
         fixture.OpenTarget(target);
-        await Assert.That(fixture.Target!.Position).IsEqualTo(state.Cut + 1);
+        await Assert.That(fixture.Target!.Position).IsEqualTo(expectedPosition);
         await MixedEventingRetentionBackupOracle.SameAsync(state.CutRows, fixture.Target, state);
         await MixedEventingRetentionBackupOracle.InitialAsync(fixture, state, fixture.Database);
         await SourceAsync(fixture, state, token);

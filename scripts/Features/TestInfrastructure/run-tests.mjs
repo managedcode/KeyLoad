@@ -21,6 +21,8 @@ const localImageFilters = new Set(['/*/*/RemoteTransferDistinctOwnerTests/Actual
   '/*/*/RelationalSqlRf3JoinRejectionTests/*',
   '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*',
   '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*']);
+const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
+const nativeTextPreparedFilter = '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*';
 const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
 const localImageInheritedIdentity = ['KEYLOAD_IMAGE_PROVENANCE', 'KEYLOAD_LOCAL_IMAGE_RECEIPT',
   'KeyLoad__ContainerImages__Server', 'KEYLOAD_LOCAL_RF3_IMAGE_CHILD',
@@ -62,9 +64,14 @@ export function nativeSelection(input, inherited = process.env) {
   }
   const localImageEnabled = values.get('LocalRf3Image:Enabled');
   const localImageSelected = values.has('LocalRf3Image:Enabled');
+  const filterUid = values.get('FilterUid');
+  if (values.has('FilterUid') && (!localImageSelected || localImageEnabled !== 'true'
+    || suite !== 'rf3' || values.get('Filter') !== nativeTextPreparedFilter || filterUid !== nativeTextSdkUid)) {
+    throw new Error('Invalid native focused text UID selection.');
+  }
   if (localImageSelected && (localImageEnabled !== 'true' || suite !== 'rf3'
     || !localImageFilters.has(values.get('Filter'))
-    || [...values.keys()].some(key => !['Suite', 'Filter', 'LocalRf3Image:Enabled',
+    || [...values.keys()].some(key => !['Suite', 'Filter', 'FilterUid', 'LocalRf3Image:Enabled',
       'ReportTrx', 'TimeoutMinutes', 'ResultsDirectory', 'Execution:MaximumParallelTests'].includes(key))
     || localImageGithubIdentity.some(key => inherited[key] !== undefined && inherited[key] !== '')
     || localImageInheritedIdentity.some(key => inherited[key] !== undefined && inherited[key] !== ''))) {
@@ -97,6 +104,10 @@ export function nativeSelection(input, inherited = process.env) {
       const minutes = Number(value);
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) throw new Error('Invalid native timeout.');
 
+    } else if (key === 'FilterUid') {
+      args.push('--filter-uid', value, '--minimum-expected-tests', '1');
+    } else if (key === 'Filter' && filterUid !== undefined) {
+      continue;
     } else if (mapped.has(key)) {
       args.push(mapped.get(key), key.startsWith('Coverage') && key !== 'CoverageFormat' ? path.resolve(root, value) : value);
     } else if (['ScaleProfile', 'VectorProfile', 'OpenLoopRate'].includes(key)) {

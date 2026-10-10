@@ -54736,11 +54736,11 @@
       "nativeUidAndOriginalLinuxQualificationPending": true,
       "runtimeQualified": false,
       "allAcceptanceClosed": false,
-      "qualification": "Guarded whole-task census and native binder source joined. Private original36 Unit cases and7 process cases passed in normal/scalar with exact source/image/native UID receipts; current integrated source and original Linux/RF3/full coverage acceptance remain open.",
+      "qualification": "The exact original48 native cases are now bound to strict qualification; the completed binder is retired. Current main normal/scalar36 whole Unit operations passed with the fresh continuation-cut regression; original Linux strict48, genuine RF3, current process and complete functional coverage remain open.",
       "semanticSuccessorManifestSha256": "b0c0fe1b1e3e78e19635c62630a1713da858f568f734676dc034b2b0fb802640",
       "fullPageAndOpaqueContinuationAllFourCallersSourcePresent": true,
-      "canonicalLocalBuildPassed": false,
-      "canonicalFullFormatterPassed": false,
+      "canonicalLocalBuildPassed": true,
+      "canonicalFullFormatterPassed": true,
       "focusedLocalFeedLiveCases": {
         "total": 15,
         "passed": 15,
@@ -54789,7 +54789,104 @@
         "nativeCensusAndStrictBinderJoined": true,
         "originalLinuxRf3AndFullCoverageQualified": false
       },
-      "currentNativeCompilerAnalysisPassed": true
+      "currentNativeCompilerAnalysisPassed": true,
+      "strictCurrentSourceDevelopment20261010": {
+        "contractSha256": "90eff0182548950a302b571c5f3a302e523805c4ca88ff0f0cccd00d9873cf2f",
+        "strictCases": {
+          "unit": 36,
+          "processRecovery": 7,
+          "rf3": 5,
+          "total": 48
+        },
+        "completedBinderRetired": true,
+        "unknownSourceNamesStillRejected": true,
+        "currentUnitImageBuildPassed": true,
+        "currentIntegrationImageBuildPassed": true,
+        "unitNormal": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-r92-20261010/original-native-run.json",
+          "sha256": "7bb849cecc6d890a40a6bbd75e19d1631236462ce797d0a311daa2c84203f5cf",
+          "exitCode": 0,
+          "passed": 36,
+          "total": 36,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 25,
+          "nativeSlots": 50
+        },
+        "unitScalar": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-scalar-r92-20261010/original-native-run.json",
+          "sha256": "7cadaffb6a1d902f587f86a1db21a72b2a3feb85ea4740eef20c42685217fc23",
+          "exitCode": 0,
+          "passed": 36,
+          "total": 36,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 28,
+          "nativeSlots": 50
+        },
+        "freshContinuationCutWholeOperationExecuted": true,
+        "rf3LocalAttempt": {
+          "passed": 0,
+          "total": 1,
+          "databaseScenarioStarted": false,
+          "blocker": "Missing container image setting: KeyLoad:ContainerImages:Server",
+          "receipt": "/private/tmp/keyload-stage44-current-empty-snapshot-rf3-r89-20261010/original-native-run.json"
+        },
+        "originalLinuxStrict48Passed": false,
+        "fullFunctionalCoverageQualified": false,
+        "allAcceptanceClosed": false,
+        "qualification": "Fresh canonical full-solution Release build and formatter passed; normal/scalar native53-case selections each passed all36 mapped feed/live operations,12 adjacent real owner operations and5 mandatory SDK UID selection controls against the actual final images. The real local RF3 preparation refusal before database startup is retained. Current-source Linux strict48 and full functional coverage remain mandatory and open.",
+        "preFinalImageEvidence": {
+          "unitNormal": {
+            "receipt": "/private/tmp/keyload-stage44-current-kl079-unit-r88-20261010/original-native-run.json",
+            "sha256": "3905bae40c631cb13f6e95dbf95b26a290e726e63568396dd75b4e706093db2f",
+            "exitCode": 0,
+            "passed": 36,
+            "total": 36,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 21
+          },
+          "unitScalar": {
+            "receipt": "/private/tmp/keyload-stage44-current-kl079-unit-scalar-r88-20261010/original-native-run.json",
+            "sha256": "374ef5ee2621e15bfe9d1d3681d7a9328d08ea3621d937893258c13a18a6436e",
+            "exitCode": 0,
+            "passed": 36,
+            "total": 36,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 19
+          },
+          "productionImagesUnchangedFromActualR85Producer": true
+        },
+        "finalCurrentImageVerification": {
+          "solutionBuild": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-solution-r91-20261010/original.json",
+            "sha256": "009ed5a52caea193bf4ca5e8d5be234b01a5b382a52e9b46d85ace809fcf9114",
+            "exitCode": 0,
+            "errors": 0,
+            "warnings": 0,
+            "sourceInputs": 6721,
+            "sourceDrift": 0
+          },
+          "canonicalFullSolutionFormatter": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-format-r91-20261010/original.json",
+            "sha256": "a2ccb46736dc2d149a8b9a1a2ba0adb771e036edfcea51df503f5c7bf992c811",
+            "exitCode": 0,
+            "sourceDrift": 0
+          },
+          "actualFinalProducerImages": 32,
+          "matchingActualUnitProductionCopies": 30,
+          "authenticatedUnitImages": 398,
+          "nativeDiscoveredCases": 3286,
+          "numericFunctionalCoverage": "unmeasured",
+          "allAcceptanceClosed": false
+        }
+      }
     }
   },
   "KL-080": {
@@ -54948,7 +55045,91 @@
       "actualActivationCallbackColdAndPublicFlowQualified": false,
       "privatePublicResultId7RetentionCompiled": true,
       "mixedGenuineOwnerFourEnvelopeRestoreInProgress": true,
-      "allAcceptanceClosed": false
+      "allAcceptanceClosed": false,
+      "mixedCurrentNativeOwnerWholeFlow20261010": {
+        "manifestSha256": "0aeae464c198e57ca77973d016e0a387369771133d981dd7ae4bf512a9baf833",
+        "joinedPaths": 25,
+        "actualOrderedJournalRecoveryAndFourCatalogEnvelopes": true,
+        "sameRootColdOriginalIdentityAndFullModelReplay": true,
+        "normal": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-r92-20261010/original-native-run.json",
+          "sha256": "7bb849cecc6d890a40a6bbd75e19d1631236462ce797d0a311daa2c84203f5cf",
+          "exitCode": 0,
+          "passed": 12,
+          "total": 12,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 25,
+          "nativeSlots": 50
+        },
+        "scalar": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-scalar-r92-20261010/original-native-run.json",
+          "sha256": "7cadaffb6a1d902f587f86a1db21a72b2a3feb85ea4740eef20c42685217fc23",
+          "exitCode": 0,
+          "passed": 12,
+          "total": 12,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 28,
+          "nativeSlots": 50
+        },
+        "productOperationCasesPerProfile": 12,
+        "publicProviderBCAndSixOwnerRf3Qualified": false,
+        "fullFunctionalCoverageQualified": false,
+        "allAcceptanceClosed": false,
+        "qualification": "All12 complete mixed native owner restore/recovery and adjacent queue/fixture operations passed in both53-case normal/scalar selections against freshly built actual full-solution images. Earlier nine mandatory source-evidence controls remain separately retained; final five native SDK UID selection controls passed. Public provider B/C, original Linux, six-owner RF3 and full functional coverage acceptance remain open.",
+        "earlierSourceEvidenceControls": {
+          "normal": {
+            "receipt": "/private/tmp/keyload-stage44-current-mixed-unit-r86-20261010/original-native-run.json",
+            "sha256": "7192123c086f24e67d8b3a6908e5c745af23a62c95cfaf2ee0d14a954c6cf103",
+            "exitCode": 0,
+            "passed": 21,
+            "total": 21,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 16
+          },
+          "scalar": {
+            "receipt": "/private/tmp/keyload-stage44-current-mixed-unit-scalar-r86-20261010/original-native-run.json",
+            "sha256": "9d2c7ff44d4fa74156a000191d23a0859752385e0daf517bdb3c946495e655f3",
+            "exitCode": 0,
+            "passed": 21,
+            "total": 21,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 16
+          },
+          "requiredSourceEvidenceControlsPerProfile": 9
+        },
+        "finalNativeSelectionControlsPerProfile": 5,
+        "finalCurrentImageVerification": {
+          "solutionBuild": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-solution-r91-20261010/original.json",
+            "sha256": "009ed5a52caea193bf4ca5e8d5be234b01a5b382a52e9b46d85ace809fcf9114",
+            "exitCode": 0,
+            "errors": 0,
+            "warnings": 0,
+            "sourceInputs": 6721,
+            "sourceDrift": 0
+          },
+          "canonicalFullSolutionFormatter": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-format-r91-20261010/original.json",
+            "sha256": "a2ccb46736dc2d149a8b9a1a2ba0adb771e036edfcea51df503f5c7bf992c811",
+            "exitCode": 0,
+            "sourceDrift": 0
+          },
+          "actualFinalProducerImages": 32,
+          "matchingActualUnitProductionCopies": 30,
+          "authenticatedUnitImages": 398,
+          "nativeDiscoveredCases": 3286,
+          "numericFunctionalCoverage": "unmeasured",
+          "allAcceptanceClosed": false
+        }
+      }
     }
   },
   "KL-085": {
@@ -55145,7 +55326,93 @@
       "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs",
       "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
       "tests/KeyLoad.UnitTests/Features/Authorization/Cases/DeniedCommandReplayClockTests.cs"
-    ]
+    ],
+    "currentStageXLIVWholeTaskDevelopment": {
+      "mixedCurrentNativeOwnerWholeFlow20261010": {
+        "manifestSha256": "0aeae464c198e57ca77973d016e0a387369771133d981dd7ae4bf512a9baf833",
+        "joinedPaths": 25,
+        "actualOrderedJournalRecoveryAndFourCatalogEnvelopes": true,
+        "sameRootColdOriginalIdentityAndFullModelReplay": true,
+        "normal": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-r92-20261010/original-native-run.json",
+          "sha256": "7bb849cecc6d890a40a6bbd75e19d1631236462ce797d0a311daa2c84203f5cf",
+          "exitCode": 0,
+          "passed": 12,
+          "total": 12,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 25,
+          "nativeSlots": 50
+        },
+        "scalar": {
+          "receipt": "/private/tmp/keyload-stage44-current-final-unit-scalar-r92-20261010/original-native-run.json",
+          "sha256": "7cadaffb6a1d902f587f86a1db21a72b2a3feb85ea4740eef20c42685217fc23",
+          "exitCode": 0,
+          "passed": 12,
+          "total": 12,
+          "completeSelectedRunPassed": 53,
+          "completeSelectedRunTotal": 53,
+          "sourceDrift": 0,
+          "imageDrift": 0,
+          "actualMaximumConcurrentTests": 28,
+          "nativeSlots": 50
+        },
+        "productOperationCasesPerProfile": 12,
+        "publicProviderBCAndSixOwnerRf3Qualified": false,
+        "fullFunctionalCoverageQualified": false,
+        "allAcceptanceClosed": false,
+        "qualification": "All12 complete mixed native owner restore/recovery and adjacent queue/fixture operations passed in both53-case normal/scalar selections against freshly built actual full-solution images. Earlier nine mandatory source-evidence controls remain separately retained; final five native SDK UID selection controls passed. Public provider B/C, original Linux, six-owner RF3 and full functional coverage acceptance remain open.",
+        "earlierSourceEvidenceControls": {
+          "normal": {
+            "receipt": "/private/tmp/keyload-stage44-current-mixed-unit-r86-20261010/original-native-run.json",
+            "sha256": "7192123c086f24e67d8b3a6908e5c745af23a62c95cfaf2ee0d14a954c6cf103",
+            "exitCode": 0,
+            "passed": 21,
+            "total": 21,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 16
+          },
+          "scalar": {
+            "receipt": "/private/tmp/keyload-stage44-current-mixed-unit-scalar-r86-20261010/original-native-run.json",
+            "sha256": "9d2c7ff44d4fa74156a000191d23a0859752385e0daf517bdb3c946495e655f3",
+            "exitCode": 0,
+            "passed": 21,
+            "total": 21,
+            "sourceDrift": 0,
+            "imageDrift": 0,
+            "actualMaximumConcurrentTests": 16
+          },
+          "requiredSourceEvidenceControlsPerProfile": 9
+        },
+        "finalNativeSelectionControlsPerProfile": 5,
+        "finalCurrentImageVerification": {
+          "solutionBuild": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-solution-r91-20261010/original.json",
+            "sha256": "009ed5a52caea193bf4ca5e8d5be234b01a5b382a52e9b46d85ace809fcf9114",
+            "exitCode": 0,
+            "errors": 0,
+            "warnings": 0,
+            "sourceInputs": 6721,
+            "sourceDrift": 0
+          },
+          "canonicalFullSolutionFormatter": {
+            "receipt": "/private/tmp/keyload-stage44-current-final-format-r91-20261010/original.json",
+            "sha256": "a2ccb46736dc2d149a8b9a1a2ba0adb771e036edfcea51df503f5c7bf992c811",
+            "exitCode": 0,
+            "sourceDrift": 0
+          },
+          "actualFinalProducerImages": 32,
+          "matchingActualUnitProductionCopies": 30,
+          "authenticatedUnitImages": 398,
+          "nativeDiscoveredCases": 3286,
+          "numericFunctionalCoverage": "unmeasured",
+          "allAcceptanceClosed": false
+        }
+      }
+    }
   },
   "KL-099": {
     "title": "Eventing replication і migration",

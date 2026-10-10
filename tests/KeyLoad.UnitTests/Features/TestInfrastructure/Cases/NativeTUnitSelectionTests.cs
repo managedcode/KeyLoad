@@ -21,6 +21,13 @@ internal sealed class NativeTUnitSelectionTests
     private const string NativeTextUnsupportedCountProperty = "nativeTextUnsupportedCount";
     private const int ExpectedNativeTextRejectionCount = 4;
     private const string NativeTextFilter = "/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*";
+    private const string NativeTextSdkProperty = "nativeTextSdk";
+    private const string NativeTextSdkRejectedProperty = "nativeTextSdkRejectedCount";
+    private const int ExpectedNativeTextSdkRejections = 8;
+    private const string NativeUidArgument = "--filter-uid";
+    private const string MinimumExpectedTestsArgument = "--minimum-expected-tests";
+    private const string SingleExpectedTest = "1";
+    private const string NativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
     private const string RemoteTransferProperty = "remoteTransfer";
     private const string RemoteTransferUnsupportedCountProperty = "remoteTransferUnsupportedCount";
     private const int ExpectedRemoteTransferRejectionCount = 4;
@@ -80,6 +87,7 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RejectionProperty), RejectionFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(ConnectionProperty), ConnectionFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
+            await AssertNativeTextSdkAsync(selection.RootElement).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RemoteTransferProperty), RemoteTransferFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(RemoteTransferUnsupportedCountProperty).GetInt32())
                 .IsEqualTo(ExpectedRemoteTransferRejectionCount);
@@ -89,6 +97,22 @@ internal sealed class NativeTUnitSelectionTests
                 .IsEqualTo(ExpectedConnectionRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);
         }
+    }
+
+    private static async Task AssertNativeTextSdkAsync(JsonElement root)
+    {
+        var selected = root.GetProperty(NativeTextSdkProperty);
+        var args = selected.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
+        await Assert.That(args).DoesNotContain("--treenode-filter");
+        await Assert.That(args[Array.IndexOf(args, NativeUidArgument) + 1]).IsEqualTo(NativeTextSdkUid);
+        await Assert.That(args[Array.IndexOf(args, MinimumExpectedTestsArgument) + 1]).IsEqualTo(SingleExpectedTest);
+        await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
+        using var prepared = JsonDocument.Parse(selected.GetProperty(EnvironmentProperty)
+            .GetProperty(LocalArgumentsEnvironment).GetString()!);
+        await Assert.That(prepared.RootElement.EnumerateArray().Select(value => value.GetString()!).ToArray())
+            .IsEquivalentTo(["--KeyLoadTests:Suite=rf3", "--KeyLoadTests:Filter=" + NativeTextFilter,
+                "--KeyLoadTests:LocalRf3Image:Enabled=true"], CollectionOrdering.Matching);
+        await Assert.That(root.GetProperty(NativeTextSdkRejectedProperty).GetInt32()).IsEqualTo(ExpectedNativeTextSdkRejections);
     }
 
     private static async Task AssertParallelismAsync(JsonElement selection, string expected)

@@ -15,11 +15,11 @@ internal static class EventingArtifactSeed
                 [new(EventingArtifactFixture.FirstEvent, EventingArtifactFixture.EventType, EventingArtifactFixture.Json), new(EventingArtifactFixture.SecondEvent, EventingArtifactFixture.EventType, EventingArtifactFixture.Json),
                     new(EventingArtifactFixture.ThirdEvent, EventingArtifactFixture.EventType, EventingArtifactFixture.Json)])]);
         fixture.Original = fixture.Operation(OperationKind.Batch, command, id);
-        var originalResult = source.Database.Apply(fixture.Original);
+        var originalResult = fixture.SubmitIssued(source.Database, fixture.Original);
         originalResult.Get<CommitReceipt>();
         var position = source.Store.Position;
         var bytes = EventingArtifactState.FullBytes(source.Store);
-        await EventingArtifactState.SameResultAsync(originalResult, source.Database.Apply(fixture.Original));
+        await EventingArtifactState.SameResultAsync(originalResult, fixture.SubmitIssued(source.Database, fixture.Original));
         await Assert.That(source.Store.Position).IsEqualTo(position);
         await Assert.That(EventingArtifactState.FullBytes(source.Store)).IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         foreach (var group in new[] { fixture.Group, fixture.Other })

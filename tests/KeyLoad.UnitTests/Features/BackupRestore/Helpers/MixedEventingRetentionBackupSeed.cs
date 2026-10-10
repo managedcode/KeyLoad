@@ -9,14 +9,21 @@ internal static class MixedEventingRetentionBackupSeed
         await EventingArtifactSeed.RunAsync(fixture);
         QueueLifecycleProvisioning.Seed(fixture.Source, byteSublimit: false);
         var state = new MixedEventingRetentionBackupState
-        { Queue = new(fixture.Source.Partition, QueueWholeFlowStorage.Clock(fixture.Source.Store)) };
+        {
+            Queue = new(fixture.Source.Partition, QueueWholeFlowStorage.Clock(fixture.Source.Store))
+            { NativeSubmit = fixture.Source.SubmitIssued }
+        };
         await QueueLifecycleInitialPhase.RunAsync(fixture.Source.Database, fixture.Source.Store, state.Queue, token);
+        var originalFailures = new List<Exception>();
+        await MixedEventingJournalRecovery.RunAsync(fixture.Source, state.Queue, originalFailures, token);
+        await Assert.That(originalFailures).IsNotEmpty();
+        state.OriginalJournalFailures = originalFailures.ToArray();
         await MixedEventingRetentionBackupTopic.SeedAsync(fixture.Source, state, token);
         var inbox = TargetInboxNativeSetup.Create(fixture.Source);
         state.Inbox = inbox.Request;
         state.InboxSource = inbox.Source;
         state.InboxDelivery = inbox.Delivery;
-        state.InboxResult = TargetInboxNativeSetup.Apply(fixture.Source.Database, inbox.Request, token).Get<CommitInboxResult>();
+        state.InboxResult = fixture.ApplyInbox(fixture.Source.Database, inbox.Request, token).Get<CommitInboxResult>();
         await Assert.That(state.InboxResult.AlreadyProcessed).IsFalse();
         await TargetInboxNativeAssertions.EffectsAsync(fixture.Source.Database, inbox.Request);
         await TargetInboxNativeAssertions.CapacityAsync(fixture.Source.Store, inbox.Request, TargetInboxUnitProtocol.FirstRevision);

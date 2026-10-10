@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
 
@@ -13,9 +14,13 @@ internal static class MixedEventingRetentionBackupTrial
         var finalRows = MixedEventingRetentionBackupOracle.Rows(fixture.Target!, state);
         var finalPhysical = EventingArtifactState.FullBytes(fixture.Target!);
         var identity = fixture.Target!.Identity;
+        var signingFingerprint = SHA256.HashData(identity.SigningKey.Span);
         var cut = fixture.Target.Position;
         fixture.ReopenTarget(Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Target));
-        await Assert.That(fixture.Target!.Identity).IsEqualTo(identity);
+        await Assert.That(fixture.Target!.Identity with { SigningKey = ReadOnlyMemory<byte>.Empty })
+            .IsEqualTo(identity with { SigningKey = ReadOnlyMemory<byte>.Empty });
+        await Assert.That(SHA256.HashData(fixture.Target.Identity.SigningKey.Span))
+            .IsEquivalentTo(signingFingerprint, CollectionOrdering.Matching);
         await Assert.That(fixture.Target.Position).IsEqualTo(cut);
         await MixedEventingRetentionBackupOracle.SameAsync(finalRows, fixture.Target, state);
         await Assert.That(EventingArtifactState.FullBytes(fixture.Target)).IsEquivalentTo(finalPhysical, CollectionOrdering.Matching);
@@ -26,11 +31,11 @@ internal static class MixedEventingRetentionBackupTrial
         await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.ReceiptCapacity);
         await Assert.That(TargetInboxNativeSetup.Apply(fixture.Database, state.Inbox, token).Error).IsEqualTo(ErrorCode.TokenInvalidated);
         await MixedEventingRetentionBackupTopic.EqualAsync(state.HealthyInboxResult,
-            TargetInboxNativeSetup.Apply(fixture.Database, state.HealthyInbox, token).Get<CommitInboxResult>());
+            fixture.ApplyInbox(fixture.Database, state.HealthyInbox, token).Get<CommitInboxResult>());
         await MixedEventingRetentionBackupPrivacy.RequireAsync(fixture.Database, state);
         await ColdHealthyAsync(fixture);
         await MixedEventingRetentionBackupArchive.SourceAsync(fixture, state, token);
-    });
+    }, nativeAdmission: true);
 
     private static async Task ColdHealthyAsync(EventingArtifactFixture fixture)
     {
