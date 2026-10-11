@@ -57028,7 +57028,7 @@
   },
   "KL-065": {
     "title": "Row ACL planner і graph enforcement",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
@@ -57087,6 +57087,45 @@
       "nativeTeamsDecoderRepaired": true,
       "remaining": "Linux, public generation/write/revocation RF3 and measured resource/coverage gates open. Extended write/cold proposal is next-stage source.",
       "wholeTaskAccepted": false
+    },
+    "allAcceptanceClosed": true,
+    "acceptanceScope": "Original architecture KL-065 criteria at recorded f0d869c source; complete current product/full-suite/coverage/endurance/performance qualification remains open.",
+    "recordedSourceAcceptance20261011": {
+      "sourceRevision": "f0d869c08f1a9efe30e93911c4631ad26eb87fb0",
+      "workflowRun": 38162441575,
+      "workflowAttempt": 1,
+      "workflowJob": 114538000515,
+      "workflowJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38162441575/job/114538000515",
+      "artifactId": 11711112499,
+      "artifactName": "task-acceptance-KL-065-normal",
+      "artifactZipSha256": "baeb291d60863d793ea873bbfdc1a8c16bacd784d0ff2ed64e8e6f07925dbc5b",
+      "profile": "normal",
+      "passedNativeCases": 78,
+      "failedNativeCases": 0,
+      "skippedNativeCases": 0,
+      "selectionCount": 20,
+      "executedPassedBySuite": {
+        "unit": 45,
+        "recovery": 25,
+        "rf3": 8
+      },
+      "originalReceiptSha256": "c10e39fd5129e46a9517f453c7a6a93cd3f3eaf462761e72ec0fd967d9df1f74",
+      "originalExecutionManifestSha256": "6b479297111e2c08098e179dc489ffc847dd56954fc32a8295a6bcbebdcd193c",
+      "originalArtifactsVerified": 189,
+      "sourceAndPdbBoundFilesVerified": 6592,
+      "observationSha256": "52d23f3f12c4f7a02708f913ed94a57519f301a9393f6b2a57e65b68df7aec37",
+      "nativeProcessesAndReadersJoined": true,
+      "compiledSourceAndPdbBindingComplete": true,
+      "preparedImagesEqualBeforeAfter": true,
+      "dockerServerImageRevisionVerified": true,
+      "criteria": [
+        "Exact tenant/database/principal and policy epoch scope prevents cross-tenant visibility cache collisions.",
+        "Fresh persisted owner/team/project grants and final row authorization reject stale or revoked grants.",
+        "Hidden graph sources, targets and intermediate paths remain absent from unauthorized response and Explain across SDK and official MCP."
+      ],
+      "evidenceDocument": "docs/implementation/qualification-stage59-current-joined.md",
+      "fullProductCoverageQualified": false,
+      "productionOrPowerLossQualified": false
     }
   },
   "KL-066": {

@@ -15,6 +15,8 @@ public sealed class AdmittedCommand : IDisposable
 
     internal bool Control { get; }
 
+    internal string Tenant { get; }
+
     /// <summary>Gets the task completed when the consumer records the operation outcome.</summary>
     public Task<OperationResult> Completion => completion.Task;
 
@@ -22,6 +24,7 @@ public sealed class AdmittedCommand : IDisposable
     {
         Operation = operation;
         Control = lease.Control;
+        Tenant = lease.Tenant;
         this.lease = lease;
     }
 

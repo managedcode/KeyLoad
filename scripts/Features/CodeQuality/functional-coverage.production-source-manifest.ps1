@@ -122,10 +122,9 @@ function Assert-PsmSourceTree([string] $Root, [string] $ProjectName, [bool] $IsT
     $entries = 0
     $sources = 0
     while ($pending.Count -gt 0) {
-        foreach ($entryPath in [IO.Directory]::EnumerateFileSystemEntries($pending.Pop())) {
+        foreach ($entry in [IO.DirectoryInfo]::new($pending.Pop()).EnumerateFileSystemInfos()) {
             if ($entries -ge $script:Psm.MaximumEntries) { throw $script:Psm.InvalidInventory }
             $entries++
-            $entry = Get-Item -LiteralPath $entryPath -Force
             if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $script:Psm.InvalidInventory }
             if ($entry -is [IO.DirectoryInfo]) {
                 if ($entry.Name -cne 'obj' -and $entry.Name -cne 'bin') { $pending.Push($entry.FullName) }

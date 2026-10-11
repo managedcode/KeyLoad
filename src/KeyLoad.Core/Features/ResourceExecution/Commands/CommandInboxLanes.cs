@@ -9,8 +9,8 @@ internal sealed class CommandInboxLanes(int maximumControlBurst)
 
     private const string SignalMismatchDetail = "The command queue signal is inconsistent.";
 
-    private readonly Queue<AdmittedCommand> commands = [];
-    private readonly Queue<AdmittedCommand> controls = [];
+    private readonly CommandTenantLane commands = new();
+    private readonly CommandTenantLane controls = new();
     private int controlBurst;
 
     /// <summary>Adds an admitted command to its FIFO lane.</summary>
@@ -52,7 +52,7 @@ internal sealed class CommandInboxLanes(int maximumControlBurst)
         FailLane(controls);
     }
 
-    private static void FailLane(Queue<AdmittedCommand> queue)
+    private static void FailLane(CommandTenantLane queue)
     {
         while (queue.TryDequeue(out var command))
         {

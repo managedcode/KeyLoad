@@ -28514,7 +28514,7 @@
       "methodName": "AlternatesPrefixesAndBoundsRealZoneTreePages",
       "instanceName": "AlternatesPrefixesAndBoundsRealZoneTreePages",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs",
-      "sourceSha256": "611d5114d4db6b9a3badb0ccb772997052f57e22139e69818db187bd1cae8262",
+      "sourceSha256": "a7e6e61f87d3927663bc9a0b7d0a632d8c3872dbb792f5524830718aedf37d83",
       "lineNumber": 9,
       "endLineNumber": 31,
       "classification": "functional",
@@ -28532,9 +28532,9 @@
       "methodName": "CancellationRejectsTheWholeDiscoveryPage",
       "instanceName": "CancellationRejectsTheWholeDiscoveryPage",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs",
-      "sourceSha256": "611d5114d4db6b9a3badb0ccb772997052f57e22139e69818db187bd1cae8262",
+      "sourceSha256": "a7e6e61f87d3927663bc9a0b7d0a632d8c3872dbb792f5524830718aedf37d83",
       "lineNumber": 106,
-      "endLineNumber": 115,
+      "endLineNumber": 116,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -28550,9 +28550,9 @@
       "methodName": "CursorAuthorityChangeStartsANewFixedTailSweep",
       "instanceName": "CursorAuthorityChangeStartsANewFixedTailSweep",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs",
-      "sourceSha256": "611d5114d4db6b9a3badb0ccb772997052f57e22139e69818db187bd1cae8262",
-      "lineNumber": 117,
-      "endLineNumber": 136,
+      "sourceSha256": "a7e6e61f87d3927663bc9a0b7d0a632d8c3872dbb792f5524830718aedf37d83",
+      "lineNumber": 118,
+      "endLineNumber": 137,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -28568,7 +28568,7 @@
       "methodName": "FiltersInactiveRowsAndReportsCorruptRows",
       "instanceName": "FiltersInactiveRowsAndReportsCorruptRows",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs",
-      "sourceSha256": "611d5114d4db6b9a3badb0ccb772997052f57e22139e69818db187bd1cae8262",
+      "sourceSha256": "a7e6e61f87d3927663bc9a0b7d0a632d8c3872dbb792f5524830718aedf37d83",
       "lineNumber": 33,
       "endLineNumber": 70,
       "classification": "functional",
@@ -28586,7 +28586,7 @@
       "methodName": "FixedTailDefersHigherKeysUntilTheFollowingSweep",
       "instanceName": "FixedTailDefersHigherKeysUntilTheFollowingSweep",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs",
-      "sourceSha256": "611d5114d4db6b9a3badb0ccb772997052f57e22139e69818db187bd1cae8262",
+      "sourceSha256": "a7e6e61f87d3927663bc9a0b7d0a632d8c3872dbb792f5524830718aedf37d83",
       "lineNumber": 72,
       "endLineNumber": 104,
       "classification": "functional",
@@ -59787,6 +59787,26 @@
       "acceptance": [
         "AC-REP-006"
       ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests",
+      "methodName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "instanceName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TenantAdmissionWholeFlowTests.cs",
+      "sourceSha256": "e27dd6d079e84f01b9be3b1c6b25c369d84d479f65c39cef843e329c95eacee2",
+      "lineNumber": 5,
+      "endLineNumber": 11,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-RESOURCE-TENANT-001",
+        "REQ-RESOURCE-TENANT-SHUTDOWN-001"
+      ],
+      "acceptance": [
+        "AC-RESOURCE-TENANT-001",
+        "AC-RESOURCE-TENANT-SHUTDOWN-001"
+      ]
     }
   ],
   "requiredNonContributorCases": [
@@ -68944,6 +68964,26 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Existing case-specific source review witness in immutable R27 classification; current source hash comparison recorded separately."
+    },
+    {
+      "className": "KeyLoad.UnitTests.ReplicaBorrowedClockOperationTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.ReplicaBorrowedClockOperationTests",
+      "methodName": "OriginalSignedExpiryRefusesWithoutEffectsThenBorrowedClockHealthyReplyAndReplayStayExact",
+      "instanceName": "OriginalSignedExpiryRefusesWithoutEffectsThenBorrowedClockHealthyReplyAndReplayStayExact",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterReplication/Cases/ReplicaBorrowedClockOperationTests.cs",
+      "sourceSha256": "465ed1cb86854b83244241d3c54e14c2dacc3a186350b28f93fb5577fd4c6637",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-TIME-PEER-001"
+      ],
+      "acceptance": [
+        "AC-TIME-PEER-001"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Genuine native signer/receiver expiry, request/reply MAC and nonce replay with full unchanged canonical image/cut; accepted ReadBarrier is not dispatched at ReplicaLeader and reply uses fixture literal EmptyRead. Required ordinary transport control, not database operation coverage contributor."
     }
   ],
   "coverageGroups": [
@@ -72231,6 +72271,7 @@
         "KeyLoad.UnitTests.Features.ResourceExecution.PreparedScalarTests",
         "KeyLoad.UnitTests.Features.ResourceExecution.ReadGateLifetimeTests",
         "KeyLoad.UnitTests.Features.ResourceExecution.SqlAdmissionTests",
+        "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests",
         "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests",
         "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreeCoordinatedPointCacheBindingTests",
         "KeyLoad.UnitTests.Features.ResourceExecution.ZoneTreePointCacheLifetimeTests",
@@ -72738,6 +72779,7 @@
         "KeyLoad.UnitTests.Features.ResourceExecution.SqlAdmissionTests|AcAiSql007SqlAndQueryReserveTheSameWorkingBudgetBeforePrincipalBinding|AcAiSql007SqlAndQueryReserveTheSameWorkingBudgetBeforePrincipalBinding",
         "KeyLoad.UnitTests.Features.ResourceExecution.SqlAdmissionTests|AcAiSql007SqlDataSaturationCannotConsumeDirectControlProgress|AcAiSql007SqlDataSaturationCannotConsumeDirectControlProgress",
         "KeyLoad.UnitTests.Features.ResourceExecution.SqlAdmissionTests|AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively|AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively",
+        "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests|BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes|BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
         "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests|ConcurrentCompareAndSwapHasOneWinner|ConcurrentCompareAndSwapHasOneWinner",
         "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests|DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects|DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects",
         "KeyLoad.UnitTests.Features.ResourceExecution.TransactionTests|SameLiteralPartitionKeyCannotCrossTransactionDomains|SameLiteralPartitionKeyCannotCrossTransactionDomains",

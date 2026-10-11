@@ -77,7 +77,7 @@ That's what we're building: **one place for context, one place for the work that
 
 | Original tasks | Accepted | In progress |
 |---|---|---|
-| **104** | **17** | **87** |
+| **104** | **18** | **86** |
 
 ```mermaid
 flowchart LR
@@ -90,9 +90,9 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current qualification record](docs/implementation/qualification-stage58-current-joined.md) separates implemented source, local checks and remaining acceptance gates; earlier evidence remains in the [original qualification record](docs/implementation/qualification-stage57-kl035-kl079.md).
+KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current qualification record](docs/implementation/qualification-stage59-current-joined.md) separates implemented source, local checks and remaining acceptance gates; earlier evidence remains in the [original qualification record](docs/implementation/qualification-stage57-kl035-kl079.md).
 
-SIMD is enabled throughout the current execution path. The latest completed full Linux run at `ffab3ee4` passed all 328 process-recovery tests; its Unit suite passed 3,271 of 3,383 tests, with 112 failures under repair. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. The original full-text replay checks now preserve the complete original checkpoint while validating the actual current source cut; their owning build, scoped formatter and four original native test identities passed locally, with runtime qualification open. Complete Linux/RF3 acceptance and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
+SIMD is enabled throughout the current execution path. The latest completed full Linux run at `f0d869c` passed all 349 process-recovery tests; its Unit suite passed 3,461 of 3,478 tests, with 17 errors under repair. KL-065 passed its complete 78-case task acceptance lane: 45 Unit, 25 process recovery and 8 Aspire RF3 cases. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. The original full-text replay checks now preserve the complete original checkpoint while validating the actual current source cut; their owning build, scoped formatter and four original native test identities passed locally, with runtime qualification open. Complete Linux/RF3 acceptance and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|

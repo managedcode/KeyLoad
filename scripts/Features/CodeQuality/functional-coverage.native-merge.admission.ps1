@@ -95,7 +95,9 @@ function Read-FcNativeUnitCensusRun([string] $Root, [string] $Repository, [objec
     if ($functional.value.Contains('commitSha') -and $functional.value.commitSha -cne $Manifest.value.sourceRevision) {
         throw $script:FcNativeMergeInput.InvalidEvidence
     }
-    $identities = @(Read-FcNativeFunctionalCases $functional.value $expected $Suite $Repository -MatchSourceLocations)
+    $nativeIds = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::Ordinal)
+    $identities = @(Read-FcNativeFunctionalCases $functional.value $expected $Suite $Repository `
+        -MatchSourceLocations -ObservedNativeIds $nativeIds)
     $trxFile = Read-FcNativeEvidenceFile $Root $Run.trx $Value.bounds.maximumReportBytes $Value.bounds.maximumPathCharacters
     $trx = Read-FcNativeTrx $trxFile.path $Suite $expected
     $trxIdentities = @($trx.cases | ForEach-Object { [string] $_.caseIdentity } | Sort-Object)
@@ -105,7 +107,7 @@ function Read-FcNativeUnitCensusRun([string] $Root, [string] $Repository, [objec
     $functionalIdentities = @($Inventory.functionalCases | ForEach-Object {
         Get-FcNativeTrxKey $_.className $_.methodName $_.instanceName
     } | Sort-Object)
-    [ordered]@{ runId = $Run.runId; identities = $functionalIdentities; censusIdentities = $identities }
+    [ordered]@{ runId = $Run.runId; identities = $functionalIdentities; censusIdentities = $identities; nativeIds = $nativeIds }
 }
 
 function Assert-FcNativeProductModuleCompleteness([object] $Contributors, [object] $Manifest) {
@@ -224,8 +226,13 @@ function Read-FcNativeSuiteRun([string] $Root, [string] $Repository, [object] $V
     if ($functional.value.Contains('commitSha') -and $functional.value.commitSha -cne $Manifest.value.sourceRevision) {
         throw $script:FcNativeMergeInput.InvalidEvidence
     }
+    $requiredNativeIds = if ($expectedSuite -ceq 'unit') { $Census.normal.nativeIds } else { $null }
+    if ($expectedSuite -ceq 'unit' -and
+        $requiredNativeIds -isnot [Collections.Generic.Dictionary[string, string]]) {
+        throw $script:FcNativeMergeInput.InvalidEvidence
+    }
     $reportCases = @(Read-FcNativeFunctionalCases $functional.value $expected ([string] $Run.suite) $Repository `
-        -MatchSourceLocations:($expectedSuite -ceq 'unit'))
+        -MatchSourceLocations:($expectedSuite -ceq 'unit') -RequiredNativeIds $requiredNativeIds)
     $trx = Read-FcNativeSuiteTrx $Root $Run $expected $Value.bounds
     if ($reportCases.Count -ne $trx.identities.Count -or ($reportCases -join "`n") -cne ($trx.identities -join "`n")) {
         throw $script:FcNativeMergeInput.InvalidEvidence

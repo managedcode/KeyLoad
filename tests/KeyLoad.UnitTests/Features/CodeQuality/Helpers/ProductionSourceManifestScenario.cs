@@ -83,6 +83,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         await AssertSuccessfulProcessAsync(prepared);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
         await NativeUnitImageAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
+        await NativeFunctionalReportAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
         await NativeCoverageRf3ContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
         await VerifyUnsupportedScalarRejectedAsync(cancellationToken);
         await VerifyTamperRejectedAsync(ManifestFile, cancellationToken);

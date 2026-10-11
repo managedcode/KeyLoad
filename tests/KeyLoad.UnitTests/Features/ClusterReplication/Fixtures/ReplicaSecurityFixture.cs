@@ -33,6 +33,7 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     internal const byte MutationBit = 1;
     internal static byte[] EmptyRead { get; } = ReplicaProtocolCodec.Serialize(string.Empty);
     private readonly TestDatabase canonical = new();
+    private readonly TimeProvider clock;
     private readonly IHost host;
     private readonly ReplicaMessageMac mac;
     private readonly byte[] credential;
@@ -44,8 +45,9 @@ internal sealed class ReplicaSecurityFixture : IDisposable
     internal ReplicaEnvelopeAuthenticator Receiver { get; }
     internal string OtherGeneration { get; }
 
-    internal ReplicaSecurityFixture(ReplicaReplayLimits? limits = null)
+    internal ReplicaSecurityFixture(ReplicaReplayLimits? limits = null, TimeProvider? clock = null)
     {
+        this.clock = clock ?? TimeProvider.System;
         host = new HostBuilder().UseOrleans(silo => silo.Services.Configure<EndpointOptions>(endpoint =>
         { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; })).Build();
         var local = host.Services.GetRequiredService<ILocalSiloDetails>();
@@ -55,9 +57,9 @@ internal sealed class ReplicaSecurityFixture : IDisposable
             credential, ClusterId)
         { ConnectTimeout = TimeSpan.FromSeconds(1), ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
         Discovery = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), local);
-        Receiver = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
+        Receiver = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), Discovery, this.clock, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
         var senderConfiguration = Configuration with { LocalId = VoterA };
-        Sender = new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), local), TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
+        Sender = new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), local), this.clock, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
         OtherGeneration = SiloAddress.New(local.SiloAddress.Endpoint, checked(local.SiloAddress.Generation + 1)).ToParsableString();
         mac = new(Options.Secret, Options.ClusterId);
     }
@@ -87,7 +89,7 @@ internal sealed class ReplicaSecurityFixture : IDisposable
         return Resign(request with { Payload = ReplicaSecurityWireFixture.Append(value, operation) });
     }
     private ReplicatedOperation Operation(OperationKind kind)
-        => Database.NormalizeOperation(new(Guid.NewGuid(), kind, VoterA, TimeProvider.System.GetUtcNow(), OperationPayload));
+        => Database.NormalizeOperation(new(Guid.NewGuid(), kind, VoterA, clock.GetUtcNow(), OperationPayload));
     /// <inheritdoc />
     public void Dispose() { Sender.Dispose(); Receiver.Dispose(); mac.Dispose(); host.Dispose(); canonical.Dispose(); CryptographicOperations.ZeroMemory(credential); }
 }

@@ -132,7 +132,7 @@ function Read-FcNativeJsonReference([string] $Root, [object] $Reference, [long] 
     try {
         $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($file.bytes))
         Assert-FcNativeJsonUnique $json.RootElement
-        $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($file.bytes)) -AsHashtable -Depth $script:FcNativeMergeInput.MaximumJsonDepth
+        $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($file.bytes)) -AsHashtable -DateKind String -Depth $script:FcNativeMergeInput.MaximumJsonDepth
         return [ordered]@{ file = $file; value = $value }
     }
     catch [System.Exception] { throw $script:FcNativeMergeInput.InvalidEvidence }

@@ -60,10 +60,9 @@ function Get-FcTestProjectSources([string] $Root) {
     $visitedEntries = 0
     while ($pending.Count -gt 0) {
         $directory = $pending.Pop()
-        foreach ($entryPath in [IO.Directory]::EnumerateFileSystemEntries($directory)) {
+        foreach ($entry in [IO.DirectoryInfo]::new($directory).EnumerateFileSystemInfos()) {
             if ($visitedEntries -ge $script:FcTestIdentity.MaximumEntries) { throw $script:FcTestIdentity.InvalidInventory }
             $visitedEntries++
-            $entry = Get-Item -LiteralPath $entryPath -Force
             if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $script:FcTestIdentity.InvalidInventory }
             if ($entry -is [IO.DirectoryInfo]) {
                 if ($entry.Name -cne 'obj' -and $entry.Name -cne 'bin') { $pending.Push($entry.FullName) }

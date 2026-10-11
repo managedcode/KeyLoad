@@ -1184,6 +1184,24 @@
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests",
+      "methodName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "instanceName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "requirements": [
+        "REQ-RESOURCE-TENANT-001",
+        "REQ-RESOURCE-TENANT-SHUTDOWN-001"
+      ],
+      "acceptance": [
+        "AC-RESOURCE-TENANT-001",
+        "AC-RESOURCE-TENANT-SHUTDOWN-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Core"
+      ],
+      "operationOutcomeAndState": "Actual native tenant fair turns with persisted principals and ordered journal apply; full literal receipts/models/cuts; capacity/cancellation/stop refusal with unchanged state, original producer settlement, same-ID immutable replay, joined shutdown and same-root cold healthy continuation."
     }
   ]
 }

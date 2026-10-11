@@ -9,7 +9,7 @@ internal sealed class DueWorkDiscoveryTests
     [Test]
     public async Task AlternatesPrefixesAndBoundsRealZoneTreePages()
     {
-        using var fixture = new RecurringSagaDatabase();
+        using var fixture = new RecurringSagaDatabase(timeProvider: new DueDiscoveryClock());
         AddDueWork(fixture, DueWorkTestData.PageCount);
         var pages = DueWorkTestData.ReadPages(fixture, DueWorkTestData.PageCount * 2, out var hints);
         await Assert.That(hints.Length).IsEqualTo(DueWorkTestData.PageCount * 2);
@@ -72,7 +72,7 @@ internal sealed class DueWorkDiscoveryTests
     [Test]
     public async Task FixedTailDefersHigherKeysUntilTheFollowingSweep()
     {
-        using var fixture = new RecurringSagaDatabase();
+        using var fixture = new RecurringSagaDatabase(timeProvider: new DueDiscoveryClock());
         var originalIds = Enumerable.Range(1, DueWorkTestData.PageCount)
             .Select(DueWorkTestData.OrderedId).ToArray();
         foreach (var id in originalIds)
@@ -112,6 +112,7 @@ internal sealed class DueWorkDiscoveryTests
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             DueWorkDiscovery.ReadPage(fixture.Database, null, DueWorkTestData.WakeAt, cancellation.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
+        await DueDiscoveryDeadlineFlow.RunAsync();
     }
 
     [Test]

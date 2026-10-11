@@ -503,6 +503,30 @@
               "instanceName": "ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs",
               "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "methodName": "CredentialStatusRejectsOldBooleanBodyThenSameCommandReceivesNoDataAcknowledgement",
+              "instanceName": "CredentialStatusRejectsOldBooleanBodyThenSameCommandReceivesNoDataAcknowledgement",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "methodName": "CredentialStatusCancellationKeepsUnknownOutcomeAndFreshSameIdRequestRemainsHealthy",
+              "instanceName": "CredentialStatusCancellationKeepsUnknownOutcomeAndFreshSameIdRequestRemainsHealthy",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.ClientApi.KeyLoadClientNullWriteTests",
+              "methodName": "CredentialStatusPreservesOriginalProblemThenSameIdHealthyNoDataAcknowledgement",
+              "instanceName": "CredentialStatusPreservesOriginalProblemThenSameIdHealthyNoDataAcknowledgement",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientNullWriteTests.cs",
+              "parameterTypeFullNames": []
             }
           ]
         },
@@ -646,6 +670,16 @@
               "methodName": "AcOrl012RealSignedOperationsExportBoundedPrivateNativeTelemetry",
               "instanceName": "AcOrl012RealSignedOperationsExportBoundedPrivateNativeTelemetry",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/OrleansRuntimeTelemetryTests.cs"
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationTelemetryClientWholeFlowTests",
+              "methodName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog",
+              "instanceName": "AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(ClientRemoteLink)",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/AuthorizationTelemetryWholeFlowTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.UnitTests.Features.Authorization.AuthorizationUnsafeSpanState"
+              ]
             }
           ]
         },
@@ -3411,7 +3445,7 @@
               "className": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
               "nativeReportClassName": "KeyLoad.RecoveryTests.ReplicaPersistenceTests",
               "methodName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry",
-              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(\u0416)",
+              "instanceName": "SerializedReadBudgetAcceptsMaximumCommandAndRejectsAnOversizeSingleEntry(Ж)",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs",
               "parameterTypeFullNames": [
                 "System.String"

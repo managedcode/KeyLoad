@@ -21,7 +21,9 @@ $script:FcNativeFunctionalReport = [ordered]@{
 }
 
 function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCases, [string] $Suite,
-    [string] $Repository, [switch] $MatchSourceLocations) {
+    [string] $Repository, [switch] $MatchSourceLocations,
+    [Collections.Generic.Dictionary[string, string]] $ObservedNativeIds,
+    [Collections.Generic.Dictionary[string, string]] $RequiredNativeIds) {
     $baseSuite = Get-FcNativeBaseSuite $Suite
     Assert-FcNativeFunctionalReport $Report $baseSuite
     $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
@@ -31,6 +33,11 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
     }
     $reportExpected = New-FcNativeReportIdentityMap $ExpectedCases $MatchSourceLocations
     $observed = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $nativeIds = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::Ordinal)
+    $uniqueNativeIds = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    if ($null -ne $ObservedNativeIds -and $ObservedNativeIds.Count -ne 0) {
+        throw $script:FcNativeFunctionalReport.Invalid
+    }
     $identities = [Collections.Generic.List[string]]::new()
     foreach ($group in $Report.groups) {
         Assert-FcNativeFunctionalGroup $group
@@ -51,6 +58,7 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
         foreach ($test in $group.tests) {
             $qualifiedClass = $groupQualifiedClass
             Assert-FcNativeFunctionalTest $test
+            if (-not $uniqueNativeIds.Add([string] $test.id)) { throw $script:FcNativeFunctionalReport.Invalid }
             if ($test.className -cne $group.className) { throw $script:FcNativeFunctionalReport.Invalid }
             if ($baseSuite -ceq 'rf3') {
                 if ($rf3HasConstructorData) {
@@ -74,11 +82,19 @@ function Read-FcNativeFunctionalCases([object] $Report, [object[]] $ExpectedCase
             if ($MatchSourceLocations) {
                 Assert-FcNativeFunctionalSourceLocation $test $expected[$key] $Repository
             }
+            if ($null -ne $RequiredNativeIds -and
+                (-not $RequiredNativeIds.ContainsKey($key) -or $RequiredNativeIds[$key] -cne $test.id)) {
+                throw $script:FcNativeFunctionalReport.Invalid
+            }
+            $nativeIds.Add($key, [string] $test.id)
             $identities.Add($key)
         }
     }
     if ($identities.Count -ne $expected.Count -or $Report.summary.total -ne $identities.Count) {
         throw $script:FcNativeFunctionalReport.Invalid
+    }
+    if ($null -ne $ObservedNativeIds) {
+        foreach ($key in $nativeIds.Keys) { $ObservedNativeIds.Add($key, $nativeIds[$key]) }
     }
     @($identities | Sort-Object)
 }
@@ -134,9 +150,16 @@ function Assert-FcNativeFunctionalReport([object] $Report, [string] $Suite) {
         throw $script:FcNativeFunctionalReport.Invalid
     }
     if ($Report.Contains('sourceLinks')) {
-        Assert-FcNativeExactKeys $Report.sourceLinks @('lineUrl','rangeUrl')
-        if ([string]::IsNullOrWhiteSpace($Report.sourceLinks.lineUrl) -or
-            [string]::IsNullOrWhiteSpace($Report.sourceLinks.rangeUrl)) { throw $script:FcNativeFunctionalReport.Invalid }
+        $requiredLinks = @('lineUrl','rangeUrl')
+        $expectedLinks = if ($Report.sourceLinks -is [Collections.IDictionary] -and
+            $Report.sourceLinks.Contains('rawUrl')) { @('lineUrl','rangeUrl','rawUrl') } else { $requiredLinks }
+        Assert-FcNativeExactKeys $Report.sourceLinks $expectedLinks
+        foreach ($name in $expectedLinks) {
+            if ($Report.sourceLinks[$name] -isnot [string] -or
+                [string]::IsNullOrWhiteSpace($Report.sourceLinks[$name])) {
+                throw $script:FcNativeFunctionalReport.Invalid
+            }
+        }
     }
     Assert-FcNativeFunctionalSummary $Report.summary
 }
@@ -167,8 +190,8 @@ function Assert-FcNativeFunctionalTest([object] $Test) {
     }
     if ($Test.status -cne 'passed' -or $Test.durationMs -isnot [ValueType] -or
         -not [double]::IsFinite([double] $Test.durationMs) -or $Test.durationMs -lt 0 -or
-        $Test.lineNumber -isnot [int] -and $Test.lineNumber -isnot [long] -or
-        $Test.endLineNumber -isnot [int] -and $Test.endLineNumber -isnot [long] -or
+        ($Test.lineNumber -isnot [int] -and $Test.lineNumber -isnot [long]) -or
+        ($Test.endLineNumber -isnot [int] -and $Test.endLineNumber -isnot [long]) -or
         $Test.lineNumber -le 0 -or $Test.endLineNumber -lt $Test.lineNumber -or
         ($Test.Contains('sourceRelativePath') -and ($Test.sourceRelativePath -isnot [string] -or [string]::IsNullOrWhiteSpace($Test.sourceRelativePath)))) {
         throw $script:FcNativeFunctionalReport.Invalid
