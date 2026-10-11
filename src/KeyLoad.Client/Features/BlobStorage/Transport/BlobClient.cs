@@ -5,16 +5,16 @@ namespace KeyLoad.Client;
 /// <summary>Typed blob operations sharing the client's canonical authenticated transport.</summary>
 public static class BlobClientExtensions
 {
-    /// <summary>Reads authorized current metadata, including null for an absent object.</summary>
+    /// <summary>Reads authorized current metadata in a response whose Metadata field is null for an absent object.</summary>
     /// <param name="client">The authenticated SDK client.</param>
     /// <param name="request">The complete blob identity.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>The authorized metadata, including null when absent, or a classified problem.</returns>
-    public static Task<Result<BlobMetadata?>> GetBlobMetadataAsync(this KeyLoadClient client, BlobMetadataRequest request, CancellationToken cancellationToken = default)
+    /// <returns>A response whose Metadata field is null when absent, or a classified problem.</returns>
+    public static Task<Result<BlobMetadataReadResult>> GetBlobMetadataAsync(this KeyLoadClient client, BlobMetadataRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<BlobMetadata?>(BlobOperationProtocol.Metadata, request, false, null, cancellationToken, allowNullResult: true);
+        return client.Send<BlobMetadataReadResult>(BlobOperationProtocol.Metadata, request, false, null, cancellationToken);
     }
 
     /// <summary>Lists a bounded page of visible live blob metadata.</summary>
@@ -41,16 +41,16 @@ public static class BlobClientExtensions
         return client.Send<BlobReadResult>(BlobOperationProtocol.ReadRange, request, false, null, cancellationToken);
     }
 
-    /// <summary>Reads creator-scoped upload progress, including null when absent.</summary>
+    /// <summary>Reads creator-scoped upload progress in a response whose Upload field is null when absent.</summary>
     /// <param name="client">The authenticated SDK client.</param>
     /// <param name="request">The complete blob and upload identities.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>The upload progress, including null when absent, or a classified problem.</returns>
-    public static Task<Result<BlobUploadInfo?>> GetBlobUploadInfoAsync(this KeyLoadClient client, BlobUploadInfoRequest request, CancellationToken cancellationToken = default)
+    /// <returns>A response whose Upload field is null when absent, or a classified problem.</returns>
+    public static Task<Result<BlobUploadInfoReadResult>> GetBlobUploadInfoAsync(this KeyLoadClient client, BlobUploadInfoRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<BlobUploadInfo?>(BlobOperationProtocol.UploadInfo, request, false, null, cancellationToken, allowNullResult: true);
+        return client.Send<BlobUploadInfoReadResult>(BlobOperationProtocol.UploadInfo, request, false, null, cancellationToken);
     }
 
     /// <summary>Starts one scoped upload with the caller's stable command identity.</summary>

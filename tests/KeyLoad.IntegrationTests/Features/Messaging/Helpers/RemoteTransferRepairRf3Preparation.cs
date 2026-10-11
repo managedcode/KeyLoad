@@ -26,7 +26,7 @@ internal static class RemoteTransferRepairRf3Preparation
             {
                 var accepted = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(new(Guid.NewGuid(),
                     seed.Scenario.DestinationPartition, [new AcceptQueueTransfer(seed.Scenario.DestinationQueue, intent.IntentToken)]), token));
-                proof = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+                proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
                     ?? throw new InvalidOperationException(RemoteTransferRepairRf3Protocol.Missing);
                 await Assert.That(proof.TargetCommit).IsEqualTo(accepted.Token);
             }

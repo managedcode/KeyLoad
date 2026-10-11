@@ -32,7 +32,7 @@ internal static class RemoteTransferCoordinatorRf3Assertions
         RemoteTransferColdSeed seed, RemoteTransferCoordinationHint hint, QueueTransferInspection delivered,
         long sequence, CancellationToken token)
     {
-        var proof = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+        var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferCoordinatorRf3Protocol.Missing);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, delivered, token);
         await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);

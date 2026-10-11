@@ -22,8 +22,8 @@ internal static class ClusterRestoreMixedRetentionRf3Literal
         string collection, string id, CancellationToken token)
     {
         var reference = new EntityRef(state.Partition, collection, id);
-        return FourAsync<DocumentResult?>(callers, state.Partition, McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(reference), null, () => callers.Sdk.GetAsync(reference, token), token);
+        return FourAsync<DocumentReadResult>(callers, state.Partition, McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(reference), new DocumentReadResult(null), () => callers.Sdk.GetAsync(reference, token), token);
     }
 
     internal static async Task PageAsync(EventSourcePage actual, EventSourceRef source, EventData[] expected,
@@ -84,15 +84,15 @@ internal static class ClusterRestoreMixedRetentionRf3Literal
     internal static async Task InboxAsync(RequestCqrsRf3Callers callers, ClusterRestoreMixedRetentionRf3State state, CancellationToken token)
     {
         var input = new InspectMessageRequest(state.Source, ClusterRestoreMixedRetentionRf3Protocol.OriginalInput);
-        await FourAsync<MessageInspection?>(callers, state.Source.Partition, McpCallerTools.MessagesInspect, input,
-            state.Continued ? state.FinalOriginalInput : state.InputImage, () => callers.Sdk.InspectAsync(input, token), token);
+        await FourAsync<MessageInspectionResult>(callers, state.Source.Partition, McpCallerTools.MessagesInspect, input,
+            new MessageInspectionResult(state.Continued ? state.FinalOriginalInput : state.InputImage), () => callers.Sdk.InspectAsync(input, token), token);
         await EffectAsync(callers, state, ClusterRestoreMixedRetentionRf3Protocol.OriginalEffect,
             state.OutputImage, state.DocumentImage, state.InboxEvents, token);
         if (state.Continued)
         {
             var current = new InspectMessageRequest(state.Source, ClusterRestoreMixedRetentionRf3Protocol.FreshInput);
-            await FourAsync<MessageInspection?>(callers, state.Source.Partition, McpCallerTools.MessagesInspect, current,
-                state.FreshInputImage, () => callers.Sdk.InspectAsync(current, token), token);
+            await FourAsync<MessageInspectionResult>(callers, state.Source.Partition, McpCallerTools.MessagesInspect, current,
+                new MessageInspectionResult(state.FreshInputImage), () => callers.Sdk.InspectAsync(current, token), token);
             await EffectAsync(callers, state, ClusterRestoreMixedRetentionRf3Protocol.FreshEffect,
                 new(new(ClusterRestoreMixedRetentionRf3Protocol.FreshEffect, MessageState.Ready, ClusterRestoreMixedRetentionRf3Protocol.NoAttempts,
                     QueueLifecyclePublicProtocol.One, QueueLifecyclePublicProtocol.Two, null, null),
@@ -107,10 +107,10 @@ internal static class ClusterRestoreMixedRetentionRf3Literal
         MessageInspection output, DocumentResult document, System.Collections.Immutable.ImmutableArray<EventRecord> events, CancellationToken token)
     {
         var inspect = new InspectMessageRequest(new(state.Partition, ClusterRestoreMixedRetentionRf3Protocol.Output), effect);
-        await FourAsync<MessageInspection?>(callers, state.Partition, McpCallerTools.MessagesInspect, inspect, output,
+        await FourAsync<MessageInspectionResult>(callers, state.Partition, McpCallerTools.MessagesInspect, inspect, new MessageInspectionResult(output),
             () => callers.Sdk.InspectAsync(inspect, token), token);
-        await FourAsync<DocumentResult?>(callers, state.Partition, McpCallerTools.DocumentsGet, new GetDocumentRequest(document.Reference),
-            document, () => callers.Sdk.GetAsync(document.Reference, token), token);
+        await FourAsync<DocumentReadResult>(callers, state.Partition, McpCallerTools.DocumentsGet, new GetDocumentRequest(document.Reference),
+            new DocumentReadResult(document), () => callers.Sdk.GetAsync(document.Reference, token), token);
         var stream = ClusterRestoreMixedRetentionRf3Inbox.Stream(state, effect);
         var page = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadStreamAsync(new(stream), token));
         await SqlRf3Protocol.EqualAsync(new StreamHead(ClusterRestoreMixedRetentionRf3Protocol.FirstRevision,

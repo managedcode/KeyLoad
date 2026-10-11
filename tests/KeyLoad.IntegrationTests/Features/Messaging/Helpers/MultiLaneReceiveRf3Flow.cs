@@ -56,7 +56,7 @@ internal static class MultiLaneReceiveRf3Flow
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
-        var inspected = await McpCallerAssertions.SdkSuccessAsync(await administrator.InspectAsync(new(request.Lane, Message), token));
+        var inspected = await PublicReadAssertions.MessageAsync(await administrator.InspectAsync(new(request.Lane, Message), token));
         await Assert.That(inspected!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(inspected.Metadata.LeaseUntil).IsEqualTo(delivery.LeaseUntil);
         await Assert.That(inspected.Metadata.LeaseVersion).IsEqualTo(delivery.LeaseVersion);

@@ -30,7 +30,7 @@ internal static class AuthorizationTelemetryFlow
             if (unsafeParent)
             { caller.AddBaggage(AuthorizationTelemetryTestProtocol.BaggageKey, AuthorizationTelemetryTestProtocol.BaggageCanary); }
             suppressedTrace = unsafeParent || state is AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink
-                or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink ? caller.TraceId.ToHexString() : null;
+                or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink ? caller.TraceId.ToHexString() : null;
             using (var denied = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.MemberKey, request, deadline.Token))
             {
                 await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);

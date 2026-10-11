@@ -7,6 +7,30 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
 
 internal sealed class ProductionSourceManifestScenario : IDisposable
 {
+    private const string TaskAdmissionRootVariable = "KEYLOAD_TASK_ADMISSION_ROOT";
+    private const string TaskAdmissionCommand = """
+        $ErrorActionPreference = 'Stop'
+        $root = $env:KEYLOAD_TASK_ADMISSION_ROOT
+        . (Join-Path $root 'scripts/Features/CodeQuality/functional-coverage.shared.ps1')
+        foreach ($name in @('task-acceptance.ps1','task-acceptance.verify.ps1','task-acceptance.contract.json')) {
+            if (-not (Test-FcTaskAcceptanceScriptName $name)) { throw 'Canonical task script rejected.' }
+        }
+        foreach ($name in @('task-acceptance.kl065-binding.ps1','task-acceptance.unreviewed.ps1')) {
+            $rejected = $false
+            try { $null = Test-FcTaskAcceptanceScriptName $name }
+            catch { if ($_.Exception.Message -cne $script:FunctionalCoverage.ErrorInventory) { throw }; $rejected = $true }
+            if (-not $rejected) { throw 'Retired or unknown task script admitted.' }
+        }
+        $path = Join-Path $root 'scripts/Features/CodeQuality/task-acceptance.contract.json'
+        $registry = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json -AsHashtable
+        $task = @($registry.tasks | Where-Object { $_.taskId -ceq 'KL-065' })
+        if ($task.Count -ne 1 -or $task[0].Contains('censusSelections') -or $task[0].selections.Count -eq 0) {
+            throw 'KL065 must have genuine strict selections.'
+        }
+        foreach ($selection in $task[0].selections) {
+            if ($selection.cases.Count -eq 0) { throw 'Strict task selection has no original cases.' }
+        }
+        """;
     private const string ContributorsProperty = "contributors";
     private const string SuiteProperty = "suite";
     private const string UnsupportedScalarSuite = "unit-scalar";
@@ -54,6 +78,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
 
     private async Task VerifyCreateTamperAndFollowupAsync(CancellationToken cancellationToken)
     {
+        await VerifyTaskAdmissionAsync(cancellationToken);
         var prepared = await ProductionSourceManifestProcess.RunAsync(executionOptions, Prepare, evidenceRoot, cancellationToken);
         await AssertSuccessfulProcessAsync(prepared);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
@@ -65,6 +90,31 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         await VerifyTamperRejectedAsync(SettingsFile, cancellationToken);
         await VerifyRestoredAcceptedAsync(cancellationToken);
         await VerifyCreateOnlyAsync(cancellationToken);
+    }
+
+    private async Task VerifyTaskAdmissionAsync(CancellationToken cancellationToken)
+    {
+        var root = ProductionSourceManifestProcess.RepositoryRoot;
+        var registry = Path.Combine(root, "scripts/Features/CodeQuality/task-acceptance.contract.json");
+        var original = await File.ReadAllBytesAsync(registry, cancellationToken);
+        var start = new global::System.Diagnostics.ProcessStartInfo("pwsh")
+        {
+            WorkingDirectory = root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        start.ArgumentList.Add("-NoLogo");
+        start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-NonInteractive");
+        start.ArgumentList.Add("-Command");
+        start.ArgumentList.Add(TaskAdmissionCommand);
+        start.Environment[TaskAdmissionRootVariable] = root;
+        var result = await ProductionSourceManifestProcess.RunAsync(executionOptions, start, cancellationToken);
+        await AssertSuccessfulProcessAsync(result);
+        await Assert.That(await File.ReadAllBytesAsync(registry, cancellationToken)).IsEquivalentTo(
+            original, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private async Task VerifyUnsupportedScalarRejectedAsync(CancellationToken cancellationToken)

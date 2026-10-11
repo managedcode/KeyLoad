@@ -26,9 +26,9 @@ internal sealed record RequestCqrsFaultReceiptOracle(
     {
         ArgumentNullException.ThrowIfNull(callers);
         var reference = new EntityRef(partition, collection, documentId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
+        var sdk = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         if (sdk is null || mcp.Value is null)
@@ -75,9 +75,9 @@ internal sealed record RequestCqrsFaultReceiptOracle(
     {
         await Assert.That(receipt.Mutations.Length).IsGreaterThan(0);
         var reference = new EntityRef(Partition, Collection, DocumentId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
+        var sdk = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         var expectedRevision = checked(BeforeRevision + 1);

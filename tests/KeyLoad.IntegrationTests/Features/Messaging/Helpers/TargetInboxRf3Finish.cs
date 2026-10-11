@@ -29,6 +29,6 @@ internal static class TargetInboxRf3Finish
         var output = await McpCallerAssertions.SdkSuccessAsync(await client.ReceiveAsync(new(Guid.NewGuid(), outputLane), token));
         var delivery = await Assert.That(output.Deliveries).HasSingleItem();
         _ = await McpCallerAssertions.SdkSuccessAsync(await client.CompleteAsync(new(Guid.NewGuid(), outputLane, delivery.Token, DeliveryAction.Ack), token));
-        await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(new(outputLane, delivery.Id), token)))!.Metadata.State).IsEqualTo(MessageState.Acked);
+        await Assert.That((await PublicReadAssertions.MessageAsync(await client.InspectAsync(new(outputLane, delivery.Id), token)))!.Metadata.State).IsEqualTo(MessageState.Acked);
     }
 }

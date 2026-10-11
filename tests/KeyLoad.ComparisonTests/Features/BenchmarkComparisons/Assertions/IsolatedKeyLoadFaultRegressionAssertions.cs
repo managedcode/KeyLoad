@@ -9,7 +9,7 @@ internal static class IsolatedKeyLoadFaultRegressionAssertions
         CancellationToken token)
     {
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.GetAsync(seed.Sentinel, attempt), token)))!,
             seed.Sentinel, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(seed.SentinelReceipt,
@@ -21,7 +21,7 @@ internal static class IsolatedKeyLoadFaultRegressionAssertions
         await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(
             await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.CompleteAsync(seed.Ack with { CommandId = Guid.NewGuid() }, attempt), token), ErrorCode.StaleLease);
-        var inspection = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+        var inspection = await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
             attempt => sdk.InspectAsync(seed.Inspect, attempt), token));
         await Assert.That(inspection!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(inspection.PayloadJson).IsNull();
@@ -40,7 +40,7 @@ internal static class IsolatedKeyLoadFaultRegressionAssertions
             await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.CommitAsync(command, attempt), token)));
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.GetAsync(reference, attempt), token)))!,
             reference, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
     }

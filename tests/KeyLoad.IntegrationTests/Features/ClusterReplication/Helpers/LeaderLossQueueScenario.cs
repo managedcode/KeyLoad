@@ -19,7 +19,7 @@ internal static class LeaderLossQueueScenario
         var surviving = state.Clients[state.Survivors[0]];
         var retried = await RetryDuringElectionAsync(() => surviving.CommitAsync(state.Command, cancellationToken), cancellationToken);
         await Assert.That(Success(retried).Token).IsEqualTo(state.Receipt.Token);
-        await Assert.That(Success(await surviving.GetAsync(new(state.Partition, collection, DocumentKey), cancellationToken))!.Revision)
+        await Assert.That(Success(await surviving.GetAsync(new(state.Partition, collection, DocumentKey), cancellationToken)).Document!.Revision)
             .IsEqualTo(InitialRevision);
         var receive = new ReceiveRequest(Guid.NewGuid(), new(state.Partition, queue));
         var received = await RetryDuringElectionAsync(() => surviving.ReceiveAsync(receive, cancellationToken), cancellationToken);
@@ -27,7 +27,7 @@ internal static class LeaderLossQueueScenario
         var processing = new ProcessingRequest(Guid.NewGuid(), new(state.Partition, queue), delivery.Token, Worker, ExecutionGeneration,
             [new PatchDocument(collection, DocumentKey, [new(StatusPath, PatchKind.Set, CompletedJson)], InitialRevision)]);
         Success(await RetryDuringElectionAsync(() => surviving.CommitProcessingAsync(processing, cancellationToken), cancellationToken));
-        await Assert.That(Success(await state.Clients[state.Survivors[1]].InspectAsync(new(new(state.Partition, queue), MessageKey), cancellationToken))!
+        await Assert.That(Success(await state.Clients[state.Survivors[1]].InspectAsync(new(new(state.Partition, queue), MessageKey), cancellationToken)).Message!
             .Metadata.State).IsEqualTo(MessageState.Acked);
     }
 }

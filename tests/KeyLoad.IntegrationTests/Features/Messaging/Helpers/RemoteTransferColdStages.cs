@@ -30,7 +30,7 @@ internal static class RemoteTransferColdStages
         await RemoteTransferColdAssertions.ReceiptLiteralAsync(receipt, command, seed.Scenario.DestinationQueue,
             seed.TransferId, RemoteTransferColdProtocol.AcceptKind, receipt.Token.Position);
         await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, command, receipt, token);
-        var proof = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+        var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferColdProtocol.Missing);
         await Assert.That(proof.SourceQueue).IsEqualTo(seed.Scenario.SourceQueue);
         await Assert.That(proof.DestinationQueue).IsEqualTo(seed.Scenario.DestinationQueue);

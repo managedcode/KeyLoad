@@ -86,7 +86,7 @@ internal static class RemoteTransferPostAwaitContinuation
         };
         var created = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.CommitAsync(seed.Create, token));
         await calls.ReplayAsync(seed.Create, created, token);
-        var intent = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.InspectQueueTransferAsync(seed.SourceRequest, token))
+        var intent = await PublicReadAssertions.TransferAsync(await calls.Sdk.InspectQueueTransferAsync(seed.SourceRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         var accept = seed.Accept(intent);
         var accepted = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.CommitAsync(accept, token));

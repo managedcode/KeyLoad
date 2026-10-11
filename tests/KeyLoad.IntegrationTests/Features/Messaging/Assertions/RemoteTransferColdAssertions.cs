@@ -9,7 +9,7 @@ internal static class RemoteTransferColdAssertions
     internal static async Task<QueueTransferInspection> SourceAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         RemoteTransferColdSeed seed, QueueTransferInspection? expected, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(seed.SourceRequest, token))
+        var actual = await PublicReadAssertions.TransferAsync(await sdk.InspectQueueTransferAsync(seed.SourceRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferColdProtocol.Missing);
         await Assert.That(actual.SourceQueue).IsEqualTo(seed.Scenario.SourceQueue);
         await Assert.That(actual.Destination).IsEqualTo(seed.Scenario.DestinationQueue);
@@ -17,24 +17,24 @@ internal static class RemoteTransferColdAssertions
         await Assert.That(string.IsNullOrEmpty(actual.IntentToken)).IsFalse();
         if (expected is not null)
         { await SqlRf3Protocol.EqualAsync(expected, actual); }
-        await SqlRf3Protocol.EqualAsync(actual, (await McpCallerAssertions.SuccessAsync<QueueTransferInspection?>(
+        await SqlRf3Protocol.EqualAsync(actual, (await PublicReadAssertions.TransferAsync(
             await mcp.CallAsync(RemoteTransferColdProtocol.InspectSource, seed.SourceRequest, token))).Value);
         var sql = SqlRf3Protocol.Call(seed.Scenario.SourcePartition, RemoteTransferColdProtocol.InspectSource, seed.SourceRequest);
-        await SqlRf3Protocol.EqualAsync(actual, await SqlRf3Protocol.SdkAsync<QueueTransferInspection?>(sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(actual, await SqlRf3Protocol.McpAsync<QueueTransferInspection?>(mcp, sql, token));
+        await SqlRf3Protocol.EqualAsync(actual, (await SqlRf3Protocol.SdkAsync<QueueTransferReadResult>(sdk, sql, token)).Transfer);
+        await SqlRf3Protocol.EqualAsync(actual, (await SqlRf3Protocol.McpAsync<QueueTransferReadResult>(mcp, sql, token)).Transfer);
         return actual;
     }
 
     internal static async Task<QueueTransferReceiptInspection?> ReceiptAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         RemoteTransferColdSeed seed, QueueTransferReceiptInspection? expected, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token));
+        var actual = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token));
         await SqlRf3Protocol.EqualAsync(expected, actual);
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<QueueTransferReceiptInspection?>(
+        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.ReceiptAsync(
             await mcp.CallAsync(RemoteTransferColdProtocol.InspectReceipt, seed.ReceiptRequest, token))).Value);
         var sql = SqlRf3Protocol.Call(seed.Scenario.DestinationPartition, RemoteTransferColdProtocol.InspectReceipt, seed.ReceiptRequest);
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<QueueTransferReceiptInspection?>(sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<QueueTransferReceiptInspection?>(mcp, sql, token));
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.SdkAsync<QueueTransferReceiptReadResult>(sdk, sql, token)).Receipt);
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.McpAsync<QueueTransferReceiptReadResult>(mcp, sql, token)).Receipt);
         return actual;
     }
 
@@ -42,12 +42,12 @@ internal static class RemoteTransferColdAssertions
         MessageInspection? expected, CancellationToken token)
     {
         var request = new InspectMessageRequest(seed.Scenario.DestinationQueue, seed.Message.MessageId);
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<MessageInspection?>(
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, token)));
+        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.MessageAsync(
             await mcp.CallAsync(McpCallerTools.MessagesInspect, request, token))).Value);
         var sql = SqlRf3Protocol.Call(seed.Scenario.DestinationPartition, McpCallerTools.MessagesInspect, request);
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<MessageInspection?>(sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<MessageInspection?>(mcp, sql, token));
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.SdkAsync<MessageInspectionResult>(sdk, sql, token)).Message);
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.McpAsync<MessageInspectionResult>(mcp, sql, token)).Message);
     }
 
     internal static MessageInspection Ready(RemoteTransferColdSeed seed, long sequence)

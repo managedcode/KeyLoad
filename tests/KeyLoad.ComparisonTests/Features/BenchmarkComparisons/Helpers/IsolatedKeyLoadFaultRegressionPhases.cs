@@ -72,7 +72,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
     {
         if (nodes == 1)
         {
-            await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+            await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.GetAsync(reference, attempt), token))).IsNull();
         }
         var resolved = await IsolatedKeyLoadFaultRegressionQuorum.ResolveAsync(sdk, command, token);
@@ -96,7 +96,7 @@ internal static class IsolatedKeyLoadFaultRegressionPhases
             using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, index);
             var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
             await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-                (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+                (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                     attempt => sdk.GetAsync(reference, attempt), token)))!,
                 reference, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
         }

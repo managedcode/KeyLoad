@@ -62,7 +62,7 @@ internal sealed class PartitionMovementBlobWireSeed(PartitionMovementBlobWireCal
     {
         foreach (var replay in replays)
         { await replay(token); }
-        var document = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.GetAsync(new(Partition, DocumentResource, DocumentId), token));
+        var document = await PublicReadAssertions.DocumentAsync(await callers.Source.GetAsync(new(Partition, DocumentResource, DocumentId), token));
         await Assert.That(document!.Json).IsEqualTo(DocumentJson);
         var bytes = Enumerable.Repeat(Content, Length).ToArray();
         var expected = new BlobReadResult(Metadata, InitialRevision, bytes);
@@ -70,11 +70,11 @@ internal sealed class PartitionMovementBlobWireSeed(PartitionMovementBlobWireCal
         await callers.RequireAsync(Partition, BlobToolNames.ReadRange, read, ct => callers.Source.ReadBlobRangeAsync(read, ct), expected, token);
         var metadata = new BlobMetadataRequest(Metadata.Blob);
         await callers.RequireAsync(Partition, BlobToolNames.Metadata, metadata,
-            ct => callers.Source.GetBlobMetadataAsync(metadata, ct), Metadata, token);
+            ct => callers.Source.GetBlobMetadataAsync(metadata, ct), new BlobMetadataReadResult(Metadata), token);
         var upload = new BlobUploadInfoRequest(Metadata.Blob, Metadata.VersionId!.Value);
-        var original = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.GetBlobUploadInfoAsync(upload, token));
+        var original = await PublicReadAssertions.UploadAsync(await callers.Source.GetBlobUploadInfoAsync(upload, token));
         await callers.RequireAsync(Partition, BlobToolNames.UploadInfo, upload,
-            ct => callers.Source.GetBlobUploadInfoAsync(upload, ct), original, token);
+            ct => callers.Source.GetBlobUploadInfoAsync(upload, ct), new BlobUploadInfoReadResult(original), token);
         var list = new BlobListRequest(Partition, Resource);
         var page = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.ListBlobsAsync(list, token));
         await Assert.That(page.Items.Length).IsEqualTo(OriginalLiveBlobCount);

@@ -40,10 +40,10 @@ internal static class IsolatedKeyLoadPublicRegressionBlobs
         await mcp.ErrorAsync(IsolatedKeyLoadPublicRegressionProtocol.BlobPart, invalid, ErrorCode.Validation, token);
         await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(await sdk.WriteBlobPartAsync(invalid, token), ErrorCode.Validation);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(initial,
-            await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobUploadInfoAsync(new(blob, uploadId), token)));
-        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobMetadataAsync(new(blob), token))).IsNull();
-        await Assert.That(await mcp.SuccessAsync<BlobMetadata?>(IsolatedKeyLoadPublicRegressionProtocol.BlobMetadata,
-            new BlobMetadataRequest(blob), token)).IsNull();
+            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobUploadInfoAsync(new(blob, uploadId), token))).Upload);
+        await Assert.That((await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobMetadataAsync(new(blob), token))).Metadata).IsNull();
+        await Assert.That((await mcp.SuccessAsync<BlobMetadataReadResult>(IsolatedKeyLoadPublicRegressionProtocol.BlobMetadata,
+            new BlobMetadataRequest(blob), token)).Metadata).IsNull();
     }
 
     private static async Task<BlobMetadata> PublishTailAsync(KeyLoadClient sdk, IsolatedKeyLoadPublicRegressionMcp mcp,
@@ -58,7 +58,7 @@ internal static class IsolatedKeyLoadPublicRegressionBlobs
         await Assert.That(accepted.Value.IntegrityHash).IsEqualTo(hash);
         var invalid = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, uploadId, InvalidHash);
         await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(await sdk.CompleteBlobUploadAsync(invalid, token), ErrorCode.Validation);
-        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobMetadataAsync(new(blob), token))).IsNull();
+        await Assert.That((await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetBlobMetadataAsync(new(blob), token))).Metadata).IsNull();
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, uploadId, hash);
         var published = await mcp.SuccessAsync<BlobCommitResult<BlobMetadata>>(SqlOperationProtocol.ToolName,
             IsolatedKeyLoadPublicRegressionProtocol.Call(blob.Partition, IsolatedKeyLoadPublicRegressionProtocol.BlobComplete, complete), token);

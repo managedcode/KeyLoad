@@ -34,6 +34,7 @@ internal static class GenerationVisibilityFlow
         if (admissionControls)
         { await GenerationVisibilityAdmissionFlow.ControlsAsync(db, queries, cache, memory, token); }
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store, InitialRevision, TeamRowPolicyFlow.OriginalJson, token);
+        await GenerationVisibilitySnapshotFlow.RunAsync(db, queries, cache, token);
         var writes = await GenerationVisibilityWriteFlow.RunAsync(db, queries, cache, token);
         using var held = GenerationVisibilityAssertions.Hold(db, cache);
         await GenerationVisibilityCrossTenant.RunAsync(db, queries, token);
@@ -62,6 +63,12 @@ internal static class GenerationVisibilityFlow
         {
             await writes.VerifyAsync(database, store, currentToken);
             await ownerProject.VerifyAsync(database, store, currentToken);
+            if (admissionControls)
+            {
+                await GenerationVisibilityPartialScanFlow.HealthyAsync(database, store, db.Partition,
+                TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson,
+                    GenerationVisibilityWriteFlow.ResurrectedRevision, currentToken);
+            }
         }, token);
     }
 

@@ -12,25 +12,25 @@ public static class QueueTransferClient
     /// <param name="client">The authenticated KeyLoad client.</param>
     /// <param name="request">The complete source lane and stable transfer identity.</param>
     /// <param name="cancellationToken">Cancellation for the complete request.</param>
-    /// <returns>The persisted source state, or null when absent.</returns>
-    public static Task<Result<QueueTransferInspection?>> InspectQueueTransferAsync(this KeyLoadClient client,
+    /// <returns>A response whose Transfer field contains the persisted source state, or null when absent.</returns>
+    public static Task<Result<QueueTransferReadResult>> InspectQueueTransferAsync(this KeyLoadClient client,
         InspectQueueTransferRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferInspection?>(InspectPath, request, false, null, cancellationToken, allowNullResult: true);
+        return client.Send<QueueTransferReadResult>(InspectPath, request, false, null, cancellationToken);
     }
 
     /// <summary>Reads the committed destination receipt without asserting source completion.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>
     /// <param name="request">The complete destination and source lanes and stable transfer identity.</param>
     /// <param name="cancellationToken">Cancellation for the complete request.</param>
-    /// <returns>The persisted destination proof, or null when absent.</returns>
-    public static Task<Result<QueueTransferReceiptInspection?>> InspectQueueTransferReceiptAsync(this KeyLoadClient client,
+    /// <returns>A response whose Receipt field contains the persisted destination proof, or null when absent.</returns>
+    public static Task<Result<QueueTransferReceiptReadResult>> InspectQueueTransferReceiptAsync(this KeyLoadClient client,
         InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferReceiptInspection?>(ReceiptPath, request, false, null, cancellationToken, allowNullResult: true);
+        return client.Send<QueueTransferReceiptReadResult>(ReceiptPath, request, false, null, cancellationToken);
     }
 }

@@ -132,7 +132,7 @@ internal sealed record ThreeWayHybridRf3Scenario(PartitionRef Partition)
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var verifier = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
         var credential = new ApiKeyRecord(keyId, principal.Id, verifier);
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), credential, cancellationToken));
+        await McpCallerAssertions.SdkStatusAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), credential, cancellationToken));
         return new(persisted, credential, secret);
     }
 

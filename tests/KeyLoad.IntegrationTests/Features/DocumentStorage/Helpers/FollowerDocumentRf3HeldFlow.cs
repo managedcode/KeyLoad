@@ -36,7 +36,7 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
     {
         var sdk = state.Administrator!.Sdk;
         if (state.Change == FollowerDocumentChange.Credential)
-        { await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with { Revoked = true }, token).ConfigureAwait(false)).ConfigureAwait(false); }
+        { await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential with { Revoked = true }, token).ConfigureAwait(false)).ConfigureAwait(false); }
         if (state.Change == FollowerDocumentChange.Grant)
         {
             state.Principal = state.Principal with { Grants = [], PolicyEpoch = state.Principal.PolicyEpoch + 1 };
@@ -110,7 +110,7 @@ internal sealed class FollowerDocumentRf3HeldFlow(FollowerDocumentRf3State state
     private async Task RestoreAndContinueAsync(CancellationToken token)
     {
         var sdk = state.Administrator!.Sdk;
-        await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential, token).ConfigureAwait(false)).ConfigureAwait(false);
+        await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), state.Credential, token).ConfigureAwait(false)).ConfigureAwait(false);
         state.Principal = new(state.Identity.PrincipalId, state.Identity.Partition.TenantId,
             [new(state.Identity.Partition.DatabaseId, RequestCqrsRf3Protocol.AdminCollection,
                 Capability.DocumentsRead | Capability.DocumentsWrite)], [FollowerDocumentRf3Protocol.FieldGrant])

@@ -30,8 +30,8 @@ internal static class NativeAnnPublicColdAssertions
         foreach (var id in NativeAnnMaintenanceRf3Scenario.Ids)
         {
             var reference = new EntityRef(seed.Scenario.Partition, NativeAnnMaintenanceRf3Scenario.Collection, id);
-            var direct = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.GetAsync(reference, token));
-            var remote = (await McpCallerAssertions.SuccessAsync<DocumentResult>(await caller.Mcp.CallAsync(
+            var direct = await PublicReadAssertions.DocumentAsync(await caller.Sdk.GetAsync(reference, token));
+            var remote = (await PublicReadAssertions.DocumentAsync(await caller.Mcp.CallAsync(
                 McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value;
             var expected = new DocumentResult(reference, Revision, "{}", false, []);
             await ExactAsync(expected, direct);

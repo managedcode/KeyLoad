@@ -28,13 +28,13 @@ internal static class EventMessageSensitivePublicSeed
                 | Capability.DeadLettersRead | Capability.TopicsRead | Capability.SubscriptionsConsume | Capability.SubscriptionsAck)],
             [EventMessageSensitivePublicProtocol.GrantBefore]);
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), worker, token));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            KeyLoad.Core.DatabaseEngine.Credential(id, id, key), token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
+            KeyLoad.Core.DatabaseEngine.Credential(id, id, key), token))).IsSuccess).IsTrue();
         var state = new EventMessageSensitivePublicState(partition, resource, worker, key, subscription, dataAuthority, header);
         var inspector = worker with { Id = state.InspectorId, FieldGrants = [] };
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), inspector, token));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            KeyLoad.Core.DatabaseEngine.Credential(inspector.Id, inspector.Id, state.InspectorKey), token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
+            KeyLoad.Core.DatabaseEngine.Credential(inspector.Id, inspector.Id, state.InspectorKey), token))).IsSuccess).IsTrue();
         var command = new CommandRequest(Guid.NewGuid(), partition, subscription
             ? [new PublishTopic(resource.Name, [new(EventMessageSensitivePublicProtocol.Message, EventMessageSensitivePublicProtocol.EventType,
                 EventMessageSensitivePublicProtocol.Payload, EventMessageSensitivePublicProtocol.Headers)])]

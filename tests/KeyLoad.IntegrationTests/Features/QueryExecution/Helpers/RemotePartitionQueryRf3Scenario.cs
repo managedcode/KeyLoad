@@ -61,7 +61,7 @@ internal sealed class RemotePartitionQueryRf3Scenario : IAsyncDisposable
         var destinationAfter = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
         await Assert.That(sourceAfter.Applied).IsEqualTo(sourceBefore.Applied);
         await Assert.That(destinationAfter.Applied).IsEqualTo(destinationBefore.Applied);
-        await RemoteDocumentRf3Assertions.DocumentAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await RemoteDocumentRf3Assertions.DocumentAsync(await PublicReadAssertions.DocumentAsync(
             await destination.GetAsync(RemoteDocumentRf3Protocol.Reference, token)), projected: false);
     }
 

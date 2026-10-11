@@ -17,7 +17,7 @@ internal static class McpCommandCatalog
         McpOperationFactory.Command<ProcessingRequest, CommitReceipt>(McpToolNames.MessagesProcess, McpToolRoutes.MessagesProcess, OperationKind.Processing, static request => request.CommandId),
         McpOperationFactory.HeaderCommand<ConfigureResourceRequest, ResourceDefinition>(McpToolNames.ResourcesConfigure, McpToolRoutes.ResourcesConfigure, OperationKind.ConfigureResource),
         McpOperationFactory.HeaderCommand<ConfigurePrincipalRequest, PrincipalRecord>(McpToolNames.PrincipalsConfigure, McpToolRoutes.PrincipalsConfigure, OperationKind.ConfigurePrincipal),
-        McpOperationFactory.HeaderCommand<ConfigureApiKeyRequest, bool>(McpToolNames.CredentialsConfigure, McpToolRoutes.CredentialsConfigure, OperationKind.ConfigureApiKey),
+        McpOperationFactory.HeaderStatusCommand<ConfigureApiKeyRequest>(McpToolNames.CredentialsConfigure, McpToolRoutes.CredentialsConfigure, OperationKind.ConfigureApiKey),
         McpOperationFactory.HeaderCommand<bool, bool>(McpToolNames.AdminDispatch, McpToolRoutes.AdminDispatch, OperationKind.SetDispatch),
         McpOperationFactory.Command<PartitionMoveRequest, PartitionMoveResult>(McpToolNames.AdminPartitionMove,
             McpToolRoutes.AdminPartitionMove, OperationKind.MovePartition, static request => request.MoveId),

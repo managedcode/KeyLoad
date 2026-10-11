@@ -488,3 +488,79 @@ REQ-REP-004/005, AC-REP-004/005 and AC-KL035-EMPTY-001..003 retain the original 
 Ordered implementation: preserve the original R37 initiating OwnershipLost and cancellation cleanup evidence; append only ReplicaSnapshotReadiness to the existing marker phase admission; retain all original marker version/kind/session/voter/request, canonical entry, exact active-arm/scope, duplicate, immutable byte and marker-count checks; retain sidecar-before-Observed publication and independent fixture qualification. No public/persisted ID, protocol, trusted role, threshold16, deadline, quota, operation effect or stopped oracle changes. All existing marker phases and refusals remain mandatory.
 
 Ownership is the existing Server ClusterRouting Execution/RequestCqrsProbeRecords.cs. Dependencies are the actually joined Natural23 readiness observer/sidecar and closed-target successor3. Join these current guarded documents before that one native source correction; rollback restores its exact preimage and does not reinterpret any observed evidence. The same original EmptyReplicaSnapshotRf3Tests case must run normal then scalar against an unchanged discovered source/DLL/PDB/image, through genuine Kill/join, strict installed image/ordered tail, SDK/official MCP/Q1 replay, cold and healthy continuation. Native marker source/preview or a qualifying running cut does not close the original stopped or Linux acceptance gates.
+
+
+## TASK-KL021-RECEIVING-AUTHORITY-COLD-005 — original native minimum-token repair
+
+REQ/AC-SESSIONREAD-002..004 and ADR-017 retain the fresh quorum and same-cut
+authorization contract. REQ-SESSIONREAD-COLD-001 / AC-SESSIONREAD-COLD-001
+adds three complete native receiving-owner flows for missing, negative and
+truncated canonical AppliedBytes after an acknowledged document seed. The
+existing actual ZoneTree owner closes and reopens with the damaged selected
+row; repeated receiving reads return the existing exact Corruption detail, no
+document or witness, and preserve both complete store images and positions.
+Only the fixture's exact original AppliedBytes are restored. The complete
+pre-fault image must return with precisely two raw commits, retaining the
+original native identity, catalog, grants, document and outcomes.
+
+REQ-SESSIONREAD-COLD-002 / AC-SESSIONREAD-COLD-002 requires full literal
+projected document and receiving witness after repair, exact original complete
+command receipt Apply/Resolve replay without effects, a foreign receiving
+physical owner refusal and original cancellation without a result, followed
+by an authorized revision2 write, old/new minimum-token reads, full receipt
+replay and a second joined same-root cold owner. The independent destination
+incarnation/epoch, atomic identity, revisions, redacted fields and ProcessDurable
+receipt are fixed by the existing native fixture contract; local store position
+is independently retained. Source-owner complete state remains unchanged.
+
+Ownership: new UnitTests DocumentStorage Cases/DocumentSessionAuthorityColdTests,
+Helpers/DocumentSessionAuthorityColdTrial, DocumentSessionAuthorityFault,
+DocumentSessionAuthorityContinuation and Assertions/DocumentSessionAuthorityColdAssertions.
+Core0, public/SDK Result contracts0, existing fixtures0, bounds0, protocol0.
+No exception or owner is mocked and no scalar execution profile is introduced.
+The original source8e4 RF3 majority-write UnknownWriteOutcome cause remains
+unclassified; this source-proven missing native cold/repair/replay acceptance
+closure does not repair or qualify that failure. Root owns compilation, actual
+native discovery and normal SIMD-enabled runs; source-only Arguments establish
+no UID/count/PASS. Linux RF3, real process recovery, SDK/official MCP/bothQ1,
+power-loss and endurance gates remain separately required.
+
+
+The same bounded task extends existing DocumentSessionReadRf3Flow only after
+its genuine leader kill, second voter kill and original voter restarts. Preserve
+the actual revision2 CommandRequest; validate both complete native quorum
+receipts against literal mutation revisions, atomic identity and durability.
+Through the surviving real endpoint, freshly authenticate an official root MCP
+session and replay both actual commands through SDK, official MCP and both Q1
+CALL adapters using existing ReplayedAsync. Every complete receipt must equal
+its original and the complete existing OutboxStatus no-effect oracle must hold,
+then all four original minimum-token document routes return literal revision2.
+The supporting three local receiving-owner cases use native Apply and persisted
+AppliedBytes, not a ReplicaJournal or RF3 substitute. This addition preserves
+all original cancellation/authority/privacy/bounds and the original Linux
+majority-write UnknownWriteOutcome failure; its initiating cause remains unknown.
+The existing RF3 case identity/arguments and native inventory stay unchanged.
+
+
+## TASK-KL021-REMOTE-MINIMUM-ADMISSION-006 — destination authority on all public routes
+
+REQ/AC-SESSIONREAD-002..004 and REQ/AC-OWNER-DOC-003/005 require the actual
+receiving owner's persisted grant before any minimum-token result. The existing
+RemoteDocumentRf3Scenario has a genuine acknowledged B token and an A-authorized
+reader whose B principal has no grants; its initial denial previously used only
+SDK and official MCP ordinary GET. Add the same acknowledged minimum-token
+request through SDK, official MCP and both Q1 CALL adapters within the existing
+source/destination Applied-before/after bracket. Require exact PermissionDenied
+Problem, absent SDK/Q1 value, native official no-result error and no credential,
+private document or canary disclosure. Retain both original no-token refusals.
+
+The existing native B grant, four-route literal projected document, original
+complete receipt replay, genuine same-owner process kill/restart and four-route
+healthy continuation remain unchanged. Ownership: existing IntegrationTests
+DocumentStorage Helpers/RemoteDocumentRf3Scenario and NEW Assertions/
+RemoteDocumentSessionAuthorityRf3Assertions; bounded append DocumentStorage/ADR017.
+Core0, public SDK Result contracts0, fixtures0, topology0, bounds0, newCases0.
+This contract joins the previous native3/current SessionRF3 receipt packet as
+one source10 successor, preserving source8 and all original failure receipts.
+Root owns actual compile/discovery/Linux evidence. Original8e4 majority
+UnknownWriteOutcome cause remains unknown; source closure is not runtime PASS.

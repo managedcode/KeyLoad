@@ -95,7 +95,7 @@ internal sealed record NodeEpochRf3Workload(PartitionRef Partition, string Colle
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var key = new ApiKeyRecord(keyId, id,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), key,
+        await McpCallerAssertions.SdkStatusAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), key,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         return new(id, secret, persisted, key);
     }
@@ -154,7 +154,7 @@ internal sealed record NodeEpochRf3Workload(PartitionRef Partition, string Colle
         await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.RevisionConflict));
         var mcpResult = await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale, cancellationToken).ConfigureAwait(false);
         await McpCallerAssertions.ErrorAsync(mcpResult, ErrorCode.RevisionConflict, dispatched: true).ConfigureAwait(false);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(partition, CollectionName, DocumentName), cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(document?.Revision).IsEqualTo(2L);
         await Assert.That(document?.Json).IsEqualTo(DocumentJson);

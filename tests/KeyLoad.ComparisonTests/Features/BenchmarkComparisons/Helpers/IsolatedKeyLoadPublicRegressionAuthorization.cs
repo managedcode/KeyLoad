@@ -16,10 +16,10 @@ internal static class IsolatedKeyLoadPublicRegressionAuthorization
         await using var mcp = await IsolatedKeyLoadPublicRegressionMcp.ConnectAsync(app, nodeCount, identity.Secret, token);
         var request = new GetDocumentRequest(scenario.Sentinel);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await reader.GetAsync(scenario.Sentinel, token)))!,
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await reader.GetAsync(scenario.Sentinel, token)))!,
             scenario.Sentinel, scenario.SentinelJson, 1);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            await mcp.SuccessAsync<DocumentResult>(IsolatedKeyLoadPublicRegressionProtocol.Get, request, token),
+            await mcp.RequiredDocumentAsync(IsolatedKeyLoadPublicRegressionProtocol.Get, request, token),
             scenario.Sentinel, scenario.SentinelJson, 1);
         var denied = scenario.Command(new PutDocument(scenario.Sentinel.Collection, scenario.Sentinel.Id,
             scenario.UpdatedJson, 1, ExplicitReplacement: true));
@@ -32,7 +32,7 @@ internal static class IsolatedKeyLoadPublicRegressionAuthorization
             ErrorCode.PermissionDenied, identity.Secret, scenario.PrivateValue);
         await mcp.ErrorAsync(SqlOperationProtocol.ToolName, sql, ErrorCode.PermissionDenied, token, identity.Secret, scenario.PrivateValue);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await administrator.GetAsync(scenario.Sentinel, token)))!,
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await administrator.GetAsync(scenario.Sentinel, token)))!,
             scenario.Sentinel, scenario.SentinelJson, 1);
     }
 }

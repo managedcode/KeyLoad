@@ -20,7 +20,8 @@ internal sealed class AuthorizationNativeSpanObservation(IOptions<AuthorizationT
             activity.Events.Take(options.Value.MaximumRecords).Select(static item => item.Name).ToArray(),
             activity.Links.Take(options.Value.MaximumRecords).Select(static link => new AuthorizationNativeLinkState(
                 link.Context.TraceId.ToHexString(), link.Context.SpanId.ToHexString(), link.Context.TraceState,
-                link.Tags?.Take(AuthorizationTelemetryTestProtocol.CatalogCount).Any() ?? false)).ToArray(),
+                link.Tags?.Take(AuthorizationTelemetryTestProtocol.CatalogCount).Any() ?? false,
+                link.Context.IsRemote, link.Context.TraceFlags)).ToArray(),
             parents.Length, parents,
             parents.Length <= Privacy.MaximumParentLinks ? activity.Baggage.Take(Privacy.MaximumBaggageItems + AuthorizationTelemetryTestProtocol.CatalogCount).ToArray() : [],
             activity.TagObjects.Take(Privacy.MaximumTags + AuthorizationTelemetryTestProtocol.CatalogCount)

@@ -55414,7 +55414,7 @@
   },
   "KL-035": {
     "title": "Replica snapshot і installation",
-    "status": "done",
+    "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs",
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointGeneration.cs",
@@ -55616,6 +55616,25 @@
         "Log reclamation preserves the last snapshot/tail recovery path."
       ],
       "evidenceDocument": "docs/implementation/qualification-stage57-kl035-kl079.md"
+    },
+    "currentSourceRegression20261011": {
+      "source": "fc4e490e66ff20d3c6e5e2891883ecb698ba99bc",
+      "run": 38154439586,
+      "job": 114514387807,
+      "artifact": 11707669002,
+      "jobURL": "https://github.com/managedcode/KeyLoad/actions/runs/38154439586/job/114514387807",
+      "artifactURL": "https://github.com/managedcode/KeyLoad/actions/runs/38154439586/artifacts/11707669002",
+      "zipSHA256": "304fce5cf6b2838179973eeae8322b54804e1a61749619e28c92ed0d3321bc68",
+      "nativeCases": 49,
+      "passed": 48,
+      "failed": 1,
+      "failedNativeId": "KeyLoad.IntegrationTests.Features.ClusterReplication.EmptyReplicaSnapshotRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ErasedFollowerInstallsNativeSnapshotAndOrderedTailBeforeCompletePublicReplayAndHealthyContinuation.1.1.0",
+      "observedFailure": "The actual ordered tail entry is absent.",
+      "initiatingCause": "unknown; snapshot/reclamation authority under native source review",
+      "completeCaseBindingSHA256": "7c35910aa74e8055f410063d7e7c0a0308d7248c87c35aa30ab258e32c6ecbef",
+      "historicalB1AcceptanceRetained": true,
+      "repairQualified": false,
+      "fullTaskComplete": false
     }
   },
   "KL-036": {

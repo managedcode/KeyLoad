@@ -41,8 +41,8 @@ internal static class QueueLifecyclePublicSeed
     private static async Task ConfigureAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, string key, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
-        var saved = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
+        var saved = await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             DatabaseEngine.Credential(principal.Id, principal.Id, key), token));
-        await Assert.That(saved).IsTrue();
+        await Assert.That(saved.IsSuccess).IsTrue();
     }
 }

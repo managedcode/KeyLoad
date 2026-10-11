@@ -22,12 +22,14 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     private readonly TimeProvider clock = TimeProvider.System;
     private readonly IOptions<AuthorizationTelemetryCaptureOptions> options;
     private bool disposed;
+    private readonly bool useServerErrorMiddleware;
     private WebApplication? app;
     internal AuthorizationUnsafeSpanState UnsafeState { get; set; }
     private HttpClient? client;
     private readonly SemaphoreSlim completedRequests = new(AuthorizationTelemetryTestProtocol.IndexCount);
-    internal AuthorizationTelemetryHttpFixture()
+    internal AuthorizationTelemetryHttpFixture(bool useServerErrorMiddleware = false)
     {
+        this.useServerErrorMiddleware = useServerErrorMiddleware;
         var policy = new AuthorizationTelemetryCaptureOptions();
         if (!policy.IsValid())
         { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure); }
@@ -68,6 +70,8 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         app = builder.Build();
         NativeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.ServiceDefaults.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
+        if (useServerErrorMiddleware)
+        { app.UseMiddleware<global::KeyLoad.Server.ServerErrorMiddleware>(); }
         var endpoint = new AuthorizationTelemetryEndpoint(Database, clock, () => UnsafeState, () => completedRequests.Release());
         app.MapPost(AuthorizationTelemetryTestProtocol.Route, endpoint.ExecuteAsync);
         using var deadline = Deadline();
@@ -87,6 +91,14 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         if (!configured)
         { throw new InvalidOperationException(AuthorizationTelemetryTestProtocol.CaptureFailure); }
     }
+    internal async Task JoinForColdAsync(CancellationToken cancellationToken)
+    {
+        await AuthorizationTelemetryColdLifetime.JoinAsync(client, app, Flush, cancellationToken);
+        client = null;
+        app = null;
+        Database.JoinOwnedResources();
+    }
+
     internal void Flush()
     {
         if (app is null)
@@ -108,7 +120,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
     internal async Task AwaitExportsAsync(AuthorizationUnsafeSpanState state, CancellationToken cancellationToken)
     {
         var expected = state is AuthorizationUnsafeSpanState.None or AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
-            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink
+            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
             ? AuthorizationTelemetryTestProtocol.RequestCount : AuthorizationTelemetryTestProtocol.HealthyCount;
         Flush();
         while (Spans.Bank.Snapshot().Count(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpServerSource) < expected)

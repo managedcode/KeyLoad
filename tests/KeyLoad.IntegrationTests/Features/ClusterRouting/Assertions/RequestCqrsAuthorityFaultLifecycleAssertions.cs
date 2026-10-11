@@ -7,12 +7,15 @@ internal static class RequestCqrsAuthorityFaultLifecycleAssertions
 {
     internal static async Task VerifyReleasedAndDisposedAsync(RequestCqrsProbeFixture controls,
         IReadOnlyList<ReplicaSiloDiscovery> discovery, Guid armId, Guid commandId,
-        RequestCqrsProbeMarkerRecord original, CancellationToken cancellationToken)
+        RequestCqrsProbeMarkerRecord original, CancellationToken cancellationToken,
+        Action<RequestCqrsLifecycleStage>? observeStage = null)
     {
+        observeStage?.Invoke(RequestCqrsLifecycleStage.AuthorityReleasedMarkerWait);
         var released = await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.AuthorizationReload,
             RequestCqrsProbeOutcome.Released, discovery, cancellationToken).ConfigureAwait(false);
         await Assert.That(released.RequestId).IsEqualTo(original.RequestId);
         await Assert.That(released.CommandId).IsEqualTo(commandId);
+        observeStage?.Invoke(RequestCqrsLifecycleStage.AuthorityProducerDisposedMarkerWait);
         var disposed = await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.ProducerDisposed,
             RequestCqrsProbeOutcome.Observed, discovery, cancellationToken).ConfigureAwait(false);
         await Assert.That(disposed.RequestId).IsEqualTo(original.RequestId);

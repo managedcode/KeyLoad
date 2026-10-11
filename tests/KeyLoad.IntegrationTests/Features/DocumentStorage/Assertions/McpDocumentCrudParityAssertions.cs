@@ -29,20 +29,20 @@ internal static class McpDocumentCrudParityAssertions
         McpDocumentCrudParityScenario scenario, long? expectedRevision, string? expectedJson,
         CancellationToken cancellationToken)
     {
-        var sdkDocument = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
-        var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await mcp.CallAsync(
+        var sdkDocument = (await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken))).Document;
+        var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), cancellationToken));
         if (expectedRevision is null)
         {
             await Assert.That(sdkDocument).IsNull();
-            await Assert.That(mcpDocument.Value).IsNull();
+            await Assert.That(mcpDocument.Value.Document).IsNull();
             return;
         }
 
         await Assert.That(sdkDocument).IsNotNull();
-        await Assert.That(mcpDocument.Value).IsNotNull();
+        await Assert.That(mcpDocument.Value.Document).IsNotNull();
         var sdkValue = sdkDocument!;
-        var mcpValue = mcpDocument.Value!;
+        var mcpValue = mcpDocument.Value.Document!;
         await Assert.That(sdkValue.Revision).IsEqualTo(expectedRevision.Value);
         await Assert.That(mcpValue.Revision).IsEqualTo(expectedRevision.Value);
         await Assert.That(sdkValue.Json).IsEqualTo(expectedJson);

@@ -12,10 +12,10 @@ internal sealed class AuthorizationUnsafeClientSpanProcessor(Func<AuthorizationU
         var selected = state();
         if (selected == AuthorizationUnsafeSpanState.ClientEvent)
         { activity.AddEvent(new(AuthorizationTelemetryTestProtocol.ExceptionCanary)); }
-        if (selected is AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientExtraLink)
+        if (selected is AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink)
         {
             var context = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded,
-                null);
+                null, isRemote: selected == AuthorizationUnsafeSpanState.ClientRemoteLink);
             var tags = selected == AuthorizationUnsafeSpanState.ClientTaggedLink ? new ActivityTagsCollection
                 { { AuthorizationTelemetryTestProtocol.CanaryTag, AuthorizationTelemetryTestProtocol.TagCanary } } : null;
             activity.AddLink(new(context, tags));

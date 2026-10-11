@@ -42,6 +42,10 @@ internal sealed class SystemClockSemanticTests
             internal sealed class Subject(TimeProvider timeProvider, ClockData clockData)
             {
                 internal DateTimeOffset ProviderNow() => timeProvider.GetUtcNow();
+                internal DateTime ProviderUtcDate() => timeProvider.GetUtcNow().UtcDateTime;
+                internal DateTime ProviderLocalDate() => timeProvider.GetLocalNow().LocalDateTime;
+                internal DateTime ProviderToday() => timeProvider.GetLocalNow().LocalDateTime.Date;
+                internal DateTimeOffset ProviderLocalOffset() => timeProvider.GetLocalNow();
                 internal static TimeProvider SystemProvider() => TimeProvider.System;
                 internal static DateTime Minimum() => DateTime.MinValue;
                 internal static DateTimeOffset Maximum() => DateTimeOffset.MaxValue;

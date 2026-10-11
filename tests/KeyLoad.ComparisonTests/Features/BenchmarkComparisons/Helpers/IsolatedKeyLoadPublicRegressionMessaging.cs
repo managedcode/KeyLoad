@@ -51,16 +51,16 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         IsolatedKeyLoadPublicRegressionScenario scenario, CancellationToken token)
     {
         var request = scenario.Inspect;
-        var before = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(request, token));
+        var before = await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await sdk.InspectAsync(request, token));
         await Assert.That(before!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(before.Metadata.Attempts).IsEqualTo(0);
         await Assert.That(before.Metadata.LeaseOwner).IsNull();
         await Assert.That(before.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
         var sql = IsolatedKeyLoadPublicRegressionProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicRegressionProtocol.Inspect, request);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(before,
-            await mcp.SuccessAsync<MessageInspection>(SqlOperationProtocol.ToolName, sql, token));
+            await mcp.RequiredMessageAsync(SqlOperationProtocol.ToolName, sql, token));
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(before,
-            await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(request, token)));
+            await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await sdk.InspectAsync(request, token)));
     }
 
     private static async Task VerifyLeaseAsync(KeyLoadClient sdk, IsolatedKeyLoadPublicRegressionMcp mcp,
@@ -75,13 +75,13 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
         await Assert.That(delivery.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(received,
             await mcp.SuccessAsync<ReceiveResult>(IsolatedKeyLoadPublicRegressionProtocol.Receive, request, token));
-        var leased = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(scenario.Inspect, token));
+        var leased = await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await sdk.InspectAsync(scenario.Inspect, token));
         var forged = new DeliveryCommand(Guid.NewGuid(), scenario.Lane, InvalidToken, DeliveryAction.Ack);
         await mcp.ErrorAsync(SqlOperationProtocol.ToolName,
             IsolatedKeyLoadPublicRegressionProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicRegressionProtocol.Complete, forged),
             ErrorCode.TokenInvalidated, token);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(leased,
-            await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(scenario.Inspect, token)));
+            await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await sdk.InspectAsync(scenario.Inspect, token)));
         await VerifyAckAsync(sdk, mcp, scenario, delivery, leased!, token);
     }
 
@@ -95,7 +95,7 @@ internal static class IsolatedKeyLoadPublicRegressionMessaging
             scenario.Lane.Queue, scenario.MessageId, leased.Metadata.StateVersion + 1));
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(receipt,
             await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.CompleteAsync(command, token)));
-        var acknowledged = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.InspectAsync(scenario.Inspect, token));
+        var acknowledged = await IsolatedKeyLoadPublicRegressionAssertions.MessageReadAsync(await sdk.InspectAsync(scenario.Inspect, token));
         await Assert.That(acknowledged!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(acknowledged.Metadata.LeaseOwner).IsNull();
         await Assert.That(acknowledged.PayloadJson).IsNull();

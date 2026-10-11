@@ -10,14 +10,14 @@ internal static class DocumentSessionReadRf3Assertions
     internal static async Task HealthyAsync(KeyLoadClient sdk, McpOfficialClient mcp, EntityRef reference,
         CommitToken minimum, string json, long revision, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, minimum, token));
-        var official = await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, minimum, token));
+        var official = await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token));
         await LiteralAsync(actual, reference, json, revision);
         await LiteralAsync(official.Value, reference, json, revision);
         var call = SqlRf3Protocol.Call(reference.Partition, McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum));
-        await LiteralAsync(await SqlRf3Protocol.SdkAsync<DocumentResult>(sdk, call, token), reference, json, revision);
-        await LiteralAsync(await SqlRf3Protocol.McpAsync<DocumentResult>(mcp, call, token), reference, json, revision);
+        await LiteralAsync((await SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, reference, json, revision);
+        await LiteralAsync((await SqlRf3Protocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, reference, json, revision);
     }
 
     internal static async Task RejectedAsync(KeyLoadClient sdk, McpOfficialClient mcp, EntityRef reference,

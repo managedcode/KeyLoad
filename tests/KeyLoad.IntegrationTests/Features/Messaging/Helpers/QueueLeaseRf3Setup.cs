@@ -31,7 +31,7 @@ internal static class QueueLeaseRf3Setup
                 new EnqueueMessage(futureLane.Queue, QueueLeaseRf3Protocol.FutureMessage,
                     QueueLeaseRf3Protocol.Payload, QueueLeaseRf3Protocol.Headers, NotBefore: futureDue)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(command, token));
-        var future = await McpCallerAssertions.SdkSuccessAsync(await root.InspectAsync(
+        var future = await PublicReadAssertions.MessageAsync(await root.InspectAsync(
             new(futureLane, QueueLeaseRf3Protocol.FutureMessage), token))
             ?? throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup);
         return new(lane, futureLane, futureDue, future, resource, worker, foreign, command, receipt);

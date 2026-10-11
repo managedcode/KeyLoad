@@ -34,8 +34,8 @@ internal sealed class SampleChunkJobRevocationScenario(SampleChunkRf3Scenario wi
             System.Security.Cryptography.RandomNumberGenerator.GetBytes(SampleChunkJobRevocationProtocol.SecretBytes));
         var credential = new ApiKeyRecord(keyId, actual.Id, Convert.ToHexStringLower(
             System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(secret))));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), credential, token).ConfigureAwait(false))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, token).ConfigureAwait(false))).IsSuccess).IsTrue();
         var from = TimeProvider.System.GetUtcNow();
         var window = new SampleChunkRf3Scenario(new(partition), Guid.NewGuid(), from,
             from.AddHours(SampleChunkRf3Protocol.WindowHours));

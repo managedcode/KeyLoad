@@ -48,8 +48,8 @@ internal static class RecurringScheduleRf3Assertions
         var until = TimeProvider.System.GetUtcNow() + ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(
-                new(scenario.SourceQueue, scheduleId), cancellationToken))
+            var view = (await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(
+                new(scenario.SourceQueue, scheduleId), cancellationToken))).Schedule
                 ?? throw new InvalidOperationException("The persisted schedule disappeared during autonomous progress.");
             if (view.NextOrdinal == expectedOrdinal)
             {
@@ -70,13 +70,13 @@ internal static class RecurringScheduleRf3Assertions
         CancellationToken cancellationToken)
     {
         var request = new InspectRecurringScheduleRequest(scenario.SourceQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(request,
-            cancellationToken));
+        var sdkView = (await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(request,
+            cancellationToken))).Schedule;
         var reply = await mcp.CallAsync(InspectTool, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(
+        var mcpView = await McpCallerAssertions.SuccessAsync<RecurringScheduleReadResult>(
             reply);
         await Assert.That(sdkView).IsNotNull();
-        await Assert.That(mcpView.Value).IsNotNull();
+        await Assert.That(mcpView.Value.Schedule).IsNotNull();
         await Assert.That(sdkView!.Definition.Lane).IsEqualTo(scenario.SourceQueue);
         await Assert.That(sdkView.Definition.ScheduleId).IsEqualTo(id);
         await Assert.That(sdkView.Cancelled).IsFalse();
@@ -90,7 +90,7 @@ internal static class RecurringScheduleRf3Assertions
         await Assert.That(sdkView.Redacted).IsTrue();
         await Assert.That(sdkView.RedactedFields).IsEquivalentTo(
             ["payload:/secret", "headers:/secret"], CollectionOrdering.Matching);
-        await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
+        await Assert.That(JsonDefaults.Serialize(mcpView.Value.Schedule).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
@@ -102,16 +102,16 @@ internal static class RecurringScheduleRf3Assertions
     {
         var request = new InspectMessageRequest(scenario.SourceQueue,
             OccurrenceMessageId(scheduleId, generation, ordinal));
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = (await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken))).Message;
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspectionResult>(reply);
         await Assert.That(sdkView).IsNotNull();
-        await Assert.That(mcpView.Value).IsNotNull();
+        await Assert.That(mcpView.Value.Message).IsNotNull();
         await Assert.That(sdkView!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(sdkView.Metadata.NotBefore).IsEqualTo(dueAt);
         await Assert.That(sdkView.PayloadJson).IsEqualTo("{}");
         await Assert.That(sdkView.HeadersJson).IsEqualTo("{}");
-        await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
+        await Assert.That(JsonDefaults.Serialize(mcpView.Value.Message).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
@@ -123,11 +123,11 @@ internal static class RecurringScheduleRf3Assertions
     {
         var request = new InspectMessageRequest(scenario.SourceQueue,
             OccurrenceMessageId(scheduleId, generation, ordinal));
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = (await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken))).Message;
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspectionResult>(reply);
         await Assert.That(sdkView).IsNull();
-        await Assert.That(mcpView.Value).IsNull();
+        await Assert.That(mcpView.Value.Message).IsNull();
     }
 
     internal static string OccurrenceMessageId(Guid scheduleId, long generation, long ordinal)

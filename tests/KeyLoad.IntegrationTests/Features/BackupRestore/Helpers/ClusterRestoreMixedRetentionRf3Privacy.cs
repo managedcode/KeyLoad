@@ -49,9 +49,9 @@ internal static class ClusterRestoreMixedRetentionRf3Privacy
         foreach (var id in new[] { QueueLifecyclePublicProtocol.Parked, QueueLifecyclePublicProtocol.Pending })
         {
             var inspect = new InspectMessageRequest(state.OriginalQueue.Lane, id);
-            await ClusterRestoreMixedRetentionRf3Literal.FourAsync<MessageInspection?>(caller, state.Partition,
+            await ClusterRestoreMixedRetentionRf3Literal.FourAsync<MessageInspectionResult>(caller, state.Partition,
                 McpCallerTools.MessagesInspect, inspect,
-                new(Metadata(state, id), state.Continued ? null : "{}", state.Continued ? null : "{}"),
+                new MessageInspectionResult(new MessageInspection(Metadata(state, id), state.Continued ? null : "{}", state.Continued ? null : "{}")),
                 () => caller.Sdk.InspectAsync(inspect, token), token);
         }
     }

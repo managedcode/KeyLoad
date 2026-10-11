@@ -75,13 +75,14 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         MessagingRf3Scenario scenario, Guid transferId, string credential, CancellationToken cancellationToken)
     {
         var request = new InspectQueueTransferRequest(scenario.SourceQueue, transferId);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(request,
+        var sdkResponse = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(request,
             cancellationToken));
+        var sdkView = sdkResponse.Transfer;
         var reply = await mcp.CallAsync(InspectSourceTool, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<QueueTransferInspection?>(reply);
+        var mcpView = await McpCallerAssertions.SuccessAsync<QueueTransferReadResult>(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(sdkView!.State).IsEqualTo(QueueTransferState.OutputPending);
-        await Assert.That(mcpView.Value).IsEqualTo(sdkView);
+        await Assert.That(mcpView.Value.Transfer).IsEqualTo(sdkView);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);
         return sdkView;
     }
@@ -109,11 +110,11 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         await AssertSdkFailureAsync(await sdk.CommitAsync(command, cancellationToken), ErrorCode.PermissionDenied);
         var message = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
             new(scenario.DestinationQueue, TransferMessageId), cancellationToken));
-        await Assert.That(message).IsNull();
+        await Assert.That(message.Message).IsNull();
         var request = new InspectQueueTransferReceiptRequest(scenario.DestinationQueue, scenario.SourceQueue, transferId);
-        var absent = await McpCallerAssertions.SuccessAsync<QueueTransferReceiptInspection?>(
+        var absent = await McpCallerAssertions.SuccessAsync<QueueTransferReceiptReadResult>(
             await mcp.CallAsync(InspectReceiptTool, request, cancellationToken));
-        await Assert.That(absent.Value).IsNull();
+        await Assert.That(absent.Value.Receipt).IsNull();
         return revoked;
     }
 
@@ -122,13 +123,14 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         string credential, CancellationToken cancellationToken)
     {
         var request = new InspectQueueTransferReceiptRequest(scenario.DestinationQueue, scenario.SourceQueue, transferId);
-        var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(request,
+        var sdkResponse = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(request,
             cancellationToken));
+        var sdkReceipt = sdkResponse.Receipt;
         var reply = await mcp.CallAsync(InspectReceiptTool, request, cancellationToken);
-        var mcpReceipt = await McpCallerAssertions.SuccessAsync<QueueTransferReceiptInspection?>(reply);
+        var mcpReceipt = await McpCallerAssertions.SuccessAsync<QueueTransferReceiptReadResult>(reply);
         await Assert.That(sdkReceipt).IsNotNull();
         await Assert.That(sdkReceipt!.TransferId).IsEqualTo(transferId);
-        await Assert.That(mcpReceipt.Value).IsEqualTo(sdkReceipt);
+        await Assert.That(mcpReceipt.Value.Receipt).IsEqualTo(sdkReceipt);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
         return sdkReceipt;
@@ -150,7 +152,8 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
             .SequenceEqual(JsonDefaults.Serialize(mcpAck.Value))).IsTrue();
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
             new(scenario.DestinationQueue, TransferMessageId), cancellationToken));
-        await Assert.That(persisted!.Metadata.State).IsEqualTo(MessageState.Acked);
+        await Assert.That(persisted.Message).IsNotNull();
+        await Assert.That(persisted.Message!.Metadata.State).IsEqualTo(MessageState.Acked);
     }
 
     private static async Task AcceptAfterAcknowledgementAsync(KeyLoadClient sdk, MessagingRf3Scenario scenario,
@@ -162,10 +165,11 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         _ = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(accept, cancellationToken));
         var current = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(
             new(scenario.DestinationQueue, scenario.SourceQueue, transferId), cancellationToken));
-        await Assert.That(current).IsEqualTo(receipt);
+        await Assert.That(current.Receipt).IsEqualTo(receipt);
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
             new(scenario.DestinationQueue, TransferMessageId), cancellationToken));
-        await Assert.That(persisted!.Metadata.State).IsEqualTo(MessageState.Acked);
+        await Assert.That(persisted.Message).IsNotNull();
+        await Assert.That(persisted.Message!.Metadata.State).IsEqualTo(MessageState.Acked);
         var next = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
             new(Guid.NewGuid(), scenario.DestinationQueue), cancellationToken));
         await Assert.That(next.Deliveries).IsEmpty();
@@ -180,13 +184,15 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         _ = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, complete, cancellationToken));
         var request = new InspectQueueTransferRequest(scenario.SourceQueue, transferId);
-        var final = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(request,
+        var finalResponse = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(request,
             cancellationToken));
+        var final = finalResponse.Transfer;
+        await Assert.That(final).IsNotNull();
         await Assert.That(final!.State).IsEqualTo(QueueTransferState.Delivered);
         await Assert.That(final.ReceiptToken).IsEqualTo(receipt.ReceiptToken);
-        var mcpFinal = await McpCallerAssertions.SuccessAsync<QueueTransferInspection?>(
+        var mcpFinal = await McpCallerAssertions.SuccessAsync<QueueTransferReadResult>(
             await mcp.CallAsync(InspectSourceTool, request, cancellationToken));
-        await Assert.That(mcpFinal.Value).IsEqualTo(final);
+        await Assert.That(mcpFinal.Value.Transfer).IsEqualTo(final);
     }
 
     private static async Task AssertSdkFailureAsync<T>(ManagedCode.Communication.Result<T> result,

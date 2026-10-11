@@ -269,3 +269,74 @@ Admit only the two exact canonical generated directory names via their owning co
 Extend existing WrongKnownEntryKindsRejectBeforeMutation whole operation with exact-name file and symlink refusals for both directories, unchanged original content/link target, removal of only fixture-created invalid entry, real healthy native write and same-root cold reopen. Existing two original admission cases retain all full images/receipts/quota/shutdown assertions. Existing paired-identity cases retain native corruption-before-tail and healthy cold proof.
 
 Join docs first, then three source paths. Root owns fresh native build/discovery/normal+scalar executions and RF3 current-source proof. Source-only packet does not close KL042.
+
+
+## TASK-KL042-PROGRESS-REFUSAL-CLOSURE-015 — complete original process-cut fault images
+
+Docs-first Core0 refinement of REQ/AC-BACKUP-RESTORE-RESUME-001..003 and
+REQ/AC-BACKUP-CLUSTER-003/004 under ADR-123. The existing seven
+`ClusterRestoreRf3ResumeTests.ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold`
+arguments retain their genuine paused CLI process, observed native barrier,
+joined kill/readers/locks, original OperationId and original complete continuation.
+Source proves the six node-bearing cuts currently exercise missing progress but
+only plan framing corruption; progress framing corruption is checked only after
+terminal publication. The framing helper also lacks published target and repaired
+complete-image equality. Staged nodes already belong to the recursive
+OperationRoot image; this task does not invent a missing staged-byte oracle.
+
+REQ-BACKUP-RESTORE-PROGRESS-CLOSURE-001 requires original progress framing
+refusal before authoritative mutation, followed by exact same-owner repair.
+AC-BACKUP-RESTORE-PROGRESS-CLOSURE-001 maps to those existing seven wholeflows:
+after each node-bearing cut except PlanPublished, change only the original
+progress file's first framing bit, execute the actual original CLI and require
+its existing FormatUnsupported/state-corruption Problem and failed six-resource
+admission. Compare the entire damaged operation tree and actual published
+target presence/full tree after joined refusal. NodesPublished is already a
+published pre-terminal cut; actual target presence, not the stage label, selects
+the target image. No progress row or terminal receipt is manufactured for the
+earlier PlanPublished cut. Existing missing-progress RecoveryRequired checks
+and plan-corruption checks remain in their original order.
+
+REQ-BACKUP-RESTORE-PROGRESS-CLOSURE-002 requires exact byte repair and full
+healthy original continuation. AC-BACKUP-RESTORE-PROGRESS-CLOSURE-002 maps to
+the same wholeflows: after genuine native shutdown, verify that the selected
+regular file still contains exactly the fixture's damaged bytes, replace only
+those bytes under the existing exclusive native file open and Flush(true), then
+require the entire original operation and target images. Unexpected absence,
+link, length or content replacement refuses repair. Actual initiating and joined
+cleanup/repair failures remain in original order; no failed join permits a write
+under a live owner. The existing published-progress corruption check receives
+the same full image/repair guarantees, followed by original terminal receipt
+replay including ActualElapsed, full source/archive equality, all six original
+SDK/official MCP/Q1 linked models, authorized fresh work and true same-root cold
+continuation. No failed branch starts healthy continuation.
+
+Ownership: IntegrationTests BackupRestore existing Helpers ResumeTrial and
+PlanCorruption; new Helpers FaultImage and Assertions FaultImageAssertions;
+append-only BackupRestore and ADR-123. Product, public/persisted schemas, source
+credentials, signer/mapping, policy, central bounds, deadlines, topology, native
+SIMD, Cases/Arguments, discovery inventory and status are unchanged. No SDK
+nullable-result wrappers are edited. Root owns source joining and fresh native
+source/DLL/PDB/census/report evidence. Source-only code is neither observed UID
+count nor Linux process/RF3 acceptance; mandatory broader gates remain OPEN.
+Rollback removes only this unqualified test-only closure and bounded append,
+preserving every original failure and complete existing operation.
+
+```mermaid
+flowchart LR
+  Cut[Original joined native process cut] --> Fault[One retained progress framing bit]
+  Fault --> Refuse[Actual CLI refusal and unchanged complete images]
+  Refuse --> Join[Original process readers and native owners joined]
+  Join --> Repair[Exact selected original bytes and complete preimage]
+  Repair --> Replay[Original terminal receipt and six-owner healthy cold flow]
+```
+
+The existing CanonicalCut.RequireOriginalAsync supplies the independent complete
+verified-archive model oracle at two fully published offline seams: after genuine
+StartOperatorOnly, TargetRead(dispatchPaused:true), RequireOperatorReceipt and
+ReadOriginalReceipt; and after the original terminal receipt replay following all
+published fault repairs. It is never called while the selected process cut still
+has legitimate unpublished staging. The same original archives, source metadata,
+partition families and six native owners are used without new seed or read API.
+This complete semantic cut supplements the fault's unchanged physical images;
+neither proof substitutes for the other.

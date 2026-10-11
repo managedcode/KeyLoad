@@ -10,13 +10,13 @@ internal static class QueueDeadlineRf3Assertions
         string id, CancellationToken token)
     {
         var request = new InspectMessageRequest(lane, id);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(request, token));
-        var mcp = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await callers.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token));
+        var sdk = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, token));
+        var mcp = await PublicReadAssertions.MessageAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token));
         await Assert.That(sdk).IsNotNull();
         await QueueLeaseRf3Assertions.EqualAsync(mcp.Value, sdk);
         var sql = SqlRf3Protocol.Call(lane.Partition, McpCallerTools.MessagesInspect, request);
-        await QueueLeaseRf3Assertions.EqualAsync(await SqlRf3Protocol.SdkAsync<MessageInspection?>(callers.Sdk, sql, token), sdk);
-        await QueueLeaseRf3Assertions.EqualAsync(await SqlRf3Protocol.McpAsync<MessageInspection?>(callers.Mcp, sql, token), sdk);
+        await QueueLeaseRf3Assertions.EqualAsync((await SqlRf3Protocol.SdkAsync<MessageInspectionResult>(callers.Sdk, sql, token)).Message, sdk);
+        await QueueLeaseRf3Assertions.EqualAsync((await SqlRf3Protocol.McpAsync<MessageInspectionResult>(callers.Mcp, sql, token)).Message, sdk);
         return sdk!;
     }
 

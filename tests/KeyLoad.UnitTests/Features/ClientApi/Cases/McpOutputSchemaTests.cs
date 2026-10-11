@@ -17,7 +17,6 @@ internal sealed class McpOutputSchemaTests
     private const string OwnershipEpoch = "ownershipEpoch";
     private const long DefaultOwnershipEpoch = 1;
     private const string AdditionalProperties = "additionalProperties";
-    private const string BooleanType = "boolean";
     private const string ObjectType = "object";
     private const string Durability = "durability";
 
@@ -71,7 +70,7 @@ internal sealed class McpOutputSchemaTests
             .Any(value => value.GetString() == OwnershipEpoch)).IsFalse();
     }
 
-    /// <summary>The eight absent-object reads and dynamic SQL adapter allow a null root result.</summary>
+    /// <summary>Absent-object reads retain nullable domain fields in nonnull responses; dynamic SQL retains its actual root shape.</summary>
     [Test]
     public async Task AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull()
     {
@@ -79,11 +78,16 @@ internal sealed class McpOutputSchemaTests
         {
             var result = descriptor.OutputSchema.GetProperty(McpSchemaInspector.OneOf)[0]
                 .GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
-            var expected = descriptor.Name is McpCatalogExpectations.DocumentsGet or McpCatalogExpectations.MessagesInspect
-                or BlobAgentCases.Metadata or BlobAgentCases.UploadInfo or SqlOperationProtocol.ToolName
-                or McpCatalogExpectations.QueueTransferInspect or McpCatalogExpectations.QueueTransferReceipt
-                or McpCatalogExpectations.ScheduleInspect or McpCatalogExpectations.SagaInspect;
+            var expected = descriptor.Name is SqlOperationProtocol.ToolName or McpCatalogExpectations.CredentialsConfigure;
             await Assert.That(McpSchemaInspector.HasType(result, McpSchemaInspector.Null)).IsEqualTo(expected);
+            var field = NullableDomainField(descriptor.Name);
+            if (field is null)
+            { continue; }
+            var (_, response) = ResultSchema(descriptor.Name);
+            var properties = response.GetProperty(McpSchemaInspector.Properties);
+            await Assert.That(properties.EnumerateObject().Select(property => property.Name))
+                .IsEquivalentTo(new[] { field });
+            await Assert.That(McpSchemaInspector.HasType(properties.GetProperty(field), McpSchemaInspector.Null)).IsTrue();
         }
     }
 
@@ -92,7 +96,7 @@ internal sealed class McpOutputSchemaTests
     public async Task AcMcp007RepresentativeCanonicalResultTypesRemainDescribed()
     {
         var credentials = ResultSchema(McpCatalogExpectations.CredentialsConfigure);
-        await Assert.That(ResolvesToType(credentials.Root, credentials.Node, BooleanType)).IsTrue();
+        await Assert.That(ResolvesToType(credentials.Root, credentials.Node, McpSchemaInspector.Null)).IsTrue();
 
         var samples = ResultSchema(McpCatalogExpectations.SeriesRead);
         await Assert.That(ResolvesToType(samples.Root, samples.Node, McpSchemaInspector.Array)).IsTrue();
@@ -110,11 +114,60 @@ internal sealed class McpOutputSchemaTests
         await Assert.That(HasEnumSchema(receipt.Root, durability)).IsTrue();
     }
 
+    [Test]
+    public async Task CredentialNoDataProjectionPreservesNativeTrueOutcomeAndExactSameIdReplay()
+    {
+        using var database = new TestDatabase(nativeReplicaAdmission: true);
+        var commandId = Guid.NewGuid();
+        var credential = global::KeyLoad.Core.DatabaseEngine.Credential("status-native-key", "root", "status-native-secret");
+        var request = new ConfigureApiKeyRequest(credential);
+        var original = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
+        await Assert.That(original.Error).IsNull();
+        await Assert.That(original.SafeDetail).IsNull();
+        await Assert.That(original.Get<bool>()).IsTrue();
+        var originalResult = NativeSerialization.Serialize(original);
+        var entry = database.ReadRetainedEntry(commandId);
+        var entryBytes = NativeSerialization.Serialize(entry);
+        var outcome = database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.GlobalOutcome("root", commandId)));
+        var key = database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)));
+        await Assert.That(outcome).IsNotNull();
+        await Assert.That(key).IsNotNull();
+        await Assert.That(PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, original.NativeValue)).IsNull();
+        var replay = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
+        await Assert.That(replay.Get<bool>()).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(originalResult)).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(database.ReadRetainedEntry(commandId)).SequenceEqual(entryBytes)).IsTrue();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.GlobalOutcome("root", commandId)))!
+            .SequenceEqual(outcome!)).IsTrue();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)))!
+            .SequenceEqual(key!)).IsTrue();
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+            PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, false));
+        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)))!
+            .SequenceEqual(key!)).IsTrue();
+    }
+
+    private static string? NullableDomainField(string operationName) => operationName switch
+    {
+        McpCatalogExpectations.DocumentsGet => "document",
+        McpCatalogExpectations.MessagesInspect => "message",
+        McpCatalogExpectations.QueueTransferInspect => "transfer",
+        McpCatalogExpectations.QueueTransferReceipt => "receipt",
+        McpCatalogExpectations.ScheduleInspect => "schedule",
+        McpCatalogExpectations.SagaInspect => "saga",
+        BlobAgentCases.Metadata => "metadata",
+        BlobAgentCases.UploadInfo => "upload",
+        _ => null
+    };
+
     private static (JsonElement Root, JsonElement Node) ResultSchema(string operationName)
     {
         var descriptor = McpOperationCatalog.Entries.Single(item => item.Name == operationName);
         var result = descriptor.OutputSchema.GetProperty(McpSchemaInspector.OneOf)[0]
             .GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
+        if (operationName == McpCatalogExpectations.CredentialsConfigure)
+        { return (descriptor.OutputSchema, result); }
         var reference = McpSchemaInspector.References(result).First();
         return (descriptor.OutputSchema, McpSchemaInspector.Resolve(descriptor.OutputSchema, reference));
     }

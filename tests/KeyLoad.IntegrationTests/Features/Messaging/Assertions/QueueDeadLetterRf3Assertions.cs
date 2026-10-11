@@ -24,8 +24,8 @@ internal static class QueueDeadLetterRf3Assertions
             QueueDeadLetterRf3Protocol.One, QueueDeadLetterRf3Protocol.TerminalVersion, QueueDeadLetterRf3Protocol.First,
             null, null, LeaseVersion: QueueDeadLetterRf3Protocol.First, SafeFailureCode: QueueDeadLetterRf3Protocol.Exhausted, ParkedSequence: QueueDeadLetterRf3Protocol.First),
             QueueDeadLetterRf3Protocol.Payload, QueueDeadLetterRf3Protocol.Headers);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(request, token)), expected);
-        await EqualAsync((await McpCallerAssertions.SuccessAsync<MessageInspection>(await callers.Mcp.CallAsync(
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, token)), expected);
+        await EqualAsync((await PublicReadAssertions.MessageAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesInspect, request, token))).Value, expected);
     }
 
@@ -52,9 +52,9 @@ internal static class QueueDeadLetterRf3Assertions
         await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.CommitAsync(state.Refused, token), ErrorCode.ResourceExhausted);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
             state.Refused, token), ErrorCode.ResourceExhausted, dispatched: true);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(state.Partition, QueueDeadLetterRf3Protocol.Collection, QueueDeadLetterRf3Protocol.Refused), token))).IsNull();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(
+        await Assert.That(await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
             new(state.Lane, QueueDeadLetterRf3Protocol.Refused), token))).IsNull();
     }
 
@@ -86,8 +86,8 @@ internal static class QueueDeadLetterRf3Assertions
             QueueDeadLetterRf3Protocol.ClaimVersion, sequence, null, null, QueueDeadLetterRf3Protocol.Root,
             QueueDeadLetterRf3Protocol.First, delivery.LeaseUntil), QueueDeadLetterRf3Protocol.Payload, QueueDeadLetterRf3Protocol.Headers);
         var request = new InspectMessageRequest(lane, delivery.Id);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(request, token)), expected);
-        await EqualAsync((await McpCallerAssertions.SuccessAsync<MessageInspection>(await callers.Mcp.CallAsync(
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, token)), expected);
+        await EqualAsync((await PublicReadAssertions.MessageAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesInspect, request, token))).Value, expected);
     }
 

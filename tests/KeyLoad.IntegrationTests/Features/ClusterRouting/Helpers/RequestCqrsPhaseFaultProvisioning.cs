@@ -60,8 +60,8 @@ internal static class RequestCqrsPhaseFaultProvisioning
         await Assert.That(stored.Id).IsEqualTo(principalId);
         await Assert.That(stored.ClusterAdministrator).IsFalse();
         await Assert.That(stored.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsSuccess).IsTrue();
     }
 
     private static async Task SeedDocumentAsync(KeyLoadClient administrator, PartitionRef partition,

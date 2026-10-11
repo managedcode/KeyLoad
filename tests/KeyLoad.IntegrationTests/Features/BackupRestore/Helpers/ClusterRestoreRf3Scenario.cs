@@ -138,9 +138,9 @@ internal static class ClusterRestoreRf3Scenario
         PartitionRef partition, CancellationToken cancellationToken)
     {
         var reference = new EntityRef(partition, RelationalSqlRf3Tokens.Documents, PostCaptureId);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken))).IsNull();
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, cancellationToken))).IsNull();
         var request = new GetDocumentRequest(reference);
-        await Assert.That((await McpCallerAssertions.SuccessAsync<DocumentResult?>(await official.CallAsync(
+        await Assert.That((await PublicReadAssertions.DocumentAsync(await official.CallAsync(
             McpCallerTools.DocumentsGet, request, cancellationToken))).Value).IsNull();
         var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsGet, request);
         await Assert.That(await SqlRf3Protocol.SdkAsync<DocumentResult?>(sdk, sql, cancellationToken)).IsNull();

@@ -19,9 +19,9 @@ internal static partial class PartitionMovementPublicParentRf3Cut
     {
         var models = seed.Models;
         var sdk = seed.Source;
-        var first = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(models.First, cancellationToken));
-        var second = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(models.Second, cancellationToken));
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(new(models.Partition,
+        var first = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(models.First, cancellationToken));
+        var second = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(models.Second, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(new(models.Partition,
             RelationalSqlRf3Tokens.Documents, RelationalSqlRf3Tokens.DocumentId), cancellationToken));
         var graph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(new(models.Partition,
             RelationalSqlRf3Tokens.Graph, models.First), cancellationToken));
@@ -29,10 +29,10 @@ internal static partial class PartitionMovementPublicParentRf3Cut
             PartitionMovementPublicParentRf3Seed.Graph, models.First), cancellationToken));
         var vectors = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(models.Search(), cancellationToken));
         var stream = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(models.ReadStream(), cancellationToken));
-        var work = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(models.Inspect(), cancellationToken));
-        var forward = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(new(new(models.Partition,
+        var work = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(models.Inspect(), cancellationToken));
+        var forward = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(new(models.Partition,
             PartitionMovementPublicParentRf3Seed.Queue), PartitionMovementPublicParentRf3Seed.ForwardMessage), cancellationToken));
-        var reverse = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(new(new(models.Partition,
+        var reverse = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(new(models.Partition,
             PartitionMovementPublicParentRf3Seed.Queue), PartitionMovementPublicParentRf3Seed.DerivedMessage), cancellationToken));
         var samples = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadSamplesAsync(new(models.Partition,
             RelationalSqlRf3Tokens.SeriesSet, RelationalSqlRf3Tokens.SeriesId,

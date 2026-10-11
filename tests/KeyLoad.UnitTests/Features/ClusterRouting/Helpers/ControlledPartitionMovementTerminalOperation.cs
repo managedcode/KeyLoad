@@ -16,12 +16,14 @@ internal static class ControlledPartitionMovementTerminalOperation
         ServerRuntimeOptions sourceRuntime, ServerRuntimeOptions targetRuntime,
         PartitionMovementPeerAdmission sourceAdmission, PartitionMovementPeerAdmission targetAdmission,
         string callerAddress, byte[] originalReceipt, ControlledPartitionMovementOutcomeAuthority originalAuthority,
-        DateTimeOffset originalRecordedAt, long initialPosition, DateTimeOffset wholeExpiresAt, TimeSpan issuedExpiryWindow, CancellationToken cancellationToken)
+        DateTimeOffset originalRecordedAt, long initialPosition, DateTimeOffset wholeExpiresAt, TimeSpan issuedExpiryWindow, CancellationToken cancellationToken, ControlledPartitionMovementRetainedOutcomeAudit? audit = null)
     {
         await PartitionMovementCleanupCountAssertions.InventoryAsync();
         var installed = await ControlledPartitionMovementInstallationScenario.ExecuteAsync(source, target,
             corpus, sourceRuntime, targetRuntime, sourceAdmission, targetAdmission, callerAddress,
             originalReceipt, initialPosition, wholeExpiresAt, cancellationToken);
+        if (audit is not null)
+        { await audit.CheckAsync(source, target); }
         var finalized = await ControlledPartitionMovementFinalizeFlow.ExecuteAsync(source, sourceRuntime,
             sourceAdmission, corpus, installed.Installed, callerAddress,
             ControlledPartitionMovementFirstPhaseExpiry.Create(source, sourceRuntime, wholeExpiresAt, cancellationToken),
@@ -46,6 +48,8 @@ internal static class ControlledPartitionMovementTerminalOperation
             .SequenceEqual(targetImage, StringComparer.Ordinal)).IsTrue();
         await ControlledPartitionMovementRetiredSourceAssertions.AssertAsync(source, target,
             originalAuthority, originalReceipt, originalRecordedAt, cancellationToken);
+        if (audit is not null)
+        { await audit.ReplayAsync(source, target, cancellationToken); }
         var sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var sourcePosition = source.Store.Position;
         source.Reopen();
@@ -57,5 +61,7 @@ internal static class ControlledPartitionMovementTerminalOperation
         await ControlledPartitionMovementInstalledModelImage.AssertAsync(target, corpus, installed.Pages);
         await ControlledPartitionMovementRetiredSourceAssertions.AssertAsync(source, target,
             originalAuthority, originalReceipt, originalRecordedAt, cancellationToken);
+        if (audit is not null)
+        { await audit.CheckAsync(source, target); }
     }
 }

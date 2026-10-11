@@ -27,7 +27,7 @@ internal static class TopicSqlRf3Seed
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token));
         var original = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadEventSourceAsync(new(new(partition,
             TopicSqlRf3Protocol.Topic, EventSourceKind.Topic)), token));
-        var queue = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(new(new(partition,
+        var queue = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(new(partition,
             TopicSqlRf3Protocol.Queue), TopicSqlRf3Protocol.Message), token));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, TopicSqlRf3Protocol.Topic, Capability.Query, token);
         return new TopicSqlRf3State(partition, command, receipt, original, queue!, identity);

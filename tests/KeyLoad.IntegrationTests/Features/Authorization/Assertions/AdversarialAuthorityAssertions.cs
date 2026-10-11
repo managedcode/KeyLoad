@@ -14,8 +14,8 @@ internal static class AdversarialAuthorityAssertions
     internal static async Task<AdversarialAuthorityImage> ImageAsync(KeyLoadClient root,
         AdversarialAuthorityState state, CancellationToken token)
     {
-        var owned = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(state.Owned.Scenario.Reference, token));
-        var foreign = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(state.Foreign.Scenario.Reference, token));
+        var owned = await PublicReadAssertions.DocumentAsync(await root.GetAsync(state.Owned.Scenario.Reference, token));
+        var foreign = await PublicReadAssertions.DocumentAsync(await root.GetAsync(state.Foreign.Scenario.Reference, token));
         await Assert.That(owned).IsNotNull();
         await Assert.That(foreign).IsNotNull();
         await DocumentAsync(state.Owned, owned!);
@@ -28,10 +28,10 @@ internal static class AdversarialAuthorityAssertions
     internal static async Task HealthyAsync(KeyLoadClient reader, McpOfficialClient session,
         AdversarialAuthorityState state, CancellationToken token)
     {
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(state.Owned.Scenario.Reference, token));
+        var sdk = await PublicReadAssertions.DocumentAsync(await reader.GetAsync(state.Owned.Scenario.Reference, token));
         await Assert.That(sdk).IsNotNull();
         await DocumentAsync(state.Owned, sdk!);
-        var official = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(
+        var official = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Owned.Scenario.Reference), token));
         await DocumentAsync(state.Owned, official.Value);
         await Assert.That(official.Value.Reference).IsEqualTo(state.Owned.Scenario.Reference);

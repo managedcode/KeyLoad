@@ -50,8 +50,8 @@ internal static class ScopedCommandIdentityRf3Assertions
         var document = ScopedCommandIdentityRf3Oracle.Document(scenario, first);
         await AssertDocumentAsync(sdk, mcp, document, minimum, cancellationToken);
         var request = new InspectMessageRequest(new(document.Reference.Partition, scenario.Queue), "same-message");
-        var sdkMessage = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
-        var mcpMessage = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await mcp.CallAsync(
+        var sdkMessage = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
+        var mcpMessage = await PublicReadAssertions.MessageAsync(await mcp.CallAsync(
             McpCallerTools.MessagesInspect, request, cancellationToken));
         var expected = ScopedCommandIdentityRf3Oracle.Message(first);
         await ScopedCommandIdentityRf3Oracle.EqualAsync<MessageInspection?>(expected, sdkMessage);
@@ -61,8 +61,8 @@ internal static class ScopedCommandIdentityRf3Assertions
     private static async Task AssertDocumentAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         DocumentResult expected, CommitToken minimum, CancellationToken cancellationToken)
     {
-        var sdkDocument = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(expected.Reference, minimum, cancellationToken));
-        var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await mcp.CallAsync(
+        var sdkDocument = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(expected.Reference, minimum, cancellationToken));
+        var mcpDocument = await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(expected.Reference, minimum), cancellationToken));
         await ScopedCommandIdentityRf3Oracle.EqualAsync<DocumentResult?>(expected, sdkDocument);
         await ScopedCommandIdentityRf3Oracle.EqualAsync<DocumentResult?>(expected, mcpDocument.Value);

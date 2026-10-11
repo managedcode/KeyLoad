@@ -29,6 +29,28 @@ internal static class ClusterReplicationTestSupport
         return result.Value!;
     }
 
+    internal static Result Success(Result result)
+    {
+        if (!result.IsSuccess)
+        { Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}"); }
+        return result;
+    }
+
+    internal static async Task<Result> RetryDuringElectionAsync(Func<Task<Result>> action,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var result = await action();
+            if (result.IsSuccess)
+            { return result; }
+            var code = result.Problem?.ErrorCode ?? "MissingProblem";
+            await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
+                .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
+            await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
+        }
+    }
+
     internal static async Task EventuallyAsync(Func<Task<bool>> predicate, CancellationToken cancellationToken)
     {
         while (!await predicate())
@@ -88,7 +110,7 @@ internal static class LeaderLossRecoveryScenario
         await ClusterReplicationTestSupport.EventuallyAsync(
             async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
         await Assert.That(ClusterReplicationTestSupport.Success(
-            await surviving.GetAsync(new(state.Partition, Collection, "minority"), cancellationToken))).IsNull();
+            await surviving.GetAsync(new(state.Partition, Collection, "minority"), cancellationToken)).Document).IsNull();
         await VerifyAllNodesReadyAsync(fixture, state, projectionThroughSequence, cancellationToken);
     }
 
@@ -107,12 +129,12 @@ internal static class LeaderLossRecoveryScenario
             await Assert.That(ClusterReplicationTestSupport.Success(
                 await state.Clients[index].SubscriptionStatusAsync(state.Subscription, cancellationToken)).Checkpoint).IsEqualTo(3);
             await Assert.That(ClusterReplicationTestSupport.Success(
-                await state.Clients[index].GetAsync(new(state.Partition, Collection, "o1"), cancellationToken))!.Revision).IsEqualTo(3);
+                await state.Clients[index].GetAsync(new(state.Partition, Collection, "o1"), cancellationToken)).Document!.Revision).IsEqualTo(3);
             await Assert.That(ClusterReplicationTestSupport.Success(
                 await state.Clients[index].OutboxStatusAsync(state.Partition, cancellationToken))
                 .Consumers.Single().Checkpoint).IsEqualTo(projectionThroughSequence);
             await Assert.That(ClusterReplicationTestSupport.Success(
-                await state.Clients[index].GetAsync(new(state.Partition, Materialized, "o1"), cancellationToken))!.Revision).IsEqualTo(1);
+                await state.Clients[index].GetAsync(new(state.Partition, Materialized, "o1"), cancellationToken)).Document!.Revision).IsEqualTo(1);
         }
     }
 }

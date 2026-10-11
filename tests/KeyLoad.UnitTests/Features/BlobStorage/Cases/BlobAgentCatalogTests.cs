@@ -27,6 +27,7 @@ internal sealed class BlobAgentCatalogTests
     private const string Receipt = "receipt";
     private const string Value = "value";
     private const string Metadata = "metadata";
+    private const string Upload = "upload";
     private const string Offset = "offset";
     private const string Bytes = "bytes";
     private const string Items = "items";
@@ -132,9 +133,20 @@ internal sealed class BlobAgentCatalogTests
             var root = Find(item.Name).OutputSchema;
             var success = root.GetProperty(McpSchemaInspector.OneOf)[0];
             var wrapper = success.GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
-            var nullable = item.Name is BlobAgentCases.Metadata or BlobAgentCases.UploadInfo;
-            await Assert.That(McpSchemaInspector.HasType(wrapper, McpSchemaInspector.Null)).IsEqualTo(nullable);
+            var absentRead = item.Name is BlobAgentCases.Metadata or BlobAgentCases.UploadInfo;
+            await Assert.That(McpSchemaInspector.HasType(wrapper, McpSchemaInspector.Null)).IsFalse();
             var result = root.GetProperty(McpSchemaInspector.Defs).GetProperty(McpSchemaInspector.Result);
+            if (absentRead)
+            {
+                var field = item.Name == BlobAgentCases.Metadata ? Metadata : Upload;
+                var properties = result.GetProperty(McpSchemaInspector.Properties);
+                await Assert.That(Names(properties)).IsEquivalentTo(new[] { field });
+                var domain = properties.GetProperty(field);
+                await Assert.That(McpSchemaInspector.HasType(domain, McpSchemaInspector.Null)).IsTrue();
+                var value = Resolve(root, domain);
+                await Assert.That(Names(value.GetProperty(McpSchemaInspector.Properties)))
+                    .IsEquivalentTo(ValueFields(item.Name == BlobAgentCases.Metadata ? BlobAgentCases.Complete : BlobAgentCases.Begin));
+            }
             if (item.CommandKind.HasValue)
             {
                 await Assert.That(Names(result.GetProperty(McpSchemaInspector.Properties))).IsEquivalentTo(new[] { Receipt, Value });

@@ -22,11 +22,11 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         {
             var response = await client.GetAsync(new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken)
                 .ConfigureAwait(false);
-            if (!response.IsSuccess)
+            if (response.IsFailed)
             {
-                return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem?.ErrorCode);
+                return KeyLoadOpenLoopResults.RejectOrThrow(response.Problem.ErrorCode);
             }
-            var found = response.Value;
+            var found = response.Value.Document;
             var result = found is null ? null : new FoundDocument(found.Reference.Id, found.Json);
             return new(OpenLoopSessionDisposition.Succeeded, new(Document: result));
         }
@@ -108,7 +108,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     {
         var requested = new EntityRef(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id);
         var actual = KeyLoadClientResults.Success(await client.GetAsync(requested, cancellationToken)
-            .ConfigureAwait(false), OpenLoopProtocolIdentities.CancellationHealthyReadOperation);
+            .ConfigureAwait(false), OpenLoopProtocolIdentities.CancellationHealthyReadOperation).Document;
         return actual is null
             ? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMissing)
             : new(requested, actual);
@@ -121,7 +121,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var found = KeyLoadClientResults.Success(await client.GetAsync(
-            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken));
+            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken)).Document;
         return found is null ? null : new(found.Reference.Id, found.Json);
     }
 

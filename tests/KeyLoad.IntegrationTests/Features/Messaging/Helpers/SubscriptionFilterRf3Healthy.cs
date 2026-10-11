@@ -27,7 +27,7 @@ internal static class SubscriptionFilterRf3Healthy
             SubscriptionFilterRf3Protocol.Initial, [new PutDocument(SubscriptionFilterRf3Protocol.Collection, SubscriptionFilterRf3Protocol.Healthy, SubscriptionFilterRf3Protocol.Payload)]);
         var original = await McpCallerAssertions.SdkSuccessAsync(await manager.CommitSubscriptionProcessingAsync(processing, token));
         await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionProcessingResult>(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, processing, token))).Value, original);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await manager.GetAsync(new(seed.Group.Source.Partition, SubscriptionFilterRf3Protocol.Collection, SubscriptionFilterRf3Protocol.Healthy), token));
+        var document = await PublicReadAssertions.DocumentAsync(await manager.GetAsync(new(seed.Group.Source.Partition, SubscriptionFilterRf3Protocol.Collection, SubscriptionFilterRf3Protocol.Healthy), token));
         await Assert.That(document!.Json).IsEqualTo(SubscriptionFilterRf3Protocol.Payload);
         await Assert.That(document.Revision).IsEqualTo(SubscriptionFilterRf3Protocol.Initial);
         await SubscriptionFilterRf3Assertions.StatusAsync(manager, mcp, seed.Group, SubscriptionFilterRf3Protocol.Updated, SubscriptionFilterRf3Protocol.HealthyCheckpoint, false, token);

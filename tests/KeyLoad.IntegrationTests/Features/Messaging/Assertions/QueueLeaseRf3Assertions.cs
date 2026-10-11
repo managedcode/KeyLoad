@@ -8,7 +8,7 @@ internal static class QueueLeaseRf3Assertions
 {
     internal static async Task<MessageInspection> InspectAsync(KeyLoadClient sdk, QueueLaneRef lane, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        var actual = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             new(lane, QueueLeaseRf3Protocol.Message), token));
         return actual ?? throw new InvalidOperationException(QueueLeaseRf3Protocol.MissingSetup);
     }

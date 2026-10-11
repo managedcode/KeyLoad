@@ -48,9 +48,9 @@ internal static class RelationalSqlRf3JoinRejectionFlow
     internal static async Task<(DocumentResult? Left, DocumentResult? Right)> ReadRowsAsync(KeyLoadClient sdk,
         RelationalSqlRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var left = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        var left = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(scenario.Partition, RelationalSqlRf3Tokens.Table, OrderId), cancellationToken));
-        var right = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        var right = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(scenario.Partition, Right, CustomerId), cancellationToken));
         await Assert.That(left).IsNotNull();
         await Assert.That(right).IsNotNull();

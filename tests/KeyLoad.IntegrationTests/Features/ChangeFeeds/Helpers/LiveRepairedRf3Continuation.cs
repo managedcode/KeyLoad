@@ -20,15 +20,15 @@ internal static class LiveRepairedRf3Continuation
         await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt(FeedLiveRf3Protocol.RepairedMutationKind, FeedLiveRf3Protocol.Collection,
             FeedLiveRf3Protocol.First, FeedLiveRf3Protocol.RepairedRevision) }, receipt.Mutations.ToArray());
         var request = new ReadLiveQueryRequest(scenario.Query, repaired.Cursor);
-        await LiveRepairedRf3Assertions.DeltaAsync(reader, scenario, request, receipt, token);
+        await LiveRepairedRf3Assertions.DeltaAsync(administrator, reader, scenario, request, receipt, token);
         await ReplayAsync(administrator, scenario, command, receipt, token);
         (administrator, reader) = await LiveSubscriptionRf3Cold.RestartAsync(owner, administrator, reader,
             scenario, token);
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
             () => LiveTailRf3Assertions.DeniedAsync(reader, obsolete, ErrorCode.TokenInvalidated, token), token);
-        await LiveRepairedRf3Assertions.DeltaAsync(reader, scenario, request, receipt, token);
+        await LiveRepairedRf3Assertions.DeltaAsync(administrator, reader, scenario, request, receipt, token);
         await ReplayAsync(administrator, scenario, command, receipt, token);
-        await LiveRepairedRf3Assertions.FreshAsync(reader, scenario, receipt, token);
+        await LiveRepairedRf3Assertions.FreshAsync(administrator, reader, scenario, receipt, token);
     }
 
     private static async Task ReplayAsync(RequestCqrsRf3Callers administrator, FeedLiveRf3Scenario scenario,

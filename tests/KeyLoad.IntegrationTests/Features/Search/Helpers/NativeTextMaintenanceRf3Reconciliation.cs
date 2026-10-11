@@ -49,13 +49,13 @@ internal sealed class NativeTextMaintenanceRf3Reconciliation(byte[] originalOutb
 
     private static async Task SdkDocumentAsync(KeyLoadClient sdk, DocumentResult expected, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(expected.Reference, token));
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(expected.Reference, token));
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
     private static async Task McpDocumentAsync(McpOfficialClient mcp, DocumentResult expected, CancellationToken token)
     {
-        var actual = (await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        var actual = (await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(expected.Reference), token))).Value;
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }

@@ -25,7 +25,7 @@ internal sealed class MultiLaneReceiveRf3Tests(ClusterFixture fixture)
             identity.Secret, deadline.Token);
         var tool = await mcp.Client.DiscoverKeyLoadToolAsync(MultiLaneReceiveRf3Flow.Tool, deadline.Token);
         await McpDiscoveryAssertions.VerifyAsync(tool);
-        var deniedBefore = await McpCallerAssertions.SdkSuccessAsync(await administrator.InspectAsync(new(lanes[1], MultiLaneReceiveRf3Flow.Message), deadline.Token));
+        var deniedBefore = await PublicReadAssertions.MessageAsync(await administrator.InspectAsync(new(lanes[1], MultiLaneReceiveRf3Flow.Message), deadline.Token));
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [.. lanes.Select(lane => new ReceiveRequest(Guid.NewGuid(), lane))]);
         var original = await McpCallerAssertions.SdkSuccessAsync(await worker.ReceiveAcrossLanesAsync(request, deadline.Token));
         await Assert.That(original.RequestId).IsEqualTo(request.RequestId);
@@ -41,7 +41,7 @@ internal sealed class MultiLaneReceiveRf3Tests(ClusterFixture fixture)
         var sqlMcp = await McpCallerAssertions.SuccessAsync<MultiLaneReceiveResult>(await mcp.CallAsync(
             SqlOperationProtocol.ToolName, MultiLaneReceiveRf3Flow.Sql(request), deadline.Token));
         await MultiLaneReceiveRf3Flow.EquivalentAsync(sqlMcp.Value, original);
-        var deniedAfter = await McpCallerAssertions.SdkSuccessAsync(await administrator.InspectAsync(new(lanes[1], MultiLaneReceiveRf3Flow.Message), deadline.Token));
+        var deniedAfter = await PublicReadAssertions.MessageAsync(await administrator.InspectAsync(new(lanes[1], MultiLaneReceiveRf3Flow.Message), deadline.Token));
         await Assert.That(JsonDefaults.Serialize(deniedAfter).AsSpan().SequenceEqual(JsonDefaults.Serialize(deniedBefore))).IsTrue();
         await CompleteAndFollowAsync(administrator, worker, mcp, request, original, deadline.Token);
     }
@@ -67,7 +67,7 @@ internal sealed class MultiLaneReceiveRf3Tests(ClusterFixture fixture)
             var completed = await McpCallerAssertions.SdkSuccessAsync(await worker.CompleteAsync(ack, token));
             var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token));
             await Assert.That(JsonDefaults.Serialize(completed).AsSpan().SequenceEqual(JsonDefaults.Serialize(replay.Value))).IsTrue();
-            var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.InspectAsync(new(lane, MultiLaneReceiveRf3Flow.Message), token));
+            var after = await PublicReadAssertions.MessageAsync(await administrator.InspectAsync(new(lane, MultiLaneReceiveRf3Flow.Message), token));
             await Assert.That(after!.Metadata.State).IsEqualTo(MessageState.Acked);
         }
         var healthyLane = request.Requests[0].Lane;

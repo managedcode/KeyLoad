@@ -32,7 +32,7 @@ internal sealed class ConnectionRf3AuthorizationTests
         var reference = ConnectionRf3PublicOperations.Reference(scenario.SecondIdentity);
         var following = await scenario.ObserveAsync(scenario.SecondIdentity, Guid.Empty, GrainReadKind.Document,
             () => independent.GetAsync(reference, token), token);
-        var value = await McpCallerAssertions.SdkSuccessAsync(following.Result);
+        var value = await PublicReadAssertions.DocumentAsync(following.Result);
         await ConnectionRf3PublicOperations.DocumentAsync(new(value, null), scenario.SecondIdentity, following.Witness,
             RequestCqrsRf3Protocol.DocumentJson, ConnectionRf3Protocol.InitialRevision);
         await ConnectionRf3WitnessReader.SameOwnerAsync(first.Witness, following.Witness);

@@ -85,7 +85,7 @@ internal static class PartitionMovementControlledBlobNewEffectsRf3Trial
         await Assert.That(failed.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         await McpCallerAssertions.ErrorAsync(await seed.Official.CallAsync(BlobToolNames.WritePart, request, token)
             .ConfigureAwait(false), ErrorCode.Validation, dispatched: true);
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobUploadInfoAsync(
+        var actual = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(
             new(request.Blob, request.UploadId), token).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(expected, actual);
     }

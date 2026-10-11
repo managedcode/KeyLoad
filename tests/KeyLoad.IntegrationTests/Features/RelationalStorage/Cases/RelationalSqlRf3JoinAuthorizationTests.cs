@@ -80,9 +80,9 @@ internal sealed class RelationalSqlRf3JoinAuthorizationTests(ClusterFixture fixt
     private static async Task<(DocumentResult? Left, DocumentResult? Right)> ReadRowsAsync(KeyLoadClient admin,
         RelationalSqlRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var left = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(
+        var left = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(
             new(scenario.Partition, RelationalSqlRf3Tokens.Table, "join-order"), cancellationToken));
-        var right = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(
+        var right = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(
             new(scenario.Partition, RightCollection, "join-customer"), cancellationToken));
         return (left, right);
     }

@@ -44,6 +44,7 @@ internal static class CredentialAuthorityClients
                 else
                 {
                     await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state.Document, token);
+                    await CredentialAuthorityFlow.VerifyStatusRoutesAsync(fixture, root, state, token);
                     await CredentialAuthorityFlow.ReplayAsync(root, state, token);
                 }
             }

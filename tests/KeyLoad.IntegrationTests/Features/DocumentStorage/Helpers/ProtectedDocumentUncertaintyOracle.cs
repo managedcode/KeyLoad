@@ -26,14 +26,14 @@ internal static class ProtectedDocumentUncertaintyOracle
         var expected = new DocumentResult(new(seed.Partition, "protected-documents", "one"), 2, ExpectedJson, false, []);
         var actual = minimum is null ? await sdk.GetAsync(expected.Reference, token)
             : await sdk.GetAsync(expected.Reference, minimum, token);
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(actual));
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(actual));
     }
 
     internal static async Task DocumentMcpAsync(McpOfficialClient official, ProtectedDocumentRf3Seed seed,
         CommitToken minimum, CancellationToken token)
     {
         var expected = new DocumentResult(new(seed.Partition, "protected-documents", "one"), 2, ExpectedJson, false, []);
-        var actual = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await official.CallAsync(
+        var actual = await PublicReadAssertions.DocumentAsync(await official.CallAsync(
             "keyload_documents_get", new GetDocumentRequest(expected.Reference, minimum), token));
         await SqlRf3Protocol.EqualAsync<DocumentResult?>(expected, actual.Value);
     }

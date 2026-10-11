@@ -33,10 +33,13 @@ internal sealed class SqlRf3BlobParityTests(ClusterFixture fixture)
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
         var request = new BlobMetadataRequest(new(scenario.Partition, RelationalSqlRf3Tokens.Blobs, RelationalSqlRf3Tokens.BlobId));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetBlobMetadataAsync(request, deadline.Token))).IsNull();
+        var absent = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetBlobMetadataAsync(request, deadline.Token));
+        await Assert.That(absent.Metadata).IsNull();
         var sql = SqlRf3Protocol.Call(scenario.Partition, SqlRf3Protocol.BlobMetadataTool, request);
-        await Assert.That(await SqlRf3Protocol.SdkAsync<BlobMetadata?>(sdk, sql, deadline.Token)).IsNull();
-        await Assert.That(await SqlRf3Protocol.McpAsync<BlobMetadata?>(mcp, sql, deadline.Token)).IsNull();
+        var sqlAbsent = await SqlRf3Protocol.SdkAsync<BlobMetadataReadResult>(sdk, sql, deadline.Token);
+        var mcpAbsent = await SqlRf3Protocol.McpAsync<BlobMetadataReadResult>(mcp, sql, deadline.Token);
+        await Assert.That(sqlAbsent.Metadata).IsNull();
+        await Assert.That(mcpAbsent.Metadata).IsNull();
         var list = new BlobListRequest(scenario.Partition, RelationalSqlRf3Tokens.Blobs);
         var native = await McpCallerAssertions.SdkSuccessAsync(await sdk.ListBlobsAsync(list, deadline.Token));
         var listSql = SqlRf3Protocol.Call(scenario.Partition, SqlRf3Protocol.BlobListTool, list);
@@ -113,14 +116,15 @@ internal sealed class SqlRf3BlobParityTests(ClusterFixture fixture)
         var request = new BlobMetadataRequest(metadata.Blob);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetBlobMetadataAsync(request, cancellationToken));
         var sql = SqlRf3Protocol.Call(metadata.Blob.Partition, SqlRf3Protocol.BlobMetadataTool, request);
-        await SqlRf3Protocol.EqualAsync(metadata, actual);
-        await SqlRf3Protocol.EqualAsync(metadata, await SqlRf3Protocol.McpAsync<BlobMetadata>(mcp, sql, cancellationToken));
+        await SqlRf3Protocol.EqualAsync(metadata, actual.Metadata);
+        var official = await SqlRf3Protocol.McpAsync<BlobMetadataReadResult>(mcp, sql, cancellationToken);
+        await SqlRf3Protocol.EqualAsync(metadata, official.Metadata);
         var list = new BlobListRequest(metadata.Blob.Partition, metadata.Blob.Resource);
         var native = await McpCallerAssertions.SdkSuccessAsync(await sdk.ListBlobsAsync(list, cancellationToken));
         var listSql = SqlRf3Protocol.Call(metadata.Blob.Partition, SqlRf3Protocol.BlobListTool, list);
-        var official = await SqlRf3Protocol.McpAsync<BlobListPage>(mcp, listSql, cancellationToken);
+        var officialList = await SqlRf3Protocol.McpAsync<BlobListPage>(mcp, listSql, cancellationToken);
         await Assert.That(native.Items).HasSingleItem();
         await SqlRf3Protocol.EqualAsync(metadata, native.Items[0]);
-        await SqlRf3Protocol.EqualAsync(native, official);
+        await SqlRf3Protocol.EqualAsync(native, officialList);
     }
 }

@@ -14,8 +14,8 @@ internal static class BlobMcpCatalog
         McpOperationFactory.Command<AbortBlobUploadRequest, BlobCommitResult<BlobUploadInfo>>(BlobToolNames.AbortUpload, BlobToolRoutes.AbortUpload, OperationKind.AbortBlobUpload, static request => request.CommandId),
         McpOperationFactory.Command<DeleteBlobRequest, BlobCommitResult<BlobMetadata>>(BlobToolNames.Delete, BlobToolRoutes.Delete, OperationKind.DeleteBlob, static request => request.CommandId),
         McpOperationFactory.Command<ReclaimBlobRequest, BlobCommitResult<BlobReclaimResult>>(BlobToolNames.Reclaim, BlobToolRoutes.Reclaim, OperationKind.ReclaimBlob, static request => request.CommandId),
-        McpOperationFactory.Read<BlobMetadataRequest, BlobMetadata>(BlobToolNames.Metadata, BlobToolRoutes.Metadata, GrainReadKind.BlobMetadata, true),
-        McpOperationFactory.Read<BlobUploadInfoRequest, BlobUploadInfo>(BlobToolNames.UploadInfo, BlobToolRoutes.UploadInfo, GrainReadKind.BlobUploadInfo, true),
+        McpOperationFactory.Read<BlobMetadataRequest, BlobMetadataReadResult>(BlobToolNames.Metadata, BlobToolRoutes.Metadata, GrainReadKind.BlobMetadata),
+        McpOperationFactory.Read<BlobUploadInfoRequest, BlobUploadInfoReadResult>(BlobToolNames.UploadInfo, BlobToolRoutes.UploadInfo, GrainReadKind.BlobUploadInfo),
         McpOperationFactory.Read<BlobReadRequest, BlobReadResult>(BlobToolNames.ReadRange, BlobToolRoutes.ReadRange, GrainReadKind.BlobRange),
         McpOperationFactory.Read<BlobListRequest, BlobListPage>(BlobToolNames.List, BlobToolRoutes.List, GrainReadKind.BlobList)
     ];

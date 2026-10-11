@@ -25,7 +25,7 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Publication
             OperationKind.DeleteBlob, wrong.CommandId, BlobToolNames.Delete, wrong, null, ErrorCode.RevisionConflict,
             false, ct => seed.Source.DeleteBlobAsync(wrong, ct));
         await PartitionMovementControlledBlobFailedCutRf3Trial.RequireAsync(wave, seed, refused, token).ConfigureAwait(false);
-        var unchanged = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobMetadataAsync(new(blob), token).ConfigureAwait(false));
+        var unchanged = await PublicReadAssertions.MetadataAsync(await seed.Source.GetBlobMetadataAsync(new(blob), token).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(metadata, unchanged);
         proofs.Add(refused);
         var delete = new DeleteBlobRequest(Guid.NewGuid(), blob, metadata.Revision);
@@ -48,9 +48,9 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Publication
         await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(upload, OnePart, NoParts, PartLength, true), reclaimed.Value);
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.ReclaimBlob, reclaim.CommandId,
             BlobToolNames.Reclaim, reclaim, reclaimed, null, true, ct => seed.Source.ReclaimBlobAsync(reclaim, ct)));
-        var tombstone = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobMetadataAsync(new(blob), token).ConfigureAwait(false));
+        var tombstone = await PublicReadAssertions.MetadataAsync(await seed.Source.GetBlobMetadataAsync(new(blob), token).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(expected, tombstone);
-        var absent = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
+        var absent = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
         await Assert.That(absent).IsNull();
     }
 

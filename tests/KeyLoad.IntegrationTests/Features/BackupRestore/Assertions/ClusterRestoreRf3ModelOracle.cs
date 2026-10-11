@@ -21,13 +21,13 @@ internal static class ClusterRestoreRf3ModelOracle
         var models = seed.Models;
         var first = new DocumentResult(models.First, FirstRevision, RelationalSqlRf3Tokens.FirstRow, false, []);
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(models.First), first, () => sdk.GetAsync(models.First, cancellationToken), cancellationToken);
+            new GetDocumentRequest(models.First), new DocumentReadResult(first), () => sdk.GetAsync(models.First, cancellationToken), cancellationToken);
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(models.Second), new DocumentResult(models.Second, FirstRevision,
-                RelationalSqlRf3Tokens.SecondRow, false, []), () => sdk.GetAsync(models.Second, cancellationToken), cancellationToken);
+            new GetDocumentRequest(models.Second), new DocumentReadResult(new DocumentResult(models.Second, FirstRevision,
+                RelationalSqlRf3Tokens.SecondRow, false, [])), () => sdk.GetAsync(models.Second, cancellationToken), cancellationToken);
         var document = new EntityRef(models.Partition, RelationalSqlRf3Tokens.Documents, RelationalSqlRf3Tokens.DocumentId);
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(document), new DocumentResult(document, FirstRevision, RelationalSqlRf3Tokens.EmptyJson, false, []),
+            new GetDocumentRequest(document), new DocumentReadResult(new DocumentResult(document, FirstRevision, RelationalSqlRf3Tokens.EmptyJson, false, [])),
             () => sdk.GetAsync(document, cancellationToken), cancellationToken);
         await GraphsAsync(sdk, official, seed, cancellationToken).ConfigureAwait(false);
         await ReadAsync(sdk, official, models.Partition, McpCallerTools.SearchExecute, models.Search(),
@@ -82,11 +82,11 @@ internal static class ClusterRestoreRf3ModelOracle
         var forward = new InspectMessageRequest(new(seed.Partition, PartitionMovementPublicParentRf3Seed.Queue),
             PartitionMovementPublicParentRf3Seed.ForwardMessage);
         var reverse = forward with { Id = PartitionMovementPublicParentRf3Seed.DerivedMessage };
-        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, work, seed.OriginalModels.Work,
+        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, work, new MessageInspectionResult(seed.OriginalModels.Work),
             () => sdk.InspectAsync(work, cancellationToken), cancellationToken);
-        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, forward, seed.OriginalModels.Forward,
+        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, forward, new MessageInspectionResult(seed.OriginalModels.Forward),
             () => sdk.InspectAsync(forward, cancellationToken), cancellationToken);
-        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, reverse, seed.OriginalModels.Reverse,
+        await ReadAsync(sdk, official, seed.Partition, McpCallerTools.MessagesInspect, reverse, new MessageInspectionResult(seed.OriginalModels.Reverse),
             () => sdk.InspectAsync(reverse, cancellationToken), cancellationToken);
         var blob = new BlobReadRequest(seed.Blob.Blob, seed.Blob.Revision,
             BlobLimits.RawPartBytes - BlobRangeAdjustment, PartitionMovementPublicParentRf3Seed.BlobRange.Length);

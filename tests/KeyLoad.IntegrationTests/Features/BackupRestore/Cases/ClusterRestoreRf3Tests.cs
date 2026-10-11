@@ -31,6 +31,7 @@ internal sealed class ClusterRestoreRf3Tests
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken,
             deadline.Token);
         var failures = new List<Exception>();
+        var phase = new ClusterRestoreRf3PhaseObservation(TimeProvider.System);
         TwoRf3MembershipWave? source = null;
         PartitionMovementPublicParentRf3Seed? seed = null;
         var ownedRoot = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, ArtifactsDirectory,
@@ -42,16 +43,31 @@ internal sealed class ClusterRestoreRf3Tests
             Directory.CreateDirectory(ownedRoot);
             if (!OperatingSystem.IsWindows())
             { File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
-            source = await TwoRf3MembershipWave.StartProtectedDocumentsAsync(caller.Token).ConfigureAwait(false);
+            source = await TwoRf3MembershipWave.StartProtectedDocumentsAsync(phase.Startup, caller.Token).ConfigureAwait(false);
+            phase.Set(ClusterRestoreRf3Phase.SeedCreate);
             seed = await PartitionMovementPublicParentRf3Seed.CreateAsync(source, caller.Token).ConfigureAwait(false);
+            phase.Set(ClusterRestoreRf3Phase.ScenarioEnter);
             await scenario(source, seed, ownedRoot, caller.Token).ConfigureAwait(false);
+            phase.Set(ClusterRestoreRf3Phase.ScenarioComplete);
         }, failures).ConfigureAwait(false);
+        var bodyPhase = phase.Current;
+        var callerCanceled = caller.IsCancellationRequested;
+        var deadlineCanceled = deadline.IsCancellationRequested;
+        phase.Set(ClusterRestoreRf3Phase.Unknown);
         if (seed is { } calls)
-        { await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            phase.Set(ClusterRestoreRf3Phase.SeedDispose);
+            await ServerFailureObserver.ObserveAsync(() => calls.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (source is { } topology)
-        { await ServerFailureObserver.ObserveAsync(() => topology.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        {
+            phase.Set(ClusterRestoreRf3Phase.SourceDispose);
+            await ServerFailureObserver.ObserveAsync(() => topology.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         if (failures.Count == 0 && Directory.Exists(ownedRoot))
         { ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures); }
+        await ServerFailureObserver.ObserveAsync(() => phase.WriteAsync(bodyPhase, failures.Count,
+            callerCanceled, deadlineCanceled), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

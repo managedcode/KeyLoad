@@ -64,7 +64,7 @@ internal static class MultiLaneReceiveCancellationAssertions
             McpCallerTools.MessagesComplete, command, token).ConfigureAwait(false)).ConfigureAwait(false);
         await EqualAsync(replay.Value, result).ConfigureAwait(false);
         await Assert.That(result.CommandId).IsEqualTo(command.CommandId);
-        var inspected = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.InspectAsync(
+        var inspected = await PublicReadAssertions.MessageAsync(await administrator.Sdk.InspectAsync(
             new(lane, delivery.Id), token).ConfigureAwait(false)).ConfigureAwait(false);
         var expected = new MessageInspection(new(delivery.Id, MessageState.Acked, 1, 3, readySequence,
             null, null, LeaseVersion: 1), null, null);
@@ -106,7 +106,7 @@ internal static class MultiLaneReceiveCancellationAssertions
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
-        var inspected = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.InspectAsync(
+        var inspected = await PublicReadAssertions.MessageAsync(await administrator.Sdk.InspectAsync(
             new(lane, id), token).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(inspected!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(inspected.Metadata.LeaseUntil).IsEqualTo(delivery.LeaseUntil);
@@ -117,6 +117,6 @@ internal static class MultiLaneReceiveCancellationAssertions
 
     private static async Task<MessageInspection?> InspectAsync(RequestCqrsRf3Callers administrator,
         QueueLaneRef lane, CancellationToken token)
-        => await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.InspectAsync(
+        => await PublicReadAssertions.MessageAsync(await administrator.Sdk.InspectAsync(
             new(lane, MultiLaneReceiveRf3Flow.Message), token).ConfigureAwait(false)).ConfigureAwait(false);
 }

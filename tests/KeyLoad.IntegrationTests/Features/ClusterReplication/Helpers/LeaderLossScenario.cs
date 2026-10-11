@@ -92,7 +92,7 @@ internal static class LeaderLossScenario
     {
         foreach (var client in clients)
         {
-            await Assert.That(Success(await client.GetAsync(new(partition, Collection, "o1"), cancellationToken))!.Revision).IsEqualTo(1);
+            await Assert.That(Success(await client.GetAsync(new(partition, Collection, "o1"), cancellationToken)).Document!.Revision).IsEqualTo(1);
             await Assert.That(Success(await client.ReadStreamAsync(new(new(partition, Events, "o1")), cancellationToken)).Events).HasSingleItem();
             await Assert.That(Success(await client.ReadEventSourceAsync(new(subscription.Source), cancellationToken)).Events.Length).IsEqualTo(3);
         }

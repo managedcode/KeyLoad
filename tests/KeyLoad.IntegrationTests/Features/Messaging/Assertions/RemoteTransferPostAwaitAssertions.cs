@@ -11,18 +11,18 @@ internal static class RemoteTransferPostAwaitAssertions
         CancellationToken token)
     {
         await calls.RequireAsync(seed.Scenario.SourcePartition, RemoteTransferColdProtocol.InspectSource,
-            seed.SourceRequest, ct => calls.Sdk.InspectQueueTransferAsync(seed.SourceRequest, ct), intent, token);
+            seed.SourceRequest, ct => calls.Sdk.InspectQueueTransferAsync(seed.SourceRequest, ct), new QueueTransferReadResult(intent), token);
         await calls.RequireAsync(seed.Scenario.DestinationPartition, RemoteTransferColdProtocol.InspectReceipt,
-            seed.ReceiptRequest, ct => calls.Sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, ct), proof, token);
+            seed.ReceiptRequest, ct => calls.Sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, ct), new QueueTransferReceiptReadResult(proof), token);
         var request = new InspectMessageRequest(seed.Scenario.DestinationQueue, seed.Message.MessageId);
         await calls.RequireAsync(seed.Scenario.DestinationPartition, McpCallerTools.MessagesInspect,
-            request, ct => calls.Sdk.InspectAsync(request, ct), message, token);
+            request, ct => calls.Sdk.InspectAsync(request, ct), new MessageInspectionResult(message), token);
     }
 
     internal static async Task<QueueTransferReceiptInspection> ReceiptAsync(RemoteTransferPostAwaitCallers calls,
         RemoteTransferColdSeed seed, CommitReceipt receipt, CancellationToken token)
     {
-        var proof = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.InspectQueueTransferReceiptAsync(
+        var proof = await PublicReadAssertions.ReceiptAsync(await calls.Sdk.InspectQueueTransferReceiptAsync(
             seed.ReceiptRequest, token)) ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         await Assert.That(proof.SourceQueue).IsEqualTo(seed.Scenario.SourceQueue);
         await Assert.That(proof.DestinationQueue).IsEqualTo(seed.Scenario.DestinationQueue);

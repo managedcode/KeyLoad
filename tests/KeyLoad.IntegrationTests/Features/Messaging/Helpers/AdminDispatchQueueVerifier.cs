@@ -56,7 +56,7 @@ internal static class AdminDispatchQueueVerifier
             McpCallerTools.MessagesComplete, command, cancellationToken));
         var ackReplay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(command, cancellationToken));
         await Assert.That(JsonDefaults.Serialize(ackReplay).AsSpan().SequenceEqual(JsonDefaults.Serialize(acknowledged.Value))).IsTrue();
-        var message = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(new(lane, Message), cancellationToken));
+        var message = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(lane, Message), cancellationToken));
         await Assert.That(message!.Metadata.State).IsEqualTo(MessageState.Acked);
         var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
             new(Guid.NewGuid(), lane, PageMessages), cancellationToken));

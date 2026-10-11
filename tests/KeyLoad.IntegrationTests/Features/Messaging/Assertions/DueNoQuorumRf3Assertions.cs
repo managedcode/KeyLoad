@@ -15,9 +15,9 @@ internal static class DueNoQuorumRf3Assertions
         long expectedOrdinal, CancellationToken cancellationToken)
     {
         var request = new InspectRecurringScheduleRequest(seed.Lane, seed.ScheduleId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectRecurringScheduleAsync(request,
+        var sdk = await PublicReadAssertions.ScheduleAsync(await callers.Sdk.InspectRecurringScheduleAsync(request,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.ScheduleAsync(await callers.Mcp.CallAsync(
             DueNoQuorumRf3Protocol.InspectScheduleTool, request, cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         await Assert.That(sdk).IsNotNull();
@@ -37,9 +37,9 @@ internal static class DueNoQuorumRf3Assertions
         bool expectedPresent, CancellationToken cancellationToken)
     {
         var request = new InspectMessageRequest(seed.Lane, seed.OccurrenceId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(request, cancellationToken)
+        var sdk = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.MessageAsync(await callers.Mcp.CallAsync(
             DueNoQuorumRf3Protocol.InspectMessageTool, request, cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         await Assert.That(sdk is not null).IsEqualTo(expectedPresent);
@@ -113,9 +113,9 @@ internal static class DueNoQuorumRf3Assertions
             {
                 await Assert.That(read.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.OwnershipLost));
             }
-            else if (read.Value is { NextOrdinal: > 1 })
+            else if (read.Value?.Schedule is { NextOrdinal: > 1 })
             { throw new InvalidOperationException(Incomplete); }
-            if (read.IsSuccess && read.Value is { NextOrdinal: 1 })
+            if (read.IsSuccess && read.Value?.Schedule is { NextOrdinal: 1 })
             {
                 await AssertOrdinalAsync(callers, seed, 1, deadline.Token).ConfigureAwait(false);
                 await AssertOccurrenceAsync(callers, seed, expectedPresent: true, deadline.Token).ConfigureAwait(false);

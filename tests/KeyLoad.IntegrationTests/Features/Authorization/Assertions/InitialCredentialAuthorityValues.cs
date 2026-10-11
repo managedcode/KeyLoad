@@ -13,10 +13,10 @@ internal static class InitialCredentialAuthorityValues
         InitialCredentialAuthorityState state, CancellationToken token)
     {
         var before = await ImageAsync(root, state, token);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(state.Seed.Scenario.Reference, token));
+        var sdk = await PublicReadAssertions.DocumentAsync(await reader.GetAsync(state.Seed.Scenario.Reference, token));
         await Assert.That(sdk).IsNotNull();
         await SqlRf3Protocol.EqualAsync<DocumentResult?>(Expected(state), sdk);
-        var official = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(
+        var official = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Seed.Scenario.Reference), token));
         await SqlRf3Protocol.EqualAsync(Expected(state), official.Value);
         await SqlRf3Protocol.EqualAsync(before, await ImageAsync(root, state, token));
@@ -25,7 +25,7 @@ internal static class InitialCredentialAuthorityValues
     internal static async Task<DiscoveryAuthorityImage> ImageAsync(global::KeyLoad.Client.KeyLoadClient root,
         InitialCredentialAuthorityState state, CancellationToken token)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(state.Seed.Scenario.Reference, token));
+        var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(state.Seed.Scenario.Reference, token));
         await Assert.That(document).IsNotNull();
         await SqlRf3Protocol.EqualAsync<DocumentResult?>(Expected(state), document);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Seed.Scenario.Partition, token));

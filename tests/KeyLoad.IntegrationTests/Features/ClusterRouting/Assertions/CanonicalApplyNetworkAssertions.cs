@@ -44,13 +44,13 @@ internal static class CanonicalApplyNetworkAssertions
         PartitionRef partition, CancellationToken token)
     {
         var reference = new EntityRef(partition, RequestCqrsRf3Protocol.AdminCollection, RequestCqrsRf3Protocol.DocumentId);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.GetAsync(reference, token));
+        var document = await PublicReadAssertions.DocumentAsync(await caller.Sdk.GetAsync(reference, token));
         await Assert.That(document!.Reference).IsEqualTo(reference);
         await Assert.That(document.Json).IsEqualTo(RequestCqrsRf3Protocol.ChangedDocumentJson);
         await Assert.That(document.Revision).IsEqualTo(2L);
         await Assert.That(document.Redacted).IsFalse();
         await Assert.That(document.RedactedFields.IsEmpty).IsTrue();
-        var official = await McpCallerAssertions.SuccessAsync<DocumentResult>(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
+        var official = await PublicReadAssertions.DocumentAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
         await EqualAsync(official.Value, document);
         var message = await MessageAsync(caller, new(partition, CanonicalApplyNetworkData.Queue), CanonicalApplyNetworkData.Message, 1, token);
         return (document, message);
@@ -58,8 +58,8 @@ internal static class CanonicalApplyNetworkAssertions
     private static async Task<MessageInspection> MessageAsync(RequestCqrsRf3Callers caller, QueueLaneRef lane,
         string id, long sequence, CancellationToken token)
     {
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.InspectAsync(new(lane, id), token));
-        var official = await McpCallerAssertions.SuccessAsync<MessageInspection>(await caller.Mcp.CallAsync(McpCallerTools.MessagesInspect, new InspectMessageRequest(lane, id), token));
+        var sdk = await PublicReadAssertions.MessageAsync(await caller.Sdk.InspectAsync(new(lane, id), token));
+        var official = await PublicReadAssertions.MessageAsync(await caller.Mcp.CallAsync(McpCallerTools.MessagesInspect, new InspectMessageRequest(lane, id), token));
         var expected = new MessageInspection(new(id, MessageState.Ready, 0, 1, sequence, null, null, null, 0, null, 1, null),
             CanonicalApplyNetworkData.Payload, CanonicalApplyNetworkData.Headers);
         await EqualAsync(sdk, expected);

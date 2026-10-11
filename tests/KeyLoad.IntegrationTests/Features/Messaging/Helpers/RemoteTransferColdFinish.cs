@@ -19,7 +19,7 @@ internal static class RemoteTransferColdFinish
         var acknowledged = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
             McpCallerTools.MessagesComplete, ack, token))).Value;
         await SqlRf3Protocol.EqualAsync(acknowledged, await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, token)));
-        var image = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        var image = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             new(seed.Scenario.DestinationQueue, seed.Message.MessageId), token));
         ArgumentNullException.ThrowIfNull(image);
         await Assert.That(image.Metadata.State).IsEqualTo(MessageState.Acked);

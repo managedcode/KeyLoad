@@ -10,12 +10,12 @@ internal static class CompositionSqlColdCapture
         RelationalSqlRf3Scenario scenario, QueueGraphLink link, CommandRequest forward, CommitReceipt forwardReceipt,
         CommandRequest reverse, CommitReceipt reverseReceipt, CancellationToken token)
     {
-        var first = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, token));
-        var second = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Second, token));
+        var first = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, token));
+        var second = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Second, token));
         var graph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(new(scenario.Partition,
             RelationalSqlRf3Tokens.Graph, scenario.First), token));
-        var source = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(CompositionSqlColdProtocol.Message), token));
-        var derived = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(
+        var source = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect(CompositionSqlColdProtocol.Message), token));
+        var derived = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect(
             CompositionSqlColdProtocol.MessagePrefix + CompositionSqlColdProtocol.EdgePrefix + CompositionSqlColdProtocol.Message), token));
         return new(scenario, link, forward, forwardReceipt, reverse, reverseReceipt, first!, second!, graph, source!, derived!);
     }

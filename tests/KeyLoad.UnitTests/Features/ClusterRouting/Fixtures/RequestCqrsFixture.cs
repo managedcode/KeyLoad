@@ -15,13 +15,20 @@ using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 [AttributeUsage(AttributeTargets.Class)]
-internal sealed class RequestCqrsDataSourceAttribute(bool nativeTextMaintenance = false)
+internal sealed class RequestCqrsDataSourceAttribute(bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false)
     : DataSourceGeneratorAttribute<RequestCqrsClusterFixture>
 {
     public bool NativeTextMaintenance { get; } = nativeTextMaintenance;
+    public bool NativeAnnMaintenance { get; } = nativeAnnMaintenance;
 
     protected override IEnumerable<Func<RequestCqrsClusterFixture>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
+        if (NativeAnnMaintenance)
+        {
+            yield return static () => new RequestCqrsClusterFixture(nativeAnnMaintenance:
+                static database => new KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime(database));
+            yield break;
+        }
         if (NativeTextMaintenance)
         {
             yield return static () => new RequestCqrsClusterFixture(nativeMaintenance:
@@ -33,7 +40,7 @@ internal sealed class RequestCqrsDataSourceAttribute(bool nativeTextMaintenance 
     }
 }
 
-internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDisposable
+internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDisposable
 {
     private const int ShutdownSeconds = 30;
     private const int StartupSeconds = 30;
@@ -41,6 +48,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private readonly System.Threading.Lock disposalGate = new();
     private Task? disposal;
     private readonly Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeFactory;
+    private readonly Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnFactory;
     private bool clusterStopped;
     private NativeRequestWorkOwner? requestWork;
     private readonly string ownerId = Guid.NewGuid().ToString("N");
@@ -48,12 +56,14 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null,
         Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime>? nativeMaintenance = null,
-        IGrainRequestPurposeObserver? purposeObserver = null)
+        IGrainRequestPurposeObserver? purposeObserver = null,
+        Func<TestDatabase, KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime>? nativeAnnMaintenance = null)
     {
         nativeFactory = nativeMaintenance;
+        nativeAnnFactory = nativeAnnMaintenance;
         Clock = clock ?? TimeProvider.System;
         RoutingOptions = UnitRoutingOptions.Routing(routing);
-        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: nativeFactory is not null);
+        Database = new TestDatabase(timeProvider: Clock, nativeReplicaAdmission: nativeFactory is not null || nativeAnnFactory is not null);
         try
         {
             RequestCqrsFixtureOwners.Register(ownerId, this);
@@ -88,6 +98,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal TimeProvider Clock { get; }
     internal IOptions<GrainRoutingOptions> RoutingOptions { get; }
     internal KeyLoad.UnitTests.Features.Search.NativeTextMaintenanceTestRuntime? NativeMaintenance { get; private set; }
+    internal KeyLoad.UnitTests.Features.Search.NativeAnnMaintenanceTestRuntime? NativeAnnMaintenance { get; private set; }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
     public Task InitializeAsync() => InitializeAsync(CancellationToken.None);
@@ -100,6 +111,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         try
         {
             NativeMaintenance = nativeFactory?.Invoke(Database);
+            NativeAnnMaintenance = nativeAnnFactory?.Invoke(Database);
             await Cluster.DeployAsync(startup.Token);
         }
         catch (Exception startupFailure)
@@ -179,31 +191,6 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             }, failures);
     }
 
-    private async Task DisposeOwnedResourcesAsync(List<Exception> failures)
-    {
-        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
-        if (requestWork is not null)
-        {
-            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
-        }
-        if (NativeMaintenance is not null)
-        {
-            if (!clusterStopped)
-            { return; }
-            var before = failures.Count;
-            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => NativeMaintenance.DisposeAsync().AsTask(), failures);
-            if (failures.Count != before)
-            { return; }
-        }
-        try
-        {
-            KeyLoad.Server.ServerFailureObserver.Observe(Database.Dispose, failures);
-        }
-        finally
-        {
-            RequestCqrsFixtureOwners.Release(ownerId);
-        }
-    }
 }
 
 internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
@@ -225,12 +212,21 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
                 .ValidateOnStart();
             siloBuilder.Services.AddSingleton<INativeTextMaintenance>(native.Owner);
         }
+        if (fixture.NativeAnnMaintenance is { } ann)
+        {
+            siloBuilder.Services.AddOptions<AnnMaintenanceOptions>()
+                .Bind(new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build()
+                    .GetSection(AnnMaintenanceOptions.SectionName))
+                .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage)
+                .ValidateOnStart();
+            siloBuilder.Services.AddSingleton<INativeAnnMaintenance>(ann.Owner);
+        }
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
-        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.NativeMaintenance is not null
+        siloBuilder.Services.AddSingleton<ICommitCoordinator>(fixture.NativeMaintenance is not null || fixture.NativeAnnMaintenance is not null
             ? new RequestCqrsNativeCommitCoordinator(fixture.Database)
             : new EmbeddedCoordinator(fixture.Database.Database));
         siloBuilder.Services.AddSingleton(fixture.Clock);

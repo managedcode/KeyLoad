@@ -111,10 +111,10 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
         var beforeB = await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token));
         var expected = json is null ? null : new DocumentResult(seed.Reference, revision, json, true, ["/secret"]);
         var request = new GetDocumentRequest(seed.Reference);
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(seed.Reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentResult?>(await official.CallAsync(Get, request, token))).Value);
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<DocumentResult?>(reader, SqlRf3Protocol.Call(seed.Partition, Get, request), token));
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<DocumentResult?>(official, SqlRf3Protocol.Call(seed.Partition, Get, request), token));
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await reader.GetAsync(seed.Reference, token)));
+        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(await official.CallAsync(Get, request, token))).Value);
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.SdkAsync<DocumentReadResult>(reader, SqlRf3Protocol.Call(seed.Partition, Get, request), token)).Document);
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.McpAsync<DocumentReadResult>(official, SqlRf3Protocol.Call(seed.Partition, Get, request), token)).Document);
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token))).Applied).IsGreaterThanOrEqualTo(beforeA.Applied);
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await target.StatusAsync(token))).Applied).IsGreaterThanOrEqualTo(beforeB.Applied);
     }
@@ -174,9 +174,9 @@ internal sealed class ProtectedDocumentRf3Scenario(TwoRf3MembershipWave wave) : 
             "deleteDocument" => null,
             _ => throw new InvalidDataException("The protected document oracle kind is invalid.")
         };
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
             await sdk.GetAsync(reference, minimum, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentResult?>(
+        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
             await mcp.CallAsync(Get, new GetDocumentRequest(reference, minimum), token))).Value);
     }
 

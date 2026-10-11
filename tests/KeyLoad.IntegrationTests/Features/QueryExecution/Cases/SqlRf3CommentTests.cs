@@ -57,7 +57,7 @@ internal sealed class SqlRf3CommentTests(ClusterFixture fixture)
             await sdk.GetAsync(scenario.First, deadline.Token))).IsNull();
         var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, request, deadline.Token);
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token));
+        var after = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token));
         await Assert.That(after).IsNotNull();
         await Assert.That(after!.Revision).IsEqualTo(RelationalSqlRf3Tokens.FirstRevision);
     }

@@ -24,6 +24,20 @@ internal static class IsolatedKeyLoadPublicRegressionAssertions
         return result.Value!;
     }
 
+    internal static async Task<DocumentResult?> DocumentReadAsync(Result<DocumentReadResult> result)
+    {
+        var response = await SuccessAsync(result);
+        await Assert.That(response).IsNotNull();
+        return response.Document;
+    }
+
+    internal static async Task<MessageInspection?> MessageReadAsync(Result<MessageInspectionResult> result)
+    {
+        var response = await SuccessAsync(result);
+        await Assert.That(response).IsNotNull();
+        return response.Message;
+    }
+
     internal static async Task ErrorAsync<T>(Result<T> result, ErrorCode code, string? credential = null, string? privateValue = null)
     {
         await Assert.That(result.IsSuccess).IsFalse();

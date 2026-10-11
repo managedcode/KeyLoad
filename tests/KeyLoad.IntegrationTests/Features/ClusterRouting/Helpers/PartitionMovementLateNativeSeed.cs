@@ -67,7 +67,7 @@ internal sealed class PartitionMovementLateNativeSeed : IDisposable
 
     internal async Task RequireOriginalAsync(CancellationToken cancellationToken)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await Source.GetAsync(new(Partition, Collection, DocumentId), cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await Source.GetAsync(new(Partition, Collection, DocumentId), cancellationToken));
         await Assert.That(document!.Json).IsEqualTo(OriginalJson);
         await Assert.That(document.Revision).IsEqualTo(OriginalRevision);
         await SqlRf3Protocol.EqualAsync(receipt,
@@ -82,7 +82,7 @@ internal sealed class PartitionMovementLateNativeSeed : IDisposable
         var command = new CommandRequest(Guid.NewGuid(), Partition,
             [new PutDocument(Collection, DocumentId, HealthyJson, ExpectedRevision: OriginalRevision)], placement.PlacementEpoch);
         _ = await McpCallerAssertions.SdkSuccessAsync(await Target.CommitAsync(command, cancellationToken));
-        var document = await McpCallerAssertions.SdkSuccessAsync(await Target.GetAsync(new(Partition, Collection, DocumentId), cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await Target.GetAsync(new(Partition, Collection, DocumentId), cancellationToken));
         await Assert.That(document!.Json).IsEqualTo(HealthyJson);
         await Assert.That(document.Revision).IsEqualTo(HealthyRevision);
     }

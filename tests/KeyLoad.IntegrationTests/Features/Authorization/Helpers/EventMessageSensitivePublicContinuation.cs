@@ -25,7 +25,7 @@ internal static class EventMessageSensitivePublicContinuation
             await EventMessageSensitivePublicOperations.CompleteAsync(worker, state, state.Original, DeliveryAction.Nack, token);
             await EventMessageSensitivePublicReads.RedactedAsync(inspector, state, true, token);
             var request = new InspectMessageRequest(state.Lane, EventMessageSensitivePublicProtocol.Message);
-            var parked = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.InspectAsync(request, token));
+            var parked = await PublicReadAssertions.MessageAsync(await root.Sdk.InspectAsync(request, token));
             await Assert.That(parked!.Metadata.State).IsEqualTo(MessageState.DeadLettered);
             var command = new CommandRequest(Guid.NewGuid(), state.Partition,
                 [new RedriveQueueMessage(state.Resource.Name, request.Id, parked.Metadata.StateVersion, parked.Metadata.DeliveryGeneration)]);

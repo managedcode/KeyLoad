@@ -44,7 +44,7 @@ internal static class PartitionMovementPublicParentRf3Administrator
         await Assert.That(actual.Id).IsEqualTo(principal.Id);
         await Assert.That(actual.ClusterAdministrator).IsTrue();
         await Assert.That(actual.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(),
-            credential, cancellationToken).ConfigureAwait(false))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(),
+            credential, cancellationToken).ConfigureAwait(false))).IsSuccess).IsTrue();
     }
 }

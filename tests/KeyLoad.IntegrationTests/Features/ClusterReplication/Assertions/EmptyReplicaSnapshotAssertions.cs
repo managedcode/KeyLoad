@@ -136,13 +136,13 @@ internal static class EmptyReplicaSnapshotAssertions
         string json, long revision, CommitToken minimum, CancellationToken token)
     {
         var expected = new DocumentResult(reference, revision, json, false, []);
-        await ExactAsync(Success(await sdk.GetAsync(reference, minimum, token)), expected);
-        await ExactAsync((await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        await ExactAsync(Success(await sdk.GetAsync(reference, minimum, token)).Document, expected);
+        await ExactAsync((await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token))).Value, expected);
         var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(reference.Partition,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum));
-        await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<DocumentResult>(sdk, call, token), expected);
-        await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<DocumentResult>(mcp, call, token), expected);
+        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, expected);
+        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, expected);
     }
 
     internal static async Task ExactAsync<T>(T actual, T expected)

@@ -37,7 +37,7 @@ internal static class CrossTenantRf3HealthyFlow
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo("The command ID was already used with different content.");
         await McpCallerAssertions.DoesNotDiscloseAsync(conflict, secret, McpDocumentProtocol.ConflictValue);
         await CrossTenantRf3StateAssertions.StateAsync(sdk, owned, CrossTenantRf3WholeFlow.HealthyJson, 2, token);
-        var read = await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(McpCallerTools.DocumentsGet,
+        var read = await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(owned.Reference), token));
         await Assert.That(JsonDefaults.Serialize(read.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(
             new DocumentResult(owned.Reference, 2, CrossTenantRf3WholeFlow.HealthyJson, false, [])))).IsTrue();

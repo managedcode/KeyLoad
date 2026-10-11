@@ -12,7 +12,7 @@ internal static class RemoteTransferRepairRf3Healthy
     {
         var seed = original.Seed;
         var delivered = await RemoteTransferCoordinatorRf3Wait.DeliveredAsync(sdk, seed, token);
-        var proof = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+        var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferRepairRf3Protocol.Missing);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, original.Intent with
         { State = QueueTransferState.Delivered, ReceiptToken = proof.ReceiptToken }, token);

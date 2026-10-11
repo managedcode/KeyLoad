@@ -65,9 +65,9 @@ internal static class NodeEpochRf3ReadOracle
         bool expectedCurrent, CancellationToken cancellationToken)
     {
         var reference = new EntityRef(workload.Partition, workload.Collection, workload.DocumentId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(reference,
+        var sdk = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         var expectedJson = expectedCurrent ? NodeEpochRf3Workload.DocumentJson : ReadStartDocument;

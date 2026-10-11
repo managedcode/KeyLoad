@@ -38,7 +38,7 @@ internal static class DiscoveryAuthorityRefusals
         await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
     }
 
-    private static async Task SdkAsync(ManagedCode.Communication.Result<DocumentResult?> result,
+    private static async Task SdkAsync(ManagedCode.Communication.Result<DocumentReadResult> result,
         DiscoveryAuthorityState state, ErrorCode expected)
     {
         await Assert.That(result.IsSuccess).IsFalse();

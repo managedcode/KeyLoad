@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -33,30 +34,52 @@ internal static class LiveTailRf3Assertions
         }
         await Assert.That(tail.ThroughSequence).IsEqualTo(FeedLiveRf3Protocol.UpdatedSequence);
         await Assert.That(tail.HasMore).IsFalse();
-        await Assert.That(tail.CutPosition).IsGreaterThanOrEqualTo(receipt.Token.Position);
+
     }
 
-    internal static async Task AllPathsAsync(RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario,
-        ReadLiveQueryRequest request, LiveQueryPage expected, CancellationToken token)
+    internal static async Task AllPathsAsync(RequestCqrsRf3Callers administrator,
+        RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest request,
+        LiveQueryPage expected, CommitReceipt receipt, CancellationToken token)
     {
-        var reply = await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, request, token);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveRf3Protocol.Secret);
-        var official = (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(reply)).Value;
-        var sql = SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.LiveRead, request);
-        var sdkSql = await SqlRf3Protocol.SdkAsync<LiveQueryPage>(reader.Sdk, sql, token);
-        var mcpSql = await SqlRf3Protocol.McpAsync<LiveQueryPage>(reader.Mcp, sql, token);
-        await LivePageRf3Assertions.RequireAsync(expected, expected, request,
+        ImmutableArray<QueryRow> rows = expected.ThroughSequence == FeedLiveRf3Protocol.DeletedSequence
+            ? [] : expected.ThroughSequence == FeedLiveRf3Protocol.UpdatedSequence
+                ? [UpdatedRow] : [LiveRepairedRf3Assertions.Row];
+        Task<QueryPage> SdkQuery() => QueryAsync(reader, scenario, token);
+        Task<QueryPage> McpQuery() => OfficialQueryAsync(reader, scenario, token);
+        var querySql = SqlRf3Protocol.Call(scenario.Partition, LiveQueryCutRf3Assertions.QueryTool, scenario.Query);
+        var sdkCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, receipt,
+            rows, SdkQuery, token);
+        var mcpCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, receipt,
+            rows, McpQuery, token);
+        var sdkSqlCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, receipt,
+            rows, () => SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, querySql, token), token);
+        var mcpSqlCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, receipt,
+            rows, () => SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, querySql, token), token);
+        await LivePageRf3Assertions.RequireAsync(expected, request, sdkCut,
             async next => await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(next, token)));
-        await LivePageRf3Assertions.RequireAsync(official, expected, request,
-            async next => (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(
-                await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, next, token))).Value);
-        await LivePageRf3Assertions.RequireAsync(sdkSql, expected, request,
+        await LivePageRf3Assertions.RequireAsync(expected, request, mcpCut, async next =>
+        {
+            var reply = await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, next, token);
+            await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveRf3Protocol.Secret);
+            return (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(reply)).Value;
+        });
+        await LivePageRf3Assertions.RequireAsync(expected, request, sdkSqlCut,
             next => SqlRf3Protocol.SdkAsync<LiveQueryPage>(reader.Sdk,
                 SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.LiveRead, next), token));
-        await LivePageRf3Assertions.RequireAsync(mcpSql, expected, request,
+        await LivePageRf3Assertions.RequireAsync(expected, request, mcpSqlCut,
             next => SqlRf3Protocol.McpAsync<LiveQueryPage>(reader.Mcp,
                 SqlRf3Protocol.Call(scenario.Partition, FeedLiveRf3Protocol.LiveRead, next), token));
     }
+
+    internal static async Task<QueryPage> QueryAsync(RequestCqrsRf3Callers reader,
+        FeedLiveRf3Scenario scenario, CancellationToken token)
+        => await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAstAsync(scenario.Query, token));
+
+    private static async Task<QueryPage> OfficialQueryAsync(RequestCqrsRf3Callers reader,
+        FeedLiveRf3Scenario scenario, CancellationToken token)
+        => (await McpCallerAssertions.SuccessAsync<QueryPage>(await reader.Mcp.CallAsync(
+            LiveQueryCutRf3Assertions.QueryTool, scenario.Query, token))).Value;
+
     internal static async Task DeniedAsync(RequestCqrsRf3Callers reader, ReadLiveQueryRequest request,
         ErrorCode expected, CancellationToken token)
     {

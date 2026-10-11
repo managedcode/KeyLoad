@@ -179,7 +179,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
         {
             var result = await AnnMaintenanceExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
-                clock, chunkSerializer, options, diagnostics, writer).ConfigureAwait(true);
+                clock, chunkSerializer, options, diagnostics, writer, purpose).ConfigureAwait(true);
             return EncodeParent(result, writer.CancellationToken);
         }
         var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,

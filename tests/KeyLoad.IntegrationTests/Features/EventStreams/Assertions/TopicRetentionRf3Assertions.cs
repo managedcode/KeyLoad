@@ -35,12 +35,12 @@ internal static class TopicRetentionRf3Assertions
     private static async Task PreservedModelsAsync(TopicRetentionRf3Scenario scenario, KeyLoadClient sdk,
         McpOfficialClient session, CancellationToken token)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(new(scenario.Partition, "orders", "derived"), token));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(new(scenario.Partition, "orders", "derived"), token));
         await Assert.That(document!.Json).IsEqualTo("{\"done\":true}");
         await Assert.That(document.Revision).IsEqualTo(1L);
         var request = new InspectMessageRequest(new(scenario.Partition, "work"), "derived");
-        var message = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, token));
-        var official = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await session.CallAsync(
+        var message = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, token));
+        var official = await PublicReadAssertions.MessageAsync(await session.CallAsync(
             McpCallerTools.MessagesInspect, request, token));
         await Assert.That(message!.PayloadJson).IsEqualTo("{\"input\":1}");
         await Assert.That(message.HeadersJson).IsEqualTo("{}");

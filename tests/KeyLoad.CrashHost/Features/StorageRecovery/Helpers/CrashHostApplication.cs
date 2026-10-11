@@ -17,6 +17,8 @@ internal static class CrashHostApplication
         const int RunAsyncArgsComponentIndex = 3;
 
         _ = SerializationExecutionRegistration.Process.Value;
+        if (await global::KeyLoad.CrashHost.Features.BlobStorage.BlobCommitCutScenario.TryRunAsync(args))
+        { return; }
         if (await NativeChecksumProfileScenario.TryRunAsync(args))
         { return; }
         if (await ClusterRestoreProcessCutScenario.TryRunAsync(args))

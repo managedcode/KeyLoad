@@ -20,7 +20,7 @@ internal static class ConnectionRf3IdleContinuation
         var reference = ConnectionRf3PublicOperations.Reference(scenario.SecondIdentity);
         var following = await scenario.ObserveAsync(scenario.SecondIdentity, Guid.Empty, GrainReadKind.Document,
             () => independent.GetAsync(reference, cancellationToken), cancellationToken);
-        var document = await McpCallerAssertions.SdkSuccessAsync(following.Result);
+        var document = await PublicReadAssertions.DocumentAsync(following.Result);
         await ConnectionRf3PublicOperations.DocumentAsync(new(document, null), scenario.SecondIdentity, following.Witness,
             RequestCqrsRf3Protocol.ChangedDocumentJson, ConnectionRf3Protocol.UpdatedRevision);
         await Assert.That(following.Witness.ConnectionId).IsNotEqualTo(original.ConnectionId);

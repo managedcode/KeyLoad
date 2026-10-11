@@ -97,7 +97,9 @@ internal enum RequestCqrsLifecycleStage
     ReleaseAndProducerObserved,
     JoinOriginalDenied,
     RetireRevocationArm,
-    FinalRevocationNoEffects
+    FinalRevocationNoEffects,
+    AuthorityReleasedMarkerWait,
+    AuthorityProducerDisposedMarkerWait
 }
 
 internal enum RequestCqrsNodeReadinessOutcome

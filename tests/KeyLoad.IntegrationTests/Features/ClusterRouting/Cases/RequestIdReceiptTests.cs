@@ -75,7 +75,8 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
             {
                 Assert.Fail(read.Problem?.Detail ?? "A parallel SDK read failed.");
             }
-            await Assert.That(read.Value!.Revision).IsEqualTo(1);
+            await Assert.That(read.Value!.Document).IsNotNull();
+            await Assert.That(read.Value.Document!.Revision).IsEqualTo(1);
         }
 
         var parallelReceipts = recorder.Snapshot().Skip(readStart).ToArray();

@@ -17,7 +17,7 @@ internal static class PartitionAuthorityImage
         {
             var partition = state.Scenario.Partitions[row.Item1];
             var reference = new EntityRef(partition, PartitionQueryRf3Protocol.Collection, row.Item2);
-            var document = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(reference, token));
+            var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(reference, token));
             await Assert.That(document).IsNotNull();
             await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, PartitionQueryRf3Protocol.RowRevision,
                 row.Item3, false, []), document);

@@ -33,7 +33,7 @@ internal sealed class RelationalSqlRf3RowsTests(ClusterFixture fixture)
         var patched = await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, patch), deadline.Token);
         await Assert.That(patched.Token.Position).IsGreaterThan(first.Token.Position);
-        var row = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token));
+        var row = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token));
         await Assert.That(row!.Revision).IsEqualTo(RelationalSqlRf3Tokens.PatchedRevision);
         using var json = JsonDocument.Parse(row.Json);
         await Assert.That(json.RootElement.GetProperty(RelationalSqlRf3Tokens.Count).GetInt32()).IsEqualTo(RelationalSqlRf3Tokens.PatchedCount);
@@ -49,7 +49,7 @@ internal sealed class RelationalSqlRf3RowsTests(ClusterFixture fixture)
         var scenario = await RelationalSqlRf3Scenario.CreateAsync(sdk, deadline.Token);
         await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.Command(
             new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow)), deadline.Token));
-        var before = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token));
+        var before = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token));
         var command = scenario.Command(new PatchDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId,
             [new(RelationalSqlRf3Tokens.CountPath, PatchKind.Set, RelationalSqlRf3Tokens.InvalidPatchValue)], RelationalSqlRf3Tokens.FirstRevision));
         var sql = SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
@@ -57,7 +57,7 @@ internal sealed class RelationalSqlRf3RowsTests(ClusterFixture fixture)
         await Assert.That(failed.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token), ErrorCode.Validation, dispatched: true);
-        var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token));
+        var after = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token));
         await SqlRf3Protocol.EqualAsync(before, after);
     }
 

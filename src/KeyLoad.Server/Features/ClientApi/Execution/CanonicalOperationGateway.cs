@@ -36,7 +36,7 @@ internal static class CanonicalOperationGateway
         {
             var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
             cancellationToken.ThrowIfCancellationRequested();
-            return new(requestId, McpBoundedJson.Serialize(value.Value,
+            return new(requestId, McpBoundedJson.Serialize(PublicReadResponse.Create(readKind, commandKind, value.Value),
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
         catch (Exception failure) when (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition

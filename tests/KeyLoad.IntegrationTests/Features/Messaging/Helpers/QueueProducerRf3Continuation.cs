@@ -19,7 +19,7 @@ internal static class QueueProducerRf3Continuation
                 QueueProducerRf3Protocol.Healthy, token), healthy.Image);
             await QueueProducerRf3Assertions.EqualAsync(await QueueProducerRf3Assertions.InspectAsync(publisher, seed,
                 QueueProducerRf3Protocol.Original, token), healthy.Acked);
-            await QueueProducerRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await publisher.GetAsync(
+            await QueueProducerRf3Assertions.EqualAsync(await PublicReadAssertions.DocumentAsync(await publisher.GetAsync(
                 QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Original), token)), healthy.Original.Image.Document);
             await AtomicProducerRf3EventAssertions.PublicAsync(mcp, seed, QueueProducerRf3Protocol.Original, healthy.Original.Image.Events, token);
             await QueueProducerRf3Assertions.EqualAsync(await AtomicProducerRf3EventAssertions.ReadAsync(publisher, seed,

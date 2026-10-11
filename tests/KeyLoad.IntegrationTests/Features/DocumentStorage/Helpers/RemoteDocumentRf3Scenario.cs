@@ -36,7 +36,7 @@ internal sealed class RemoteDocumentRf3Scenario : IAsyncDisposable
         await RemoteDocumentRf3Assertions.ReceiptAsync(seed).ConfigureAwait(false);
         var reader = Sdk(TwoRf3MembershipProtocol.Node2, seed.Secret);
         var official = await OfficialAsync(TwoRf3MembershipProtocol.Node3, seed.Secret, token).ConfigureAwait(false);
-        await DenialAsync(source, destination, reader, official, token).ConfigureAwait(false);
+        await DenialAsync(source, destination, reader, official, seed, token).ConfigureAwait(false);
         await seed.GrantDestinationAsync(destination, token).ConfigureAwait(false);
         await HealthyAsync(source, destination, reader, official, seed.Receipt.Token, token).ConfigureAwait(false);
         var destinationOfficial = await OfficialAsync(TwoRf3MembershipProtocol.Node5, wave.Profile.AdminKey, token).ConfigureAwait(false);
@@ -45,18 +45,19 @@ internal sealed class RemoteDocumentRf3Scenario : IAsyncDisposable
     }
 
     private static async Task DenialAsync(KeyLoadClient source, KeyLoadClient destination,
-        KeyLoadClient reader, McpOfficialClient official, CancellationToken token)
+        KeyLoadClient reader, McpOfficialClient official, RemoteDocumentRf3Seed seed, CancellationToken token)
     {
         var sourceBefore = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         var destinationBefore = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
         await RemoteDocumentRf3Assertions.DeniedAsync(reader, token).ConfigureAwait(false);
         await McpCallerAssertions.ErrorAsync(await official.CallAsync(RemoteDocumentRf3Protocol.DocumentsGet,
             new GetDocumentRequest(RemoteDocumentRf3Protocol.Reference), token), ErrorCode.PermissionDenied, dispatched: true);
+        await RemoteDocumentSessionAuthorityRf3Assertions.DeniedAsync(reader, official, seed, token).ConfigureAwait(false);
         var sourceAfter = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         var destinationAfter = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
         await Assert.That(sourceAfter.Applied).IsEqualTo(sourceBefore.Applied);
         await Assert.That(destinationAfter.Applied).IsEqualTo(destinationBefore.Applied);
-        await RemoteDocumentRf3Assertions.DocumentAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await RemoteDocumentRf3Assertions.DocumentAsync(await PublicReadAssertions.DocumentAsync(
             await destination.GetAsync(RemoteDocumentRf3Protocol.Reference, token)), projected: false);
     }
 
@@ -65,16 +66,16 @@ internal sealed class RemoteDocumentRf3Scenario : IAsyncDisposable
     {
         var sourceBefore = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         var destinationBefore = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
-        await RemoteDocumentRf3Assertions.DocumentAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await RemoteDocumentRf3Assertions.DocumentAsync(await PublicReadAssertions.DocumentAsync(
             await reader.GetAsync(RemoteDocumentRf3Protocol.Reference, minimum, token)), projected: true);
         var request = new GetDocumentRequest(RemoteDocumentRf3Protocol.Reference, minimum);
-        var document = (await McpCallerAssertions.SuccessAsync<DocumentResult?>(await official.CallAsync(
+        var document = (await PublicReadAssertions.DocumentAsync(await official.CallAsync(
             RemoteDocumentRf3Protocol.DocumentsGet, request, token))).Value;
         await RemoteDocumentRf3Assertions.DocumentAsync(document, projected: true);
-        await RemoteDocumentRf3Assertions.DocumentAsync(await SqlRf3Protocol.SdkAsync<DocumentResult?>(reader,
-            SqlRf3Protocol.Call(RemoteDocumentRf3Protocol.Partition, RemoteDocumentRf3Protocol.DocumentsGet, request), token), projected: true);
-        await RemoteDocumentRf3Assertions.DocumentAsync(await SqlRf3Protocol.McpAsync<DocumentResult?>(official,
-            SqlRf3Protocol.Call(RemoteDocumentRf3Protocol.Partition, RemoteDocumentRf3Protocol.DocumentsGet, request), token), projected: true);
+        await RemoteDocumentRf3Assertions.DocumentAsync((await SqlRf3Protocol.SdkAsync<DocumentReadResult>(reader,
+            SqlRf3Protocol.Call(RemoteDocumentRf3Protocol.Partition, RemoteDocumentRf3Protocol.DocumentsGet, request), token)).Document, projected: true);
+        await RemoteDocumentRf3Assertions.DocumentAsync((await SqlRf3Protocol.McpAsync<DocumentReadResult>(official,
+            SqlRf3Protocol.Call(RemoteDocumentRf3Protocol.Partition, RemoteDocumentRf3Protocol.DocumentsGet, request), token)).Document, projected: true);
         var sourceAfter = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         var destinationAfter = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
         await Assert.That(sourceAfter.Applied).IsEqualTo(sourceBefore.Applied);

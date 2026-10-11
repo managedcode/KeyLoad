@@ -33,8 +33,10 @@ internal static class EventMessageSensitivePublicReads
             else
             {
                 var request = new InspectMessageRequest(state.Lane, EventMessageSensitivePublicProtocol.Message);
-                var inspection = await QueueLifecyclePublicRoutes.CallAsync(inspector, route, state.Partition, McpCallerTools.MessagesInspect,
+                var response = await QueueLifecyclePublicRoutes.CallAsync(inspector, route, state.Partition, McpCallerTools.MessagesInspect,
                     request, () => inspector.Sdk.InspectAsync(request, token), token);
+                var inspection = response.Message;
+                await Assert.That(inspection).IsNotNull();
                 await Assert.That(inspection!.Metadata.Id).IsEqualTo(request.Id);
                 await Assert.That(inspection.Metadata.State).IsEqualTo(dlq ? MessageState.DeadLettered : MessageState.Leased);
                 await Assert.That(inspection.PayloadJson).IsEqualTo(payload);

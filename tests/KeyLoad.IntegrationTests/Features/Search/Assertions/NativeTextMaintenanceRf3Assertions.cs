@@ -39,8 +39,8 @@ internal static class NativeTextMaintenanceRf3Assertions
             NativeTextMaintenanceRf3Scenario.Ukrainian);
         var expected = new DocumentResult(reference, changed ? ChangedRevision : FirstRevision,
             changed ? NativeTextMaintenanceRf3Scenario.ChangedJson : NativeTextMaintenanceRf3Scenario.UkrainianJson, false, []);
-        var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, token));
-        var official = (await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        var direct = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, token));
+        var official = (await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value;
         await Assert.That(JsonDefaults.Serialize(direct).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(official).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
@@ -60,8 +60,8 @@ internal static class NativeTextMaintenanceRf3Assertions
                 NativeTextMaintenanceFlowPhase.FinalEmptyEnglish, token);
             var removed = new EntityRef(scenario.Partition, NativeTextMaintenanceRf3Scenario.Collection,
                 NativeTextMaintenanceRf3Scenario.English);
-            await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(removed, token))).IsNull();
-            await Assert.That((await McpCallerAssertions.SuccessAsync<DocumentResult?>(await mcp.CallAsync(
+            await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(removed, token))).IsNull();
+            await Assert.That((await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
                 McpCallerTools.DocumentsGet, new GetDocumentRequest(removed), token))).Value).IsNull();
         }
     }

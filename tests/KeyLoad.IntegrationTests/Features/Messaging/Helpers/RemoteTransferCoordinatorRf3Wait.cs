@@ -11,7 +11,7 @@ internal static class RemoteTransferCoordinatorRf3Wait
         var deadline = TimeProvider.System.GetUtcNow() + DueRecurringRf3Protocol.ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < deadline)
         {
-            var current = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferAsync(seed.SourceRequest, token));
+            var current = await PublicReadAssertions.TransferAsync(await sdk.InspectQueueTransferAsync(seed.SourceRequest, token));
             if (current?.State == QueueTransferState.Delivered)
             { return current; }
             await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, token);

@@ -42,3 +42,8 @@ flowchart LR
     Owner --> Timers[Provider delays and cancellation deadlines]
     Owner --> DB[Authorized request and node local database effects]
 ```
+
+
+## TASK-TIME-KIND-001 — exact current wall-clock projection
+
+REQ/AC-TIME-KIND-001 preserves UTC/local DateTimeKind: borrowed GetUtcNow().UtcDateTime, GetLocalNow().LocalDateTime and local Date. DateTimeOffset uses native GetUtcNow/GetLocalNow. System selection stays in composition; provider timezone review is separate from machine-local DateTime conversion. Native monotonic budgets/timers, original evaluated timestamps, explicit dates and parsing remain unchanged. Existing TimeProviderOperationTests and genuine Roslyn SystemClockSemanticTests own complete current command/replay/read-budget and compiler controls; no new scalar profile or claimed runtime gate. KeyLoad KLD0022 owns this rule independently of Prostir. Private implementation/test stage joins only through root with source/image/field/clock evidence.

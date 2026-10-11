@@ -101,7 +101,7 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
         var scenario = await AdminDashboardScenario.CreateAsync(fixture, deadline.Token);
         var sdk = fixture.Client(McpCallerProtocol.Node1);
         var before = await McpCallerAssertions.SdkSuccessAsync(await sdk.DashboardAsync(deadline.Token));
-        await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(new(scenario.Partition,
+        await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(new(scenario.Partition,
             AdminDashboardScenario.Collection, AdminDashboardScenario.DocumentId), deadline.Token));
         var failed = await sdk.GetAsync(new(scenario.Partition, AdminDashboardScenario.Queue,
             AdminDashboardScenario.DocumentId), deadline.Token);

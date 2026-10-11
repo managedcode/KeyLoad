@@ -31,9 +31,9 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         await Assert.That(nativeRetry.Value.Token).IsEqualTo(first.Value.Token);
         await Assert.That(JsonDefaults.Serialize(nativeRetry.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpRetry))).IsTrue();
         await Assert.That(first.RequestId).IsNotEqualTo(nativeRetry.RequestId);
-        var document = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
+        var document = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
-        var httpDocument = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
+        var httpDocument = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(document.Value.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
         await Assert.That(JsonDefaults.Serialize(document.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpDocument))).IsTrue();
         await Assert.That(new[] { first.RequestId, nativeRetry.RequestId, document.RequestId }.Distinct().Count())
@@ -58,9 +58,9 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         await McpCallerAssertions.DoesNotDiscloseAsync(rejected, fixture.AdminKey, McpDocumentProtocol.ConflictValue);
         var httpRejected = await sdk.CommitAsync(changed, deadline.Token);
         await Assert.That(httpRejected.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
-        var read = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
+        var read = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
-        var httpRead = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
+        var httpRead = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(read.Value.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
         await Assert.That(JsonDefaults.Serialize(read.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpRead))).IsTrue();
         await Assert.That(read.Value.Json.Contains(McpDocumentProtocol.ConflictValue, StringComparison.Ordinal)).IsFalse();
@@ -78,10 +78,10 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
         var request = new GetDocumentRequest(scenario.Reference);
-        var first = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
-        var second = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
+        var first = await PublicReadAssertions.DocumentAsync(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
+        var second = await PublicReadAssertions.DocumentAsync(await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
-        var missing = await McpCallerAssertions.SdkSuccessAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token));
+        var missing = await PublicReadAssertions.DocumentAsync(await new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(first.Value).IsNull();
         await Assert.That(second.Value).IsNull();
         await Assert.That(missing).IsNull();

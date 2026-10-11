@@ -27,6 +27,26 @@ internal static class McpCallerAssertions
         return result.Value!;
     }
 
+    internal static async Task<ManagedCode.Communication.Result> SdkStatusAsync(ManagedCode.Communication.Result result)
+    {
+        await Assert.That(result.IsSuccess).IsTrue().Because("The canonical SDK outcome reported "
+            + ClosedErrorCode(result.Problem?.ErrorCode) + ".");
+        await Assert.That(result.Problem).IsNull();
+        return result;
+    }
+
+    internal static async Task<Guid> StatusAsync(CallToolResult reply)
+    {
+        await Assert.That(reply.IsError is true).IsFalse().Because(SafeMcpFailureReason(reply));
+        var envelope = reply.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
+        await VerifyKeysAsync(envelope, [McpCallerProtocol.Result, McpCallerProtocol.RequestId]);
+        await Assert.That(envelope.GetProperty(McpCallerProtocol.Result).ValueKind).IsEqualTo(JsonValueKind.Null);
+        var id = envelope.GetProperty(McpCallerProtocol.RequestId).GetGuid();
+        await Assert.That(id).IsNotEqualTo(Guid.Empty);
+        await VerifySummaryAsync(reply);
+        return id;
+    }
+
     private static string ClosedErrorCode(string? actual)
         => actual is { Length: > 0 and <= 64 } && Enum.TryParse<ErrorCode>(actual, out var parsed)
             && Enum.IsDefined(parsed) && string.Equals(parsed.ToString(), actual, StringComparison.Ordinal)

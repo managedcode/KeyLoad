@@ -1161,3 +1161,76 @@ The existing authentication scan charges bounded actual bytes before inspection,
 Ordered ownership: docs/ADR039 before reader/projection, original fixture/cases, native guarded preview, isolated complete ClientApi authentication normal/scalar, fresh full build and genuine original RF3 startup/public operations. Root is sole live integration/Git owner. Source and local controls do not qualify Linux/RF3 or close KL065. Rollback removes this current-format closure together with Teams; no stored-format migration or compatibility path.
 
 Malformed-input construction correction: canonical NativeSerialization rejects default Teams before emission. Use the existing malformed fixture actual generated NativePayload serializer, exactly as original DefaultArray; the reader still must reject emitted default Teams and return all reservations. R11 initiating fixture failure is immutable, not a product refusal failure.
+
+
+## TASK-CLIENT-RESULT-001 — successful typed absence
+
+# Exact current absence response boundary
+
+REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. TASK-CLIENT-RESULT-001 is one coherent producer/API/consumer package join; partial wrappers are not deployable.
+
+Native proof: GrainCoreReadCapabilities has exactly six nullable domain branches: Document, Message, QueueTransfer, QueueTransferReceipt, RecurringSchedule, Saga. SDK GetAsync(two overloads), InspectAsync, QueueTransferClient(two extensions), RecurringSagaClientExtensions(two extensions) all use allowNullResult:true. McpReadCatalog independently declares these exact six output schemas nullable. Other domain reads remain unchanged. Existing OwnedDocumentReadResultV1 private identity data cannot be exposed as a public response.
+
+Recommended current named responses (each sealed record, GenerateSerializer, sole nullable native domain field Id0; stable new alias below):
+
+| Response | Nullable field | Alias |
+|---|---|---|
+| DocumentReadResult | DocumentResult? Document | keyload.document-read-result.v1 |
+| MessageInspectionResult | MessageInspection? Message | keyload.message-inspection-result.v1 |
+| QueueTransferReadResult | QueueTransferInspection? Transfer | keyload.queue-transfer-read-result.v1 |
+| QueueTransferReceiptReadResult | QueueTransferReceiptInspection? Receipt | keyload.queue-transfer-receipt-read-result.v1 |
+| RecurringScheduleReadResult | RecurringScheduleInspection? Schedule | keyload.recurring-schedule-read-result.v1 |
+| SagaReadResult | SagaInspection? Saga | keyload.saga-read-result.v1 |
+
+The native storage/capability observations remain unchanged and nullable. The existing CanonicalOperationGateway, after successful original GrainValue decode and before its existing McpBoundedJson serialization, produces the named current public response for these six public read kinds. This single gateway already owns SDK HTTP, official MCP and SQL CALL reply shaping. No native peer response or underlying private transfer/receipt authority is restamped or wrapped; no changed grain kind, operation ordinal, storage family or request fields. The exact outer wrapper is included in the same MaximumDataReplyBytes check; no response-size exemption. Null native value yields nullable field, exact expected native type yields its unchanged record, and any other actual native type fails closed using existing RecoveryRequired/InvalidRequest. Original error paths never fabricate a successful outer value.
+
+Update SDK generic signatures, remove allowNullResult plumbing, and require every successfully decoded response to be nonnull. Update the six official MCP output schemas to their named nonnullable outer response; preserve field/body privacy and schema validation. Existing SQL CALL output is the same canonical response from this gateway; SQL SELECT domain rows and core query composition remain unchanged. No dual reader or compatibility route for prior unreleased JSON null shape. All current client examples/tests/actual typed CQRS consumers must use the nullable domain field deliberately, preserving prior successful absence versus failures. Native/core direct reads retain their existing APIs.
+
+All three Communication pins10.3.7 join only after the complete affected source/test chain compiles; actual published payloads are verified. Root owns the shared package/config/docs/source join. Focused original HTTP null/healthy/retry/cancellation tests, genuine official MCP absent/present/privacy tests, current SQL CALL full output and unchanged native/no-effect/replay/cold receipts prove only their actual scope. Required integrated Linux RF3/process and whole solution gates stay open. No new public status-only generic wrapper is introduced; status operations use nongeneric native Result where their actual meaning is status only.
+
+
+### Blob absence dependency discovered before package join
+
+Native BlobClientExtensions also has two genuine successful nullable reads, independently asserted by the original AllNativeAbsentReads whole operation: BlobMetadata and BlobUploadInfo. REQ/AC-CLIENT-RESULT-001 therefore requires BlobMetadataReadResult(BlobMetadata? Metadata) with alias keyload.blob-metadata-read-result.v1 and BlobUploadInfoReadResult(BlobUploadInfo? Upload), alias keyload.blob-upload-info-read-result.v1, sole field Id0. Preserve native creator/resource authorization, range/list and upload mutation/receipt contracts. The same bounded public gateway shapes both records before current reply admission; eight domain responses total, nine SDK calls counting both document overloads. Official MCP output and SQL CALL stay identical. No generic Optional or absent→failure.
+# TASK-CLIENT-RESULT-CONSUMERS-001
+
+The existing KeyLoad comparative SDK adapter reads DocumentReadResult.Document after the original success/failure guard. Its legitimate absent-document disposition, full Reference/Json mapping and cancellation-health missing-record refusal remain unchanged. This is required consumer compilation of the named public response, not a workload, measurement, topology or published benchmark change. No local comparison execution is authorized by this stage.
+### TASK-CLIENT-RESULT-PUBLIC-ORACLES-001
+
+REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 retain every original integration operation and literal nullable domain expectation. Feature-local PublicReadAssertions uses explicitly named Document/Message/Transfer/Receipt/Schedule/Saga/Metadata/Upload assertions: it checks the actual successful nonnull SDK response or the actual closed official MCP named response, then returns its nullable domain field and unchanged execution identifier to the complete existing oracle. No old-wire decode, product compatibility property, implicit conversion, fallback or alternate dispatcher is permitted. The existing generic result assertion remains for non-absence results. All current public, SQL CALL, authorization, receipt, cold and bounded-response gates remain required.
+
+
+## TASK-CLIENT-RESULT-CONSUMER-CLOSURE-002
+
+REQ/AC-CLIENT-RESULT-001 includes every existing original official MCP, SDK and SQL CALL absent/positive consumer. The same tests retain exact independent domain data, receipts, authorization/refusal/no-effect and cold assertions after decoding the named response outer object. Existing nullable data fields remain nullable. Original generic MCP helpers remain available for non-absence outputs; only the eight declared absence domains use their explicit typed response decoder. Compiler success is insufficient evidence for generic JSON deserialization, so semantic references and complete original operations must also verify these callers. The Blob catalog schema oracle requires a nonnull outer metadata/upload response and a nullable exact sole domain field, retaining all original inner fields and command receipt/value checks. No test declarations, identities, clocks, limits or native lifecycle change.
+
+## TASK-KL068-MALFORMED-HTTP-EXPORT-001
+
+REQ/AC-AUTH-009, REQ/AC-AUTH-KL015-002, REQ-CLIENT-002 and AC-DIAG-001/002 require actual malformed request JSON to preserve the safe original protocol error and complete exported privacy. The new dedicated AuthorizationMalformedHttpExportTests case uses real Kestrel/ZoneTree/native exporters, with the original ServerErrorMiddleware opt-in inside the same fixture's original AdminHttpMetricsMiddleware; default fixture graph/options remain unchanged. Its truncated original AdminResourcesRequest carries the existing member credential/path/header/body/scope/span canaries. Actual ReadFromJsonAsync fails before Authenticate or effects; require HTTP400 and the complete independent five-field Validation Problem literal, no canaries, complete native image/physical-position invariance. This is a parsing gate, not an authorization-denial or signed RF3 claim.
+
+Real root-authorized same-member epoch2 repair then retains the complete original native outcome and no-effect same-ID replay. The SAME member credential must return the full literal catalog at actual current physical position, unchanged complete post-repair image, real safe native spans/links/log/metrics and all original canary/privacy oracles. A handled JSON failure occurs before the endpoint's denied log: require exactly the real HealthyEventId602 event, never synthesize a denied event; record actual400 failure and200 healthy request. Original cases keep their existing default403/two operation logs. Every original request bound/deadline, producer/export/app/store join and initiating/cleanup failure remains.
+
+Owning paths are Authorization Cases/Fixtures/Assertions/Contracts, append-only Authorization/ClientApi/ADR121. Dependencies: telemetry READY5→enumR2 and RemoteLink11 exact shared-owner postimages. Native review/NS, owning final compiler/format/discovery/native50 affected full cohort and root/Linux/RF3/cold/full KL068 remain OPEN until their original evidence. No provider/logger/product API/schema/quota/clock/topology changes.
+
+
+## TASK-CLIENT-STATUS-ACK-001 — nongeneric credential acknowledgement
+
+Recommended next status-only public boundary (not part of sealed Result189)
+
+REQ-CLIENT-STATUS-ACK-001 / AC-CLIENT-STATUS-ACK-001: ConfigureApiKey public SDK returns native nongeneric Result; success carries no public data, original failures retain their exact Problem, and stable command identity/replay/current authorization remain unchanged. Meaningful ConfigurePrincipal/Resource DTOs and all eight nullable read-domain fields remain unchanged. Existing internal durable bool acknowledgement is original ledger evidence, not a fabricated nullable public payload; preserve its original native bytes and validate true at the public status boundary before exposing success. No serializer/alias/Id/OperationKind change is proposed.
+
+Exact native API: CommunicationEndpointExtensions.WithCommunicationResults(RouteHandlerBuilder) maps genuine nongeneric Result.Succeed() to HTTP204; Result.Fail(Problem) retains RFC7807. Native HTTP client metadata also has nongeneric SendForResultAsync, but its documented caller cancellation propagation differs from KeyLoad original-write UnknownWriteOutcome, and the exposed overload has no KeyLoad MaximumProblemBodyBytes parameter. Therefore do not blindly replace the current bounded KeyLoad transport or widen problem admission. Reuse the existing KeyLoad transport owner/message construction/bounded problem reader and error mapping, with one nongeneric status branch returning native Result.Succeed() only for the exact admitted no-content status; no fake data, default success or alternate dispatcher.
+
+Server status projection must run only after the same CanonicalOperationGateway native command completes and after the actual genuine bool ACK is validated. Before effects, current persisted authorization and original signed connection/CQRS checks remain authorities. Unexpected native status type or false ACK fails closed; original initiating exceptions and middleware Problem mapping stay unchanged. HTTP response keeps original operation identity headers. Official MCP/SQL status output must be explicitly no-data (JSON null) under their existing success envelopes with genuine RequestId, independently reflected in the status tool output schema; never confuse this with outer-null typed query success. Current command routes/roles/input schemas/effect hints remain unchanged.
+
+Required complete existing operations: credential revoke/expiry refuses actual SDK/official MCP request without effects, exact same credential repair command succeeds, replay has no additional database effects and returns genuine nongeneric success; two same-volume cold cuts retain original credential/command authority. Update each original bool control to its exact declared status/no-data assertion, preserving the independent complete database images and original native acknowledgement evidence; do not delete controls wholesale. Transport controls cover exact204, unexpected success shape, bounded original RFC7807, mid-body/caller cancellation mapped to original-write UnknownWriteOutcome, lost response and same-ID reconciliation. No retries/timeouts/defaults change.
+
+
+Implementation order: public projection validates the original native true ACK; Authorization HTTP returns the genuine nongeneric Communication Result through its native endpoint filter; SDK admits only 204 in the existing bounded transport; MCP/SQL retain null-data envelopes and explicit output schema; complete credential repair/replay/cold and transport controls retain original receipt evidence. No persisted layout changes. This private successor depends on sealed Result189. Runtime and delivered Linux/RF3 gates remain open.
+
+
+## TASK-RESULT-CONSUMER-JOIN-003 — complete existing comparison and live-cut consumers
+
+REQ/AC-CLIENT-STATUS-ACK-001 and the named successful-absence contract apply to the existing isolated public regression and live-query-cut workflows. ConfigureApiKey observes the genuine non-generic success with no Problem; the original persisted principal and grants remain independently checked. Invalid blob-part/completion operations retain complete original upload-state equality and both SDK/official MCP successful metadata absence, by checking the existing Upload/Metadata fields. The live query compares its independently literal full DocumentResult or null to DocumentReadResult.Document and preserves every owner, receipt, query-page and before/after read-cut assertion.
+
+No persisted receipt, alias, field, command, clock, bound or public route changes. Three actual Main CS0411 code-fix preflights returned NotSupported; the exact native consumer correction preview returned applied=N. Root owns integrated compiler/runtime qualification. The ongoing private credential RF3 cohort remains source/image-frozen and is not changed by this proposal.

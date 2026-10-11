@@ -170,3 +170,20 @@ Extend original GenerationVisibilityFlow with a separate actual persisted restri
 Each read brackets complete native key/value image+cut, checks complete ordered literal QueryRows/access path/null cursor/actual cut and all three full point DocumentResults. Revoke returns original Unauthenticated for both Query/Get and leaves all bytes/cut unchanged. All real root command IDs/complete receipt fields/native original outcome bytes remain captured; exact same-ID direct native replay must add no effects or outcome rewrite. Cold reuses the existing one original GenerationVisibilityCold owner/callback, proves unchanged original rows/cut before reads, then complete owner/project literal result and original receipt/outcome replay. No new cold owner, cache-hit claim, API, alias/Id/quota/clock/provider/migration/fallback.
 
 Ordered implementation: this contract + additive Authorization/ADR014 before new owning Helpers/Assertions and exact original Flow callback extension. Root owns current main join. Native previews/new exact NotSupported receipts required; private normal SIMD native50 focused original two cases and original source/image/cleanup proof required. No RF3/performance/Linux acceptance borrowed from Unit. Activation migration is distinct open runtime gate; snapshot/read generation correctness remains existing source scope.
+
+
+### TASK-KL065-PARTIAL-SCAN-AND-NATIVE-CUTS-003
+
+REQ/AC-AUTH-005/007, REQ/AC-QUERY-004/005 and ADR014 preserve both original GenerationVisibilityTests operations and all original results, receipt/replay/revoke/repair/cold/no-effect and shared-admission assertions. R24 failed originals remain immutable.
+
+The new partial-scan owner runs after the complete original occupied-budget and cancelled-caller controls. Native RowVisibilityCache.ReserveEntry legitimately retires unpinned sets under pressure; the supporting new Reader set must not prepopulate the old exact admission baseline. No old occupied snapshot expectation is removed, weakened or replaced.
+
+The snapshot operation freezes two distinct original facts before capture: ZoneTreeStore.Position is the local durable journal cut, while DatabaseEngine.LastApplied is genuine replicated metadata. CreateSnapshot requires that original LastApplied value; full captured and installed Position must equal the original local cut and AppliedPosition must equal that original replicated cut. Original whole raw rows/outcomes, node/incarnation and exactly-next ReadGeneration remain independently checked. No synthetic applied metadata, position equality assumption, owner substitution, timeout, provider or product API change.
+
+Private development lane only. R20/R23 originals remain sealed; R25 is their complete same-intent successor. Main source/bin/obj remain root-owned, full Linux/task qualification remains open.
+
+Preserve the complete R25 contract, all original two case UIDs, exact cache pressure/cancel/bounds, distinct native local/applied snapshot cuts, immutable old leases, full original mutations/receipts/outcomes, revoke/repair/strict failed replay and cold continuation. R24/R25 failures remain immutable.
+
+The unrestricted supporting Reader oracle has two distinct independently specified phases. Warm seed expects ForeignTeam revision1. The original GenerationVisibilityWriteFlow then commits visible revision2, tombstone revision3 and resurrection revision4, validating each original receipt/record/outcome/replay. The cold Reader oracle therefore explicitly uses existing ResurrectedRevision4 with original JSON and compares the complete sorted two-row payload including the main row's actual independently specified healthy revision/content. Every cursor/cut/access-path/cache-membership/full image assertion stays intact. Never construct expected rows from an observed result. No original mutation, public API, policy, deadline or quota changes.
+
+Private development evidence only; Main root-owned. Full Linux/product qualification remains open.

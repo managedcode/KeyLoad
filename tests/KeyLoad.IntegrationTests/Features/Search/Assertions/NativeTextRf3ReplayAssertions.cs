@@ -56,11 +56,11 @@ internal static class NativeTextRf3ReplayAssertions
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         await NativeTextWaitRf3CutAssertions.OwnerAsync(before, after);
         await NativeTextRf3ReplayHistory.RequireAsync(administrator, command.Partition, history, token);
-        var first = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(
+        var first = await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(
             new(command.Partition, NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.FirstId), token));
         await DocumentAsync(first, command.Partition, NativeTextRf3Scenario.FirstId,
             NativeTextRf3Scenario.UpdatedRevision, UpdatedJson, false);
-        var deleted = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(
+        var deleted = await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(
             new(command.Partition, NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId), token));
         await Assert.That(deleted).IsNull();
     }

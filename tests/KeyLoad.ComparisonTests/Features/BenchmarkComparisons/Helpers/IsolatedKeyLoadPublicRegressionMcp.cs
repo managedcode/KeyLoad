@@ -45,6 +45,28 @@ internal sealed class IsolatedKeyLoadPublicRegressionMcp : IAsyncDisposable
     internal async Task<T> SuccessAsync<T>(string operation, object request, CancellationToken token)
         => await IsolatedKeyLoadPublicRegressionAssertions.McpSuccessAsync<T>(await CallAsync(operation, request, token));
 
+    internal async Task<DocumentResult?> DocumentAsync(string operation, object request, CancellationToken token)
+    {
+        var response = await SuccessAsync<DocumentReadResult>(operation, request, token);
+        await Assert.That(response).IsNotNull();
+        return response.Document;
+    }
+
+    internal async Task<DocumentResult> RequiredDocumentAsync(string operation, object request, CancellationToken token)
+    {
+        var document = await DocumentAsync(operation, request, token);
+        await Assert.That(document).IsNotNull();
+        return document!;
+    }
+
+    internal async Task<MessageInspection> RequiredMessageAsync(string operation, object request, CancellationToken token)
+    {
+        var response = await SuccessAsync<MessageInspectionResult>(operation, request, token);
+        await Assert.That(response).IsNotNull();
+        await Assert.That(response.Message).IsNotNull();
+        return response.Message!;
+    }
+
     internal async Task ErrorAsync(string operation, object request, ErrorCode code, CancellationToken token,
         string? credential = null, string? privateValue = null)
         => await IsolatedKeyLoadPublicRegressionAssertions.McpErrorAsync(await CallAsync(operation, request, token),

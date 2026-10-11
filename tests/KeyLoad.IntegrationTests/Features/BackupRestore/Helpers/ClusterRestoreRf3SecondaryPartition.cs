@@ -85,7 +85,7 @@ internal static class ClusterRestoreRf3SecondaryPartition
     private static async Task ReadAsync(KeyLoadClient sdk, McpOfficialClient official, DocumentResult expected,
         CancellationToken cancellationToken)
         => await ClusterRestoreRf3EventingReadOracle.FourAsync<DocumentResult?>(expected,
-            await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(expected.Reference,
+            await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(expected.Reference,
                 cancellationToken).ConfigureAwait(false)), sdk, official, expected.Reference.Partition,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(expected.Reference), cancellationToken).ConfigureAwait(false);
 }

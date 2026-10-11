@@ -51,7 +51,7 @@ internal static class InboxProcessingRf3Trial
             _ = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.MessagesProcess,
                 new ProcessingRequest(Guid.NewGuid(), outputLane, delivery.Token, InboxProcessingRf3Protocol.Handler,
                     InboxProcessingRf3Protocol.Generation, []), token));
-            var completed = await McpCallerAssertions.SdkSuccessAsync(await worker.InspectAsync(
+            var completed = await PublicReadAssertions.MessageAsync(await worker.InspectAsync(
                 new(outputLane, InboxProcessingRf3Protocol.Message), token));
             await Assert.That(completed!.Metadata.State).IsEqualTo(MessageState.Acked);
         }, token);

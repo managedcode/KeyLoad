@@ -29,7 +29,7 @@ internal static class EmptyReplicaSnapshotPolicyAssertions
             await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, Json);
             var admin = fixture.Client(node);
-            var healthy = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(reference, minimum, token));
+            var healthy = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, minimum, token));
             await EmptyReplicaSnapshotAssertions.ExactAsync(healthy, new DocumentResult(reference, Revision, Json, false, []));
         }, failures);
         if (deniedMcp is not null)

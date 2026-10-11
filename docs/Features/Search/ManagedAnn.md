@@ -809,3 +809,77 @@ REQ/AC-ANN-GEN-006, AC-ANN-007: existing actual ReleasedGenerationKeepsActualPin
 After genuine Release and before original held.Dispose, inspect SAME admitted lease complete three original records against independent literal IDs/field/space/revision/vector bytes; perform actual bounded native cosine Search over all three eligible ordinals, compare every original candidate ID/ordinal/revision/score/order against independent literal query/vectors through the current public Similarity arithmetic. Native generation equals original pin, indexed applied prefix covers original actual seed receipt. Full current canonical snapshot/position remain exact around that genuine retained-reader work. New Wait remains denied; no re-admission, re-open, new generation or policy borrowing. Original finally-held disposal and failure ledger, native file retention/reclaim, Abort, real next-generation configure/build/wait all remain exact.
 
 Ownership: existing Unit Search retirement case +new Search assertion helper, append ManagedAnn/ADR019 after immutable public-cold8 docs. No product, root GenerationVisibility/PreparedSimilarity/SearchEngine/SIMD/mapper, schema/IDs, test method/Args, quota/deadline/clock/UID/inventory edits. Existing configured read limits, captured caller seed max work and original TestContext cancellation bound actual retained native search. Docs first. Root native existing preview N/new exact NotSupported then guarded creation; root final cohort builds/analyzes/formats and executes exact original normal method plus Linux native/process/RF3 gates. Source is not qualification. Rollback removes only this additive held-reader oracle/doc append.
+
+
+## KL034 native ANN maintenance progress admission (2026-10-11)
+
+TASK-KL034-ANN-CQRS-PHASES-001 refines REQ/AC-ANN-GEN-003/004/006,
+AC-ANN-007 and REQ/AC-NCQRS-002/003/005 under ADR-019 and ADR-082.
+Authentic Linux run38143183124, source8e4cadd03d6547f05ac6904f7c7faf7765762e27,
+job114481041228/artifact11704239742 retains the original ANN first-build
+UnknownWriteOutcome/HTTP503, child QuorumRead Cancellation/Cancelled and parent
+CapabilityExecution Cancellation/UnknownWriteOutcome. These observations do not
+establish the initiating cancellation cause. Source independently proves that
+AnnMaintenanceParentFlow emits AnnPhase progress while both existing producer
+and consumer admissions classify it as ordinary Started/Final and reject that
+first Progress. The repair must qualify this demonstrated stream invariant;
+its relationship to that original runtime failure remains pending execution.
+
+REQ-ANN-CQRS-001: only the verified signed MaintainAnnIndex Build/Restore request
+enables the ANN profile. The producer enables it after unchanged payload,
+persisted-administrator, CommandId, physical NodeId and mode validation; the
+consumer resolves its same original typed request lazily on first Progress.
+Release, malformed payload, early Failed and unrelated operations preserve
+their original short stream. No arbitrary chunk or ambient context selects a
+long profile. No public DTO, alias, field ID, policy, option, deadline, topology,
+provider, canonical format, receipt or storage owner changes.
+
+AC-ANN-CQRS-001: real signed ConnectionGrain native maintenance Build and Restore
+over original native ZoneTree/ANN owners traverse Configure, Capture, zero or
+more Replay phases, Verify, NativeIndex, Publish, Checkpoint, Completed, then
+one complete successful result. Repeated Replay is admitted only in the replay
+region. Completed is emitted only after the original checkpoint settles; no
+inferred ACK or completion replaces the native result. Failed may terminate an
+admitted prefix. Validate every original request GUID, sequence, exact phase,
+sole typed progress field, event type, bounded static message and absent final,
+event ID or tail payload. Successful final requires Completed. Ordinary and
+Release streams cannot admit ANN progress.
+
+REQ-ANN-CQRS-002: every ANN progress frame consumes unchanged
+MaximumStartedBytes, MaximumTotalFrames and MaximumAggregateBytes; native
+producer/backpressure, deadline, selected cancellation and joined original
+enumerator/connection cleanup remain authoritative. No general progress
+permission, fallback profile, budget widening or suppression is allowed.
+
+AC-ANN-CQRS-002: genuine native CQRS malformed-frame regressions reject wrong
+identity/order/mixed fields/missing completion/extra completion/after-final and
+frame exhaustion with their exact original errors, joined producer settlement
+and unchanged full canonical image/cut, then perform real signed healthy ANN
+maintenance on the same native fixture. Full typed consumer/generation/source,
+checkpoint receipt, native digest and independent literal vector results must
+be checked, with genuine update/delete Restore and original receipt replay.
+Native frame support is controlled protocol input, not original database
+receipt proof. Existing NativeAnnMaintenanceRf3Tests and NativeAnnWaitRf3Tests
+remain mandatory real SDK/official MCP/Q1/cold Linux qualification; local source,
+compilation and tests cannot qualify RF3, performance or power-loss durability.
+
+Slice ownership: Search/Execution AnnMaintenanceProgress and parent/execution;
+Search/Streaming AnnMaintenanceStreamShape; ClusterRouting/Streaming verified
+purpose/admission and existing ConnectionGrain; UnitTests ClusterRouting roles
+for original native fixture composition, cases, helpers and assertions. New
+helpers own no separate dispatcher, store, scheduler or fake service. Frontend
+N/A: internal execution admission; SDK/MCP/SQL schemas remain unchanged.
+Root owns source joining, canonical strict formatter/build/native census and
+source/PE/PDB-bound original evidence. Rollback removes the coherent ANN profile,
+its Completed emission and optional test composition together without changing
+persisted data or weakening existing text/tail/ordinary admission.
+
+```mermaid
+flowchart LR
+    Signed[Verified signed ANN request] --> Mode[Validated Build or Restore]
+    Mode --> Producer[Original bounded native owner and child calls]
+    Producer --> Phases[Strict ANN phase grammar]
+    Phases --> Bounds[Original frame byte deadline bounds]
+    Bounds --> Final[Completed phase then actual final result]
+    Final --> Join[Joined original producer and connection]
+```

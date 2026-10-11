@@ -61,7 +61,7 @@ internal static class QueueDeadLetterRf3Scenario
         var original = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(ack, token));
         var replay = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token))).Value;
         await QueueDeadLetterRf3Assertions.EqualAsync(original, replay);
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(new(state.HealthyLane, id), token));
+        var actual = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(state.HealthyLane, id), token));
         await Assert.That(actual!.Metadata).IsEqualTo(new MessageMetadata(id, MessageState.Acked, QueueDeadLetterRf3Protocol.One,
             QueueDeadLetterRf3Protocol.TerminalVersion, sequence, null, null, LeaseVersion: QueueDeadLetterRf3Protocol.First));
         await Assert.That(actual.PayloadJson).IsNull();

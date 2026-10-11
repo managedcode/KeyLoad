@@ -26,7 +26,7 @@ internal static class DueRecurringRf3Assertions
         var until = TimeProvider.System.GetUtcNow() + DueRecurringRf3Protocol.ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(
+            var view = await PublicReadAssertions.ScheduleAsync(await sdk.InspectRecurringScheduleAsync(
                 new(scenario.SourceQueue, scheduleId), cancellationToken));
             if (view is not null && view.NextOrdinal == expectedOrdinal)
             {
@@ -46,10 +46,10 @@ internal static class DueRecurringRf3Assertions
         bool cancelled, DateTimeOffset firstDueAt, string credential, CancellationToken cancellationToken)
     {
         var request = new InspectRecurringScheduleRequest(scenario.SourceQueue, scheduleId);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(
+        var sdkView = await PublicReadAssertions.ScheduleAsync(await sdk.InspectRecurringScheduleAsync(
             request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.ScheduleInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(reply);
+        var mcpView = await PublicReadAssertions.ScheduleAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Revision).IsEqualTo(revision);
@@ -77,9 +77,9 @@ internal static class DueRecurringRf3Assertions
     {
         var id = DueRecurringRf3Protocol.OccurrenceId(scheduleId, Generation, FirstOrdinal);
         var request = new InspectMessageRequest(scenario.SourceQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Metadata.Id).IsEqualTo(id);
@@ -98,9 +98,9 @@ internal static class DueRecurringRf3Assertions
     {
         var request = new InspectMessageRequest(scenario.SourceQueue,
             DueRecurringRf3Protocol.OccurrenceId(scheduleId, Generation, FirstOrdinal));
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNull();
         await Assert.That(mcpView.Value).IsNull();
     }
@@ -114,9 +114,9 @@ internal static class DueRecurringRf3Assertions
         MessagingRf3Scenario scenario, string id, CancellationToken cancellationToken)
     {
         var request = new InspectMessageRequest(scenario.SourceQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNull();
         await Assert.That(mcpView.Value).IsNull();
     }

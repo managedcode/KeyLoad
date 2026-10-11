@@ -102,7 +102,7 @@ internal static class RelationalSqlRf3JoinBudgetFlow
         var snapshots = ImmutableArray.CreateBuilder<StoredSource>(references.Length);
         foreach (var reference in references)
         {
-            var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, token));
+            var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, token));
             var stored = document ?? throw new InvalidOperationException(MissingDocument);
             await Assert.That(stored.Reference).IsEqualTo(reference);
             snapshots.Add(new(stored.Reference, stored.Revision, stored.Json));

@@ -868,3 +868,83 @@ REQ/AC-BACKUP-MIXED-RETENTION-001 and REQ/AC-MSG-088-ORDER retain the original s
 The passive wait also retains every bounded native store row and the physical cut, proving time alone causes no persisted transition. The original healthy Receive/ACK must then require the complete literal healthy Acked inspection and the complete derived Ready inspection: state3/ready3, attempts1, leaseVersion1, generation1, null deadline/owner, unchanged payload/headers and all remaining fields. Repeat the same complete inspections after joined same-root cold reopen, alongside the existing complete raw image, signing-key digest, receipts, current authorization, inbox, topic and genuine healthy continuation. Existing fixed-time backup fixtures keep their complete original Leased oracle. No product algorithm, lease, retry, clock, policy, quota, receipt or assertion is removed or weakened.
 
 Ownership: the existing EventingArtifactHealthyAssertions shares only the complete inspection comparison, with explicit separately constructed Leased and naturally requeued expected records; MixedEventingRetentionBackupHealthy and Trial select only the new Ready oracle; HeldLease adds complete bounded physical-image equality across the passive wait. ADR: N/A for a new decision, because the existing native due-lease/restore contract is unchanged. Canonical original mixed and adjacent false/true operation tests run normal/scalar at native50. Original failed reports remain retained; exact-source Linux/full required checks remain separate. Rollback removes this scoped expected-state amendment and its callers together, preserving original failures.
+
+
+## TASK-KL042-PROGRESS-REFUSAL-CLOSURE-015 — complete original process-cut fault images
+
+Docs-first Core0 refinement of REQ/AC-BACKUP-RESTORE-RESUME-001..003 and
+REQ/AC-BACKUP-CLUSTER-003/004 under ADR-123. The existing seven
+`ClusterRestoreRf3ResumeTests.ActualOwnedProcessCutResumesOriginalPlanAndNativeSlotsThenWholeRf3CallersContinueCold`
+arguments retain their genuine paused CLI process, observed native barrier,
+joined kill/readers/locks, original OperationId and original complete continuation.
+Source proves the six node-bearing cuts currently exercise missing progress but
+only plan framing corruption; progress framing corruption is checked only after
+terminal publication. The framing helper also lacks published target and repaired
+complete-image equality. Staged nodes already belong to the recursive
+OperationRoot image; this task does not invent a missing staged-byte oracle.
+
+REQ-BACKUP-RESTORE-PROGRESS-CLOSURE-001 requires original progress framing
+refusal before authoritative mutation, followed by exact same-owner repair.
+AC-BACKUP-RESTORE-PROGRESS-CLOSURE-001 maps to those existing seven wholeflows:
+after each node-bearing cut except PlanPublished, change only the original
+progress file's first framing bit, execute the actual original CLI and require
+its existing FormatUnsupported/state-corruption Problem and failed six-resource
+admission. Compare the entire damaged operation tree and actual published
+target presence/full tree after joined refusal. NodesPublished is already a
+published pre-terminal cut; actual target presence, not the stage label, selects
+the target image. No progress row or terminal receipt is manufactured for the
+earlier PlanPublished cut. Existing missing-progress RecoveryRequired checks
+and plan-corruption checks remain in their original order.
+
+REQ-BACKUP-RESTORE-PROGRESS-CLOSURE-002 requires exact byte repair and full
+healthy original continuation. AC-BACKUP-RESTORE-PROGRESS-CLOSURE-002 maps to
+the same wholeflows: after genuine native shutdown, verify that the selected
+regular file still contains exactly the fixture's damaged bytes, replace only
+those bytes under the existing exclusive native file open and Flush(true), then
+require the entire original operation and target images. Unexpected absence,
+link, length or content replacement refuses repair. Actual initiating and joined
+cleanup/repair failures remain in original order; no failed join permits a write
+under a live owner. The existing published-progress corruption check receives
+the same full image/repair guarantees, followed by original terminal receipt
+replay including ActualElapsed, full source/archive equality, all six original
+SDK/official MCP/Q1 linked models, authorized fresh work and true same-root cold
+continuation. No failed branch starts healthy continuation.
+
+Ownership: IntegrationTests BackupRestore existing Helpers ResumeTrial and
+PlanCorruption; new Helpers FaultImage and Assertions FaultImageAssertions;
+append-only BackupRestore and ADR-123. Product, public/persisted schemas, source
+credentials, signer/mapping, policy, central bounds, deadlines, topology, native
+SIMD, Cases/Arguments, discovery inventory and status are unchanged. No SDK
+nullable-result wrappers are edited. Root owns source joining and fresh native
+source/DLL/PDB/census/report evidence. Source-only code is neither observed UID
+count nor Linux process/RF3 acceptance; mandatory broader gates remain OPEN.
+Rollback removes only this unqualified test-only closure and bounded append,
+preserving every original failure and complete existing operation.
+
+```mermaid
+flowchart LR
+  Cut[Original joined native process cut] --> Fault[One retained progress framing bit]
+  Fault --> Refuse[Actual CLI refusal and unchanged complete images]
+  Refuse --> Join[Original process readers and native owners joined]
+  Join --> Repair[Exact selected original bytes and complete preimage]
+  Repair --> Replay[Original terminal receipt and six-owner healthy cold flow]
+```
+
+The existing CanonicalCut.RequireOriginalAsync supplies the independent complete
+verified-archive model oracle at two fully published offline seams: after genuine
+StartOperatorOnly, TargetRead(dispatchPaused:true), RequireOperatorReceipt and
+ReadOriginalReceipt; and after the original terminal receipt replay following all
+published fault repairs. It is never called while the selected process cut still
+has legitimate unpublished staging. The same original archives, source metadata,
+partition families and six native owners are used without new seed or read API.
+This complete semantic cut supplements the fault's unchanged physical images;
+neither proof substitutes for the other.
+
+
+## TASK-KL042-TYPED-STARTUP-PHASE-016 — bounded diagnostic separation
+
+Docs-first diagnostic refinement of REQ/AC-BACKUP-RESTORE-RESUME-001..003 and BACKUP-CLUSTER-003/004. Preserve all original native case identities, actual awaits, operation/refusal assertions, cancellation/deadlines, observer exception identities and ordered joined cleanup. Existing optional native startup observation identifies ApplicationStart, SixHealthy and DataReadiness before their actual awaits; expose it only through a separate protected-document fixture overload. The original ordered observer creates a TaskCanceledException for a canceled Task, so its terminal stack does not identify the awaited phase. This is lost diagnostic context, not a proved startup/product defect.
+
+The BackupRestore test emits one bounded typed phase record after original owner cleanup settles: original last body phase, latest cleanup phase, failure count, caller/deadline cancellation flags and elapsed time. Startup strings map only to a closed enum; arbitrary text is never output. Failed body phase is captured before cleanup so shutdown does not overwrite it. Output failures enter the same ordered failure ledger after original failures. No exception wrapping, detached work, additional timer/request, trace/principal/key/payload/endpoint content, retry, admission or bound change. Last awaited phase is evidence only; exact cause remains Unknown.
+
+Automated acceptance remains the same original three restore and seven process-cut whole flows, with real Aspire RF3 SDK/official MCP callers and cleanup. Canonical compiler/formatter, fresh native census/report/image binding and original Linux qualification are pending. Closure015 full fault/repair images remain independently preserved; neither source packet claims to repair the original8e4 failure.

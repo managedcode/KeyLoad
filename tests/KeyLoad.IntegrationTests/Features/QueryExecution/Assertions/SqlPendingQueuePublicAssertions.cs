@@ -28,7 +28,7 @@ internal static class SqlPendingQueuePublicAssertions
         await Assert.That(page.CutPosition).IsGreaterThan(QueueLifecyclePublicProtocol.NoSequence);
         foreach (var row in page.Rows)
         {
-            var native = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(new(state.Lane, row.EntityId), token));
+            var native = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(state.Lane, row.EntityId), token));
             using var payload = native!.PayloadJson is null ? null : JsonDocument.Parse(native.PayloadJson);
             using var headers = native.HeadersJson is null ? null : JsonDocument.Parse(native.HeadersJson);
             var expected = JsonSerializer.Serialize(new

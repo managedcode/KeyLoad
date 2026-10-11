@@ -31,7 +31,7 @@ internal static class GraphSearchRf3SurvivorReadiness
             if (!probe.IsSuccess && probe.Problem?.ErrorCode == nameof(ErrorCode.OwnershipLost)
                 && probe.Problem.Detail == ReplicaProtocol.NoLeader)
             { return false; }
-            var document = await McpCallerAssertions.SdkSuccessAsync(probe);
+            var document = await PublicReadAssertions.DocumentAsync(probe);
             await Assert.That(document).IsNotNull();
             await Assert.That(document!.Reference).IsEqualTo(scenario.Vertex(GraphSearchRf3Scenario.Projects, GraphSearchRf3Scenario.SecondSeed));
             await Assert.That(document.Revision).IsEqualTo(1L);

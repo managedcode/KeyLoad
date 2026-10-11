@@ -13,6 +13,14 @@ internal sealed class KeyLoadClientNullReadTests
     private const string UnavailableDetail = "The read response is unavailable.";
     private const string Node = "healthy-node";
     private const string PartitionId = "partition";
+    private const string DocumentAbsence = "{\"document\":null}";
+    private const string MessageAbsence = "{\"message\":null}";
+    private const string TransferAbsence = "{\"transfer\":null}";
+    private const string ReceiptAbsence = "{\"receipt\":null}";
+    private const string ScheduleAbsence = "{\"schedule\":null}";
+    private const string SagaAbsence = "{\"saga\":null}";
+    private const string MetadataAbsence = "{\"metadata\":null}";
+    private const string UploadAbsence = "{\"upload\":null}";
     private static readonly string[] ExpectedNullablePaths =
     [
         "/v1/documents/get", "/v1/documents/get", "/v1/queues/inspect",
@@ -50,7 +58,7 @@ internal sealed class KeyLoadClientNullReadTests
                 _ = await JsonSerializer.DeserializeAsync<JsonElement>(context.Request.Body,
                     JsonDefaults.Options, context.RequestAborted);
                 paths.Add(context.Request.Path.Value!);
-                await context.Response.WriteAsync("null", context.RequestAborted);
+                await context.Response.WriteAsync(AbsentBody(paths.Count), context.RequestAborted);
                 return;
             }
             if (Interlocked.Increment(ref statusCalls) == 1)
@@ -84,22 +92,38 @@ internal sealed class KeyLoadClientNullReadTests
         var other = new QueueLaneRef(partition, "other-queue");
         var blob = new BlobRef(partition, "blobs", "absent");
         var id = Guid.NewGuid();
-        await AbsentAsync(client.GetAsync(reference, cancellationToken), observation);
-        await AbsentAsync(client.GetAsync(reference, minimum, cancellationToken), observation);
-        await AbsentAsync(client.InspectAsync(new(lane, "absent"), cancellationToken), observation);
-        await AbsentAsync(client.InspectQueueTransferAsync(new(lane, id), cancellationToken), observation);
-        await AbsentAsync(client.InspectQueueTransferReceiptAsync(new(other, lane, id), cancellationToken), observation);
-        await AbsentAsync(client.InspectRecurringScheduleAsync(new(lane, id), cancellationToken), observation);
-        await AbsentAsync(client.InspectSagaAsync(new(lane, id), cancellationToken), observation);
-        await AbsentAsync(client.GetBlobMetadataAsync(new(blob), cancellationToken), observation);
-        await AbsentAsync(client.GetBlobUploadInfoAsync(new(blob, id), cancellationToken), observation);
+        await AbsentAsync(client.GetAsync(reference, cancellationToken), static value => value.Document, observation);
+        await AbsentAsync(client.GetAsync(reference, minimum, cancellationToken), static value => value.Document, observation);
+        await AbsentAsync(client.InspectAsync(new(lane, "absent"), cancellationToken), static value => value.Message, observation);
+        await AbsentAsync(client.InspectQueueTransferAsync(new(lane, id), cancellationToken), static value => value.Transfer, observation);
+        await AbsentAsync(client.InspectQueueTransferReceiptAsync(new(other, lane, id), cancellationToken), static value => value.Receipt, observation);
+        await AbsentAsync(client.InspectRecurringScheduleAsync(new(lane, id), cancellationToken), static value => value.Schedule, observation);
+        await AbsentAsync(client.InspectSagaAsync(new(lane, id), cancellationToken), static value => value.Saga, observation);
+        await AbsentAsync(client.GetBlobMetadataAsync(new(blob), cancellationToken), static value => value.Metadata, observation);
+        await AbsentAsync(client.GetBlobUploadInfoAsync(new(blob, id), cancellationToken), static value => value.Upload, observation);
     }
 
-    private static async Task AbsentAsync<T>(Task<Result<T>> pending, KeyLoadClientKestrelObservation observation)
+    private static async Task AbsentAsync<T>(Task<Result<T>> pending, Func<T, object?> data, KeyLoadClientKestrelObservation observation)
+        where T : class
     {
         var result = await pending;
         observation.Record(KestrelObservationStage.SdkCompleted);
-        await Assert.That(result.IsSuccess).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        if (result.IsFailed)
+        { throw new InvalidOperationException(result.Problem.Detail); }
+        await Assert.That(result.Value).IsNotNull();
+        await Assert.That(data(result.Value)).IsNull();
     }
+
+    private static string AbsentBody(int operation) => operation switch
+    {
+        1 or 2 => DocumentAbsence,
+        3 => MessageAbsence,
+        4 => TransferAbsence,
+        5 => ReceiptAbsence,
+        6 => ScheduleAbsence,
+        7 => SagaAbsence,
+        8 => MetadataAbsence,
+        9 => UploadAbsence,
+        _ => throw new InvalidOperationException()
+    };
 }

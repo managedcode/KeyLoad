@@ -25,7 +25,7 @@ internal static class ResourcePolicyUpdateRf3Assertions
     {
         using var http = McpCallerHttp.Create(fixture, node);
         var sdk = new KeyLoadClient(http, reader.Secret, IntegrationClientOptions.Execution());
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsTrue();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);
         await Assert.That(document.RedactedFields).Contains(ResourcePolicyUpdateRf3Protocol.SecretPath);
@@ -37,7 +37,7 @@ internal static class ResourcePolicyUpdateRf3Assertions
     private static async Task AssertMcpDeniedAsync(McpOfficialClient mcp,
         ResourcePolicyUpdateRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var document = await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        var document = await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), cancellationToken));
         await Assert.That(document.Value.Redacted).IsTrue();
         await Assert.That(document.Value.Revision).IsEqualTo(scenario.DocumentRevision);
@@ -54,10 +54,10 @@ internal static class ResourcePolicyUpdateRf3Assertions
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         var reader = new KeyLoadClient(http, scenario.Reader.Secret, IntegrationClientOptions.Execution());
-        var document = await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(scenario.Reference, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await reader.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsFalse();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);
-        var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentResult>(await readerMcp.CallAsync(
+        var mcpDocument = await PublicReadAssertions.RequiredDocumentAsync(await readerMcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), cancellationToken));
         await Assert.That(mcpDocument.Value.Redacted).IsFalse();
         await Assert.That(mcpDocument.Value.Revision).IsEqualTo(scenario.DocumentRevision);
@@ -77,11 +77,11 @@ internal static class ResourcePolicyUpdateRf3Assertions
     {
         using var http = McpCallerHttp.Create(fixture, SecondNode);
         var sdk = new KeyLoadClient(http, reader.Secret, IntegrationClientOptions.Execution());
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Redacted).IsFalse();
         await Assert.That(document.Revision).IsEqualTo(scenario.DocumentRevision);
         await Assert.That(document.Json.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsTrue();
-        var mcpDocument = await McpCallerAssertions.SuccessAsync<DocumentResult>(await mcp.CallAsync(
+        var mcpDocument = await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), cancellationToken));
         await Assert.That(mcpDocument.Value.Redacted).IsFalse();
         await Assert.That(mcpDocument.Value.Revision).IsEqualTo(scenario.DocumentRevision);

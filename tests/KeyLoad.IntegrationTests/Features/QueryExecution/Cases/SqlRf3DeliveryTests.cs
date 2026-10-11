@@ -32,7 +32,7 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         await SqlRf3Protocol.EqualAsync(result, await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(receive, deadline.Token)));
         await SqlRf3Protocol.EqualAsync(result, await SqlRf3Protocol.McpAsync<ReceiveResult>(mcp, sql, deadline.Token));
         await VerifyNoDeliveryAsync(mcp, scenario, deadline.Token);
-        var leased = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect, deadline.Token));
+        var leased = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect, deadline.Token));
         await Assert.That(leased!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(leased.Metadata.LeaseVersion).IsEqualTo(delivery.LeaseVersion);
         await Assert.That(leased.Metadata.DeliveryGeneration).IsEqualTo(delivery.DeliveryGeneration);
@@ -51,10 +51,10 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
             ErrorCode.TokenInvalidated, dispatched: true);
-        await SqlRf3Protocol.EqualAsync(leased, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlRf3Protocol.EqualAsync(leased, await PublicReadAssertions.MessageAsync(
             await sdk.InspectAsync(scenario.Inspect, cancellationToken)));
-        await SqlRf3Protocol.EqualAsync(leased, await SqlRf3Protocol.McpAsync<MessageInspection>(mcp,
-            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, scenario.Inspect), cancellationToken));
+        await SqlRf3Protocol.EqualAsync(leased, (await SqlRf3Protocol.McpAsync<MessageInspectionResult>(mcp,
+            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, scenario.Inspect), cancellationToken)).Message);
     }
 
     private async Task VerifyPrincipalFenceAsync(KeyLoadClient administrator, SqlRf3DeliveryScenario scenario,
@@ -73,7 +73,7 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
         await McpCallerAssertions.ErrorAsync(await foreignMcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
             ErrorCode.TokenInvalidated, dispatched: true);
-        await SqlRf3Protocol.EqualAsync(leased, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlRf3Protocol.EqualAsync(leased, await PublicReadAssertions.MessageAsync(
             await administrator.InspectAsync(scenario.Inspect, cancellationToken)));
     }
 
@@ -89,7 +89,7 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
             SqlRf3DeliveryScenario.Queue, SqlRf3DeliveryScenario.MessageId, leased.StateVersion + McpCallerProtocol.EpochIncrement));
         await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(command, cancellationToken)));
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, cancellationToken));
-        var acknowledged = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect, cancellationToken));
+        var acknowledged = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect, cancellationToken));
         await Assert.That(acknowledged!.Metadata).IsEqualTo(leased with
         {
             State = MessageState.Acked,
@@ -99,8 +99,8 @@ internal sealed class SqlRf3DeliveryTests(ClusterFixture fixture)
         });
         await Assert.That(acknowledged.PayloadJson).IsNull();
         await Assert.That(acknowledged.HeadersJson).IsNull();
-        await SqlRf3Protocol.EqualAsync(acknowledged, await SqlRf3Protocol.McpAsync<MessageInspection>(mcp,
-            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, scenario.Inspect), cancellationToken));
+        await SqlRf3Protocol.EqualAsync(acknowledged, (await SqlRf3Protocol.McpAsync<MessageInspectionResult>(mcp,
+            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, scenario.Inspect), cancellationToken)).Message);
         await VerifyNoDeliveryAsync(mcp, scenario, cancellationToken);
     }
 

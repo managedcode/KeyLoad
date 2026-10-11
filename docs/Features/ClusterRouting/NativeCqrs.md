@@ -130,3 +130,8 @@ Correction ownership is restricted to the optional coordinator adapter, TestData
 
 
 Actual coherent private R11 execution: original two signed Build/Restore instances passed normal2/2 and scalar2/2; every original RequestCqrsTextMaintenanceTests case passed normal9/9 and scalar9/9. This is local development evidence only. The original R10 ACK physical position7 versus replication Applied3 failures remain immutable. Delivered Linux, actual process/cold and public RF3 SDK/MCP/Q1 qualification remain OPEN. The main fixture overlay preserves current mixed restore and ordinary EmbeddedCoordinator defaults; only explicit native maintenance composition selects the same native replica admission coordinator and joined committed-index read barrier.
+
+
+### KL034 typed ANN progress profile (2026-10-11)
+
+REQ/AC-ANN-CQRS-001/002 extend REQ/AC-NCQRS-002/003/005 with the narrowly signed ANN Build/Restore phase grammar in [the canonical ANN contract](../Search/ManagedAnn.md#kl034-native-ann-maintenance-progress-admission-2026-10-11). Both original producer and consumer reject arbitrary progress for ordinary/Release requests; only the validated ANN mode enables Configure, Capture, Replay*, Verify, NativeIndex, Publish, Checkpoint, Completed and actual successful Final. All frame/byte/deadline, persisted authorization and joined cleanup bounds remain unchanged. Native ANN shape failures and genuine signed maintenance full flows qualify source changes separately from authentic original Linux first-build cancellation and remaining SDK/official MCP/Q1/cold RF3 gates. This introduces no public or persisted format change.

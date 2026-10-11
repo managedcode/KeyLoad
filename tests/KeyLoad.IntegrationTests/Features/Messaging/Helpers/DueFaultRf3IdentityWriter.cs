@@ -31,8 +31,8 @@ internal static class DueFaultRf3IdentityWriter
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         var secret = CreateSecret();
         var credential = CreateCredential(principal.Id, secret);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsSuccess).IsTrue();
         return new(secret);
     }
 

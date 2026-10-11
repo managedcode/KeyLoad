@@ -19,7 +19,7 @@ internal static class SnapshotInstallFeedCutAssertions
         var before = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
         await RequireOwnerAsync(before, installed, tail);
         var reference = new EntityRef(partition, Collection, Document);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, tail.Token, token));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, tail.Token, token));
         await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, Revision, Json, false, []), document);
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(new(partition, PointQuery), token));
         await SqlRf3Protocol.EqualAsync(new QueryPage(

@@ -89,7 +89,7 @@ internal static class ClusterRestoreRf3EventingHealthy
         await ClusterRestoreRf3EventingReceiptOracle.QueueAckAsync(ack.CommandId, state, owner, receipt, state.HealthyMessage);
         var inspect = new InspectMessageRequest(lane, ClusterRestoreRf3EventingProtocol.Healthy);
         await ClusterRestoreRf3EventingReadOracle.FourAsync<MessageInspection?>(state.HealthyMessage,
-            await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(inspect, cancellationToken).ConfigureAwait(false)),
+            await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(inspect, cancellationToken).ConfigureAwait(false)),
             sdk, official, state.Partition, McpCallerTools.MessagesInspect, inspect, cancellationToken).ConfigureAwait(false);
     }
 }

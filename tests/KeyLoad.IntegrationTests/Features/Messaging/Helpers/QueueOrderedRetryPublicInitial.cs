@@ -15,7 +15,7 @@ internal static class QueueOrderedRetryPublicInitial
         var request = new InspectMessageRequest(state.Caller.Lane, QueueOrderedRetryPublicProtocol.First);
         var actual = await QueueLifecyclePublicRoutes.CallAsync(callers, state.Caller.Route, state.Caller.Partition, McpCallerTools.MessagesInspect,
             request, () => callers.Sdk.InspectAsync(request, token), token);
-        var metadata = actual?.Metadata ?? throw new InvalidOperationException("The recorded retry metadata is missing.");
+        var metadata = actual.Message?.Metadata ?? throw new InvalidOperationException("The recorded retry metadata is missing.");
         var retryAt = metadata.NotBefore ?? throw new InvalidOperationException("The recorded retry deadline is missing.");
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Scheduled, QueueOrderedRetryPublicProtocol.One,

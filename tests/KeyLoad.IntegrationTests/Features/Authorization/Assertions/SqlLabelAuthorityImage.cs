@@ -20,7 +20,7 @@ internal static class SqlLabelAuthorityImage
             ("graphdocs", "gamma", "{\"name\":\"gamma\"}") })
         {
             var reference = new EntityRef(partition, row.Collection, row.Id);
-            var actual = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(reference, token));
+            var actual = await PublicReadAssertions.DocumentAsync(await root.GetAsync(reference, token));
             await Assert.That(actual).IsNotNull();
             await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, McpCallerProtocol.FirstRevision,
                 row.Json, false, []), actual);

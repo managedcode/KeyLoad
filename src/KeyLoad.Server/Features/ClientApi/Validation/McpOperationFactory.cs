@@ -28,6 +28,16 @@ internal static class McpOperationFactory
         Create(name, route, null, kind, typeof(TRequest), typeof(TResult), false, true, McpToolHints.ForCommand(kind),
             (arguments, limit) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind, limit));
 
+    internal static McpOperationDescriptor HeaderStatusCommand<TRequest>(string name, string route, OperationKind kind)
+    {
+        if (kind != OperationKind.ConfigureApiKey)
+        { throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(kind)); }
+        return new(name, route, null, kind, McpToolDescriptions.For(name) + McpToolDescriptions.StableRetry,
+            McpSchemaFactory.CreateInput(typeof(TRequest), true),
+            McpSchemaFactory.CreateOutput(typeof(object), false, true), McpToolHints.ForCommand(kind),
+            (arguments, limit) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind, limit));
+    }
+
     private static McpOperationDescriptor Create(string name, string route, GrainReadKind? readKind, OperationKind? commandKind,
         Type? requestType, Type resultType, bool nullableResult, bool outerCommandId, McpToolHints hints,
         Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation> decoder) =>

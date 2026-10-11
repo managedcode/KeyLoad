@@ -27,7 +27,7 @@ internal static class ClusterRestoreRf3EventingReadOracle
         {
             var inspect = new InspectMessageRequest(new(state.Partition, ClusterRestoreRf3EventingProtocol.HealthyQueue),
                 ClusterRestoreRf3EventingProtocol.Healthy);
-            await FourAsync<MessageInspection?>(state.HealthyMessage, await McpCallerAssertions.SdkSuccessAsync(
+            await FourAsync<MessageInspectionResult>(new(state.HealthyMessage), await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.InspectAsync(inspect, cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition,
                 McpCallerTools.MessagesInspect, inspect, cancellationToken).ConfigureAwait(false);
         }
@@ -66,12 +66,12 @@ internal static class ClusterRestoreRf3EventingReadOracle
     {
         var reference = new EntityRef(state.Partition, ClusterRestoreRf3EventingProtocol.Documents,
             ClusterRestoreRf3EventingProtocol.DocumentId);
-        await FourAsync<DocumentResult?>(new(reference, ClusterRestoreRf3EventingProtocol.FirstRevision,
-            ClusterRestoreRf3EventingProtocol.Json, false, []), await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        await FourAsync<DocumentReadResult>(new(new(reference, ClusterRestoreRf3EventingProtocol.FirstRevision,
+            ClusterRestoreRf3EventingProtocol.Json, false, [])), await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
             reference, cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition, McpCallerTools.DocumentsGet,
             new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false);
         var inspect = new InspectMessageRequest(state.Lane, ClusterRestoreRf3EventingProtocol.MessageId);
-        await FourAsync<MessageInspection?>(state.Message, await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        await FourAsync<MessageInspectionResult>(new(state.Message), await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
             inspect, cancellationToken).ConfigureAwait(false)), sdk, official, state.Partition, McpCallerTools.MessagesInspect,
             inspect, cancellationToken).ConfigureAwait(false);
     }

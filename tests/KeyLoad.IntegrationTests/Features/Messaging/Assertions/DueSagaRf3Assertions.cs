@@ -20,7 +20,7 @@ internal static class DueSagaRf3Assertions
         var until = TimeProvider.System.GetUtcNow() + ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var view = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectSagaAsync(
+            var view = await PublicReadAssertions.SagaAsync(await sdk.InspectSagaAsync(
                 new(scenario.SourceQueue, sagaId), cancellationToken))
                 ?? throw new InvalidOperationException("The persisted waiting saga disappeared before timeout.");
             if (view.Phase == SagaPhase.TimedOut)
@@ -41,9 +41,9 @@ internal static class DueSagaRf3Assertions
         DateTimeOffset expectedDeadline, string credential, CancellationToken cancellationToken)
     {
         var request = new InspectSagaRequest(scenario.SourceQueue, sagaId);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectSagaAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.SagaAsync(await sdk.InspectSagaAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.SagaInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<SagaInspection?>(reply);
+        var mcpView = await PublicReadAssertions.SagaAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Lane).IsEqualTo(scenario.SourceQueue);
@@ -65,9 +65,9 @@ internal static class DueSagaRf3Assertions
     {
         var id = TimeoutId(sagaId, InitialRevision);
         var request = new InspectMessageRequest(scenario.TimeoutQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Metadata.Id).IsEqualTo(id);
@@ -84,9 +84,9 @@ internal static class DueSagaRf3Assertions
         MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
     {
         var request = new InspectMessageRequest(scenario.TimeoutQueue, TimeoutId(sagaId, InitialRevision));
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNull();
         await Assert.That(mcpView.Value).IsNull();
     }
@@ -141,9 +141,9 @@ internal static class DueSagaRf3Assertions
         MessagingRf3Scenario scenario, string id, CancellationToken cancellationToken)
     {
         var request = new InspectMessageRequest(scenario.TimeoutQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var sdkView = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         var reply = await mcp.CallAsync(McpCallerTools.MessagesInspect, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<MessageInspection?>(reply);
+        var mcpView = await PublicReadAssertions.MessageAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(sdkView!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(mcpView.Value).IsNotNull();

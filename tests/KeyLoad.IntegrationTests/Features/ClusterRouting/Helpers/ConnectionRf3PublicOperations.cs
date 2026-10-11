@@ -24,12 +24,12 @@ internal static class ConnectionRf3PublicOperations
         var reference = Reference(identity);
         if (useMcp)
         {
-            var actual = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await caller.CallAsync(
+            var actual = await PublicReadAssertions.DocumentAsync(await caller.CallAsync(
                 McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
                 .ConfigureAwait(false);
             return new(actual.Value, actual.RequestId);
         }
-        return new(await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.GetAsync(reference,
+        return new(await PublicReadAssertions.DocumentAsync(await caller.Sdk.GetAsync(reference,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false), null);
     }
 

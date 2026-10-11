@@ -58,7 +58,7 @@ internal static class AdversarialAuthorityRefusals
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node3, state.Identity.Secret, token);
     }
 
-    private static async Task SdkAsync(Result<DocumentResult?> result, AdversarialAuthorityState state, ErrorCode expected)
+    private static async Task SdkAsync(Result<DocumentReadResult> result, AdversarialAuthorityState state, ErrorCode expected)
     {
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value).IsNull();

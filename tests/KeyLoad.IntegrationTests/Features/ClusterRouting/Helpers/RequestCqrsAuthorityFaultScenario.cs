@@ -155,7 +155,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         await RequestCqrsAuthorityFaultLifecycleAssertions.VerifyReleasedAndDisposedAsync(
             activeControls,
             discovery ?? throw new InvalidOperationException(MissingOwner), armId, commandId, marker,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, lifecycle.SetStage).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.JoinOriginalDenied);
         await RequestCqrsAuthorityFaultAssertions.JoinOriginalAndAssertDeniedAsync(useMcp,
             sdkCall, mcpCall, heldMarker, MissingOwner).ConfigureAwait(false);

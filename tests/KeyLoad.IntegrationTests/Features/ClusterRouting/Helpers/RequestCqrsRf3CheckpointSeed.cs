@@ -86,7 +86,7 @@ internal static class RequestCqrsRf3CheckpointSeed
         string documentId, int ordinal, CancellationToken cancellationToken)
     {
         var reference = new EntityRef(partition, Collection, documentId);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken)
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(document).IsNotNull();
         await Assert.That(document!.Reference).IsEqualTo(reference);

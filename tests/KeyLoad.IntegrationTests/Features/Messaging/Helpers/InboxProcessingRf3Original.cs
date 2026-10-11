@@ -9,16 +9,16 @@ internal static class InboxProcessingRf3Original
     {
         var received = await McpCallerAssertions.SdkSuccessAsync(await client.ReceiveAsync(new(Guid.NewGuid(), lane), token));
         var delivery = await Assert.That(received.Deliveries).HasSingleItem();
-        var before = await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(
+        var before = await PublicReadAssertions.MessageAsync(await client.InspectAsync(
             new(lane, InboxProcessingRf3Protocol.Message), token));
         var failed = new ProcessingRequest(Guid.NewGuid(), lane, delivery.Token, InboxProcessingRf3Protocol.Handler,
             InboxProcessingRf3Protocol.Generation,
             [new PutDocument(InboxProcessingRf3Protocol.Collection, InboxProcessingRf3Protocol.Document,
                 InboxProcessingRf3Protocol.Payload, InboxProcessingRf3Protocol.MissingRevision)]);
         await InboxProcessingRf3Assertions.DeniedAsync(await client.CommitProcessingAsync(failed, token), ErrorCode.RevisionConflict);
-        await InboxProcessingRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(
+        await InboxProcessingRf3Assertions.EqualAsync(await PublicReadAssertions.MessageAsync(await client.InspectAsync(
             new(lane, InboxProcessingRf3Protocol.Message), token)), before);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await client.GetAsync(
             new(lane.Partition, InboxProcessingRf3Protocol.Collection, InboxProcessingRf3Protocol.Document), token))).IsNull();
         var original = failed with
         {
@@ -29,10 +29,10 @@ internal static class InboxProcessingRf3Original
              new EnqueueMessage(InboxProcessingRf3Protocol.Output, InboxProcessingRf3Protocol.Message, InboxProcessingRf3Protocol.Payload)]
         };
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await client.CommitProcessingAsync(original, token));
-        var input = await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(new(lane, InboxProcessingRf3Protocol.Message), token));
-        var output = await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(
+        var input = await PublicReadAssertions.MessageAsync(await client.InspectAsync(new(lane, InboxProcessingRf3Protocol.Message), token));
+        var output = await PublicReadAssertions.MessageAsync(await client.InspectAsync(
             new(new(lane.Partition, InboxProcessingRf3Protocol.Output), InboxProcessingRf3Protocol.Message), token));
-        var document = await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(
+        var document = await PublicReadAssertions.DocumentAsync(await client.GetAsync(
             new(lane.Partition, InboxProcessingRf3Protocol.Collection, InboxProcessingRf3Protocol.Document), token));
         await Assert.That(input!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(output!.Metadata.State).IsEqualTo(MessageState.Ready);

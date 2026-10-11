@@ -67,7 +67,7 @@ internal sealed class RemoteTransferPostAwaitTrial : IAsyncDisposable
             setup.Seed.Scenario.SourceQueue, setup.Seed.TransferId,
             RemoteTransferColdProtocol.CreateKind, RemoteTransferColdProtocol.CreateRevision);
         await calls.ReplayAsync(setup.Seed.Create, created, token);
-        var intent = await McpCallerAssertions.SdkSuccessAsync(await calls.Sdk.InspectQueueTransferAsync(setup.Seed.SourceRequest, token))
+        var intent = await PublicReadAssertions.TransferAsync(await calls.Sdk.InspectQueueTransferAsync(setup.Seed.SourceRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         await Assert.That(intent.State).IsEqualTo(QueueTransferState.OutputPending);
         await Assert.That(intent.ReceiptToken).IsNull();

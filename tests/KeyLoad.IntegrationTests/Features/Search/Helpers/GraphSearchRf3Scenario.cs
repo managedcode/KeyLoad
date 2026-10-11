@@ -147,7 +147,7 @@ internal sealed record GraphSearchRf3Scenario(PartitionRef Partition)
         var keyId = "graph-rf3-key-" + Guid.NewGuid().ToString("N");
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var verifier = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(),
+        await McpCallerAssertions.SdkStatusAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(keyId, principal.Id, verifier), cancellationToken));
         return new(persisted, new(keyId, principal.Id, verifier), secret);
     }

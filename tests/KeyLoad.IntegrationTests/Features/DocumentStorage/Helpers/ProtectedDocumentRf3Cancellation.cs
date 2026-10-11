@@ -25,7 +25,7 @@ internal static class ProtectedDocumentRf3Cancellation
         var arm = controls.WriteArm(seed.ReaderId, Guid.Empty, GrainReadKind.Document,
             RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
-        Task<Result<DocumentResult?>>? sdk = null;
+        Task<Result<DocumentReadResult>>? sdk = null;
         Task<RequestCqrsFaultMcpObservation>? mcp = null;
         if (useMcp)
         { mcp = CallAsync(official, seed, caller.Token); }

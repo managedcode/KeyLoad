@@ -65,8 +65,8 @@ internal static class RequestCqrsRf3SurvivorOracle
             SdkErrorCodeLabel, problem?.ErrorCode ?? MissingProblemValue,
             SdkSafeDetailLabel, problem?.Detail ?? MissingProblemValue);
         await Assert.That(sdkResult.IsSuccess).IsTrue().Because(failureContext);
-        var sdk = sdkResult.Value;
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var sdk = sdkResult.Value?.Document;
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         await Assert.That(sdk?.Json).IsEqualTo(workload.InitialDocuments[0]);

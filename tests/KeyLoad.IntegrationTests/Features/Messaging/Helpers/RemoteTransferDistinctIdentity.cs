@@ -19,8 +19,8 @@ internal static class RemoteTransferDistinctIdentity
             Guid.NewGuid(), principal, token));
         await Assert.That(actual.Id).IsEqualTo(principal.Id);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(principal.PolicyEpoch);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), credential, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, token))).IsSuccess).IsTrue();
         return new(actual, credential, secret);
     }
 }

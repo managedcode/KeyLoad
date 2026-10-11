@@ -58,7 +58,7 @@ internal static class NullQueueDeadlineRf3Observation
         var until = TimeProvider.System.GetUtcNow() + DueRecurringRf3Protocol.ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.InspectRecurringScheduleAsync(
+            var actual = await PublicReadAssertions.ScheduleAsync(await admin.Sdk.InspectRecurringScheduleAsync(
                 new(definition.Lane, definition.ScheduleId), token));
             await Assert.That(actual).IsNotNull();
             if (actual!.NextOrdinal == NextOrdinal)
@@ -76,15 +76,15 @@ internal static class NullQueueDeadlineRf3Observation
         var expected = new RecurringScheduleInspection(definition,
             cancelled ? CancelledRevision : OriginalRevision, Generation, NextOrdinal, cancelled, false, []);
         await QueueLeaseRf3Assertions.EqualAsync(
-            await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.InspectRecurringScheduleAsync(request, token)), expected);
-        var mcp = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(
+            await PublicReadAssertions.ScheduleAsync(await admin.Sdk.InspectRecurringScheduleAsync(request, token)), expected);
+        var mcp = await PublicReadAssertions.ScheduleAsync(
             await admin.Mcp.CallAsync(McpCallerTools.ScheduleInspect, request, token));
         await QueueLeaseRf3Assertions.EqualAsync(mcp.Value, expected);
         var sql = SqlRf3Protocol.Call(definition.Lane.Partition, McpCallerTools.ScheduleInspect, request);
         await QueueLeaseRf3Assertions.EqualAsync(
-            await SqlRf3Protocol.SdkAsync<RecurringScheduleInspection?>(admin.Sdk, sql, token), expected);
+            (await SqlRf3Protocol.SdkAsync<RecurringScheduleReadResult>(admin.Sdk, sql, token)).Schedule, expected);
         await QueueLeaseRf3Assertions.EqualAsync(
-            await SqlRf3Protocol.McpAsync<RecurringScheduleInspection?>(admin.Mcp, sql, token), expected);
+            (await SqlRf3Protocol.McpAsync<RecurringScheduleReadResult>(admin.Mcp, sql, token)).Schedule, expected);
     }
 
     private static Task RequireOccurrenceAsync(RequestCqrsRf3Callers admin,

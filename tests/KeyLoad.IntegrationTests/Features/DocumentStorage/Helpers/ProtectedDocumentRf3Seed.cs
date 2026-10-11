@@ -58,7 +58,7 @@ internal sealed record ProtectedDocumentRf3Seed(PartitionRef Partition, EntityRe
         var principal = new PrincipalRecord(id, partition.TenantId,
             capability == Capability.None ? [] : [new(partition.DatabaseId, Collection, capability)], [.. fields]);
         _ = await McpCallerAssertions.SdkSuccessAsync(await source.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
-        _ = await McpCallerAssertions.SdkSuccessAsync(await source.ConfigureApiKeyAsync(Guid.NewGuid(),
+        _ = await McpCallerAssertions.SdkStatusAsync(await source.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(key, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)))), token));
         return (id, secret);
     }

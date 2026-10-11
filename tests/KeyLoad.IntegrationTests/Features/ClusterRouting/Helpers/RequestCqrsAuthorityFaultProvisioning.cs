@@ -88,9 +88,9 @@ internal static class RequestCqrsAuthorityFaultProvisioning
     private static async Task ConfigureCredentialAsync(KeyLoadClient administrator, ApiKeyRecord credential,
         CancellationToken cancellationToken)
     {
-        var saved = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
+        var saved = await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             credential, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        await Assert.That(saved).IsTrue();
+        await Assert.That(saved.IsSuccess).IsTrue();
     }
 
     private static async Task SeedDocumentAsync(KeyLoadClient administrator, PartitionRef partition,

@@ -143,7 +143,7 @@ internal sealed class MultiLaneReceiveCancellationScenario(bool useMcp)
     }
 
     private async Task<MessageInspection> InspectAsync(int index, CancellationToken token)
-        => await McpCallerAssertions.SdkSuccessAsync(await administrator!.Sdk.InspectAsync(
+        => await PublicReadAssertions.MessageAsync(await administrator!.Sdk.InspectAsync(
             new(request!.Requests[index].Lane, MultiLaneReceiveRf3Flow.Message), token).ConfigureAwait(false))
             .ConfigureAwait(false) ?? throw new InvalidOperationException(Missing);
 }

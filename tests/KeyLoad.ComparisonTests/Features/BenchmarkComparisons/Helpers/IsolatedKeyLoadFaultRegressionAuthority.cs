@@ -28,11 +28,11 @@ internal static class IsolatedKeyLoadFaultRegressionAuthority
         var sdk = new KeyLoadClient(http, seed.Reader.Secret, ComparisonClientOptions.Execution());
         await using var mcp = await IsolatedKeyLoadFaultRegressionCalls.ConnectAsync(app, node, seed.Reader.Secret, token);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.GetAsync(seed.Sentinel, attempt), token)))!,
             seed.Sentinel, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            await IsolatedKeyLoadFaultRegressionCalls.RunAsync(attempt => mcp.SuccessAsync<DocumentResult>(
+            await IsolatedKeyLoadFaultRegressionCalls.RunAsync(attempt => mcp.RequiredDocumentAsync(
                 IsolatedKeyLoadPublicRegressionProtocol.Get, new GetDocumentRequest(seed.Sentinel), attempt), token),
             seed.Sentinel, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
         var denied = new CommandRequest(Guid.NewGuid(), seed.Partition,
@@ -43,7 +43,7 @@ internal static class IsolatedKeyLoadFaultRegressionAuthority
         await IsolatedKeyLoadFaultRegressionCalls.RunAsync(attempt => mcp.ErrorAsync(IsolatedKeyLoadPublicRegressionProtocol.Commit,
             denied, ErrorCode.PermissionDenied, attempt, seed.Reader.Secret), token);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await IsolatedKeyLoadFaultRegressionCalls.RunAsync(
                 attempt => sdk.GetAsync(seed.Sentinel, attempt), token)))!, seed.Sentinel, IsolatedKeyLoadFaultRegressionSeed.Payload, 1);
     }
 }

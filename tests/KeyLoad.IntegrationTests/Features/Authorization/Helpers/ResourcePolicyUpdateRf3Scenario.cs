@@ -32,7 +32,7 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
             [ResourcePolicyUpdateRf3Protocol.ReadGrantV1, ResourcePolicyUpdateRf3Protocol.UseGrantV1], cancellationToken);
         var reference = new EntityRef(partition, ResourcePolicyUpdateRf3Protocol.Collection,
             ResourcePolicyUpdateRf3Protocol.DocumentId);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(reference, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, cancellationToken));
         return new(partition, reference, persistedDefinition, reader, document!.Revision);
     }
 

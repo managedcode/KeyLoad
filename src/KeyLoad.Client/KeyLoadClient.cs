@@ -24,8 +24,8 @@ public sealed partial class KeyLoadClient
     internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 
     internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
-        HttpMethod? method = null, bool allowNullResult = false)
-        => transport.Send<T>(path, request, write, id, cancellationToken, method, allowNullResult);
+        HttpMethod? method = null)
+        => transport.Send<T>(path, request, write, id, cancellationToken, method);
     /// <summary>Submits one atomic command using its stable idempotency identifier.</summary>
     /// <param name="command">Typed command and caller-owned stable command identifier.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
@@ -38,9 +38,9 @@ public sealed partial class KeyLoadClient
     /// <summary>Reads one document through the authenticated public API.</summary>
     /// <param name="reference">Document identity to read.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>The document result, including null when absent.</returns>
-    public Task<Result<DocumentResult?>> GetAsync(EntityRef reference, CancellationToken cancellationToken = default)
-        => Send<DocumentResult?>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken, allowNullResult: true);
+    /// <returns>A document response whose Document field is null when absent, or a classified problem.</returns>
+    public Task<Result<DocumentReadResult>> GetAsync(EntityRef reference, CancellationToken cancellationToken = default)
+        => Send<DocumentReadResult>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
     /// <summary>Reads a bounded page from one event stream.</summary>
     /// <param name="request">Stream identity, cursor and page limit.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
@@ -143,9 +143,9 @@ public sealed partial class KeyLoadClient
     /// <summary>Inspects one queue message without leasing it.</summary>
     /// <param name="request">Queue and message identity.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>The inspection result, or null when absent.</returns>
-    public Task<Result<MessageInspection?>> InspectAsync(InspectMessageRequest request, CancellationToken cancellationToken = default)
-        => Send<MessageInspection?>(ClientApiRoutes.QueuesInspect, request, false, null, cancellationToken, allowNullResult: true);
+    /// <returns>An inspection response whose Message field is null when absent, or a classified problem.</returns>
+    public Task<Result<MessageInspectionResult>> InspectAsync(InspectMessageRequest request, CancellationToken cancellationToken = default)
+        => Send<MessageInspectionResult>(ClientApiRoutes.QueuesInspect, request, false, null, cancellationToken);
     /// <summary>Executes a parsed query request.</summary>
     /// <param name="request">Typed query and requested page controls.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
@@ -277,9 +277,9 @@ public sealed partial class KeyLoadClient
     /// <param name="commandId">Stable command identifier for the write.</param>
     /// <param name="key">API key metadata and policy.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>True when the write is committed.</returns>
-    public Task<Result<bool>> ConfigureApiKeyAsync(Guid commandId, ApiKeyRecord key, CancellationToken cancellationToken = default)
-        => Send<bool>(ClientApiRoutes.ApiKeysConfigure, new ConfigureApiKeyRequest(key), true, commandId, cancellationToken);
+    /// <returns>No-data acknowledgement after the original native credential write succeeds.</returns>
+    public Task<Result> ConfigureApiKeyAsync(Guid commandId, ApiKeyRecord key, CancellationToken cancellationToken = default)
+        => transport.SendStatus(ClientApiRoutes.ApiKeysConfigure, new ConfigureApiKeyRequest(key), commandId, cancellationToken);
     /// <summary>Reads public node readiness and status information.</summary>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The node status.</returns>

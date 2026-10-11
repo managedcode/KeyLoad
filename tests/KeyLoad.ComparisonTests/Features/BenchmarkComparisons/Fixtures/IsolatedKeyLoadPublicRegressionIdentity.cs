@@ -19,8 +19,9 @@ internal sealed record IsolatedKeyLoadPublicRegressionIdentity(string Secret)
             await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That(persisted.Id).IsEqualTo(principal.Id);
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(principal.Grants, persisted.Grants);
-        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(
-            await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), key, token))).IsTrue();
+        var configured = await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), key, token);
+        await Assert.That(configured.IsSuccess).IsTrue();
+        await Assert.That(configured.Problem).IsNull();
         return new(secret);
     }
 }

@@ -25,3 +25,11 @@ flowchart TD
     Engine --> Tests[Controlled time real operation tests]
     Runtime --> RF3[Native scheduling and RF3 authority]
 ```
+
+
+## TASK-TIME-KIND-001 — exact current wall-clock projection
+
+REQ/AC-TIME-KIND-001 preserves UTC/local DateTimeKind: borrowed GetUtcNow().UtcDateTime, GetLocalNow().LocalDateTime and local Date. DateTimeOffset uses native GetUtcNow/GetLocalNow. System selection stays in composition; provider timezone review is separate from machine-local DateTime conversion. Native monotonic budgets/timers, original evaluated timestamps, explicit dates and parsing remain unchanged. Existing TimeProviderOperationTests and genuine Roslyn SystemClockSemanticTests own complete current command/replay/read-budget and compiler controls; no new scalar profile or claimed runtime gate. KeyLoad KLD0022 owns this rule independently of Prostir. Private implementation/test stage joins only through root with source/image/field/clock evidence.
+### System-local projection versus provider-local offset
+
+The exact DateTime.Now/Today replacement preserves machine-local DateTimeKind through LocalDateTime. This does not redefine an injected provider's timezone. Native GetLocalNow applies the provider's LocalTimeZone offset, whereas DateTimeOffset.LocalDateTime converts to the local system timezone. Preserve a custom provider's DateTimeOffset and review its owning domain before any DateTime projection; this stage changes no such persisted or signed clock field. Existing UTC stamps and monotonic budgets retain their own provider and units. See the native [GetLocalNow contract](https://learn.microsoft.com/en-us/dotnet/api/system.timeprovider.getlocalnow?view=net-10.0) and [LocalDateTime contract](https://learn.microsoft.com/en-us/dotnet/api/system.datetimeoffset.localdatetime?view=net-10.0).

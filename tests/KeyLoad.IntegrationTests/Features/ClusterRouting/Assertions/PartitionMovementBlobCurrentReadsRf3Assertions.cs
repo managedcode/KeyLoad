@@ -15,11 +15,11 @@ internal static class PartitionMovementBlobCurrentReadsRf3Assertions
     internal static async Task RequireAsync(PartitionMovementPublicParentRf3Seed seed, CancellationToken token)
     {
         var metadata = new BlobMetadataRequest(seed.Blob.Blob);
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobMetadataAsync(metadata, token).ConfigureAwait(false));
+        var actual = await PublicReadAssertions.MetadataAsync(await seed.Source.GetBlobMetadataAsync(metadata, token).ConfigureAwait(false));
         await RequireRoutesAsync(seed, BlobToolNames.Metadata, metadata, seed.Blob, actual, token).ConfigureAwait(false);
         var upload = new BlobUploadInfoRequest(seed.Blob.Blob, seed.BlobOriginals.Begin.UploadId);
         var expectedUpload = seed.BlobOriginals.TailReceipt.Value with { Status = BlobUploadStatus.Complete };
-        var info = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobUploadInfoAsync(upload, token).ConfigureAwait(false));
+        var info = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(upload, token).ConfigureAwait(false));
         await RequireRoutesAsync(seed, BlobToolNames.UploadInfo, upload, expectedUpload, info, token).ConfigureAwait(false);
         var firstBytes = new byte[BlobLimits.RawPartBytes];
         Array.Fill(firstBytes, FirstByte);

@@ -45,7 +45,7 @@ internal sealed class ClusterFixtureSnapshotReadiness(RequestCqrsProbeFixture co
         await Assert.That(actual.ClusterAdministrator).IsTrue();
         await Assert.That(actual.PolicyEpoch).IsEqualTo(PolicyEpoch);
         await Assert.That(ClusterReplicationTestSupport.Success(await fixture.Client(RequestCqrsRf3Protocol.Node1)
-            .ConfigureApiKeyAsync(Guid.NewGuid(), definition, token))).IsTrue();
+            .ConfigureApiKeyAsync(Guid.NewGuid(), definition, token)).IsSuccess).IsTrue();
         secret = credential;
     }
 

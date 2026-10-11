@@ -63,9 +63,9 @@ internal static class RequestCqrsAuthorityFaultAssertions
     {
         var reference = new EntityRef(identity.Partition, RequestCqrsRf3Protocol.AdminCollection,
             RequestCqrsRf3Protocol.DocumentId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.GetAsync(reference,
+        var sdk = await PublicReadAssertions.DocumentAsync(await administrator.Sdk.GetAsync(reference,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await administrator.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await administrator.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         await Assert.That(sdk?.Reference).IsEqualTo(reference);

@@ -78,7 +78,7 @@ internal sealed record FilteredSearchRf3Scenario(PartitionRef Partition)
         var keyId = "filtered-rf3-key-" + Guid.NewGuid().ToString("N");
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var verifier = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
+        await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(keyId, principal.Id, verifier), cancellationToken));
         return new(principal, new(keyId, principal.Id, verifier), secret);
     }

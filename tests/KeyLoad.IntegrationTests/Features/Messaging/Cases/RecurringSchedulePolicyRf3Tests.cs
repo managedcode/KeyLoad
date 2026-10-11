@@ -115,10 +115,10 @@ internal sealed class RecurringSchedulePolicyRf3Tests(ClusterFixture fixture)
         CancellationToken cancellationToken)
     {
         var request = new InspectRecurringScheduleRequest(scenario.SourceQueue, id);
-        var sdkView = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectRecurringScheduleAsync(request,
+        var sdkView = await PublicReadAssertions.ScheduleAsync(await sdk.InspectRecurringScheduleAsync(request,
             cancellationToken));
         var reply = await mcp.CallAsync(InspectTool, request, cancellationToken);
-        var mcpView = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(reply);
+        var mcpView = await PublicReadAssertions.ScheduleAsync(reply);
         await Assert.That(sdkView).IsNotNull();
         await Assert.That(mcpView.Value).IsNotNull();
         await Assert.That(sdkView!.Revision).IsEqualTo(1L);

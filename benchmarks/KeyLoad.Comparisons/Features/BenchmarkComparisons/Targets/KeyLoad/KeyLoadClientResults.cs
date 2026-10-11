@@ -10,12 +10,12 @@ internal static class KeyLoadClientResults
         const string EmptyText = "";
         const string FieldSeparator = ":";
 
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
-            throw new ComparisonFailureException(KeyLoadDetail + result.Problem?.ErrorCode +
+            throw new ComparisonFailureException(KeyLoadDetail + result.Problem.ErrorCode +
                 (stage is null ? EmptyText : FieldSeparator + stage));
         }
 
-        return result.Value!;
+        return result.Value;
     }
 }

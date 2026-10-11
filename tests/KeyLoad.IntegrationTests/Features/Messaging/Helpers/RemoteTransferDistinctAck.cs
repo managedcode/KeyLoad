@@ -29,7 +29,7 @@ internal static class RemoteTransferDistinctAck
             RemoteTransferDistinctAckProtocol.Attempts, RemoteTransferDistinctAckProtocol.StateVersion,
             RemoteTransferColdProtocol.OriginalReadySequence, null, null,
             LeaseVersion: RemoteTransferDistinctAckProtocol.LeaseVersion), null, null);
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             new(seed.Scenario.DestinationQueue, seed.Message.MessageId), token)));
         await RemoteTransferDistinctCallers.WithAsync(wave, seed, async (source, official) =>
         {

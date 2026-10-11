@@ -169,13 +169,13 @@ internal static class RetainedReplicaSnapshotScenario
         var recovered = Success(await client.StatusAsync(cancellationToken));
         await Assert.That(recovered.NodeId).IsEqualTo(state.InitialStatuses[index].NodeId);
         await Assert.That(recovered.Incarnation).IsEqualTo(state.InitialStatuses[index].Incarnation);
-        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "doc-39"), cancellationToken))!.Revision).IsEqualTo(1);
+        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "doc-39"), cancellationToken)).Document!.Revision).IsEqualTo(1);
         await Assert.That(Success(await RetryDuringElectionAsync(() => client.CommitAsync(final.Command, cancellationToken),
             cancellationToken)).Token).IsEqualTo(final.Receipt.Token);
         await Assert.That(recovered.ReadGeneration > state.InitialStatuses[index].ReadGeneration).IsTrue()
             .Because("The retained replica must advance its installed snapshot generation while catching up.");
         await Assert.That(Success(await client.SubscriptionStatusAsync(state.Subscription, cancellationToken)).Checkpoint).IsEqualTo(1);
-        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "projection"), cancellationToken))!.Revision).IsEqualTo(1);
+        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "projection"), cancellationToken)).Document!.Revision).IsEqualTo(1);
         await Assert.That(Success(await client.OutboxStatusAsync(state.Partition, cancellationToken)).Consumers.Single().Checkpoint)
             .IsEqualTo(state.Batch.ThroughSequence);
         await VerifyReplayAndHistoryAsync(state, client, cancellationToken);
@@ -197,7 +197,7 @@ internal static class RetainedReplicaSnapshotScenario
             cancellationToken));
         await Assert.That(replayed.AlreadyProcessed).IsTrue();
         await Assert.That(replayed.OriginalEffectsToken).IsEqualTo(state.ProcessingEffect.OriginalEffectsToken);
-        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "projection"), cancellationToken))!.Revision)
+        await Assert.That(Success(await client.GetAsync(new(state.Partition, SnapshotDirectory, "projection"), cancellationToken)).Document!.Revision)
             .IsEqualTo(1);
     }
 

@@ -24,7 +24,7 @@ internal static class DocumentSessionReadRf3Flow
                 new(Tenant, Database, new(Collection, ResourceKind.Collection, Collection)), deadline.Token));
             var command = new CommandRequest(Guid.NewGuid(), partition, [new PutDocument(Collection, DocumentId, FirstJson)]);
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(command, deadline.Token));
-            await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+            await ReplicaIsolationFlowAssertions.ReceiptAsync(receipt, command, First);
             var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Collection,
                 Capability.DocumentsRead, deadline.Token);
             var status = await McpCallerAssertions.SdkSuccessAsync(await admin.StatusAsync(deadline.Token));
@@ -62,8 +62,10 @@ internal static class DocumentSessionReadRf3Flow
         await DocumentSessionReadRf3Assertions.HealthyAsync(sdk, mcp, reference, receipt.Token, FirstJson, First, token);
         await DocumentSessionReadRf3Assertions.RejectedAsync(sdk, mcp, reference, receipt.Token, identity.Secret, token);
         await DocumentSessionReadRf3Authorization.VerifyAsync(admin, sdk, mcp, reference, receipt.Token, identity, token);
-        var next = await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(new(Guid.NewGuid(), partition,
-            [new PutDocument(Collection, DocumentId, SecondJson, First, ExplicitReplacement: true)]), token));
+        var nextCommand = new CommandRequest(Guid.NewGuid(), partition,
+            [new PutDocument(Collection, DocumentId, SecondJson, First, ExplicitReplacement: true)]);
+        var next = await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(nextCommand, token));
+        await ReplicaIsolationFlowAssertions.ReceiptAsync(next, nextCommand, Second);
         await Assert.That(next.Token.OwnershipEpoch).IsEqualTo(receipt.Token.OwnershipEpoch);
         await Assert.That(next.Token.Incarnation).IsEqualTo(receipt.Token.Incarnation);
         await Assert.That(next.Token.AtomicPartitionId).IsEqualTo(receipt.Token.AtomicPartitionId);
@@ -73,6 +75,9 @@ internal static class DocumentSessionReadRf3Flow
         await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, receipt.Token, identity.Secret, token);
         foreach (var node in stopped.ToArray())
         { await fixture.RestartContainerAsync(node, token); stopped.Remove(node); }
+        await using var restoredAdminMcp = await McpOfficialClient.ConnectAsync(fixture, survivors[Zero], fixture.AdminKey, token);
+        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, restoredAdminMcp, command, receipt, token);
+        await ReplicaIsolationFlowAssertions.ReplayedAsync(admin, restoredAdminMcp, nextCommand, next, token);
         await DocumentSessionReadRf3Assertions.HealthyAsync(sdk, mcp, reference, receipt.Token, SecondJson, Second, token);
     }
 }

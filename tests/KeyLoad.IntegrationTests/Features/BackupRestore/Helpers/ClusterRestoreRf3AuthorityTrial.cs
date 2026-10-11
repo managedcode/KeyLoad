@@ -101,14 +101,14 @@ internal static class ClusterRestoreRf3AuthorityTrial
     {
         var reference = new EntityRef(partition, RelationalSqlRf3Tokens.Documents, id);
         var expected = new DocumentResult(reference, FirstRevision, FreshJson, false, []);
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference,
+        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference,
             actualToken, cancellationToken).ConfigureAwait(false)));
         var request = new GetDocumentRequest(reference, actualToken);
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentResult?>(await official
+        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(await official
             .CallAsync(McpCallerTools.DocumentsGet, request, cancellationToken).ConfigureAwait(false))).Value);
         var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsGet, request);
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<DocumentResult?>(sdk, sql, cancellationToken));
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<DocumentResult?>(official, sql, cancellationToken));
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, sql, cancellationToken)).Document);
+        await SqlRf3Protocol.EqualAsync(expected, (await SqlRf3Protocol.McpAsync<DocumentReadResult>(official, sql, cancellationToken)).Document);
     }
 
     internal static async Task ErrorAsync<T>(Result<T> result, ErrorCode expected)

@@ -105,9 +105,9 @@ internal sealed record RequestCqrsRf3Workload(PartitionRef Partition, CommandReq
         long revision, CancellationToken cancellationToken)
     {
         var reference = new EntityRef(Partition, RequestCqrsRf3Protocol.AdminCollection, DocumentId(index));
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await clients.Sdk.GetAsync(reference,
+        var sdk = await PublicReadAssertions.DocumentAsync(await clients.Sdk.GetAsync(reference,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await clients.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await clients.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         await Assert.That(sdk?.Revision).IsEqualTo(revision);

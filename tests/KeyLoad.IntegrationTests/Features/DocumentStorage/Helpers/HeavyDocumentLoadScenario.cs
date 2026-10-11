@@ -116,7 +116,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             var original = client.GetAsync(HeavyDocumentLoadReadback.Sentinel(partition), token);
             // Completion is monotonic: a later incomplete read also existed at the observed incomplete write.
             var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
-            var result = await McpCallerAssertions.SdkSuccessAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
+            var result = await PublicReadAssertions.DocumentAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result, partition).ConfigureAwait(false);
             if (concurrent)
             { overlap.ReadOverlapped(SdkReaderLane); }
@@ -131,7 +131,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             var original = owner.CallAsync(McpCallerTools.DocumentsGet,
                 new GetDocumentRequest(HeavyDocumentLoadReadback.Sentinel(partition)), token);
             var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
-            var result = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await original.ConfigureAwait(false))
+            var result = await PublicReadAssertions.DocumentAsync(await original.ConfigureAwait(false))
                 .ConfigureAwait(false);
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, partition).ConfigureAwait(false);
             if (concurrent)

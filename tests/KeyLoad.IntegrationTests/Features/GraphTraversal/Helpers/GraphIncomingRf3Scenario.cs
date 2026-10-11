@@ -173,7 +173,7 @@ internal static class GraphIncomingRf3Scenario
         var secret = keyId + SecretSeparator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
         var apiKey = new ApiKeyRecord(keyId, principalId,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
-        _ = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), apiKey,
+        _ = await McpCallerAssertions.SdkStatusAsync(await admin.ConfigureApiKeyAsync(Guid.NewGuid(), apiKey,
             cancellationToken)).ConfigureAwait(false);
         return new(principal, apiKey, secret);
     }

@@ -47,8 +47,8 @@ internal static class ClusterRestoreRf3CaptureAuthorityTrial
     {
         using var http = McpCallerHttp.Create(source.Application, TwoRf3MembershipProtocol.Node1);
         var root = new KeyLoadClient(http, source.Profile.AdminKey, IntegrationClientOptions.Execution());
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), credential,
-            cancellationToken).ConfigureAwait(false))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(), credential,
+            cancellationToken).ConfigureAwait(false))).IsSuccess).IsTrue();
     }
 
     private static async Task DeniedAsync(KeyLoadClient sdk, McpOfficialClient official, PartitionRef partition,

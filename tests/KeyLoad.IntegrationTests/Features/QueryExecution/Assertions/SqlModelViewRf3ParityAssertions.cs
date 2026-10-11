@@ -97,9 +97,9 @@ internal static class SqlModelViewRf3ParityAssertions
     internal static async Task<(MessageInspection First, MessageInspection Second)> InspectBothAsync(
         KeyLoadClient sdk, SqlModelViewRf3Scenario scenario, CancellationToken cancellationToken)
     {
-        var first = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        var first = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             scenario.Inspect(SqlModelViewRf3Scenario.FirstMessageId), cancellationToken));
-        var second = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        var second = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             scenario.Inspect(SqlModelViewRf3Scenario.SecondMessageId), cancellationToken));
         return (first!, second!);
     }

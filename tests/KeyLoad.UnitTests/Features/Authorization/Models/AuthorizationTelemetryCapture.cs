@@ -18,7 +18,7 @@ internal sealed record AuthorizationNativeSpanState(string Source, bool Recorded
     string SpanId, string ParentSpanId, string[] Events, AuthorizationNativeLinkState[] Links,
     int LocalParentCount, string[] ParentOperations, KeyValuePair<string, string?>[] Baggage,
     KeyValuePair<string, string?>[] Tags, int MaximumParents, int MaximumBaggage, int MaximumTags);
-internal sealed record AuthorizationNativeLinkState(string TraceId, string SpanId, string? TraceState, bool HasTags);
+internal sealed record AuthorizationNativeLinkState(string TraceId, string SpanId, string? TraceState, bool HasTags, bool IsRemote, ActivityTraceFlags TraceFlags);
 
 internal sealed record AuthorizationLinkCapture(string TraceId, string SpanId, string? TraceState,
     bool IsRemote, ActivityTraceFlags TraceFlags, KeyValuePair<string, string?>[] Tags);

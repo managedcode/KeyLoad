@@ -712,3 +712,125 @@ REQ-DSTORE-005 / AC-DSTORE-005 and the existing recorded queue-retry contract re
 Root observed both original `DocumentMutationImageReadTests` complete flows fail on delivered Linux source `da3e3f74` and current coherent local source `c67d4dac`: first Put performs15 borrowed reads instead of9, and an existing mutation16 instead of10. Native `QueueRetryPreparation` reads outcome/principal/authorization before finding an empty deadline retry inventory, causing the redundant preflight. Retain the existing9/10 counters, original paired13-byte/65,536-byte payload controls, complete literal receipt/document/outbox/replay and failure oracles; do not increase expected counters or budgets.
 
 Ordered implementation: freeze this cross-slice contract and Messaging join; root edits only Core/Messaging/Commands/QueueRetryPreparation through Roslynk; run native document image/full authorization/failure and deadline/full-jitter/ordered-retry whole flows in normal/scalar against coherent compiled inputs; preserve original process recovery and complete delivered Linux RF3 gates. Existing ADR-017, ADR-035 and recorded-retry ADR-028 are sufficient; ADR: N/A because public/serialized/trust/storage/topology contracts and stateful authorization order do not change. No acceleration or task-closure claim follows from local counters. Rollback removes only the guarded state-free preflight selection; it does not rewrite records, outcomes, signed choices or journals.
+
+
+## TASK-CLIENT-RESULT-001 — successful typed absence
+
+# Exact current absence response boundary
+
+REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. TASK-CLIENT-RESULT-001 is one coherent producer/API/consumer package join; partial wrappers are not deployable.
+
+Native proof: GrainCoreReadCapabilities has exactly six nullable domain branches: Document, Message, QueueTransfer, QueueTransferReceipt, RecurringSchedule, Saga. SDK GetAsync(two overloads), InspectAsync, QueueTransferClient(two extensions), RecurringSagaClientExtensions(two extensions) all use allowNullResult:true. McpReadCatalog independently declares these exact six output schemas nullable. Other domain reads remain unchanged. Existing OwnedDocumentReadResultV1 private identity data cannot be exposed as a public response.
+
+Recommended current named responses (each sealed record, GenerateSerializer, sole nullable native domain field Id0; stable new alias below):
+
+| Response | Nullable field | Alias |
+|---|---|---|
+| DocumentReadResult | DocumentResult? Document | keyload.document-read-result.v1 |
+| MessageInspectionResult | MessageInspection? Message | keyload.message-inspection-result.v1 |
+| QueueTransferReadResult | QueueTransferInspection? Transfer | keyload.queue-transfer-read-result.v1 |
+| QueueTransferReceiptReadResult | QueueTransferReceiptInspection? Receipt | keyload.queue-transfer-receipt-read-result.v1 |
+| RecurringScheduleReadResult | RecurringScheduleInspection? Schedule | keyload.recurring-schedule-read-result.v1 |
+| SagaReadResult | SagaInspection? Saga | keyload.saga-read-result.v1 |
+
+The native storage/capability observations remain unchanged and nullable. The existing CanonicalOperationGateway, after successful original GrainValue decode and before its existing McpBoundedJson serialization, produces the named current public response for these six public read kinds. This single gateway already owns SDK HTTP, official MCP and SQL CALL reply shaping. No native peer response or underlying private transfer/receipt authority is restamped or wrapped; no changed grain kind, operation ordinal, storage family or request fields. The exact outer wrapper is included in the same MaximumDataReplyBytes check; no response-size exemption. Null native value yields nullable field, exact expected native type yields its unchanged record, and any other actual native type fails closed using existing RecoveryRequired/InvalidRequest. Original error paths never fabricate a successful outer value.
+
+Update SDK generic signatures, remove allowNullResult plumbing, and require every successfully decoded response to be nonnull. Update the six official MCP output schemas to their named nonnullable outer response; preserve field/body privacy and schema validation. Existing SQL CALL output is the same canonical response from this gateway; SQL SELECT domain rows and core query composition remain unchanged. No dual reader or compatibility route for prior unreleased JSON null shape. All current client examples/tests/actual typed CQRS consumers must use the nullable domain field deliberately, preserving prior successful absence versus failures. Native/core direct reads retain their existing APIs.
+
+All three Communication pins10.3.7 join only after the complete affected source/test chain compiles; actual published payloads are verified. Root owns the shared package/config/docs/source join. Focused original HTTP null/healthy/retry/cancellation tests, genuine official MCP absent/present/privacy tests, current SQL CALL full output and unchanged native/no-effect/replay/cold receipts prove only their actual scope. Required integrated Linux RF3/process and whole solution gates stay open. No new public status-only generic wrapper is introduced; status operations use nongeneric native Result where their actual meaning is status only.
+
+
+## TASK-KL021-RECEIVING-AUTHORITY-COLD-005 — original native minimum-token repair
+
+REQ/AC-SESSIONREAD-002..004 and ADR-017 retain the fresh quorum and same-cut
+authorization contract. REQ-SESSIONREAD-COLD-001 / AC-SESSIONREAD-COLD-001
+adds three complete native receiving-owner flows for missing, negative and
+truncated canonical AppliedBytes after an acknowledged document seed. The
+existing actual ZoneTree owner closes and reopens with the damaged selected
+row; repeated receiving reads return the existing exact Corruption detail, no
+document or witness, and preserve both complete store images and positions.
+Only the fixture's exact original AppliedBytes are restored. The complete
+pre-fault image must return with precisely two raw commits, retaining the
+original native identity, catalog, grants, document and outcomes.
+
+REQ-SESSIONREAD-COLD-002 / AC-SESSIONREAD-COLD-002 requires full literal
+projected document and receiving witness after repair, exact original complete
+command receipt Apply/Resolve replay without effects, a foreign receiving
+physical owner refusal and original cancellation without a result, followed
+by an authorized revision2 write, old/new minimum-token reads, full receipt
+replay and a second joined same-root cold owner. The independent destination
+incarnation/epoch, atomic identity, revisions, redacted fields and ProcessDurable
+receipt are fixed by the existing native fixture contract; local store position
+is independently retained. Source-owner complete state remains unchanged.
+
+Ownership: new UnitTests DocumentStorage Cases/DocumentSessionAuthorityColdTests,
+Helpers/DocumentSessionAuthorityColdTrial, DocumentSessionAuthorityFault,
+DocumentSessionAuthorityContinuation and Assertions/DocumentSessionAuthorityColdAssertions.
+Core0, public/SDK Result contracts0, existing fixtures0, bounds0, protocol0.
+No exception or owner is mocked and no scalar execution profile is introduced.
+The original source8e4 RF3 majority-write UnknownWriteOutcome cause remains
+unclassified; this source-proven missing native cold/repair/replay acceptance
+closure does not repair or qualify that failure. Root owns compilation, actual
+native discovery and normal SIMD-enabled runs; source-only Arguments establish
+no UID/count/PASS. Linux RF3, real process recovery, SDK/official MCP/bothQ1,
+power-loss and endurance gates remain separately required.
+
+
+The same bounded task extends existing DocumentSessionReadRf3Flow only after
+its genuine leader kill, second voter kill and original voter restarts. Preserve
+the actual revision2 CommandRequest; validate both complete native quorum
+receipts against literal mutation revisions, atomic identity and durability.
+Through the surviving real endpoint, freshly authenticate an official root MCP
+session and replay both actual commands through SDK, official MCP and both Q1
+CALL adapters using existing ReplayedAsync. Every complete receipt must equal
+its original and the complete existing OutboxStatus no-effect oracle must hold,
+then all four original minimum-token document routes return literal revision2.
+The supporting three local receiving-owner cases use native Apply and persisted
+AppliedBytes, not a ReplicaJournal or RF3 substitute. This addition preserves
+all original cancellation/authority/privacy/bounds and the original Linux
+majority-write UnknownWriteOutcome failure; its initiating cause remains unknown.
+The existing RF3 case identity/arguments and native inventory stay unchanged.
+
+
+## TASK-KL021-REMOTE-MINIMUM-ADMISSION-006 — destination authority on all public routes
+
+REQ/AC-SESSIONREAD-002..004 and REQ/AC-OWNER-DOC-003/005 require the actual
+receiving owner's persisted grant before any minimum-token result. The existing
+RemoteDocumentRf3Scenario has a genuine acknowledged B token and an A-authorized
+reader whose B principal has no grants; its initial denial previously used only
+SDK and official MCP ordinary GET. Add the same acknowledged minimum-token
+request through SDK, official MCP and both Q1 CALL adapters within the existing
+source/destination Applied-before/after bracket. Require exact PermissionDenied
+Problem, absent SDK/Q1 value, native official no-result error and no credential,
+private document or canary disclosure. Retain both original no-token refusals.
+
+The existing native B grant, four-route literal projected document, original
+complete receipt replay, genuine same-owner process kill/restart and four-route
+healthy continuation remain unchanged. Ownership: existing IntegrationTests
+DocumentStorage Helpers/RemoteDocumentRf3Scenario and NEW Assertions/
+RemoteDocumentSessionAuthorityRf3Assertions; bounded append DocumentStorage/ADR017.
+Core0, public SDK Result contracts0, fixtures0, topology0, bounds0, newCases0.
+This contract joins the previous native3/current SessionRF3 receipt packet as
+one source10 successor, preserving source8 and all original failure receipts.
+Root owns actual compile/discovery/Linux evidence. Original8e4 majority
+UnknownWriteOutcome cause remains unknown; source closure is not runtime PASS.
+
+
+## TASK-KL021-RECEIVING-AUTHORITY-COLD-005 — complete native identity oracle
+
+REQ/AC-SESSIONREAD-COLD-001 compares the full original StoreIdentity value across
+its genuine same-root cold reopen. Capture the complete generated native payload
+before the original AppliedBytes fault, then require byte-for-byte equality of
+the reopened identity. All nine native fields and the entire signing-key content
+remain checked; neither payload is logged. ReadOnlyMemory record equality checks
+buffer ownership after decoding and is not this persisted-value contract.
+
+DocumentSessionAuthorityColdTrial retains all three missing/negative/truncated
+arguments, both exact refusals, complete unchanged store images and positions,
+exact original repair, full Apply/Resolve receipt replay, foreign/cancellation
+refusal, literal revision2 continuation and second cold owner. Product contracts,
+fixtures, expected fields, bounds, deadlines and case identities are unchanged.
+Existing ADR-017 supplies the architecture; no new boundary or format is created.
+The original local150/146/4-failure report remains immutable. This correction is
+source only until the current helper's strict build and actual three native
+cases pass; it does not qualify the separate Linux RF3 or durability gates.

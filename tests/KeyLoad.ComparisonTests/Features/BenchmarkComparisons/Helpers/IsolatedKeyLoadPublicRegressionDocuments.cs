@@ -22,7 +22,7 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(receipt,
             await IsolatedKeyLoadPublicRegressionProtocol.SqlAsync<CommitReceipt>(sdk,
                 IsolatedKeyLoadPublicRegressionProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicRegressionProtocol.Commit, create), token));
-        var initial = await mcp.SuccessAsync<DocumentResult>(IsolatedKeyLoadPublicRegressionProtocol.Get,
+        var initial = await mcp.RequiredDocumentAsync(IsolatedKeyLoadPublicRegressionProtocol.Get,
             new GetDocumentRequest(scenario.Document), token);
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(initial, scenario.Document, scenario.InitialStoredJson, 1);
         await VerifyUpdateAsync(sdk, mcp, scenario, token);
@@ -40,7 +40,7 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await Assert.That(receipt.Mutations[0]).IsEqualTo(new MutationReceipt(PutKind, scenario.Document.Collection, scenario.Document.Id, 2));
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(receipt,
             await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.CommitAsync(update, token)));
-        var document = await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Document, token));
+        var document = await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await sdk.GetAsync(scenario.Document, token));
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(document!, scenario.Document, scenario.UpdatedStoredJson, 2);
     }
 
@@ -55,9 +55,9 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(await sdk.CommitAsync(updateMissing, token), ErrorCode.RevisionConflict);
         var deleteMissing = scenario.Command(new DeleteDocument(scenario.Missing.Collection, scenario.Missing.Id, 1));
         await mcp.ErrorAsync(IsolatedKeyLoadPublicRegressionProtocol.Commit, deleteMissing, ErrorCode.NotFound, token);
-        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Missing, token))).IsNull();
+        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await sdk.GetAsync(scenario.Missing, token))).IsNull();
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Document, token)))!,
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await sdk.GetAsync(scenario.Document, token)))!,
             scenario.Document, scenario.UpdatedStoredJson, 2);
     }
 
@@ -71,11 +71,11 @@ internal static class IsolatedKeyLoadPublicRegressionDocuments
         await Assert.That(receipt.Mutations[0]).IsEqualTo(new MutationReceipt(DeleteKind, scenario.Document.Collection, scenario.Document.Id, 3));
         await IsolatedKeyLoadPublicRegressionAssertions.EqualAsync(receipt,
             await mcp.SuccessAsync<CommitReceipt>(IsolatedKeyLoadPublicRegressionProtocol.Commit, delete, token));
-        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Document, token))).IsNull();
-        await Assert.That(await mcp.SuccessAsync<DocumentResult?>(IsolatedKeyLoadPublicRegressionProtocol.Get,
+        await Assert.That(await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await sdk.GetAsync(scenario.Document, token))).IsNull();
+        await Assert.That(await mcp.DocumentAsync(IsolatedKeyLoadPublicRegressionProtocol.Get,
             new GetDocumentRequest(scenario.Document), token)).IsNull();
         await IsolatedKeyLoadPublicRegressionAssertions.DocumentAsync(
-            (await IsolatedKeyLoadPublicRegressionAssertions.SuccessAsync(await sdk.GetAsync(scenario.Sentinel, token)))!,
+            (await IsolatedKeyLoadPublicRegressionAssertions.DocumentReadAsync(await sdk.GetAsync(scenario.Sentinel, token)))!,
             scenario.Sentinel, scenario.SentinelJson, 1);
     }
 }

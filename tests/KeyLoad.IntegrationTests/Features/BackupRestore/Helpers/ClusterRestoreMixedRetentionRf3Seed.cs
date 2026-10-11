@@ -133,7 +133,7 @@ internal static class ClusterRestoreMixedRetentionRf3Seed
     internal static async Task CredentialAsync(KeyLoadClient root, PrincipalRecord principal, CancellationToken token)
     {
         _ = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token).ConfigureAwait(false));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(principal.Id, principal.Id, principal.Id + ClusterRestoreMixedRetentionRf3Protocol.CredentialSuffix), token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(Guid.NewGuid(),
+            DatabaseEngine.Credential(principal.Id, principal.Id, principal.Id + ClusterRestoreMixedRetentionRf3Protocol.CredentialSuffix), token))).IsSuccess).IsTrue();
     }
 }

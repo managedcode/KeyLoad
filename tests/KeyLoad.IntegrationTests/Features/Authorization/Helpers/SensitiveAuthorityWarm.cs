@@ -14,9 +14,9 @@ internal static class SensitiveAuthorityWarm
         return await SensitiveAuthorityClients.RunAsync(fixture, identity.Secret,
             async (root, sdk, session) =>
             {
-                var before = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(
+                var before = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
                     McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), token));
-                var httpBefore = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, token));
+                var httpBefore = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, token));
                 await Assert.That(before.Value.Redacted).IsTrue();
                 await Assert.That(before.Value.RedactedFields).Contains(McpDocumentProtocol.ProtectedPath);
                 await Assert.That(before.Value.Json.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal)).IsFalse();
@@ -24,10 +24,10 @@ internal static class SensitiveAuthorityWarm
                 await SensitiveAuthorityAssertions.RedactedAsync(scenario, before.Value);
                 var denied = SensitiveAuthorityContinuation.Command(scenario);
                 await SensitiveAuthorityRefusals.PatchAsync(root, sdk, session, scenario, identity, denied, false, token);
-                var after = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(
+                var after = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
                     McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), token));
                 await Assert.That(JsonDefaults.Serialize(before.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(after.Value))).IsTrue();
-                var original = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(scenario.Reference, token));
+                var original = await PublicReadAssertions.DocumentAsync(await root.GetAsync(scenario.Reference, token));
                 await Assert.That(original!.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
                 await Assert.That(original.Json.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal)).IsTrue();
                 await SensitiveAuthorityAssertions.RawAsync(scenario, original, false);

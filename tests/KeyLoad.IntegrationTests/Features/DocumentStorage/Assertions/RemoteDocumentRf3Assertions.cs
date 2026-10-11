@@ -57,6 +57,6 @@ internal static class RemoteDocumentRf3Assertions
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(seed.Receipt))).IsTrue();
         var after = await McpCallerAssertions.SdkSuccessAsync(await destination.StatusAsync(token));
         await Assert.That(after.Applied).IsEqualTo(before.Applied);
-        await DocumentAsync(await McpCallerAssertions.SdkSuccessAsync(await destination.GetAsync(RemoteDocumentRf3Protocol.Reference, token)), projected: false);
+        await DocumentAsync(await PublicReadAssertions.DocumentAsync(await destination.GetAsync(RemoteDocumentRf3Protocol.Reference, token)), projected: false);
     }
 }

@@ -45,7 +45,7 @@ internal static class CompositionSqlColdAssertions
     {
         var graph = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.TraverseAsync(new(state.Scenario.Partition,
             CompositionSqlColdProtocol.OtherGraph, state.Scenario.First), token));
-        var marker = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(new(state.Scenario.Partition,
+        var marker = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(new(state.Scenario.Partition,
             RelationalSqlRf3Tokens.Documents, CompositionSqlColdProtocol.Marker), token));
         if (!healthy)
         {

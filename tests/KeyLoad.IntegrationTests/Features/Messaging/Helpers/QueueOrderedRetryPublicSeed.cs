@@ -41,7 +41,7 @@ internal static class QueueOrderedRetryPublicSeed
     private static async Task ConfigureAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, string key, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(principal.Id, principal.Id, key), token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
+            DatabaseEngine.Credential(principal.Id, principal.Id, key), token))).IsSuccess).IsTrue();
     }
 }

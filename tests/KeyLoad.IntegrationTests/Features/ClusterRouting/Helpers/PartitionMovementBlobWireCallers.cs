@@ -49,7 +49,7 @@ internal sealed class PartitionMovementBlobWireCallers : IAsyncDisposable
         {
             await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
                 await client.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
-            await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await client.ConfigureApiKeyAsync(Guid.NewGuid(), record, token))).IsTrue();
+            await Assert.That((await McpCallerAssertions.SdkStatusAsync(await client.ConfigureApiKeyAsync(Guid.NewGuid(), record, token))).IsSuccess).IsTrue();
         }
         Source = new(source.Client, credential, IntegrationClientOptions.Execution());
         Target = new(target.Client, credential, IntegrationClientOptions.Execution());

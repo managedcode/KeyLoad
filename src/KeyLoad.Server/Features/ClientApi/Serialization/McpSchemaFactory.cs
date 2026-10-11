@@ -50,13 +50,15 @@ internal static class McpSchemaFactory
     /// <summary>Describes disjoint canonical success and safe error envelopes.</summary>
     /// <param name="resultType">Actual typed canonical operation result.</param>
     /// <param name="nullableResult">Explicit root nullability from the frozen operation contract.</param>
+    /// <param name="statusOnly">Requires the explicit null-data acknowledgment for a status-only command.</param>
     /// <returns>An owned immutable structured-output schema.</returns>
-    internal static JsonElement CreateOutput(Type resultType, bool nullableResult)
+    internal static JsonElement CreateOutput(Type resultType, bool nullableResult, bool statusOnly = false)
     {
         ArgumentNullException.ThrowIfNull(resultType);
         var success = McpSchemaObjects.Closed(new JsonObject
         {
-            [McpCatalogProtocol.Result] = nullableResult ? McpSchemaObjects.NullableResult() :
+            [McpCatalogProtocol.Result] = statusOnly ? new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.Null } :
+                nullableResult ? McpSchemaObjects.NullableResult() :
                 McpSchemaObjects.Reference(McpSchemaKeywords.ResultReference),
             [McpCatalogProtocol.RequestId] = McpSchemaObjects.Identity(false)
         }, new JsonArray(McpCatalogProtocol.Result, McpCatalogProtocol.RequestId));
@@ -73,7 +75,8 @@ internal static class McpSchemaFactory
             [McpSchemaKeywords.UnevaluatedProperties] = false,
             [McpSchemaKeywords.Definitions] = new JsonObject
             {
-                [McpCatalogProtocol.Result] = Export(resultType, OutputOptions, McpSchemaKeywords.ResultReference),
+                [McpCatalogProtocol.Result] = statusOnly ? new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.Null } :
+                    Export(resultType, OutputOptions, McpSchemaKeywords.ResultReference),
                 [McpCatalogProtocol.Error] = McpSafeProblemSchema.Create()
             }
         };

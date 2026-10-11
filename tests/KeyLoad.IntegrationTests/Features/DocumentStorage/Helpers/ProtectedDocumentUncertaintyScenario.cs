@@ -84,7 +84,7 @@ internal sealed class ProtectedDocumentUncertaintyScenario(TwoRf3MembershipWave 
         var secret = key + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(),
             new(id, "protected-tenant", [], []) { ClusterAdministrator = true }, token));
-        _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
+        _ = await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(key, id, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)))), token));
         return (id, secret);
     }

@@ -15,12 +15,12 @@ internal static class TargetInboxRf3Assertions
     }
     internal static async Task UnchangedAsync(KeyLoadClient client, TargetInboxRf3State state, CancellationToken token)
     {
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(new(state.Source, TargetInboxRf3Protocol.Message), token)), state.Input);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(new(new(state.Target.Partition,
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await client.InspectAsync(new(state.Source, TargetInboxRf3Protocol.Message), token)), state.Input);
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await client.InspectAsync(new(new(state.Target.Partition,
             TargetInboxRf3Protocol.Output), TargetInboxRf3Protocol.Message), token)), state.Output);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(new(state.Target.Partition,
+        await EqualAsync(await PublicReadAssertions.DocumentAsync(await client.GetAsync(new(state.Target.Partition,
             TargetInboxRf3Protocol.Collection, TargetInboxRf3Protocol.Document), token)), state.Document);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(new(state.Target.Partition,
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await client.GetAsync(new(state.Target.Partition,
             TargetInboxRf3Protocol.Collection, TargetInboxRf3Protocol.Changed), token))).IsNull();
     }
 }

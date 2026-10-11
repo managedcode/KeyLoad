@@ -28,7 +28,7 @@ internal static class SensitiveAuthorityAssertions
     internal static async Task<SensitiveAuthorityImage> ImageAsync(KeyLoadClient root,
         McpDocumentScenario scenario, bool patched, CancellationToken token)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(scenario.Reference, token));
+        var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(scenario.Reference, token));
         await Assert.That(document).IsNotNull();
         await RawAsync(scenario, document!, patched);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(scenario.Partition, token));
@@ -38,10 +38,10 @@ internal static class SensitiveAuthorityAssertions
     internal static async Task HealthyAsync(KeyLoadClient reader, McpOfficialClient session,
         McpDocumentScenario scenario, bool patched, CancellationToken token)
     {
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.GetAsync(scenario.Reference, token));
+        var sdk = await PublicReadAssertions.DocumentAsync(await reader.GetAsync(scenario.Reference, token));
         await Assert.That(sdk).IsNotNull();
         await RawAsync(scenario, sdk!, patched);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(
+        var mcp = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), token));
         await RawAsync(scenario, mcp.Value, patched);
     }

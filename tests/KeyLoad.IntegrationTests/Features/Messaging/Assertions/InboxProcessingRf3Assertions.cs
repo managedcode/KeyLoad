@@ -17,13 +17,13 @@ internal static class InboxProcessingRf3Assertions
 
     internal static async Task UnchangedAsync(KeyLoadClient client, InboxProcessingRf3State state, CancellationToken token)
     {
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await client.InspectAsync(
             new(state.Lane, InboxProcessingRf3Protocol.Message), token)), state.Input);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.InspectAsync(
+        await EqualAsync(await PublicReadAssertions.MessageAsync(await client.InspectAsync(
             new(new(state.Lane.Partition, InboxProcessingRf3Protocol.Output), InboxProcessingRf3Protocol.Message), token)), state.Output);
-        await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(
+        await EqualAsync(await PublicReadAssertions.DocumentAsync(await client.GetAsync(
             new(state.Lane.Partition, InboxProcessingRf3Protocol.Collection, InboxProcessingRf3Protocol.Document), token)), state.Document);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await client.GetAsync(
             new(state.Lane.Partition, InboxProcessingRf3Protocol.Collection, InboxProcessingRf3Protocol.Refused), token))).IsNull();
     }
 }

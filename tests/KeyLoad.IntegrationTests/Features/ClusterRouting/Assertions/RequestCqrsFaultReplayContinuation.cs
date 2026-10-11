@@ -94,9 +94,9 @@ internal static class RequestCqrsFaultReplayContinuation
     internal static async Task DocumentAsync(RequestCqrsRf3Callers callers, EntityRef reference, long revision,
         string json, CancellationToken cancellationToken)
     {
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
+        var sdk = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false))
             .ConfigureAwait(false);
         var expected = new DocumentResult(reference, revision, json, false, []);
@@ -107,9 +107,9 @@ internal static class RequestCqrsFaultReplayContinuation
     private static async Task DocumentAtMinimumAsync(RequestCqrsRf3Callers callers, EntityRef reference,
         CommitToken minimum, long revision, string json, CancellationToken cancellationToken)
     {
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.GetAsync(reference, minimum,
+        var sdk = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, minimum,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.DocumentAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         var expected = new DocumentResult(reference, revision, json, false, []);

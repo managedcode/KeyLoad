@@ -21,7 +21,7 @@ internal static class AuthorizationTelemetryAssertions
         await Assert.That(page.NextAfterName).IsNull();
         await Assert.That(page.CutPosition).IsEqualTo(position);
     }
-    internal static async Task ExportsAsync(AuthorizationTelemetryHttpFixture fixture, AuthorizationUnsafeSpanState state, string? suppressedTrace)
+    internal static async Task ExportsAsync(AuthorizationTelemetryHttpFixture fixture, AuthorizationUnsafeSpanState state, string? suppressedTrace, bool malformedJson = false, bool authenticationFailure = false)
     {
         var nativeSpans = fixture.NativeSpans.Bank.Snapshot();
         var spans = fixture.Spans.Bank.Snapshot();
@@ -35,17 +35,17 @@ internal static class AuthorizationTelemetryAssertions
         var servers = spans.Where(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpServerSource).ToArray();
         var clients = spans.Where(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpClientSource).ToArray();
         await Assert.That(servers.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.None or AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
-            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink
+            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
             ? AuthorizationTelemetryTestProtocol.RequestCount : AuthorizationTelemetryTestProtocol.HealthyCount);
         await Assert.That(clients.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
-            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink
+            or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
             ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount).Because(JsonSerializer.Serialize(new { exported = serialized, nativeSpans }, JsonDefaults.Options));
         await AuthorizationTelemetryNativeAssertions.SuppressionAsync(nativeSpans, suppressed, state, suppressedTrace);
         await AuthorizationTelemetryNativeAssertions.IdentityAsync(spans, nativeSpans);
         await SpansAsync(servers, clients, suppressedTrace);
-        await LogsAsync(logs, servers, clients, suppressedTrace);
+        await LogsAsync(logs, servers, clients, suppressedTrace, malformedJson || authenticationFailure);
         await MetricsAsync(metrics);
-        await ObservationAsync(observation);
+        await ObservationAsync(observation, malformedJson, authenticationFailure);
     }
     private static async Task SpansAsync(AuthorizationSpanCapture[] servers, AuthorizationSpanCapture[] clients, string? suppressedTrace)
     {
@@ -91,11 +91,12 @@ internal static class AuthorizationTelemetryAssertions
         await Assert.That(span.Tags.Single(static tag => tag.Key == HttpTelemetryPrivacyPolicy.MethodTag).Value).IsEqualTo(HttpMethods.Post);
     }
     private static async Task LogsAsync(AuthorizationLogCapture[] logs, AuthorizationSpanCapture[] servers,
-        AuthorizationSpanCapture[] clients, string? suppressedTrace)
+        AuthorizationSpanCapture[] clients, string? suppressedTrace, bool noRejectedCatalogLog)
     {
         var operationLogs = logs.Where(static log => log.EventId is AuthorizationTelemetryTestProtocol.DeniedEventId
             or AuthorizationTelemetryTestProtocol.HealthyEventId).ToArray();
-        await Assert.That(operationLogs.Length).IsEqualTo(AuthorizationTelemetryTestProtocol.RequestCount);
+        await Assert.That(operationLogs.Length).IsEqualTo(noRejectedCatalogLog
+            ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount);
         foreach (var log in operationLogs)
         {
             await Assert.That(log.Category).IsEqualTo(HttpTelemetryPrivacyPolicy.KeyLoadCategory);
@@ -112,7 +113,8 @@ internal static class AuthorizationTelemetryAssertions
         }
         var healthy = operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.HealthyEventId);
         await Assert.That(servers.Any(span => span.SpanId == healthy.SpanId && span.TraceId == healthy.TraceId)).IsTrue();
-        await Assert.That(operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.DeniedEventId).Level).IsEqualTo(LogLevel.Error);
+        if (!noRejectedCatalogLog)
+        { await Assert.That(operationLogs.Single(static log => log.EventId == AuthorizationTelemetryTestProtocol.DeniedEventId).Level).IsEqualTo(LogLevel.Error); }
         await Assert.That(healthy.Level).IsEqualTo(LogLevel.Information);
     }
     private static async Task MetricsAsync(AuthorizationMetricCapture[] metrics)
@@ -126,7 +128,7 @@ internal static class AuthorizationTelemetryAssertions
             await Assert.That(observed.All(static metric => metric.Tags.Length == AuthorizationTelemetryTestProtocol.IndexCount)).IsTrue();
         }
     }
-    private static async Task ObservationAsync(AdminHttpSnapshot observation)
+    private static async Task ObservationAsync(AdminHttpSnapshot observation, bool malformedJson, bool authenticationFailure)
     {
         await Assert.That(observation.CompletedRequests).IsEqualTo((long)AuthorizationTelemetryTestProtocol.RequestCount);
         await Assert.That(observation.FailedRequests).IsEqualTo((long)AuthorizationTelemetryTestProtocol.HealthyCount);
@@ -134,7 +136,8 @@ internal static class AuthorizationTelemetryAssertions
         var failure = observation.RecentFailures.Single();
         await Assert.That(failure.Method).IsEqualTo(HttpMethods.Post);
         await Assert.That(failure.Route).IsEqualTo(AuthorizationTelemetryTestProtocol.Route);
-        await Assert.That(failure.StatusCode).IsEqualTo(StatusCodes.Status403Forbidden);
+        await Assert.That(failure.StatusCode).IsEqualTo(authenticationFailure ? StatusCodes.Status401Unauthorized
+            : malformedJson ? StatusCodes.Status400BadRequest : StatusCodes.Status403Forbidden);
         await Assert.That(failure.Aborted).IsFalse();
     }
 }

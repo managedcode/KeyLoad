@@ -36,13 +36,13 @@ internal static class PhysicalShardCatalogRf3Assertions
     {
         using var http = McpCallerHttp.Create(app, node);
         var sdk = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken)
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false)).IsNull();
         await using var mcp = await McpOfficialClient.ConnectAsync(app, node, adminKey, cancellationToken)
             .ConfigureAwait(false);
         var response = await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false);
-        var receipt = await McpCallerAssertions.SuccessAsync<DocumentResult?>(response).ConfigureAwait(false);
+        var receipt = await PublicReadAssertions.DocumentAsync(response).ConfigureAwait(false);
         await Assert.That(receipt.Value).IsNull();
     }
 
@@ -52,7 +52,7 @@ internal static class PhysicalShardCatalogRf3Assertions
         await VerifyReadyAsync(app, node, cancellationToken).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(app, node);
         var sdk = new KeyLoadClient(http, adminKey, IntegrationClientOptions.Execution());
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, cancellationToken)
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await AssertDocumentAsync(document, expectedJson).ConfigureAwait(false);
 
@@ -60,7 +60,7 @@ internal static class PhysicalShardCatalogRf3Assertions
             .ConfigureAwait(false);
         var response = await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(reference), cancellationToken).ConfigureAwait(false);
-        var receipt = await McpCallerAssertions.SuccessAsync<DocumentResult?>(response).ConfigureAwait(false);
+        var receipt = await PublicReadAssertions.DocumentAsync(response).ConfigureAwait(false);
         await AssertDocumentAsync(receipt.Value, expectedJson).ConfigureAwait(false);
     }
 

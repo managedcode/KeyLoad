@@ -65,6 +65,8 @@ internal static class ClusterRestoreRf3ResumeTrial
         {
             await ClusterRestoreRf3MissingProgress.RequireAsync(target, Directory.Exists(target.DataRoot),
                 cancellationToken).ConfigureAwait(false);
+            await ClusterRestoreRf3PlanCorruption.RequireAsync(target, Directory.Exists(target.DataRoot),
+                ClusterRestoreRf3ResumeProtocol.ProgressFile, cancellationToken).ConfigureAwait(false);
         }
         var originalPlan = ClusterRestoreRf3RetainedCut.Plan(target);
         var originalOperation = ClusterRestoreRf3RetainedCut.Operation(target);
@@ -82,6 +84,8 @@ internal static class ClusterRestoreRf3ResumeTrial
         var nodes = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals, dispatchPaused: true).ConfigureAwait(false);
         await target.RequireOperatorReceiptAsync(nodes).ConfigureAwait(false);
         var originalReceipt = await target.ReadOriginalReceiptAsync().ConfigureAwait(false);
+        await ClusterRestoreRf3CanonicalCut.RequireOriginalAsync(target, originals, archives,
+            cancellationToken).ConfigureAwait(false);
         await Assert.That(ClusterRestoreRf3RetainedCut.Plan(target).SequenceEqual(originalPlan)).IsTrue();
         await ClusterRestoreRf3PlanCorruption.RequireAsync(target, published: true,
             ClusterRestoreRf3ResumeProtocol.ProgressFile, cancellationToken).ConfigureAwait(false);
@@ -91,6 +95,8 @@ internal static class ClusterRestoreRf3ResumeTrial
         var replayNodes = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals, dispatchPaused: true).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(nodes, replayNodes);
         await target.RequireReceiptReplayAsync(originalReceipt).ConfigureAwait(false);
+        await ClusterRestoreRf3CanonicalCut.RequireOriginalAsync(target, originals, archives,
+            cancellationToken).ConfigureAwait(false);
         await Assert.That(ClusterRestoreRf3RetainedCut.Plan(target).SequenceEqual(originalPlan)).IsTrue();
         await RequireWholeCallersAsync(target, seed, originals, eventing, secondary, cancellationToken).ConfigureAwait(false);
         await ClusterRestoreRf3NativeArchive.RequireOriginalAsync(originals, archives, cancellationToken).ConfigureAwait(false);

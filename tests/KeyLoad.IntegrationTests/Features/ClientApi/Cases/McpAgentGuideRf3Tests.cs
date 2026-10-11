@@ -28,7 +28,7 @@ internal sealed class McpAgentGuideRf3Tests(ClusterFixture fixture)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
+        await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             identity.Credential with { Revoked = true }, cancellationToken));
         var error = await Assert.ThrowsAsync<HttpRequestException>(() =>
             session.Client.ListResourcesAsync(cancellationToken: cancellationToken).AsTask());

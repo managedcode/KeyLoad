@@ -21,7 +21,7 @@ internal static class NativeTextCapturedRf3Publisher
         var stored = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That(JsonDefaults.Serialize(stored).SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         await Assert.That(stored.ClusterAdministrator).IsTrue();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsSuccess).IsTrue();
         return new(stored, credential, secret);
     }
 }

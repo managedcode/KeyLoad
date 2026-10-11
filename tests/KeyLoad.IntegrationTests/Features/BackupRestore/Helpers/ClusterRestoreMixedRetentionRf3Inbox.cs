@@ -19,7 +19,7 @@ internal static class ClusterRestoreMixedRetentionRf3Inbox
             McpCallerTools.MessagesReceive, state.InputRequest, () => callers.Sdk.ReceiveAsync(state.InputRequest, token), token);
         var delivery = await Assert.That(state.InputReceived.Deliveries).HasSingleItem();
         state.Inbox = Request(state, delivery, ClusterRestoreMixedRetentionRf3Protocol.OriginalEffect);
-        state.InputImage = (await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(new(state.Source, delivery.Id), token)))!;
+        state.InputImage = (await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(state.Source, delivery.Id), token)))!;
         var failed = state.Inbox with
         {
             CommandId = Guid.NewGuid(),
@@ -32,7 +32,7 @@ internal static class ClusterRestoreMixedRetentionRf3Inbox
         await ClusterRestoreMixedRetentionRf3Literal.AbsentDocumentAsync(callers, state,
             ClusterRestoreMixedRetentionRf3Protocol.Documents, ClusterRestoreMixedRetentionRf3Protocol.OriginalEffect, token);
         await ClusterRestoreMixedRetentionRf3Literal.FourAsync(callers, state.Source.Partition, McpCallerTools.MessagesInspect,
-            new InspectMessageRequest(state.Source, delivery.Id), state.InputImage,
+            new InspectMessageRequest(state.Source, delivery.Id), new MessageInspectionResult(state.InputImage),
             () => callers.Sdk.InspectAsync(new(state.Source, delivery.Id), token), token);
         state.InboxResult = await QueueLifecyclePublicRoutes.CallAsync(callers, state.OriginalQueue.Route, state.Partition,
             TargetInboxRf3Protocol.Tool, state.Inbox, () => callers.Sdk.CommitInboxAsync(state.Inbox, token), token);
@@ -121,7 +121,7 @@ internal static class ClusterRestoreMixedRetentionRf3Inbox
             TargetInboxRf3Protocol.Tool, duplicate, () => callers.Sdk.CommitInboxAsync(duplicate, token), token);
         await SqlRf3Protocol.EqualAsync(state.InboxResult with { AlreadyProcessed = true }, duplicated);
         await ClusterRestoreMixedRetentionRf3Literal.InboxAsync(callers, state, token);
-        var current = (await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(
+        var current = (await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
             new(state.Source, ClusterRestoreMixedRetentionRf3Protocol.OriginalInput), token)))!;
         var cancel = new CommandRequest(Guid.NewGuid(), state.Source.Partition,
             [new CancelQueueMessage(state.Source.Queue, current.Metadata.Id, current.Metadata.StateVersion, current.Metadata.DeliveryGeneration)]);

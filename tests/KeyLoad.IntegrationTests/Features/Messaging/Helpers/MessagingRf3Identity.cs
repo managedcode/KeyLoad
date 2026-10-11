@@ -37,8 +37,8 @@ internal sealed record MessagingRf3Identity(PrincipalRecord Principal, ApiKeyRec
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal,
             cancellationToken));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), credential, cancellationToken))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, cancellationToken))).IsSuccess).IsTrue();
         return new(principal, credential, secret);
     }
 

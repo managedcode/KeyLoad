@@ -25,6 +25,17 @@ internal static class ApiGrainDispatch
         Guid.TryParse(context.Request.Headers[ServerProtocol.CommandHeader], out var id) && id != Guid.Empty ? id
             : throw Errors.Fail(ErrorCode.Validation, ServerProtocol.StableCommandRequired);
 
+    internal static async Task<global::ManagedCode.Communication.Result> SubmitStatusAsync<T>(
+        HttpContext context, OperationKind kind, Guid commandId, T payload)
+    {
+        if (kind != OperationKind.ConfigureApiKey)
+        { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+        await CanonicalOperationGateway.ExecuteAsync(context, null, kind, commandId,
+            NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements),
+            context.RequestAborted).ConfigureAwait(false);
+        return global::ManagedCode.Communication.Result.Succeed();
+    }
+
     private static async Task<IResult> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload)
     {

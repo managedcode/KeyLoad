@@ -69,3 +69,12 @@ Observer SHA256: `8ffbd9d69afb36a5ef75d53c07793bc7b3b6d312f45116bfb8e946025c316a
 ## Subsequent live-page regression: KL-079 reopened
 
 Linux [run38143183124/job114481041255](https://github.com/managedcode/KeyLoad/actions/runs/38143183124/job/114481041255), source `8e4cadd03d6547f05ac6904f7c7faf7765762e27`, passed the original reconnect/cold case but failed `ConcurrentSnapshotAndCommittedTailRemainGapFreePrivateAndRevocable` at the complete `LiveQueryPage` byte oracle. The original log is155335bytes, SHA256 `9659192b5d1c92a39d60358a850a0371c98c73aab3bc3de0ffe72dd92f1853f6`. The first failure is distinct from later Aspire cleanup messages. No cause, relaxed assertion or repair success is inferred. KL-079 is again in progress until causal repair preserves the full page, cursor, fence, retry, privacy, original deadline and owned RF3 lifecycle and the complete original48-case Linux lane succeeds. The original B1 job, ZIP, receipts and all48 PASS observations above remain immutable. Current plan:18 accepted,86 in progress.
+
+
+## Subsequent fc4 snapshot regression: KL-035 reopened
+
+Linux [run38154439586/job114514387807](https://github.com/managedcode/KeyLoad/actions/runs/38154439586/job/114514387807), source `fc4e490e66ff20d3c6e5e2891883ecb698ba99bc`, executed all49 original cases:48 passed and the empty-follower SDK/MCP scenario failed after73.381seconds because the expected ordered tail entry was absent. The original observation records installed snapshot80, later snapshot96, committed/applied/tail position96 and no retained entry at that position. It does not establish the initiating cause. Later Aspire cleanup messages are separate. No tail assertion, deadline, retention or task gate is waived.
+
+The original authenticated [artifact11707669002](https://github.com/managedcode/KeyLoad/actions/runs/38154439586/artifacts/11707669002) has ZIP SHA256 `304fce5cf6b2838179973eeae8322b54804e1a61749619e28c92ed0d3321bc68`. Every original CLI UID, native JSON ID, TRX instance and source/image observation is bound in the49-case observer, SHA256 `7c35910aa74e8055f410063d7e7c0a0308d7248c87c35aa30ab258e32c6ecbef`. The independent root intake has SHA256 `736e630edc5f3969ce925ed36df0aa7026759325bac6021bec31dd9926d30b5b`.
+
+KL-035 is in progress until a causal repair preserves the original snapshot/ordered-tail, retention, canonical outcomes and joined RF3 lifecycle and all49 original Linux cases pass on the delivered source. Historical B1 acceptance remains49/49. Current original104-task plan:17 accepted,87 in progress.

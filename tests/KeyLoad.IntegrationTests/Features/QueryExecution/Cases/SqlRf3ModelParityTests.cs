@@ -101,15 +101,16 @@ internal sealed class SqlRf3ModelParityTests(ClusterFixture fixture)
     {
         var request = scenario.Inspect();
         var expected = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
-        var actual = await SqlRf3Protocol.SdkAsync<MessageInspection>(sdk,
+        var actual = await SqlRf3Protocol.SdkAsync<MessageInspectionResult>(sdk,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, request), cancellationToken);
-        var official = await SqlRf3Protocol.McpAsync<MessageInspection>(mcp,
+        var official = await SqlRf3Protocol.McpAsync<MessageInspectionResult>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, request), cancellationToken);
         await SqlRf3Protocol.EqualAsync(expected, actual);
         await SqlRf3Protocol.EqualAsync(expected, official);
-        await Assert.That(actual.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(actual.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
-        await Assert.That(actual.Metadata.LeaseOwner).IsNull();
+        await Assert.That(actual.Message).IsNotNull();
+        await Assert.That(actual.Message!.Metadata.State).IsEqualTo(MessageState.Ready);
+        await Assert.That(actual.Message!.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
+        await Assert.That(actual.Message!.Metadata.LeaseOwner).IsNull();
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
         await SqlRf3Protocol.EqualAsync(expected, after);
     }

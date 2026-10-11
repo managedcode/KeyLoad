@@ -92,7 +92,7 @@ internal static class RemotePartitionQueryRf3Assertions
         await Assert.That(NativeSerialization.Serialize(mcp).AsSpan().SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
         var after = await McpCallerAssertions.SdkSuccessAsync(await source.StatusAsync(token));
         await Assert.That(after.Applied).IsEqualTo(before.Applied);
-        var document = await McpCallerAssertions.SdkSuccessAsync(await source.GetAsync(
+        var document = await PublicReadAssertions.DocumentAsync(await source.GetAsync(
             new(RemotePartitionQueryRf3Seed.Local, RemoteDocumentRf3Protocol.Collection, RemoteDocumentRf3Protocol.Document), token));
         var literal = new DocumentResult(new(RemotePartitionQueryRf3Seed.Local,
             RemoteDocumentRf3Protocol.Collection, RemoteDocumentRf3Protocol.Document), FirstRevision,

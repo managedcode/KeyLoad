@@ -21,24 +21,46 @@ internal static class ClusterRestoreRf3PlanCorruption
             || (file.Attributes & FileAttributes.ReparsePoint) != default)
         { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
         var original = await File.ReadAllBytesAsync(path, cancellationToken).ConfigureAwait(false);
+        var originalImage = ClusterRestoreRf3FaultImage.Capture(target);
+        var changed = original.ToArray();
+        changed[MagicByte] ^= FlipMagicBit;
         var failures = new List<Exception>();
+        var faultWritten = false;
+        var joined = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var changed = original.ToArray();
-            changed[MagicByte] ^= FlipMagicBit;
-            Write(path, changed);
-            var corrupt = ClusterRestoreRf3RetainedCut.Operation(target);
+            Replace(path, original, changed);
+            faultWritten = true;
+            var corruptImage = ClusterRestoreRf3FaultImage.Capture(target);
             await target.StartRejectedCorruptPlanAsync(published, cancellationToken).ConfigureAwait(false);
-            await Assert.That(ClusterRestoreRf3RetainedCut.Operation(target).SequenceEqual(corrupt)).IsTrue();
+            await ClusterRestoreRf3FaultImageAssertions.RequireAsync(target, corruptImage).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(() => Write(path, original), failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await target.StopAsync().ConfigureAwait(false);
+            joined = true;
+        }, failures).ConfigureAwait(false);
+        if (faultWritten && joined)
+        { ServerFailureObserver.Observe(() => Replace(path, changed, original), failures); }
         ServerFailureObserver.ThrowIfAny(failures);
+        await ClusterRestoreRf3FaultImageAssertions.RequireAsync(target, originalImage).ConfigureAwait(false);
     }
 
-    private static void Write(string path, byte[] bytes)
+    private static void Replace(string path, byte[] expected, byte[] replacement)
     {
-        using var file = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-        file.Write(bytes);
+        var attributes = File.GetAttributes(path);
+        if ((attributes & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != default
+            || expected.Length != replacement.Length)
+        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        using var file = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        if (file.Length != expected.Length)
+        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        var actual = new byte[expected.Length];
+        file.ReadExactly(actual);
+        if (!actual.AsSpan().SequenceEqual(expected))
+        { throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid); }
+        file.Position = MagicByte;
+        file.Write(replacement);
         file.Flush(flushToDisk: true);
     }
 }

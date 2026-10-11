@@ -117,7 +117,7 @@ internal sealed class AdminDispatchClientParityTests(ClusterFixture fixture)
     private static async Task AssertDocumentAsync(KeyLoadClient sdk, McpDocumentScenario scenario, string json,
         long revision, CancellationToken cancellationToken)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
+        var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, cancellationToken));
         await Assert.That(document!.Json).IsEqualTo(json);
         await Assert.That(document.Revision).IsEqualTo(revision);
     }

@@ -2,7 +2,7 @@
 
 This checkpoint contains the joined graph, messaging and time-series record-integrity repairs; complete authorization, blob-lifetime, generation-visibility, telemetry and SQL authority flows; process-recovery flows; and native test-selection/startup controls. It was checked in the current main checkout based on `8e4cadd03d6547f05ac6904f7c7faf7765762e27`. The separately prepared Result/TimeProvider, ANN, live-page and telemetry successors are not included in these observations.
 
-The original104-task plan remains **18 accepted,86 in progress**. KL-035 retains its authenticated recorded-source acceptance. KL-079 is reopened because of the subsequent Linux full-page regression. See [the original acceptance and regression crosswalk](qualification-stage57-kl035-kl079.md). This checkpoint does not close other original tasks.
+At this checkpoint the original104-task plan recorded **18 accepted,86 in progress**. The subsequent fc4 Linux snapshot regression reopened KL-035; the current plan records **17 accepted,87 in progress**. KL-079 remains in progress after the earlier Linux full-page regression. See [the original acceptance and regression crosswalk](qualification-stage57-kl035-kl079.md). This checkpoint does not close other original tasks.
 
 ## Actual local checks
 

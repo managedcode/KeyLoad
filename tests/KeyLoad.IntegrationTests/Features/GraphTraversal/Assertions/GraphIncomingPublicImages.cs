@@ -11,7 +11,7 @@ internal static class GraphIncomingPublicImages
     {
         var documents = new List<DocumentResult>();
         foreach (var reference in new[] { seed.Target, seed.LocalSource, seed.FirstSource, seed.SecondSource })
-        { documents.Add((await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(reference, token)))!); }
+        { documents.Add((await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)))!); }
         var outbox = new List<OutboxStatus>();
         foreach (var partition in new[] { seed.TargetPartition, seed.FirstSourcePartition, seed.SecondSourcePartition })
         { outbox.Add(await McpCallerAssertions.SdkSuccessAsync(await administrator.OutboxStatusAsync(partition, token))); }
@@ -40,7 +40,7 @@ internal static class GraphIncomingPublicImages
             var expected = new DocumentResult(reference, reference == seed.LocalSource ? localRevision
                 : GraphIncomingPublicPolicy.InitialRevision, GraphIncomingRf3Scenario.EmptyJson, false, []);
             await SqlRf3Protocol.EqualAsync(expected,
-                await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(reference, token)));
+                await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)));
         }
     }
 }

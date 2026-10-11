@@ -36,8 +36,8 @@ internal static class DueNoQuorumRf3IdentityWriter
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
         _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(
-            Guid.NewGuid(), key, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), key, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false)).IsSuccess).IsTrue();
         return new(principal, secret);
     }
 

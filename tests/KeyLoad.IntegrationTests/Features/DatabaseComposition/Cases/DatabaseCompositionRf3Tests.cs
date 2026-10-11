@@ -67,10 +67,10 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         var rejected = await sdk.ExecuteSqlAsync(sql, deadline.Token);
         await Assert.That(rejected.IsFailed).IsTrue();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.NotFound));
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token))).IsNull();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token))).IsNull();
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(scenario.Partition, RelationalSqlRf3Tokens.Documents, Marker), deadline.Token))).IsNull();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
+        await Assert.That(await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             scenario.Inspect(Message), deadline.Token))).IsNull();
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
@@ -89,7 +89,7 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(graph.Edges[0].To).IsEqualTo(scenario.Second);
         await SqlRf3Protocol.EqualAsync(graph, await SqlRf3Protocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traversal), cancellationToken));
-        var source = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
+        var source = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(source.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
         await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionRf3Payload.OrdinalGolden(link));
@@ -106,11 +106,11 @@ internal sealed class DatabaseCompositionRf3Tests(ClusterFixture fixture)
         await Assert.That(receipt.Mutations).HasSingleItem();
         await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, sql, cancellationToken));
         var request = scenario.Inspect(MessagePrefix + EdgePrefix + Message);
-        var derived = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(request, cancellationToken));
+        var derived = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(request, cancellationToken));
         await Assert.That(derived!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
-        await SqlRf3Protocol.EqualAsync(derived, await SqlRf3Protocol.McpAsync<MessageInspection>(mcp,
-            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, request), cancellationToken));
+        await SqlRf3Protocol.EqualAsync(derived, (await SqlRf3Protocol.McpAsync<MessageInspectionResult>(mcp,
+            SqlRf3Protocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, request), cancellationToken)).Message);
         return (command, receipt);
     }
 }

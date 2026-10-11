@@ -55,7 +55,7 @@ internal static class ClusterRestoreRf3EventingSeed
         state.QueueClaim = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(new(Guid.NewGuid(), state.Lane),
             cancellationToken).ConfigureAwait(false));
         state.Page = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadEventSourceAsync(new(state.Source), cancellationToken).ConfigureAwait(false));
-        state.Message = (await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(new(state.Lane,
+        state.Message = (await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(state.Lane,
             ClusterRestoreRf3EventingProtocol.MessageId), cancellationToken).ConfigureAwait(false)))!;
         state.Outbox = await McpCallerAssertions.SdkSuccessAsync(await sdk.OutboxStatusAsync(partition, cancellationToken).ConfigureAwait(false));
         await ClusterRestoreRf3EventingSourceOracle.RequireAsync(sdk, state, cancellationToken).ConfigureAwait(false);

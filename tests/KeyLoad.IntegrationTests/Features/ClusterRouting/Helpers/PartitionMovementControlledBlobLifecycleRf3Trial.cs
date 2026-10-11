@@ -55,7 +55,7 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Trial
             OperationKind.ReclaimBlob, forbidden.CommandId, BlobToolNames.Reclaim, forbidden, null, ErrorCode.Conflict,
             false, ct => seed.Source.ReclaimBlobAsync(forbidden, ct));
         await PartitionMovementControlledBlobFailedCutRf3Trial.RequireAsync(wave, seed, refused, token).ConfigureAwait(false);
-        var unchanged = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
+        var unchanged = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
         await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(written.Value, unchanged);
         proofs.Add(refused);
         var abort = new AbortBlobUploadRequest(Guid.NewGuid(), blob, upload);
@@ -80,7 +80,7 @@ internal static class PartitionMovementControlledBlobLifecycleRf3Trial
             new BlobReclaimResult(upload, OnePart, NoParts, PartLength, true), result.Value);
         proofs.Add(PartitionMovementControlledBlobLifecycleRf3Calls.Capture(OperationKind.ReclaimBlob, request.CommandId,
             BlobToolNames.Reclaim, request, result, null, true, ct => seed.Source.ReclaimBlobAsync(request, ct)));
-        var absent = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
+        var absent = await PublicReadAssertions.UploadAsync(await seed.Source.GetBlobUploadInfoAsync(new(blob, upload), token).ConfigureAwait(false));
         await Assert.That(absent).IsNull();
         foreach (var proof in proofs.Where(value => value.LifetimeRemoved))
         { await PartitionMovementControlledBlobLifecycleRf3Calls.RequireAsync(seed, proof, ErrorCode.TokenInvalidated, token).ConfigureAwait(false); }

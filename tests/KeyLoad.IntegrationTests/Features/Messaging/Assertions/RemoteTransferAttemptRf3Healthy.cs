@@ -18,7 +18,7 @@ internal static class RemoteTransferAttemptRf3Healthy
             var accept = new CommandRequest(RemoteTransferAttemptIdentity.AcceptId(hint, RemoteTransferAttemptRf3Protocol.AdvancedGeneration),
                 seed.Scenario.DestinationPartition, [new AcceptQueueTransfer(seed.Scenario.DestinationQueue, original.IntentToken)]);
             var accepted = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(accept, token));
-            var proof = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+            var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
                 ?? throw new InvalidOperationException(RemoteTransferCoordinatorRf3Protocol.Missing);
             await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);
             await Assert.That(accepted.Token).IsEqualTo(proof.TargetCommit);

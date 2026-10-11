@@ -31,7 +31,7 @@ internal static class AnnPublicCancellationAssertions
         await Assert.That(stored.Id).IsEqualTo(id);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(principal.PolicyEpoch);
         await Assert.That(stored.ClusterAdministrator).IsFalse();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsSuccess).IsTrue();
         return new(stored, credential, secret);
     }
 

@@ -35,8 +35,8 @@ internal static class ClusterRestoreRf3CredentialTrial
                 _ = await ClusterRestoreRf3CallerOwner.RunAsync(source.Application, node, source.Profile.AdminKey,
                     async (sdk, _) =>
                     {
-                        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureApiKeyAsync(
-                            Guid.NewGuid(), row, cancellationToken).ConfigureAwait(false))).IsTrue();
+                        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(
+                            Guid.NewGuid(), row, cancellationToken).ConfigureAwait(false))).IsSuccess).IsTrue();
                         return true;
                     }, cancellationToken).ConfigureAwait(false);
             }

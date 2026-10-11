@@ -27,7 +27,7 @@ internal static class PartitionMovementBlobWireEffects
         await callers.RequireAsync(seed.Partition, BlobToolNames.Reclaim, reclaim,
             ct => callers.Source.ReclaimBlobAsync(reclaim, ct), reclaimed, token);
         var published = await UploadAsync(callers, seed.Partition, blob, true, token);
-        var metadata = await McpCallerAssertions.SdkSuccessAsync(await callers.Source.GetBlobMetadataAsync(new(blob), token));
+        var metadata = await PublicReadAssertions.MetadataAsync(await callers.Source.GetBlobMetadataAsync(new(blob), token));
         await Assert.That(metadata!.Length).IsEqualTo((long)Length);
         await Assert.That(metadata.Revision).IsEqualTo(PublishedRevision);
         var delete = new DeleteBlobRequest(Guid.NewGuid(), blob, metadata.Revision);

@@ -39,7 +39,7 @@ internal static class ColdBootstrapSdkAssertions
     internal static async Task DocumentAtMinimumAsync(KeyLoadClient sdk, EntityRef reference,
         CommitToken minimum, long revision, string json, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, minimum, token));
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, minimum, token));
         var expected = new DocumentResult(reference, revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
@@ -47,7 +47,7 @@ internal static class ColdBootstrapSdkAssertions
     internal static async Task DocumentAsync(KeyLoadClient sdk, EntityRef reference, long revision,
         string json, CancellationToken token)
     {
-        var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference, token));
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, token));
         await Assert.That(actual is not null).IsTrue();
         var expected = new DocumentResult(reference, revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

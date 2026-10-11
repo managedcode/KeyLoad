@@ -47,7 +47,7 @@ internal static class EventMessageSensitivePublicTrial
         if (state.Subscription)
         { state.OriginalPage = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadEventSourceAsync(new(state.Source), token)); }
         else
-        { state.OriginalInspection = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.InspectAsync(new(state.Lane, EventMessageSensitivePublicProtocol.Message), token)); }
+        { state.OriginalInspection = await PublicReadAssertions.MessageAsync(await root.Sdk.InspectAsync(new(state.Lane, EventMessageSensitivePublicProtocol.Message), token)); }
         await EventMessageSensitivePublicOperations.PolicyAsync(root, state, false, token);
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, state.OriginalRequest, ErrorCode.PermissionDenied, token);
         await EventMessageSensitivePublicReads.RedactedAsync(inspector, state, false, token);

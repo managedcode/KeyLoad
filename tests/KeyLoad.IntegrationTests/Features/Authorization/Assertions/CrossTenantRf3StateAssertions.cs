@@ -13,7 +13,7 @@ internal static class CrossTenantRf3StateAssertions
     internal static async Task StateAsync(KeyLoadClient admin, McpDocumentScenario scenario, string json,
         long revision, CancellationToken token)
     {
-        var document = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(scenario.Reference, token));
+        var document = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(scenario.Reference, token));
         await Assert.That(document).IsNotNull();
         await Assert.That(document!.Reference).IsEqualTo(scenario.Reference);
         await Assert.That(document.Revision).IsEqualTo(revision);

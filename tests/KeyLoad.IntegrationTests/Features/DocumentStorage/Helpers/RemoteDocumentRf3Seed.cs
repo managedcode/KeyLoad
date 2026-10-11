@@ -54,7 +54,7 @@ internal sealed record RemoteDocumentRf3Seed(PrincipalRecord Principal, string S
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(principal))).IsTrue();
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await sdk.ConfigureApiKeyAsync(Guid.NewGuid(), credential, token))).IsSuccess).IsTrue();
     }
 
     internal async Task GrantDestinationAsync(KeyLoadClient sdk, CancellationToken token)

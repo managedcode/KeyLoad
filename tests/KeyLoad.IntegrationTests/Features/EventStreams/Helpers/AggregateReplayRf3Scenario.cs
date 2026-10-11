@@ -143,7 +143,7 @@ internal sealed record AggregateReplayRf3Scenario(PartitionRef Partition, Princi
             + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = keyId + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var verifier = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
+        await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(Guid.NewGuid(),
             new(keyId, worker.Id, verifier), cancellationToken));
         return secret;
     }

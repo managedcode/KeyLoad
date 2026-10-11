@@ -28,7 +28,7 @@ internal sealed class ConnectionRf3OverlapTests
         var reference = ConnectionRf3PublicOperations.Reference(scenario.SecondIdentity);
         var read = await scenario.ObserveAsync(scenario.SecondIdentity, Guid.Empty, GrainReadKind.Document,
             () => independent.GetAsync(reference, token), token);
-        var document = await McpCallerAssertions.SdkSuccessAsync(read.Result);
+        var document = await PublicReadAssertions.DocumentAsync(read.Result);
         await ConnectionRf3PublicOperations.DocumentAsync(new(document, null), scenario.SecondIdentity, read.Witness,
             RequestCqrsRf3Protocol.ChangedDocumentJson, ConnectionRf3Protocol.UpdatedRevision);
         await ConnectionRf3WitnessReader.SameOwnerAsync(held.Witness, read.Witness);

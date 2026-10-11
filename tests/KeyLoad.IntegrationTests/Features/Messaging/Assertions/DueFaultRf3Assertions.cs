@@ -34,9 +34,9 @@ internal static class DueFaultRf3Assertions
     internal static async Task<bool> AreBothTransitionsCommittedAsync(KeyLoadClient first, KeyLoadClient second,
         DueFaultRf3Seed seed, CancellationToken cancellationToken)
     {
-        var a = await McpCallerAssertions.SdkSuccessAsync(await first.InspectRecurringScheduleAsync(
+        var a = await PublicReadAssertions.ScheduleAsync(await first.InspectRecurringScheduleAsync(
             new(seed.RecurringLane, seed.ScheduleId), cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var b = await McpCallerAssertions.SdkSuccessAsync(await second.InspectSagaAsync(
+        var b = await PublicReadAssertions.SagaAsync(await second.InspectSagaAsync(
             new(seed.SagaLane, seed.SagaId), cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         if (a is null || b is null)
         { throw new InvalidOperationException(MissingDueRecord); }
@@ -47,9 +47,9 @@ internal static class DueFaultRf3Assertions
         CancellationToken cancellationToken)
     {
         var request = new InspectRecurringScheduleRequest(seed.RecurringLane, seed.ScheduleId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectRecurringScheduleAsync(request,
+        var sdk = await PublicReadAssertions.ScheduleAsync(await callers.Sdk.InspectRecurringScheduleAsync(request,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<RecurringScheduleInspection?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.ScheduleAsync(await callers.Mcp.CallAsync(
             DueFaultRf3Protocol.InspectScheduleTool, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(sdk).IsNotNull();
         await Assert.That(mcp.Value).IsNotNull();
@@ -67,9 +67,9 @@ internal static class DueFaultRf3Assertions
         CancellationToken cancellationToken)
     {
         var request = new InspectSagaRequest(seed.SagaLane, seed.SagaId);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectSagaAsync(request,
+        var sdk = await PublicReadAssertions.SagaAsync(await callers.Sdk.InspectSagaAsync(request,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<SagaInspection?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.SagaAsync(await callers.Mcp.CallAsync(
             DueFaultRf3Protocol.InspectSagaTool, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(sdk).IsNotNull();
         await Assert.That(mcp.Value).IsNotNull();
@@ -85,9 +85,9 @@ internal static class DueFaultRf3Assertions
         CancellationToken cancellationToken)
     {
         var request = new InspectMessageRequest(lane, id);
-        var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(request, cancellationToken)
+        var sdk = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        var mcp = await McpCallerAssertions.SuccessAsync<MessageInspection?>(await callers.Mcp.CallAsync(
+        var mcp = await PublicReadAssertions.MessageAsync(await callers.Mcp.CallAsync(
             DueFaultRf3Protocol.InspectMessageTool, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(sdk).IsNotNull();
         await Assert.That(mcp.Value).IsNotNull();
@@ -127,7 +127,7 @@ internal static class DueFaultRf3Assertions
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(command, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(JsonDefaults.Serialize(sdk).AsSpan().SequenceEqual(JsonDefaults.Serialize(mcp.Value))).IsTrue();
-        var message = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.InspectAsync(new(lane, id),
+        var message = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(lane, id),
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(message!.Metadata.State).IsEqualTo(MessageState.Acked);
         await AssertEmptyQueueAsync(callers, lane, cancellationToken).ConfigureAwait(false);

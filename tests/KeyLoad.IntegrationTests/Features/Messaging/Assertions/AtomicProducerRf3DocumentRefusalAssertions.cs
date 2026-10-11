@@ -56,9 +56,9 @@ internal static class AtomicProducerRf3DocumentRefusalAssertions
             QueueProducerRf3Protocol.Refused, token);
         var document = new GetDocumentRequest(QueueProducerRf3Assertions.Document(seed, QueueProducerRf3Protocol.Refused));
         var message = new InspectMessageRequest(seed.Lane, QueueProducerRf3Protocol.Refused);
-        await Assert.That((await McpCallerAssertions.SuccessAsync<DocumentResult?>(await mcp.CallAsync(
+        await Assert.That((await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, document, token))).Value).IsNull();
-        await Assert.That((await McpCallerAssertions.SuccessAsync<MessageInspection?>(await mcp.CallAsync(
+        await Assert.That((await PublicReadAssertions.MessageAsync(await mcp.CallAsync(
             McpCallerTools.MessagesInspect, message, token))).Value).IsNull();
         await Assert.That(await SqlRf3Protocol.SdkAsync<DocumentResult?>(sdk,
             SqlRf3Protocol.Call(seed.Lane.Partition, McpCallerTools.DocumentsGet, document), token)).IsNull();

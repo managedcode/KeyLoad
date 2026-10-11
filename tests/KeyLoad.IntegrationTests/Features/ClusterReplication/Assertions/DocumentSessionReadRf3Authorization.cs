@@ -30,7 +30,7 @@ internal static class DocumentSessionReadRf3Authorization
         var sqlOfficial = await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
         await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, identity.Secret, FirstJson);
-        var unchanged = await McpCallerAssertions.SdkSuccessAsync(await admin.GetAsync(reference, minimum, token));
+        var unchanged = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, minimum, token));
         var expected = new DocumentResult(reference, First, FirstJson, false, []);
         await Assert.That(JsonDefaults.Serialize(unchanged).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         var restored = identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + First };
