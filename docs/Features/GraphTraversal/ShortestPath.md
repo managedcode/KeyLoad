@@ -187,3 +187,29 @@ Preserves REQ-GRAPH-010 / AC-GRAPH-009 and REQ/AC-REP-003 stable-command outcome
 Freeze before code: capture the original CommandRequest exactly once, preserve its original partition/mutation bytes, existing administrator principal/client and unchanged original initiating deadline/token. Only an actual first UnknownWriteOutcome admits ONE awaited same-object CommitAsync reconciliation. Any other first error, any unsuccessful reconciliation (including another unknown), and cancellation remain failure. No loops, new IDs, alternate caller, sleep/backoff, generic election retry, health-only success or deadline extension. A successful receipt must come from the real SDK, never inferred from readiness or path existence. After actual canonical success, one same-command receipt replay must return byte-identical complete CommandId/token/mutations/durability. Literal mutation upsertEdge/exact graph+edge/revision1 and complete shortcut edge endpoints/label/attributes{} /revision1 prove one logical graph effect. This also applies when initial call succeeds.
 
 Owning paths: existing IntegrationTests GraphTraversal Helpers/GraphPathRf3LeaderLoss.cs and cohesive Helpers/GraphPathRf3CommandReconciliation.cs. The existing real AcGraph009 flow is the regression; no fake provider/probe is introduced. All original survivor SDK and official MCP path checks, restored-node health/native status/catchup, every replica SDK path and restored-node official MCP path remain, strengthened with exact shortcut edge equality. Cleanup retains primary and all original stop/restart errors. Dependencies unchanged; no migration/public dispatcher/consensus repair. Root guards/joins/builds and runs exact native AcGraph009 plus mandatory full gates. Source reconstruction is unqualified. Rollback removes helper/calls/oracle amendments together, without changing canonical identity or RF3 policies.
+
+## TASK-GRAPH-PATH-CORRUPTION-001 — actual persisted adjacency refusal
+
+REQ-GRAPH-008/009 and AC-GRAPH-007/008 additionally map to native shortest-path
+corruption flows in `GraphShortestPathCorruptionTests`. Seed genuine documents
+and a canonical directed edge, verify the independently expected path, then
+inject one fixture-owned missing or inconsistent canonical/adjacency row.
+The actual path operation must return Corruption before returning a partial
+result and preserve the complete native store image and position. Repeat that
+operation after joined close/reopen, then restore only the injected row and
+verify the full healthy path, edge fields and unchanged read cut/store image.
+Cases cover absent edge, changed edge identity/source/foreign target, invalid
+stored label/target identifier, malformed adjacency and the wrong native root type.
+
+Root owns only new GraphTraversal Cases/Helpers/Models test files and this
+acceptance map. Existing ADR-098 defines the native consistency checks; no new
+production contract, public API, record/format or migration is required. Static
+review identifies an untested error flow, not a confirmed ZoneTree defect.
+Combined solution build/analyzer/formatter and native SIMD TUnit tests precede
+any result claim; current-source Linux, recovery and RF3 qualification remain
+mandatory and separate. Rollback removes only these additive tests and mapping.
+
+Development verification on 2026-10-11 passed all eight native corruption/repair
+flows (8/8) in the reviewed isolated snapshot. Shared build, affected-suite and
+qualification limits are recorded in [the Messaging development result](../Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
+Current-source Linux and Aspire RF3 qualification remain open.

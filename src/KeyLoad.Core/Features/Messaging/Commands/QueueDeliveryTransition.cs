@@ -7,7 +7,6 @@ public sealed partial class DatabaseEngine
 {
     private const int QueueDeliveryTransitionMinimumPositiveCount = 1;
     private const int QueueDeliveryTransitionVersionOne = 1;
-    private const int QueueDeliveryTransitionAdjacentElementOffset = 1;
 
     private const int DefaultRenewalSeconds = 30;
 
@@ -31,11 +30,7 @@ public sealed partial class DatabaseEngine
         }
         else
         {
-            counters = counters with
-            {
-                InFlightMessages = counters.InFlightMessages - QueueDeliveryTransitionAdjacentElementOffset,
-                InFlightBytes = counters.InFlightBytes - lease.BodyBytes
-            };
+            counters = ReleaseQueueInFlight(counters, lease.BodyBytes);
             updated = CompleteDeliveryAction(tx, command.Lane, resource.QueuePolicy, command.Action,
                 metadata, lease.BodyBytes, now, ref counters, operation);
         }
@@ -50,11 +45,7 @@ public sealed partial class DatabaseEngine
     {
         if (action == DeliveryAction.Ack)
         {
-            counters = counters with
-            {
-                StoredMessages = counters.StoredMessages - QueueDeliveryTransitionAdjacentElementOffset,
-                StoredBytes = counters.StoredBytes - bodyBytes
-            };
+            counters = ReleaseQueueStored(counters, bodyBytes);
             var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
             RemoveQueueOrder(tx, lane, policy, body.Body, metadata);

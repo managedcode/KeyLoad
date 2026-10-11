@@ -226,3 +226,27 @@ flowchart LR
 
 ### TASK-KL039-PUBLIC-RETAINED-READER Storage ownership
 Original REQ/AC-CUT-001..004 additionally map to the exact [public retained-reader flow](../Search/OnlineGenerationLifetime.md#task-kl039-public-retained-reader-finite-original-public-reader-overlap) under ADR-097/095/125. ZoneTreeReadCutLease adds internal point lookup and borrowed callback visitation only while its original native traversal is active; existing copied VisitPrefix callers remain unchanged. Storage-owned bounded captured scopes distinguish actual absence from unadmitted keys and admit every owned key/value/capacity before copying. The fully owned read-only closure may outlive its joined snapshot; no live view/native snapshot remains after slot release. Its same selected FTS reader remains independently leased through the real caller operation. Original one-snapshot/default budget/deadline/format and node-local ownership remain exact. This is a runtime-only adapter, no migration/public API or production readiness claim.
+
+### TASK-CUT-CAPTURED-OPERATION-001 — owned frozen scope and point admission
+
+REQ/AC-CUT-001..004 and the existing ADR-097 map to two additive real-ZoneTree
+operation regressions in `NativeCapturedReadScopeTests`: capture present values,
+an observed absent key and a prefix, then commit live update/delete/insert, join
+the snapshot and original owner, and retain the exact original captured bytes
+and absence through a cold live open. Unadmitted point/range access must return
+HistoryUnavailable without changing the current store; fresh live reads and a
+healthy write must succeed. The second flow exhausts exact point-byte admission
+before callback delivery, joins the lease, opens a healthy lease and verifies
+the unchanged cold records. These tests exercise the accepted runtime adapter;
+they add no storage, authorization, format or public contract.
+
+Storage worker owns only new StorageRecovery Cases/Helpers test files. Root owns
+this map and combined build/analyzer/formatter plus native TUnit unit/recovery/RF3
+verification at the integration barrier. Source review identifies a coverage gap,
+not an upstream ZoneTree defect or a passing runtime gate. Existing reports and
+qualification limits remain exact; removal rolls back only these additive tests.
+
+Development verification on 2026-10-11 passed both native captured-scope flows
+(2/2) in the reviewed isolated snapshot. Shared build, affected-suite and
+qualification limits are recorded in [the Messaging development result](../Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
+Current-source Linux and Aspire RF3 qualification remain open.

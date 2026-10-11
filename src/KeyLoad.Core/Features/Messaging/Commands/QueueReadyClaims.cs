@@ -82,12 +82,7 @@ public sealed partial class DatabaseEngine
         };
         state.TransitionInputs.Add(new(ReadyKey: key.ToArray(), MetadataKey: metadataKey, Metadata: expired,
             TransitionKey: bodyKey, DeletesBody: true, StrictOrderKey: orderKey));
-        var counters = state.Counters!;
-        state.Counters = counters with
-        {
-            StoredMessages = counters.StoredMessages - QueueReadyClaimsAdjacentElementOffset,
-            StoredBytes = counters.StoredBytes - bodyBytes
-        };
+        state.Counters = ReleaseQueueStored(state.Counters!, bodyBytes);
         state.CountersChanged = true;
     }
 

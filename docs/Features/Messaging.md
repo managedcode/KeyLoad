@@ -912,3 +912,45 @@ settlement. Root commits/pushes the completed stage and retains exact delivered
 Linux evidence. Rollback removes only this added test/enrollment. Null service,
 leadership/migration, physical drift/lateness and whole KL092 remain OPEN until
 their separate genuine gates pass; no new UID or PASS is inferred from source.
+
+### TASK-MSG-COUNTER-DEBIT-001 — exact retained usage before lifecycle debit
+
+REQ/AC-MSG-001/004/005 and existing ADR-026/028 require exact byte/message
+accounting and atomic failure. Source review found lifecycle paths subtracting
+inflight/stored counts and bytes without the existing `ReleaseQueueInFlight` and
+`ReleaseQueueStored` checks. Reuse those native checks at every selected delivery,
+ready expiry and due lease/scheduled expiry debit. An insufficient retained
+count or bytes throws the helpers' existing Corruption before the transaction
+commits. Global contradictory-counter RecoveryRequired checks remain unchanged.
+No new error, authority, public API, record, lifetime or storage format is added.
+
+Messaging worker owns `QueueDeliveryTransition.cs`, `QueueSweepTransitions.cs`
+and `QueueReadyClaims.cs` plus new Messaging Cases/Helpers/Assertions/Contracts/Models. The real
+ZoneTree matrix executes ACK with each undercounted column, NACK and processing
+inflight debit, receive-driven lease reclaim, ready expiry and scheduled expiry.
+Inject only the fixture-owned counters row with otherwise nonnegative usage;
+require actual refusal, unchanged full queue image/position after refusal,
+repeated same-operation Corruption and joined cold state. Corruption is excluded
+from persisted failure outcomes by the existing atomic commit contract; no
+failure receipt is invented. Restore only the damaged row, execute the original
+uncommitted operation successfully, verify its exact success receipt replay,
+then fresh healthy work and final model/counters through a second cold owner.
+Root reviews the complete batch and joins native build/analyzers,
+formatter and 50-slot TUnit plus mandatory recovery/RF3 gates. Source finding is
+KeyLoad-owned; it is not an upstream ZoneTree defect. Original failures remain
+evidence and no acceptance closes from source alone. Rollback restores the
+three production owners and removes only this batch's tests/map.
+
+Development verification on 2026-10-11 used an isolated reviewed macOS arm64
+snapshot with native SIMD enabled. The original nine cases failed against
+source `6c008bb3865bdab69cabc04a52abc8842e696db9`: insufficient nonnegative
+counters were accepted, producing negative or mismatched retained usage.
+The patched cases passed 9/9 after final helper formatting; the affected native
+queue/blob/graph/read-cut suite passed 268/268, and queue process-kill recovery
+passed 15/15, all without skips. The complete Release solution build passed
+with zero warnings/errors. Native coverage for the three changed production
+owners measured 97.87–98.81% lines and 75–90% branches; this is scoped development
+evidence, not the complete coverage gate. Canonical `dotnet format KeyLoad.slnx
+--verify-no-changes --no-restore` passed on that snapshot. Current-source Linux full suites,
+Aspire RF3 through SDK/MCP, endurance and delivery remain open. Process-kill
+results do not establish power-loss durability.

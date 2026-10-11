@@ -160,3 +160,30 @@ Qualification: PRIVATE SOURCE ONLY. Root-only compiler/analyzer, actual native U
 ### TASK-BLOB-CURRENT-LITERAL-641
 
 REQ/AC-BLOB-001/002/005/007 and ADR-038: keep both original complete real-store operation cases, exact original resource/public JSON, native record image and position, stable success/refusal replay, default limit rejection, genuine upload/publish/full and partial bytes, healthy document, joined close/reopen and full receipts. The literal current default resource image includes accepted queue DLQ sublimits null, CompetingConsumers ordering, Continue parked-head behavior, None jitter and factor2; all original default limits and other resource bytes remain exact. Null InboxPolicy remains omitted by the existing explicit JsonIgnore contract. This updates the independent first-release golden for current approved additions, never a legacy reader/migration/fallback. Preserve original numeric identities; explicitly add QueueCancel bit38 and InboxWrite bit39 and exact All bits0..39. No production-derived expected value/count, authorization/payload/receipt weakening or standalone getter test. Original source641 failures remain immutable history; source repair is unqualified until root executes normal/scalar plus mandatory recovery/RF3.
+
+### TASK-BLOB-RECLAIM-WHOLE-001 — partial reclaim, cold cursor and rollback
+
+Existing REQ/AC-BLOB-001/002/004/005/007 and ADR-038 map to two actual native
+operation flows in `BlobReclaimWholeFlowTests`. A multipart active upload is
+aborted; only its unwritten reservation and active slot are released. Bounded
+one-part reclaim releases the exact accepted bytes, preserves the remaining
+cursor/version charge and survives joined close/reopen. Final reclaim releases
+the remaining bytes/version slot once; reuse of that UploadId denies the old
+lifetime's replay without changing the new upload, then healthy publication and
+an exact partial read succeed. Resource/global counters, full native image,
+position and original receipt/replay bytes are independently asserted.
+
+The second flow corrupts only its owned second raw part, calls a two-part reclaim
+and requires Corruption with both original parts, metadata, cursor and counters
+unchanged: deletion staged for the first part must roll back. Repair only the
+injected raw row, then complete bounded reclaim, cold verification and healthy
+reuse/publication/read. No policy, authority, format, quota or deadline changes.
+Blob worker owns new Cases/Helpers/Assertions/Fixtures under the BlobStorage test
+slice; root owns this contract and integrated checks. Existing architecture is
+sufficient (ADR-038); runtime and Linux/RF3 qualification remain pending until
+original reports exist. Rollback removes only the additive tests and mapping.
+
+Development verification on 2026-10-11 passed both native reclaim flows (2/2)
+in the reviewed isolated snapshot. Shared build, affected-suite and qualification
+limits are recorded in [the Messaging development result](Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
+Current-source Linux and Aspire RF3 qualification remain open.

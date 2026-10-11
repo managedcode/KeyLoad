@@ -79,11 +79,7 @@ public sealed partial class DatabaseEngine
         tx.Delete(item.Key.ToArray());
         if (leased)
         {
-            current = current with
-            {
-                InFlightMessages = current.InFlightMessages - QueueSweepTransitionsAdjacentElementOffset,
-                InFlightBytes = current.InFlightBytes - body.Bytes
-            };
+            current = ReleaseQueueInFlight(current, body.Bytes);
         }
         var updated = DueMetadata(tx, lane, policy, now, metadata, body.Bytes, ref current, operation, item.Key.Span);
         tx.PutRecord(metadataKey, updated);
@@ -96,11 +92,7 @@ public sealed partial class DatabaseEngine
     {
         if (metadata.ExpiresAt <= now)
         {
-            counters = counters with
-            {
-                StoredMessages = counters.StoredMessages - QueueSweepTransitionsAdjacentElementOffset,
-                StoredBytes = counters.StoredBytes - bodyBytes
-            };
+            counters = ReleaseQueueStored(counters, bodyBytes);
             var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, metadata.Id))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
             RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
