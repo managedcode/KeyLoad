@@ -9,3 +9,12 @@ Roslynk__Port = "16502"
 
 [mcp_servers.roslynk.tools.apply_patch]
 approval_mode = "approve"
+
+[mcp_servers.dotnet_diagnostics]
+command = "dotnet-diagnostics-mcp"
+args = ["--stdio"]
+startup_timeout_sec = 60
+tool_timeout_sec = 120
+
+[mcp_servers.dotnet_diagnostics.env]
+MCP_ARTIFACT_ROOT = "/Users/ksemenenko/Developer/KeyLoad/artifacts/profiling"

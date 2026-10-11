@@ -19,7 +19,7 @@ atomic stage. Логічні таблиці, колекції й черги ор
 **Моделі:** JSON/KV, індекси, property graph, часові ряди, вектори, гібридний пошук, Event Store, durable queues і topics.  
 **Розширення 0.2:** SQL, unified planner, clients/grains, users/permissions, sensitive fields, managed ANN, sharding і PostgreSQL benchmark.  
 **Розширення 0.3:** streams/replay, durable delivery, consumer groups, inbox/outbox, shared TransactionDomain, persisted scheduling та eventing recovery.  
-**План робіт:** 104 задачі KL-001..KL-104; реалізація і вимірювання ще попереду.
+**План робіт:** 105 задач KL-001..KL-105; KL-105 додано власником 2026-10-12 для обов'язкового профілювання .NET через `dotnet-diagnostics-mcp`. Поточні результати та відкриті gates наведено в [канонічному статусі](../implementation/status.json).
 
 Цей документ містить результати перевірки публічної документації, вибіркове читання API ZoneTree та запропоновані рішення для KeyLoad. Прототип, навантажувальні тести, перевірки відмов і повний аудит коду залежностей у межах цього дослідження не виконувалися. Числові межі в розділах про тести й бюджет запитів є початковими інженерними цілями. Версії пакетів та source commits потрібно зафіксувати в KL-001 перед реалізацією.
 
@@ -2736,6 +2736,14 @@ RabbitMQ quorum queues додаються як specialized messaging arm, Kurren
 **Робота:** Єдиний release gate для declared data/event/messaging capabilities, restores, limits, latency, operator runbooks і dependency provenance.
 
 **Приймання:** Кожен advertised contract має real-process evidence; paused restore та redrive runbook перевірені; optional KL-100 потрібен лише для заявленої job/saga capability; непідтверджені performance claims відсутні.
+
+### KL-105 · Профілювання .NET і виправлення виміряних вузьких місць
+
+**Етап:** P5..P6. **Залежності:** KL-075, KL-077, KL-080; виконувати паралельно з відкритими задачами.
+
+**Робота:** Виконати `dotnet tool install -g dotnet-diagnostics-mcp`, створити skill `dotnet-diagnostics-profiling` і застосувати actual native diagnostics до справжніх .NET процесів. Зняти bounded CPU, allocations, GC, contention та ThreadPool профілі; зіставити hotspots із точним source/DLL/PDB, виправити підтверджені вузькі місця та повторити профілі на зіставних workloads. Джерело інструмента: [pedrosakuma/dotnet-diagnostics](https://github.com/pedrosakuma/dotnet-diagnostics).
+
+**Приймання:** [REQ/AC-PROFILE-105](../Features/BenchmarkComparisons/DotnetProfiling.md) вимагають реальні captures, quality/loss/overhead metadata, correctness regressions, matched before/after та original Linux GitHub performance artifacts. Встановлення, skill, source review чи trace самі не закривають задачу та не доводять прискорення. RF3, native Orleans, ZoneTree, persisted authorization, SIMD, admission і durability contracts залишаються обов'язковими.
 
 ### ADR-023..ADR-031
 

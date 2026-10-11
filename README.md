@@ -75,9 +75,9 @@ That's what we're building: **one place for context, one place for the work that
 
 > **Development preview.** Production qualification is still open.
 
-| Original tasks | Accepted | In progress |
+| Plan tasks | Accepted | In progress |
 |---|---|---|
-| **104** | **18** | **86** |
+| **105** | **18** | **87** |
 
 ```mermaid
 flowchart LR
@@ -89,6 +89,8 @@ flowchart LR
 ```
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
+
+[KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
 KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current qualification record](docs/implementation/qualification-stage59-current-joined.md) separates implemented source, local checks and remaining acceptance gates; earlier evidence remains in the [original qualification record](docs/implementation/qualification-stage57-kl035-kl079.md).
 

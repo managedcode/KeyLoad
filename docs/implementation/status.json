@@ -59865,6 +59865,81 @@
       "wholeTaskAccepted": false
     }
   },
+  "KL-105": {
+    "title": ".NET profiling with dotnet-diagnostics-mcp and measured bottleneck repairs",
+    "status": "in_progress",
+    "ownerDirection": "2026-10-12",
+    "evidence": [
+      "AGENTS.md",
+      "docs/design/architecture-v0.3.uk.md",
+      "docs/Features/BenchmarkComparisons/DotnetProfiling.md",
+      "https://github.com/pedrosakuma/dotnet-diagnostics"
+    ],
+    "tool": {
+      "package": "dotnet-diagnostics-mcp",
+      "command": "dotnet tool install -g dotnet-diagnostics-mcp",
+      "observedVersion": "0.28.0",
+      "installExitCode": 0,
+      "installResult": "already_installed_verified_by_original_global_tool_list_and_install_command",
+      "sourceCommit": "551dd045a87de0e49ffe3165103a6df6450d2adf",
+      "projectMcpConfiguration": ".codex/config.toml"
+    },
+    "skill": {
+      "name": "dotnet-diagnostics-profiling",
+      "path": "/Users/ksemenenko/.codex/skills/dotnet-diagnostics-profiling/SKILL.md",
+      "status": "created_installed_and_validated",
+      "sha256": "9eb9118fb28e0339532d31e8570b5b9227020dde4ee1f210959c5fade836b9b6",
+      "automaticDiscovery": true,
+      "sourceValidationExitCode": 0,
+      "installedValidationExitCode": 0,
+      "mcpProtocolSmoke": "passed_official_MCP_CSharp_SDK_initialization_and_discovery_13_tools",
+      "initialSha256": "572cb8a8d15d623a95e14b3b0f2b37b9fc8b6a282bdca81bf917c49ddcf30413",
+      "helperPath": "/Users/ksemenenko/.codex/skills/dotnet-diagnostics-profiling/scripts/invoke.cs",
+      "helperSha256": "bbeed38bdad8e5213fbeef0cffccbb60c705fed1d23cf2027f9150150b1df821",
+      "helperFailureRegression": "passed_request_saved_before_invocation_bounded_client_timeout_classified_followup_discovery_13_tools"
+    },
+    "qualification": {
+      "actualApplicationProfiles": "blocked_current_functional_build_and_no_running_application",
+      "confirmedBottleneckRepairs": "open",
+      "correctnessRegressions": "open",
+      "matchedBeforeAfterProfiles": "open",
+      "isolatedLinuxGithubPerformanceEvidence": "open",
+      "accepted": false
+    },
+    "developmentWorkflow": {
+      "policy": "regular_runtime_profiling_alongside_Roslynk_for_runtime_symptoms_and_functional_regressions",
+      "governance": "passed",
+      "skillValidation": "passed",
+      "actualApplicationProcessDiscovery": "no_KeyLoad_application_process_only_diagnostics_client_matched_path",
+      "functionalBuild": {
+        "command": "dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-restore --configuration Release --disable-build-servers -m:1",
+        "exitCode": 1,
+        "errors": 31,
+        "blockers": [
+          "ORLEANS0107_and_CS0122_AnnProjectionJobProtocol_Identity_inaccessible",
+          "ORLEANSEXP005_native_Journaling_optins",
+          "KLD0035_KLD0037_IDE0005_analyzer_findings"
+        ],
+        "testsExecuted": false
+      },
+      "originalPrivateArtifacts": "artifacts/profiling/kl105-development-20261012/",
+      "collectorSmoke": {
+        "scope": "owned_official_MCP_client_only_not_a_KeyLoad_application_workload",
+        "processId": 87265,
+        "runtimeVersion": "10.0.12",
+        "os": "macOS",
+        "architecture": "arm64",
+        "durationSeconds": 3,
+        "nativeRuntimeClassification": "NativeAot_despite_PublishAot_false_helper_and_CoreLib_allocation_frames",
+        "cpu": "explicit_EventPipe_UnsupportedRuntime_retained",
+        "allocationGcThreadpoolCounters": "native_batch_returned_four_handles",
+        "contention": "native_handle_returned_no_events_observed",
+        "samplingLoss": "unknown_when_not_reported",
+        "diagnosticOverhead": "not_measured",
+        "bottleneckConclusion": "none_helper_smoke_does_not_establish_KeyLoad_behavior"
+      }
+    }
+  },
   "AdminDashboard": {
     "title": "Read-only адміністративна панель бази даних",
     "status": "in_progress",
