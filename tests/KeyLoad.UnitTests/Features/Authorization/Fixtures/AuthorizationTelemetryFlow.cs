@@ -8,10 +8,12 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class AuthorizationTelemetryFlow
 {
-    internal static async Task ExecuteAsync(AuthorizationTelemetryHttpFixture fixture, AuthorizationUnsafeSpanState state)
+    internal static async Task ExecuteAsync(AuthorizationTelemetryHttpFixture fixture, AuthorizationUnsafeSpanState state,
+        bool repairPersistedMember = false)
     {
         var partition = fixture.Database.Partition;
         var position = fixture.Database.Database.LastApplied;
+        var originalImage = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
         using var deadline = fixture.Deadline();
         fixture.UnsafeState = state;
         using var connectionState = new AuthorizationConnectionTraceState(() => fixture.UnsafeState);
@@ -41,11 +43,16 @@ internal static class AuthorizationTelemetryFlow
         }
         await Assert.That(ReferenceEquals(Activity.Current, ambient)).IsTrue();
         await Assert.That(fixture.Database.Database.LastApplied).IsEqualTo(position);
+        await AuthorizationTelemetryPolicyRepair.UnchangedAsync(fixture.Database, originalImage);
+        if (repairPersistedMember)
+        { position = await AuthorizationTelemetryPolicyRepair.RepairAsync(fixture.Database); }
+        var healthyImage = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
         fixture.UnsafeState = AuthorizationUnsafeSpanState.None;
         using (var healthyCaller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
             await AuthorizationTelemetryNativeAssertions.CallerAsync(healthyCaller);
-            using var healthy = await SendAsync(fixture, AuthorizationTelemetryTestProtocol.AdministratorKey,
+            using var healthy = await SendAsync(fixture, repairPersistedMember
+                ? AuthorizationTelemetryTestProtocol.MemberKey : AuthorizationTelemetryTestProtocol.AdministratorKey,
                 request with { AfterName = null }, deadline.Token);
             await Assert.That(healthyCaller.Current!.Recorded).IsTrue();
             await Assert.That(healthy.StatusCode).IsEqualTo(HttpStatusCode.OK);
@@ -54,6 +61,7 @@ internal static class AuthorizationTelemetryFlow
         }
         await Assert.That(ReferenceEquals(Activity.Current, ambient)).IsTrue();
         await Assert.That(fixture.Database.Database.LastApplied).IsEqualTo(position);
+        await AuthorizationTelemetryPolicyRepair.UnchangedAsync(fixture.Database, healthyImage);
         await fixture.JoinProducersAsync(deadline.Token);
         await fixture.AwaitExportsAsync(state, deadline.Token);
         await AuthorizationTelemetryAssertions.ExportsAsync(fixture, state, suppressedTrace);

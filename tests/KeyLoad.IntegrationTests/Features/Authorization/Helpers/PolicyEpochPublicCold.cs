@@ -26,7 +26,7 @@ internal static class PolicyEpochPublicCold
             root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.CurrentReader.Secret,
                 async reader =>
                 {
-                    await PolicyEpochPublicRefusals.AllAsync(reader, root.Sdk, state, ErrorCode.CursorExpired, token);
+                    await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root.Sdk, state, ErrorCode.CursorExpired, token);
                     await PolicyEpochPublicAssertions.PagesAsync(reader, root.Sdk, state.Scenario, false, token);
                     await PolicyEpochPublicPolicy.ReplayAsync(root.Sdk, state, token);
                     return true;

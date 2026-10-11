@@ -11,16 +11,18 @@ const fileKind = 2;
 const temporaryDirectoryMode = 0o700;
 const temporaryFileMode = 0o600;
 const readFlags = constants.O_RDONLY | constants.O_NOFOLLOW;
+const sourceReadBufferBytes = 65_536;
 const writeFlags = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW;
 
 export async function readBuildInputs(root) {
   const inputs = await enumerateBuildInputs(root);
   const digest = createHash('sha256');
   let copiedBytes = 0;
+  const buffer = Buffer.allocUnsafe(sourceReadBufferBytes);
   for (const entry of inputs.entries) {
     appendHeader(digest, entry);
     if (entry.kind === 'file') {
-      const result = await streamSourceFile(entry, digest);
+      const result = await streamSourceFile(entry, digest, buffer);
       if (entry.controlDigest !== null && result.digest !== entry.controlDigest) {
         throw new Error(messages.contextChanged);
       }
@@ -215,9 +217,8 @@ async function copySnapshotFile(entry, target, digest, state) {
   return Object.freeze({ bytes, digest: fileDigest.digest('hex') });
 }
 
-async function streamSourceFile(entry, digest) {
+async function streamSourceFile(entry, digest, buffer) {
   let handle;
-  let stream;
   const failures = [];
   const fileDigest = createHash('sha256');
   let bytes = 0;
@@ -225,10 +226,12 @@ async function streamSourceFile(entry, digest) {
     handle = await open(entry.absolute, readFlags);
     const before = await handle.stat();
     if (!before.isFile() || !sameStat(entry.stat, before)) throw new Error(messages.contextChanged);
-    stream = handle.createReadStream({ autoClose: false });
-    for await (const chunk of stream) {
-      bytes += chunk.length;
+    while (true) {
+      const result = await handle.read(buffer, 0, buffer.length, bytes);
+      if (result.bytesRead === 0) break;
+      bytes += result.bytesRead;
       if (bytes > entry.size || bytes > localImage.maxInputFileBytes) throw new Error(messages.contextChanged);
+      const chunk = buffer.subarray(0, result.bytesRead);
       digest.update(chunk);
       fileDigest.update(chunk);
     }
@@ -240,7 +243,6 @@ async function streamSourceFile(entry, digest) {
   } catch (error) {
     failures.push(mapInputError(error));
   }
-  if (stream && !stream.destroyed) stream.destroy();
   if (handle) await captureFailure(() => handle.close(), failures);
   throwFailures(failures);
   return Object.freeze({ bytes, digest: fileDigest.digest('hex') });

@@ -37,6 +37,7 @@ internal static class GenerationVisibilityFlow
         var writes = await GenerationVisibilityWriteFlow.RunAsync(db, queries, cache, token);
         using var held = GenerationVisibilityAssertions.Hold(db, cache);
         await GenerationVisibilityCrossTenant.RunAsync(db, queries, token);
+        var ownerProject = await GenerationVisibilityOwnerProjectFlow.RunAsync(db, queries, cache, token);
         var original = Command(db, InitialRevision, TeamRowPolicyFlow.CurrentJson);
         var receipt = db.Submit(OperationKind.Batch, original, TeamRowPolicyFlow.Reader, original.CommandId).Get<CommitReceipt>();
         await TeamRowPolicyAssertions.ReceiptAsync(db.Store, original, receipt, CurrentRevision, OriginalEpoch);
@@ -57,7 +58,11 @@ internal static class GenerationVisibilityFlow
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store, TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson, token);
         held.Dispose();
         await Assert.That(memory.GetSnapshot().RetainedBytes).IsEqualTo(NoRetainedBytes);
-        await GenerationVisibilityCold.RunAsync(db, memory, original, outcome, current, fresh, currentOutcome, writes.VerifyAsync, token);
+        await GenerationVisibilityCold.RunAsync(db, memory, original, outcome, current, fresh, currentOutcome, async (database, store, currentToken) =>
+        {
+            await writes.VerifyAsync(database, store, currentToken);
+            await ownerProject.VerifyAsync(database, store, currentToken);
+        }, token);
     }
 
     internal static async Task SeedAsync(TestDatabase db)

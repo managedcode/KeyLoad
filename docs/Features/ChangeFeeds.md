@@ -1,6 +1,6 @@
 # ChangeFeeds
 
-Status: source-present for a single atomic partition; delivered-source GitHub qualification remains pending. The design target includes replayable projections and resumable public feeds. Cross-partition coverage and external-index publication are planned.
+Status: in progress after a later Linux live-page regression. Original KL-079 acceptance passed48/48 at `b1f57eb8d487270983b428d835c922701dd14ed7`; [original evidence and subsequent regression](../implementation/qualification-stage57-kl035-kl079.md) remain separate. Repair and current-source qualification are open. Cross-partition coverage, richer subscriptions and external-index publication remain planned.
 
 ## Purpose, actors, and entry points
 

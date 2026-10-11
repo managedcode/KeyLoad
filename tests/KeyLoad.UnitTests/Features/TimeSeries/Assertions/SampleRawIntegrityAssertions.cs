@@ -1,3 +1,6 @@
+using System.Text.Json;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -15,7 +18,7 @@ internal static class SampleRawIntegrityAssertions
             var page = view.Scan([], MaximumImageRecords);
             if (page.HasMore)
             { throw new InvalidOperationException(ImageBound); }
-            return global::System.Text.Json.JsonSerializer.Serialize(page.Records.Select(record =>
+            return JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));
 
@@ -30,11 +33,11 @@ internal static class SampleRawIntegrityAssertions
     internal static async Task RefuseAsync(SampleRawIntegrityFixture fixture, ReplicatedOperation expiry)
     {
         await RefuseOneAsync(fixture, () => SampleRawIntegrityScenario.ReadRange(fixture, final: false));
-        await RefuseOneAsync(fixture, () => global::KeyLoad.Core.TimeSeriesReadOperations.ReadLatestSample(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        await RefuseOneAsync(fixture, () => fixture.Owner.ReadLatestSample(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Latest(fixture, final: false)));
-        await RefuseOneAsync(fixture, () => global::KeyLoad.Core.TimeSeriesReadOperations.AggregateSamples(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        await RefuseOneAsync(fixture, () => fixture.Owner.AggregateSamples(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Aggregate(fixture, final: false)));
-        await RefuseOneAsync(fixture, () => global::KeyLoad.Core.TimeSeriesReadOperations.AggregateSampleWindows(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        await RefuseOneAsync(fixture, () => fixture.Owner.AggregateSampleWindows(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Windows(fixture, final: false)));
         await RefuseOneAsync(fixture, () => fixture.Apply(expiry));
     }
@@ -81,14 +84,14 @@ internal static class SampleRawIntegrityAssertions
             await Assert.That(NativeSerialization.Serialize(actualRows[index]).SequenceEqual(
                 NativeSerialization.Serialize(expectedRows[index]))).IsTrue();
         }
-        var latest = global::KeyLoad.Core.TimeSeriesReadOperations.ReadLatestSample(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        var latest = fixture.Owner.ReadLatestSample(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Latest(fixture, final));
         await Assert.That(latest.Sample).IsEqualTo(expectedRows[1]);
         var expectedAggregate = final ? new SampleAggregate(2, 18, 8, 10, 9) : new(2, 10, 4, 6, 5);
-        var aggregate = global::KeyLoad.Core.TimeSeriesReadOperations.AggregateSamples(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        var aggregate = fixture.Owner.AggregateSamples(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Aggregate(fixture, final));
         await Assert.That(aggregate).IsEqualTo(expectedAggregate);
-        var windows = global::KeyLoad.Core.TimeSeriesReadOperations.AggregateSampleWindows(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        var windows = fixture.Owner.AggregateSampleWindows(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Windows(fixture, final));
         await Assert.That(windows.Windows.Length).IsEqualTo(1);
         await Assert.That(windows.Windows[0]).IsEqualTo(new SampleAggregateWindow(
@@ -100,12 +103,12 @@ internal static class SampleRawIntegrityAssertions
 
     private static async Task RequireAuthorityAsync(SampleRawIntegrityFixture fixture, bool final)
     {
-        var status = global::KeyLoad.Core.TimeSeriesReadOperations.ReadSampleRetention(fixture.Owner, SampleAggregateTestData.RootPrincipal,
+        var status = fixture.Owner.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
             new(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));
         await Assert.That(status).IsEqualTo(new SampleRetentionStatus(
             final ? SampleRawIntegrityScenario.FinalFloor : SampleRawIntegrityScenario.InitialFloor, final ? 3 : 1, false));
         var raw = fixture.Store.Read(view => view.Scan(
-            global::KeyLoad.Core.Features.TimeSeries.SampleReadKeys.Prefix(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series), MaximumImageRecords));
+            SampleReadKeys.Prefix(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series), MaximumImageRecords));
         var expected = final
             ? new[] { SampleRawIntegrityScenario.Record(4), SampleRawIntegrityScenario.Record(5) }
             : new[] { SampleRawIntegrityScenario.Record(2), SampleRawIntegrityScenario.Record(3), SampleRawIntegrityScenario.Record(4) };
@@ -116,7 +119,7 @@ internal static class SampleRawIntegrityAssertions
             await Assert.That(raw.Records[index].Value.Span.SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
         }
         var sequence = NativeSerialization.Deserialize<long>(fixture.Store.Read(view => view.ReadOwnedValue(
-            global::KeyLoad.Core.Features.TimeSeries.SampleRollupKeys.Sequence(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)))!);
+            SampleRollupKeys.Sequence(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)))!);
         await Assert.That(sequence).IsEqualTo(final ? 5L : 4L);
     }
 }

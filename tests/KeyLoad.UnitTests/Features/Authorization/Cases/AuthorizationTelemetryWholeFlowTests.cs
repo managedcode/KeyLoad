@@ -7,7 +7,8 @@ internal sealed class AuthorizationTelemetryWholeFlowTests
     public async Task AcAuthKl015002RealHttpAndLogExportsKeepSafeMetadataAfterDenialThenHealthyCatalog()
     {
         using var fixture = new AuthorizationTelemetryHttpFixture();
-        await fixture.RunAsync(owner => AuthorizationTelemetryFlow.ExecuteAsync(owner, AuthorizationUnsafeSpanState.None));
+        await fixture.RunAsync(owner => AuthorizationTelemetryFlow.ExecuteAsync(owner,
+            AuthorizationUnsafeSpanState.None, repairPersistedMember: true));
     }
 
     [Test]

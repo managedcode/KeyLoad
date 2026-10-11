@@ -19,7 +19,12 @@ internal static class SampleChunkGenerationReader
                         work, options.Value.HashChunkBytes);
                     var decoded = SampleChunkCodec.DecodeWithWork(bytes, work, options, SampleChunkCodec.MaximumEncodedBytes);
                     foreach (var record in decoded)
-                    { work.Check(); SampleChunkWindowValidation.Record(record, window, series); }
+                    {
+                        work.Check();
+                        SampleChunkWindowValidation.Record(record, window, series);
+                        if (record.Sequence > manifest.SourceSequence)
+                        { throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt); }
+                    }
                     records.AddRange(decoded);
                 }, charge.Charge);
             if (!present)

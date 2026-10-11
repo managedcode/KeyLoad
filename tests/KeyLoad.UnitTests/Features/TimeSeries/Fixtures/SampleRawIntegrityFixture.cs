@@ -1,3 +1,5 @@
+using System.Text.Json;
+using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -7,7 +9,7 @@ internal sealed class SampleRawIntegrityFixture : IDisposable
     private readonly TestDatabase original = new();
     private readonly List<ZoneTreeStore> opened = [];
     internal ZoneTreeStore Store { get; private set; }
-    internal global::KeyLoad.Core.DatabaseEngine Owner { get; private set; }
+    internal DatabaseEngine Owner { get; private set; }
     internal PartitionRef Partition => original.Partition;
     internal ReplicatedOperation SeedOperation { get; }
     internal CommitReceipt SeedReceipt { get; }
@@ -42,7 +44,7 @@ internal sealed class SampleRawIntegrityFixture : IDisposable
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, Partition, [mutation]);
         return new(id, OperationKind.Batch, SampleAggregateTestData.RootPrincipal,
-            Owner.EvaluationClock.GetUtcNow(), global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options));
+            Owner.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
     }
 
     internal CommitReceipt Apply(ReplicatedOperation operation) => Owner.Apply(operation).Get<CommitReceipt>();
@@ -68,9 +70,7 @@ internal sealed class SampleRawIntegrityFixture : IDisposable
         {
             try
             { original.Dispose(); }
-            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
             { failures.Add(error); }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

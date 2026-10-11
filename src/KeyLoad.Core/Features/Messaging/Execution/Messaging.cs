@@ -215,9 +215,13 @@ public sealed partial class DatabaseEngine
             return null;
         }
 
-        if (metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter)
+        var retainedDeadLetter = metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter;
+        if (retainedDeadLetter)
+        { Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead); }
+        if (metadata.Id != id)
+        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        if (retainedDeadLetter)
         {
-            Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead);
             _ = RequireQueueLifecycleCounters(view, lane);
             if (metadata.State == MessageState.DeadLettered)
             { RequireQueueParkedAuthority(view, lane, metadata); }
@@ -226,6 +230,10 @@ public sealed partial class DatabaseEngine
         }
 
         var body = view.GetRecord<MessageBody>(QueueKey(MessagingMessageBodyKeySpace, lane, id));
+        var retainedBody = metadata.State is MessageState.Ready or MessageState.Scheduled or MessageState.Leased
+            or MessageState.DeadLettered or MessageState.PendingDeadLetter;
+        if (retainedBody && (body is null || body.Id != id))
+        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody); }
         return new MessageInspection(metadata, body is null ? null : Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _),
             body is null ? null : Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));
     });

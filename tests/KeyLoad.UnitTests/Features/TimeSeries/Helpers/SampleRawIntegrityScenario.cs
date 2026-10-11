@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -24,7 +25,7 @@ internal static class SampleRawIntegrityScenario
         => new(SampleAggregateTestData.Series, Sample(index), index, SampleAggregateTestData.EmptyTags);
 
     internal static byte[] DamagedKey(PartitionRef partition)
-        => global::KeyLoad.Core.KeySpace.Partition(SampleSpace, partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series,
+        => KeySpace.Partition(SampleSpace, partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series,
             Sample(DamagedIndex).Timestamp, (long)DamagedIndex);
 
     internal static byte[] OriginalBytes(SampleRawIntegrityFixture fixture)

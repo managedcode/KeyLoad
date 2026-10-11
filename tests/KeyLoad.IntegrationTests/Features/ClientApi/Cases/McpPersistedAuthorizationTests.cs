@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 
@@ -18,22 +17,9 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
         await scenario.SeedAsync(fixture, deadline.Token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition, Capability.DocumentsRead, deadline.Token);
-        await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
-            identity.Secret, deadline.Token);
-        await session.Client.ListToolsAsync(cancellationToken: deadline.Token);
-        var first = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(scenario.Reference), deadline.Token));
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var restricted = identity.Principal with { Grants = [], PolicyEpoch = identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement };
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), restricted, deadline.Token));
-
-        var denied = await session.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(scenario.Reference), deadline.Token);
-        var deniedId = await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
-        await Assert.That(deniedId).IsNotEqualTo(first.RequestId);
-        await McpCallerAssertions.DoesNotDiscloseAsync(denied, identity.Secret, McpDocumentProtocol.PrivateValue);
-        var sdkDenied = await new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution()).GetAsync(scenario.Reference, deadline.Token);
-        await Assert.That(sdkDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
+        var state = new DiscoveryAuthorityState(scenario, identity, Guid.NewGuid(), identity.Principal with
+        { PolicyEpoch = DiscoveryAuthorityProtocol.FinalEpoch });
+        await DiscoveryAuthorityFlow.RunAsync(fixture, state, deadline.Token);
     }
 
     /// <summary>A valid key cannot read a different real tenant or provide trusted authority in tool arguments.</summary>

@@ -1001,3 +1001,170 @@ mandatory. Root joins build/analyzers/formatter, native SIMD-enabled 50-slot
 TUnit and delivered-source Linux qualification. Source declarations and review
 are not runtime PASS or whole-feature closure. Rollback removes only this
 helper/call and its new operation regression map.
+
+
+### TASK-MSG-DLQ-SELECTED-AUTHORITY-001 — canonical selected dead-letter rows
+
+Private source proposal, not joined or runtime-qualified. REQ/AC-MSG-001/002/
+004/005 and REQ/AC-MSG-088-PARK/REDRIVE/CANCEL retain ADR-026/028 fencing,
+retained body identity, atomic refusal, immutable inbox/history and bounded DLQ
+accounting. The current dead-letter counter witness ignores its scanned key;
+an index value naming another genuine parked message can pass its witness.
+Lifecycle state likewise compares body identity only to metadata identity and
+can accept a pair copied from another genuine message. DLQ inspection currently
+projects a missing or foreign retained body. These are source-confirmed
+KeyLoad-owned defects; no upstream defect or runtime failure is asserted.
+
+Before implementation freeze three repairs: bind the bounded selected DLQ key
+and its metadata identity to the exact decoded index ID, using existing
+RecoveryRequired/MissingReference and MissingMetadata details; bind lifecycle
+metadata to the requested MessageId after existing version/generation/terminal
+checks, using existing Corruption/MissingReference; and require requested
+metadata identity plus the retained DLQ body's matching ID before projection,
+using existing Corruption/MissingReference or MissingBody. Preserve absent
+message reads, terminal null bodies, authorization/error ordering, one-row
+witness bound, native serialization, quotas, formats and all public contracts.
+No new purge API exists or is introduced; existing explicit cancel is the
+retained-body deletion operation. No migration, fallback, counter reconstruction,
+scalar execution mode or trusted caller role is authorized.
+
+QueueDeadLetterSelectedAuthorityWholeFlowTests seed two genuine parked messages
+through enqueue/claim/NACK, then alter only captured fixture-owned index,
+metadata/body pair or body row. The nine authored cases include reading the
+other genuine message to exercise the witness metadata identity guard separately
+from selected-message inspection. A prior genuine processing inbox/document in
+a separate authorized lane is retained byte-for-byte throughout subject refusal
+and repair; it is independently checked and replayed alongside original DLQ
+producer/claim/NACK history. Actual redrive/cancel/read must refuse without
+changing complete native bytes/cut or saving a new failed outcome; repeat and
+join the same-root cold owner. Repair only exact captured original bytes, retry
+the SAME rejected mutation successfully with exact receipt replay, or repeat
+the SAME read arguments and perform a separate legitimate cancellation, then execute
+fresh legitimate settlement and healthy atomic processing. Independently check
+full metadata/body/fingerprint/index/counters, document and inbox receipts,
+immutable original producer/claim/NACK histories and a second joined cold owner.
+Malformed rows outside the selected bounded witness are not silently scanned
+or repaired; complete global reconstruction is outside this operation.
+
+Ownership: the three existing Core Messaging authority/lifecycle/inspection
+files plus new Unit Messaging Cases/Contracts/Models/Helpers/Assertions and this
+appendix only. Existing ADRs suffice (new ADR N/A: no boundary or format change).
+Root owns serialized integration, canonical Release/analyzers/formatter, native
+SIMD-enabled TUnit50, coverage, process recovery and SDK/official MCP Aspire RF3
+plus delivered-source Linux gates. Private source review is not PASS or delivery.
+Rollback removes only these authority guards and additive operation regressions.
+
+
+## TASK-MSG-DLQ-ADMISSION-COLD-002 — authoritative counter and selected witness refusal
+
+REQ-MSG-DLQ-ADMISSION-001 maps to AC-MSG-DLQ-ADMISSION-001 and existing
+REQ/AC-MSG-001/002/004/005, REQ/AC-MSG-088-CANCEL under ADR-026/028.
+Original native broader affected543 Cobertura reports QueueDeadLetterAuthority
+92.31% lines/68% branches: counter absence line10 is 1/2, line18 authoritative
+counter predicate is 11/20 with rejection line24 unvisited, index witness versus
+usage line27 is 1/2 with rejection line28 unvisited, and missing witness metadata
+line35 is 1/2. These observations identify unexercised operation acceptance;
+source declarations do not claim a changed numeric result or runtime PASS.
+
+Seven actual complete native cancellation flows seed two genuine parked messages
+and an unrelated committed processing inbox/document. Alter one owned row only:
+remove counters; make StoredMessages negative; make DeadLetterMessages negative;
+make NextParkedSequence negative; make DeadLetterBytes exceed StoredBytes; retain
+the genuine DLQ index witness with zero DLQ usage; remove the first witness's
+metadata while selecting the second genuine parked message. These are persisted
+corruption controls, not legitimate policy updates or tolerance changes.
+
+Inspection and the original cancellation must refuse RecoveryRequired with the
+existing exact InvalidCounter or MissingMetadata detail. Repeat the same input
+and command ID without changed complete image/identity/cut or saved failure
+outcome. First joined cold owner retains that exact refusal. Restore only the
+captured original owned row, require the complete original native image at the
+two owned fault/repair commit delta, then retry the SAME cancellation successfully
+with the exact new mutation receipt. Retained producer/claim/NACK/inbox/document
+history stays immutable. Fresh legitimate enqueue/claim/atomic processing, exact
+remaining parked body/index/counters and receipt replays remain healthy through a
+second joined cold owner. Preserve original limits, native serialization and
+normal SIMD. No product defect/change, global reconstruction, format/API, bounds,
+suppression or relaxed assertions are introduced.
+
+Source map: additive Unit Messaging QueueDeadLetterAdmission Cases/Models/
+Helpers/Assertions; reuse existing native selected-authority wholeflow fixture,
+complete image/history/retained inbox/continuation oracles unchanged. Private
+packet root joins build/analyzers/formatter/original native results and source
+coverage. Linux/process/RF3/performance/endurance qualification remains separate.
+Rollback removes this additive batch/map together.
+
+### TASK-MSG-LIFECYCLE-CONDITIONS-001: actual native edge refusal and repair
+
+REQ/AC-MSG-001/004/005 and REQ/AC-MSG-088-PARK/REDRIVE/CANCEL retain ADR-026/028
+condition fencing and corruption refusal. Original affected543 development coverage
+shows QueueLifecycleConditions lines22/34/40 unexecuted: nonpositive lifecycle
+conditions, terminal message transition and foreign decoded body identity. Line37
+foreign metadata branch is partial; missing-state null branch is also partial.
+Default mutation-switch line14 is defensive and unreachable through public native
+lifecycle dispatch; no reflection/source-text coverage substitute is admitted.
+
+Add six actual native operation cases. Zero expected state-version or generation,
+missing message and a genuinely cancelled terminal source fail the complete batch;
+queue model image remains exact and their original full failed outcomes replay
+without new full-image/cut effects across joined same-root cold. Positive source
+cancellation and fresh authorized enqueue/Receive/ACK prove healthy continuation.
+Two real native faults retain well-formed typed metadata/body with foreign IDs at
+the original owned key. Original Cancel refuses Corruption without any full-store
+image/identity/cut effect, also after joined cold. Exact owned-row repair restores
+the entire pre-fault image at its two legitimately advanced cuts BEFORE applying
+the same original command. Exact receipt replay and independently literal terminal
+source/healthy rows/body absence persist through a second joined cold owner.
+
+This additive Unit-only packet changes no product, serializer, bounds, limits,
+clock, provider, authority or terminal-state rules. Uses the original persisted
+scoped lifecycle principal and genuine ZoneTree APIs. Source-authored cases require
+root native normal-SIMD execution; no line/branch coverage improvement is claimed
+before actual report. Build/analyzers/formatter, Linux/process/RF3 and remaining
+coverage/CRAP gates stay mandatory. New ADR is N/A; existing contracts suffice.
+
+
+### TASK-MSG-PENDING-PARK-AUTHORITY-001 — selected pending marker through original park and cold continuation
+
+REQ/AC-MSG-001/004/005, the accepted Phase1 pending/park contract above, and ADR-026/028 require the selected pending reference to match the original message ID, delivery generation and AttemptsExhausted reason before explicit ParkPendingQueueMessage can consume capacity. Current RequireQueuePendingAuthority already enforces this boundary. This packet closes its distinct native whole-operation coverage gap; it claims no new product defect or policy.
+
+Two original native TUnit instances start with real enqueue/claim/NACK of one parked message and one full-DLQ pending message, complete a third message through actual Processing to retain a document/inbox/receipt, then legitimately cancel the parked body to free capacity. Damage only the selected pending row by deletion or foreign delivery generation. The SAME sealed park operation must throw original RecoveryRequired/missing-reference without durable outcome, full-store image, identity or cut changes on repeated attempts and after joined cold reopen. Repair exactly the saved owned row; the full original image and cut plus two intentional raw commits must return. The original park then succeeds, keeps complete body/metadata/index/counters, and replays its exact canonical receipt without further commits.
+
+A genuine redrive and new-generation Processing follow; the retained prior inbox/document/history remain exact. Fresh healthy enqueue/claim/Processing produces an independently checked document/inbox/receipt. A second joined same-root cold reopen preserves the complete image, full terminal metadata, empty live/dead-letter/pending/ordered/body indices, exact counters, all original durable command/receive outcomes and receipt replay. Every owned raw mutation, operation result, body/fingerprint and native reference is bounded and independently asserted. No clock wait, deadline/lease/quota/budget change, migration, fallback, public or stored format change, mock, getter-only test, synthetic UID or forced-scalar mode is introduced.
+
+Owned source consists only of new Messaging Cases/Models/Helpers/Assertions files and this appended contract. Native discovery/runtime, canonical compiler/analyzers/formatter, original broader/process and SDK/official MCP Aspire RF3 gates remain root-owned and pending; source declarations are not PASS evidence. Rollback removes this additive test/doc packet only, retaining original production guards and historical evidence.
+
+
+### TASK-MSG-RETAINED-INBOX-NATIVE-AUTHORITY-001 — old execution receipt versus fresh terminal-token execution
+
+REQ/AC-MSG-002 and accepted REQ/AC-MSG-088-REDRIVE, ADR-026, require exact handler/execution fingerprint replay without duplicate database effects or ACK, while a fresh execution identity still requires a current fenced delivery. Existing CompleteProcessing reads the native InboxRecord before its same-fingerprint receipt branch; IKeyValueView.GetRecord invokes KeyLoad NativeSerialization.Deserialize, whose generated-envelope wrapper rejects any trailing bytes with Corruption. Current cached original Processing outcome reauthorization checks current effect permissions without re-reading the inbox. These distinct authoritative replay paths are preserved; this packet claims no product defect and changes Core0.
+
+One additive wholeflow reuses the actual pending/park fixture and genuine retained Processing document/inbox/receipt. Append exactly one trailing byte to that selected owned inbox row, leaving every other row unchanged. The SAME sealed fresh-command/same-handler/execution1/effects/token processing operation must throw original Corruption/invalid-binary-payload with no StoredOutcome, image, identity or cut change twice and after joined cold. Every known original processing receipt remains exact and its replay is effect-free even at the damaged cut. Exact saved-row repair restores full original image at cut+2 BEFORE legitimate commands.
+
+The original previously refused fresh command now returns the OLD complete processing receipt (original CommandId/token/mutations), records its legitimate new command outcome, and leaves exact queue/inbox/document bytes unchanged. Stable replay of that same operation has no commit. A distinct fresh operation using ExecutionGeneration2 and the old terminal delivery token legitimately returns StaleLease and retains its original failed outcome; this ordinary validation outcome is not labelled uncommitted or Corruption. It must replay exactly across cold and cannot create an execution2 inbox or reapply effects. Then original pending park, redrive/new delivery generation, actual processing and fresh healthy work succeed. A second joined same-root cold preserves complete full-store image/cut, literal body/metadata/index/counters/documents/inboxes, original old/equivalent receipts and the failed new-execution receipt.
+
+Owned files are new Messaging Cases/Helpers/Assertions only and this appended contract. Settled PendingMarker2 helpers are reused unchanged. No fake prior-generation inbox, new public/stored format, altered error policy, lease/deadline/quota/budget, compatibility path, provider replacement, exception fabrication or scalar mode. Source self-review is not native discovery/PASS: root owns strict build/formatter, native declaration1 UID and actual execution, broader/process and SDK/official MCP Aspire RF3 gates. Rollback removes this additive case/doc packet only.
+
+
+### TASK-MSG-SCHEDULED-NATIVE-AUTHORITY-001
+
+REQ-MSG-004 / AC-MSG-004, REQ-MSG-001 / AC-MSG-001 and ADR-026 preserve recorded-command-time due transitions and exact retained scheduled authority. One finite native flow changes ONLY an existing scheduled MessageMetadata.NotBefore to another valid due timestamp while preserving the original scheduled index. Existing RequireCurrentQueueDueEntry must refuse RecoveryRequired with its canonical StaleDecision detail before any row deletion, counter transition, receive outcome or delivery. Repeated refusal and first joined same-root cold reopen preserve the complete native image, serialized StoreIdentity and position. Restore the exact original metadata row before commands: full image equals the pre-fault image at position+2. SAME Receive then produces the independently expected scheduled-to-ready-to-leased transition and original delivery; Processing commits one document/inbox plus ACK. Original producer/processing outcomes replay exactly; original Receive retains its exact saved delivery but current replay is StaleLease after ACK. A fresh healthy enqueue/receive/Processing lifecycle and second joined cold reopen preserve full metadata, body/index/counter invariants, native receipt history and two exact inbox/document effects.
+
+Test-owned Cases/Helpers/Models/Assertions files only; Core0. This is distinct from malformed inbox bytes, retained lease settlement and pending/DLQ markers: it covers the scheduled due key versus native metadata timestamp branch. No new invariant, format, API, fallback, bound, timer, SIMD profile or error policy. Native source declaration is one case; actual discovery/build/runtime and Linux/process/RF3 gates remain pending Root qualification.
+
+
+### TASK-MSG-LIVE-INSPECTION-RETAINED-BODY-001
+
+REQ-MSG-001 / AC-MSG-001 and REQ-MSG-004 / AC-MSG-004, ADR-026 retain canonical body authority during Ready, Scheduled, Leased, DeadLettered and PendingDeadLetter states. Enqueue persists the exact MessageBody; retry/claim/renew retain it; only legitimate ACK, cancellation or expiry removes it. Authorized InspectMessage must reject a missing retained body or decoded body with another message identity using existing Corruption / QueueLifecycleProtocol.MissingBody before payload/header projection. Preserve existing metadata identity check, queue and DLQ authorization, native decoding and DLQ index/counter validation. Inspect never admits a lease action, reclaims expiry, mutates a row/outcome/cut, or validates worker lease expiry. Legal Acked/Cancelled/Expired null-body inspection retains terminal metadata and null payload/header; no new public or persisted format/error policy or index reconstruction.
+
+Two native complete leased flows capture original body, metadata, counters, lease index, producer/Receive histories and the full native image/serialized identity/cut. Remove ONLY that owned body row or replace ONLY its Id with another valid native identity. Repeated Inspect refuses without any original Processing outcome, full-image, identity or cut movement, including first joined same-root cold. Exact one-row repair restores the complete original image at cut+2 BEFORE legitimate commands. The SAME current delivery's original Processing performs one document/inbox plus ACK, terminal Inspect has full literal metadata and null payload/header, receipt replay is exact and effect-free; old Receive's saved delivery remains exact while replay is StaleLease. Fresh healthy enqueue/claim/ACK and second joined same-root cold preserve all original complete histories, terminal/body/index/counter/document/inbox state and full native image.
+
+Minimal Core Inspect retained-body condition plus test-owned Cases/Helpers/Assertions only. Source-proven defect, original-Core runtime control pending Root; two source declarations are not native UID/count or runtime qualification. Original quotas, clocks, deadlines, scan bounds, SIMD and Linux/process/RF3 qualification remain unchanged.
+
+
+TASK-MSG-LIVE-INSPECTION-RETAINED-BODY-001 six-state/fault qualification extension: preserve the original two Leased cases exactly. Four further native Args cover Ready/Scheduled × missing/foreign MessageBody. Each targets the genuine separately provisioned positive sibling lane's actual native body key and saved bytes; independently compare the full native single-row difference. While damaged, selected Inspect refuses repeatedly/firstcold with canonical Corruption, unchanged complete image/identity/cut and absent original leased Processing outcome. Independently inspect the unaffected leased message and the other Ready/Scheduled sibling; do not falsely call selected damaged state healthy. Exact one-row repair precedes every command and restores the full pre-fault image at cut+2. Full positive Ready/Scheduled inspection and original producer receipt replay now succeed, original leased Processing ACK/document/inbox plus fresh healthy ACK completes, terminal null payload/header remains correct, and second cold preserves complete native histories/image. The original live-body predicate is unchanged. Root must retain six actual original-Core negative controls and six actual repaired PASS results before native admission; source declarations alone do not establish those results.
+
+
+## TASK-MSG-LEASE-AUTHORITY-PROCESS-001 — original stopped-process lease row repair
+
+REQ/AC-MSG-001/004/005, KL087/KL088 and REQ/AC-MSG-088-ORDER/JITTER retain ADR026/028. Two additive QueueLeaseAuthorityProcessRecoveryTests cases reuse the actual ordered-retry CrashHost HeaderWritten cut after acknowledged producer/Receive. The uncommitted sealed NACK must reject an absent or foreign selected lease reference with exact Corruption detail and no whole-store, identity, cut or outcome effect, including repeated and cold calls. Single-row native repair restores the complete pre-fault image at cut+2; the same original NACK then commits its recorded jitter and exact receipt. Complete independent original and healthy messages, retain full body/metadata/counter/order/index checks, and replay all delivery receipts after a second joined cold owner. Original process lifetime, cleanup, scan, policy and SIMD contracts are unchanged. Source declarations are not native execution or qualification; process-kill is not power-loss proof.

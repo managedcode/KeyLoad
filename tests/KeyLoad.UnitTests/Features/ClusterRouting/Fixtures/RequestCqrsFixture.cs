@@ -96,6 +96,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(StartupSeconds), TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
+        var logRoot = Path.Combine(Directory.GetCurrentDirectory(), "logs");
         try
         {
             NativeMaintenance = nativeFactory?.Invoke(Database);
@@ -103,15 +104,9 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         }
         catch (Exception startupFailure)
         {
-            try
-            {
-                await DisposeAsync();
-            }
-            catch (Exception cleanupFailure)
-            {
-                throw new AggregateException(startupFailure, cleanupFailure);
-            }
-
+            await NativeClusterStartupEvidence.ThrowAfterCleanupAsync(startupFailure, Cluster,
+                nameof(RequestCqrsClusterFixture), logRoot, cancellationToken.IsCancellationRequested,
+                deadline.IsCancellationRequested, () => DisposeAsync().AsTask());
             throw;
         }
     }

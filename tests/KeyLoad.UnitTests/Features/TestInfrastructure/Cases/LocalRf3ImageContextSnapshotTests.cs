@@ -50,6 +50,12 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           assert.deepEqual(await readFile(markerPath), markerBytes);
           await assertMissing(path.join(root, 'TestResults'));
           await rm(overflowDirectory, { recursive: true });
+          const largeRelative = 'src/KeyLoad.Core/multi-chunk.bin';
+          const emptyRelative = 'src/KeyLoad.Core/empty.bin';
+          const largeBytes = Buffer.alloc(2 * 65_536 + 17);
+          for (let index = 0; index < largeBytes.length; index++) largeBytes[index] = (index * 29 + 11) % 256;
+          await writeFile(path.join(root, largeRelative), largeBytes);
+          await writeFile(path.join(root, emptyRelative), Buffer.alloc(0));
           const before = await readBuildInputs(root);
           firstSnapshot = await createBuildContextSnapshot(root);
           assert.equal(firstSnapshot.digest, before.digest);
@@ -57,6 +63,8 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           assert.equal(firstSnapshot.bytes, before.bytes);
           const snapshotMarker = path.join(firstSnapshot.directory, markerRelative);
           assert.deepEqual(await readFile(snapshotMarker), markerBytes);
+          assert.deepEqual(await readFile(path.join(firstSnapshot.directory, largeRelative)), largeBytes);
+          assert.deepEqual(await readFile(path.join(firstSnapshot.directory, emptyRelative)), Buffer.alloc(0));
           assert.equal(await readFile(path.join(firstSnapshot.directory,
             'tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets'), 'utf8'), 'identity');
           const buildScaffold = firstSnapshot.scaffolds.find(entry =>
@@ -79,6 +87,8 @@ internal sealed class LocalRf3ImageContextSnapshotTests
           await assertMissing(firstDirectory);
           secondSnapshot = await createBuildContextSnapshot(root);
           assert.deepEqual(await readFile(path.join(secondSnapshot.directory, markerRelative)), updatedBytes);
+          assert.deepEqual(await readFile(path.join(secondSnapshot.directory, largeRelative)), largeBytes);
+          assert.deepEqual(await readFile(path.join(secondSnapshot.directory, emptyRelative)), Buffer.alloc(0));
           if (process.platform !== 'win32') {
             assert.equal((await lstat(path.join(secondSnapshot.directory, markerRelative))).mode & 0o777, 0o600);
           }

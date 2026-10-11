@@ -1,4 +1,5 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
 
@@ -15,6 +16,7 @@ internal sealed class GraphShortestPathReader
     private const string MissingEdge = "A graph adjacency record has no canonical edge.";
     private const string InconsistentVisitor = "The graph path adjacency visitor stopped inconsistently.";
     private readonly IKeyValueView view;
+    private readonly IOptions<DatabaseLimits> limits;
     private readonly GraphShortestPathRequest request;
     private readonly ReadExecutionBudget budget;
     private readonly GraphPathRetention retention;
@@ -32,6 +34,7 @@ internal sealed class GraphShortestPathReader
         const int EmptyLabelCount = 0;
 
         this.view = view;
+        limits = database.OperationLimitsOptions;
         this.request = request;
         this.budget = budget;
         retention = new(database.OperationLimitsOptions, budget);
@@ -111,7 +114,7 @@ internal sealed class GraphShortestPathReader
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace,
             request.Partition, request.Graph, edgeId));
         GraphShortestPathValidation.ValidateAdjacency(key, edgeId, edge, source,
-            request.Partition, request.Graph, budget);
+            request.Partition, request.Graph, limits.Value, budget);
         var validEdge = edge ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         if (labelSet is not null && !labelSet.Contains(validEdge.Label))
         {

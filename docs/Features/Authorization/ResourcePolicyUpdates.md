@@ -84,3 +84,8 @@ sequenceDiagram
 ```
 
 Controlled movement reuses the existing pure SameNonPolicyDefinition comparer internally for authenticated A resource snapshots at the actual B document effect. It preserves all non-policy definition fields, including configured vectors/indexes, while existing A resource-policy CAS and outstanding durable command/grant pins remain authoritative. No B policy-table copy or new independent comparator is introduced. The private transaction supplies only exact bounded authenticated resource reads to existing document operations; public ordinary target effects remain fenced until the full A outcome bridge is qualified.
+
+
+### TASK-KL066-PUBLIC-AUTH-REFUSAL-R17
+
+REQ-RPOL/AC-RPOL-004 retains the original four SDK/MCP/Q1 routes and complete image, persisted epoch, cursor, repair, replay and cold oracles. Revoked official MCP and Q1/MCP credentials are refused by HTTP401 before tool dispatch. The owning assertion awaits the original CallAsync exception, validates Unauthorized and omission of the actual credential/private canary, then invokes the existing same-node MCP unauthorized protocol probe. CursorExpired remains a dispatched typed tool refusal. No transport, credential, deadline or operation contract changes.

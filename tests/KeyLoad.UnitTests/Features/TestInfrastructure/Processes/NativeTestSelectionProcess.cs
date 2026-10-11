@@ -74,8 +74,8 @@ internal static class NativeTestSelectionProcess
             }
             const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
             const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            """ + NativeCapabilitySelectionProgram.Declaration + NativePurposeSelectionProgram.Declaration + NativeGraphIncomingSelectionProgram.Source + NativeResourcePolicySelectionProgram.Source + """
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs, purposeArgs, graphIncomingArgs, resourcePolicyArgs]) {
+            """ + NativeCapabilitySelectionProgram.Declaration + NativePurposeSelectionProgram.Declaration + NativeGraphIncomingSelectionProgram.Source + NativeResourcePolicySelectionProgram.Source + NativeMcpAuthoritySelectionProgram.Source + """
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs, purposeArgs, graphIncomingArgs, resourcePolicyArgs, mcpAuthorityArgs, mcpCredentialArgs, mcpInitialArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -156,7 +156,7 @@ internal static class NativeTestSelectionProcess
               throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
             }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, purpose, purposeUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount, resourcePolicy, resourcePolicyUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, purpose, purposeUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount, resourcePolicy, resourcePolicyUnsupportedCount, mcpAuthority, mcpCredential, mcpAuthorityUnsupportedCount, mcpCredentialUnsupportedCount, mcpInitial, mcpInitialUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

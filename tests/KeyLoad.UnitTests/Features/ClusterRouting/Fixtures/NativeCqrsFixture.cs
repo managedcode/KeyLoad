@@ -31,20 +31,16 @@ internal sealed class NativeCqrsClusterFixture : IAsyncInitializer, IAsyncDispos
     public async Task InitializeAsync()
     {
         using var deadline = new CancellationTokenSource(StartupBound, TimeProvider.System);
+        var logRoot = Path.Combine(Directory.GetCurrentDirectory(), "logs");
         try
         {
             await Cluster.DeployAsync(deadline.Token);
         }
         catch (Exception startupError)
         {
-            try
-            {
-                await DisposeAsync();
-            }
-            catch (Exception cleanupError)
-            {
-                throw new AggregateException(startupError, cleanupError);
-            }
+            await NativeClusterStartupEvidence.ThrowAfterCleanupAsync(startupError, Cluster,
+                nameof(NativeCqrsClusterFixture), logRoot, false, deadline.IsCancellationRequested,
+                () => DisposeAsync().AsTask());
             throw;
         }
     }

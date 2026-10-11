@@ -1,5 +1,7 @@
 using System.Text;
 using KeyLoad.Query;
+using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.Authorization;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -69,31 +71,50 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
     [Test]
     public async Task AcSqlc006ABothBoundFieldsAreAuthorizedBeforeRangeExecution()
     {
-        using var database = new TestDatabase();
-        database.Configure(SqlBetweenTestData.Collection, ResourceKind.Collection,
-            fields: [new("/lowerBound", Sensitive), new("/upperBound", Sensitive)]);
-        database.Commit(new PutDocument(SqlBetweenTestData.Collection, SqlBetweenTestData.RowMiddle,
-            "{\"number\":5,\"lowerBound\":1,\"upperBound\":9}"));
-        ConfigureReader(database);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var position = database.Store.Position;
-        var lowerDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
-            SqlBetweenTestData.Request(database,
-                "SELECT * FROM orders WHERE number BETWEEN lowerBound AND 9")));
-        var upperDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
-            SqlBetweenTestData.Request(database,
-                "SELECT * FROM orders WHERE number BETWEEN 1 AND upperBound")));
+        var failures = new List<Exception>();
+        try
+        {
+            using var database = new TestDatabase();
+            try
+            {
+                database.Configure(SqlBetweenTestData.Collection, ResourceKind.Collection,
+                    fields: [new("/lowerBound", Sensitive), new("/upperBound", Sensitive)]);
+                database.Commit(new PutDocument(SqlBetweenTestData.Collection, SqlBetweenTestData.RowMiddle,
+                    "{\"number\":5,\"lowerBound\":1,\"upperBound\":9}"));
+                ConfigureReader(database);
+                var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+                var image = TeamRowPolicyAssertions.Image(database.Store);
+                var position = database.Store.Position;
+                var lowerDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
+                    SqlBetweenTestData.Request(database,
+                        "SELECT * FROM orders WHERE number BETWEEN lowerBound AND 9")));
+                var upperDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
+                    SqlBetweenTestData.Request(database,
+                        "SELECT * FROM orders WHERE number BETWEEN 1 AND upperBound")));
 
-        await Assert.That(lowerDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(upperDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
+                await Assert.That(lowerDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
+                await Assert.That(upperDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
+                await TeamRowPolicyAssertions.UnchangedAsync(database.Store, image, position);
+                await Assert.That(database.Store.Position).IsEqualTo(position);
 
-        var adminControl = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
-            AuthorizedFieldBoundsSql));
+                var adminControl = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
+                    AuthorizedFieldBoundsSql));
 
-        await Assert.That(SqlBetweenTestData.Ids(adminControl)).IsEqualTo(SqlBetweenTestData.RowMiddle);
-        await Assert.That(adminControl.CutPosition).IsEqualTo(position);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
+                await Assert.That(SqlBetweenTestData.Ids(adminControl)).IsEqualTo(SqlBetweenTestData.RowMiddle);
+                await Assert.That(adminControl.CutPosition).IsEqualTo(position);
+                await Assert.That(database.Store.Position).IsEqualTo(position);
+                await SqlBetweenAuthorityContinuation.RunAsync(database);
+            }
+            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
+            { failures.Add(error); }
+            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+            { failures.Add(error); }
+        }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
+        { failures.Add(error); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+        { failures.Add(error); }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 
     [Test]

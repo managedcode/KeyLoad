@@ -55414,7 +55414,7 @@
   },
   "KL-035": {
     "title": "Replica snapshot і installation",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs",
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointGeneration.cs",
@@ -55435,7 +55435,8 @@
       "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTermMetadataSnapshotTests.cs",
       "docs/design/replica-snapshots.md",
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "docs/implementation/qualification-stage57-kl035-kl079.md"
     ],
     "stageXVSourceDevelopment": {
       "status": "local_native_flows_passed_linux_acceptance_pending",
@@ -55586,6 +55587,35 @@
       "coldOrderingExercised": false,
       "currentScopedRf3": "Original normal1FAIL during initial native authentication decode; cold helper not reached. No scalar executed.",
       "wholeTaskAccepted": false
+    },
+    "recordedSourceAcceptance20261011": {
+      "sourceRevision": "b1f57eb8d487270983b428d835c922701dd14ed7",
+      "workflowRun": 38141392779,
+      "workflowJob": 114475823187,
+      "workflowJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38141392779/job/114475823187",
+      "artifactId": 11703094406,
+      "artifactName": "task-acceptance-KL-035-normal",
+      "artifactZipSha256": "ced2aa3050bf23c329bd45c239affd0f1d27e431f72f1e99485294257c429180",
+      "profile": "normal",
+      "passedNativeCases": 49,
+      "failedNativeCases": 0,
+      "skippedNativeCases": 0,
+      "selectionCount": 4,
+      "originalReceiptSha256": "236ff9bfe8374120afe816417df76b310f7a46419488d167e6e30c085c848d68",
+      "originalExecutionManifestSha256": "a9bbc309667ea88ea093ccec8fb69064390a5cf37d1fd179349fe65ceb2992f1",
+      "contractSha256": "a2962ead4543691b7697b7b65a977c72c41f5b1131fe63eb0e35b9e15cb81910",
+      "originalArtifactsVerified": 45,
+      "observationSha256": "8ffbd9d69afb36a5ef75d53c07793bc7b3b6d312f45116bfb8e946025c316a22",
+      "qualifiedScope": "Original task acceptance for the recorded source only; later changes require fresh checks.",
+      "currentJoinedMainRuntimeQualified": false,
+      "fullProductCoverageQualified": false,
+      "productionOrPowerLossQualified": false,
+      "criteria": [
+        "Empty-disk follower installs a verified committed snapshot and ordered later tail through real SDK and official MCP.",
+        "Interrupted installation recovers a complete verified cut without partial canonical publication.",
+        "Log reclamation preserves the last snapshot/tail recovery path."
+      ],
+      "evidenceDocument": "docs/implementation/qualification-stage57-kl035-kl079.md"
     }
   },
   "KL-036": {
@@ -57375,7 +57405,9 @@
       "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
       "docs/design/change-feeds.md",
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs",
+      "docs/implementation/qualification-stage57-kl035-kl079.md",
+      "Recorded b1f57eb8 Linux48/48 remains immutable historical acceptance. Current pushed8e4 Linux job114481041255 failed the complete live-query page oracle; KL079 reopened pending causal repair and fresh original48-case qualification."
     ],
     "currentStageXLIVWholeTaskDevelopment": {
       "manifestSha256": "b42bd9e4ce02b1c9d8ed93724f25252fbc06b7b54dc086a0e2031aa6b95a95d0",
@@ -57552,6 +57584,49 @@
       "allAcceptanceClosed": false,
       "runtimeQualified": false,
       "productCoveragePercent": null
+    },
+    "recordedSourceAcceptance20261011": {
+      "sourceRevision": "b1f57eb8d487270983b428d835c922701dd14ed7",
+      "workflowRun": 38141392779,
+      "workflowJob": 114475823404,
+      "workflowJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38141392779/job/114475823404",
+      "artifactId": 11703682407,
+      "artifactName": "task-acceptance-KL-079-normal",
+      "artifactZipSha256": "829806a66d83b94100e62229e11107e65be26752c734907eec8f8c354f39f868",
+      "profile": "normal",
+      "passedNativeCases": 48,
+      "failedNativeCases": 0,
+      "skippedNativeCases": 0,
+      "selectionCount": 14,
+      "originalReceiptSha256": "9899f851994ebed022a72799d52e5f7e0cc6906d87f0ec93e1bbd85a2d211fbc",
+      "originalExecutionManifestSha256": "a6933beec5b24bfe044ae3264202d5985061436cbae7164cef25b827183f9623",
+      "contractSha256": "a2962ead4543691b7697b7b65a977c72c41f5b1131fe63eb0e35b9e15cb81910",
+      "originalArtifactsVerified": 135,
+      "observationSha256": "8ffbd9d69afb36a5ef75d53c07793bc7b3b6d312f45116bfb8e946025c316a22",
+      "qualifiedScope": "Original task acceptance for the recorded source only; later changes require fresh checks.",
+      "currentJoinedMainRuntimeQualified": false,
+      "fullProductCoverageQualified": false,
+      "productionOrPowerLossQualified": false,
+      "criteria": [
+        "Reconnect resumes all committed changes within the retained window.",
+        "The documented duplicate-delivery contract is idempotent with stable command/effect receipts.",
+        "An old subscription is rechecked against current persisted policy and cannot retain a revoked grant.",
+        "The authorized feed projects protected fields and never returns raw PII."
+      ],
+      "evidenceDocument": "docs/implementation/qualification-stage57-kl035-kl079.md"
+    },
+    "currentSourceRegression20261011": {
+      "sourceRevision": "8e4cadd03d6547f05ac6904f7c7faf7765762e27",
+      "workflowRun": 38143183124,
+      "workflowJob": 114481041255,
+      "workflowJobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38143183124/job/114481041255",
+      "originalFailureLogSha256": "9659192b5d1c92a39d60358a850a0371c98c73aab3bc3de0ffe72dd92f1853f6",
+      "originalFailureLog": "/private/tmp/keyload-stage57-latest8e4-failures-r1-20261011/KL079.job.original.log",
+      "failedCase": "ConcurrentSnapshotAndCommittedTailRemainGapFreePrivateAndRevocable",
+      "observedFailure": "Complete LiveQueryPage byte equality at LiveTailRf3Trial45, LiveTailRf3Assertions48 and LivePageRf3Assertions17.",
+      "causalDiagnosisConfirmed": false,
+      "repairAndCurrentLinuxQualification": "OPEN",
+      "historicalB1AcceptancePreserved": true
     }
   },
   "KL-080": {

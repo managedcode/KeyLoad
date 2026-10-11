@@ -1,0 +1,107 @@
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.Server;
+
+namespace KeyLoad.IntegrationTests.Features.Search;
+
+internal static class ProjectionPublicPolicyCold
+{
+    internal static async Task RunAsync(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
+        McpPersistedIdentity reader, CommitReceipt original, CancellationToken token)
+    {
+        var before = await CaptureAsync(fixture, scenario, reader, token);
+        await RestartAsync(fixture, token);
+        var after = await CaptureAsync(fixture, scenario, reader, token);
+        for (var node = 0; node < before.Length; node++)
+        {
+            await Assert.That(after[node].Node.NodeId).IsEqualTo(before[node].Node.NodeId);
+            await Assert.That(after[node].Node.Incarnation).IsEqualTo(before[node].Node.Incarnation);
+            await Assert.That(after[node].Node.ReadGeneration).IsGreaterThanOrEqualTo(before[node].Node.ReadGeneration);
+            await Assert.That(after[node].Node.Applied).IsGreaterThanOrEqualTo(before[node].Node.Applied);
+            await Assert.That(after[node].PhysicalCut).IsGreaterThanOrEqualTo(before[node].PhysicalCut);
+        }
+        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            reader.Secret, async caller =>
+            {
+                await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
+                    scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
+                return true;
+            }, token);
+        await ReplayAsync(fixture, scenario, original, token);
+        await CaptureAsync(fixture, scenario, reader, token);
+    }
+
+    internal static async Task ReplayAsync(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
+        CommitReceipt original, CancellationToken token)
+    {
+        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            scenario.WorkerSecret, async worker =>
+            {
+                var sdk = await McpCallerAssertions.SdkSuccessAsync(
+                    await worker.Sdk.CommitAsync(scenario.ApplyCommand(), token));
+                var response = await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit, scenario.ApplyCommand(), token);
+                var mcp = await McpCallerAssertions.SuccessAsync<CommitReceipt>(response);
+                await Assert.That(global::KeyLoad.JsonDefaults.Serialize(sdk).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(original))).IsTrue();
+                await Assert.That(global::KeyLoad.JsonDefaults.Serialize(mcp.Value).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(original))).IsTrue();
+                await McpCallerAssertions.DoesNotDiscloseAsync(response, scenario.WorkerSecret, EventProjectionRf3Scenario.Secret);
+                return true;
+            }, token);
+    }
+
+    private static async Task<(NodeStatus Node, long PhysicalCut)[]> CaptureAsync(ClusterFixture fixture,
+        EventProjectionRf3Scenario scenario, McpPersistedIdentity reader, CancellationToken token)
+    {
+        var tasks = ProjectionPublicPolicyProtocol.Nodes
+            .Select(node => CaptureNodeAsync(fixture, node, scenario, reader, token)).ToArray();
+        await ((Task)Task.WhenAll(tasks)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        var failures = new List<Exception>();
+        foreach (var task in tasks)
+        {
+            await ServerFailureObserver.ObserveAsync(() => task, failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+        var result = new List<(NodeStatus Node, long PhysicalCut)>();
+        foreach (var task in tasks)
+        {
+            result.Add(await task);
+        }
+        return result.ToArray();
+    }
+
+    private static Task<(NodeStatus Node, long PhysicalCut)> CaptureNodeAsync(ClusterFixture fixture,
+        string node, EventProjectionRf3Scenario scenario, McpPersistedIdentity reader, CancellationToken token)
+    {
+        return RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, fixture.AdminKey,
+            async root =>
+            {
+                var image = await ProjectionPublicPolicyImage.ReadAsync(root.Sdk, scenario, token);
+                await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, reader.Secret,
+                    async caller =>
+                    {
+                        await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
+                            scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
+                        return true;
+                    }, token);
+                var nativeStatus = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));
+                return (nativeStatus, image.CutPosition);
+            }, token);
+    }
+
+    private static async Task RestartAsync(ClusterFixture fixture, CancellationToken token)
+    {
+        var failures = new List<Exception>();
+        foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
+        { await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, ProjectionPublicPolicyProtocol.ColdScenario, token), failures); }
+        foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
+        { await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures); }
+        foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
+        { await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures); }
+        foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
+        {
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.App.ResourceNotifications
+            .WaitForResourceHealthyAsync(node, Aspire.Hosting.ApplicationModel.WaitBehavior.WaitOnResourceUnavailable, token), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+}

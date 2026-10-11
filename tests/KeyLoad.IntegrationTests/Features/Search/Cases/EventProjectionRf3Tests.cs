@@ -44,17 +44,42 @@ internal sealed class EventProjectionRf3Tests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await EventProjectionRf3Scenario.CreateAsync(fixture, deadline.Token);
-        using var workerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var worker = new KeyLoadClient(workerHttp, scenario.WorkerSecret, IntegrationClientOptions.Execution());
-        await McpCallerAssertions.SdkSuccessAsync(await worker.CommitAsync(scenario.ApplyCommand(), deadline.Token));
-        var restricted = await EventProjectionRf3Scenario.CreateReaderAsync(fixture, scenario.Partition,
-            true, EventProjectionRf3Scenario.TargetOwner, deadline.Token);
-        using var callerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var caller = new KeyLoadClient(callerHttp, restricted.Secret, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            restricted.Secret, deadline.Token);
-        await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller, mcp, scenario.VectorSearch(),
-            restricted.Secret, BaselineOnly(), deadline.Token);
+        var warm = await HiddenReaderWarmAsync(scenario, deadline.Token);
+        await ProjectionPublicPolicyFlow.RunAsync(fixture, scenario, warm.Reader, warm.Original, deadline.Token);
+    }
+
+    private async Task<(CommitReceipt Original, McpPersistedIdentity Reader)> HiddenReaderWarmAsync(
+        EventProjectionRf3Scenario scenario, CancellationToken cancellationToken)
+    {
+        var failures = new List<Exception>();
+        (CommitReceipt Original, McpPersistedIdentity Reader) result = default;
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var workerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var worker = new KeyLoadClient(workerHttp, scenario.WorkerSecret, IntegrationClientOptions.Execution());
+                var original = await McpCallerAssertions.SdkSuccessAsync(await worker.CommitAsync(
+                    scenario.ApplyCommand(), cancellationToken));
+                var restricted = await EventProjectionRf3Scenario.CreateReaderAsync(fixture, scenario.Partition,
+                    true, EventProjectionRf3Scenario.TargetOwner, cancellationToken);
+                using var callerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
+                await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    var caller = new KeyLoadClient(callerHttp, restricted.Secret, IntegrationClientOptions.Execution());
+                    await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+                        restricted.Secret, cancellationToken);
+                    await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                    {
+                        await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller, mcp, scenario.VectorSearch(),
+                            restricted.Secret, BaselineOnly(), cancellationToken);
+                        result = (original, restricted);
+                    }, failures);
+                }, failures);
+            }, failures);
+        }, failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+        return result;
     }
 
     [Test]

@@ -20,26 +20,26 @@ internal static class PolicyEpochPublicContinuation
         await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
         return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
             root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, scenario.Reader.Secret,
-                reader => ContinueAsync(root.Sdk, reader, scenario, seed, receipt, token), token), token);
+                reader => ContinueAsync(fixture, root.Sdk, reader, scenario, seed, receipt, token), token), token);
     }
 
-    private static async Task<PolicyEpochPublicState> ContinueAsync(KeyLoadClient root, RequestCqrsRf3Callers reader,
+    private static async Task<PolicyEpochPublicState> ContinueAsync(ClusterFixture fixture, KeyLoadClient root, RequestCqrsRf3Callers reader,
         ResourcePolicyUpdateRf3Scenario scenario, CommandRequest seed, CommitReceipt receipt, CancellationToken token)
     {
         var cursors = await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, false, token);
         var state = new PolicyEpochPublicState(scenario, seed, receipt, cursors, scenario.Reader);
         var reduced = await PolicyEpochPublicPolicy.ChangeAsync(root, scenario.Reader, [], false, token);
         state = state with { CurrentReader = reduced };
-        await PolicyEpochPublicRefusals.AllAsync(reader, root, state, ErrorCode.CursorExpired, token);
+        await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.CursorExpired, token);
         await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, true, token);
         state = state with { CurrentReader = await PolicyEpochPublicPolicy.ChangeAsync(root, reduced, [], true, token) };
-        await PolicyEpochPublicRefusals.AllAsync(reader, root, state, ErrorCode.Unauthenticated, token);
+        await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.Unauthenticated, token);
         state = state with
         {
             CurrentReader = await PolicyEpochPublicPolicy.ChangeAsync(root, state.CurrentReader,
             scenario.Reader.Principal.FieldGrants, false, token)
         };
-        await PolicyEpochPublicRefusals.AllAsync(reader, root, state, ErrorCode.CursorExpired, token);
+        await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.CursorExpired, token);
         await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, false, token);
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
         return state;

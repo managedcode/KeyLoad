@@ -78,7 +78,7 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
             GraphShortestPathValidation.ValidateAdjacency(
                 KeySpace.Partition(AdjacencySpace, request.Partition, request.Graph, OutDirection,
                     predecessor.Previous.Collection, predecessor.Previous.Id, predecessor.EdgeId),
-                predecessor.EdgeId, edge, predecessor.Previous, request.Partition, request.Graph, budget);
+                predecessor.EdgeId, edge, predecessor.Previous, request.Partition, request.Graph, database.Limits, budget);
             var visible = edge with
             {
                 AttributesJson = database.Authorization.Project(principal, graph.FieldPolicies,

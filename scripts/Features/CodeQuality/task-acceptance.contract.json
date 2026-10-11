@@ -6852,6 +6852,29 @@
               "parameterTypeFullNames": []
             }
           ]
+        },
+        {
+          "selectionId": "unit-generation-visibility-tests",
+          "suite": "unit",
+          "filter": "/*/*/GenerationVisibilityTests/*",
+          "cases": [
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+              "methodName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
+              "instanceName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
+              "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+              "methodName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
+              "instanceName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
+              "parameterTypeFullNames": []
+            }
+          ]
         }
       ]
     }

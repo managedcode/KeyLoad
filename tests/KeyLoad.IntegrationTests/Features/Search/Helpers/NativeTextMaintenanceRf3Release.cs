@@ -7,6 +7,7 @@ internal static class NativeTextMaintenanceRf3Release
 {
     private const int EmptyRecords = 0;
     private const string ReleasedDetail = "The projection generation was released.";
+    private const string ReleasedMcpDetail = "The database operation could not be completed.";
 
     internal static async Task RunAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         NativeTextMaintenanceRf3Scenario scenario, TextIndexMaintenanceRequest originalRestore,
@@ -35,7 +36,7 @@ internal static class NativeTextMaintenanceRf3Release
         var official = await mcp.CallAsync(TextIndexMaintenanceProtocol.ToolName, originalRestore, token);
         _ = await McpCallerAssertions.ErrorAsync(official, ErrorCode.TokenInvalidated, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-            .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(ReleasedDetail);
+            .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(ReleasedMcpDetail);
         await NativeTextMaintenanceRf3Assertions.CanonicalAsync(sdk, mcp, scenario, changed: true, token);
     }
 }

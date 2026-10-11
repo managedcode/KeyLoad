@@ -225,3 +225,77 @@ and this mapping. Root joins solution/analyzer/format, affected native TUnit wit
 normal SIMD enabled, recovery and real SDK/official MCP Aspire RF3. Source stage
 is unqualified until original source-bound reports exist. Existing ADR-038 is
 sufficient; rollback removes only this additive test batch and mapping.
+
+
+## TASK-BLOB-PUBLISHED-LIFETIME-WHOLE-003 — current state ownership through deletion and reuse
+
+REQ-BLOB-PUBLISHED-LIFETIME-001 and AC-BLOB-PUBLISHED-LIFETIME-001 refine
+REQ/AC-BLOB-001/004/005/007 and ADR-038. A published two-part head whose current
+state is absent or marked retired must refuse metadata, delete, reclaim and the
+original cached completion before any effects. Repeat unchanged operation IDs
+and compare complete native key/value image and physical position; a joined cold
+owner must preserve the same refusal. Restore exactly the owned state row and
+require the complete original image, original completion receipt replay and
+full independent first/tail payload bytes.
+
+Continue with actual deletion: exact revision-two tombstone, retained charged
+bytes/version and retired state; current-version reclaim before deletion must
+refuse Conflict. Reclaim both retired parts and verify exact result, zero byte
+and version/upload counters, one permanent object-key slot, absent raw/meta/state
+rows and no-effect final reclaim replay. Reuse the same UploadId with a distinct
+BeginCommandId at the tombstone revision for an empty publication. Its H0 is an
+independent SHA256 of the frozen KeyCodec transcript. Old begin/completion/reclaim
+outcomes must be TokenInvalidated without effects; the new publication is exactly
+revision three, with new expiry/lifetime, zero length/parts and independent hash.
+A second joined cold owner preserves complete native image, exact zero-byte
+read/metadata/counters and new receipt replays plus old-lifetime refusal.
+
+Source map: additive Unit BlobStorage Cases/Helpers/Assertions/Models published
+lifetime files; existing native engine contracts remain unchanged. No production
+defect is claimed from source review. Private candidate packet only until root
+joins original build/analyzer/formatter/native normal-SIMD reports. Process/RF3
+SDK/MCP/Linux/endurance qualification remains separate and pending. No API,
+format, policy, tolerance, deadline or limit changes. Rollback removes this
+additive batch and mapping together.
+
+### TASK-BLOB-PRIOR-PUBLICATION-PROCESS-001
+
+REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007 and ADR-038: two native Recovery cases (missing current completed BlobState; current completed BlobState with Retired=true) preserve a previously acknowledged four-byte publication across an independent queue-lifecycle HeaderWritten process kill in the same physical ZoneTree store. This is prior-publication survival across an unrelated same-store commit cut, not a Blob Complete commit-cut or complete Blob recovery qualification. The parent first creates native RF3 catalog authority; the unchanged child validates that same catalog/incarnation/tenant and does not reset the store.
+
+Acceptance: literal complete and partial bytes, metadata, chain hash, raw part/manifest/state and both quotas agree before and after the kill; the uncommitted queue batch has no outcome. Selected-state corruption refuses metadata/range/delete/reclaim and cached completion without any complete-store, cut or identity effect, repeatedly and after cold reopen. Repair restores exactly the one original row and entire pre-fault image at cut+2. The original deletion/reclaim succeeds with exact receipts, counters and owned-row removal; the same upload identifier publishes fresh healthy bytes with revision 3 while old lifetime outcomes invalidate. A second cold owner preserves all final rows, bytes, identity, catalog and replay receipts. Original 90-second trial, 30-second joined cleanup and 4096-row image bounds remain unchanged. Local native process-stop evidence does not establish Linux qualification, RF3 failover or power-loss durability.
+
+Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobPriorPublicationProcessRecoveryTests.PriorAcknowledgedPublicationSurvivesIndependentQueueCutThenLifetimeRepairAndReuse, Arguments(true), Arguments(false).
+
+### TASK-BLOB-RETIRED-PART-PROCESS-001
+
+REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: three native Recovery cases preserve a previously acknowledged Blob publication and deletion (revision2 tombstone) across the unchanged independent queue-lifecycle HeaderWritten kill in the same physical store. This is prior retired-lifetime survival and reclaim integrity at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Parent catalog/root principal/incarnation remain identical to the existing native three-voter authority; the unchanged child never resets the store.
+
+Selected faults are exactly one retired upload ordinal0 row: missing raw part; missing part metadata; shape-valid part metadata with a SHA256 of different literal bytes. Before faults, complete literal retired state, tombstone, raw part/manifest, both quotas and original publication/deletion receipts survive the stop. Original Reclaim(MaxParts1) refuses Corruption with no partial deletion, quota, outcome, full-store, cut or identity effect, repeatedly and after first cold reopen. Repair restores exactly that owned row and complete pre-fault image at cut+2. The same original Reclaim releases4bytes/1version/1part and replays its complete receipt, leaves tombstone and removes state/raw/manifest. Reuse of the same upload identifier publishes fresh literal [9,10,11,12] bytes at revision3, with independent hashes, full/partial/empty-tail reads, exact native state/quotas, fresh receipts and old-lifetime invalidation. A second cold owner preserves final image, identity/catalog and original unrelated queue image/outcome absence.
+
+Original trial90s/cleanup30s/output8192/image4096 and real joined child cleanup remain mandatory; native normal SIMD50, no mocks/shared fixture/protocol/format/bounds changes. Local macOS development results do not establish Linux/full Recovery/RF3 failover or power-loss qualification. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenPartRepairReclaimAndReuse, MissingRaw/MissingManifest/WrongManifestHash.
+
+### TASK-BLOB-RETIRED-PART-BYTES-PROCESS-001
+
+Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR-038: two native Recovery cases extend retired-part integrity to an actual equal-length altered raw value and a shape-valid manifest declaring the wrong part length. A previously acknowledged publication and deletion survive the unchanged independent queue-lifecycle HeaderWritten process kill in the same physical store. This is prior retired-lifetime survival at an unrelated commit cut; existing CrashHost controls do not target Blob Complete, Delete or Reclaim commits. The only CompleteBlob child seed precedes movement fault arming, whose input rejects operations other than PartitionMovementPhase. No Blob publication commit-cut qualification is claimed.
+
+The selected ordinal0 raw row originally contains literal [1,2,3,4]; its equal-length alteration becomes [5,6,7,8] while the exact original manifest remains. The alternative changes only the native manifest to format1/length3/the original four-byte SHA256, preserving raw bytes and every other row. Original Reclaim(MaxParts1) must refuse exact Corruption repeatedly and after a cold owner, with no partial deletion, quota, outcome, full-store, cut, identity or authority effect. One-row repair restores the original complete image at cut+2. The same original command then releases exactly4bytes/1part/1version with receipt replay, leaves revision2 tombstone, removes retired state/raw/manifest and permits same-upload-ID reuse with literal [9,10,11,12] publication at revision3. Full/partial/empty-tail reads, independent hash transcript, exact native counters/state/receipts and old-lifetime invalidation survive a second cold owner. The original unrelated queue image and absent outcome remain exact.
+
+Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartBytesProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenByteRepairReclaimAndReuse, AlteredRawBytes/WrongManifestLength. Reuses the accepted complete W6/W7 seed/receipt/image/reclaim oracles without modifying them. Original trial90s/cleanup30s/output8192/image4096, joined native child and normal SIMD50 remain unchanged. Candidate source alone is unqualified; local process results do not establish Linux/full Recovery/RF3 or power-loss gates.
+
+### TASK-BLOB-LATER-PART-PROCESS-001
+
+Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: two actual native process cases preserve an acknowledged two-part publication and revision2 deletion across the unchanged independent same-store queue HeaderWritten cut. This remains prior Blob lifetime survival at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Original payload65553 bytes is the deterministic literal byte at index i = i modulo239; ordinal0 has65536 bytes and ordinal1 has17 bytes. Bounded reads independently verify every byte through two legal ranges and a boundary-crossing range.
+
+Original Reclaim(MaxParts2) encounters healthy ordinal0 then a missing or equal-length altered ordinal1 raw row. Existing DeleteParts stages raw0/meta0 deletions before reading ordinal1; quota mutation follows successful completion of that loop. The native refusal must leave every row, raw0/meta0, both quotas, retired state/cursor, tombstone, receipts, outcome absence, authority, identity and cut unchanged, repeatedly and after a first cold owner. Exact damaged-image closure changes exactly selected ordinal1 raw row; one-owned-row repair restores the complete pre-fault image at cut+2. The same original reclaim then removes state/all2 raw/all2 metadata rows and releases65553bytes/2parts/1version exactly once with receipt replay.
+
+Reuse of the same upload identifier publishes literal [9,10,11,12] at revision3, with exact full/partial/tail bytes, independent hashes, native quotas/state, fresh receipts and old-lifetime invalidation. A second cold owner preserves complete final image, catalog/root principal/incarnation, receipts and the original unrelated queue image/outcome absence. Original90s trial/30s cleanup/8192 output/4096 image bound and joined real child remain unchanged; native normal SIMD50. No Core/protocol/shared fixture change. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobLaterPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenLaterPartRepairReclaimAndReuse, MissingSecondRaw/AlteredSecondRaw. Source is unqualified until original results exist; local process checks do not establish Linux/full Recovery/RF3 or power-loss gates.
+
+### TASK-BLOB-EXTRA-PART-PROCESS-001
+
+Existing REQ/AC-BLOB-001/002/004/005/007 and ADR038: two native process cases extend acknowledged two-part retired-lifetime survival at the unchanged independent same-store queue HeaderWritten cut to unexpected extra owned ordinal2 rows. This is not Blob Complete/Delete/Reclaim commit-cut qualification. Preserve the accepted independent65553-byte body/2-part publication and deletion, native catalog/root/incarnation, exact head/state/manifest/raw/quota and original receipts.
+
+Insert exactly one previously absent owned ordinal2 raw row with literal [77,78,79], or one native part manifest format1/length3/SHA256(literal3). Both original ordinals0/1 remain healthy. Exact whole-store image includes only that one inserted key/value at cut+1. Original Reclaim(MaxParts2) reads both healthy parts, stages all4 raw/manifest deletions and resource/global quota decrement, then ProveEmpty refuses the unexpected raw or manifest row with exact Corruption. Repeated refusal and first cold owner must preserve complete image, both original parts, extra row, quotas65553bytes/1object/1version/0uploads, retired state/cursor, tombstone, original receipts, absence of reclaim outcome, cut/identity/authority. This staged order is the existing actual owning implementation; no fabricated failpoint is used.
+
+Delete-only repair of exactly the injected owned key restores complete original image at cut+2. Same original reclaim then releases65553bytes/2parts/1version exactly once, removes state/all2 raw/all2 manifest with exact quotas and receipt replay, and retains revision2 tombstone. Same-upload reuse publishes literal [9,10,11,12] revision3 with whole/partial/tail bytes, independent hashes, native state/quotas, fresh receipt replay and original lifetime invalidation. Both extra ordinal2 families and old ordinal1 remain absent after healthy reuse and second cold owner; final whole image/cut/authority and unrelated queue image/outcome remain exact.
+
+Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobExtraPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenExtraPartRepairReclaimAndReuse, ExtraRaw/ExtraManifest. Reuses unchanged W6/W7/W9 complete native helpers/oracles; Core0/protocol0. Original90s trial/30s cleanup/8192 output/4096 image and actual joined child/native SIMD50 remain mandatory. Source alone remains unqualified; local process checks do not establish Linux/full Recovery/RF3, actual Blob commit-cut or power-loss qualification.

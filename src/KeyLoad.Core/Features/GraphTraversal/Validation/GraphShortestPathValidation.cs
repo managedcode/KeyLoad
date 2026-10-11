@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using KeyLoad.Core.Features.GraphTraversal.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
@@ -74,7 +75,7 @@ internal static class GraphShortestPathValidation
     }
 
     internal static void ValidateAdjacency(ReadOnlySpan<byte> key, string edgeId, EdgeRecord? edge,
-        EntityRef source, PartitionRef partition, string graph, ReadExecutionBudget budget)
+        EntityRef source, PartitionRef partition, string graph, DatabaseLimits limits, ReadExecutionBudget budget)
     {
         ValidateStoredIdentifier(edgeId, budget);
         if (edge is null || edgeId != edge.Id || edge.From != source || edge.To is null
@@ -84,6 +85,9 @@ internal static class GraphShortestPathValidation
             throw Errors.Fail(ErrorCode.Corruption, InvalidAdjacency);
         }
         ValidateStoredIdentifiers(edge, budget);
+        budget.Check();
+        GraphCrossPartitionValidation.ValidateEdge(edge, limits);
+        budget.Check();
     }
 
     private static void ValidateIdentifiers(GraphShortestPathRequest request, ReadExecutionBudget budget)

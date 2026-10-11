@@ -32,6 +32,8 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.RevisionConflict, QueueLifecycleProtocol.StaleCondition); }
         if (metadata.State is MessageState.Acked or MessageState.Cancelled or MessageState.Expired)
         { throw Errors.Fail(ErrorCode.Conflict, QueueLifecycleProtocol.InvalidState); }
+        if (metadata.Id != id)
+        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
         var body = StoredMessageBody.Read(view, QueueKey(MessageBodySpace, lane, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)

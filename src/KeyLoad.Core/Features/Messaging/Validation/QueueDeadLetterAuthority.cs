@@ -30,8 +30,12 @@ public sealed partial class DatabaseEngine
         {
             var id = view.GetRecord<string>(record.Key.ToArray())
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference);
+            if (!record.Key.Span.SequenceEqual(QueueKey(DeadLetterQueueSpace, lane, id)))
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingReference); }
             var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessageMetadataSpace, lane, id))
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingMetadata);
+            if (metadata.Id != id)
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.MissingMetadata); }
             RequireQueueParkedAuthority(view, lane, metadata);
         }
     }
