@@ -31,7 +31,9 @@ internal enum RequestCqrsProbePhase
     DistributedSearchStatisticsCaptured,
     OnlineTextCaptured,
     ReplicaSnapshotReadiness,
-    EventVectorFirstDispatchReserved
+    EventVectorFirstDispatchReserved,
+    EventVectorFirstCapturesReady,
+    EventVectorFirstAdmitPrepared
 }
 
 internal enum RequestCqrsProbeAction

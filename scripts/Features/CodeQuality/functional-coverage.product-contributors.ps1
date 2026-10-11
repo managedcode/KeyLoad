@@ -1,6 +1,6 @@
 $script:PsmProductContributors = [ordered]@{
     SchemaVersion = 1
-    MinimumSuites = 4
+    MinimumSuites = 3
     VersionProperty = 'schemaVersion'
     ContributorsProperty = 'contributors'
     Invalid = 'The source-controlled product contributor registry is invalid or incomplete.'

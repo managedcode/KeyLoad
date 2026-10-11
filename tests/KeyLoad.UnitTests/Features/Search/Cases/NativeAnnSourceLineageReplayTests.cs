@@ -17,6 +17,7 @@ internal sealed class NativeAnnSourceLineageReplayTests
         NativeAnnLineageTestData.Seed(database);
         var request = NativeAnnMaintenanceTestData.Pin(database);
         var failures = new List<Exception>();
+        AnnMaintenanceCapabilityResult? publication = null;
         try
         {
             await using var runtime = new NativeAnnMaintenanceTestRuntime(database);
@@ -25,12 +26,15 @@ internal sealed class NativeAnnSourceLineageReplayTests
             {
                 var built = await CompleteAsync(database, actual, request);
                 await Assert.That(built.Count).IsEqualTo(InitialCount);
+                await NativeAnnLineageReplayOracle.AssertSeedAsync(AnnSeedTestSupport.Capture(database,
+                    AnnProjectionPinTestSupport.Principal), NativeAnnLineageReplayOracle.Stage.Initial);
                 await actual.Owner.AbortAsync(actual.SessionId);
                 NativeAnnLineageTestData.ChangeSource(database);
                 request = request with { Mode = AnnMaintenanceMode.Restore };
                 var hidden = await CompleteAsync(database, actual, request);
                 await Assert.That(hidden.Count).IsEqualTo(HiddenCount);
                 var seed = AnnSeedTestSupport.Capture(database, AnnProjectionPinTestSupport.Principal);
+                await NativeAnnLineageReplayOracle.AssertSeedAsync(seed, NativeAnnLineageReplayOracle.Stage.Hidden);
                 await Assert.That(seed.Records.Select(row => row.DocumentId)).IsEquivalentTo(RemainingIds, CollectionOrdering.Matching);
                 await actual.Owner.AbortAsync(actual.SessionId);
                 NativeAnnLineageTestData.Reproject(database);
@@ -41,11 +45,15 @@ internal sealed class NativeAnnSourceLineageReplayTests
                 await Assert.That(restored.Records[0].Values).IsEquivalentTo(new float[] { 4, 3, 2 }, CollectionOrdering.Matching);
                 await Assert.That(healthy.Source!.CorpusSha256).IsEqualTo(restored.CorpusSha256);
                 await Assert.That(healthy.IndexSha256).IsNotEqualTo(hidden.IndexSha256);
+                await NativeAnnLineageReplayOracle.AssertSeedAsync(restored, NativeAnnLineageReplayOracle.Stage.Reprojected);
+                publication = healthy;
             }, failures);
         }
         catch (Exception cleanup) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         catch (Exception cleanup) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
+        await NativeAnnLineageColdContinuation.RunAsync(database, request, publication
+            ?? throw new InvalidOperationException("The native lineage publication did not complete."));
     }
 
     private static async Task<AnnMaintenanceCapabilityResult> CompleteAsync(TestDatabase database,

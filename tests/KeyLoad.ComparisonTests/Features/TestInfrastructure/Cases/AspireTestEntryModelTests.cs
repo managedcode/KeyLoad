@@ -13,7 +13,8 @@ internal sealed class AspireTestEntryModelTests
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string ScalarRuntimeEnvironment = "DOTNET_EnableHWIntrinsic";
     private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
-    private const string DefaultMaximumParallelTests = "20";
+    private const string DefaultMaximumParallelTests = "50";
+    private const string ExplicitComparisonOverlap = "20";
     private const string ComparisonSuite = "comparison";
     private const string ComparisonMaximumParallelTests = "1";
     private const string ParallelismSetting = "KeyLoadTests:Execution:MaximumParallelTests";
@@ -23,7 +24,6 @@ internal sealed class AspireTestEntryModelTests
     [
         ("analyzers", "KeyLoad.Analyzers.Tests"),
         ("unit", "KeyLoad.UnitTests"),
-        ("unit-scalar", "KeyLoad.UnitTests"),
         ("recovery", "KeyLoad.RecoveryTests"),
         ("rf3", "KeyLoad.IntegrationTests"),
         ("comparison", "KeyLoad.ComparisonTests"),
@@ -58,11 +58,7 @@ internal sealed class AspireTestEntryModelTests
                 }, CollectionOrdering.Matching);
                 var environment = configuration.EnvironmentVariables.ToDictionary();
                 await Assert.That(environment[SuiteEnvironment]).IsEqualTo("");
-                await Assert.That(environment.ContainsKey(ScalarRuntimeEnvironment)).IsEqualTo(suite == "unit-scalar");
-                if (suite == "unit-scalar")
-                {
-                    await Assert.That(environment[ScalarRuntimeEnvironment]).IsEqualTo("0");
-                }
+                await Assert.That(environment.ContainsKey(ScalarRuntimeEnvironment)).IsFalse();
             }
             finally
             {
@@ -74,6 +70,7 @@ internal sealed class AspireTestEntryModelTests
     [Test]
     public async Task FilterIsOneNativeArgumentAndIsBoundedBeforeResourcesAreAdded()
     {
+        await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit-scalar");
         var builder = CreateBuilder("--KeyLoadTests:Suite=unit", FilterArgument);
         KeyLoadAppHostApplication.AddKeyLoad(builder);
         var app = builder.Build();
@@ -150,7 +147,7 @@ internal sealed class AspireTestEntryModelTests
         var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadAppHostApplication.AddKeyLoad(rejected));
         await Assert.That(failure.Message).IsEqualTo(ComparisonIsolationMessage);
         await Assert.That(rejected.Resources).IsEmpty();
-        await Assert.That(rejected.Configuration[ParallelismSetting]).IsEqualTo(DefaultMaximumParallelTests);
+        await Assert.That(rejected.Configuration[ParallelismSetting]).IsEqualTo(ExplicitComparisonOverlap);
         foreach (var args in new[] {
             new[] { "--KeyLoadTests:Suite=comparison" },
             new[] { "--KeyLoadTests:Suite=comparison", "--KeyLoadTests:Execution:MaximumParallelTests=1" } })

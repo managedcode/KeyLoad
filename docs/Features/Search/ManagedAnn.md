@@ -742,3 +742,70 @@ Exact ownership: ConnectionGrain plus AnnMaintenanceExecution/ChildCalls, TextMa
 Dependencies: ConnectionGrain starts at immutable MultiLane8 proposed postimage (itself includes KL039 post-Capture14); OnlineTextExecution/ChildCalls and OnlineGenerationLifetime start at the exact immutable KL039 post-Capture14 proposed postimages. ClientApi/ADR125 start at immutable MultiLane8 docs. Preserve native context observer and every existing appendix by explicit composition. Other files use exact current live bytes. Roll back only this invocation chain, together, without changing persisted/native authorities.
 
 The clean original R32 MultiLane14 failed 14/14 with source and binaries coherent. Its Event3 CapabilityExecution/Unexpected/UnknownWriteOutcome is not an exception-chain proof of this self-RPC cause. Source establishes the invalid outgoing self-boundary against pinned Graph's same-ID contract; root must run original clean normal/scalar and the complete related native/recovery/RF3 cases after this repair. No runtime/PASS, native UID/count/selector or dependency release claim.
+
+
+## TASK-ANN-LINEAGE-PUBLISHED-COLD-001: complete lineage replay and native cold image
+
+REQ-ANN-LINEAGE-PUBLISHED-COLD-001 refines REQ/AC-ANN-007: genuine canonical
+source patch removal and subsequent admitted ApplyVectorProjection replay
+must produce complete independent native corpus records, not only counts or
+the first reprojected row. AC-ANN-LINEAGE-PUBLISHED-COLD-001 maps to the SAME
+`NativeAnnSourceLineageReplayTests.ActualSourcePatchAndNativeProjectionTargetReappearOnlyThroughAdmittedCanonicalOutboxReplay`
+method and arguments. Retain all original native Begin/Load/ApplyPage/StagePage,
+canonical signed checkpoint ACK and exact receipt replay, counts/digests,
+consumer/generation bounds, cancellation and initiating+cleanup failure ledger.
+Independently assert all IDs, fields, complete vector space, revisions, values
+and corpus digest at the initial3, source-patch hidden2 and reprojected3 cuts.
+
+After genuine runtime settlement, open the actual published native owner and
+LoadCompleted through a fresh persisted CapturePinned operation, with unchanged
+validated options, budgets and original cancellation. Validate the full literal
+reprojected seed and all candidate IDs/ordinals/revisions/order/scores against
+independent literal vectors. Hold the real admitted native reader and join its
+release and owner disposal. Load never falls back to Build or adopts an orphan.
+
+Then join the original canonical/replica owners, open the exact same canonical
+files twice under original validated native options, and repeat current-policy
+CapturePinned + native published Load + complete literal search. Require full
+generated original native identity equality as a boolean (no signer export),
+original position and every bounded canonical key/value byte unchanged across
+read-only warm/cold phases. A scan reporting HasMore must fail rather than
+accepting a partial state image. Preserve exact native index digest from the
+actual original healthy publication.
+
+Unit Search owns only the existing case and new Assertions/NativeAnnLineageReplayOracle
+and Helpers/NativeAnnLineageColdContinuation. Product, public APIs/fields/aliases,
+projection-generation algorithms, provider, roles, quotas, clocks and shared
+fixtures are unchanged. Root owns guarded join, fresh Release/format/analyzers
+and original normal native case; Linux process/RF3/public caller/fault/endurance
+gates remain independently required and OPEN. This proves a bounded supporting
+lineage/cold operation only after actual execution, not full KL031 acceptance.
+Rollback removes the additive test continuation/contracts only; no format or
+migration/compatibility path is introduced.
+
+
+## TASK-ANN-PENDING-REFUSAL-IMAGE-001: damaged native publication retention
+
+Related REQ/AC-ANN-GEN-004/006 and AC-ANN-007; KL-031. Existing actual truncated pending-array operation rejects Corruption, restores exact original fixture-owned bytes, resumes genuine native checkpoint ACK/replay and checks complete literal published arrays plus native reader results. The missing oracle is retention of the actual damaged native binary inventory during rejection and original owner shutdown.
+
+Before constructing the existing Restore runtime, capture the existing bounded NativeAnnFixtureFileSnapshot (16 native .bin files, 2 MiB total, complete relative paths and bytes). After the unchanged Begin/original checkpoint reconciliation/Load refusal and actual runtime/native owner cleanup join, compare that same complete bounded inventory. This proves original damaged arrays, generated manifests and receipt binary bytes remain exact; it does not inspect unrelated nonbinary files or establish power-loss durability. All canonical image/position, exact Corruption, actual original-byte repair and complete published healthy assertions remain unchanged.
+
+Ownership: only existing Unit Search helper plus append-only ManagedAnn/ADR019. No product, APIs, IDs, test method/Arguments, selectors, quota, clock, cancellation, concurrency or deadlines change. Docs explicitly depend on immutable lineage-published-cold5 proposed postimages; helper depends on current native-read main body. Root merges appendage once, builds/analyzes/formats final cohort, executes original normal whole operation and retains actual source/PDB/TRX. Linux/process/RF3/full KL031 gates remain open; no runtime or UID claim. Rollback removes only this test oracle/doc append.
+
+
+## TASK-ANN-PUBLIC-RF3-COLD-001 implementation contract
+
+REQ/AC-ANN-GEN-004/006, AC-ANN-007 and TASK-SEARCH-CONNECTION-CHILD-001: add one dedicated fixture-owned public ANN maintenance cold operation. Existing shared keyed methods and all their Arguments remain exact. The new case owns original ClusterFixture with existing validated EnableApproximateSearch and original McpCallerDeadline, real SDK and official MCP callers; each caller group joins before killing any original resource. Retain complete genuine six-effect seed command/receipt, independent literal document/vector/search result corpus and real native generation. Two SAME-volume cold cuts kill all3, Begin all3, then settle all3 existing Restart/health/source receipts using unchanged token and failure ledger. Fresh status/placement plus persisted authentication precede each explicit Restore; compare original generation/index/corpus/through/schema/policy/physical owner/incarnation against actual recovered authority. No Build fallback.
+
+Every warm/cold scope reconciles SAME original seed ID via SDK and MCP with exact original receipt bytes and full independent six mutation identities/revisions, reads all three original documents and exact search rows, and uses existing approximate SDK/MCP/both SQL CALL page oracle. Separate genuinely persisted nonadministrator reader begins Query/DocumentsRead/VectorSearch, is explicitly denied VectorSearch via actual ConfigurePrincipal, proves precise SDK/MCP PermissionDenied/null result and complete original business model plus receipt retention, then restored current grants precede full healthy public page. Administrator/seed issuer policy is unchanged; no replay across obsolete issuer epoch is manufactured. After both cold scopes, release the actual original generation, reject old Restore Conflict through both clients, then genuinely fresh consumer Build with original literal corpus. This final Build is explicit and never used to repair a failed Restore.
+
+Ownership: Integration Search Case/Helpers/Assertions only, append ManagedAnn/ADR019 on pending-refusal3 postimages. No shared fixture/product/mapper/API/alias/field/limit/time/deadline/selector/inventory edits. New declaration is required to own its dedicated physical lifecycle and is heavy RF3 NotInParallel. No UID known until root fresh census. Source previews retain exact NotSupported creation receipts. Root final coherent build/analysis/format and original normal50/Linux RF3 source/image/receipt/TRX required; authoring is not qualification or power-loss evidence. Rollback removes only this additive case/helpers/docs.
+
+
+## TASK-ANN-RETIRED-READER-LITERAL-001 implementation contract
+
+REQ/AC-ANN-GEN-006, AC-ANN-007: existing actual ReleasedGenerationKeepsActualPinnedIndexUntilReaderJoinsThenNewNativeGenerationReturnsHealthyPrefix holds a genuine bounded original native IAnnProjectionLease. It releases the real canonical consumer and physical generation, proves native index files retained and new Wait HistoryUnavailable, then disposes held lease, proves actual file reclamation, and publishes/waits fresh generation. Missing whole-flow oracle: the admitted held reader itself never executes after retirement.
+
+After genuine Release and before original held.Dispose, inspect SAME admitted lease complete three original records against independent literal IDs/field/space/revision/vector bytes; perform actual bounded native cosine Search over all three eligible ordinals, compare every original candidate ID/ordinal/revision/score/order against independent literal query/vectors through the current public Similarity arithmetic. Native generation equals original pin, indexed applied prefix covers original actual seed receipt. Full current canonical snapshot/position remain exact around that genuine retained-reader work. New Wait remains denied; no re-admission, re-open, new generation or policy borrowing. Original finally-held disposal and failure ledger, native file retention/reclaim, Abort, real next-generation configure/build/wait all remain exact.
+
+Ownership: existing Unit Search retirement case +new Search assertion helper, append ManagedAnn/ADR019 after immutable public-cold8 docs. No product, root GenerationVisibility/PreparedSimilarity/SearchEngine/SIMD/mapper, schema/IDs, test method/Args, quota/deadline/clock/UID/inventory edits. Existing configured read limits, captured caller seed max work and original TestContext cancellation bound actual retained native search. Docs first. Root native existing preview N/new exact NotSupported then guarded creation; root final cohort builds/analyzes/formats and executes exact original normal method plus Linux native/process/RF3 gates. Source is not qualification. Rollback removes only this additive held-reader oracle/doc append.

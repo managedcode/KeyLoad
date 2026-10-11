@@ -1,5 +1,7 @@
 # TestInfrastructure local image tooling
 
+- Owner correction 2026-10-11 requires native SIMD to remain enabled. The native selector rejects retired `unit-scalar` selections and inherited options that disable CPU intrinsics or SIMD before launching a runner. Preserve native TUnit50, every ordinary suite and authentic source/image receipts; no active disabled-intrinsics profile is permitted.
+
 - This slice owns only the explicitly selected local RF3 test-image producer and its bounded ownership receipts.
 - Never create Docker database nodes here; only the Aspire-owned RF3 child AppHost composes node resources.
 - Do not consume or synthesize GitHub source/run identities, registry manifests, qualification receipts, or benchmark evidence.

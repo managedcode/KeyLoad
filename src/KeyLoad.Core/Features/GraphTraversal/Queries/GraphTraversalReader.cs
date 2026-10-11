@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.GraphTraversal.Validation;
 using KeyLoad.Storage;
 using GraphTraversalResult = global::KeyLoad.GraphTraversal;
 
@@ -18,6 +19,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     private const string EdgeVisitExceeded = "The edge visit budget was exhausted.";
     private const string VertexVisitExceeded = "The vertex visit budget was exhausted.";
     private const string MissingEdge = "An adjacency record has no edge.";
+    private const string InvalidAdjacency = "An outgoing graph adjacency record is inconsistent.";
     private const string ResultExceeded = "The graph result byte budget is exceeded.";
     private readonly GraphVertexVisibility visibility = new(database, view, principal, budget);
     private readonly HashSet<EntityRef> visited = [];
@@ -37,7 +39,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         while (pending.TryDequeue(out var item))
         {
             budget.Check();
-            if (item.Depth >= maxDepth)
+            if (item.Depth >= maxDepth || item.Vertex.Partition != partition)
             {
                 continue;
             }
@@ -57,14 +59,15 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         var prefix = KeySpace.Partition(AdjacencySpace, partition, graph, OutDirection,
             item.Vertex.Collection, item.Vertex.Id);
         var remaining = Math.Min(maxEdges, maxEdges - examinedEdges + OverflowProbeRows);
-        var scan = budget.VisitRange(view, prefix, remaining, (_, value) => VisitEdge(value, item.Depth));
+        var scan = budget.VisitRange(view, prefix, remaining,
+            (key, value) => VisitEdge(key, value, item.Vertex, item.Depth));
         if (scan.HasMore)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
         }
     }
 
-    private bool VisitEdge(ReadOnlySpan<byte> value, int depth)
+    private bool VisitEdge(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, EntityRef source, int depth)
     {
         const int HopIncrement = 1;
 
@@ -72,9 +75,19 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
         }
-        var id = NativeSerialization.Deserialize<string>(value);
+        var id = NativeSerialization.Deserialize<string>(value)
+            ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, graph, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
+        budget.Check();
+        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        if (edge.Id != id || edge.From != source
+            || !key.SequenceEqual(KeySpace.Partition(AdjacencySpace, partition, graph,
+                OutDirection, source.Collection, source.Id, id)))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidAdjacency);
+        }
+        budget.Check();
         if (labelSet is not null && !labelSet.Contains(edge.Label))
         {
             return true;

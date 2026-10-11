@@ -108,6 +108,10 @@ internal sealed class ReplicaTermMetadataFailureTests
             sourceStore.CreateSnapshot(snapshotPath, AppliedCut);
             await Assert.That(fixture.Log.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);
             var beforeFault = fixture.Store.GetReadDiagnostics();
+            var originalIdentity = fixture.Store.Identity;
+            var originalPosition = fixture.Store.Position;
+            var originalState = fixture.Log.State;
+            var originalImage = await ReplicaPoisonedInstallColdAssertions.CaptureAsync(fixture.Store, 4);
             failInstall = true;
 
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.InstallSnapshot(snapshotPath, AppliedCut)).Code)
@@ -121,6 +125,8 @@ internal sealed class ReplicaTermMetadataFailureTests
             fixture.CloseStore();
             fixture.Store.Dispose();
             fixture.Store.Dispose();
+            await ReplicaPoisonedInstallColdAssertions.RunAsync(fixture.Configuration,
+                originalIdentity, originalPosition, originalState, originalImage);
         }, (stage, _, _) =>
         {
             if (failInstall && stage == failedStage)

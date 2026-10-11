@@ -1,5 +1,5 @@
 $script:FcNativeTestImages = [ordered]@{
-    ExpectedSuites = @('unit','unit-scalar','recovery','rf3')
+    ExpectedSuites = @('unit','recovery','rf3')
     Invalid = 'The original native test-image manifest is absent, changed or outside its suite binding.'
 }
 
@@ -51,7 +51,7 @@ function Add-FcNativeTestImageManifestFile([string] $Path, [object] $Read,
     $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($Read.bytes))
     try { Assert-FcNativeJsonUnique $json.RootElement }
     finally { $json.Dispose() }
-    $identity = if ($Entry.suite -cin @('unit','unit-scalar')) {
+    $identity = if ($Entry.suite -ceq 'unit') {
         Read-FcTestIdentityManifest $Path $Repository
     } else {
         Read-FcNativeTestIdentityManifest $Path $Repository ([string] $Entry.suite) $Bounds
@@ -68,12 +68,9 @@ function Add-FcNativeTestImageManifestFile([string] $Path, [object] $Read,
 }
 
 function Assert-FcNativeTestImageSuiteRelationships([Collections.Generic.Dictionary[string, object]] $BySuite) {
-    $unit = $BySuite['unit']; $scalar = $BySuite['unit-scalar']
-    if ($unit.path -cne $scalar.path -or $unit.sha256 -cne $scalar.sha256) {
-        throw $script:FcNativeMergeInput.InvalidSource
-    }
+    $unit = $BySuite['unit']
     foreach ($suite in @('recovery','rf3')) {
-        if ($BySuite[$suite].path -ceq $unit.path -or $BySuite[$suite].path -ceq $scalar.path) {
+        if ($BySuite[$suite].path -ceq $unit.path) {
             throw $script:FcNativeMergeInput.InvalidSource
         }
     }
@@ -83,7 +80,6 @@ function Assert-FcNativeTestImageSuiteRelationships([Collections.Generic.Diction
 
 $script:FcNativeTestImageProjects = [ordered]@{
     'unit' = [ordered]@{ project = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'; assembly = 'KeyLoad.UnitTests.dll' }
-    'unit-scalar' = [ordered]@{ project = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'; assembly = 'KeyLoad.UnitTests.dll' }
     'recovery' = [ordered]@{ project = 'tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj'; assembly = 'KeyLoad.RecoveryTests.dll' }
     'rf3' = [ordered]@{ project = 'tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj'; assembly = 'KeyLoad.IntegrationTests.dll' }
 }

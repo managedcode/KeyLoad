@@ -6,9 +6,6 @@ param(
     [string] $UnitCobertura,
     [string] $UnitTrx,
     [int] $UnitExitCode = -1,
-    [string] $ScalarCobertura,
-    [string] $ScalarTrx,
-    [int] $ScalarExitCode = -1,
     [string] $Filter
 )
 
@@ -50,7 +47,7 @@ try {
     }
     else {
         Invoke-FcVerify $paths.root $paths.evidence $paths.contract `
-            $UnitCobertura $UnitTrx $UnitExitCode $ScalarCobertura $ScalarTrx $ScalarExitCode $Filter
+            $UnitCobertura $UnitTrx $UnitExitCode $Filter
     }
 }
 catch [System.Exception] {

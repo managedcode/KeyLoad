@@ -2181,3 +2181,48 @@ full native image, original-mode cold reopen and exact receipt/outcome continuat
 does not add cases. Rebind only current source hash and actual native method ranges
 after the same coherent build/PE-PDB and original normal/scalar discovery. Preserve
 the initial strict metadata refusal and every other inventory identity and field.
+
+### TASK-CQ-CURRENT-TASK-HELPER-001
+
+REQ-CQ-039/040 and AC-CQ-039/040/042 require the current production source
+manifest to admit the actual scoped `task-acceptance.kl065-binding.ps1` helper in
+addition to the three existing exact task filenames. Add that one case-sensitive
+name to Test-FcTaskAcceptanceScriptName and to the independent literal oracle in
+ProductionSourceManifestScriptAssertions. Preserve rejection of every unknown
+task-acceptance prefix, original file/link/size/count/hash bounds and create-only
+source/PE/PDB/report receipts. The existing
+ProductionSourceManifestOperationTests.NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence
+whole operation must produce the real manifest, deny altered inputs, restore the
+original bytes and verify the healthy original manifest. Retain original Linux
+run38120509521/source6c008bb3865bdab69cabc04a52abc8842e696db9: both builds passed,
+then preparation rejected the unlisted helper before discovery; no KL035 runtime
+case executed. ADR-033/117 cover this inventory repair; root owns the joined
+scripts/oracle/docs and original delivered-source rerun. No Query-source roster
+regeneration, inventory bypass or task promotion is authorized by that failure.
+
+
+# TASK-CODEQUALITY-SIMD-NORMAL-ONLY-001
+
+Owner 2026-10-11 SIMD-always correction supersedes active forced-no-intrinsics qualification. Related REQ/AC-TUNIT-ENTRY-001, current functional coverage identity/threshold/confinement and original native product acceptance retain all complete operations.
+
+REQ-CQ-SIMD-PROFILE-001 requires a single current normal profile with native SIMD enabled, exact normal/full-group/recovery/RF3 source-bound inventories, and closed refusal of former scalar inputs without evidence replacement. AC-CQ-SIMD-PROFILE-001 maps to the existing complete ProductionSourceManifestOperationTests native operation, current CLI profile refusal controls, full native report/descriptor merge and delivered normal functional collection; all must preserve thresholds and genuine shutdown. ADR-117 owns this current profile schema/admission change; historical receipts are read only as immutable history, never by a current compatibility reader.
+
+Scope: private CodeQuality PS/JSON producers, descriptor/merge/profile/report/contributor/task validators, independent native C# whole-operation assertions. Exclude workflows, run-tests.mjs, runtime/kernel/startup, root-owned ProductionSourceManifestScriptAssertions and NativeTestSelectionProcess/NativeTUnitSelectionTests. Root solely composes shared contract joins.
+
+Current profile inventory becomes unit normal full census plus exactly five disjoint normal functional groups, recovery, all 11 RF3 contributors and unchanged required ordinary controls. Contributor registry is independently frozen 49 Unit +1 recovery +11 RF3 =61; remove only 49 scalar duplicates. Exact remaining operation identities/requirements/modules/state descriptions stay unchanged. The three real test images Unit/Recovery/Integration remain independently source/PDB/compile-receipt bound; redundant scalar Unit reference disappears.
+
+The current reviewed Unit inventory enrolls the 57 genuine additional native instances: four multipart blob integrity flows, 23 outgoing graph integrity/foreign-frontier flows, 20 retained queue lease-authority flows, eight raw sample integrity flows and two original replica journal read-admission/repair operations. It retires only the removed `unit-scalar` native argument control. Preserve every other original case, classification and class owner; keep zero exclusions and all five bounded canonical groups. Actual coherent R3 discovery contains 3383 native instances, mapped to 2960 functional cases and 423 required non-contributors using its original source spans and independent PE/PDB/source observation. This inventory enrollment is distinct from numeric coverage and complete task acceptance. Formatting or later source changes require fresh compiled-image observation and the unchanged strict native census before current-source qualification.
+
+Current descriptor unitCensus has exactly normal, run-status exactly one full normal +five groups, suiteRuns exactly five groups +recovery +RF3; unknown scalar keys/suites/status/profile reject before file acquisition under unchanged exact-key guards. Task Profile ValidateSet accepts normal only. Reject inherited disabled-intrinsics environment before launching current normal work, restore unchanged original environment in finally; do not manufacture historical profiles or accept scalar receipts through compatibility readers. Historical original evidence bytes/hashes remain untouched.
+
+All remaining report/TRX UID, source/PDB/image equality, maximumParallelTests50, create-only, file/byte/path/reparse/inventory/refusal/disposal/charged reads and 80/70/90/noDecrease/repeated-input gates remain unchanged. No successful coverage or task acceptance from source/discovery or partial SELECT.
+
+Whole regression: existing NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence performs native prepare/full literal inventory and compile identity checks, failed edited input unchanged, exact repair/healthy verify and create-only refusal. Deepen same operation with actual unsupported scalar contributor/image manifest refusal and unchanged exact repair; no property-only tests. Existing native report merge/repeated input/read confinement/process settlement/RF3 contributor controls remain in complete selected normal operation set. One complete owning batch compile/normal execution after all edits; root integrates then delivered Linux required. No new scalar runs. Rollback only this current normal-only schema admission change under owner direction; no legacy reader.
+
+### TASK-CQ-NATIVE-SIMD-COVERAGE-001 — current coverage suite admission
+
+The owner2026-10-11 normal-only SIMD decision also retires the removed ScalarUnitSuite arm in NativeCoverageSelection.IsFunctionalSuite. Keep unit/recovery/rf3 binary coverage admission, comparison refusal and all original coverage settings, report, threshold and source/image qualification contracts. Do not regenerate the rejected constant to silence CS0117. The complete source batch is reviewed once and then qualified with original current-image native reports; source admission alone is not coverage evidence.
+
+The 2026-10-11 current-source checkpoint passed the canonical full Release build with zero warnings/errors and no drift across 7344 source inputs. Fresh native discovery observed 3383 Unit and 394 Integration instances; the strict Unit census matched the reviewed inventory after independent PE/PDB/source verification. The complete 22 operations in the eight original classes containing the previous nine failures passed without skips, source/image/entry drift, or disabled intrinsics. Native TUnit admission remained 50; actual overlap for this selected batch was 16. Changed-file SDK format checks passed after all 62 original whitespace diagnostics were repaired through reviewed native patches.
+
+This checkpoint is local development evidence. The original failed runs remain separate; the later focused startup successes do not establish their cause. The final native Roslynk diagnostics invocation failed with an incomplete Streamable HTTP reply, so no clean native diagnostic result is claimed. Required Linux, full functional coverage, recovery, public RF3 and task-acceptance gates remain mandatory; no additional KL task is closed by this checkpoint.

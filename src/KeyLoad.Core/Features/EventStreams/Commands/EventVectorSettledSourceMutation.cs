@@ -2,12 +2,13 @@ namespace KeyLoad.Core;
 
 internal static class EventVectorSettledSourceMutation
 {
+    private const long EmptyPolicyEpoch = 0;
     private const string NonceFormat = "N";
     private const string Invalid = "The original settled event vector source mutation is inconsistent.";
 
     internal static EventVectorSourceMutation Create(EventVectorMap map, EventVectorEntry current,
         EventVectorEntry target, EventVectorSourcePhase settled, EventVectorSourcePhaseRole role,
-        DateTimeOffset originalParentExpiry, EventVectorAdmissionPolicy admission)
+        DateTimeOffset originalParentExpiry, long currentSourcePolicyEpoch, EventVectorAdmissionPolicy admission)
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(current);
@@ -26,13 +27,15 @@ internal static class EventVectorSettledSourceMutation
         var pin = result.Pin;
         if (pin.Position != current.Position || pin.CoverageGeneration != map.CoverageGeneration
             || pin.PrincipalId != map.PrincipalId || pin.ControlIncarnation != map.ControlIncarnation
-            || originalParentExpiry == default)
+            || originalParentExpiry == default || currentSourcePolicyEpoch <= EmptyPolicyEpoch
+            || role == EventVectorSourcePhaseRole.Advance && pin.SourcePolicyEpoch != currentSourcePolicyEpoch)
         { throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid); }
         var firstBody = settled.Role == EventVectorSourcePhaseRole.Pin
             ? settled.OriginalNativeBody : original.OriginalPinNativeBody;
         admission.RequireEncodedBytes(firstBody.Length);
         return original with
         {
+            SourcePolicyEpoch = currentSourcePolicyEpoch,
             Role = role,
             ExpectedPinRevision = pin.PinRevision,
             ExpectedCoverageGeneration = pin.CoverageGeneration,

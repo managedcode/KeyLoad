@@ -1,5 +1,5 @@
 $script:FcNativeFunctionalReport = [ordered]@{
-    Assemblies = [ordered]@{ unit = 'KeyLoad.UnitTests'; 'unit-scalar' = 'KeyLoad.UnitTests'; recovery = 'KeyLoad.RecoveryTests'; rf3 = 'KeyLoad.IntegrationTests' }
+    Assemblies = [ordered]@{ unit = 'KeyLoad.UnitTests'; recovery = 'KeyLoad.RecoveryTests'; rf3 = 'KeyLoad.IntegrationTests' }
     Rf3Fixture = 'KeyLoad.IntegrationTests.ClusterFixture'
     Rf3ClassAliases = [ordered]@{
         'KeyLoad.IntegrationTests.Features.QueryExecution|PartitionQueryPublicRf3Tests(ClusterFixture)' = 'KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests'

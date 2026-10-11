@@ -33,6 +33,7 @@ internal sealed class NativeAnnWaitRetirementTests
                     await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory)
                         .Where(row => Path.GetFileName(row.Path) == NativeAnnProtocol.IndexFile).ToArray())
                         .IsEquivalentTo(original, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+                    await NativeAnnRetiredReaderAssertions.AssertAsync(database, held, pin, receipt);
                     var image = NativeAnnMaintenanceTestData.Snapshot(database);
                     var cut = database.Store.Position;
                     var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => AnnPublicWholeFlow.Engine(database, runtime)

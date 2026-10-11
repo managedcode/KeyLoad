@@ -11,7 +11,7 @@ internal static class NativeChecksumProfileProcess
     private const string Dotnet = "dotnet";
     private const string Failed = "The current native checksum profile child failed.";
 
-    internal static async Task RunAsync(bool firstScalar, CancellationToken callerToken)
+    internal static async Task RunAsync(CancellationToken callerToken)
     {
         var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
         using var originalTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
@@ -20,14 +20,13 @@ internal static class NativeChecksumProfileProcess
         Exception? primary = null;
         try
         {
-            foreach (var (phase, scalar) in new[] { (NativeChecksumProfileProtocol.Seed, firstScalar),
-                (NativeChecksumProfileProtocol.FirstAppend, !firstScalar),
-                (NativeChecksumProfileProtocol.SecondAppend, firstScalar), (NativeChecksumProfileProtocol.Cold, !firstScalar) })
+            foreach (var phase in new[] { NativeChecksumProfileProtocol.Seed,
+                NativeChecksumProfileProtocol.FirstAppend, NativeChecksumProfileProtocol.SecondAppend,
+                NativeChecksumProfileProtocol.Cold })
             {
                 active = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
-                    NativeChecksumProfileProtocol.CompletionSignalPrefix + phase + ":"
-                        + (scalar ? NativeChecksumProfileProtocol.Disabled : NativeChecksumProfileProtocol.Enabled));
-                active.Start(Start(root, phase, scalar));
+                    NativeChecksumProfileProtocol.CompletionSignalPrefix + phase);
+                active.Start(Start(root, phase));
                 active.ThrowStartupFailure();
                 await active.WaitAndJoinAsync(timeout.Token);
                 if (active.ExitCode != NativeChecksumProfileProtocol.Success)
@@ -43,15 +42,11 @@ internal static class NativeChecksumProfileProcess
         await CommandIdempotencyProcessCleanup.CleanupActiveTrialAsync(root, active, primary);
     }
 
-    private static ProcessStartInfo Start(string root, string phase, bool scalar)
+    private static ProcessStartInfo Start(string root, string phase)
     {
         var start = new ProcessStartInfo(Dotnet) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var value in new[] { typeof(CrashHostMarker).Assembly.Location, NativeChecksumProfileProtocol.Mode, root, phase,
-            scalar ? NativeChecksumProfileProtocol.Disabled : NativeChecksumProfileProtocol.Enabled })
+        foreach (var value in new[] { typeof(CrashHostMarker).Assembly.Location, NativeChecksumProfileProtocol.Mode, root, phase })
         { start.ArgumentList.Add(value); }
-        var profile = scalar ? NativeChecksumProfileProtocol.Disabled : NativeChecksumProfileProtocol.Enabled;
-        start.Environment[NativeChecksumProfileProtocol.DotnetIntrinsics] = profile;
-        start.Environment[NativeChecksumProfileProtocol.ComPlusIntrinsics] = profile;
         return start;
     }
 }

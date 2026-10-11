@@ -126,3 +126,70 @@ flowchart LR
     Exact --> Fusion[Unchanged weighted fusion]
     Fusion --> Reply[Authorized complete result or typed failure]
 ```
+
+
+## TASK-FILTER-POLICY-COLD-001: retained policy refusal and same-root recovery
+
+REQ-FILTER-POLICY-COLD-001 refines REQ-FILTER-002/003: an empty output
+allowlist never bypasses persisted capability, field-use or revocation checks.
+AC-FILTER-POLICY-COLD-001 maps to the existing
+`FilteredSearchPolicyTests.EmptyAllowlistStillEnforcesPersistedCapabilitiesFieldUseAndRevocation`
+identity, without changing its arguments or original three precise denials.
+Capture the complete bounded canonical key/value inventory and commit position
+under the actual store read gate before refusal; verify exact unchanged bytes
+and position after each refusal. Repair the reader through the existing real
+ConfigurePrincipal operation, retain the separately revoked principal, and
+verify an independently literal complete eligible vector result.
+
+Join the original native owner before each of two same-root cold opens. Reuse
+its validated storage options and actual configured DatabaseEngine factory;
+require unchanged node/incarnation and complete canonical inventory. On each
+opened owner, the still-revoked principal must remain Unauthenticated, the
+repaired reader must return the literal authorized document/reference/revision,
+score, unredacted body, empty redaction fields and absent explanation, and
+queries must preserve every canonical byte and position. The oracle scan cap
+is test-local and must reject HasMore rather than accepting a partial image.
+
+Ownership: Unit Search/Cases/FilteredSearchPolicyTests and a uniquely named
+Search/Assertions/FilteredPolicyColdContinuation. No product code, fields,
+quotas, clocks, routing, projection generation or native authority changes.
+ADR-087 governs this stage; ADR-019 lifecycle and public F3 approximation/recall,
+process crashes and genuine SDK/MCP RF3 remain separate required gates.
+Root integrates exact guarded postimages, builds and executes the original
+normal native case plus existing filtered cases; fresh delivered-source Linux
+qualification remains mandatory. Private source/preview is not runtime proof.
+Rollback removes only this test continuation and its contract append; no stored
+format, public behavior, policy or original assertion changes.
+
+
+## TASK-FILTER-FALLBACK-ORACLE-001: independent full fallback after refusal
+
+REQ-FILTER-FALLBACK-ORACLE-001 refines REQ-FILTER-003/004: the exact fallback
+result after an exhausted adaptive traversal is compared with an independent
+exhaustive eligible ranking, never solely with an earlier executor return.
+AC-FILTER-FALLBACK-ORACLE-001 maps to the unchanged original
+`AdaptiveFilteredPlannerTests.AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch`.
+Keep its actual 100 bottom-ranked eligible records, real 10,000-record native
+seed, original index options, original budgets and N-1 typed BudgetExceeded.
+The original measured and subsequent healthy result must each equal the
+independent complete eligible order and every candidate ID, revision and score;
+retain mode/expansion/fallback/total distance and work assertions. Capture the
+original native position and complete authorized canonical vector model before
+querying and compare after refusal and healthy continuation. No query effect
+or incomplete exact result is accepted.
+
+Move only this complete existing method body into the feature-local
+Search/Helpers/AdaptiveFallbackWholeFlow so its caller remains the same native
+case and the existing test type is within the 200-line bound. Each helper method
+stays within64 lines. Reuse the independent AdaptiveFilteredPlannerOracle,
+actual persisted native root and current WithVectors loader; no dispatcher,
+provider, projection generation, public reply, quota or serialization changes.
+Computational index health is not durable ANN generation or process/RF3 proof.
+
+This packet depends explicitly on TASK-FILTER-POLICY-COLD-001 document
+postimages; root appends in that order. Root owns guarded join, fresh Release,
+format/analyzer, original normal native execution and delivered-source Linux
+qualification. Private preview is not runtime evidence. Existing recall/F3,
+public SDK/MCP and KL031 lifecycle gates remain mandatory. Rollback restores
+only the method extraction/oracle continuation and additive contracts, keeping
+all original cases and assertions.

@@ -124,7 +124,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    internal const int Count = 87;
+    internal const int Count = 88;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
@@ -186,6 +186,7 @@ internal static class McpCatalogExpectations
         ("keyload_tail_event_feed", "/v1/event-feeds/tail", null, OperationKind.EventFeedControl),
         ("keyload_open_event_feed", "/v1/event-feeds/open", null, OperationKind.EventFeedControl),
         ("keyload_offer_event_feed", "/v1/event-feeds/offer", null, OperationKind.EventFeedControl),
+        ("keyload_refresh_event_feed", "/v1/event-feeds/refresh", null, OperationKind.EventFeedControl),
         ("keyload_acknowledge_event_feed", "/v1/event-feeds/acknowledge", null, OperationKind.EventFeedControl),
         ("keyload_release_event_feed", "/v1/event-feeds/release", null, OperationKind.EventFeedControl),
         (SubscriptionsConfigure, SubscriptionsConfigureRoute, null, OperationKind.ConfigureSubscription),

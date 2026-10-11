@@ -104,7 +104,7 @@ public sealed partial class SearchEngine
         return SearchCapturedExecution.Complete(database, original, request, budget, similarity, eligibility);
     }
 
-    /// <summary>Computes the selected vector metric using the same SIMD and scalar grouping as search.</summary>
+    /// <summary>Computes the selected vector metric using the same native SIMD blocks and bounded scalar tails as search.</summary>
     /// <param name="left">Finite query vector.</param>
     /// <param name="right">Finite candidate vector.</param>
     /// <param name="metric">Typed distance metric.</param>

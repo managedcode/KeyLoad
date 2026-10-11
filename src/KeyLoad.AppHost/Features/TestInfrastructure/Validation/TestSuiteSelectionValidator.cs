@@ -59,7 +59,7 @@ internal static class TestSuiteSelectionValidator
         => suite switch
         {
             TestSuiteProtocol.AnalyzersSuite => TestSuiteProtocol.AnalyzerTestProjectName,
-            TestSuiteProtocol.UnitSuite or TestSuiteProtocol.ScalarUnitSuite => TestSuiteProtocol.UnitTestProjectName,
+            TestSuiteProtocol.UnitSuite => TestSuiteProtocol.UnitTestProjectName,
             TestSuiteProtocol.RecoverySuite => TestSuiteProtocol.RecoveryTestProjectName,
             TestSuiteProtocol.Rf3Suite => TestSuiteProtocol.IntegrationTestProjectName,
             TestSuiteProtocol.ComparisonSuite => TestSuiteProtocol.ComparisonTestProjectName,

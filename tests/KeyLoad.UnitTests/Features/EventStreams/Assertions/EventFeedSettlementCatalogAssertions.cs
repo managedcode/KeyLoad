@@ -19,6 +19,8 @@ internal static class EventFeedSettlementCatalogAssertions
     private const string AcknowledgeRoute = "/v1/event-feeds/acknowledge";
     private const string ReleaseName = "keyload_release_event_feed";
     private const string ReleaseRoute = "/v1/event-feeds/release";
+    private const string RefreshName = "keyload_refresh_event_feed";
+    private const string RefreshRoute = "/v1/event-feeds/refresh";
     private const string OriginalCursor = "original-signed-cursor";
     private const string OriginalOffer = "original-signed-offer";
 
@@ -26,6 +28,7 @@ internal static class EventFeedSettlementCatalogAssertions
     {
         await RequireOperationAsync(AcknowledgeName, AcknowledgeRoute, EventFeedControlAction.Acknowledge);
         await RequireOperationAsync(ReleaseName, ReleaseRoute, EventFeedControlAction.Release);
+        await RequireOperationAsync(RefreshName, RefreshRoute, EventFeedControlAction.Refresh);
     }
 
     private static async Task RequireOperationAsync(string name, string route, EventFeedControlAction action)

@@ -6,16 +6,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const defaultMaximumParallelTests = 50;
 const maximumParallelTests = 50;
 const comparisonParallelTests = 1;
+const nativeSimdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsic',
+  'DOTNET_EnableSIMD', 'COMPlus_EnableSIMD'];
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
 const heavyLoadFilter = '/*/*/HeavyDocumentLoadRf3Tests/*';
 const ordinaryRf3Filter = '/*/*/*/*[Category!=HeavyLoad]';
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
-  ['unit-scalar', 'KeyLoad.UnitTests'], ['recovery', 'KeyLoad.RecoveryTests'],
+  ['recovery', 'KeyLoad.RecoveryTests'],
   ['rf3', 'KeyLoad.IntegrationTests'], ['comparison', 'KeyLoad.ComparisonTests'], ['site', 'KeyLoad.SiteTests']
 ]);
 const localImageArgumentsEnvironment = 'KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS';
-const localImageFilters = new Set(['/*/*/EventFeedFirstOpenRf3Tests/ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold', '/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit', '/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts', '/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
+const localImageFilters = new Set(['/*/*/ResourcePolicyUpdateRf3Tests/AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossRf3', '/*/*/EventFeedFirstOpenRf3Tests/ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold', '/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit', '/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts', '/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay', '/*/*/EmptyReplicaSnapshotRf3Tests/*',
   '/*/*/QueueDeadlineAutonomousRf3Tests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck',
   '/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes',
   '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage',
@@ -38,6 +40,9 @@ const mapped = new Map([
 
 // Selection only: workloads and Aspire resource lifetimes belong to the C# TUnit tests.
 export function nativeSelection(input, inherited = process.env) {
+  if (nativeSimdOptions.some(key => inherited[key] !== undefined && inherited[key] !== '' && inherited[key] !== '1')) {
+    throw new Error('Native SIMD must remain enabled.');
+  }
   const values = new Map();
   const workload = [];
   for (const argument of input) {
@@ -95,7 +100,6 @@ export function nativeSelection(input, inherited = process.env) {
   const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore', '--configuration', 'Release',
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
-  if (suite === 'unit-scalar') environment.DOTNET_EnableHWIntrinsic = '0';
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['rf3', 'comparison'].includes(suite) ? 60 : 30)}m`);
   const preparation = [];
   for (const [key, value] of values) {

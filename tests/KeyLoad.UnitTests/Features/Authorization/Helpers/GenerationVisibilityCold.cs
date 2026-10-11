@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
@@ -10,7 +11,7 @@ internal static class GenerationVisibilityCold
     private const int EmptyCacheEntries = 0;
 
     internal static async Task RunAsync(TestDatabase db, CacheMemoryBudget memory, CommandRequest original,
-        byte[] originalOutcome, CommandRequest current, CommitReceipt receipt, byte[] currentOutcome, CancellationToken token)
+        byte[] originalOutcome, CommandRequest current, CommitReceipt receipt, byte[] currentOutcome, Func<DatabaseEngine, ZoneTreeStore, CancellationToken, Task> verifyWrites, CancellationToken token)
     {
         var identity = db.Store.Identity;
         var image = TeamRowPolicyAssertions.Image(db.Store);
@@ -37,6 +38,7 @@ internal static class GenerationVisibilityCold
                 var queries = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
                 await GenerationVisibilityAssertions.HealthyAsync(db, database, queries, cold,
                     TeamRowPolicyFlow.HealthyRevision, TeamRowPolicyFlow.HealthyJson, token);
+                await verifyWrites(database, cold, token);
                 await TeamRowPolicyAssertions.OldRefusedAsync(database, cold, original, originalOutcome, ErrorCode.PermissionDenied, token);
                 await TeamRowPolicyFlow.ReplayAsync(database, cold, current, receipt, currentOutcome, token);
                 await GenerationVisibilityAssertions.HealthyAsync(db, database, queries, cold,

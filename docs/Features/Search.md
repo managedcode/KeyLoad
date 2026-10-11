@@ -90,6 +90,71 @@ RF3/MCP public integration and measured server memory remain required join gates
 
 ## Portable SIMD validation qualification
 
+### Current mandatory SIMD contract — owner correction 2026-10-11
+
+The following current contract supersedes the hardware-disabled/full scalar
+execution and qualification instructions in the historical stages below. Their
+original source and report receipts remain historical evidence.
+
+REQ-SIMD-005: the normal product requires native hardware-accelerated .NET SIMD.
+Core owns `Features/Search/Validation/SimdRuntime.cs` and the shared public
+`KeyLoad.SimdRuntime.RequireHardwareSupport()` admission. The native
+`System.Numerics.Vector.IsHardwareAccelerated` predicate admits the supported
+CPU's actual .NET implementation; unsupported execution throws an explicit
+`PlatformNotSupportedException`. Server's existing ClientApi composition calls
+that admission before serialization initialization, configuration construction
+or node-local storage acquisition. Standalone similarity validates its original
+dimension bounds and then invokes the same admission before vector validation.
+Remove the complete scalar fallback and SIMD disable selections. Preserve native
+Vector finite blocks, Widen/Dot accumulation, bounded scalar tails, error order,
+authorization, read cuts, cancellation and the original metrics.
+
+AC-SIMD-005 maps REQ-SIMD-005 to the existing VectorMetricValidationTests,
+VectorMetricGoldenTests and CanonicalVectorPublicMetricTests whole operations:
+every native lane and tail keeps its original finite/error result; the three
+canonical metrics exercise a real complete native block plus a bounded tail,
+full authorized pages, cancellation without effects and healthy continuation.
+Native source review must also verify that Server calls the shared hardware
+admission before configuration/storage and that no complete scalar fallback
+remains. Unsupported hardware is rejected rather than advertised as supported;
+these operation results do not establish a speed improvement.
+
+REQ-SIMD-006: current execution and qualification expose one normal SIMD-enabled
+profile. Native test selection rejects `unit-scalar` and inherited hardware/SIMD
+disable requests before launching a runner. CI retains normal unit, process
+recovery, genuine Aspire RF3 SDK/MCP and every applicable functional coverage
+group/control with unchanged parallelism50, thresholds and evidence guards.
+
+AC-SIMD-006 maps REQ-SIMD-006 to the existing
+NativeTUnitSelectionTests.NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections
+whole selection operation and the actual production source-manifest,
+descriptor/coverage and task-acceptance operations. They must reject retired
+profile inputs, preserve original failed inputs/receipts, restore original bytes
+and admit the complete healthy normal operation. Original full Linux suites,
+source/PE/PDB/TRX binding, native RF3 cleanup and coverage80/70/critical90 remain
+required; retirement of duplicate profiles is not a passing coverage result.
+
+TASK-SIMD-MANDATORY-001 implements REQ-SIMD-005/006 and AC-SIMD-005/006 under
+ADR-035: the kernel owner supplies native admission/finite-block changes and
+existing whole-operation metric tests; the integration owner joins early Server
+admission, native selector, CI and documentation; CodeQuality owns the strict
+normal-only source/report/task validators and their complete operation tests.
+Review the combined batch before one coherent build/analysis/format and affected
+native TUnit run. Root owns final source binding, all-code commit/push and genuine
+Linux acceptance. Performance comparisons use equivalent competitor workloads
+and authenticated original previous-code baselines, with matching inputs,
+hardware, topology, resources and durability. No forced-no-SIMD profile, legacy
+reader, format migration or synthetic performance evidence is introduced.
+
+```mermaid
+flowchart LR
+    Start[Server or standalone similarity] --> Support[Native SIMD hardware admission]
+    Support -->|supported| Blocks[Native vector blocks and bounded tails]
+    Support -->|unsupported| Refuse[Explicit failure before storage startup]
+    Blocks --> Flow[Original bounded authorized operation]
+    Flow --> Evidence[Normal native tests and matched benchmarks]
+```
+
 On 2026-10-02 the owner explicitly mapped the earlier SMID wording to SIMD and
 directed .NET intrinsics first, Rust only after profiling. The existing Accepted
 ADR-035 TASK-MP-006D validation stage is now executed under
@@ -535,3 +600,66 @@ Implementation order and roles: freeze this Search/ADR009 contract, then Integra
 Replay Assertions/NativeTextRf3ReplayHistory captures full original public change-feed history before real original MCP replay and independently reads it afterwards. All DocumentChange bytes (original commit/time/reference/revision/deleted/before/after), ThroughSequence/Tail/FirstAvailable/HasMore remain identical; original complete receipt and literal document/vector/text results remain. Both actual signed cursors are independently consumed through the real public API and must yield no new change with unchanged complete history metadata. Cursor expiry/signature and local CutPosition legitimately differ per cut: require actual nonempty accepted cursor, monotonic local cut and unchanged actual physical owner, never fabricated stable RF3 Applied. Preserve no-link/stop/cold owners, identities, native old receipt, all case Arguments and every full literal oracle. Production is unchanged; no dispatcher/observer/timer/retry/default/limit/auth/serialization/alias/ID changes.
 
 Rollback restores only fixture oracles and removes purpose helpers. Root fresh exact-source Linux normal/scalar AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart and AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted remain required, plus unchanged four native maintenance Args and all native/refusal/recovery/full RF3 suites. Source-only checks do not establish runtime PASS or cause of the unlogged original Q1 differing field.
+
+
+# TASK-NATIVE-WAL-SIMD-NORMAL-ONLY-001
+
+Owner 2026-10-11 SIMD-always correction supersedes the active cross-profile directions of REQ/AC-NATIVE-WAL-PROFILE-001/002. REQ-NATIVE-WAL-NORMAL-001 requires native SIMD eligibility before opening this test-owned store and four original real processes in seed → first-append → second-append → cold order. AC-NATIVE-WAL-NORMAL-001 maps to NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses with zero parameters: retain the 257 exact native corpus rows, both acknowledged command/receipt/native outcome appends, original retry/conflicting-body refusal, complete persisted models/outbox, byte-exact cold cut and same-root identity. This is process recovery, not power-loss or performance qualification.
+
+The parent passes only existing mode/root/phase (three arguments), never writes DOTNET/COMPlus intrinsics environment or exposes a retired profile selector. The actual native Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported) guard remains before storage acquisition. Ambient unavailable/disabled native hardware cannot count as success. Remove only exclusively retired options/binding/validator and protocol profile flags/index. Old four-argument shapes fail the unchanged strict argument-count refusal; no compatibility reader, migration or new authority. Capability output remains actual bounded native facts; completion is phase-only and emitted after genuine native store close and failure ledger settlement.
+
+Keep the original StorageTrialLease, 90-second original execution/30-second cleanup owners, bounded pipe readers, original initiating/fatal/cleanup exceptions, exact phase order/child count, each real process/task/handle join and original deadline/cancellation. Keep every independent corpus byte (including historically named scalar-append data), command ID, generated alias/field ID and complete receipt/effect/outcome/cut check. CrashHostApplication continues the same existing TryRun dispatch; no other mode or feature changes. ZoneTree issue182 and historical profile receipts remain immutable history; the existing genuine native checksums/dependency ownership are untouched.
+
+Ownership: existing Recovery StorageRecovery Cases/Processes; CrashHost StorageRecovery Protocol/Scenario and deletion of exclusively retired Configuration/Options+Binding. Append this superseding contract to StorageRecovery.md, Search.md and ADR035 before source. Root alone composes docs/current selectors, native full solution build/format/discovery and actual normal complete process execution. Audit task/contributor inventories for the renamed zero-argument method; do not create native UID or change strict counts before fresh original compiled census. No private broad build, new Docker, kernel/Server/Storage/Blob/Messaging/Graph/workflow/selector changes. Rollback is only the coherent current test/protocol admission tranche under owner direction; never restore active forced-scalar execution by silently accepting old arguments.
+
+
+## KL067 complete classification-lineage refusal and cold oracle
+
+TASK-KL067-CLASSIFICATION-WHOLE-001 maps REQ-SEARCH-003/005 and REQ-AUTH-009 to AC-SEARCH-003/005 and AC-AUTH-009, under ADR-015 and the existing AC-LINEAGE-002/003. Native source already checks current source field-use, row visibility, classifications and revision; this stage changes no product authority or projection format. The existing AcLineage002RevokedReaderCannotSearchDerivedVectors case is extended instead of adding a duplicate test.
+
+REQ-SEARCH-LINEAGE-WHOLE-001: a genuine persisted vector effect and actual native ZoneTree.FullTextSearch generation must preserve classified-result omission across current reader revocation, explicit persisted repair and same-root cold reopen. AC-SEARCH-LINEAGE-WHOLE-001: warm vector and native text calls return an independently reconstructed complete RankedDocument (reference, revision, empty redacted JSON, ordered input/vector omissions, exact rank score, null explanation); both revoked calls return Unauthenticated with unchanged complete canonical image and position. A real ConfigurePrincipal operation repairs the reader; fresh healthy calls return the same literals. Dispose the original native provider before native canonical reopen, then reconstruct the provider on its same owned path and verify complete literals, retained vector/lineage bytes and the original effect receipt.
+
+Owned source: UnitTests Search/Cases/EventProjectionPolicyTests.cs and Search/Helpers/ClassificationLineageWholeFlow.cs plus ClassificationLineageWholeAssertions.cs. Product SearchEngine/PreparedSimilarity/SIMD, other search cases, shared fixtures, public DTOs/aliases/IDs and all limits/deadlines remain unchanged. This is a genuine real-store/native-provider Unit gate, not RF3/process-kill/coverage evidence. Existing EventProjectionRf3Tests, lineage process cases and ANN lineage lifecycle/replay gates remain required and open until authenticated current-source execution. Root owns coherent build/analysis/format and normal native50 execution of /*/*/EventProjectionPolicyTests/AcLineage002RevokedReaderCannotSearchDerivedVectors. No scalar profile or migration is introduced.
+
+
+### KL067 genuine corrupt-lineage repair continuation
+
+TASK-KL067-CLASSIFICATION-CORRUPTION-002 extends the SAME AcLineage002MalformedPersistedLineageFailsClosedInsteadOfLeakingTheVector, under REQ/AC-SEARCH-LINEAGE-WHOLE-001 and AC-LINEAGE-002/003. Preserve its genuine native fault of SourceEventRevision=0 and exact Corruption. Verify the actual injected encoded row is the only changed canonical row and its owning storage commit advances position once. The failed search must preserve every damaged raw row and that position. Restore ONLY exact captured original lineage bytes through the same native commit owner; all original canonical rows return, with a second measured position increment (not a fabricated apply receipt/cut). Reopen the same canonical root, verify complete18-field lineage/vector and native text/vector literals from READY5, then replay SAME original CommandId with stable effect receipt and no new raw rows/cut. This is fixture fault/read repair, not a product recovery API, admitted failed-write outcome or power-loss proof.
+
+
+### TASK-KL067-CLASSIFICATION-RF3-ORACLE-003 — complete independent caller payload
+
+REQ-SEARCH-LINEAGE-RF3-ORACLE-003 / AC-SEARCH-LINEAGE-RF3-ORACLE-003 strengthens the existing AC-LINEAGE-001..003 SDK/official MCP operations: each result must independently match the complete original literal reference (partition, collection, ID), revision1, derived/baseline JSON, redacted=true, ordered `/input` and `/embedding` omissions, unchanged expected rank-fusion score and absent explanation. Caller agreement alone is insufficient. The exact existing scenario seeds and policy grants determine these literals; no result is adopted as expectation.
+
+Implementation owner: IntegrationTests Search/Assertions/EventProjectionRf3Assertions.cs only. Existing EventProjectionRf3Tests retain all original command IDs, receipts, changed-payload conflict, stale input/reclassification refusal and baseline-only results; EventProjectionRf3LeaderLoss retains original kill, receipt replay, restart and all-node checks. Both SDK and MCP are compared against the independently constructed full DTO. Unknown expected document IDs fail closed. No product schema, alias/ID, authority, deadline, retry, resource bound or topology changes.
+
+Ordered dependency: CLASSIFICATION-WHOLE-001 READY5, CLASSIFICATION-CORRUPTION-002, then this additive oracle successor; preserve every earlier doc appendage. Rollback removes only this assertion refinement. Runtime gates remain exact-source Linux Aspire RF3 for all three original EventProjectionRf3Tests methods, including leader-loss/restart. Source review/native preview alone does not qualify or close KL-067.
+
+### TASK-SEARCH-NATIVE-ORACLE-COMPILATION-001 — preserve whole-operation metric and adaptive flows
+
+CanonicalVectorPublicMetricTests retains all three real native metrics, hardware-vector block plus tail dimensions, independent literal ordering/scores and cancellation/no-effect/healthy continuation. Its coordinate fixture returns the existing ImmutableArray<float> representation required by PutVector and SearchRequest; generating alternate public constructors is prohibited. AdaptiveFilteredPlannerTests keeps the complete existing budget-refusal and healthy operation in its extracted full-flow helper; remove only the unused former private assertion with the native IDE0051 action. Actual integrated compiler/native reports and RF3/Linux qualification remain required.
+
+
+## TASK-KL066-PROJECTION-ORIGINAL-POLICY-004
+
+REQ/AC-AUTH007/008/009, REQ/AC-SEARCH-LINEAGE-WHOLE-001 and original AC-LINEAGE-003 require current persisted worker policy before disclosing a cached projection outcome. Extend SAME original EventProjectionReplayTests.AcLineage003NativeReopenPreservesEffectLineageAndStableReceipt after every original assertion. Capture its genuine original CommandId before first Apply. Real ConfigureWorker revocation makes that exact original success retry Unauthenticated without altering the full native row image or cut. Persisted repair advances the policy epoch: original success remains PermissionDenied under existing ValidateCachedResult, never rewritten or disclosed as current authority. Healthy continuation MUST use a genuinely NEW ID at the repaired epoch. Existing canonical effect reuse preserves the original full mutation receipt/vector/18-field lineage; its genuine new outcome/clock is not misreported as globally no-effect.
+
+After actual new-ID settlement, same-ID replay must retain full receipt and exact complete raw rows/cut. Real native text and vector reads independently match complete redacted literals through the prior CLASSIFICATION-WHOLE-001 helper. Dispose/join the original provider before genuine same-root Harness.Reopen; check actual NodeId/incarnation/nondecreasing ReadGeneration, complete canonical rows/cut, old-ID PermissionDenied, current new-ID full receipt/no-effect replay, exact original lineage/vector and full fresh native text/vector result. Original constructor/fixture disposal and failures remain; provider directly disposes on success and preserves initiating plus cleanup errors on refusal.
+
+Owner paths: Unit/Search/Cases/EventProjectionReplayTests.cs and new Helpers/ProjectionOriginalPolicyContinuation.cs; Search feature and ADR022 append only. Dependencies READY5→corruption4→RF3oracle3 docs; exact native ApplyCommittedCommand/ExecuteAndBuildOutcome/ReplayCommand/ValidateCachedResult/PersistCommandOutcome implement the unchanged product contract. No new API, token, aliases/Ids, stored format, grants, quota, clock, cancellation/deadline, retry or policy relaxation. Rollback removes only this test-owned continuation and original-ID capture, preserving all original assertions. Required unchanged native normal-SIMD50 selector /*/*/EventProjectionReplayTests/AcLineage003NativeReopenPreservesEffectLineageAndStableReceipt and full Linux gates remain OPEN; private native preview/source is not execution/PASS or completed KL066/067.
+
+
+## TASK-KL067-CLASSIFICATION-REPAIR-COLD-005
+
+REQ/AC-AUTH006/007/008/009, AC-LINEAGE001..003 and original weaker-target refusal require a complete original classification repair operation. SAME EventProjectionInputTests.AcLineage002RejectsAWeakerTargetClassificationAtomically retains every original PermissionDenied/vector-null/lineage-null assertion; capture its actual first failed CommandId through the exact unchanged Harness.Submit→Database.Apply→Get<CommitReceipt> path. First definitive failure genuinely persists an outcome/clock, so do not claim unchanged global rows/cut for that first admitted command. Subsequent SAME failed-ID replay, including after repair, must preserve complete raw rows/cut and PermissionDenied rather than rewrite it as success.
+
+Actual root ConfigureResource CAS schema1→2 repairs ONLY original /embedding Classification from projection-public to projection-sensitive; all other resource identity/policies/grants remain. Independent complete persisted replacement is checked. A genuinely NEW worker command creates its first actual canonical projection with full literal mutation receipt, vector [1,0]/space/revision1 and all18 lineage fields, including actual source+target schema2 and original worker epoch1. Real native text and vector independently return full redacted target literals through READY5. No grants/epoch/cursor/generation are forged or relaxed.
+
+Join original provider before same-root reopen, check actual NodeId/incarnation/nondecreasing ReadGeneration and complete native rows/cut. Cold retains exact vector/lineage bytes, all18 schema2 facts, old failed-ID PermissionDenied and new successful-ID exact receipt/no-effect replay; fresh text/vector healthy reads leave full rows/cut unchanged. Owners: existing Unit/Search/Cases/EventProjectionInputTests.cs + new Helpers/ProjectionClassificationRepairFlow.cs; feature/ADR015 append only. Dependency original READY5→corruption4→RF3oracle3→original-policy4 doc chain (ADR015 exact R3 postimage). Existing native transaction/outcome/history/authorization/format/aliases/Ids/limits/deadlines remain unchanged. Rollback removes only continuation/original failed-ID capture, preserving original assertions and immutable reports. Required unchanged original normal native-SIMD50 selector /*/*/EventProjectionInputTests/AcLineage002RejectsAWeakerTargetClassificationAtomically and full exact-source Linux gates remain OPEN; source/preview is not PASS.
+
+
+### TASK-KL066-067-NATIVE-RECEIPT-EPOCH-010
+
+REQ/AC-SEARCH-LINEAGE-WHOLE-001 and AC-LINEAGE-002/003 require the existing original warm/replay/cold flows to compare all native MutationReceipt values: Kind, Resource, Id, Revision and ordered CompositionReferences. Generated record equality includes ImmutableArray backing identity and does not prove decoded semantic equality. Retain every complete raw-row/cut and captured vector/lineage byte assertion. No persisted format, alias, field ID or product equality contract changes.
+
+The existing FilteredPolicy cold continuation must genuinely ConfigurePrincipal with checked current persisted PolicyEpoch plus one, read from its owning native store; a new principal begins at the existing initial epoch. Retain original grants/revocation, ordered command/outcome, complete healthy literals and both same-root cold passes. No policy bypass, clock/limit/deadline changes or fabricated authority. Existing mapped native SIMD50 operations and required exact-source Linux/RF3 gates remain mandatory; source and compiler receipts are not operation PASS.

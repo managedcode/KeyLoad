@@ -6,6 +6,7 @@ internal static class McpEventFeedDescriptions
     {
         EventFeedOpenProtocol.Tool => EventFeedOpenProtocol.Description,
         EventFeedOfferProtocol.Tool => EventFeedOfferProtocol.Description,
+        EventFeedRefreshProtocol.Tool => EventFeedRefreshProtocol.Description,
         EventFeedSettlementProtocol.AcknowledgeTool => EventFeedSettlementProtocol.AcknowledgeDescription,
         EventFeedSettlementProtocol.ReleaseTool => EventFeedSettlementProtocol.ReleaseDescription,
         _ => null

@@ -67,9 +67,10 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }
+        SimdRuntime.RequireHardwareSupport();
         var index = FirstElementIndex;
         var infinity = new Vector<float>(float.PositiveInfinity);
-        for (; Vector.IsHardwareAccelerated && index + Vector<float>.Count <= values.Length; index += Vector<float>.Count)
+        for (; index + Vector<float>.Count <= values.Length; index += Vector<float>.Count)
         {
             var block = new Vector<float>(values[index..]);
             if (!Vector.LessThanAll(Vector.Abs(block), infinity))

@@ -23,6 +23,8 @@ internal static class EventStreamApi
             EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Open));
         app.MapPost(EventFeedOfferProtocol.Route, (EventFeedControlRequest request, HttpContext context) =>
             EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Offer));
+        app.MapPost(EventFeedRefreshProtocol.Route, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Refresh));
         app.MapPost(EventFeedSettlementProtocol.AcknowledgeRoute, (EventFeedControlRequest request, HttpContext context) =>
             EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Acknowledge));
         app.MapPost(EventFeedSettlementProtocol.ReleaseRoute, (EventFeedControlRequest request, HttpContext context) =>

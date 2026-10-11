@@ -39,6 +39,12 @@ internal sealed class PartitionRecordCancellationTests
             .IsEqualTo(outcome.ExaminedBytesBeyondBaseline);
         await PartitionRecordCancellationStateAssertions.VerifyHealthyAsync(fixture.Store, Partition, Family,
             rows, position, MaximumPageBytes);
+        for (var cold = 0; cold < 2; cold++)
+        {
+            fixture.Reopen();
+            await PartitionRecordCancellationStateAssertions.VerifyHealthyAsync(fixture.Store, Partition, Family,
+                rows, position, MaximumPageBytes);
+        }
     }
 
     [Test]

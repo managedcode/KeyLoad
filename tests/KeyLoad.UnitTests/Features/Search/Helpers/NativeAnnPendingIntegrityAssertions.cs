@@ -8,8 +8,10 @@ internal static class NativeAnnPendingIntegrityAssertions
 {
     private const int Count = 3;
 
-    internal static Task RejectAsync(TestDatabase database, AnnMaintenanceRequest request)
-        => WithOwnerAsync(database, async runtime =>
+    internal static async Task RejectAsync(TestDatabase database, AnnMaintenanceRequest request)
+    {
+        var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+        await WithOwnerAsync(database, async runtime =>
         {
             var before = NativeAnnMaintenanceTestData.Snapshot(database);
             var position = database.Store.Position;
@@ -21,6 +23,9 @@ internal static class NativeAnnPendingIntegrityAssertions
             await Assert.That(NativeAnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(before, CollectionOrdering.Matching);
             await Assert.That(database.Store.Position).IsEqualTo(position);
         });
+        await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
+            .IsEquivalentTo(files, CollectionOrdering.Matching);
+    }
 
     internal static async Task ResumeAsync(TestDatabase database, AnnMaintenanceRequest request, long upper)
     {

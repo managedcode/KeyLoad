@@ -13,8 +13,12 @@ internal static class EventFeedTailRf3Refusal
     private const string Tool = "keyload_tail_event_feed";
     private const string Invalid = "The original refused Tail frame is not a typed failure.";
 
-    internal static async Task RunAsync(TwoRf3MembershipWave wave, string credential,
+    internal static Task RunAsync(TwoRf3MembershipWave wave, string credential,
         EventFeedControlRequest offered, EventFeedControlResult original, CancellationToken token)
+        => RunAsync(wave, credential, offered, original, ErrorCode.PermissionDenied, token);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave, string credential,
+        EventFeedControlRequest offered, EventFeedControlResult original, ErrorCode expected, CancellationToken token)
     {
         var request = EventFeedTailRf3Flow.Request(offered, original);
         var policy = new CqrsStreamClientOptions { MaximumStreamBytes = new DatabaseLimits().MaxQueryReadBytes };
@@ -26,8 +30,8 @@ internal static class EventFeedTailRf3Refusal
             await Assert.That(frame.Kind).IsEqualTo(CqrsStreamChunkKind.Failed);
             if (frame.Final is not { IsSuccess: false, Problem: { } problem })
             { throw new InvalidOperationException(Invalid); }
-            await Assert.That(problem.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-            await Assert.That(problem.StatusCode).IsEqualTo(Errors.Status(ErrorCode.PermissionDenied));
+            await Assert.That(problem.ErrorCode).IsEqualTo(expected.ToString());
+            await Assert.That(problem.StatusCode).IsEqualTo(Errors.Status(expected));
             await Assert.That(frame.ProgressResult.HasValue).IsFalse();
             ++failures;
         }
@@ -41,7 +45,7 @@ internal static class EventFeedTailRf3Refusal
                 [McpCallerProtocol.ToolId] = Tool,
                 [McpCallerProtocol.Arguments] = McpOfficialClient.Arguments(request with { CommandId = Guid.NewGuid() })
             }, progress: progress, cancellationToken: token).ConfigureAwait(false);
-        await McpCallerAssertions.ErrorAsync(terminal, ErrorCode.PermissionDenied, dispatched: true);
+        await McpCallerAssertions.ErrorAsync(terminal, expected, dispatched: true);
         await progress.RequireAbsentAsync();
     }
 }

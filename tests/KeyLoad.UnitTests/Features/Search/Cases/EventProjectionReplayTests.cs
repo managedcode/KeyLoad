@@ -36,7 +36,8 @@ internal sealed class EventProjectionReplayTests
     {
         using var fixture = new EventProjectionFixture();
         var request = fixture.Request();
-        var receipt = fixture.Apply(request);
+        var originalCommandId = Guid.NewGuid();
+        var receipt = fixture.Apply(request, originalCommandId);
         var persistedVector = fixture.VectorBytes()!;
         fixture.Harness.Reopen();
 
@@ -50,6 +51,8 @@ internal sealed class EventProjectionReplayTests
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(persistedVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);
+        await ProjectionOriginalPolicyContinuation.RunAsync(fixture, request, originalCommandId,
+            receipt, persistedVector);
     }
 
     [Test]

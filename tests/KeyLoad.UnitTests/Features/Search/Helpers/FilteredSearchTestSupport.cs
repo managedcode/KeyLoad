@@ -14,6 +14,8 @@ internal static class FilteredSearchTestSupport
     internal const string PartitionKey = "customer-1";
     internal const int Dimension = 2;
     internal const int Revision = 1;
+    private const long AbsentPrincipalEpoch = 0;
+    private const long PolicyEpochAdvance = 1;
     internal const int FusionConstant = 13;
     internal const double Tolerance = 0.0000000000005;
     internal static VectorSpace Space { get; } = new("filtered-space", Dimension, DistanceMetric.Cosine, Model, Version);
@@ -67,6 +69,9 @@ internal static class FilteredSearchTestSupport
             [.. fieldGrants])
         {
             OwnerId = owner,
+            PolicyEpoch = database.Store.Read(view => checked(
+                (global::KeyLoad.Storage.StorageRecords.GetRecord<PrincipalRecord>(view, global::KeyLoad.Core.KeySpace.Principal(id))?.PolicyEpoch
+                    ?? AbsentPrincipalEpoch) + PolicyEpochAdvance)),
             RestrictRows = restrictRows,
             Revoked = revoked
         };

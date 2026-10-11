@@ -1,5 +1,10 @@
 # GitHub Actions workflows
 
+## Mandatory SIMD execution, owner correction 2026-10-11
+
+- SIMD is always enabled in the product. This explicit correction supersedes active `unit-scalar`, disabled-intrinsics and normal/scalar matrix requirements above. Execute every ordinary unit, process-recovery, RF3, coverage and benchmark contract through its normal native SIMD image; retain actual original historical reports without relabelling or reusing them as current qualification.
+- Preserve the complete functional case inventory, native TUnit50, five confined coverage groups, 80/70/90 thresholds, source/PE/PDB/TRX provenance, real Aspire topology, authentication and cleanup. Performance comparisons use matched competitor workloads and original previous-code measurements, never a current product SIMD-disable switch.
+
 ## Build and Tests scope, owner correction 2026-10-06
 
 - Build and Tests executes only solution builds, repository checks and KeyLoad functional tests. Benchmark/comparison cases and their progress, entry, counter and image-preparation checks belong exclusively to Benchmarks. Keep benchmark contracts in KeyLoad.ComparisonTests, not KeyLoad.UnitTests; retain their assertions and execution in Benchmarks. RF3 functional qualification builds only the KeyLoad server image, never a benchmark load-generator image. This explicit owner correction supersedes earlier benchmark-correctness placement in ordinary CI.

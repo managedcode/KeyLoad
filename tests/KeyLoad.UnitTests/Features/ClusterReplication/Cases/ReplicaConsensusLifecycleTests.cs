@@ -78,7 +78,6 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     private const string VoterC = "c";
     private readonly string directory;
     private readonly ZoneTreeStore canonical;
-    private readonly ZoneTreeStore replica;
 
     internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null,
         Action<CommitStage, long, int>? canonicalObserver = null)
@@ -90,8 +89,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
             Configuration = Configuration with { MaxAppendEntries = maximum };
         }
         canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation, FaultObserver = canonicalObserver }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Log = new(replica, ReplicaExecutionTestOptions.Configuration(Configuration));
+        ReplicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        Log = new(ReplicaStore, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
         var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
@@ -101,6 +100,7 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     }
 
     internal ReplicaConfiguration Configuration { get; }
+    internal ZoneTreeStore ReplicaStore { get; }
     internal DurableReplicaLog Log { get; }
     internal DatabaseEngine Database { get; }
     internal ReplicaMaterializer Materializer { get; }
@@ -125,7 +125,7 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
             finally
             {
                 Log.Dispose();
-                replica.Dispose();
+                ReplicaStore.Dispose();
                 canonical.Dispose();
                 Directory.Delete(directory, true);
             }

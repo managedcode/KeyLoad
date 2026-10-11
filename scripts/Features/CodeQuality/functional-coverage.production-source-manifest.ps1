@@ -291,7 +291,6 @@ function Get-PsmManifest([string] $Root, [object[]] $ScriptInventory) {
         compiledProducts = $products
         compiledTestsManifest = @(
             [ordered]@{ suite = 'unit'; fileName = 'functional-coverage.test-image.unit.json'; sha256 = $references[0].sha256 },
-            [ordered]@{ suite = 'unit-scalar'; fileName = 'functional-coverage.test-image.unit.json'; sha256 = $references[0].sha256 },
             [ordered]@{ suite = 'recovery'; fileName = 'functional-coverage.test-image.recovery.json'; sha256 = $references[1].sha256 },
             [ordered]@{ suite = 'rf3'; fileName = 'functional-coverage.test-image.rf3.json'; sha256 = $references[2].sha256 }
         )

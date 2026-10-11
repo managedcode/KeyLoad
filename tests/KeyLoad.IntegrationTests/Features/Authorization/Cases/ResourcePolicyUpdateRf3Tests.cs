@@ -12,38 +12,77 @@ internal sealed class ResourcePolicyUpdateRf3Tests(ClusterFixture fixture)
     public async Task AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossRf3()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await ResourcePolicyUpdateRf3Scenario.CreateAsync(fixture, deadline.Token);
+        var state = await WarmAsync(deadline.Token);
+        await PolicyEpochPublicCold.RunAsync(fixture, state, deadline.Token);
+    }
+
+    private async Task<PolicyEpochPublicState> WarmAsync(CancellationToken token)
+    {
+        var scenario = await ResourcePolicyUpdateRf3Scenario.CreateAsync(fixture, token);
         await Assert.That(scenario.InitialDefinition.SchemaVersion)
             .IsEqualTo(ResourcePolicyUpdateRf3Protocol.InitialSchemaVersion);
-        await using var administratorMcp = await McpOfficialClient.ConnectAsync(fixture,
-            McpCallerProtocol.Node1, fixture.AdminKey, deadline.Token);
-        await using var readerMcp = await McpOfficialClient.ConnectAsync(fixture,
-            McpCallerProtocol.Node3, scenario.Reader.Secret, deadline.Token);
-        using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await VerifyInitialAccessAsync(fixture, readerMcp, scenario, deadline.Token);
-        var cursors = await CaptureCursorsAsync(admin, administratorMcp, scenario, deadline.Token);
+        var failures = new List<Exception>();
+        PolicyEpochPublicState? result = null;
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var administratorMcp = await McpOfficialClient.ConnectAsync(fixture,
+                McpCallerProtocol.Node1, fixture.AdminKey, token);
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await using var readerMcp = await McpOfficialClient.ConnectAsync(fixture,
+                    McpCallerProtocol.Node3, scenario.Reader.Secret, token);
+                await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                    result = await WarmHttpAsync(administratorMcp, readerMcp, scenario, token), failures);
+            }, failures);
+        }, failures);
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+        return result!;
+    }
+
+    private async Task<PolicyEpochPublicState> WarmHttpAsync(McpOfficialClient administratorMcp,
+        McpOfficialClient readerMcp, ResourcePolicyUpdateRf3Scenario scenario, CancellationToken token)
+    {
+        var failures = new List<Exception>();
+        PolicyEpochPublicState? result = null;
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+            var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                result = await WarmCallsAsync(admin, administratorMcp, readerMcp, scenario, token), failures);
+        }, failures);
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+        return result!;
+    }
+
+    private async Task<PolicyEpochPublicState> WarmCallsAsync(KeyLoadClient admin,
+        McpOfficialClient administratorMcp, McpOfficialClient readerMcp,
+        ResourcePolicyUpdateRf3Scenario scenario, CancellationToken token)
+    {
+        await VerifyInitialAccessAsync(fixture, readerMcp, scenario, token);
+        var cursors = await CaptureCursorsAsync(admin, administratorMcp, scenario, token);
         var versionTwo = await UpdateThroughMcpAsync(administratorMcp, scenario,
             ResourcePolicyUpdateRf3Protocol.ReadGrantV2, ResourcePolicyUpdateRf3Protocol.UseGrantV2,
-            ResourcePolicyUpdateRf3Protocol.InitialSchemaVersion, deadline.Token);
+            ResourcePolicyUpdateRf3Protocol.InitialSchemaVersion, token);
         await VerifyPolicyAckAsync(fixture, admin, administratorMcp, readerMcp, scenario, versionTwo,
-            cursors, deadline.Token);
-        await VerifyStaleAndUnauthorizedWritesAsync(fixture, admin, scenario, deadline.Token);
+            cursors, token);
+        await VerifyStaleAndUnauthorizedWritesAsync(fixture, admin, scenario, token);
         scenario = scenario with
         {
             Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateRf3Protocol.ReadGrantV2, ResourcePolicyUpdateRf3Protocol.UseGrantV2], deadline.Token)
+            [ResourcePolicyUpdateRf3Protocol.ReadGrantV2, ResourcePolicyUpdateRf3Protocol.UseGrantV2], token)
         };
         await ResourcePolicyUpdateRf3Assertions.AssertPolicyAllowedAsync(fixture, scenario,
-            scenario.Reader, readerMcp, deadline.Token);
-        await VerifySdkRetryCannotRestoreOldPolicyAsync(fixture, admin, scenario, versionTwo, deadline.Token);
+            scenario.Reader, readerMcp, token);
+        await VerifySdkRetryCannotRestoreOldPolicyAsync(fixture, admin, scenario, versionTwo, token);
         scenario = scenario with
         {
             Reader = await ResourcePolicyUpdateRf3Scenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateRf3Protocol.ReadGrantV4, ResourcePolicyUpdateRf3Protocol.UseGrantV4], deadline.Token)
+            [ResourcePolicyUpdateRf3Protocol.ReadGrantV4, ResourcePolicyUpdateRf3Protocol.UseGrantV4], token)
         };
         await ResourcePolicyUpdateRf3Assertions.AssertPolicyAllowedAsync(fixture, scenario,
-            scenario.Reader, readerMcp, deadline.Token);
+            scenario.Reader, readerMcp, token);
+        return await PolicyEpochPublicContinuation.RunAsync(fixture, admin, scenario, token);
     }
 
     private static async Task VerifyInitialAccessAsync(ClusterFixture fixture, McpOfficialClient readerMcp,

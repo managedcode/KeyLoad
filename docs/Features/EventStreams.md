@@ -594,3 +594,113 @@ Canonical formatting exposed KLD0032 in EventVectorParentCommit.Write. Extract o
 ### Current native Tail JSON admission contributor enrollment
 
 Under ADR117 and REQ/AC-EVENTS-TAIL-TRANSPORT-001, enroll the three actual `EventFeedTailJsonAdmissionTests` native instances: a genuine native producer settles before typed quota refusal and healthy continuation; an insufficient terminal grant refuses before producer execution then an adequate grant is healthy; original caller cancellation joins the producer without a quota frame then healthy work continues. These are complete native CQRS transport operations. Preserve all original functional and required noncontributor identities and all five canonical groups, use actual native source spans and independent compiled PE/PDB/source binding, and run the unchanged strict census validator. Supporting JSON admission evidence does not close actual SDK/official MCP RF3, Linux or numerical coverage gates.
+
+## TASK-KL084-LOCAL-PROFILE-NEGATIVE-002
+
+REQ-EVENTS-FIRST-OPEN-ORDERED-001 / AC-EVENTS-FIRST-OPEN-ORDERED-001, TASK-KL084-RESERVED-LOCAL-PROFILE-001: the existing EventVectorReservedLocalProfileTests complete original foreign-enrollment refusal keeps exact protected error and full owned bytes/modes. Only Registration=false removes its three dependent remote/query/protected selectors so strict base membership validation succeeds before the intended protected EventVector guard. EventVector=true stays selected; product validation order and every other negative/repair remain unchanged. Original Stage54 normal/scalar setup failures retained; configuration proof does not qualify RF3 FirstOpen/coverage or Linux acceptance.
+
+### TASK-KL084-NATIVE-PENDING-FRONTIER-001: original prepared parent observation
+
+REQ/AC-EVENTS-FIRST-OPEN-ORDERED-001 and the existing first-dispatch/replay acceptance retain the actual authenticated parent and ordered Leader append as the only effect authority. Fixture-only CapturesReady and AdmitPrepared phases observe settled authentic captures and verified native operation preparation before the original issued Admit. A closed SourceArmId/SourceRequestId pair may hold a distinct second server RequestId only after the first arm has a genuine observed marker. This marker supplies correlation only; it cannot authorize an append, quorum, receipt or replay. Single-arm early claim, existing sample/receiver pairs, producer cancellation/disposal joins and all original bounds remain unchanged. Genuine public concurrency, pending suffix, exhausted suffix, cold unknown/no-send and fresh healthy acceptance remain open until their real six-owner operations execute. No public API, serializer IDs, trusted flags, retries, expiry renewal or quota change.
+
+
+The already authored ReplicaAdmittedJournalReadTests supporting operations are enrolled in this isolated tranche: a real exhausted original ReadExecutionBudget refuses native retained row admission before copy/decode; an actual missing persisted entry charges its real key before Corruption, then exact fault-owned row repair returns the original complete native entry/bytes. ReplicaLifecycleFixture exposes only its SAME already-owned replica store for this exact row fault; its direct original disposal remains unchanged. These two raw-reader operations are explicitly not authenticated first-Admit Leader, suffix-absence, six-owner RF3 or firstOpen qualification. They use original native limits and original owners/cut; no doubles or fabricated journal authority.
+
+Their functional-inventory mapping is the existing REQ-STORAGE-001/007 and AC-MP-002/AC-STORAGE-007: admission before owned copies and strict current native record integrity with an exact repair and healthy continuation. This supporting mapping does not credit RF3, process durability or the complete first-Admit acceptance criteria.
+
+
+Marker placement refinement: an arm is broadcast identically to the three original A voters, but an actual Observed marker is written only by its producing voter. Structural pair/source-arm/session/principal/command validation therefore remains in bounded inventory validation; the exact local marker and original SourceRequestId are required only before claiming a matching Prepared arm. Missing, duplicate or foreign local markers reject the matching attempted claim before any hold or effect. Unrelated voters/readers do not invent or replicate marker evidence. The primary original RequestId never claims its adjunct. The existing lifecycle lock rejects a second claim for the same arm, including a third concurrently prepared request. This adds no lock, ordinal reinterpretation, receipt or effect authority.
+
+
+## TASK-KL084-TAIL-SLOW-CONSUMER-001
+
+The existing two-offer SDK Tail operation pauses its actual consumer after the first complete original delivery, validates the genuine next persisted offer while no second delivery has been consumed, then resumes and checks the complete second progress and terminal. Same original cancellation and joined enumeration ownership apply; this is a source-level whole-operation regression, with Linux/RF3 qualification still open. Native channel bounds do not assert socket or physical-wire memory bounds.
+
+Traceability: REQ-EVENTS-TAIL-OWNER-001/002 → AC-EVENTS-TAIL-OWNER-001/002 and AC-EVENTS-TAIL-TRANSPORT-001 → TASK-KL084-TAIL-SLOW-CONSUMER-001 → existing ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold. The slow-consumer assertion strengthens that whole case; actual provider loss/pressure and expiry-versus-caller controls remain separate open gates.
+
+## TASK-KL084-REFERENCED-OUTCOME-RECOVERY-001
+
+REQ-EVENTS-TAIL-OWNER-001/002 and AC-EVENTS-TAIL-OWNER-001/002 require RecoveryRequired when a genuinely referenced original native outcome is missing or its scoped locator is inconsistent. EventVectorParentOutcome performs the narrow owning selection: only a typed Corruption from the existing scoped selection becomes RecoveryRequired with the original exception retained as cause. Generic CommandOutcomeKeyResolver keeps its existing Corruption contract. Authorization, owner, budget, cancellation and fatal failures are not translated; existing aliases, IDs, identities, outcomes and receipts remain unchanged.
+
+The existing six-owner FirstOpen whole case supplies a genuinely committed Offer and its actual terminal index/outcome. After original AppHost disposal and all eighteen native locks have joined, a fixture-owned stopped-store operation deletes only that exact required outcome, separately truncates its native encoded suffix, then separately corrupts only its exact locator. Each fault commits through the native storage owner with an actual +1 store position; it is not a no-effect database operation. The owning read must refuse with RecoveryRequired retaining the actual Corruption cause, while the complete faulted raw image and store position remain unchanged. Exact original bytes are restored in a real native commit, full original rows return with the independently expected +1 repair position, then same-root six-owner cold startup and complete original SDK/MCP/Q1 Offer and Tail replay continue. This offline owning read is a supporting operation, not public negative RF3 evidence or power-loss qualification. No online raw mutation, synthetic outcome, fault endpoint, authority bypass or replacement reader is introduced.
+
+Traceability: TASK-KL084-REFERENCED-OUTCOME-RECOVERY-001 → ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold → EventFeedReferencedOutcomeRf3Flow. Source and private compile remain separate from required current-source Linux RF3 execution.
+
+## TASK-KL084-SETTLEMENT-CURRENT-SOURCE-AUTHORITY-001
+
+Existing R22/current-source authorization and REQ/AC-EVENTS-TAIL-OWNER-001/002 distinguish original Pin identity from current authorization. A new source Release after source-only revoke/repair must use the actual current policy epoch from the already authenticated, Core-validated fresh source capture, while preserving original Pin bytes/ID/epoch/first expiry/outcome and every original owner/schema/placement fence. Existing settlement incorrectly inherits its epoch from the original Pin body, which native current-principal apply correctly rejects. Retain bounded per-source current policy values separately in call-local prepared settlement; never adopt a new data cut/page or caller scalar. All source epochs for Advance must equal the retained pins before any phase admission; a changed fence refuses instead of partially advancing the first source. Same-epoch effects remain unchanged.
+
+The existing six-owner flow retains the source-only denial, actual policy repair and exact old terminal replay. A changed-policy old ACK refuses before source admission; actual new authorized Release cleans only its original known pins, with complete result/receipt and cold replay. A distinct fresh public Open/MapId admits current-policy pins and runs the complete independently authored late-append/two-delivery/ACK/Release/cold flow. Original issued requests/outcomes never become new success, replay never recaptures/resends, and no alias/Id/public schema/quota/deadline/generic factory changes. Private source/build and supporting operations do not close required Linux SDK/official MCP/Q1 RF3 gates.
+
+Traceability: REQ/AC-EVENTS-VECTOR-ACK-001 and REQ/AC-EVENTS-VECTOR-RELEASE-001 own the current-policy settlement repair; REQ/AC-EVENTS-TAIL-OWNER-001/002 own immutable old result and genuine new-map Tail/cold continuation. The existing ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold case executes all three public caller surfaces. Its authentic RF3 gate remains OPEN.
+
+
+### TASK-KL084-PUBLIC-REFRESH-001
+
+# KL084 public Refresh — finite implementation contract R154
+
+Source prerequisite: immutable R153, manifest 9a973e2391f2777fe4cd21faf82f656f31fe12dc8aa2a3a0bd1703526d60d0e4. Main integration order remains Stage55 -> R150 -> R153; this successor is private and unqualified.
+
+## Proven missing operation
+Native EventVectorFirstAdmitParent.ExecuteAdmitAsync branches for Offer, Acknowledge and Release, then invokes CaptureAndOpenAsync for Refresh3. Existing Core PublishRefresh6, EventVectorControlRefreshAdmission and EventVectorRefreshSettlement are implemented, but no complete public Refresh parent/protocol flow uses them. This is a source counterexample, not a historical RF3 failure diagnosis.
+
+## Required contract
+REQ-EVENTS-VECTOR-REFRESH-001 / AC-EVENTS-VECTOR-REFRESH-001: the same authenticated ConnectionGrain call-local parent may refresh a current Active map only with exact current revision/coverage, original admitted principal/control owner/resource/scope, fresh persisted control and every-source grants, valid existing map token and no unacknowledged Offer or pending child. Refusal occurs before child admission/effects. Replayed terminal parents return only their original retained outcome after current authority checks.
+
+Obtain complete actual configured roster/resource/head captures through existing EventVectorCurrentSourceRound/receiver/native reads, with original parent expiry and original task joins. A genuine absent empty-topic head produces no source generation/pin; a later actual Publish supplies its persisted head to a distinct Refresh. Coverage capture is not a page or source-position authority.
+
+Core prepares candidate entries in one bounded owning read using EventVectorRefreshEntries: retained entries preserve acknowledged positions/sequence, current capture cuts cannot rewind, required retention floors must remain available, and all original owner/incarnation/placement/principal/policy/schema/directory fences remain exact. R153 policy repair does not authorize old-pin Advance or relax Refresh epochs; such old maps need current Release followed by a distinct Open.
+
+Retained sources use genuine next-coverage Advance, newly discovered sources genuine Pin, removed sources original-coverage Release. Every intended phase is charged and admitted by the existing ordered control transaction and genuine fresh Leader append witness tied to the exact authenticated parent RequestId/phase/body. Known/pending/unknown/cold results only reconcile original outcomes; never resend, recapture or renew. Partial failure retains actual candidate proof/pins and charges; original R21 authenticated cleanup union remains required, with no false cross-partition rollback.
+
+PublishRefresh6 runs only after all genuine original source dispositions validate under EventVectorRefreshSettlement; same native transaction retains actual terminal StoredOutcome, parent locator, public complete result and receipt. Original replay never recaptures current coverage/pages or rewrites receipt IDs/cuts. Native aliases/Ids/public request fields and all current limits remain unchanged. Generic36/37 remains closed.
+
+## Ownership and ordered implementation
+1. Feature EventStreams and ADR025 append this contract before source.
+2. Core EventStreams Execution/Lifecycle: prepared Refresh owner with bounded exact retained bytes and same-view current auth/placement; reuse existing admission, RefreshEntries and pin validation.
+3. Server EventStreams Execution: Refresh parent + completion through original ConnectionGrain/Leader/current source round, joined cleanup ledger; add explicit Refresh branch preserving R147 observations and existing branches.
+4. Abstractions/Client/Server public transport/MCP/Q1: complete declared Refresh protocol and typed existing request/result schema; independent complete catalog/hint/decoder oracles, no partial endpoint or parallel dispatcher.
+5. Existing six-owner whole operation: genuine empty Topic Open -> actual Publish -> new Refresh -> Offer/ACK, complete independent pages/coverage/receipt; original Refresh replay after later Publish and same-root cold. Negative unacked-offer, stale revision/coverage, source-only revoke/fence/retention/cancellation/budget before-effects and fresh repair healthy continuation. Partial/unknown source original outcomes remain charged and genuine cleanup is separately validated.
+
+All authored changes privately guarded against native fresh bodies, exact shared hunk composition; no main writes, no Docker before fresh source/image handoff. Private owning builds and supporting normal/scalar operations are distinct from Linux RF3 acceptance. No source declaration closes an AC.
+
+
+### TASK-KL084-PUBLIC-REFRESH-PROTOCOL-001
+
+# R154 exact additive public Refresh transport
+
+REQ/AC-EVENTS-VECTOR-REFRESH-001 uses existing EventFeedControlRequest IDs0..12, EventFeedControlResult IDs0..10 and EventFeedControlAction.Refresh3 unchanged. No serializer alias or native private field changes. Complete typed SDK method RefreshEventFeedAsync requires that exact action and original CommandId; HTTP route /v1/event-feeds/refresh invokes the existing EventFeedParentApi and authenticated current ConnectionGrain parent owner. Official MCP/Q1 identity keyload_refresh_event_feed registers the SAME typed complete request/result and EventFeedParentArguments.Refresh, existing command36 parent purpose and existing command effect hints (readOnly=false, idempotent=false, destructive=true). Guidance: Refresh complete authorized source coverage only after every original source Pin, Advance and Release disposition settles, preserving acknowledged positions and the original terminal result.
+
+No stage-only endpoint, generic36/37 factory, public child payload or new transport owner. Existing current authorization, native signed context, original expiry, scoped work/bounds and original cleanup ledger remain. SDK/official MCP/Q1 successful full result and refusal -> healthy/cold replay are required; catalog/decoder controls are supporting, never proof of effects. Independent literal schema/route/tool/effect oracles must include the complete original public request and result; add only this exact tuple to the existing full catalog inventory without production-derived expected count or deleting prior tuples.
+
+
+## TASK-KL084-TAIL-REFRESH-FENCE-001
+
+# TASK-KL084-TAIL-REFRESH-FENCE-001 — private R155
+
+Prerequisite is immutable R154 manifest cb54458dfd0a4d2f32e7e272186cdbb885547517d70d57a7558b7233bb11eef4. This is one test-only whole-operation successor under existing REQ/AC-EVENTS-TAIL-OWNER-001/002 and REQ/AC-EVENTS-VECTOR-REFRESH-001; no product/API/schema/limit change.
+
+Native DatabaseEngine.RequireEventVectorTailCursor permits monotonic map revision only while admitted coverage, source digest, principal/control policy/incarnation and original expiry remain exact. A genuine successful public Refresh changes coverage and digest, so the original admitted Tail must terminate TokenInvalidated even when the historical original Offer still legally replays unchanged under fresh authorization. Do not replace this terminal with PermissionDenied merely because the existing source-revoke helper hardcodes it.
+
+Extend the existing typed refusal helper through an internal expected-code overload; its original entry delegates PermissionDenied unchanged. SDK enumeration must produce exactly one Failed terminal, no progress and exact typed safe error/status, awaiting original enumeration disposal/join. Official MCP must return the same original terminal error with absent awaited progress. Use the original signed request/token and same current map/owner/credential, fresh source/control auth, existing current stream options and original cancellation/deadline.
+
+In the EXISTING genuine six-owner operation, invoke this refusal after next Refresh before new Offer/Release; then actual newly admitted Offer with acknowledged empty pages runs existing full SDK+official MCP Tail assertions before ACK. Preserve all original result/token/receipt identities and native page/head/read-cut assertions. No new case/profile/deadline/quota, mock, callback authority or Docker launch before root handoff. Q1 remains terminal-only and is not streaming proof.
+
+Docs/ADR append before source; exact native guarded edits, isolated owning build and supporting controls. Genuine Linux RF3 old-Tail refusal/new-Tail healthy/cleanup/cold gate remains OPEN until original execution. No source declaration or catalog control is a PASS for it.
+
+
+### TASK-KL084-TAIL-CANCELLATION-HEALTHY-001
+
+The existing full Tail operation first cancels and joins its original SDK and official MCP enumerations, verifies exact original Offer replay, and then executes fresh complete SDK/MCP progress and terminal results on that unchanged Offer. REQ/AC-EVENTS-TAIL-OWNER-001/002 retain all current authorization, token, read-cut, resource and cold assertions. No new case, profile, deadline or product contract. Source/build evidence remains distinct from genuine six-owner runtime qualification.
+
+
+### TASK-KL084-TAIL-RELEASED-MAP-001
+
+The genuine complete Release deletes settled current map admission rows and frees their exact native capacity while retaining immutable original outcomes/indexes. Existing Tail requires a current header and therefore refuses a deleted map with RecoveryRequired before protected Offer decode; this is distinct from TokenInvalidated for a still-present map with changed coverage. In the same six-owner flow, verify exact original successful Offer SDK/MCP/Q1 replay and then SDK/official MCP Tail refusal with zero progress after genuine Released=true and late Publish, both before and after the existing joined same-root cold. No production classification or corruption policy changes. REQ/AC-EVENTS-TAIL-OWNER-001/002 remain runtime-open until actual execution.
+
+
+## TASK-KL084-PRIVATE-SOURCE-ROUTE-UNIQUENESS-001
+
+REQ-EVENTS-VECTOR-PRIVATE-ROUTE-001 / AC-EVENTS-VECTOR-PRIVATE-ROUTE-001 require exactly one canonical POST EventVectorRemoteProtocol.Path registration in each actual server. ServerConfiguration.Build owns EventVectorEndpoints.Map; RemoteDocumentEndpoints.Map owns only its existing DocumentStorage route. The R158 original six-owner normal log retained the real duplicate-source-route AmbiguousMatchException; native reference/body review identified the obsolete cross-feature mapper call. Removing that call preserves every original receiver readiness503, raw-byte bound, MAC/pin/replay-before-decode, persisted authorization, source/phase identity, deadline/cancellation and joined work contract. No mapper cache, alternate route, router workaround or fallback is introduced.
+
+Ordered implementation/join: preserve original failure and settlement proof; append this feature/ADR contract; native guarded removal at src/KeyLoad.Server/Features/DocumentStorage/Transport/RemoteDocumentEndpoints.cs; scoped owning Server compilation; root coherent union/build; unchanged ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold through six actual RF3 owners and SDK/official MCP/Q1 including original replay, cancellation/refusal, source-only revoke/repair and same-root cold. Public Open/Offer/Refresh/ACK/Release/Tail mappings, aliases/IDs, fresh current authority and all limits are unchanged. Rollback is exact source rollback with no persisted-format change; its prior duplicate registration remains a known failure. Private compile/source review does not close the Linux/runtime gate.

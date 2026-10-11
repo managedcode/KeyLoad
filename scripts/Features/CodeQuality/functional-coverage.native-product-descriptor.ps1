@@ -277,7 +277,7 @@ function Get-UnitCensusRun([string] $StatusId, [object] $Status, [object] $Sourc
 
 function Get-UnitGroupSuites {
     $suites = [Collections.Generic.List[string]]::new()
-    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix)) {
         for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
             $suites.Add($prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
                 [Globalization.CultureInfo]::InvariantCulture))
@@ -325,7 +325,6 @@ function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bou
     $groupSuites = [string[]] @(Get-UnitGroupSuites)
     $census = [ordered]@{
         normal = Get-UnitCensusRun 'unit-census' $statusRuns['unit-census'] $source $imageBySuite $bounds $results
-        scalar = Get-UnitCensusRun 'unit-scalar-census' $statusRuns['unit-scalar-census'] $source $imageBySuite $bounds $results
     }
     $codes = @{ recovery = $RecoveryExitCode; rf3 = $Rf3ExitCode }
     $runs = [Collections.Generic.List[object]]::new()
@@ -368,7 +367,7 @@ function Invoke-DescriptorProducer {
     }
     Assert-CompleteContributorModules @($rows.ToArray()) $source.value
     $imageBySuite = Read-FcNativeTestImageManifests $results $root $source.value $bounds
-    if ($imageBySuite.Count -ne 4) { throw $script:FcNativeProductDescriptor.Invalid }
+    if ($imageBySuite.Count -ne 3) { throw $script:FcNativeProductDescriptor.Invalid }
     $inventory = Read-FcNativeUnitInventory $root $source.value $bounds $imageBySuite $contributors
     $statusRuns = Assert-FcNativeUnitRunStatus $statusRead.value $inventory.value $policy.run.sourceRevision `
         $policy.run.sourceManifestSha256

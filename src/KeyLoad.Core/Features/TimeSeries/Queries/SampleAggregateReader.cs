@@ -34,10 +34,11 @@ internal static class SampleAggregateReader
 
         var accumulator = new SampleAggregateAccumulator();
         budget.Check();
-        var scan = view.VisitRange(scope.Prefix, request.MaxSamples, (_, value) =>
+        var scan = view.VisitRange(scope.Prefix, request.MaxSamples, (key, value) =>
         {
             budget.Check();
-            accumulator.Add(ReadSample(value));
+            accumulator.Add(SampleRawReadDecoder.Read(key, value,
+                request.Partition, request.Set, request.SeriesId));
             return true;
         }, SampleReadKeys.FromInclusive(request.Partition, request.Set, request.SeriesId, from),
             SampleReadKeys.UntilExclusive(request.Partition, request.Set, request.SeriesId, request.UntilExclusive),
@@ -67,5 +68,4 @@ internal static class SampleAggregateReader
         }
     }
 
-    internal static SampleRecord ReadSample(ReadOnlySpan<byte> value) => NativeSerialization.Deserialize<SampleRecord>(value);
 }

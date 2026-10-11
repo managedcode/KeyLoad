@@ -954,3 +954,50 @@ evidence, not the complete coverage gate. Canonical `dotnet format KeyLoad.slnx
 --verify-no-changes --no-restore` passed on that snapshot. Current-source Linux full suites,
 Aspire RF3 through SDK/MCP, endurance and delivery remain open. Process-kill
 results do not establish power-loss durability.
+
+### TASK-MSG-LEASE-AUTHORITY-001 — retained native lease reference and body identity
+
+REQ/AC-MSG-001/004/005, ADR-026/028 and the accepted queue read-work contract
+require a current fenced lease to retain its original native lease index and
+message body. Source review found that `Lease` checked token scope, metadata
+state/version/generation/owner and deadline, then body presence/length, but did
+not check the selected lease-index value or the retained body's message ID.
+An absent/foreign lease reference could therefore be silently deleted by
+ACK/NACK/renew/processing, and a well-formed body belonging to another message
+could be settled. These are KeyLoad-owned source findings; runtime proof remains
+pending and no ZoneTree-owned defect is alleged.
+
+Preserve the existing foreign/stale/expired-token error ordering. After those
+checks and the existing body read, require metadata/body identity to equal the
+original signed message identity and require the exact native lease key at its
+current persisted deadline to contain that same identity. Reuse the existing
+Corruption details for missing body or selected lifecycle reference. The
+original atomic apply rolls back without a durable failure outcome; cached
+Receive apply/resolve reauthorization must also refuse protected delivery data
+while that current authority is damaged. The same checks add one bounded native
+reference point read, retain the already decoded body and exact original byte
+length, and do not scan/rebuild counters or indexes. Public/persisted types,
+errors, tokens, grants, clocks, budgets, retry choices and formats stay fixed.
+No migration, replacement writer or compatibility path is authorized.
+
+The Messaging worker owns `Execution/Messaging.cs`, one feature-local Validation
+helper and new Cases/Contracts/Models/Helpers/Assertions. A real ZoneTree matrix
+covers ACK, NACK, renewal and atomic processing against independently injected
+missing/foreign selected lease references, wrong retained body identity, wrong
+metadata identity and absent metadata lease deadline. These last two native
+metadata edge cases preserve the same original scope/stale/expiry ordering and
+existing corruption details; they neither repair nor infer missing authority.
+Seed complete original payload/headers/metadata/body/index/counters and actual
+claim receipts. Require exact same-operation Corruption, unchanged full native
+store image/cut, absent new outcome/effects, refused original claim replay and
+null protected resolve value; preserve the original saved claim outcome bytes.
+Join and reopen the same root, repeat refusal, restore only the exact owned row
+bytes, then execute the original operation successfully with full independent
+postimage and exact receipt replay. Continue with a fresh healthy producer,
+claim and ACK, reopen a second time, and retain complete original/healthy
+receipt/history/model/index/counter bytes. Token fencing and existing body
+corruption, counter-debit, DLQ/retry, process and SDK/official MCP RF3 gates remain
+mandatory. Root joins build/analyzers/formatter, native SIMD-enabled 50-slot
+TUnit and delivered-source Linux qualification. Source declarations and review
+are not runtime PASS or whole-feature closure. Rollback removes only this
+helper/call and its new operation regression map.

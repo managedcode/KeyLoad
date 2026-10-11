@@ -2,7 +2,6 @@
 param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $NormalEvidenceRoot,
-    [Parameter(Mandatory)][string] $ScalarEvidenceRoot,
     [Parameter(Mandatory)][string] $SourceRevision,
     [Parameter(Mandatory)][string] $OutputDirectory
 )
@@ -43,8 +42,8 @@ $declared = @($contract.tasks | Where-Object { $_.taskId -ceq 'KL-065' })
 if ($declared.Count -ne 1 -or -not $declared[0].Contains('censusSelections') -or
     $declared[0].selections.Count -ne 0) { throw 'KL065 must remain census-only until reviewed binding.' }
 $profileCases = @{}; $profileImages = @{}; $observations = @()
-foreach ($profile in @('normal','scalar')) {
-    $parent = [IO.Path]::GetFullPath($(if ($profile -ceq 'normal') { $NormalEvidenceRoot } else { $ScalarEvidenceRoot }))
+foreach ($profile in @('normal')) {
+    $parent = [IO.Path]::GetFullPath($NormalEvidenceRoot)
     Assert-FcNativeNoReparsePath $parent
     $root = Join-Path $parent ('kl-065-' + $profile)
     $manifest = Read-TaskJson (Join-Path $root 'execution-manifest.json')
@@ -112,10 +111,6 @@ foreach ($profile in @('normal','scalar')) {
     }
     $profileCases[$profile] = $cases; $profileImages[$profile] = $images
 }
-if ((ConvertTo-Json $profileCases.normal -Depth 32 -Compress) -cne
-    (ConvertTo-Json $profileCases.scalar -Depth 32 -Compress) -or
-    (ConvertTo-Json $profileImages.normal -Depth 32 -Compress) -cne
-    (ConvertTo-Json $profileImages.scalar -Depth 32 -Compress)) { throw 'Normal/scalar native binding differs.' }
 $strict = [ordered]@{ taskId = 'KL-065'; selections = $profileCases.normal }
 Write-TaskOriginal (Join-Path $OutputDirectory 'kl065.strict-task.proposal.json') $strict
 Write-TaskOriginal (Join-Path $OutputDirectory 'kl065.native-binding.observations.json') $observations

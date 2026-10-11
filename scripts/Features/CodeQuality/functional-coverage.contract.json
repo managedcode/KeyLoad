@@ -207,8 +207,7 @@
   ],
   "contributors": {
     "suiteNames": [
-      "unit",
-      "unit-scalar"
+      "unit"
     ],
     "testNamePrefix": "PartitionQuery",
     "sourceFiles": [

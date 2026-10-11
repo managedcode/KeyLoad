@@ -84,14 +84,10 @@ $json = [Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($read.bytes)
 try { Assert-FcNativeJsonUnique $json.RootElement }
 finally { $json.Dispose() }
 $inventory = ConvertFrom-Json ([Text.Encoding]::UTF8.GetString($read.bytes)) -AsHashtable -Depth 64
-$inherited = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic')
-try {
-    foreach ($suite in @('unit','unit-scalar')) {
-        [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', $(if ($suite -ceq 'unit-scalar') { '0' } else { $inherited }))
-        Invoke-WorkflowDiscovery $Repository $EvidenceRoot $inventory $suite $null
-        foreach ($group in $inventory.coverageGroups) {
-            Invoke-WorkflowDiscovery $Repository $EvidenceRoot $inventory $suite $group
-        }
-    }
+if ([Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') -ceq '0') {
+    throw 'Disabled hardware intrinsics are not an admitted current qualification profile.'
 }
-finally { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', $inherited) }
+Invoke-WorkflowDiscovery $Repository $EvidenceRoot $inventory 'unit' $null
+foreach ($group in $inventory.coverageGroups) {
+    Invoke-WorkflowDiscovery $Repository $EvidenceRoot $inventory 'unit' $group
+}

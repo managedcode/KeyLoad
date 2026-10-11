@@ -71,7 +71,6 @@ internal sealed class NativeTUnitSelectionTests
 
     [Test]
     [Arguments("unit", "KeyLoad.UnitTests")]
-    [Arguments("unit-scalar", "KeyLoad.UnitTests")]
     [Arguments("analyzers", "KeyLoad.Analyzers.Tests")]
     [Arguments("recovery", "KeyLoad.RecoveryTests")]
     [Arguments("rf3", "KeyLoad.IntegrationTests")]
@@ -96,9 +95,7 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(environment.GetProperty(RevisionEnvironment).GetString()).IsEqualTo("original-revision");
         await Assert.That(environment.TryGetProperty(SuiteEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(LocalArgumentsEnvironment, out _)).IsFalse();
-        await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out var intrinsic)).IsEqualTo(suite == "unit-scalar");
-        if (suite == "unit-scalar")
-        { await Assert.That(intrinsic.GetString()).IsEqualTo("0"); }
+        await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
         if (suite == "rf3")
         {
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(LocalProperty), LocalFilter).ConfigureAwait(false);
@@ -108,6 +105,7 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
             await AssertNativeTextSdkAsync(selection.RootElement).ConfigureAwait(false);
             await AssertEmptySnapshotAsync(selection.RootElement).ConfigureAwait(false);
+            await NativeResourcePolicySelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(GraphIncomingProperty), GraphIncomingFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(GraphIncomingUnsupportedProperty).GetInt32())
                 .IsEqualTo(ExpectedGraphIncomingRejections);
@@ -164,7 +162,7 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(arguments[Array.IndexOf(arguments, ParallelismArgument) + 1]).IsEqualTo(expected);
     }
 
-    private static async Task AssertLocalSelectorAsync(JsonElement local, string expectedFilter)
+    internal static async Task AssertLocalSelectorAsync(JsonElement local, string expectedFilter)
     {
         var environment = local.GetProperty(EnvironmentProperty);
         using var arguments = JsonDocument.Parse(environment.GetProperty(LocalArgumentsEnvironment).GetString()!);

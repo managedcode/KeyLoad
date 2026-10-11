@@ -1,3 +1,4 @@
+using System.Numerics;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
@@ -9,6 +10,9 @@ internal sealed class CanonicalVectorPublicMetricTests
     private const string Collection = "public-metric-oracle";
     private const string Field = "/embedding";
     private const string Root = "root";
+    private const int FirstCoordinate = 0;
+    private const int SecondCoordinate = 1;
+    private const int TailCoordinates = 1;
 
     [Test]
     [Arguments(DistanceMetric.DotProduct)]
@@ -19,16 +23,17 @@ internal sealed class CanonicalVectorPublicMetricTests
     {
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
-        var space = new VectorSpace("literal-space", 2, metric, "literal-model", "1");
+        var query = Coordinates(1, 0);
+        var space = new VectorSpace("literal-space", query.Length, metric, "literal-model", "1");
         database.Commit(new PutDocument(Collection, "a", "{\"label\":\"a\"}"),
             new PutDocument(Collection, "b", "{\"label\":\"b\"}"),
             new PutDocument(Collection, "c", "{\"label\":\"c\"}"),
-            new PutVector(Collection, "a", Field, [3, 0], space, 1),
-            new PutVector(Collection, "b", Field, [1, 1], space, 1),
-            new PutVector(Collection, "c", Field, [0, 3], space, 1));
+            new PutVector(Collection, "a", Field, Coordinates(3, 0), space, 1),
+            new PutVector(Collection, "b", Field, Coordinates(1, 1), space, 1),
+            new PutVector(Collection, "c", Field, Coordinates(0, 3), space, 1));
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(database.Partition, Collection, VectorField: Field,
-            Vector: [1, 0], Space: space, Limit: 2);
+            Vector: query, Space: space, Limit: 2);
         // Literal independent geometry: dot3,1,0; cosine1,1/sqrt2,0;
         // Euclidean distances2,1,sqrt10. Fusion uses ranks, not these raw distances.
         var expected = metric == DistanceMetric.Euclidean ? new[] { "b", "a" } : new[] { "a", "b" };
@@ -64,5 +69,13 @@ internal sealed class CanonicalVectorPublicMetricTests
         await Assert.That(healthy.Select(row => row.Score)).IsEquivalentTo(
             new[] { 1d / 61, 1d / 62, 1d / 63 }, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
+    }
+
+    private static global::System.Collections.Immutable.ImmutableArray<float> Coordinates(float first, float second)
+    {
+        var values = new float[Vector<float>.Count + TailCoordinates];
+        values[FirstCoordinate] = first;
+        values[SecondCoordinate] = second;
+        return [.. values];
     }
 }

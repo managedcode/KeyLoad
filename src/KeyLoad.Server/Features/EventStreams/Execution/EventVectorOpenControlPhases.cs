@@ -34,7 +34,8 @@ internal static class EventVectorOpenControlPhases
         => original with
         {
             ExpectedMapRevision = phase.MapRevision,
-            ExpectedCoverageGeneration = phase.CoverageGeneration,
+            ExpectedCoverageGeneration = original.OriginalRequest.Action == EventFeedControlAction.Refresh
+                ? original.ExpectedCoverageGeneration : phase.CoverageGeneration,
             ExpectedCleanupGeneration = phase.CleanupGeneration,
             OriginalEncodedEntries = ReadOnlyMemory<byte>.Empty,
             OriginalEntryChecksum = ReadOnlyMemory<byte>.Empty,

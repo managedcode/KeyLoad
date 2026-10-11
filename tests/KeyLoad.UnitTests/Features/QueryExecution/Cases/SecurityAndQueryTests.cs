@@ -29,6 +29,8 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => queries.Execute("reader",
             new(db.Partition, "SELECT * FROM orders ORDER BY \"odd.name\"", AllowFullScan: true))).Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await KeyLoad.UnitTests.Features.Authorization.NestedSensitiveCurrentPolicyContinuation.RunAsync(db,
+            TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task RevocationInvalidatesCurrentPageAndNeverReturnsCachedPayload()
@@ -43,6 +45,8 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(first.Cursor).IsNotNull();
         Reader(db, true, 2);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("reader", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.Unauthenticated);
+        await KeyLoad.UnitTests.Features.Authorization.PolicyEpochCursorContinuation.RunAsync(db, request, first.Cursor!,
+            TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task RowScopeAndTenantCannotBeForged()

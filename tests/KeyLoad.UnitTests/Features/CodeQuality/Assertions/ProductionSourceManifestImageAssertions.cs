@@ -7,14 +7,12 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestImageAssertions
 {
-    private const int ExpectedReferenceCount = 4;
+    private const int ExpectedReferenceCount = 3;
     private const int CentralInputCount = 6;
     private const int UnitIndex = 0;
-    private const int ScalarIndex = 1;
-    private const int RecoveryIndex = 2;
-    private const int Rf3Index = 3;
+    private const int RecoveryIndex = 1;
+    private const int Rf3Index = 2;
     private const string UnitSuite = "unit";
-    private const string ScalarSuite = "unit-scalar";
     private const string RecoverySuite = "recovery";
     private const string Rf3Suite = "rf3";
     private const string UnitFileName = "functional-coverage.test-image.unit.json";
@@ -57,10 +55,7 @@ internal static class ProductionSourceManifestImageAssertions
     internal static async Task AssertImagesAsync(string evidenceRoot, JsonElement references, string settingsHash)
     {
         await Assert.That(references.GetArrayLength()).IsEqualTo(ExpectedReferenceCount);
-        var unitHash = references[UnitIndex].GetProperty(HashProperty).GetString();
         await AssertReferenceAsync(references[UnitIndex], UnitSuite, UnitFileName);
-        await AssertReferenceAsync(references[ScalarIndex], ScalarSuite, UnitFileName);
-        await Assert.That(references[ScalarIndex].GetProperty(HashProperty).GetString()).IsEqualTo(unitHash);
         await AssertReferenceAsync(references[RecoveryIndex], RecoverySuite, RecoveryFileName);
         await AssertReferenceAsync(references[Rf3Index], Rf3Suite, Rf3FileName);
         await Assert.That(references[RecoveryIndex].GetProperty(FileNameProperty).GetString()).IsNotEqualTo(

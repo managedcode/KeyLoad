@@ -4,7 +4,6 @@ internal static class RemoteDocumentEndpoints
 {
     internal static void Map(WebApplication app)
     {
-        global::KeyLoad.Server.Features.EventStreams.EventVectorEndpoints.Map(app);
         app.MapPost(RemoteDocumentProtocol.Path, static (HttpContext context, OrleansNode node) =>
         {
             if (node.RemoteDocuments?.Endpoint is not { } receiver)

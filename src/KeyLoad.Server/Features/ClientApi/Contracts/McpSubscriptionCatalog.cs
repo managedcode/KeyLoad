@@ -11,6 +11,7 @@ internal static class McpSubscriptionCatalog
         EventFeedTailMcpDescriptor.Create(),
         McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedOpenProtocol.Tool, EventFeedOpenProtocol.Route, OperationKind.EventFeedControl, EventFeedParentArguments.Open),
         McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedOfferProtocol.Tool, EventFeedOfferProtocol.Route, OperationKind.EventFeedControl, EventFeedParentArguments.Offer),
+        McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedRefreshProtocol.Tool, EventFeedRefreshProtocol.Route, OperationKind.EventFeedControl, EventFeedParentArguments.Refresh),
         McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedSettlementProtocol.AcknowledgeTool, EventFeedSettlementProtocol.AcknowledgeRoute, OperationKind.EventFeedControl, EventFeedParentArguments.Acknowledge),
         McpOperationFactory.Command<EventFeedControlRequest, EventFeedControlResult>(EventFeedSettlementProtocol.ReleaseTool, EventFeedSettlementProtocol.ReleaseRoute, OperationKind.EventFeedControl, EventFeedParentArguments.Release),
         McpOperationFactory.Command<ConfigureSubscriptionRequest, SubscriptionInfo>(McpToolNames.SubscriptionsConfigure, McpToolRoutes.SubscriptionsConfigure, OperationKind.ConfigureSubscription, static request => request.CommandId),

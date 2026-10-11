@@ -157,6 +157,7 @@ public sealed partial class DatabaseEngine
         }
         var body = StoredMessageBody.Read(view, QueueKey(MessageBodySpace, lane, claims.MessageId))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingLeasedBody);
+        RequireQueueLeaseAuthority(view, lane, claims.MessageId, metadata, body.Body);
         return new(claims, metadata, body.Bytes);
     }
     private CommitReceipt CompleteDelivery(IAtomicTransaction tx, PrincipalRecord principal, DeliveryCommand command, DateTimeOffset now, long position, ReplicatedOperation operation)

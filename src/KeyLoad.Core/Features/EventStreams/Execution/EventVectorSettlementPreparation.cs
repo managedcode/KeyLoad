@@ -71,15 +71,16 @@ public sealed partial class DatabaseEngine
         EventVectorParentCaptureScopes.Add(scopes, decoded.Projection, request.Scope, admission);
         var required = scopes.Values.ToImmutableArray();
         EventVectorParentScopes.Authorize(Authorization, principal, required, admission);
-        _ = EventVectorCurrentSourceAuthorization.Require(bounded, principal, request, required, freshSourceWitness, admission);
+        var fresh = EventVectorCurrentSourceAuthorization.Require(bounded, principal, request, required, freshSourceWitness, admission);
         var pins = EventVectorSettledPinSelection.Read(inventory, entries, admission);
+        var currentPolicyEpochs = EventVectorSettlementCurrentPolicy.Read(request, entries, pins, fresh, admission, work);
         return OwnEventVectorSettlementTargets(request, map, inventory, entries, witness, pins,
-            targets, admission, work);
+            targets, currentPolicyEpochs, admission, work);
     }
     private static EventVectorPreparedSettlement OwnEventVectorSettlementTargets(EventFeedControlRequest request,
         EventVectorMap map, EventVectorOwnedInventory inventory, ImmutableArray<EventVectorEntry> entries,
         EventVectorCoverageWitness witness, ImmutableArray<EventVectorSourcePhase> pins,
-        ImmutableArray<EventVectorEntry> targets, EventVectorAdmissionPolicy admission, ReadExecutionBudget work)
+        ImmutableArray<EventVectorEntry> targets, ImmutableArray<long> currentPolicyEpochs, EventVectorAdmissionPolicy admission, ReadExecutionBudget work)
     {
         var encoded = request.Action == EventFeedControlAction.Acknowledge
             ? EventVectorSettlementTargetEncoding.Copy(ReadEventVectorOffer(map, inventory), admission, work)
@@ -88,7 +89,7 @@ public sealed partial class DatabaseEngine
         try
         {
             var result = EventVectorSettlementOwnedEncoding.Create(map, entries, witness, pins,
-                targets, encoded.Bytes, encoded.Digest, admission, work);
+                targets, encoded.Bytes, encoded.Digest, currentPolicyEpochs, admission, work);
             transferred = true;
             return result;
         }

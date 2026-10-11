@@ -103,6 +103,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         {
             RequestCqrsReceiverIssueAdjunct.RequireDeclaredPair(arm.Record, arms, markers);
             RequestCqrsSampleChunkProbePair.RequireDeclaredPair(arm.Record, arms);
+            RequestCqrsEventVectorProbePair.RequireDeclaredPair(arm.Record, arms);
         }
         var armMap = knownArms.ToDictionary(pair => pair.Key, pair => pair.Value.Record);
         foreach (var arm in arms)
@@ -149,7 +150,9 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
                 or RequestCqrsProbePhase.SampleChunkAdmissionPersisted or RequestCqrsProbePhase.SampleChunkNativeJobReturned
                 or RequestCqrsProbePhase.SampleChunkAdmissionRefused
                 or RequestCqrsProbePhase.ReplicaSnapshotReadiness
-                or RequestCqrsProbePhase.EventVectorFirstDispatchReserved)
+                or RequestCqrsProbePhase.EventVectorFirstDispatchReserved
+                or RequestCqrsProbePhase.EventVectorFirstCapturesReady
+                or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
         { throw Invalid(); }
         var group = snapshot.Markers

@@ -26,10 +26,13 @@ function Invoke-WorkflowUnit([string] $Id, [string] $Suite, [string] $Filter, [b
         exitCode = $code; resultsDirectory = $Id })
 }
 
-foreach ($suite in @('unit','unit-scalar')) {
+if ([Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') -ceq '0') {
+    throw 'Disabled hardware intrinsics are not an admitted current qualification profile.'
+}
+foreach ($suite in @('unit')) {
     Invoke-WorkflowUnit ($suite + '-census') $suite '' $false
     foreach ($group in $inventory.coverageGroups) {
-        $id = if ($suite -ceq 'unit') { $group.groupId } else { $group.groupId.Replace('unit-', 'unit-scalar-') }
+        $id = $group.groupId
         Invoke-WorkflowUnit $id $suite ([string] $group.selector) $true
     }
 }

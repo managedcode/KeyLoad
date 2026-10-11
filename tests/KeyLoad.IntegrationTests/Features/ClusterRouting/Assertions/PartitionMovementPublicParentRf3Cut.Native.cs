@@ -39,6 +39,11 @@ internal static partial class PartitionMovementPublicParentRf3Cut
         var failures = new List<Exception>();
         foreach (var node in TwoRf3MembershipProtocol.Nodes)
         {
+            await ServerFailureObserver.ObserveAsync(async () => await wave.RemoteRuntime.BeginRestartAsync(node,
+                cancellationToken), failures).ConfigureAwait(false);
+        }
+        foreach (var node in TwoRf3MembershipProtocol.Nodes)
+        {
             await ServerFailureObserver.ObserveAsync(() => wave.RemoteRuntime.RestartAsync(node,
                 cancellationToken), failures).ConfigureAwait(false);
         }

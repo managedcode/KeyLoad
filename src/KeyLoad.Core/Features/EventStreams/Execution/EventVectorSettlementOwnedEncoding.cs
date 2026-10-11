@@ -7,7 +7,7 @@ internal static class EventVectorSettlementOwnedEncoding
     internal static EventVectorPreparedSettlement Create(EventVectorMap map, ImmutableArray<EventVectorEntry> entries,
         EventVectorCoverageWitness witness, ImmutableArray<EventVectorSourcePhase> pins,
         ImmutableArray<EventVectorEntry> targets, ReadOnlyMemory<byte> targetBytes, ReadOnlyMemory<byte> targetDigest,
-        EventVectorAdmissionPolicy admission, ReadExecutionBudget work)
+        ImmutableArray<long> currentSourcePolicyEpochs, EventVectorAdmissionPolicy admission, ReadExecutionBudget work)
     {
         var encodedWitness = ReadOnlyMemory<byte>.Empty;
         var encodedPins = ImmutableArray.CreateBuilder<ReadOnlyMemory<byte>>(pins.Length);
@@ -19,7 +19,7 @@ internal static class EventVectorSettlementOwnedEncoding
             { encodedPins.Add(EventVectorOfferOwnedEncoding.Encode(pin, admission, work)); }
             work.Check();
             var result = new EventVectorPreparedSettlement(map, entries, encodedWitness, encodedPins.ToImmutable(),
-                targets, targetBytes, targetDigest);
+                targets, targetBytes, targetDigest, currentSourcePolicyEpochs);
             transferred = true;
             return result;
         }

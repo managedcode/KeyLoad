@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
@@ -40,25 +41,7 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
     public async Task AcMcp002CrossTenantAndForgedAuthorityAreDeniedWithoutChangingTheDocument()
     {
         using var deadline = McpCallerDeadline.Create();
-        var owned = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
-        var foreign = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
-        await owned.SeedAsync(fixture, deadline.Token);
-        await foreign.SeedAsync(fixture, deadline.Token);
-        var identity = await McpPersistedIdentity.CreateAsync(fixture, owned.Partition, Capability.DocumentsRead, deadline.Token);
-        await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            identity.Secret, deadline.Token);
-        var request = new GetDocumentRequest(foreign.Reference);
-        var denied = await session.CallAsync(McpCallerTools.DocumentsGet, request, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
-        await McpCallerAssertions.DoesNotDiscloseAsync(denied, identity.Secret, McpDocumentProtocol.PrivateValue);
-        var forged = McpOfficialClient.Arguments(request);
-        forged.Add(McpCallerProtocol.PrincipalId, identity.Principal.Id);
-        forged.Add(McpCallerProtocol.Roles, new[] { McpCallerProtocol.AdministratorRole });
-        var rejected = await session.Client.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsGet, forged, cancellationToken: deadline.Token);
-        await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false);
-        var authorized = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(owned.Reference), deadline.Token));
-        await Assert.That(authorized.Value.Reference).IsEqualTo(owned.Reference);
-        await Assert.That(authorized.Value.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
+        var state = await AdversarialAuthorityTrial.WarmAsync(fixture, deadline.Token);
+        await AdversarialAuthorityCold.RunAsync(fixture, state, deadline.Token);
     }
 }

@@ -71,7 +71,7 @@ function Invoke-FcPrepare([string] $Root, [string] $EvidenceRoot, [string] $Cont
         $script:FcCoverageImages.TestManifestName)) {
         if ([IO.File]::Exists((Join-Path $EvidenceRoot $name))) { throw $t.ErrorStale }
     }
-    foreach ($suite in @('unit','unit-scalar')) {
+    foreach ($suite in @('unit')) {
         if (Test-Path -LiteralPath (Join-Path $EvidenceRoot $suite)) { throw $t.ErrorStale }
     }
     $contract = Read-FcContract $ContractPath
@@ -133,16 +133,15 @@ function Assert-FcManifest([string] $Root, [string] $EvidenceRoot, [string] $Con
 
 function Invoke-FcVerify([string] $Root, [string] $EvidenceRoot, [string] $ContractPath,
     [string] $UnitCobertura, [string] $UnitTrx, [int] $UnitExitCode,
-    [string] $ScalarCobertura, [string] $ScalarTrx, [int] $ScalarExitCode, [string] $Filter) {
+    [string] $Filter) {
     $t = $script:FunctionalCoverage
-    if ($UnitExitCode -ne 0 -or $ScalarExitCode -ne 0) { throw $t.ErrorIncomplete }
+    if ($UnitExitCode -ne 0) { throw $t.ErrorIncomplete }
     $contract = Read-FcContract $ContractPath
     if ($Filter -cne $contract.contributors.filter) { throw $t.ErrorIncomplete }
     $manifest = Assert-FcManifest $Root $EvidenceRoot $ContractPath
     $sourceInventory = @(Get-FcSourceInventory $Root $contract)
     $runInputs = @(
-        [ordered]@{ suite = 'unit'; coverage = $UnitCobertura; trx = $UnitTrx },
-        [ordered]@{ suite = 'unit-scalar'; coverage = $ScalarCobertura; trx = $ScalarTrx }
+        [ordered]@{ suite = 'unit'; coverage = $UnitCobertura; trx = $UnitTrx }
     )
     $runs = [Collections.Generic.List[object]]::new()
     foreach ($input in $runInputs) {

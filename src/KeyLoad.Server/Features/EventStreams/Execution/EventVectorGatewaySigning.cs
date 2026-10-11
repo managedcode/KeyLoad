@@ -13,7 +13,8 @@ internal static class EventVectorGatewaySigning
         { return codec.CreateCommand(actualRequestId, actualPrincipalId, kind, publicCommandId, payload); }
         var original = GrainNativePayload.ReadCommand<EventFeedControlRequest>(payload);
         if (original.Action is not (EventFeedControlAction.Open or EventFeedControlAction.Offer
-            or EventFeedControlAction.Acknowledge or EventFeedControlAction.Release or EventFeedControlAction.Tail) || original.CommandId != publicCommandId)
+            or EventFeedControlAction.Acknowledge or EventFeedControlAction.Refresh
+            or EventFeedControlAction.Release or EventFeedControlAction.Tail) || original.CommandId != publicCommandId)
         { throw Errors.Fail(ErrorCode.Validation, InvalidParent); }
         return codec.CreateEventFeedControlParent(actualRequestId, actualPrincipalId, original);
     }

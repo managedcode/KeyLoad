@@ -38,6 +38,15 @@ internal sealed class NativeCapabilityLocalProfileTests
             var ordinary = Create(fixture, Omission, "false");
             await Assert.That(NativeDiscoveryOmissionProfile.Create(ordinary, fixture.DataRoot, null, local)).IsNull();
             await NativeCapabilityRegistrationLogging.ProveAsync(ordinary, local, null).ConfigureAwait(false);
+            var unregistered = Create(fixture, Omission);
+            unregistered.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [RegistrationKey] = "false",
+                [RemoteDocumentKey] = null,
+                [RemoteQueryKey] = null,
+                [ProtectedKey] = null
+            });
+            await NativeCapabilityRegistrationLogging.ProveAsync(unregistered, local, null).ConfigureAwait(false);
             foreach (var setting in new[] { RemoteQueryKey,
                 ProtectedKey, Omission + "Enabled", Omission })
             {

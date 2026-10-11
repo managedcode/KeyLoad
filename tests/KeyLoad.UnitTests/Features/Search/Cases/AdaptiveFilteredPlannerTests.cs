@@ -86,34 +86,7 @@ internal sealed class AdaptiveFilteredPlannerTests
 
     [Test, NotInParallel]
     public async Task AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch()
-    {
-        using var database = new TestDatabase();
-        PackedAnnTestData.Configure(database);
-        var metric = DistanceMetric.DotProduct;
-        var space = PackedAnnTestData.Space(metric, PackedAnnTestData.QualityDimension);
-        PackedAnnTestData.Seed(database, RecordCount, space.Dimension, metric);
-        var records = PackedAnnTestData.Load(database, metric);
-        var options = new PackedAnnOptions { ExactThreshold = 0, EfSearch = 1 };
-        var budget = PackedAnnIndexTestSupport.Budget(database);
-        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveFallback,
-            space, records, options, budget);
-        var query = PackedAnnTestData.Vector(22_917, space.Dimension, PackedAnnTestData.CorpusSeed);
-        var bottom = AdaptiveFilteredPlannerOracle.Rank(records, query,
-            Enumerable.Range(0, records.Length).ToArray()).TakeLast(100).Select(item => item.SourceOrdinal).ToArray();
-        var bitmap = AdaptiveFilteredPlannerOracle.Bitmap(records.Length, bottom);
-        var measured = index.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
-
-        await Assert.That(measured.Mode).IsEqualTo(AnnSearchMode.ExactAfterInsufficientCandidates);
-        await Assert.That(measured.EligibleCount).IsEqualTo(bottom.Length);
-        await Assert.That(measured.ExpansionPasses).IsGreaterThan(0);
-        await Assert.That(measured.FallbackDistanceEvaluations).IsEqualTo(bottom.Length);
-        await Assert.That(measured.DistanceEvaluations >= measured.FallbackDistanceEvaluations).IsTrue();
-        await AssertBudgetExceededAsync(() => index.Search(query, bottom.Length, bitmap,
-            PackedAnnIndexTestSupport.Budget(database, measured.WorkUnits - 1)));
-        var healthy = index.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
-        await Assert.That(healthy.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
-            .IsEquivalentTo(measured.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray(), CollectionOrdering.Matching);
-    }
+        => await AdaptiveFallbackWholeFlow.RunAsync();
 
     [Test]
     public async Task AcFilter004AdaptiveWalkMayNavigateIneligibleVerticesToAnIsolatedEligibleEndpoint()
@@ -201,11 +174,5 @@ internal sealed class AdaptiveFilteredPlannerTests
         {
             await Assert.That(result.FallbackDistanceEvaluations).IsEqualTo(eligibleCount);
         }
-    }
-
-    private static async Task AssertBudgetExceededAsync(Action operation)
-    {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(operation);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 }

@@ -76,6 +76,8 @@ internal sealed class EventVectorReservedLocalProfileTests
         };
         if (changed is not null)
         { values[changed] = value; }
+        if (changed == RegistrationKey && value == "false")
+        { values.Remove(RemoteDocumentKey); values.Remove(RemoteQueryKey); values.Remove(ProtectedKey); }
         builder.Configuration.AddInMemoryCollection(values);
         return builder;
     }

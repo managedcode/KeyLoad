@@ -9,6 +9,7 @@ internal static class NativeTestSelectionProcess
             const { nativeSelection } = await import(pathToFileURL(process.argv[1]));
             const suite = process.argv[2];
             for (const bad of [[], ['--KeyLoadTests:Suite=unknown'], ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Suite=rf3'],
+              ['--KeyLoadTests:Suite=unit-scalar'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=51'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=0'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=1.5'],
@@ -33,6 +34,7 @@ internal static class NativeTestSelectionProcess
               .includes('--KeyLoadTests:Filter=/*/*/*/*[Category!=HeavyLoad]')) {
               throw new Error('Native preparation lost the ordinary heavy-load exclusion.');
             }
+            """ + NativeSimdSelectionProgram.Source + """
             const selected = nativeSelection(['--KeyLoadTests:Suite='+suite, '--KeyLoadTests:Filter=/*/*/ActualCase/*',
               '--KeyLoadTests:ReportTrx=true', '--KeyLoadTests:CoverageSettings=settings.xml',
               '--KeyLoadTests:CoverageOutput=coverage.xml'], { GITHUB_SHA: 'original-revision' });
@@ -72,8 +74,8 @@ internal static class NativeTestSelectionProcess
             }
             const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
             const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            """ + NativeCapabilitySelectionProgram.Declaration + NativePurposeSelectionProgram.Declaration + NativeGraphIncomingSelectionProgram.Source + """
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs, purposeArgs, graphIncomingArgs]) {
+            """ + NativeCapabilitySelectionProgram.Declaration + NativePurposeSelectionProgram.Declaration + NativeGraphIncomingSelectionProgram.Source + NativeResourcePolicySelectionProgram.Source + """
+            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs, purposeArgs, graphIncomingArgs, resourcePolicyArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -154,7 +156,7 @@ internal static class NativeTestSelectionProcess
               throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
             }
             console.log(JSON.stringify({ selected, explicit20, tuned50, local, standard, rejection,
-              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, purpose, purposeUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount }));
+              rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, purpose, purposeUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount, resourcePolicy, resourcePolicyUnsupportedCount }));
             """;
 
     internal static async Task<string> ReadAsync(string suite)

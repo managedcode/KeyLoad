@@ -73,6 +73,15 @@ internal sealed class EventFeedTailRf3Pair(int maximumBytes) : IProgress<Progres
         await SqlRf3Protocol.EqualAsync(original, actual);
     }
 
+    internal async Task RequirePausedAsync(EventFeedControlResult original)
+    {
+        await RequireFirstAsync(original);
+        bool absent;
+        lock (gate)
+        { if (failure is not null) { throw failure; } absent = second is null; }
+        await Assert.That(absent).IsTrue();
+    }
+
     internal async Task RequireBothAsync(EventFeedControlResult original, EventFeedControlResult next)
     {
         await RequireFirstAsync(original);

@@ -20,7 +20,7 @@ internal static class EventVectorParentOutcome
         var identity = EventVectorControlPhaseIds.Project(phase, principal.Id, admission);
         var actualId = EventVectorControlPhaseIds.For(phase, principal.Id, identity.OriginalBodyDigest, admission);
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, phase.OriginalRequest.ControlPartition);
-        var outcome = CommandOutcomeKeyResolver.Select(view, principal.Id, commandId, scope).Outcome;
+        var outcome = SelectRequired(view, principal.Id, commandId, scope);
         var metadata = JsonSerializer.Serialize(identity, JsonDefaults.Options);
         var original = new ReplicatedOperation(commandId, OperationKind.EventFeedControl, principal.Id, default, metadata);
         var fingerprint = NativeOperationFingerprint.Compute(original);
@@ -46,6 +46,19 @@ internal static class EventVectorParentOutcome
             && !EventVectorFirstCleanupResultValidation.Handles(phase.Action) || outcome.Result.NativeValue is not null)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
         return outcome;
+    }
+
+    private static StoredOutcome? SelectRequired(IKeyValueView view, string principalId,
+        Guid commandId, CommandOutcomePartitionScope scope)
+    {
+        try
+        {
+            return CommandOutcomeKeyResolver.Select(view, principalId, commandId, scope).Outcome;
+        }
+        catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption)
+        {
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome, failure);
+        }
     }
 
     private static void RequireResult(EventVectorControlResult result, Guid commandId, EventVectorControlPhase phase, Guid incarnation)

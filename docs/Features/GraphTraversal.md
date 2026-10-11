@@ -186,3 +186,40 @@ R2 full-image correction: unchanged4096edge corpus exceeds one4096record page. A
 REQ/AC-GRAPH-002/004 and REQ/AC-AUTH-005/007 map to the unchanged HiddenSourceEndpointIsOmittedFromIncomingProjection and HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows. The latter original source has no owner: genuine healthy continuation repairs its owner as well as the hidden target, rather than trusting a caller role. Full literal edge, delivered revision, projection and call-current cut follow row/grant repair; grant refusal and revocation preserve the full bounded canonical image. Same-root native close/open preserves node/incarnation and original outcomes; original row-repair command replay returns each complete receipt without a second document revision. Original declarations, limits and initial assertions remain.
 
 The source-proven embedded same-ID repair replay also retains the complete bounded native key/value image and physical cut: the cached path reauthorizes and returns before clock/effects, with no positive replicated apply index. Lexical cold-store ownership retains both the initiating operation failure and any distinct real disposal failure, emitted after cleanup.
+
+## TASK-GRAPH-TRAVERSAL-ADJACENCY-002 — canonical outgoing identity before filtering
+
+The native traversal reader decodes the outgoing index value and reads an edge,
+but does not compare the complete visited key, edge ID and From entity or validate
+the persisted edge fields before filtering/projection. This can return a
+disconnected edge or hide malformed canonical data behind a label filter. Reuse
+the existing native graph edge validator and require the exact outgoing
+key/value/source relationship before any label/visibility filter. Candidate
+charging, bounded work, deterministic ordering and current authority remain.
+
+REQ-GRAPH-ADJACENCY-001 maps to AC-GRAPH-ADJACENCY-001/002: every examined outgoing
+record must reference its canonical edge under the same graph/source partition,
+with the complete current source EntityRef, valid native identifiers, positive
+revision and canonical bounded attributes. Missing/invalid rows return Corruption
+without a partial result or changed full native image/cut, including when a label
+filter would otherwise exclude them. Independent whole-operation tests seed a
+healthy first candidate and damage only the second candidate; repeat the original
+request after a joined cold open, repair only the owned row, replay the original
+seed receipt, then perform fresh graph work and a second cold.
+
+REQ-GRAPH-ADJACENCY-002 maps to AC-GRAPH-ADJACENCY-003: preserve valid canonical
+source edges which reference another same-owner atomic partition (ADR-102).
+Those visible endpoints remain full EntityRef results; they are not expanded as
+frontiers in this partition-scoped traversal. A foreign vertex whose textual
+collection/ID collides with a local vertex must not expand the local vertex's
+edges or inherit another partition's graph authority. This does not introduce
+cross-partition traversal or alter reverse delivery/placement contracts.
+
+Source map: Core GraphTraversal Queries/GraphTraversalReader and existing
+Validation/GraphCrossPartitionValidation; Unit GraphTraversal new Cases/Fixtures/
+Helpers/Assertions/Models integrity flows. Existing ADR-004/005/010/014/102 define
+read-cut, native-key, budget, authority and cross-reference boundaries; no new
+public API, format, dependency or physical ownership is added. Source-only until
+original native build/analyzer/formatter and TUnit results; exact-source Linux,
+process/RF3 SDK/MCP and resource/performance qualification remain separate gates.
+Rollback removes the new guards and additive tests/map together.

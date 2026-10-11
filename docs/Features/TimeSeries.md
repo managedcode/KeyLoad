@@ -462,3 +462,44 @@ REQ/AC-SERIES-CHUNK-010/012: transient codec malformed-input controls do not rep
 REQ/AC-CHUNK-008/011/012 retain the original whole retention/drop/replay/fresh-window and mixed document/chunk rollback→healthy atomic operation flows. Original local native run of 81 focused cases found two fixture prerequisites absent: cutoff was one hour later than the actual evaluation clock, and a minimum-token document read used an embedded-only owner without a canonical applied record. Supply only existing TestDatabase timeProvider/nativeReplicaAdmission options through SampleChunkCanonicalFixture. The retention fixture begins at the original window start, performs its unchanged open/append/explicit-seal flow, then advances monotonically to the original window end before expiry; no cutoff, sample, retention rule, clock check, operation identity, or result oracle is weakened. The mixed atomic fixture uses the existing actual DurableReplicaLog/ReplicaMaterializer owner so the original healthy minimum-token read proves the receipt against the real persisted applied position. Keep original full chunk/doc/raw rollback and replay assertions; after the public minimum read, require the complete canonical image and physical position unchanged. Do not confuse the replication acknowledgement prefix with the separate physical store position.
 
 ADR: N/A for this test-only correction; existing retention, replica application and same-partition atomicity contracts remain unchanged. Production code, limits, deadlines, field IDs/aliases, public routes and required RF3/recovery/Linux gates remain unchanged. Actual local original evidence is retained under /private/tmp/keyload-stage44-focused-unit-coverage-r1-20261010; it is 79 PASS/2 FAIL, not a qualified product result. Root joins the three existing test files and feature-local monotone clock, builds the complete source and reruns the unchanged original full flows before any outcome promotion. This native one-owner supporting materializer is not a three-node quorum or RF3 substitute. The subsequent 84-case normal/scalar runs reached the original explicit seal and exposed that advancing the clock before seeding legitimately triggers automatic seal during append; phase the clock advance after the explicit seal. Preserve those original failures and every existing literal revision/result assertion. The two simultaneous coverage collectors altered shared DLLs, so their coverage output does not establish a qualified coherent measurement; serialize instrumentation while retaining native 50-way test scheduling.
+
+## TASK-SERIES-RAW-INTEGRITY-COLD-001 — scoped raw refusal and exact repair
+
+REQ-SERIES-003/004/005/008/009/010/011/013/015/016 and their existing
+AC-MP-005/012, AC-SERIES-004/005/008/009/010/011/013/015/016 require canonical
+sample identity and atomic corruption refusal. Source review confirms that the
+range, latest, raw aggregate and dense-window readers deserialize selected raw
+rows without verifying the record against the selected native key. An altered
+SeriesId, timestamp or sequence can therefore be consumed under another
+canonical identity. Their TimeSeries-owned decoder will validate the current
+typed root, required Sample, matching SeriesId, positive sequence, finite value
+and exact canonical partition/set/series/timestamp/sequence key before projection
+or aggregation. Use the existing native key codec; keep visited scope, ordering,
+retention, authorization, cancellation and complete operation budgets unchanged.
+This is a KeyLoad-owned defect, not an upstream ZoneTree finding. No new public
+contract, stored format, reader fallback or dependency change is introduced.
+
+New SampleRawIntegrityWholeFlowTests execute actual native append and bounded
+expiry before corrupting only the captured second retained raw row. Each
+selected integrity variant must cause all four real raw readers and the original
+two-row expiry command to refuse with Corruption and preserve the complete
+native image, identity and cut. That expiry encounters one healthy candidate
+before the corrupted row; its floor and candidate must remain unchanged.
+Joined same-root cold open repeats the original refusal and complete image.
+Restore only the captured original row bytes, execute the SAME original expiry,
+require complete original receipt replay with no further effects, replay the
+original append without resurrection, then submit a distinct healthy append and
+a retained identical expired ID. Independent complete rows, exclusive floor,
+cumulative purge count, sequence, latest, aggregates and dense windows must
+agree through a second cold owner and immutable receipt replays.
+
+TimeSeries worker owns only Core TimeSeries Validation/SampleRawReadDecoder.cs,
+the four existing raw reader files, new Unit TimeSeries Cases/Fixtures/Helpers/
+Assertions/Models as actually needed, and this feature refinement. Existing
+ADR-005/011/052/073/116 define sufficient identity, read, retention and current
+format contracts (new ADR: N/A); no shared source join is required. Root joins
+this coherent batch and owns final solution build/analyzers/formatter, native
+SIMD unit execution with configured50, functional coverage and required
+recovery/RF3/exact-source Linux evidence. Source presence and local runtime
+results do not close those gates or establish acceleration. Rollback reverts
+only this decoder integration and additive regressions as one source unit.

@@ -29,10 +29,6 @@ jobs:
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test benchmark contracts
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
-      - name: Test benchmark contracts without CPU intrinsics
-        env:
-          DOTNET_EnableHWIntrinsic: '0'
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts-scalar --KeyLoadTests:ReportTrx=true
       - name: Test prompt termination on Aspire resource failures
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
       - name: Save benchmark contract test results

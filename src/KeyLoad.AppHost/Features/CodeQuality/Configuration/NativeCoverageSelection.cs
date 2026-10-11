@@ -31,7 +31,7 @@ internal static class NativeCoverageSelection
     }
 
     private static bool IsFunctionalSuite(string suite) => suite is TestSuiteProtocol.UnitSuite
-        or TestSuiteProtocol.ScalarUnitSuite or TestSuiteProtocol.RecoverySuite or TestSuiteProtocol.Rf3Suite;
+        or TestSuiteProtocol.RecoverySuite or TestSuiteProtocol.Rf3Suite;
 
     internal static void RejectWithoutSuite(IConfiguration configuration)
     {

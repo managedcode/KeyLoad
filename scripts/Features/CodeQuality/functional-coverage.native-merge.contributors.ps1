@@ -1,10 +1,9 @@
 $script:FcNativeContributors = [ordered]@{
-    Suites = @('unit','unit-scalar','recovery','rf3')
+    Suites = @('unit','recovery','rf3')
     Invalid = 'The canonical native contributor inventory is invalid or incomplete.'
     UnitInventoryName = 'functional-coverage.unit-test-inventory.json'
     UnitGroupCount = 5
     UnitGroupPrefix = 'unit-functional-'
-    ScalarUnitGroupPrefix = 'unit-scalar-functional-'
     UnitGroupIdFormat = 'D2'
     UnitRunStatusMaximumBytes = 65536
     UnitFilterPrefix = '/*/*/('
@@ -84,17 +83,16 @@ function Assert-FcNativeUnitRunStatus([object] $Status, [object] $Inventory, [st
         $Status.sourceRevision -isnot [string] -or $Status.sourceRevision -cne $SourceRevision -or
         $Status.sourceManifestSha256 -isnot [string] -or $Status.sourceManifestSha256 -cne $SourceManifestSha256 -or
         $Status.runs -isnot [array] -or
-        $Status.runs.Count -ne 2 * $script:FcNativeContributors.UnitGroupCount + 2) {
+        $Status.runs.Count -ne $script:FcNativeContributors.UnitGroupCount + 1) {
         throw $script:FcNativeContributors.Invalid
     }
     $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     $expected.Add('unit-census', [ordered]@{ suite = 'unit'; filter = ''; coverageEnabled = $false })
-    $expected.Add('unit-scalar-census', [ordered]@{ suite = 'unit-scalar'; filter = ''; coverageEnabled = $false })
-    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix)) {
         for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
             $id = $prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
                 [Globalization.CultureInfo]::InvariantCulture)
-            $suiteName = if ($prefix -ceq $script:FcNativeContributors.UnitGroupPrefix) { 'unit' } else { 'unit-scalar' }
+            $suiteName = 'unit'
             $expected.Add($id, [ordered]@{ suite = $suiteName
                 filter = [string] $Inventory.coverageGroups[$index - 1].selector; coverageEnabled = $true })
         }

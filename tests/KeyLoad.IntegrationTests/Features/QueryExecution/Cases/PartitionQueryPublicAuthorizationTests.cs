@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -17,18 +18,9 @@ internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixt
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partitions[0],
             PartitionQueryRf3Protocol.Collection, Capability.DocumentsRead | Capability.Query, deadline.Token)
             .ConfigureAwait(false);
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var reader = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
-        var request = scenario.Request();
-        var denied = await reader.PartitionQueryAsync(request, deadline.Token).ConfigureAwait(false);
-        await Assert.That(denied.IsSuccess).IsFalse();
-        await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
-            identity.Secret, deadline.Token).ConfigureAwait(false);
-        var failure = await mcp.CallAsync(PartitionQueryRf3Protocol.ToolName, request, deadline.Token)
-            .ConfigureAwait(false);
-        await McpCallerAssertions.ErrorAsync(failure, ErrorCode.PermissionDenied, dispatched: true).ConfigureAwait(false);
-        await VerifyHealthyReadAsync(fixture, scenario, deadline.Token).ConfigureAwait(false);
+        var state = await PartitionAuthorityFlow.WarmAsync(fixture, scenario, identity,
+            () => VerifyHealthyReadAsync(fixture, scenario, deadline.Token), deadline.Token);
+        await PartitionAuthorityCold.RunAsync(fixture, state, deadline.Token);
     }
 
     private static async Task VerifyHealthyReadAsync(ClusterFixture fixture,

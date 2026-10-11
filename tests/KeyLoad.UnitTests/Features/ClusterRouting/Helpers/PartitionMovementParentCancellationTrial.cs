@@ -63,7 +63,7 @@ internal static class PartitionMovementParentCancellationTrial
         var ownReceipt = cancelled.Get<PartitionMovePhaseResult>().Journal;
         if (restorePolicy)
         { await PartitionMovementParentPolicyRestoreTrial.ExecuteAsync(source, target, fixture, abort, phaseId); }
-        var cold = await RequireColdCancellationAsync(source, fixture, abort, phaseId, prepare, ownReceipt);
+        var cold = await RequireColdCancellationAsync(source, target, fixture, abort, phaseId, prepare, ownReceipt);
         before = source.Store.Position;
         sourceImage = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var late = await Assert.ThrowsAsync<KeyLoadException>(() => fixture.OriginalAsync(phaseId, prepare, expiry));
@@ -86,6 +86,7 @@ internal static class PartitionMovementParentCancellationTrial
         PartitionMoveRequest request, Guid phaseId, PartitionMoveJournalReceipt ownReceipt, string[] targetImage)
     {
         source.Reopen();
+        target.Reopen();
         var terminal = fixture.Read(request with { Mode = PartitionMoveMode.Abort }, phaseId);
         await Assert.That(terminal.Header!.TerminalResult!.Phase).IsEqualTo(PartitionMovePhase.Aborted);
         await Assert.That(terminal.Pending).IsNull();
@@ -99,10 +100,11 @@ internal static class PartitionMovementParentCancellationTrial
     }
 
     private static async Task<PartitionMoveParentState> RequireColdCancellationAsync(ControlledPartitionMovementNode source,
-        PartitionMovementParentNativeFixture fixture, PartitionMoveRequest abort, Guid phaseId,
+        ControlledPartitionMovementNode target, PartitionMovementParentNativeFixture fixture, PartitionMoveRequest abort, Guid phaseId,
         PartitionMovePhaseCommand prepare, PartitionMoveJournalReceipt ownReceipt)
     {
         source.Reopen();
+        target.Reopen();
         var cold = fixture.Read(abort, phaseId);
         await Assert.That(cold.Header!.TerminalResult).IsNull();
         await Assert.That(cold.Header.PendingOriginalPhaseCommandId).IsEqualTo(phaseId);

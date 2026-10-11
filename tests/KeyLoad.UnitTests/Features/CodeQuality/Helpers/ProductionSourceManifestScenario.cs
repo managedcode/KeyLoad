@@ -7,6 +7,9 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
 
 internal sealed class ProductionSourceManifestScenario : IDisposable
 {
+    private const string ContributorsProperty = "contributors";
+    private const string SuiteProperty = "suite";
+    private const string UnsupportedScalarSuite = "unit-scalar";
     private const string Prepare = "prepare";
     private const string Verify = "verify";
     private const string ManifestFile = "functional-coverage.production-source-manifest.json";
@@ -56,11 +59,35 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
         await NativeUnitImageAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
         await NativeCoverageRf3ContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
+        await VerifyUnsupportedScalarRejectedAsync(cancellationToken);
         await VerifyTamperRejectedAsync(ManifestFile, cancellationToken);
         await VerifyTamperRejectedAsync("functional-coverage.test-image.recovery.json", cancellationToken);
         await VerifyTamperRejectedAsync(SettingsFile, cancellationToken);
         await VerifyRestoredAcceptedAsync(cancellationToken);
         await VerifyCreateOnlyAsync(cancellationToken);
+    }
+
+    private async Task VerifyUnsupportedScalarRejectedAsync(CancellationToken cancellationToken)
+    {
+        var manifestPath = Path.Combine(evidenceRoot, ManifestFile);
+        var original = await File.ReadAllBytesAsync(manifestPath, cancellationToken);
+        var changed = System.Text.Json.Nodes.JsonNode.Parse(original)!.AsObject();
+        changed[ContributorsProperty]!.AsArray()[0]![SuiteProperty] = UnsupportedScalarSuite;
+        var altered = System.Text.Encoding.UTF8.GetBytes(changed.ToJsonString());
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await File.WriteAllBytesAsync(manifestPath, altered, cancellationToken);
+            var rejected = await ProductionSourceManifestProcess.RunAsync(executionOptions, Verify, evidenceRoot, cancellationToken);
+            await Assert.That(rejected.ExitCode).IsNotEqualTo(SuccessfulExitCode);
+            await AssertProcessSettledAsync(rejected);
+            await Assert.That(await File.ReadAllBytesAsync(manifestPath, cancellationToken)).IsEquivalentTo(
+                altered, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }, failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(
+            () => File.WriteAllBytesAsync(manifestPath, original, CancellationToken.None), failures).ConfigureAwait(false);
+        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        await VerifyRestoredAcceptedAsync(cancellationToken);
     }
 
     private async Task VerifyTamperRejectedAsync(string fileName, CancellationToken cancellationToken)

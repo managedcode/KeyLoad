@@ -66,16 +66,10 @@ function Read-FcNativeProductPlan([string] $Root, [string] $Repository, [string]
 
 function Read-FcNativeUnitCensus([string] $Root, [string] $Repository, [object] $Value,
     [object] $Manifest, [object] $Images, [object] $Inventory, [object] $StatusRuns) {
-    Assert-FcNativeContributorExactKeys $Value.unitCensus @('normal','scalar')
+    Assert-FcNativeContributorExactKeys $Value.unitCensus @('normal')
     $normal = Read-FcNativeUnitCensusRun $Root $Repository $Value $Manifest $Images $Inventory `
         $StatusRuns 'unit' 'unit-census' $Value.unitCensus.normal
-    $scalar = Read-FcNativeUnitCensusRun $Root $Repository $Value $Manifest $Images $Inventory `
-        $StatusRuns 'unit-scalar' 'unit-scalar-census' $Value.unitCensus.scalar
-    if ($normal.runId -ceq $scalar.runId -or $normal.identities.Count -ne $scalar.identities.Count -or
-        ($normal.censusIdentities -join "`n") -cne ($scalar.censusIdentities -join "`n")) {
-        throw $script:FcNativeMergeInput.InvalidDescriptor
-    }
-    [ordered]@{ normal = $normal; scalar = $scalar }
+    [ordered]@{ normal = $normal }
 }
 
 function Read-FcNativeUnitCensusRun([string] $Root, [string] $Repository, [object] $Value,
@@ -152,7 +146,7 @@ function Read-FcNativeDescriptor([string] $Root, [string] $Descriptor, [object] 
 function Read-FcNativeSuiteRuns([string] $Root, [string] $Repository, [object] $Value, [object] $Manifest,
     [object] $Images, [object] $Contributors, [object] $Inventory, [object] $Census, [object] $StatusRuns) {
     $expectedSuites = [Collections.Generic.List[string]]::new()
-    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix)) {
         for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
             $expectedSuites.Add($prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
                 [Globalization.CultureInfo]::InvariantCulture))
@@ -182,10 +176,8 @@ function Read-FcNativeSuiteRuns([string] $Root, [string] $Repository, [object] $
 
 function Assert-FcNativeUnitGroupCensusUnion([Collections.Generic.Dictionary[string, string[]]] $SuiteIdentities,
     [object] $Census) {
-    foreach ($mode in @('normal','scalar')) {
-        $prefix = if ($mode -ceq 'normal') { $script:FcNativeContributors.UnitGroupPrefix } else {
-            $script:FcNativeContributors.ScalarUnitGroupPrefix
-        }
+    foreach ($mode in @('normal')) {
+        $prefix = $script:FcNativeContributors.UnitGroupPrefix
         $union = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
         for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
             $suite = $prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,
@@ -204,7 +196,7 @@ function Read-FcNativeSuiteRun([string] $Root, [string] $Repository, [object] $V
     [object] $Images, [object] $Contributors, [object] $Inventory, [object] $Census, [object] $StatusRuns,
     [object] $Run, [Collections.Generic.HashSet[string]] $SeenSuites,
     [Collections.Generic.HashSet[string]] $RunIds, [Collections.Generic.HashSet[string]] $CoveragePaths) {
-    $isUnitGroup = [string] $Run.suite -match '\A(unit|unit-scalar)-functional-[0-9]{2}\z'
+    $isUnitGroup = [string] $Run.suite -match '\Aunit-functional-[0-9]{2}\z'
     $expectedKeys = if ($isUnitGroup) { @('suite','runId','statusId','filter','coverageEnabled','resultsDirectory',
         'sourceRevision','sourceManifestSha256','testImageManifestSha256','nativeExitCode','functionalReport','trx','coverage') } else {
         @('suite','runId','sourceRevision','sourceManifestSha256','testImageManifestSha256','nativeExitCode',
@@ -233,7 +225,7 @@ function Read-FcNativeSuiteRun([string] $Root, [string] $Repository, [object] $V
         throw $script:FcNativeMergeInput.InvalidEvidence
     }
     $reportCases = @(Read-FcNativeFunctionalCases $functional.value $expected ([string] $Run.suite) $Repository `
-        -MatchSourceLocations:($expectedSuite -cin @('unit','unit-scalar')))
+        -MatchSourceLocations:($expectedSuite -ceq 'unit'))
     $trx = Read-FcNativeSuiteTrx $Root $Run $expected $Value.bounds
     if ($reportCases.Count -ne $trx.identities.Count -or ($reportCases -join "`n") -cne ($trx.identities -join "`n")) {
         throw $script:FcNativeMergeInput.InvalidEvidence

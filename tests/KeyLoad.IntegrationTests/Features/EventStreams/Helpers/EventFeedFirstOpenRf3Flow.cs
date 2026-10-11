@@ -40,7 +40,17 @@ internal static class EventFeedFirstOpenRf3Flow
         var offer = await EventFeedOfferRf3Flow.RunAsync(wave, credential, request, original,
             control, remote, First, Second, token).ConfigureAwait(false);
         await EventFeedTailRf3Flow.RunAsync(wave, credential, offer.Request, offer.Result, token).ConfigureAwait(false);
+        await EventFeedReferencedOutcomeRf3Flow.RunAsync(wave, credential, offer.Request, offer.Result, token).ConfigureAwait(false);
         await SourceAuthorityAsync(wave, credential, request, original, offer, token).ConfigureAwait(false);
+        var retiredRequest = request;
+        var retiredOpen = original;
+        var retiredOffer = offer;
+        var retiredRelease = await EventFeedRepairedSourceRf3Settlement.ReleaseAsync(wave, credential, offer, token).ConfigureAwait(false);
+        request = request with { CommandId = Guid.NewGuid(), MapId = Guid.NewGuid() };
+        original = await RoutesAsync(wave, credential, request, token).ConfigureAwait(false);
+        await EventFeedFirstOpenRf3Assertions.OpenAsync(request, original).ConfigureAwait(false);
+        offer = await EventFeedOfferRf3Flow.RunAsync(wave, credential, request, original,
+            control, remote, First, Second, token).ConfigureAwait(false);
         var lateReceipt = await SeedAsync(wave, credential, TwoRf3MembershipProtocol.Node4, remote, Second + "-late", token).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(original, await RoutesAsync(wave, credential, request, token).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(offer.Result, await EventFeedOfferRf3Flow.RoutesAsync(
@@ -51,10 +61,14 @@ internal static class EventFeedFirstOpenRf3Flow
         await SqlRf3Protocol.EqualAsync(original, await RoutesAsync(wave, credential, request, token).ConfigureAwait(false));
         await SqlRf3Protocol.EqualAsync(offer.Result, await EventFeedOfferRf3Flow.RoutesAsync(
             wave, credential, offer.Request, token).ConfigureAwait(false));
+        await SqlRf3Protocol.EqualAsync(retiredOpen, await RoutesAsync(wave, credential, retiredRequest, token).ConfigureAwait(false));
+        await EventFeedRepairedSourceRf3Settlement.ReplayAsync(wave, credential, retiredOffer, retiredRelease, token).ConfigureAwait(false);
         await EventFeedTailRf3Flow.RunAsync(wave, credential, offer.Request, offer.Result, token).ConfigureAwait(false);
         var latest = await EventFeedTailRf3PairFlow.RunAsync(wave, credential, offer.Request, offer.Result,
             remote, lateReceipt, Second + "-late", Second + "-third", token).ConfigureAwait(false);
+        var refresh = await EventFeedRefreshRf3Flow.RunAsync(wave, credential, request, remote, token).ConfigureAwait(false);
         await EventFeedSettlementRf3Flow.RunAsync(wave, credential, latest.Request, latest.Result, token).ConfigureAwait(false);
+        await refresh.RequireAsync(wave, credential, token).ConfigureAwait(false);
         await SqlRf3Protocol.EqualAsync(offer.Result, await EventFeedOfferRf3Flow.RoutesAsync(
             wave, credential, offer.Request, token).ConfigureAwait(false));
     }
@@ -75,7 +89,7 @@ internal static class EventFeedFirstOpenRf3Flow
         return receipt;
     }
 
-    private static Task<EventFeedControlResult> RoutesAsync(TwoRf3MembershipWave wave, string credential,
+    internal static Task<EventFeedControlResult> RoutesAsync(TwoRf3MembershipWave wave, string credential,
         EventFeedControlRequest request, CancellationToken token)
         => RequestCqrsRf3Callers.RunOwnedAsync(wave.Application, TwoRf3MembershipProtocol.Node1, credential,
             async callers =>

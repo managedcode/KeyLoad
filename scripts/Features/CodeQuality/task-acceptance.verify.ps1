@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
     [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065')][string] $Task,
-    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile,
+    [Parameter(Mandatory)][ValidateSet('normal')][string] $Profile,
     [Parameter(Mandatory)][string] $ContractPath,
     [Parameter(Mandatory)][string] $ExecutionManifestPath
 )
@@ -86,7 +86,7 @@ function Assert-AcProcess([string] $Path, [string] $Stdout, [string] $Stderr, [o
             [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$expected))) { throw $invalid }
     }
     Assert-FcNativeExactKeys $process.environment @('DOTNET_EnableHWIntrinsic')
-    $intrinsics = if ($Profile -ceq 'scalar') { '0' } else { $null }
+    $intrinsics = $null
     if ($process.environment.DOTNET_EnableHWIntrinsic -cne $intrinsics) { throw $invalid }
     $process
 }

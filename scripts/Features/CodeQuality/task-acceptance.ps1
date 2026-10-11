@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory)][string] $Repository,
     [Parameter(Mandatory)][string] $EvidenceRoot,
     [Parameter(Mandatory)][ValidateSet('KL-008','KL-011','KL-014','KL-015','KL-021','KL-027','KL-036','KL-033','KL-035','KL-029','KL-034','KL-042','KL-079','KL-065')][string] $Task,
-    [Parameter(Mandatory)][ValidateSet('normal','scalar')][string] $Profile
+    [Parameter(Mandatory)][ValidateSet('normal')][string] $Profile
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -254,8 +254,8 @@ $inherited = [Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic')
 $location = Get-Location
 try {
     Set-Location -LiteralPath $Repository
-    if ($Profile -ceq 'scalar') { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', '0') }
-    else { [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', [NullString]::Value) }
+    if ($inherited -ceq '0') { throw 'Disabled hardware intrinsics are not an admitted current task profile.' }
+    [Environment]::SetEnvironmentVariable('DOTNET_EnableHWIntrinsic', [NullString]::Value)
     foreach ($selection in $selected) {
         $manifest.selections += Invoke-TaskSelection $selection $taskRoot $censusOnly
     }

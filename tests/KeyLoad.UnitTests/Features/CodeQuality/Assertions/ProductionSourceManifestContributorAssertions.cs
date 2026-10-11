@@ -6,7 +6,6 @@ internal static class ProductionSourceManifestContributorAssertions
 {
     private const int RegistrySchemaVersion = 1;
     private const int ExpectedUnitRows = 49;
-    private const int ExpectedScalarRows = 49;
     private const int ExpectedRecoveryRows = 1;
     private const int ExpectedRf3Rows = 11;
     private const int MaximumIdentityFieldCharacters = 512;
@@ -18,7 +17,6 @@ internal static class ProductionSourceManifestContributorAssertions
     private const string ContributorsProperty = "contributors";
     private const string ExactCasesProperty = "exactCases";
     private const string UnitSuite = "unit";
-    private const string ScalarSuite = "unit-scalar";
     private const string RecoverySuite = "recovery";
     private const string Rf3Suite = "rf3";
     private const string MismatchedLeafMethod = "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead";
@@ -39,7 +37,7 @@ internal static class ProductionSourceManifestContributorAssertions
         AcceptanceProperty, ClassNameProperty, ExecutedModulesProperty, InstanceNameProperty, MethodNameProperty,
         OperationProperty, RequirementsProperty, SuiteProperty
     ];
-    private static readonly string[] Suites = [UnitSuite, ScalarSuite, RecoverySuite, Rf3Suite];
+    private static readonly string[] Suites = [UnitSuite, RecoverySuite, Rf3Suite];
     private static readonly string[] ProductionModules =
     [
         "KeyLoad.Abstractions", "KeyLoad.Artifacts", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
@@ -126,7 +124,6 @@ internal static class ProductionSourceManifestContributorAssertions
         await Assert.That(suiteCounts.Keys.Order(StringComparer.Ordinal)).IsEquivalentTo(
             Suites.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(suiteCounts[UnitSuite]).IsEqualTo(ExpectedUnitRows);
-        await Assert.That(suiteCounts[ScalarSuite]).IsEqualTo(ExpectedScalarRows);
         await Assert.That(suiteCounts[RecoverySuite]).IsEqualTo(ExpectedRecoveryRows);
         await Assert.That(suiteCounts[Rf3Suite]).IsEqualTo(ExpectedRf3Rows);
     }
@@ -135,7 +132,7 @@ internal static class ProductionSourceManifestContributorAssertions
     {
         var cases = queryContract.GetProperty(ContributorsProperty).GetProperty(ExactCasesProperty).EnumerateArray().ToArray();
         var queryIdentities = ProductionSourceManifestQueryIdentities.Read(queryContract);
-        foreach (var suite in new[] { UnitSuite, ScalarSuite })
+        foreach (var suite in new[] { UnitSuite })
         {
             var rows = contributors.EnumerateArray().Where(row =>
                 row.GetProperty(SuiteProperty).GetString() == suite &&

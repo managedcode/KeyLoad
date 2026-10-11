@@ -150,7 +150,7 @@ function Read-FcContract([string] $Path) {
         $contract.contributors.testNamespace -cne $t.TestNamespace -or
         $contract.contributors.testNamePrefix -cne 'PartitionQuery' -or
         $contract.contributors.filter -cne '/*/*/PartitionQuery*/*' -or
-        (@($contract.contributors.suiteNames) -join ',') -cne 'unit,unit-scalar' -or
+        (@($contract.contributors.suiteNames) -join ',') -cne 'unit' -or
         (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryGrantTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicBudgetTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
         $contract.contributors.exactCases.Count -ne $t.ContributorCaseCount -or
         $contract.bounds.originalXmlBytes -ne 33554432 -or $contract.bounds.sources -ne 5000 -or
@@ -210,6 +210,7 @@ function Test-FcTaskAcceptanceScriptName([string] $Name) {
         'task-acceptance.ps1' { return $true }
         'task-acceptance.verify.ps1' { return $true }
         'task-acceptance.contract.json' { return $true }
+        'task-acceptance.kl065-binding.ps1' { return $true }
     }
     if ($Name.StartsWith('task-acceptance', [StringComparison]::Ordinal)) {
         throw $script:FunctionalCoverage.ErrorInventory

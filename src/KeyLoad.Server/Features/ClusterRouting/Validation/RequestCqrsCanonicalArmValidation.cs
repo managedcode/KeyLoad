@@ -4,6 +4,9 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase is RequestCqrsProbePhase.EventVectorFirstCapturesReady
+            or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
+        { return RequestCqrsEventVectorProbePair.ValidArm(arm); }
         if (arm.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness)
         {
             return arm.ReadKind == KeyLoad.Orleans.GrainReadKind.NodeStatus

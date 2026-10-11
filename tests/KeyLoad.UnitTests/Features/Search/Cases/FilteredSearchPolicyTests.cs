@@ -59,17 +59,22 @@ internal sealed class FilteredSearchPolicyTests
             [FilteredSearchTestSupport.VectorUseGrant], revoked: true);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var empty = ImmutableArray<string>.Empty;
+        var before = await FilteredPolicyColdContinuation.CaptureAsync(database.Store);
 
         var capabilityFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.SearchAsync(Reader, VectorOnly(empty), Token())))!;
+        await FilteredPolicyColdContinuation.UnchangedAsync(database.Store, before);
         var fieldFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.SearchAsync(Reader, FilteredSearchTestSupport.Request(empty, hybrid: false), Token())))!;
+        await FilteredPolicyColdContinuation.UnchangedAsync(database.Store, before);
         var revokedFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.SearchAsync(RevokedReader, VectorOnly(empty), Token())))!;
+        await FilteredPolicyColdContinuation.UnchangedAsync(database.Store, before);
 
         await Assert.That(capabilityFailure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fieldFailure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(revokedFailure.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        await FilteredPolicyColdContinuation.RepairAndRecoverAsync(database, Reader, RevokedReader, Token());
     }
 
     private static SearchRequest VectorOnly(ImmutableArray<string>? allowedIds)

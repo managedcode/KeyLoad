@@ -105,10 +105,13 @@ internal sealed class EventProjectionInputTests
     {
         using var fixture = new EventProjectionFixture(targetClassification: "projection-public");
 
-        var error = fixture.ApplyFailure(fixture.Request());
+        var request = fixture.Request();
+        var failedCommandId = Guid.NewGuid();
+        var error = ProjectionClassificationRepairFlow.Refused(fixture, request, failedCommandId);
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.VectorBytes()).IsNull();
         await Assert.That(fixture.Lineage()).IsNull();
+        await ProjectionClassificationRepairFlow.RunAsync(fixture, request, failedCommandId);
     }
 }

@@ -33,6 +33,12 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
                 routing, clock, original, request, principal.Id, directory, admission, encoding,
                 work, originalCancellationToken).ConfigureAwait(false);
         }
+        if (request.Action == EventFeedControlAction.Refresh)
+        {
+            return await EventVectorRefreshParent.ExecuteAsync(runtime, node, partition, options,
+                routing, clock, original, request, principal.Id, directory, admission, encoding,
+                work, originalCancellationToken).ConfigureAwait(false);
+        }
         if (request.Action is EventFeedControlAction.Acknowledge or EventFeedControlAction.Release
             && request.OriginalFirstIssuancePublicCommandId == Guid.Empty)
         {
@@ -85,8 +91,12 @@ internal sealed class EventVectorFirstAdmitParent(OrleansNode node, PartitionHos
                         original.Envelope.ExpiresAt, admission, encoding, work,
                         originalCancellationToken).ConfigureAwait(false);
                 }
+                await codec.ObservePhaseAsync(original, GrainRequestPhase.EventVectorFirstCapturesReady,
+                    context, originalCancellationToken).ConfigureAwait(false);
                 var issued = EventVectorFirstAdmitPreparation.Create(partition, clock, original,
                     captures, admission, encoding, work, originalCancellationToken);
+                await codec.ObservePhaseAsync(original, GrainRequestPhase.EventVectorFirstAdmitPrepared,
+                    context, originalCancellationToken).ConfigureAwait(false);
                 var appended = await EventVectorIssuedAdmitCall.ExecuteAsync(node, original, principal, issued,
                     work, originalCancellationToken).ConfigureAwait(false);
                 result = await EventVectorFreshOpenCompletion.ExecuteAsync(runtime, node, partition,

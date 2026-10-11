@@ -59,6 +59,35 @@ source, resource measurements or performance comparisons.
 
 ## Resource qualification
 
+### Mandatory native SIMD — owner correction 2026-10-11
+
+REQ-SIMD-005/006 and AC-SIMD-005/006 in Search supersede earlier optional scalar
+product paths and hardware-disabled qualification profiles in this ADR and its
+historical stages. Core's Search validation owns the single shared native
+`KeyLoad.SimdRuntime.RequireHardwareSupport()` predicate; Server calls it before
+configuration or storage acquisition, and standalone similarity calls it before
+finite-vector work after its existing dimension validation. Native .NET chooses
+the supported CPU implementation. A missing accelerated implementation produces
+an explicit PlatformNotSupportedException; no scalar alternate is admitted.
+Bounded vector tails and independent numeric oracles retain their actual purpose.
+
+Ordered implementation/join: freeze Search requirements; integrate the kernel
+and existing metric operations; join early Server admission and normal-only test
+selection; join the complete CodeQuality producer/validator/operation batch and
+CI inventories; review the complete source; build/analyze/format once and execute
+the affected normal native50 whole operations. Kernel, Server/selector/CI and
+CodeQuality workers have disjoint implementation scopes with root as the shared
+contract and delivery owner. Current readers fail closed on retired profiles;
+immutable historical receipts are preserved without a legacy reader or data
+migration. Reverting this implementation must retain mandatory SIMD admission.
+
+Verification retains original vector error/numeric/cancellation/healthy-page
+operations, full source-manifest tamper/restore/verify flows, all normal coverage
+groups and critical thresholds, process recovery, actual SDK/official-MCP RF3,
+source/PE/PDB/TRX binding and joined resource cleanup. Final Linux and matched
+competitor/previous-code measurements remain required before qualification or
+performance claims. This accepted contract is not an implementation/PASS receipt.
+
 For every advertised operation family, REQ-RESOURCE-002 / AC-RESOURCE-002
 requires an actual workload, topology, read/acknowledgement semantics and an
 evidence-derived numeric latency/resource budget. Separate load-generator and
@@ -164,3 +193,14 @@ The fixture currently sends read responses without receiving the original JsonCo
 For the incomplete real Kestrel response, bind RequestAborted evidence directly to its SAME native token via one scoped CancellationTokenRegistration for the actual first handler. The closed completion signal proves native RequestAborted cancellation, not catch progress or SDK caller cancellation. Keep existing Write/Flush/release/SDK result and actual first/second handler settlement, original5s waits, catch/failure propagation and finally joins; dispose the native registration within that handler. No context.Abort, fake exception, new clock/timer, retry or limit change. The original timeout remains historical failed evidence; this is an actual signal ownership correction, not an inferred historical cause.
 
 Native source reads and checkOnly preview/reconstruction are source-only. Root must reproduce the original normal5 and scalar2 then full current-source Linux suites and real SDK/MCP RF3 mandatory gates. If original cancellation still occurs, it remains a failure; never extend deadlines or serialize ordinary independent controls to manufacture PASS.
+
+
+# TASK-NATIVE-WAL-SIMD-NORMAL-ONLY-001
+
+Owner 2026-10-11 SIMD-always correction supersedes the active cross-profile directions of REQ/AC-NATIVE-WAL-PROFILE-001/002. REQ-NATIVE-WAL-NORMAL-001 requires native SIMD eligibility before opening this test-owned store and four original real processes in seed → first-append → second-append → cold order. AC-NATIVE-WAL-NORMAL-001 maps to NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses with zero parameters: retain the 257 exact native corpus rows, both acknowledged command/receipt/native outcome appends, original retry/conflicting-body refusal, complete persisted models/outbox, byte-exact cold cut and same-root identity. This is process recovery, not power-loss or performance qualification.
+
+The parent passes only existing mode/root/phase (three arguments), never writes DOTNET/COMPlus intrinsics environment or exposes a retired profile selector. The actual native Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported) guard remains before storage acquisition. Ambient unavailable/disabled native hardware cannot count as success. Remove only exclusively retired options/binding/validator and protocol profile flags/index. Old four-argument shapes fail the unchanged strict argument-count refusal; no compatibility reader, migration or new authority. Capability output remains actual bounded native facts; completion is phase-only and emitted after genuine native store close and failure ledger settlement.
+
+Keep the original StorageTrialLease, 90-second original execution/30-second cleanup owners, bounded pipe readers, original initiating/fatal/cleanup exceptions, exact phase order/child count, each real process/task/handle join and original deadline/cancellation. Keep every independent corpus byte (including historically named scalar-append data), command ID, generated alias/field ID and complete receipt/effect/outcome/cut check. CrashHostApplication continues the same existing TryRun dispatch; no other mode or feature changes. ZoneTree issue182 and historical profile receipts remain immutable history; the existing genuine native checksums/dependency ownership are untouched.
+
+Ownership: existing Recovery StorageRecovery Cases/Processes; CrashHost StorageRecovery Protocol/Scenario and deletion of exclusively retired Configuration/Options+Binding. Append this superseding contract to StorageRecovery.md, Search.md and ADR035 before source. Root alone composes docs/current selectors, native full solution build/format/discovery and actual normal complete process execution. Audit task/contributor inventories for the renamed zero-argument method; do not create native UID or change strict counts before fresh original compiled census. No private broad build, new Docker, kernel/Server/Storage/Blob/Messaging/Graph/workflow/selector changes. Rollback is only the coherent current test/protocol admission tranche under owner direction; never restore active forced-scalar execution by silently accepting old arguments.

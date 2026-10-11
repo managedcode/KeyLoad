@@ -1,5 +1,7 @@
 # KeyLoad.Query
 
+- Owner correction 2026-10-11 requires native SIMD on every supported product execution. The current shared hardware guard rejects unsupported hardware; Search uses native vector blocks and bounded remainder tails. Retire active `unit-scalar` or forced-disabled-intrinsics qualification below while preserving complete normal operation tests and immutable original historical evidence. Current native TUnit selection is ADR-117; fixtures retain Aspire lifecycle ownership.
+
 ## Purpose and entry points
 - Owns query parsing, validation, execution, search and live-query behavior.
 - Entry points/types: `Features/QueryExecution/Execution/SqlParser.cs`, `Features/QueryExecution/Validation/QueryValidation.cs`, `Features/QueryExecution/Queries/QueryEngine.cs`, `Features/Search/Queries/SearchEngine.cs`, `Features/ChangeFeeds/Execution/LiveQueries.cs`, and query AST definitions.

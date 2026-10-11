@@ -195,10 +195,10 @@ function Assert-FcNativeUnitSelectorGroups([object[]] $Groups,
 
 function Get-FcNativeBaseSuite([string] $Suite) {
     if ($Suite -cin $script:FcNativeContributors.Suites) { return $Suite }
-    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix, $script:FcNativeContributors.ScalarUnitGroupPrefix)) {
+    foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix)) {
         if ($Suite.StartsWith($prefix, [StringComparison]::Ordinal)) {
             $suffix = $Suite.Substring($prefix.Length)
-            if ($suffix -cmatch '\A0[1-5]\z') { return $(if ($prefix -ceq $script:FcNativeContributors.UnitGroupPrefix) { 'unit' } else { 'unit-scalar' }) }
+            if ($suffix -cmatch '\A0[1-5]\z') { return 'unit' }
         }
     }
     ''
@@ -207,9 +207,8 @@ function Get-FcNativeBaseSuite([string] $Suite) {
 function Get-FcNativeExpectedSuiteCases([string] $Suite, [object] $Contributors, [object] $Inventory) {
     $base = Get-FcNativeBaseSuite $Suite
     if ($base -cin @('recovery','rf3')) { return @($Contributors[$base]) }
-    $prefix = if ($base -ceq 'unit') { $script:FcNativeContributors.UnitGroupPrefix } else {
-        $script:FcNativeContributors.ScalarUnitGroupPrefix
-    }
+    if ($base -cne 'unit') { throw $script:FcNativeContributors.Invalid }
+    $prefix = $script:FcNativeContributors.UnitGroupPrefix
     if (-not $Suite.StartsWith($prefix, [StringComparison]::Ordinal)) {
         throw $script:FcNativeContributors.Invalid
     }

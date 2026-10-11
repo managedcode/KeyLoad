@@ -67,13 +67,7 @@ internal sealed class EventProjectionPolicyTests
     [Test]
     public async Task AcLineage002RevokedReaderCannotSearchDerivedVectors()
     {
-        using var fixture = new EventProjectionFixture();
-        fixture.Apply(fixture.Request());
-        fixture.ConfigureReader([EventProjectionFixture.InputUse, EventProjectionFixture.VectorUse], revoked: true);
-
-        var error = (await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.SearchAsync))!;
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        await ClassificationLineageWholeFlow.RunAsync();
     }
 
     [Test]

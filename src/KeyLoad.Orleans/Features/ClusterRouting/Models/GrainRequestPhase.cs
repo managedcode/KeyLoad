@@ -23,7 +23,9 @@ internal enum GrainRequestPhase
     NativeTextOriginalPostingRead,
     DistributedSearchStatisticsCaptured,
     OnlineTextCaptured,
-    EventVectorFirstDispatchReserved
+    EventVectorFirstDispatchReserved,
+    EventVectorFirstCapturesReady,
+    EventVectorFirstAdmitPrepared
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

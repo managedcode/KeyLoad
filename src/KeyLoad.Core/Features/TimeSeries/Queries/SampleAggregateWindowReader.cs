@@ -40,10 +40,11 @@ internal static class SampleAggregateWindowReader
         var fill = new SampleWindowFill(request.From.UtcTicks, endTicks, request.Width.Ticks,
             checked((int)windowCount), budget);
         budget.Check();
-        var scan = view.VisitRange(scope.Prefix, request.MaxSamples, (_, value) =>
+        var scan = view.VisitRange(scope.Prefix, request.MaxSamples, (key, value) =>
         {
             budget.Check();
-            fill.Add(SampleAggregateReader.ReadSample(value));
+            fill.Add(SampleRawReadDecoder.Read(key, value,
+                request.Partition, request.Set, request.SeriesId));
             return true;
         }, SampleReadKeys.FromInclusive(request.Partition, request.Set, request.SeriesId, readFrom),
             SampleReadKeys.UntilExclusive(request.Partition, request.Set, request.SeriesId, request.UntilExclusive),

@@ -14,6 +14,7 @@ internal static class ProductionSourceManifestScriptAssertions
     private const string TaskAdapterName = "task-acceptance.ps1";
     private const string TaskVerifierName = "task-acceptance.verify.ps1";
     private const string TaskContractName = "task-acceptance.contract.json";
+    private const string TaskBindingName = "task-acceptance.kl065-binding.ps1";
     private const string DockerIgnoreName = ".dockerignore";
     private const string ScriptDirectory = "scripts/Features/CodeQuality";
     private const string NameProperty = "name";
@@ -71,7 +72,7 @@ internal static class ProductionSourceManifestScriptAssertions
     }
 
     private static bool IsIncludedScript(string name)
-        => name is TaskAdapterName or TaskVerifierName or TaskContractName
+        => name is TaskAdapterName or TaskVerifierName or TaskContractName or TaskBindingName
             || name.StartsWith(ScriptPrefix, StringComparison.Ordinal)
                 && AllowedExtensions.Any(extension => name.EndsWith(extension, StringComparison.Ordinal));
 

@@ -4,7 +4,6 @@ internal static class TestSuiteProtocol
 {
     internal const string AnalyzersSuite = "analyzers";
     internal const string UnitSuite = "unit";
-    internal const string ScalarUnitSuite = "unit-scalar";
     internal const string RecoverySuite = "recovery";
     internal const string Rf3Suite = "rf3";
     internal const string ComparisonSuite = "comparison";

@@ -32,7 +32,8 @@ internal static class EventVectorSettlementCompletion
     {
         if (request.Action is not (EventFeedControlAction.Acknowledge or EventFeedControlAction.Release)
             || prepared.Owned.Entries.Length != prepared.TargetEntries.Length
-            || prepared.Owned.Entries.Length != prepared.Owned.OriginalPinPhaseBytes.Length)
+            || prepared.Owned.Entries.Length != prepared.Owned.OriginalPinPhaseBytes.Length
+            || prepared.Owned.Entries.Length != prepared.CurrentSourcePolicyEpochs.Length)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid); }
         var action = request.Action == EventFeedControlAction.Acknowledge
             ? EventVectorControlAction.PublishAcknowledgement : EventVectorControlAction.CompleteRelease;
@@ -61,7 +62,7 @@ internal static class EventVectorSettlementCompletion
             ? EventVectorSourcePhaseRole.Advance : EventVectorSourcePhaseRole.Release;
         var mutation = EventVectorSettledSourceMutation.Create(prepared.Map,
             prepared.Owned.Entries[ordinal], prepared.TargetEntries[ordinal], settled.Phase,
-            role, parent.Envelope.ExpiresAt, admission);
+            role, parent.Envelope.ExpiresAt, prepared.CurrentSourcePolicyEpochs[ordinal], admission);
         var state = role == EventVectorSourcePhaseRole.Advance
             ? EventVectorMapState.Acknowledging : EventVectorMapState.Releasing;
         using var intended = new EventVectorOpenPinOwner(EventVectorPhasePreparation.Prepare(

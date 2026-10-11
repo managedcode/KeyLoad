@@ -7,6 +7,7 @@ internal static class ServerApplication
 {
     internal static async Task RunAsync(string[] args)
     {
+        global::KeyLoad.SimdRuntime.RequireHardwareSupport();
         _ = SerializationExecutionRegistration.Process.Value;
         var app = ServerConfiguration.Build(args);
         var failures = new List<Exception>();

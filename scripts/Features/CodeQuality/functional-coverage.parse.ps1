@@ -282,7 +282,7 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
         schemaVersion = $script:FunctionalCoverage.SchemaVersion
         module = 'KeyLoad.Query'
         requirements = @('REQ-CQ-009','AC-CQ-018','AC-CQ-019','AC-CQ-039')
-        scope = "Filter $Filter through Aspire unit and unit-scalar; KeyLoad.Query production module only"
+        scope = "Filter $Filter through native unit normal; KeyLoad.Query production module only"
         filter = $Filter
         lineHitUnion = $script:FunctionalCoverage.HitUnion
         mergedBranches = 'unmeasured; no branch-outcome identity union is available'
@@ -304,7 +304,7 @@ function Convert-FcReportToMarkdown([object] $Report) {
     $builder = [Text.StringBuilder]::new()
     [void] $builder.AppendLine('# KeyLoad.Query functional coverage')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through Aspire `unit` and `unit-scalar` (`unit-scalar` disables hardware intrinsics). This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
+    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through native `unit` normal with hardware intrinsics enabled. This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine('| Run | TRX cases | Native lines covered | Native lines valid | Native line percent | Native branch pairs |')
     [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|')

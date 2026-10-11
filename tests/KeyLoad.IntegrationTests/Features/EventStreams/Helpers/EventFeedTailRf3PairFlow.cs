@@ -30,10 +30,19 @@ internal static class EventFeedTailRf3PairFlow
         using var owned = CancellationTokenSource.CreateLinkedTokenSource(token);
         var progress = new EventFeedTailRf3Pair(policy.MaximumFrameBytes);
         var request = EventFeedTailRf3Flow.Request(offered, original) with { Limit = TwoDeliveries };
-        var actualOperation = EventFeedTailRf3PairOperations.SdkAsync(sdk, request, progress, owned.Token);
+        var resumeConsumer = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var actualOperation = EventFeedTailRf3PairOperations.SdkAsync(sdk, request, progress, resumeConsumer.Task, owned.Token);
         return await EventFeedTailRf3PairJoin.RunAsync(actualOperation, static value => ValueTask.FromResult(value), progress, original,
-            () => EventFeedTailRf3NextOffer.RunAsync(wave, credential, offered, original, remote,
-                nextEvent, originalSourceReceipt, publish: false, token), owned, token).ConfigureAwait(false);
+            NextWhilePausedAsync, owned, token).ConfigureAwait(false);
+
+        async Task<(EventFeedControlRequest Request, EventFeedControlResult Result)> NextWhilePausedAsync()
+        {
+            var next = await EventFeedTailRf3NextOffer.RunAsync(wave, credential, offered, original, remote,
+                nextEvent, originalSourceReceipt, publish: false, token).ConfigureAwait(false);
+            await progress.RequirePausedAsync(original).ConfigureAwait(false);
+            resumeConsumer.SetResult();
+            return next;
+        }
     }
 
     private static async Task<(EventFeedControlRequest Request, EventFeedControlResult Result)> OfficialAsync(

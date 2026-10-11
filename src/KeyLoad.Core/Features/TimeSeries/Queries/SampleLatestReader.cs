@@ -15,9 +15,11 @@ internal static class SampleLatestReader
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         SampleRecord? selected = null;
         budget.Check();
-        view.VisitReverseRange(scope.Prefix, OneSample, (_, value) =>
+        view.VisitReverseRange(scope.Prefix, OneSample, (key, value) =>
         {
-            selected = Project(database, scope, value);
+            var sample = SampleRawReadDecoder.Read(key, value,
+                request.Partition, request.Set, request.SeriesId);
+            selected = Project(database, scope, sample);
             return false;
         }, afterKey: retention is null ? null : SampleReadKeys.FromInclusive(request.Partition, request.Set,
             request.SeriesId, SampleRetentionStateReader.Before(retention)),
@@ -27,9 +29,8 @@ internal static class SampleLatestReader
         return new(selected);
     }
 
-    private static SampleRecord Project(DatabaseEngine database, SampleReadScope scope, ReadOnlySpan<byte> value)
+    private static SampleRecord Project(DatabaseEngine database, SampleReadScope scope, SampleRecord sample)
     {
-        var sample = NativeSerialization.Deserialize<SampleRecord>(value);
         return sample with
         {
             TagsJson = database.Authorization.Project(scope.Principal, scope.Resource.FieldPolicies,

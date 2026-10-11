@@ -13,7 +13,6 @@ internal static class TestSuiteResources
     private const string BenchmarkTargetEnvironment = "Benchmarks__Target";
     private const string BenchmarkScaleEnvironment = "Benchmarks__ScaleProfile";
     private const string BenchmarkVectorEnvironment = "Benchmarks__VectorProfile";
-    private const string IntrinsicsEnvironment = "DOTNET_EnableHWIntrinsic";
     private const string NoBuildArgument = "--no-build";
     private const string NoRestoreArgument = "--no-restore";
     private const string ConfigurationArgument = "--configuration";
@@ -31,7 +30,6 @@ internal static class TestSuiteResources
         const string SolutionFileName = "KeyLoad.slnx";
         const string SourceCheckoutRequired = "The test AppHost must run from the KeyLoad source checkout.";
         const string DefaultResultsDirectoryName = "TestResults";
-        const string DisabledIntrinsicsValue = "0";
 
         var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, SourceRootRelativePath));
         if (!File.Exists(Path.Combine(root, SolutionFileName)))
@@ -65,10 +63,6 @@ internal static class TestSuiteResources
         {
             runner.WithEnvironment(TestSuiteSelectionValidator.OpenLoopNativeRateEnvironment,
                 rate.ToString(CultureInfo.InvariantCulture));
-        }
-        if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)
-        {
-            runner.WithEnvironment(IntrinsicsEnvironment, DisabledIntrinsicsValue);
         }
     }
 

@@ -15,10 +15,14 @@ internal static class NativeCapabilityRegistrationLogging
         LocalDevelopmentContainerImage image, NativeDiscoveryOmissionProfile? profile)
     {
         var resources = Enumerable.Range(1, 6).Select(index =>
-            builder.AddContainer("marker-node-" + index, image.Reference)).ToArray();
+            builder.AddContainer("marker-node-" + index, image.Reference)
+                .WithHttpEndpoint(targetPort: TwoRf3ProfileProtocol.HttpPort, name: "http", isProxied: false)).ToArray();
         foreach (var resource in resources)
         { ClusterResourceSettings.Apply(builder, resource, null); }
         profile?.Apply(resources);
+        var registerOwners = TwoRf3Profile.ReadRegistration(builder.Configuration);
+        TwoRf3RemoteReadResources.Configure(KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(builder).Control,
+            resources, registerOwners);
         for (var index = 0; index < resources.Length; index++)
         {
             var environment = new Dictionary<string, object>(StringComparer.Ordinal);
@@ -27,7 +31,7 @@ internal static class NativeCapabilityRegistrationLogging
             foreach (var callback in resources[index].Resource.Annotations.OfType<EnvironmentCallbackAnnotation>())
             { await callback.Callback(context).ConfigureAwait(false); }
             await Assert.That(environment[DefaultKey]).IsEqualTo("Warning");
-            if (profile is not null && index < 3)
+            if (registerOwners && index < 3)
             { await Assert.That(environment[WorkerKey]).IsEqualTo("Information"); }
             else
             { await Assert.That(environment.ContainsKey(WorkerKey)).IsFalse(); }

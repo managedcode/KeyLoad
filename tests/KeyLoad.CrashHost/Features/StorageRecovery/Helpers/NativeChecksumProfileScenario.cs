@@ -18,14 +18,13 @@ internal static class NativeChecksumProfileScenario
         if (args.Length != NativeChecksumProfileProtocol.ArgumentCount)
         { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
         var phase = args[NativeChecksumProfileProtocol.PhaseIndex];
-        var profile = args[NativeChecksumProfileProtocol.ProfileIndex];
-        RequireProfile(profile);
+        RequireHardwareEligibility();
         var root = args[NativeChecksumProfileProtocol.RootIndex];
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RunOwnedPhaseAsync(root, phase, failures), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        Console.WriteLine(NativeChecksumProfileProtocol.CompletionSignalPrefix + phase + NativeChecksumProfileProtocol.SignalSeparator + profile);
-        Console.WriteLine($"{NativeChecksumProfileProtocol.CapabilitySignalPrefix}{phase}{NativeChecksumProfileProtocol.SignalSeparator}{profile}"
+        Console.WriteLine(NativeChecksumProfileProtocol.CompletionSignalPrefix + phase);
+        Console.WriteLine($"{NativeChecksumProfileProtocol.CapabilitySignalPrefix}{phase}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.VectorCapability}{Vector.IsHardwareAccelerated}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.Sse2Capability}{Sse2.IsSupported}"
             + $"{NativeChecksumProfileProtocol.SignalSeparator}{NativeChecksumProfileProtocol.Avx2Capability}{Avx2.IsSupported}"
@@ -50,14 +49,9 @@ internal static class NativeChecksumProfileScenario
         _ => throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid)
     };
 
-    private static void RequireProfile(string profile)
+    private static void RequireHardwareEligibility()
     {
-        var settings = NativeChecksumProfileOptionsBinding.Child().Value;
-        if (profile is not (NativeChecksumProfileProtocol.Enabled or NativeChecksumProfileProtocol.Disabled)
-            || settings.DotnetIntrinsics != profile
-            || settings.ComPlusIntrinsics != profile
-            || profile == NativeChecksumProfileProtocol.Disabled && (Vector.IsHardwareAccelerated || Sse2.IsSupported || Avx2.IsSupported || Sse42.IsSupported || AdvSimd.IsSupported)
-            || profile == NativeChecksumProfileProtocol.Enabled && !(Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)))
+        if (!(Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)))
         { throw new InvalidOperationException(NativeChecksumProfileProtocol.Invalid); }
     }
 

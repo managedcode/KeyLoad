@@ -18,6 +18,7 @@ internal static class EventFeedTailRf3Flow
     {
         var request = Request(offered, original);
         var policy = new CqrsStreamClientOptions { MaximumStreamBytes = new DatabaseLimits().MaxQueryReadBytes };
+        await EventFeedTailRf3Cancellation.RunAsync(wave, credential, offered, original, token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);
         var sdk = new KeyLoadClient(http, credential, IntegrationClientOptions.Execution(), Options.Create(policy));
         var progress = NoDeliveries;
@@ -41,7 +42,6 @@ internal static class EventFeedTailRf3Flow
         await Assert.That(completed).IsEqualTo(OneDelivery);
         await OfficialAsync(wave, credential, request with { CommandId = Guid.NewGuid() }, original, policy, token);
         await SqlRf3Protocol.EqualAsync(original, await EventFeedOfferRf3Flow.RoutesAsync(wave, credential, offered, token));
-        await EventFeedTailRf3Cancellation.RunAsync(wave, credential, offered, original, token).ConfigureAwait(false);
     }
 
     internal static EventFeedControlRequest Request(EventFeedControlRequest offered, EventFeedControlResult original)
