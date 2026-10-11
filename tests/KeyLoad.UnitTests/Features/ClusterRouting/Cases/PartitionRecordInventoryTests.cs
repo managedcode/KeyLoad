@@ -6,14 +6,17 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    internal const int ExpectedFamilyCount = 68;
+    internal const int ExpectedFamilyCount = 78;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     internal static readonly string[] ExpectedFamilies =
     [
         "adjacency", "aggregate-snapshot-v1", "blob-head-v1", "blob-part-v1", "blob-partmeta-v1",
         "blob-state-v1", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
-        "event-id", "event-sequence", "graph-cross-partition-capacity", "graph-cross-partition-intent",
+        "event-id", "event-sequence", "event-vector-capacity-v1", "event-vector-coverage-proof-v1",
+        "event-vector-map-v1", "event-vector-offer-v1", "event-vector-page-v1",
+        "event-vector-parent-call-v1", "event-vector-parent-outcome-index-v1", "event-vector-source-capacity-v1",
+        "event-vector-source-phase-v1", "event-vector-source-pin-v1", "graph-cross-partition-capacity", "graph-cross-partition-intent",
         "graph-cross-reverse-adjacency", "graph-edge-owner-version", "inbox", "index", "lease", "message-body", "message-meta",
         "online-text-current", "outbox", "outbox-head", "outcome-locator-v1", "outcome-locator-v2", "outcome-v2",
         "processing-inbox", "processing-inbox-capacity", "projection-consumer", "projection-receipt", "queue-counters",

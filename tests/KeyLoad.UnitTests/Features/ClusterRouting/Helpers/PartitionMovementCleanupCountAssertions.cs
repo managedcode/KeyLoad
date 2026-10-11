@@ -7,7 +7,7 @@ internal static class PartitionMovementCleanupCountAssertions
     private const string BlobState = "blob-state-v1";
     private const string BlobHead = "blob-head-v1";
     private const string TargetPage = "partition-move-target-page-v1";
-    private const int CleanupFamilyCount = 69;
+    private const int CleanupFamilyCount = 79;
     private const long RetireSourceCommits = 3;
     private const long AbortSourceCommits = 2;
     private const long AbortTargetCommits = 1;

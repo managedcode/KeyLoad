@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Executes genuine capture/install/finalize/publication/retirement and verifies both cold native owners.</summary>
 internal static class ControlledPartitionMovementTerminalOperation
 {
-    private const long FixedControlEntries = 236;
+    private const long FixedControlEntries = 266;
     private const long ControlEntriesPerPage = 4;
     private const long FixedTargetEntries = 3;
     private const long TargetEntriesPerPage = 2;
