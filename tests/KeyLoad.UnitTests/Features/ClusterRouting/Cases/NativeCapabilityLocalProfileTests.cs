@@ -32,7 +32,12 @@ internal sealed class NativeCapabilityLocalProfileTests
             var builder = Create(fixture);
             var local = LocalDevelopmentContainerImage.Read(builder)!;
             await Assert.That(TwoRf3QueryProbe.Create(builder, fixture.DataRoot, null, local)).IsNotNull();
-            await Assert.That(NativeDiscoveryOmissionProfile.Create(builder, fixture.DataRoot, null, local)).IsNotNull();
+            var profile = NativeDiscoveryOmissionProfile.Create(builder, fixture.DataRoot, null, local);
+            await Assert.That(profile).IsNotNull();
+            await NativeCapabilityRegistrationLogging.ProveAsync(builder, local, profile!).ConfigureAwait(false);
+            var ordinary = Create(fixture, Omission, "false");
+            await Assert.That(NativeDiscoveryOmissionProfile.Create(ordinary, fixture.DataRoot, null, local)).IsNull();
+            await NativeCapabilityRegistrationLogging.ProveAsync(ordinary, local, null).ConfigureAwait(false);
             foreach (var setting in new[] { RemoteQueryKey,
                 ProtectedKey, Omission + "Enabled", Omission })
             {

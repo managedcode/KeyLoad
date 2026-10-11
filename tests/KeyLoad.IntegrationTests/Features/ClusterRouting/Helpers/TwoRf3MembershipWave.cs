@@ -31,6 +31,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal RequestCqrsProbeFixture? queryControls;
     internal MovementFrameObservationFixture? frameObservation;
     internal bool nativeDiscoveryOmissionSelected;
+    internal bool EventVectorReservedProbe { get; set; }
     internal KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;

@@ -22,7 +22,7 @@ internal static class OrleansSiloConfiguration
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
         IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs, IRemotePartitionQueryRouter? remoteQueries, IRemoteDistributedSearchRouter? distributedSearch,
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
-        NativeDiscoveryOmissionOwner? discoveryOmission, CancellationToken startupCancellation)
+        NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
@@ -57,6 +57,8 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(movementDispatcher); }
         if (movementDispatcher is IPartitionMovementParent movementParent)
         { builder.Services.AddSingleton(movementParent); }
+        if (eventVectorParent is not null)
+        { builder.Services.AddSingleton(eventVectorParent); }
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,

@@ -5,6 +5,9 @@ namespace KeyLoad.Orleans;
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(GrainRoutingProtocol.ProgressAlias)]
 public sealed record GrainRequestProgress([property: global::Orleans.Id(0)] Guid RequestId)
 {
+    /// <summary>Gets one complete original persisted offer observed by a read-only event feed tail.</summary>
+    [global::Orleans.Id(5), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public EventFeedTailProgress? EventFeedTail { get; init; }
     /// <summary>Gets the completed bounded administrative ANN phase, when applicable.</summary>
     [global::Orleans.Id(1), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public AnnMaintenancePhase? AnnPhase { get; init; }

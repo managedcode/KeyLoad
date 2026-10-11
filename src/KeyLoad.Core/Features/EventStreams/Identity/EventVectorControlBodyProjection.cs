@@ -29,8 +29,14 @@ internal static class EventVectorControlBodyProjection
             source?.OriginalPosition, source?.ControlPolicyEpoch)
         {
             OriginalParentExpiresAt = phase.OriginalParentExpiresAt,
+            OriginalParentRequestId = phase.OriginalParentRequestId,
+            OriginalSourcePageDigest = EventVectorIdentityInputs.Digest(phase.OriginalSourcePageBytes.IsEmpty
+                ? ReadOnlyMemory<byte>.Empty : SHA256.HashData(phase.OriginalSourcePageBytes.Span)),
             OriginalCleanupFrontierSemanticDigest = EventVectorIdentityInputs.Digest(
-                EventVectorCleanupFrontierIdentity.Digest(phase.OriginalCleanupFrontierBytes, admission))
+                EventVectorCleanupFrontierIdentity.Digest(phase.OriginalCleanupFrontierBytes, admission)),
+            OriginalCapturedFirstOpenPhaseSemanticDigest = EventVectorIdentityInputs.Digest(
+                EventVectorFirstPhaseCarrier.SemanticDigest(phase.OriginalCapturedFirstOpenPhaseBytes, admission)),
+            OriginalFirstIssuancePublicCommandId = phase.OriginalFirstIssuancePublicCommandId
         };
     }
 
@@ -62,7 +68,8 @@ internal static class EventVectorControlBodyProjection
         ExpectedCoverageGeneration = original.ExpectedCoverageGeneration,
         Cursor = NullableText(original.Cursor),
         OfferDigest = NullableText(original.OfferDigest),
-        Limit = original.Limit
+        Limit = original.Limit,
+        OriginalFirstIssuancePublicCommandId = original.OriginalFirstIssuancePublicCommandId
     };
 
     private static string? NullableText(string? value)

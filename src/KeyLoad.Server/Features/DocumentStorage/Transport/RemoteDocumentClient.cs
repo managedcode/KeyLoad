@@ -81,6 +81,13 @@ internal sealed class RemoteDocumentClient : IDisposable
         CancellationToken cancellationToken)
         => RemoteControlledBlobExchange.ReadAsync(http, pins, options, membership, clock, call, wireObserver, cancellationToken);
 
+    internal Task<KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendEventVectorAsync(
+        RegisteredPhysicalOwnerV1 destination, KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall,
+        KeyLoad.Server.Features.EventStreams.EventVectorRemoteEncoding encoding,
+        KeyLoad.Core.ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        => KeyLoad.Server.Features.EventStreams.EventVectorRemoteExchange.SendAsync(http, pins, options,
+            membership, clock, destination, originalCall, encoding, work, originalCancellationToken);
+
     internal Task<KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerResult> TransferAsync(
         KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerCall call, CancellationToken token)
         => KeyLoad.Server.Features.Messaging.RemoteTransferPeerExchange.SendAsync(http, pins, options, membership, clock, call, token);

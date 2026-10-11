@@ -35,6 +35,10 @@ public sealed partial class DatabaseEngine
         }
         switch (operation.Kind)
         {
+            case OperationKind.EventFeedControl:
+                return AuthorizeEventVectorControl(view, principal, operation);
+            case OperationKind.EventFeedSourcePhase:
+                return AuthorizeEventVectorSource(view, principal, operation);
             case OperationKind.Batch:
                 var transferProof = ReadRemoteTransferNativeProof(operation);
                 return transferProof is null

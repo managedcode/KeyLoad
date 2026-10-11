@@ -14,7 +14,7 @@ internal static class TwoRf3WaveArguments
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
         RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null,
-        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null)
+        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false)
     {
         var args = new List<string>
         {
@@ -48,6 +48,8 @@ internal static class TwoRf3WaveArguments
             args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.RootArgument + nativeDiscoveryOmission.Root);
             args.Add(KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Protocol.SessionArgument + nativeDiscoveryOmission.SessionId);
         }
+        if (eventVectorReservedProbe)
+        { args.Add("--KeyLoadTests:EventVectorReservedProbe=true"); }
         if (selection is not null)
         {
             args.AddRange(selection.CreateWaveArguments());

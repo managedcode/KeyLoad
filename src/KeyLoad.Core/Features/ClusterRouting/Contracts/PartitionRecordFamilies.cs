@@ -19,6 +19,16 @@ internal static class PartitionRecordFamilies
     internal const string EventFeed = "event-feed";
     internal const string EventIdentity = "event-id";
     internal const string EventSequence = "event-sequence";
+    internal const string EventVectorCapacity = "event-vector-capacity-v1";
+    internal const string EventVectorCoverageProof = "event-vector-coverage-proof-v1";
+    internal const string EventVectorMap = "event-vector-map-v1";
+    internal const string EventVectorOffer = "event-vector-offer-v1";
+    internal const string EventVectorPage = "event-vector-page-v1";
+    internal const string EventVectorParentCall = "event-vector-parent-call-v1";
+    internal const string EventVectorParentOutcomeIndex = "event-vector-parent-outcome-index-v1";
+    internal const string EventVectorSourceCapacity = "event-vector-source-capacity-v1";
+    internal const string EventVectorSourcePhase = "event-vector-source-phase-v1";
+    internal const string EventVectorSourcePin = "event-vector-source-pin-v1";
     internal const string GraphCrossPartitionCapacity = "graph-cross-partition-capacity";
     internal const string GraphCrossPartitionIntent = "graph-cross-partition-intent";
     internal const string GraphCrossReverseAdjacency = "graph-cross-reverse-adjacency";
@@ -90,6 +100,16 @@ internal static class PartitionRecordFamilies
         EventFeed,
         EventIdentity,
         EventSequence,
+        EventVectorCapacity,
+        EventVectorCoverageProof,
+        EventVectorMap,
+        EventVectorOffer,
+        EventVectorPage,
+        EventVectorParentCall,
+        EventVectorParentOutcomeIndex,
+        EventVectorSourceCapacity,
+        EventVectorSourcePhase,
+        EventVectorSourcePin,
         GraphCrossPartitionCapacity,
         GraphCrossPartitionIntent,
         GraphCrossReverseAdjacency,

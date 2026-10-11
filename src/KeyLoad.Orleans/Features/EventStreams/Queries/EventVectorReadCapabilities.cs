@@ -43,9 +43,22 @@ internal static class EventVectorReadCapabilities
         CancellationToken originalCancellationToken)
     {
         var input = GrainNativePayload.Read<EventVectorOutcomeReadRequest>(request.Payload);
+        if (input.OriginalFirstIssuanceRequest is { } first)
+        {
+            if (input.Version != Version || first.Version != Version
+                || input.OriginalSourcePhase is not null || input.OriginalControlRequest is not null
+                || input.ControlOwner is null || first.OriginalPublicRequest is null
+                || !input.FreshSourceAuthorizationWitness.IsEmpty || input.TailObservation)
+            { throw Errors.Fail(ErrorCode.Validation, Invalid); }
+            RequireOwner(input.Version, input.ControlOwner, actualOwner);
+            RequireOwner(first.Version, first.ControlOwner, actualOwner);
+            return database.ReadEventVectorFirstIssuance(principal.Id, first.OriginalPublicRequest,
+                actualOwner, work, originalCancellationToken);
+        }
         if (input.OriginalSourcePhase is { } source)
         {
-            if (input.OriginalControlRequest is not null || input.ControlOwner is not null)
+            if (input.OriginalControlRequest is not null || input.ControlOwner is not null
+                || input.OriginalFirstIssuanceRequest is not null || !input.FreshSourceAuthorizationWitness.IsEmpty || input.TailObservation)
             { throw Errors.Fail(ErrorCode.Validation, Invalid); }
             RequireOwner(input.Version, source.SourceOwner, actualOwner);
             return database.ReadEventVectorSourceOutcome(principal.Id, source, work);
@@ -53,7 +66,12 @@ internal static class EventVectorReadCapabilities
         if (input.OriginalControlRequest is not { } control || input.ControlOwner is null)
         { throw Errors.Fail(ErrorCode.Validation, Invalid); }
         RequireOwner(input.Version, input.ControlOwner, actualOwner);
-        return database.ReadEventVectorParentOutcome(principal.Id, control, actualOwner, work,
+        if (input.TailObservation)
+        {
+            return database.ReadEventVectorTailOffer(principal.Id, control, actualOwner,
+                input.FreshSourceAuthorizationWitness, work, originalCancellationToken);
+        }
+        return database.ReadEventVectorParentOutcome(principal.Id, control, actualOwner, input.FreshSourceAuthorizationWitness, work,
             originalCancellationToken);
     }
 
@@ -62,7 +80,7 @@ internal static class EventVectorReadCapabilities
     {
         var input = GrainNativePayload.Read<EventVectorSourcesReadRequest>(request.Payload);
         RequireOwner(input.Version, input.SourceOwner, actualOwner);
-        return database.ReadEventVectorSources(principal.Id, input.Requests, input.SourceOwner, work);
+        return database.ReadEventVectorPinnedSources(principal.Id, input, work);
     }
 
     private static void RequireOwner(int version, PhysicalShardRecord supplied, PhysicalShardRecord actual)

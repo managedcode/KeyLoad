@@ -14,10 +14,10 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
     private readonly McpExecutionOptions settings = options.Value;
     private const int ContainerTokens = 2;
     private const int ScalarTokens = 1;
-    internal const int PrincipalProperties = 11;
+    internal const int PrincipalProperties = 12;
     internal const int GrantProperties = 3;
     private const int PrincipalScalarValues = 8;
-    private const int PrincipalArrayValues = 3;
+    private const int PrincipalArrayValues = 4;
     private const int PrincipalMinimumTokens = ContainerTokens + PrincipalProperties + PrincipalScalarValues + PrincipalArrayValues * ContainerTokens;
     private const int GrantMinimumTokens = ContainerTokens + GrantProperties * (ScalarTokens + ScalarTokens);
     internal static McpFrameShape Scalar => new(ScalarTokens, GetScalarPropertyCountEmptyCount);

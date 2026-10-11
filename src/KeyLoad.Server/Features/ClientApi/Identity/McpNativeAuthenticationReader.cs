@@ -64,6 +64,7 @@ internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, IOpti
         shape = Scalar<bool, TInput>(ref reader, shape, NextField);
         shape = Expires(ref reader, shape);
         shape = Scalar<long, TInput>(ref reader, shape, NextField);
+        shape = projection.Add(shape, collections.Array<string, TInput>(ref reader, NextField));
         McpAuthenticationNativeFields.End(ref reader);
         McpAuthenticationNativeFields.Record(ref reader, reference, typeof(PrincipalRecord), shape);
         return shape;

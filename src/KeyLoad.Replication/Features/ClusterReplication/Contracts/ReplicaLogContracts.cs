@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Replication;
 
@@ -25,6 +26,11 @@ public interface IDurableReplicaLog : IDisposable
     /// <param name="index">Requested replica position.</param>
     /// <returns>The owned decoded entry, or null outside the retained suffix.</returns>
     ReplicaEntry? ReadEntry(long index);
+    /// <summary>Admits actual stored native key/value work before copying or decoding one retained entry.</summary>
+    /// <param name="index">Requested replica position.</param>
+    /// <param name="observer">Original owning work charge, invoked before copy including a missing lookup.</param>
+    /// <returns>The owned decoded entry, or null outside the retained suffix.</returns>
+    ReplicaEntry? ReadEntry(long index, StorageReadObserver observer);
     /// <summary>Returns the retained entry or checkpoint term at a position.</summary>
     /// <param name="index">Requested replica position, including initial position zero.</param>
     /// <returns>The term established at the requested position.</returns>

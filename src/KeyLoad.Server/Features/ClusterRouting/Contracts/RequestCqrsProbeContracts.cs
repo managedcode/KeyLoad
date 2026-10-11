@@ -30,7 +30,8 @@ internal enum RequestCqrsProbePhase
     NativeTextOriginalPostingRead,
     DistributedSearchStatisticsCaptured,
     OnlineTextCaptured,
-    ReplicaSnapshotReadiness
+    ReplicaSnapshotReadiness,
+    EventVectorFirstDispatchReserved
 }
 
 internal enum RequestCqrsProbeAction

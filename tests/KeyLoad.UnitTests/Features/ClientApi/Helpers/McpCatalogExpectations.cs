@@ -124,13 +124,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    private const string DashboardName = "keyload_admin_dashboard";
-    private const string DashboardRoute = "/v1/admin/dashboard";
-    private const string ResourcesListName = "keyload_admin_resources_list";
-    private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
-    private const string QueueBrowseName = "keyload_admin_queue_browse";
-    private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 82;
+    internal const int Count = 87;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
@@ -189,6 +183,11 @@ internal static class McpCatalogExpectations
         (PrincipalsConfigure, PrincipalsConfigureRoute, null, OperationKind.ConfigurePrincipal),
         (CredentialsConfigure, CredentialsConfigureRoute, null, OperationKind.ConfigureApiKey),
         (AdminDispatch, AdminDispatchRoute, null, OperationKind.SetDispatch),
+        ("keyload_tail_event_feed", "/v1/event-feeds/tail", null, OperationKind.EventFeedControl),
+        ("keyload_open_event_feed", "/v1/event-feeds/open", null, OperationKind.EventFeedControl),
+        ("keyload_offer_event_feed", "/v1/event-feeds/offer", null, OperationKind.EventFeedControl),
+        ("keyload_acknowledge_event_feed", "/v1/event-feeds/acknowledge", null, OperationKind.EventFeedControl),
+        ("keyload_release_event_feed", "/v1/event-feeds/release", null, OperationKind.EventFeedControl),
         (SubscriptionsConfigure, SubscriptionsConfigureRoute, null, OperationKind.ConfigureSubscription),
         (SubscriptionsSeek, SubscriptionsSeekRoute, null, OperationKind.SeekSubscription),
         (SubscriptionsReceive, SubscriptionsReceiveRoute, null, OperationKind.ReceiveSubscription),
@@ -200,9 +199,7 @@ internal static class McpCatalogExpectations
         (ProjectionsRelease, ProjectionsReleaseRoute, null, OperationKind.ReleaseProjectionConsumer),
         (OutboxPurge, OutboxPurgeRoute, null, OperationKind.PurgeOutbox),
         .. BlobAgentCases.All().Select(item => (item.Name, item.Route, item.ReadKind, item.CommandKind)),
-        (DashboardName, DashboardRoute, GrainReadKind.AdminDashboard, null),
-        (ResourcesListName, ResourcesListRoute, GrainReadKind.AdminResources, null),
-        (QueueBrowseName, QueueBrowseRoute, GrainReadKind.AdminQueue, null),
+        .. McpAdminDashboardCatalogEntries.All,
         (SqlOperationProtocol.ToolName, SqlOperationProtocol.Route, null, null)
     ];
 }

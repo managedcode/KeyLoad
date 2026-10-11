@@ -10,6 +10,14 @@ internal sealed record EventVectorControlResult(
     [property: Orleans.Id(EventVectorControlResult.SourcePhaseField)] EventVectorSourcePhase? SourcePhase,
     [property: Orleans.Id(EventVectorControlResult.ReceiptField)] CommitReceipt Receipt)
 {
+    internal const int PublicResultField = 7;
+    [Orleans.Id(PublicResultField)]
+    public ReadOnlyMemory<byte> OriginalPublicResultBytes { get; init; }
+
+    internal const int SourcePageField = 6;
+    [Orleans.Id(SourcePageField)]
+    public ReadOnlyMemory<byte> OriginalSourcePageBytes { get; init; }
+
     internal const string SerializerAlias = "keyload.core.event-vector-control-result.v1";
     internal const int VersionField = 0;
     internal const int CommandField = 1;

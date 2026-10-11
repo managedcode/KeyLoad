@@ -19,6 +19,13 @@ internal sealed record EventVectorParentOutcomeIndex(
     [Orleans.Id(ScopesField)]
     public ImmutableArray<EventVectorAuthorizationScope> OriginalAuthorizedSourceScopes { get; init; }
 
+    internal const int FirstOpenPhaseField = 10;
+    internal const int FirstOpenCommandField = 11;
+    [Orleans.Id(FirstOpenPhaseField)]
+    public ReadOnlyMemory<byte> OriginalFirstOpenPhaseBytes { get; init; }
+    [Orleans.Id(FirstOpenCommandField)]
+    public Guid OriginalFirstOpenNativeCommandId { get; init; }
+
     internal const string SerializerAlias = "keyload.core.event-vector-parent-outcome-index.v1";
     internal const uint Field0 = 0;
     internal const uint Field1 = 1;

@@ -59,6 +59,10 @@ internal sealed class RequestCqrsProbeJson
             || value.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness
                 && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.NodeStatus
                     || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
+            || value.Phase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved
+                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold
+                    || value.Partition is not null || value.SourceRequestId is not null || value.SourceArmId is not null
+                    || value.TargetVoter is not null)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))
@@ -180,6 +184,9 @@ internal sealed class RequestCqrsProbeJson
         if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != fields.Length)
         { throw Invalid(); }
     }
+
+    internal System.Text.Json.Serialization.Metadata.JsonTypeInfo<RequestCqrsEventVectorExpiryRecord> EventVectorExpiryTypeInfo
+        => Context.RequestCqrsEventVectorExpiryRecord;
 
     internal System.Text.Json.Serialization.Metadata.JsonTypeInfo<RequestCqrsReplicaSnapshotRecord> ReplicaSnapshotTypeInfo
         => Context.RequestCqrsReplicaSnapshotRecord;

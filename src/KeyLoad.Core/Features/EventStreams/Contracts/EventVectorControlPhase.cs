@@ -15,6 +15,21 @@ internal sealed record EventVectorControlPhase(
     [property: Orleans.Id(9)] ReadOnlyMemory<byte> OriginalEncodedEntries,
     [property: Orleans.Id(10)] ReadOnlyMemory<byte> OriginalEntryChecksum)
 {
+    internal const int ParentRequestField = 17;
+    [Orleans.Id(ParentRequestField)]
+    public Guid OriginalParentRequestId { get; init; }
+
+    internal const int SourcePageField = 16;
+    [Orleans.Id(SourcePageField)]
+    public ReadOnlyMemory<byte> OriginalSourcePageBytes { get; init; }
+
+    internal const int CapturedFirstPhaseField = 14;
+    internal const int FirstIssuanceReferenceField = 15;
+    [Orleans.Id(CapturedFirstPhaseField)]
+    public ReadOnlyMemory<byte> OriginalCapturedFirstOpenPhaseBytes { get; init; }
+    [Orleans.Id(FirstIssuanceReferenceField)]
+    public Guid OriginalFirstIssuancePublicCommandId { get; init; }
+
     internal const int CleanupFrontierField = 13;
     [Orleans.Id(CleanupFrontierField)]
     public ReadOnlyMemory<byte> OriginalCleanupFrontierBytes { get; init; }

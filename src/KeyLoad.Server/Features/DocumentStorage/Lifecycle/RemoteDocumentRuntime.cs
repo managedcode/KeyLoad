@@ -23,6 +23,8 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     internal IRemotePartitionQueryRouter? QueryRouter { get; private set; }
     internal IRemoteDistributedSearchRouter? DistributedSearchRouter { get; private set; }
     internal RemoteDocumentEndpoint? Endpoint { get; private set; }
+    internal global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime? EventVectors { get; private set; }
+    internal IEventVectorParent? EventVectorParent { get; private set; }
 
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
@@ -87,7 +89,26 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
             Endpoint = new(options.Node, receiver, work, controlled, controlledBlob,
                 options.Membership, options.GrainRouting, clock, transfer);
         }
+        EventVectors = global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime.Create(node, partition, options, work, clock);
+        if (settings.Mode == MembershipAuthoritySettingsProtocol.Authority)
+        {
+            EventVectorParent = new global::KeyLoad.Server.Features.EventStreams.EventVectorFirstAdmitParent(node,
+            partition, this, options.Node, options.Core.DatabaseLimits, options.GrainRouting, clock);
+        }
     }
+
+    internal Task<global::KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendLocalEventVectorAsync(
+        global::KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall, KeyLoad.Core.ReadExecutionBudget originalWork,
+        CancellationToken originalCancellationToken)
+        => global::KeyLoad.Server.Features.EventStreams.EventVectorLocalCall.ExecuteAsync(work, EventVectors?.Local,
+            originalCall, originalWork, originalCancellationToken);
+
+    internal Task<global::KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendRemoteEventVectorAsync(
+        RegisteredPhysicalOwnerV1 destination, global::KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall,
+        global::KeyLoad.Server.Features.EventStreams.EventVectorRemoteEncoding encoding, KeyLoad.Core.ReadExecutionBudget originalWork,
+        CancellationToken originalCancellationToken)
+        => global::KeyLoad.Server.Features.EventStreams.EventVectorBorrowedRemoteCall.ExecuteAsync(work, client,
+            destination, originalCall, encoding, originalWork, originalCancellationToken);
 
     public ValueTask DisposeAsync()
     {
@@ -99,6 +120,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(work.StopAsync, failures).ConfigureAwait(false);
+        EventVectorParent = null;
+        if (EventVectors is not null)
+        { ServerFailureObserver.Observe(EventVectors.Dispose, failures); }
         if (Endpoint is not null)
         {
             try

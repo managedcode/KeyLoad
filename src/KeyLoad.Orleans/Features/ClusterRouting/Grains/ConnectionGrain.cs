@@ -89,7 +89,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             phaseSettlement?.SetIdentity(request);
             purpose.Bind(request);
             stage = GrainFailureStage.CapabilityExecution;
-            command = request.Envelope.CommandKind is not null;
+            command = request.Envelope.CommandKind is not null && !EventVectorRequestScope.IsReceivingOnly(request);
             await writer.StartedAsync(new GrainRequestProgress(requestId)).ConfigureAwait(true);
             if (codec.HasPhaseObserver)
             {
@@ -102,7 +102,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             var controlledReply = await TryExecuteControlledAsync(request, writer).ConfigureAwait(true);
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
-            if (request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
+            if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose
+                || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
             { reply = await ExecuteParentAsync(request, writer, purpose).ConfigureAwait(true); }
             else if (command)
             {
@@ -155,6 +156,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
     {
+        if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose)
+        { return await EventVectorParentExecution.ExecuteAdmitAsync(request, services, clock, codec, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true); }
         if (request.Envelope.CommandKind == OperationKind.MovePartition)
         {
             var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, codec,

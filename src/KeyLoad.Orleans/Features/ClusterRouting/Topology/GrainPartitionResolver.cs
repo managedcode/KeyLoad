@@ -7,6 +7,7 @@ internal static class GrainPartitionResolver
 {
     internal static string Resolve(DecodedGrainRequest request) => request.Envelope.CommandKind switch
     {
+        OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => GrainEventVectorSourceCommand.Resolve(request),
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose

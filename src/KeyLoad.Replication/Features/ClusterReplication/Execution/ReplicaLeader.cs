@@ -21,15 +21,10 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var entry = await state.LockedAsync(() =>
-            {
-                state.RequireReadyLeader();
-                var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with { EvaluatedAt = state.Clock.GetUtcNow() });
-                var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term,
-                    admitted);
-                state.Log.Append([next]);
-                return next;
-            }, cancellationToken).ConfigureAwait(false);
+            var admission = await state.LockedAsync(() => AppendOwned(operation, cancellationToken), cancellationToken).ConfigureAwait(false);
+            if (admission.Outcome is { } originalOutcome)
+            { return originalOutcome; }
+            var entry = admission.Entry ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
             while (true)
             {
                 await RoundAsync(entry.Term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
@@ -42,9 +37,45 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
                 await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
             }
             await state.Materializer.WaitForApplyAsync(entry.Index, cancellationToken).ConfigureAwait(false);
-            return state.Materializer.Database.ResolveOutcome(entry.Operation!);
+            var outcome = state.Materializer.Database.ResolveOutcome(entry.Operation!);
+            if (admission.SourcePhaseId != Guid.Empty && outcome.Error is null)
+            {
+                state.Materializer.Database.RequireEventVectorSourceAdmitOutcome(entry.Operation!,
+                    admission.OriginalRequestId, admission.SourcePhaseId, entry.Index, cancellationToken);
+                return outcome with
+                {
+                    NativeValue = EventVectorSourceAdmitAppendResult.FromAppliedEntry(entry,
+                    admission.OriginalRequestId, admission.SourcePhaseId, outcome)
+                };
+            }
+            return admission.OriginalRequestId != Guid.Empty && outcome.Error is null
+                ? outcome with
+                {
+                    NativeValue = EventVectorFirstAdmitAppendResult.FromAppliedEntry(entry,
+                    admission.OriginalRequestId, outcome)
+                }
+                : outcome;
         }
         finally { rounds.Release(); }
+    }
+
+    private (ReplicaEntry? Entry, OperationResult? Outcome, Guid OriginalRequestId, Guid SourcePhaseId)
+        AppendOwned(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        state.RequireReadyLeader();
+        using var firstAdmit = state.Materializer.Database.OpenEventVectorFirstAdmitProbe(operation, cancellationToken);
+        if (firstAdmit?.OriginalOutcome is { } original)
+        { return (null, original, Guid.Empty, Guid.Empty); }
+        using var sourceAdmit = state.Materializer.Database.OpenEventVectorSourceAdmitProbe(operation, cancellationToken);
+        if (sourceAdmit?.OriginalOutcome is { } sourceOriginal)
+        { return (null, sourceOriginal, Guid.Empty, Guid.Empty); }
+        ReplicaFirstEventVectorAdmit.RequireAbsent(state, firstAdmit, operation);
+        ReplicaEventVectorSourceAdmit.RequireAbsent(state, sourceAdmit, operation);
+        var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with { EvaluatedAt = state.Clock.GetUtcNow() });
+        var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term, admitted);
+        state.Log.Append([next]);
+        return (next, null, firstAdmit?.OriginalParentRequestId ?? sourceAdmit?.OriginalParentRequestId ?? Guid.Empty,
+            sourceAdmit?.OriginalSourcePhaseCommandId ?? Guid.Empty);
     }
 
     internal async Task<ReadBarrierReceipt> BarrierAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)

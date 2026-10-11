@@ -22,7 +22,8 @@ internal enum GrainRequestPhase
     SampleChunkAdmissionRefused,
     NativeTextOriginalPostingRead,
     DistributedSearchStatisticsCaptured,
-    OnlineTextCaptured
+    OnlineTextCaptured,
+    EventVectorFirstDispatchReserved
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>
@@ -33,7 +34,13 @@ internal readonly record struct GrainRequestProbeIdentity(
     GrainReadKind? ReadKind,
     OperationKind? CommandKind)
 {
+    internal DateTimeOffset OriginalExpiresAt { get; init; }
+
     internal static GrainRequestProbeIdentity From(GrainRequestEnvelope envelope)
         => new(envelope.RequestId, envelope.CommandId, envelope.PrincipalId,
-            envelope.ReadKind, envelope.CommandKind);
+            envelope.ReadKind, envelope.CommandKind)
+        {
+            OriginalExpiresAt = envelope.CommandKind == OperationKind.EventFeedControl
+                && envelope.Purpose == EventVectorRequestScope.ParentPurpose ? envelope.ExpiresAt : default
+        };
 }

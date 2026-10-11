@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Orleans;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
@@ -10,6 +11,18 @@ internal static class RuntimeJournalStartup
     private const int BootstrapIdentityCount = 2;
     private const string BootstrapCommandDomain = "keyload-runtime-journal-bootstrap-v1\0";
     private static readonly byte[] BootstrapDomain = Encoding.ASCII.GetBytes(BootstrapCommandDomain);
+    internal static Task InitializeConfiguredAsync(IServiceProvider services, PartitionHost partition,
+        PrincipalRecord administrator, NodeOptions options, ServerRuntimeOptions runtime,
+        CancellationToken cancellationToken)
+    {
+        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
+            || options.MembershipAuthority.RemoteDocumentReads)
+        {
+            return InitializeAsync(services, partition, administrator, options, runtime, cancellationToken);
+        }
+        return Task.CompletedTask;
+    }
+
     internal static async Task InitializeAsync(IServiceProvider services, PartitionHost partition,
         PrincipalRecord administrator, NodeOptions options, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)

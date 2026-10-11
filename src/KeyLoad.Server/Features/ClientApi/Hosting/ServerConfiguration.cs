@@ -57,6 +57,7 @@ internal static class ServerConfiguration
         ReplicaMembershipHealthEndpoints.Map(app);
         ReplicaMembershipAuthorityEndpoints.Map(app);
         RemoteDocumentEndpoints.Map(app);
+        global::KeyLoad.Server.Features.EventStreams.EventVectorEndpoints.Map(app);
         PartitionMovementEndpoints.Map(app);
         PhysicalOwnerRegistrationServices.Map(app);
         AdminStaticAssets.Map(app);

@@ -115,6 +115,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
             }
             var outcome = gate ? RequestCqrsProbeOutcome.Observed : RequestCqrsProbeOutcome.FaultRequested;
             var marker = CreateMarker(claim, selectedPhase, outcome);
+            if (selectedPhase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved)
+            { files.EventVectorExpiry.Publish(claim); }
             files.WriteMarker(marker);
             RequestCqrsProbeActivationCapture.Observe(files, marker, context);
             if (gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)

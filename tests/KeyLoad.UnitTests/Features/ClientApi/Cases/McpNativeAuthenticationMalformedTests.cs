@@ -49,6 +49,7 @@ internal sealed class McpNativeAuthenticationMalformedTests
         [
             NativeSerialization.Serialize(principal), NativeSerialization.Serialize(new GrainValue(WrongValue)),
             NativeSerialization.Serialize(new GrainValue(null)), McpAuthenticationMalformedFixture.DefaultArray(principal),
+            McpAuthenticationMalformedFixture.DefaultTeams(principal),
             [.. valid, TrailingByte], valid[..^1]
         ];
         var limits = new McpMemoryLimits();

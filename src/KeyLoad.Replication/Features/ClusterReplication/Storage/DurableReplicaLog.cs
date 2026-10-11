@@ -61,6 +61,19 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
     }
 
     /// <inheritdoc />
+    public ReplicaEntry? ReadEntry(long index, StorageReadObserver observer)
+    {
+        ArgumentNullException.ThrowIfNull(observer);
+        lock (gate)
+        {
+            Check();
+            return index <= (state.Snapshot?.Index ?? BeforeFirstLogPosition) || index > state.LastIndex ? null
+                : ReplicaAdmittedEntryRead.Read(store, index, state.Term, configuration.MaxAppendEntries,
+                    CanonicalDatabase, observer);
+        }
+    }
+
+    /// <inheritdoc />
     public long TermAt(long index)
     {
         lock (gate)
@@ -89,12 +102,8 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
     {
         var bytes = store.Read(view => view.ReadOwnedValue(ReplicaProtocol.EntryStorageKey(index)))
             ?? throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
-        var entry = ReplicaProtocolCodec.DeserializeStored<ReplicaEntry>(bytes, configuration.MaxAppendEntries);
-        if (entry.Index != index || entry.Term <= UnelectedTerm || entry.Term > state.Term)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ReplicaProtocol.CorruptLog);
-        }
-        return ReplicaOperationAuthority.Own(entry, CanonicalDatabase);
+        return ReplicaAdmittedEntryRead.Decode(bytes, index, state.Term, configuration.MaxAppendEntries,
+            CanonicalDatabase);
     }
 
     /// <inheritdoc />

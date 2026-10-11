@@ -130,7 +130,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
@@ -143,12 +143,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
             loggerFactory.CreateLogger<PhysicalShardCatalogStartup>());
         Volatile.Write(ref physicalShardCatalog, catalog);
         var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
-            || Options.MembershipAuthority.RemoteDocumentReads)
-        {
-            await RuntimeJournalStartup.InitializeAsync(built.Services, partition, administrator, Options,
-                runtimeOptions, cancellationToken).ConfigureAwait(false);
-        }
+        await RuntimeJournalStartup.InitializeConfiguredAsync(built.Services, partition, administrator, Options,
+            runtimeOptions, cancellationToken).ConfigureAwait(false);
         PhysicalOwnerRegistrationRuntime.PublishAndAttachAuthority(ref ownerRegistration, this, partition,
             Options, runtimeOptions, membershipAuthority, built.Services, runtimeClock);
     }
@@ -161,17 +157,14 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     /// <returns>Exact bounded reply, throwing only the typed public safe error locally.</returns>
     public Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, bool command,
         CancellationToken cancellationToken)
-        => ExecuteCoreAsync(requestId, signedRequest, command, requireCatalogAdmission: true, cancellationToken);
+        => requests.ExecuteAsync(CurrentRequestTarget, true, requestId, signedRequest, command, cancellationToken);
 
     internal Task<GrainOperationReply> ExecutePhysicalShardStartupRequestAsync(Guid requestId,
         string signedRequest, bool command, CancellationToken cancellationToken)
-        => ExecuteCoreAsync(requestId, signedRequest, command, requireCatalogAdmission: false, cancellationToken);
+        => requests.ExecuteAsync(CurrentRequestTarget, false, requestId, signedRequest, command, cancellationToken);
 
-    private Task<GrainOperationReply> ExecuteCoreAsync(Guid requestId, string signedRequest, bool command,
-        bool requireCatalogAdmission, CancellationToken cancellationToken)
-        => requests.ExecuteAsync(Grains, Volatile.Read(ref host)?.Services,
-            Volatile.Read(ref physicalShardCatalog), DatabaseReady, requireCatalogAdmission,
-            requestId, signedRequest, command, cancellationToken);
+    private NativeNodeRequestTarget CurrentRequestTarget => new(Grains, Volatile.Read(ref host)?.Services,
+        Volatile.Read(ref physicalShardCatalog), DatabaseReady);
 
     /// <summary>Joins native request work before stopping membership, replica lifecycles or physical owners.</summary>
     /// <param name="cancellationToken">Cancellation bounds this caller's wait, without interrupting owned cleanup.</param>

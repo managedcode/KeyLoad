@@ -15,46 +15,23 @@ internal static class CanonicalOperationGateway
     /// <param name="payload">The canonical typed payload.</param>
     /// <param name="cancellationToken">Cancels the caller's wait without asserting write rollback.</param>
     /// <returns>The exact canonical reply and actual execution identity.</returns>
-    internal static async Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
+    internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        => ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, null, cancellationToken);
+
+    internal static Task<DispatchedOperationReply> ExecuteTailWithProgressAsync(HttpContext context,
+        Guid commandId, ReadOnlyMemory<byte> payload, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        CancellationToken cancellationToken)
+        => ExecuteCoreAsync(context, null, OperationKind.EventFeedControl, commandId, payload, progress, cancellationToken);
+
+    private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        cancellationToken.ThrowIfCancellationRequested();
-        if (context.Items[ServerProtocol.PrincipalItem] is not PrincipalRecord principal)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
-        }
-        if (readKind == GrainReadKind.FollowerDocument)
-        { payload = FollowerReadCredentialCapability.Wrap(context, payload); }
-        if (readKind == GrainReadKind.ClusterBackupOwner)
-        { payload = ClusterBackupCredentialCapability.Wrap(context, payload); }
-        var requestId = Guid.NewGuid();
-        var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var signed = readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)
-            : codec.CreateCommand(requestId, principal.Id, commandKind!.Value, commandId, payload);
-        OperationResponseHeaders.Publish(context, requestId);
-        RequestFailureDiagnostic.MarkOperationDispatch(context, commandKind.HasValue);
-        var started = DatabasePhaseTelemetry.Begin();
-        var outcome = DatabasePhaseOutcome.Faulted;
-        GrainOperationReply reply;
-        try
-        {
-            var node = context.RequestServices.GetRequiredService<OrleansNode>();
-            using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
-            using var requestContext = node.OpenRequestContext(principal, requestId,
-                commandId, connection.Token, connection.Id);
-            reply = await node.ExecuteAsync(requestId, signed, commandKind.HasValue, connection.Token).ConfigureAwait(false);
-            outcome = DatabasePhaseOutcome.Completed;
-        }
-        catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
-        {
-            outcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken);
-            throw;
-        }
-        finally
-        {
-            DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicOperationDispatch, outcome, started);
-        }
+        var execution = await ExecuteNativeAsync(context, readKind, commandKind, commandId, payload,
+            progress, cancellationToken).ConfigureAwait(false);
+        var requestId = execution.RequestId;
+        var reply = execution.Reply;
         try
         {
             var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
@@ -70,6 +47,55 @@ internal static class CanonicalOperationGateway
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, Interrupted(commandKind));
         }
     }
+
+    internal static async Task<EventFeedControlResult> ExecuteTailResultAsync(HttpContext context, Guid commandId,
+        ReadOnlyMemory<byte> payload, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        CancellationToken cancellationToken)
+    {
+        var execution = await ExecuteNativeAsync(context, null, OperationKind.EventFeedControl, commandId,
+            payload, progress, cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        return NativeSerialization.Deserialize<GrainValue>(execution.Reply.Payload.Span).Value is EventFeedControlResult value
+            ? value : throw Errors.Fail(ErrorCode.RecoveryRequired, GrainRoutingProtocol.InvalidRequest);
+    }
+
+    private static async Task<NativeDispatch> ExecuteNativeAsync(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
+    {
+        var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
+            commandId, payload, cancellationToken);
+        if (progress is not null && !actual.ReceivingOnly)
+        { throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest); }
+        var requestId = actual.RequestId;
+        var started = DatabasePhaseTelemetry.Begin();
+        var outcome = DatabasePhaseOutcome.Faulted;
+        GrainOperationReply reply;
+        try
+        {
+            var node = context.RequestServices.GetRequiredService<OrleansNode>();
+            using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
+            using var requestContext = node.OpenRequestContext(actual.Principal, requestId,
+                commandId, connection.Token, connection.Id);
+            reply = progress is null
+                ? await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token).ConfigureAwait(false)
+                : await node.ExecuteTailWithProgressAsync(requestId, actual.SignedRequest, progress, connection.Token).ConfigureAwait(false);
+            outcome = DatabasePhaseOutcome.Completed;
+        }
+        catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
+        {
+            outcome = DatabasePhaseTelemetry.CancellationOutcome(cancellationToken);
+            throw;
+        }
+        finally
+        {
+            DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicOperationDispatch, outcome, started);
+        }
+        global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning.RefuseIncompleteOpen(commandKind, payload, reply);
+        return new(requestId, reply);
+    }
+
+    private readonly record struct NativeDispatch(Guid RequestId, GrainOperationReply Reply);
 
     private static string Interrupted(OperationKind? commandKind) => commandKind switch
     {

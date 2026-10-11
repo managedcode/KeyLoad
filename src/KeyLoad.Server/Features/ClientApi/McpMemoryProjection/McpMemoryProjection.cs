@@ -151,6 +151,12 @@ internal sealed class McpMemoryProjection
         return checked(held + simultaneousWrapperOwners + nativeMetadata + nativeStructure + nativeWriter + escaping + sseWriters);
     }
 
+    internal long ProgressNotification(int bytes)
+    {
+        const long NoRetainedProgressBytes = 0;
+        return AfterReply(NoRetainedProgressBytes, bytes, WorstShape(bytes));
+    }
+
     private void ValidateInput(McpInputMemory input, int maximumReplyBytes)
     {
         ValidateBound(input.Capacity, settings.MaximumRequestCapacityBytes, nameof(input.Capacity));

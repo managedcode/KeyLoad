@@ -16,6 +16,17 @@ internal static class EventVectorKeys
     private const string ParentCallSpace = "event-vector-parent-call-v1";
     private const string ParentOutcomeSpace = "event-vector-parent-outcome-index-v1";
     private const string PinSpace = "event-vector-source-pin-v1";
+    private const string FirstIssuanceSpace = "event-vector-first-issuance-v1";
+    private const string ActiveIssuance = "active";
+    private const string TerminalIssuance = "terminal";
+
+    internal static byte[] ActiveFirstIssuances(PartitionRef partition)
+        => KeySpace.Partition(FirstIssuanceSpace, partition, ActiveIssuance);
+    internal static byte[] FirstIssuance(PartitionRef partition, string principalId, Guid publicCommandId)
+        => KeySpace.Partition(FirstIssuanceSpace, partition, ActiveIssuance, principalId, publicCommandId);
+    internal static byte[] TerminalFirstIssuance(PartitionRef partition, string principalId, Guid publicCommandId)
+        => KeySpace.Partition(FirstIssuanceSpace, partition, TerminalIssuance, principalId, publicCommandId);
+
     internal static byte[] CleanupCalls(PartitionRef partition) => KeySpace.Partition(CleanupCallSpace, partition);
     internal static byte[] CleanupCall(PartitionRef partition, Guid mapId)
         => KeySpace.Partition(CleanupCallSpace, partition, mapId);

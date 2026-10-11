@@ -9,5 +9,10 @@ internal enum EventVectorControlAction
     Offer = 4,
     PublishAcknowledgement = 5,
     PublishRefresh = 6,
-    CompleteRelease = 7
+    CompleteRelease = 7,
+    AdmitFirstIntent = 8,
+    CaptureFirstPhase = 9,
+    ReserveFirstDispatch = 10,
+    AbandonFirstIssuance = 11,
+    CleanupAbandonedIssuance = 12
 }

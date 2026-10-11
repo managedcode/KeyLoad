@@ -27,6 +27,7 @@ internal static class LocalRf3ImageSelection
     private const string GraphIncomingFilterArgument = "--KeyLoadTests:Filter=/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
     private const string SignedPurposeFilterArgument = "--KeyLoadTests:Filter=/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts";
     private const string NullQueueDeadlineFilterArgument = "--KeyLoadTests:Filter=/*/*/QueueDeadlineAutonomousRf3Tests/NullSelectedServicePreservesScheduledStateReceiptsAcrossColdThenPublicClaimAndHealthyAck";
+    private const string EventFeedOpenFilterArgument = "--KeyLoadTests:Filter=/*/*/EventFeedFirstOpenRf3Tests/ActualSixOwnerFirstOpenPinsReplaySourceRevocationRepairAndSameRootCold";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -71,7 +72,7 @@ internal static class LocalRf3ImageSelection
         }
         var arguments = JsonSerializer.Deserialize<string[]>(value);
         if (arguments is not [Rf3SuiteArgument, MembershipFilterArgument or StandardFilterArgument or RejectionFilterArgument or ConnectionFilterArgument or NativeTextFilterArgument or RemoteTransferFilterArgument or EmptySnapshotFilterArgument or CapabilityOmissionFilterArgument
-                or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument or GraphIncomingFilterArgument or SignedPurposeFilterArgument, EnabledArgument]
+                or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument or GraphIncomingFilterArgument or SignedPurposeFilterArgument or EventFeedOpenFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

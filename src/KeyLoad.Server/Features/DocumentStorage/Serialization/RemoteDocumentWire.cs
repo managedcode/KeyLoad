@@ -17,9 +17,14 @@ internal static class RemoteDocumentWire
         return NativeSerialization.Serialize(value);
     }
 
-    internal static async Task<byte[]> ReadRequestAsync(HttpRequest request, CancellationToken cancellationToken)
+    internal static Task<byte[]> ReadRequestAsync(HttpRequest request, CancellationToken cancellationToken)
+        => ReadRequestAsync(request, RemoteDocumentProtocol.Path, cancellationToken);
+
+    internal static async Task<byte[]> ReadRequestAsync(HttpRequest request, string expectedOwnedPath,
+        CancellationToken cancellationToken)
     {
-        if (request.Method != HttpMethods.Post || request.Path != RemoteDocumentProtocol.Path
+        ArgumentException.ThrowIfNullOrEmpty(expectedOwnedPath);
+        if (request.Method != HttpMethods.Post || request.Path != expectedOwnedPath
             || request.QueryString.HasValue || request.ContentType != RemoteDocumentProtocol.ContentType
             || request.ContentLength is not (>= MinimumBodyBytes and <= RemoteDocumentProtocol.MaximumBodyBytes)
             || request.Headers.ContainsKey(Microsoft.Net.Http.Headers.HeaderNames.TransferEncoding)

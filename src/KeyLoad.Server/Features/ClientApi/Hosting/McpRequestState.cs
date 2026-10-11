@@ -47,6 +47,9 @@ internal sealed class McpRequestState : IDisposable
         Principal = McpNativeAuthentication.ReadAdmittedPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
     }
 
+    internal McpMemoryLease ReserveProgress(int bytes, CancellationToken cancellationToken)
+        => admission.ReserveProgress(bytes, cancellationToken);
+
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>
     internal void Attach(McpFrameBody ownedBody)
     {

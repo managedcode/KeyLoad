@@ -39,18 +39,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             stage = GrainFailureStage.CapabilityExecution;
             await ObserveAndValidateRequestAsync(request, GrainRequestPhase.BeforeSubmit, context,
                 operationToken).ConfigureAwait(true);
-            var result = kind switch
-            {
-                OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
-                    database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),
-                OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
-                OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
-                    operationToken).ConfigureAwait(true),
-                OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
-                    database, coordinator, request, principal, onlineText, operationToken).ConfigureAwait(true),
-                _ => await coordinator.SubmitNativeAsync(kind, envelope.CommandId, principal.Id,
-                    request.Payload, operationToken).ConfigureAwait(true)
-            };
+            var result = await SubmitCommandAsync(kind, request, principal, context, operationToken)
+                .ConfigureAwait(true);
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
                 .ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
@@ -71,6 +61,25 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             using var cleanup = work;
             NativeCapabilityWorkLifetime.Settle(primaryError, work, null, null);
         }
+    }
+
+    private async Task<OperationResult> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
+        PrincipalRecord principal, IGrainContext? context, CancellationToken operationToken)
+    {
+        return kind switch
+        {
+            OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => await GrainEventVectorSourceCommand.SubmitAsync(
+                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
+            OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
+                database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),
+            OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
+            OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
+                operationToken).ConfigureAwait(true),
+            OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
+                database, coordinator, request, principal, onlineText, operationToken).ConfigureAwait(true),
+            _ => await coordinator.SubmitNativeAsync(kind, request.Envelope.CommandId, principal.Id,
+                request.Payload, operationToken).ConfigureAwait(true)
+        };
     }
 
     private Task<OperationResult> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,

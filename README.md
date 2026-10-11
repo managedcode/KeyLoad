@@ -90,7 +90,7 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-The current local checkpoint passed the full Release build, formatting and focused operation/recovery checks. Persisted team row policy is implemented; its complete public qualification remains open because initial RF3 startup exposed an incomplete native authentication decoder. Complete Linux/RF3 qualification and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for the current acceptance gates and original evidence.
+The current local checkpoint passed the full Release build, formatting, focused recovery checks and a genuine RF3 SDK/MCP flow in both CPU modes. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. One selected unit-test fixture still requires its prepared repair; complete Linux/RF3 qualification and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|

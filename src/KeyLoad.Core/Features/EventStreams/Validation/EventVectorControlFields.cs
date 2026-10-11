@@ -27,6 +27,7 @@ internal static class EventVectorControlFields
         if (!phase.OriginalCleanupFrontierBytes.IsEmpty
             && request.Action != EventFeedControlAction.Release)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        EventVectorFirstControlFields.Require(phase, admission);
         RequireRevision(phase);
         RequireAction(phase);
         RequireSlots(phase, admission);
@@ -34,7 +35,8 @@ internal static class EventVectorControlFields
 
     private static void RequireRevision(EventVectorControlPhase phase)
     {
-        var initial = phase.Action == EventVectorControlAction.Open;
+        var initial = phase.Action == EventVectorControlAction.Open
+            || EventVectorFirstControlFields.IsIssuance(phase.Action);
         if (initial && (phase.ExpectedMapRevision != Initial || phase.ExpectedCoverageGeneration != Initial
                 || phase.ExpectedCleanupGeneration != Initial)
             || !initial && (phase.ExpectedMapRevision < FirstRevision
@@ -47,7 +49,12 @@ internal static class EventVectorControlFields
         var action = phase.OriginalRequest.Action;
         var matches = phase.Action switch
         {
-            EventVectorControlAction.Open or EventVectorControlAction.PublishOpen => action == EventFeedControlAction.Open,
+            EventVectorControlAction.Open or EventVectorControlAction.PublishOpen
+                or EventVectorControlAction.AdmitFirstIntent or EventVectorControlAction.CaptureFirstPhase
+                or EventVectorControlAction.ReserveFirstDispatch
+                => action == EventFeedControlAction.Open,
+            EventVectorControlAction.AbandonFirstIssuance or EventVectorControlAction.CleanupAbandonedIssuance
+                => action == EventFeedControlAction.Release,
             EventVectorControlAction.Offer => action is EventFeedControlAction.Offer or EventFeedControlAction.Tail,
             EventVectorControlAction.PublishAcknowledgement => action == EventFeedControlAction.Acknowledge,
             EventVectorControlAction.PublishRefresh => action == EventFeedControlAction.Refresh,
@@ -63,6 +70,9 @@ internal static class EventVectorControlFields
 
     private static void RequireSlots(EventVectorControlPhase phase, EventVectorAdmissionPolicy admission)
     {
+        if ((phase.Action == EventVectorControlAction.Offer) != !phase.OriginalSourcePageBytes.IsEmpty)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidPhase); }
+        admission.RequireEncodedBytes(phase.OriginalSourcePageBytes.Length);
         var initial = phase.Action == EventVectorControlAction.Open;
         var intended = phase.Action == EventVectorControlAction.AdmitSource;
         var observed = phase.Action == EventVectorControlAction.ObserveSource;

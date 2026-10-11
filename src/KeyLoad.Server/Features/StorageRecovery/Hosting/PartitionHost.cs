@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
@@ -53,7 +54,9 @@ internal sealed class PartitionHost : IAsyncDisposable
         try
         {
             CacheMemory = openedCacheMemory = new(runtimeOptions.Core.CacheMemory);
-            Database = OpenCanonicalDatabase(runtimeOptions, authorization, clock);
+            var openedDatabase = PartitionDatabaseComposition.Open(stores, Configuration, runtimeOptions, authorization, clock, CacheMemory);
+            Database = openedDatabase.Database;
+            rowVisibility = openedDatabase.Visibility;
             TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
@@ -109,6 +112,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         { ServerFailureObserver.Observe(openedText.Dispose, failures); }
         if (openedLog is not null)
         { ServerFailureObserver.Observe(openedLog.Dispose, failures); }
+        DisposeRowVisibility(failures);
         if (openedCacheMemory is not null)
         { ServerFailureObserver.Observe(openedCacheMemory.Dispose, failures); }
         ServerFailureObserver.Observe(() => { RequireTransferVerifierClosed(); stores.Dispose(); }, failures);
@@ -141,6 +145,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     public ITextProjection TextProjection { get; }
     /// <summary>Single node-owned retention ledger borrowed by derived cache families and movement images.</summary>
     internal CacheMemoryBudget CacheMemory { get; }
+    private readonly RowVisibilityCache? rowVisibility;
     internal NativeAnnMaintenanceService AnnMaintenance { get; }
     internal NativeTextIncrementalMaintenanceService TextMaintenance { get; }
     internal NativeTextOnlineMaintenanceService OnlineTextMaintenance { get; }
@@ -151,19 +156,14 @@ internal sealed class PartitionHost : IAsyncDisposable
     /// <summary>Admission starts before silo membership and stops after membership shutdown.</summary>
     public ClusterCoordinator Coordinator { get; }
 
-    private DatabaseEngine OpenCanonicalDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization, TimeProvider clock)
+    private void DisposeRowVisibility(List<Exception> failures)
     {
-        var core = runtimeOptions.Core;
-        RuntimeJournalStorePreparation.Prepare(stores);
-        var options = runtimeOptions.Node.Value;
-        var physicalOwner = options.MembershipAuthority.RemoteDocumentReads
-            ? new PhysicalShardRecord(options.PhysicalShardId, Configuration.Incarnation,
-                Configuration.VoterIds, PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch) : null;
-        var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
-            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, core.MovementCheckpoints,
-            new Features.ClusterRouting.PartitionMovementCheckpointVerifier(runtimeOptions.Node, runtimeOptions.ReplicaConfiguration, runtimeOptions.GrainRouting), clock, physicalOwner);
-        database.ConfigureRuntimeJournal(core.RuntimeJournal);
-        return database;
+        try
+        { rowVisibility?.Dispose(); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
+        { failures.Add(error); }
+        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+        { failures.Add(error); }
     }
 
     private void BootstrapFreshNode(NodeOptions options)
@@ -215,6 +215,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         var closingLog = CloseLogAsync(applying);
         await ServerFailureObserver.ObserveAsync(() => closingLog, failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(TextProjection.Dispose, failures);
+        DisposeRowVisibility(failures);
         ServerFailureObserver.Observe(CacheMemory.Dispose, failures);
         var closingStores = CloseStoresAsync(closingLog);
         await ServerFailureObserver.ObserveAsync(() => closingStores, failures).ConfigureAwait(false);

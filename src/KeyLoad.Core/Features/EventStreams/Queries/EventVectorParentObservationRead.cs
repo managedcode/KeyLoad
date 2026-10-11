@@ -12,10 +12,15 @@ internal static class EventVectorParentObservationRead
     internal static (ReadOnlyMemory<byte> Phase, ReadOnlyMemory<byte> Outcome) Read(IKeyValueView view,
         IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
         IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        => Read(view, authorization, principal, request, incarnation, ReadOnlyMemory<byte>.Empty, options, cancellationToken);
+
+    internal static (ReadOnlyMemory<byte> Phase, ReadOnlyMemory<byte> Outcome) Read(IKeyValueView view,
+        IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
+        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var terminal = EventVectorParentLookup.ReadTerminalDetails(view, authorization, principal, request, incarnation,
-            options, cancellationToken);
+            freshSourceAuthorizationWitness, options, cancellationToken);
         if (terminal is { } actual)
         { return (actual.PhaseBytes, OutcomeBytes(view, principal, request, actual.PhaseId, admission)); }
         var budget = new EventVectorInventoryReadBudget(options);
@@ -37,11 +42,15 @@ internal static class EventVectorParentObservationRead
         var call = EventVectorParentValidation.Read(map, actualRow, admission);
         EventVectorParentValidation.RequireRequest(call, request, admission);
         EventVectorParentScopes.Authorize(authorization, principal, call.OriginalAuthorizedSourceScopes, admission);
+        var fresh = freshSourceAuthorizationWitness.IsEmpty ? null : EventVectorCurrentSourceAuthorization.Require(view, principal, request,
+            call.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission);
         cancellationToken.ThrowIfCancellationRequested();
         var inventory = EventVectorMapInventory.Read(view, request.ControlPartition, request.MapId,
             options, cancellationToken);
         EventVectorInventoryValidation.Require(map, inventory.PayloadRows, admission);
         var phase = EventVectorParentValidation.ReadPhase(call, admission);
+        if (fresh is not null)
+        { EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission); }
         EventVectorParentScopes.RequireExact(call.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(phase, inventory, admission));
         _ = EventVectorParentOutcome.Require(view, principal, phase, call.LastAdmittedControlPhaseId,

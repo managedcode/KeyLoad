@@ -56,6 +56,8 @@ internal static class RequestCqrsProbeFileValidation
 
     internal static bool IsAllowedFileName(string name)
     {
+        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsEventVectorExpiryJson.IsName(name))
+        { return true; }
         if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsReplicaSnapshotJson.IsName(name))
         { return true; }
         if (KeyLoad.Server.Features.ClusterRouting.ConnectionProbeInventory.IsName(name))

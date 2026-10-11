@@ -80,5 +80,6 @@ public sealed partial class DatabaseEngine
         }, observer: budget.ObserveBytes);
         if (scan.HasMore)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, TopicPurgeScanExhausted); }
+        EventVectorRetentionPins.Require(view, source, tail, cut, OperationLimitsOptions, budget.ObserveBytes);
     }
 }

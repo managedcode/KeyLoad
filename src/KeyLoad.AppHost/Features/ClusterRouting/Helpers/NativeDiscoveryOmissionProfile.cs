@@ -16,6 +16,8 @@ internal sealed class NativeDiscoveryOmissionProfile
     private const string RootEnvironment = "KeyLoad__NativeDiscoveryOmission__Root";
     private const string SessionEnvironment = "KeyLoad__NativeDiscoveryOmission__SessionId";
     private const string True = "true";
+    private const string RegistrationLogEnvironment = "Logging__LogLevel__KeyLoad.Server.Features.ClusterRouting.PhysicalOwnerRegistrationWorker";
+    private const string RegistrationLogLevel = "Information";
     private const string InvalidConfiguration = "NativeDiscoveryOmissionProfileInvalid";
     private const int MaximumFields = 3;
     private const int ExcessField = 1;
@@ -60,7 +62,8 @@ internal sealed class NativeDiscoveryOmissionProfile
         {
             resources[index].WithBindMount(settings.Root, Mount)
                 .WithEnvironment(EnabledEnvironment, True).WithEnvironment(RootEnvironment, Mount)
-                .WithEnvironment(SessionEnvironment, settings.SessionId);
+                .WithEnvironment(SessionEnvironment, settings.SessionId)
+                .WithEnvironment(RegistrationLogEnvironment, RegistrationLogLevel);
         }
     }
     private static InvalidOperationException Invalid() => new(InvalidConfiguration);

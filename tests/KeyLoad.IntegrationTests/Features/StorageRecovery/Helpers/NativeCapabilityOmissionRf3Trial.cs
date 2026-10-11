@@ -67,7 +67,10 @@ internal static class NativeCapabilityOmissionRf3Trial
         else
         { controls.Arm(official); }
         enter("RestartArmed");
-        await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false);
+        if (purpose)
+        { await NativePurposeEnrollmentRestart.RestartAsync(wave, controls, token).ConfigureAwait(false); }
+        else
+        { await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token).ConfigureAwait(false); }
         enter("PublicCaller");
         if (purpose)
         { await NativeSignedPurposeRf3Callers.RequireRefusedAsync(seed, command, official, token).ConfigureAwait(false); }

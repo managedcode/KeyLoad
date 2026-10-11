@@ -11,11 +11,14 @@ internal static class McpCatalogHintExpectations
         var readOnly = read.HasValue && read is not (GrainReadKind.Backup or GrainReadKind.ClusterBackupOwner);
         var idempotent = read != GrainReadKind.Backup && (read.HasValue || command.HasValue);
         var destructive = !read.HasValue;
-        if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes)
+        if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes
+            or OperationKind.EventFeedControl)
         { idempotent = false; }
         if (command is OperationKind.ConfigureResource or OperationKind.BindAtomicPartitionPlacement
             or OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload)
         { destructive = false; }
+        if (actual.Name == "keyload_tail_event_feed")
+        { readOnly = true; idempotent = true; destructive = false; }
         await Assert.That(actual.ReadOnly).IsEqualTo(readOnly);
         await Assert.That(actual.Idempotent).IsEqualTo(idempotent);
         await Assert.That(actual.Destructive).IsEqualTo(destructive);

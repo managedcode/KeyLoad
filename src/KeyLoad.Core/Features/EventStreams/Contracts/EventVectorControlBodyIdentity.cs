@@ -11,6 +11,21 @@ internal sealed record EventVectorControlBodyIdentity(
     [property: Orleans.Id(EventVectorControlBodyIdentity.PositionField)] long? OriginalSourcePosition,
     [property: Orleans.Id(EventVectorControlBodyIdentity.PolicyField)] long? OriginalControlPolicyEpoch)
 {
+    internal const int ParentRequestField = 12;
+    [Orleans.Id(ParentRequestField)]
+    public Guid OriginalParentRequestId { get; init; }
+
+    internal const int SourcePageField = 11;
+    [Orleans.Id(SourcePageField)]
+    public ReadOnlyMemory<byte> OriginalSourcePageDigest { get; init; }
+
+    internal const int FirstPhaseField = 9;
+    internal const int FirstIssuanceReferenceField = 10;
+    [Orleans.Id(FirstPhaseField)]
+    public ReadOnlyMemory<byte> OriginalCapturedFirstOpenPhaseSemanticDigest { get; init; }
+    [Orleans.Id(FirstIssuanceReferenceField)]
+    public Guid OriginalFirstIssuancePublicCommandId { get; init; }
+
     internal const int CleanupFrontierField = 8;
     [Orleans.Id(CleanupFrontierField)]
     public ReadOnlyMemory<byte> OriginalCleanupFrontierSemanticDigest { get; init; }

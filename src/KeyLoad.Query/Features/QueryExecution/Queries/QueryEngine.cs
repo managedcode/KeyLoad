@@ -128,7 +128,7 @@ public sealed partial class QueryEngine
                 budget.Check();
                 prepared.Consider(document, json.RootElement);
             }
-        }).Visit();
+        }, visibilitySourceEpoch: cursor.SourceEpoch).Visit();
         if (query.Explain)
         {
             var explain = new QueryPage([new(ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,

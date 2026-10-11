@@ -11,6 +11,7 @@ internal sealed class NativeDiscoveryOmissionFiles
     private readonly string session;
     private readonly IOptions<RequestProbeExecutionOptions> options;
     private readonly NativeDiscoveryOmissionJson json;
+    private readonly NativeSignedPurposeJson purposeJson;
     private readonly Dictionary<string, byte[]> immutable = new(StringComparer.Ordinal);
     private readonly string[] voters;
     private readonly RequestCqrsProbeJson ownerJson;
@@ -21,6 +22,7 @@ internal sealed class NativeDiscoveryOmissionFiles
         session = node.Value.NativeDiscoveryOmission.SessionId;
         voters = [.. node.Value.Peers];
         json = new(options);
+        purposeJson = new(options);
         ownerJson = new(options);
         _ = Snapshot();
     }
@@ -28,6 +30,19 @@ internal sealed class NativeDiscoveryOmissionFiles
     { lock (sync) { RequestCqrsProbePaths.RequireDirectory(root, root); return Arm(); } }
     internal NativeDiscoveryOmissionWitness? PeekWitness(string name)
     { lock (sync) { RequestCqrsProbePaths.RequireDirectory(root, root); return Witness(name); } }
+    internal NativeSignedPurposeArm? ReadPurposeEnrollment()
+    {
+        lock (sync)
+        {
+            _ = Snapshot();
+            var bytes = PurposeRecord(NativeSignedPurposeProtocol.ArmFile);
+            if (bytes is null)
+            { return null; }
+            var arm = purposeJson.Arm(bytes);
+            RequirePurposeArm(arm);
+            return arm;
+        }
+    }
     internal T Locked<T>(Func<T> action)
     { lock (sync) { return LockedCore(action); } }
     private T LockedCore<T>(Func<T> action)

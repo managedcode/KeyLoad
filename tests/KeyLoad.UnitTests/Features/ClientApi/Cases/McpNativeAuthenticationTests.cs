@@ -14,7 +14,7 @@ internal sealed class McpNativeAuthenticationTests
     internal const string SharedValue = "native-auth-shared-value";
     private const int RequestCapacity = 16_384;
     private const string LegacyPrincipalJson = "{\"id\":\"root\"}";
-    private static readonly uint[] PrincipalIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    private static readonly uint[] PrincipalIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     private static readonly uint[] GrantIds = [0, 1, 2];
 
     [Test]
@@ -31,6 +31,7 @@ internal sealed class McpNativeAuthenticationTests
             Grants = [shared, shared],
             FieldGrants = repeated,
             Projects = repeated,
+            Teams = repeated,
             OwnerId = SharedValue,
             ExpiresAt = expires ? DateTimeOffset.UnixEpoch : null
         };
@@ -47,8 +48,18 @@ internal sealed class McpNativeAuthenticationTests
     public async Task PersistedPrincipalAdmissionOwnsDecodedValuesAndReturnsEveryReservation()
     {
         using var database = new TestDatabase();
-        var principal = Principal(database);
-        var expected = JsonDefaults.Serialize(principal);
+        var requested = Principal(database) with
+        {
+            Id = SharedValue,
+            ClusterAdministrator = false,
+            OwnerId = SharedValue,
+            Projects = [SharedValue],
+            Teams = [SharedValue]
+        };
+        var principal = database.Submit(OperationKind.ConfigurePrincipal,
+            new ConfigurePrincipalRequest(requested)).Get<PrincipalRecord>();
+        await Assert.That(JsonDefaults.Serialize(principal).AsSpan().SequenceEqual(JsonDefaults.Serialize(requested))).IsTrue();
+        var expected = JsonDefaults.Serialize(requested);
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
@@ -56,8 +67,23 @@ internal sealed class McpNativeAuthenticationTests
         using (var state = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             state.Authenticate(payload, CancellationToken.None);
+            await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
             Array.Clear(payload);
             await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
+        }
+        AssertFullPools(memory, limits);
+        using var cancelled = new CancellationTokenSource();
+        await cancelled.CancelAsync();
+        var fresh = NativeSerialization.Serialize(new GrainValue(principal));
+        using (var denied = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
+        {
+            Assert.ThrowsExactly<OperationCanceledException>(() => denied.Authenticate(fresh, cancelled.Token));
+        }
+        AssertFullPools(memory, limits);
+        using (var healthy = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
+        {
+            healthy.Authenticate(fresh, CancellationToken.None);
+            await Assert.That(JsonDefaults.Serialize(healthy.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
         }
         AssertFullPools(memory, limits);
         await Assert.That(governor.Status().Node.ControlCommands).IsEqualTo(0);

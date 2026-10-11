@@ -1,4 +1,5 @@
 using KeyLoad.Orleans;
+using KeyLoad.Server.Features.EventStreams;
 
 namespace KeyLoad.Server;
 
@@ -16,6 +17,16 @@ internal static class EventStreamApi
 
     internal static void Map(WebApplication app)
     {
+        app.MapPost(EventFeedTailPublicProtocol.Route, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedTailApi.Submit(context, request));
+        app.MapPost(EventFeedOpenProtocol.Route, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Open));
+        app.MapPost(EventFeedOfferProtocol.Route, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Offer));
+        app.MapPost(EventFeedSettlementProtocol.AcknowledgeRoute, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Acknowledge));
+        app.MapPost(EventFeedSettlementProtocol.ReleaseRoute, (EventFeedControlRequest request, HttpContext context) =>
+            EventFeedParentApi.SubmitAsync(context, request, EventFeedControlAction.Release));
         app.MapPost(StreamReadPath, (ReadStreamRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Stream, request));
         app.MapPost(EventReadPath, (ReadEventSourceRequest request, HttpContext context) =>

@@ -14,10 +14,27 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         => grains.GetGrain<IConnectionGrain>(connectionId).CloseAsync(
             services.GetRequiredService<GrainRequestCodec>().CreateConnectionClose(connectionId), cancellationToken);
 
-    internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
+    internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
+        PhysicalShardCatalogStartup? catalog, bool databaseReady, bool requireCatalogAdmission,
+        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        => ExecuteCoreAsync(factory, runtime, catalog, databaseReady, requireCatalogAdmission,
+            requestId, signedRequest, command, null, cancellationToken);
+
+    internal Task<GrainOperationReply> ExecuteAsync(NativeNodeRequestTarget target, bool requireCatalogAdmission,
+        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        => ExecuteAsync(target.Factory, target.Runtime, target.Catalog, target.DatabaseReady,
+            requireCatalogAdmission, requestId, signedRequest, command, cancellationToken);
+
+    internal Task<GrainOperationReply> ExecuteWithProgressAsync(NativeNodeRequestTarget target,
+        Guid requestId, string signedRequest, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        CancellationToken cancellationToken)
+        => ExecuteCoreAsync(target.Factory, target.Runtime, target.Catalog, target.DatabaseReady, true,
+            requestId, signedRequest, false, progress, cancellationToken);
+
+    private async Task<GrainOperationReply> ExecuteCoreAsync(IGrainFactory? factory, IServiceProvider? runtime,
         PhysicalShardCatalogStartup? catalog, bool databaseReady, bool requireCatalogAdmission,
         Guid requestId, string signedRequest, bool command,
-        CancellationToken cancellationToken)
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
         if (requireCatalogAdmission && (!databaseReady || catalog is null || !catalog.IsReady))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
@@ -38,7 +55,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
             await catalog.EnsureAdmissionAsync(execution.Token).ConfigureAwait(false);
         }
         var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
-            execution.Token, cancellationToken).ConfigureAwait(false);
+            progress, execution.Token, cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
@@ -48,15 +65,21 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
 
     private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
         Guid connectionId, Guid requestId, string signedRequest, bool command, TimeProvider clock,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken executionToken, CancellationToken callerToken)
     {
         try
         {
-            return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-                createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token),
-                serializer: services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId: requestId, clock: clock, cancellationToken: executionToken, options: routingOptions,
-                purpose: new NativeCqrsStreamPurpose(() => services.GetRequiredService<GrainRequestCodec>().VerifyRequest(signedRequest, requestId))).ConfigureAwait(false);
+            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
+                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token);
+            var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
+            var purpose = new NativeCqrsStreamPurpose(() => services.GetRequiredService<GrainRequestCodec>()
+                .VerifyRequest(signedRequest, requestId));
+            return progress is null
+                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
+                    routingOptions, purpose, executionToken).ConfigureAwait(false)
+                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
+                    routingOptions, purpose, progress, executionToken).ConfigureAwait(false);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {

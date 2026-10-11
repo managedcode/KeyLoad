@@ -24,6 +24,13 @@ internal static class McpAuthenticationMalformedFixture
             Value = new GrainValue(principal with { FieldGrants = default })
         });
 
+    internal static byte[] DefaultTeams(PrincipalRecord principal)
+        => NativeSerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new NativePayload
+        {
+            Version = NativePayloadVersion.Current,
+            Value = new GrainValue(principal with { Teams = default })
+        });
+
     private static byte[] Write(PrincipalRecord principal, McpAuthenticationArrayFault? fault)
     {
         using var session = NativeSerializerProviders.Get(typeof(GrainValue)).Sessions.GetSession();
@@ -64,6 +71,7 @@ internal static class McpAuthenticationMalformedFixture
         Scalar(ref writer, value.Revoked);
         Scalar(ref writer, value.ExpiresAt);
         Scalar(ref writer, value.PolicyEpoch);
+        Scalar(ref writer, value.Teams);
     }
 
     internal static void Begin<TBuffer>(ref Writer<TBuffer> writer, uint delta, Type expected, object value)

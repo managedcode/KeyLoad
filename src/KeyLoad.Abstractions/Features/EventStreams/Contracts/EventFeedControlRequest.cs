@@ -30,4 +30,7 @@ public sealed record EventFeedControlRequest
     [Orleans.Id(10)] public string? OfferDigest { get; init; }
     /// <summary>Gets the requested bounded page size.</summary>
     [Orleans.Id(11)] public int Limit { get; init; }
+    internal const int OriginalFirstIssuanceField = 12;
+    /// <summary>Gets the original first-issuance public identity selected only by a distinct fresh Release.</summary>
+    [Orleans.Id(OriginalFirstIssuanceField)] public Guid OriginalFirstIssuancePublicCommandId { get; init; }
 }

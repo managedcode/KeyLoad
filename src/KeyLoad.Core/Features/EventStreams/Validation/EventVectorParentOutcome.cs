@@ -28,9 +28,22 @@ internal static class EventVectorParentOutcome
             || outcome.PolicyEpoch != principal.PolicyEpoch || outcome.Fingerprint != fingerprint
             || expectedFingerprint is not null && expectedFingerprint != fingerprint)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
-        if (outcome.Result.Error is null)
-        { RequireResult(outcome.Result.Get<EventVectorControlResult>(), commandId, phase, incarnation); }
-        else if (phase.Action != EventVectorControlAction.Open || outcome.Result.NativeValue is not null)
+        if (outcome.Result.Error is null && EventVectorFirstCleanupResultValidation.Handles(phase.Action))
+        {
+            var first = outcome.Result.Get<EventVectorFirstIssuanceResult>();
+            if (first.NativeCommandId != commandId)
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
+            _ = EventVectorFirstCleanupResultValidation.Read(first, phase, principal.Id, incarnation, admission);
+        }
+        else if (outcome.Result.Error is null)
+        {
+            var result = outcome.Result.Get<EventVectorControlResult>();
+            EventVectorOfferPageProof.RequireResult(result, phase, admission);
+            _ = EventVectorOriginalPublicResult.Read(result, phase, admission);
+            RequireResult(result, commandId, phase, incarnation);
+        }
+        else if (phase.Action != EventVectorControlAction.Open
+            && !EventVectorFirstCleanupResultValidation.Handles(phase.Action) || outcome.Result.NativeValue is not null)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, MissingOutcome); }
         return outcome;
     }

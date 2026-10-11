@@ -26,6 +26,8 @@ internal static class CommandOutcomePartitionIdentity
     private static CommandOutcomePartitionScope ResolveKind(OperationKind kind, ReadOnlyMemory<byte> payload)
         => kind switch
         {
+            OperationKind.EventFeedControl => ForPayload<EventVectorControlPhase>(payload, static phase => phase.OriginalRequest?.ControlPartition),
+            OperationKind.EventFeedSourcePhase => ForPayload<global::KeyLoad.Core.EventVectorSourceMutation>(payload, static request => request.Source?.Partition),
             OperationKind.OnlineTextPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload, static request => request.Request.Consumer.Partition),
             OperationKind.PartitionMovementPhase => ForPayload<PartitionMovePhaseCommand>(payload, static request => request.Partition),
             OperationKind.Batch => ForPayload<CommandRequest>(payload, static request => request.Partition),

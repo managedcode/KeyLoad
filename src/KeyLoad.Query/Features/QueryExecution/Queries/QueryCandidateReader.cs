@@ -7,7 +7,7 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Streams one authorized access path through the shared read budget.</summary>
 internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
     ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
-    PartitionQueryLeafReadGrant? leafGrant = null)
+    PartitionQueryLeafReadGrant? leafGrant = null, long? visibilitySourceEpoch = null)
 {
     private const int EmptyElementCount = 0;
 
@@ -39,16 +39,8 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, FullScanDenied);
         }
-        var scan = VisitRange(KeySpace.Partition(DocumentSpace, request.Partition, query.Collection),
-            (_, value) =>
-            {
-                Candidate(value);
-                return true;
-            });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
-        }
+        RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
+            visitor => VisitRange(KeySpace.Partition(DocumentSpace, request.Partition, query.Collection), visitor), accept);
         return FullScanPath;
     }
 

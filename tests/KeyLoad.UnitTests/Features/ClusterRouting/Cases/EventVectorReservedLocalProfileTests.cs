@@ -37,8 +37,7 @@ internal sealed class EventVectorReservedLocalProfileTests
                 var denied = Create(fixture, setting, "false");
                 var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
                     TwoRf3QueryProbe.Create(denied, fixture.DataRoot, null, local));
-                await Assert.That(error.Message).IsEqualTo(setting is RegistrationKey
-                    ? "The two-RF3 membership profile is invalid." : Invalid);
+                await Assert.That(error.Message).IsEqualTo(Invalid);
                 await Assert.That(await EqualAsync(fixture, before, token).ConfigureAwait(false)).IsTrue();
             }
             var absent = Create(fixture, Selection, null);

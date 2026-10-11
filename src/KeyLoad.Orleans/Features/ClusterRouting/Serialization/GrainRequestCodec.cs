@@ -107,11 +107,7 @@ public sealed partial class GrainRequestCodec
         => ValidateScope(request, PurposeObserver);
 
     private void ValidateScope(GrainRequestEnvelope request, IGrainRequestPurposeObserver? observer)
-    {
-        var cut = new GrainRequestScopeCut(database.Store.Identity.Incarnation,
-            clock.GetUtcNow(), settings.MaximumFuture);
-        GrainRequestPurposeObservation.Validate(request, cut, observer);
-    }
+        => GrainRequestCurrentScopeValidation.Validate(request, database, clock, settings, observer);
 }
 
 internal readonly record struct DecodedGrainRequest(GrainRequestEnvelope Envelope, ReadOnlyMemory<byte> Payload);

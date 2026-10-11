@@ -19,6 +19,8 @@ public sealed partial class DatabaseEngine
         long position, AtomicPartitionPlacementResolution? placement)
         => operation.Kind switch
         {
+            OperationKind.EventFeedControl => ExecuteEventVectorControl(transaction, principal, operation, position, placement),
+            OperationKind.EventFeedSourcePhase => ExecuteEventVectorSource(transaction, principal, operation, position, placement),
             OperationKind.OnlineTextPublicationPhase => ExecuteOnlineTextPublication(transaction, principal, operation),
             OperationKind.PartitionMovementPhase => ExecutePartitionMovePhase(transaction, principal, operation, position),
             OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),

@@ -269,7 +269,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage49 coherent current local full build/format and102/102 selected whole-operation normal/scalar executions passed; strict3297 native source/PE/PDB census admitted after the23-row hash/range-only rebind. Separate private KL035 erased-follower genuine RF3 normal/scalar passed. Full delivered-source Linux, whole49 KL035, functional coverage and required fault/resource/endurance gates remain open.",
+    "verificationStage": "Stage54 full Release/formatter/native analyzers passed; affected Unit270/272 with the same retained negative-profile fixture failure in both CPU modes, process recovery34/34 and ordinary genuine Aspire RF3 SDK/MCP normal/scalar2/2 passed. Actual3306 native cases bound to independent current PE/PDB; complete Linux/RF3 and functional coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -350,23 +350,23 @@
     },
     "currentBuild": {
       "passed": true,
-      "scope": "Stage53 exact coherent full solution local development only; current delivered-source Linux/RF3 remains open",
-      "originalReceipt": "/private/tmp/keyload-stage53-current-coherent-solution-r2-20261011/original.json",
-      "originalReceiptSha256": "d490f9cb7c9c1725d9aa2e4093689734115922f72dae0b684444d6dd4a0a1d9e",
-      "sourceInputs": 6908,
+      "scope": "Stage54 current full solution local development; complete delivered-source Linux/RF3 qualification remains open",
+      "originalReceipt": "/private/tmp/keyload-stage54-current-coherent-solution-r2-20261011/original.json",
+      "originalReceiptSha256": "1d238d42021558fcbeb5b847899c173956b86a03134b83092b5285d81b9e73ea",
+      "sourceInputs": 7208,
       "sourceDrift": 0,
-      "developmentOnly": true,
       "errors": 0,
       "warnings": 0,
-      "actualMatchingProducerCopies": 30,
-      "actualProducerImages": 32
+      "developmentOnly": true,
+      "actualProducerImages": 32,
+      "actualMatchingProducerCopies": 30
     },
     "currentFormatter": {
       "passed": true,
-      "scope": "Stage53 exact coherent full solution local development only",
-      "originalReceipt": "/private/tmp/keyload-stage53-current-coherent-format-r2-20261011/original.json",
-      "originalReceiptSha256": "b00d02afa48fa6af5eb8f15d44fdd9e2e92e6c83b42df37babb3261d8e1f5480",
-      "sourceInputs": 6908,
+      "scope": "Stage54 current canonical full-solution local development only",
+      "originalReceipt": "/private/tmp/keyload-stage54-current-coherent-format-r2-20261011/original.json",
+      "originalReceiptSha256": "88391ef09cddb5e6807d1fb55834c9ed3f17dc1e484363a414497108e08043b9",
+      "sourceInputs": 7208,
       "sourceDrift": 0,
       "developmentOnly": true
     },
@@ -43358,7 +43358,7 @@
       "passed": true,
       "projects": 27,
       "modules": 4,
-      "scope": "Original post-fixture-cleanup governance passed. Earlier concurrent check found16 copied project paths in the live ignored local-image context; original failure is retained and no rules changed."
+      "scope": "Current Stage54 final static check passed; not runtime acceptance."
     },
     "previousCurrentBuildBeforePairedPreflight": {
       "commandArgs": [
@@ -46783,6 +46783,571 @@
         "sha256": "932631214b4a507c782b11e010307352948f920bc2878704a5762edc60f389ec"
       },
       "source": "Actual Teams persisted membership, original combined256 admission, strict candidate-only KL065 lane, retained native startup task, six-resource original capture, and all-three BeginRestart ordering joined. No complete task acceptance promoted."
+    },
+    "previousCurrentBuildBeforeStageLIV": {
+      "passed": true,
+      "scope": "Stage53 exact coherent full solution local development only; current delivered-source Linux/RF3 remains open",
+      "originalReceipt": "/private/tmp/keyload-stage53-current-coherent-solution-r2-20261011/original.json",
+      "originalReceiptSha256": "d490f9cb7c9c1725d9aa2e4093689734115922f72dae0b684444d6dd4a0a1d9e",
+      "sourceInputs": 6908,
+      "sourceDrift": 0,
+      "developmentOnly": true,
+      "errors": 0,
+      "warnings": 0,
+      "actualMatchingProducerCopies": 30,
+      "actualProducerImages": 32
+    },
+    "previousCurrentFormatterBeforeStageLIV": {
+      "passed": true,
+      "scope": "Stage53 exact coherent full solution local development only",
+      "originalReceipt": "/private/tmp/keyload-stage53-current-coherent-format-r2-20261011/original.json",
+      "originalReceiptSha256": "b00d02afa48fa6af5eb8f15d44fdd9e2e92e6c83b42df37babb3261d8e1f5480",
+      "sourceInputs": 6908,
+      "sourceDrift": 0,
+      "developmentOnly": true
+    },
+    "currentStageLIVDevelopment": {
+      "stage": "LIV",
+      "observedAtUtc": "2026-10-10T23:52:50.425620+00:00",
+      "baselineCommit": "e052ae58f383f4e8b68d6ce5f4a4fb99d7a3208f",
+      "sourceInputs": 7208,
+      "sourceDrift": [],
+      "build": {
+        "path": "/private/tmp/keyload-stage54-current-coherent-solution-r2-20261011/original.json",
+        "sha256": "1d238d42021558fcbeb5b847899c173956b86a03134b83092b5285d81b9e73ea"
+      },
+      "formatter": {
+        "path": "/private/tmp/keyload-stage54-current-coherent-format-r2-20261011/original.json",
+        "sha256": "88391ef09cddb5e6807d1fb55834c9ed3f17dc1e484363a414497108e08043b9"
+      },
+      "nativeRoslynDiagnostics": {
+        "path": "/private/tmp/keyload-stage54-current-coherent-solution-r2-20261011/native-final-diagnostics-original.json",
+        "sha256": "478620c0be2265c6a25f6da3016c1b9f6ab537ec98652d7464619341b36a6509"
+      },
+      "errors": 0,
+      "warnings": 0,
+      "producerImages": 32,
+      "matchingProducerCopies": 30,
+      "unitImages": 398,
+      "lanes": [
+        {
+          "suite": "unit",
+          "profile": "normal",
+          "cases": 136,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 43,
+          "intrinsics": null,
+          "startedAtUtc": "2026-10-10T23:33:46.493336+00:00",
+          "finishedAtUtc": "2026-10-10T23:34:15.795652+00:00",
+          "stdoutSha256": "ae896d6e0fc574b887c862eb98b3b08222710bcbb9e4f14ebed6f1707f865227",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-affected-unit-normal-r2-20261011/original-native-run.json",
+            "sha256": "67775f5288c37529fbbfc79292f648245a9338854cdcaeceecc642f9d9befaf5"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-affected-unit-normal-r2-20261011/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "1d6288966fd6e6ecd67cf92a8d538a1f68a486f1bc3b81696a223f010db3eaf8",
+              "counters": {
+                "total": "136",
+                "executed": "136",
+                "passed": "135",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 136,
+            "executed": 136,
+            "passed": 135,
+            "failed": 1,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": [
+            {
+              "executionId": "4e0e8057-d13a-4bc6-9240-5a3131d25761",
+              "testId": "33ea5e75-45f7-45b1-eff1-98590d13d0a9",
+              "testName": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+              "computerName": "konstantins-macbook-pro",
+              "duration": "00:00:03.9144180",
+              "startTime": "2026-10-10T23:33:55.3681290+00:00",
+              "endTime": "2026-10-10T23:33:59.2825470+00:00",
+              "testType": "13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B",
+              "outcome": "Failed",
+              "testListId": "8C84FA94-04C1-424b-9868-57A2D4851A1D",
+              "relativeResultsDirectory": "4e0e8057-d13a-4bc6-9240-5a3131d25761"
+            }
+          ]
+        },
+        {
+          "suite": "unit",
+          "profile": "scalar",
+          "cases": 136,
+          "imageInputs": 398,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 49,
+          "intrinsics": "0",
+          "startedAtUtc": "2026-10-10T23:33:45.524738+00:00",
+          "finishedAtUtc": "2026-10-10T23:34:23.025245+00:00",
+          "stdoutSha256": "3a6175b757edd7c229a0dc0161cbb71ac79fb7623a37a981d1739c467a16057a",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-affected-unit-scalar-r2-20261011/original-native-run.json",
+            "sha256": "3d9355f75e3511d3bc9491c6d6bdfb74448db611f43cc5ce29558b77cd206186"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-affected-unit-scalar-r2-20261011/results/KeyLoad.UnitTests_net10.0_arm64.trx",
+              "sha256": "4bb98dea3e62b80322c631b9db77cc2a6034e8cc25624200f834e65a3ed3e513",
+              "counters": {
+                "total": "136",
+                "executed": "136",
+                "passed": "135",
+                "failed": "1",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 136,
+            "executed": 136,
+            "passed": 135,
+            "failed": 1,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": [
+            {
+              "executionId": "9c1f7e58-e1be-49bf-a8b5-404e54a25e6c",
+              "testId": "33ea5e75-45f7-45b1-eff1-98590d13d0a9",
+              "testName": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+              "computerName": "konstantins-macbook-pro",
+              "duration": "00:00:03.7666220",
+              "startTime": "2026-10-10T23:34:05.4707370+00:00",
+              "endTime": "2026-10-10T23:34:09.2373590+00:00",
+              "testType": "13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B",
+              "outcome": "Failed",
+              "testListId": "8C84FA94-04C1-424b-9868-57A2D4851A1D",
+              "relativeResultsDirectory": "9c1f7e58-e1be-49bf-a8b5-404e54a25e6c"
+            }
+          ]
+        },
+        {
+          "suite": "recovery",
+          "profile": "normal",
+          "cases": 17,
+          "imageInputs": 290,
+          "matchingProducerCopies": 28,
+          "nativeSlots": 50,
+          "observedOverlap": 17,
+          "intrinsics": null,
+          "startedAtUtc": "2026-10-10T23:33:58.811158+00:00",
+          "finishedAtUtc": "2026-10-10T23:35:23.417642+00:00",
+          "stdoutSha256": "c58fc19342daa8bf9f9314b307748c3f9b267add05fe6ed0ac6a422a4b00bc65",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-related-process-normal-r2-20261011/original-native-run.json",
+            "sha256": "bf4f66fe22affc70fc2a54e912cd5e5dbea208e47261f9bf4c7f5d463ac0a475"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-related-process-normal-r2-20261011/results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "21882f740f3859af9ed04ecce6ae0628e668f01ad0ca48939368eb0437a0c3b1",
+              "counters": {
+                "total": "17",
+                "executed": "17",
+                "passed": "17",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 17,
+            "executed": 17,
+            "passed": 17,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": []
+        },
+        {
+          "suite": "recovery",
+          "profile": "scalar",
+          "cases": 17,
+          "imageInputs": 290,
+          "matchingProducerCopies": 28,
+          "nativeSlots": 50,
+          "observedOverlap": 17,
+          "intrinsics": "0",
+          "startedAtUtc": "2026-10-10T23:34:00.308845+00:00",
+          "finishedAtUtc": "2026-10-10T23:35:33.063524+00:00",
+          "stdoutSha256": "863053821a7424fc5dd314e69d48b5b55b6148c0ba8eb466280f5b5365772649",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-related-process-scalar-r2-20261011/original-native-run.json",
+            "sha256": "cccc51d0c15307db98d7512eaa749de5b4cdbc407cc2862b34c31925ffb3e5dd"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-related-process-scalar-r2-20261011/results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+              "sha256": "c6cd509f5dd028195fa8ca0a75bce7631fb78dfa84634b0b60432f5b16dc02e4",
+              "counters": {
+                "total": "17",
+                "executed": "17",
+                "passed": "17",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 17,
+            "executed": 17,
+            "passed": 17,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": []
+        },
+        {
+          "suite": "rf3",
+          "profile": "normal",
+          "cases": 1,
+          "imageInputs": 412,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 1,
+          "intrinsics": null,
+          "startedAtUtc": "2026-10-10T23:33:45.239514+00:00",
+          "finishedAtUtc": "2026-10-10T23:39:36.673805+00:00",
+          "stdoutSha256": "27df06dcf30d0f8dca51e33c3c667b95af7ae25d904c09c77d831dbd6717af48",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-null-service-rf3-normal-r2-20261011/original-native-run.json",
+            "sha256": "fed09ed5eca37a144cfba1c0bc258b38eac8c53c652ebb0f20efcba687488644"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-null-service-rf3-normal-r2-20261011/results/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+              "sha256": "fced30bf3c5ee320040c17cb1edb6a10121bfc30179e928c7b403d3c32727634",
+              "counters": {
+                "total": "1",
+                "executed": "1",
+                "passed": "1",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 1,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": [],
+          "terminalOwnedResourceObservation": {
+            "path": "/private/tmp/keyload-stage54-current-null-service-rf3-normal-r2-20261011/terminal-owned-resource-observation.original.json",
+            "sha256": "d2a70d38f0967f82da1c116f6e2da02c65dfc01020a503742d75f7d64338b986"
+          }
+        },
+        {
+          "suite": "rf3",
+          "profile": "scalar",
+          "cases": 1,
+          "imageInputs": 412,
+          "matchingProducerCopies": 30,
+          "nativeSlots": 50,
+          "observedOverlap": 1,
+          "intrinsics": "0",
+          "startedAtUtc": "2026-10-10T23:42:32.581638+00:00",
+          "finishedAtUtc": "2026-10-10T23:45:56.250715+00:00",
+          "stdoutSha256": "f71543ed6034f4ab6d09e4a80264028157122202cb2ea94b16784eb4059047ac",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalReceipt": {
+            "path": "/private/tmp/keyload-stage54-current-null-service-rf3-scalar-r1-20261011/original-native-run.json",
+            "sha256": "52f13776f4b48470c1f3199ed57d617bfc9e13e3ac93012bbd1d632cce7a16a0"
+          },
+          "originalTrx": [
+            {
+              "path": "/private/tmp/keyload-stage54-current-null-service-rf3-scalar-r1-20261011/results/KeyLoad.IntegrationTests_net10.0_arm64.trx",
+              "sha256": "0f0766077679c61f80b25f9c268a6298a92c06e54e3d08eafdcd3c3e9ced497f",
+              "counters": {
+                "total": "1",
+                "executed": "1",
+                "passed": "1",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "counters": {
+            "total": 1,
+            "executed": 1,
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "failures": [],
+          "terminalOwnedResourceObservation": {
+            "path": "/private/tmp/keyload-stage54-current-null-service-rf3-scalar-r1-20261011/terminal-owned-resource-observation.original.json",
+            "sha256": "4b845640779bd1cff673b092619d9732e6cee535e28dc4a91adf8176e52f8dd6"
+          }
+        }
+      ],
+      "numericalFunctionalCoverage": null,
+      "wholeTaskAcceptancePromoted": false,
+      "scope": "Current coherent local development only. Original Linux, complete required RF3, instrumented functional coverage, resources, endurance and power-loss gates remain open.",
+      "unitExecuted": 272,
+      "unitPassed": 270,
+      "unitFailed": 2,
+      "realProcessRecoveryExecuted": 34,
+      "realProcessRecoveryPassed": 34,
+      "ordinaryRf3Executed": 2,
+      "ordinaryRf3Passed": 2,
+      "nativeRangeRebind": {
+        "output": {
+          "path": "/private/tmp/keyload-stage54-native-case-enrollment-r2-20261011/native-rebound/inventory.current-native.v3.json",
+          "sha256": "ab33ef09b4c391859fa487cc24c201cae85d6a58200591c8c4a165813d8ed1c2"
+        },
+        "inventory": {
+          "path": "/Users/ksemenenko/Developer/KeyLoad/scripts/Features/CodeQuality/functional-coverage.unit-test-inventory.json",
+          "sha256": "ab33ef09b4c391859fa487cc24c201cae85d6a58200591c8c4a165813d8ed1c2"
+        },
+        "exactEquality": true,
+        "originalLog": {
+          "path": "/private/tmp/keyload-stage54-native-case-enrollment-r2-20261011/canonical-rebind-original.log",
+          "sha256": "b48b9b10374c47babf5838f62ef7af092436e6875150392da1e67a0bf96fbe3a"
+        }
+      },
+      "fullNativeCensus": {
+        "casesEach": 3306,
+        "functionalContributors": 2882,
+        "requiredNonContributors": 424,
+        "groups": 5,
+        "executionsInferred": false,
+        "normal": {
+          "census": {
+            "path": "/private/tmp/keyload-stage54-current-unit-census-normal-r2-20261011/stdout.json",
+            "sha256": "a5c41b4b14c93bf9deb2668b6a2b4131da92d826daa9006243d964bc23354716"
+          },
+          "validation": {
+            "path": "/private/tmp/keyload-stage54-current-census-validation-normal-r1-20261011/original-validation.json",
+            "sha256": "780b918ab2b0542a472bf9c93caee5348a5f9f34636c05610c83817529748510"
+          }
+        },
+        "scalar": {
+          "census": {
+            "path": "/private/tmp/keyload-stage54-current-unit-census-scalar-r2-20261011/stdout.json",
+            "sha256": "a5c41b4b14c93bf9deb2668b6a2b4131da92d826daa9006243d964bc23354716"
+          },
+          "validation": {
+            "path": "/private/tmp/keyload-stage54-current-census-validation-scalar-r1-20261011/original-validation.json",
+            "sha256": "d61b54b1e9496b6f1f4e04c609282c2b39bd228b2b6943a89725bba22ead6a76"
+          }
+        }
+      },
+      "nativeImageObservation": {
+        "path": "/private/tmp/keyload-stage54-current-native-image-observation-r1-20261011.json",
+        "sha256": "34a3d08ef546ce069169d36cd2640885e46e59fc26327372b606f190dd7a7451"
+      },
+      "nativeUnitDeclaredSources": 1752,
+      "nativeUnitImage": {
+        "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+        "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+        "dllSha256": "caddf32af6cc6cd1defc64f86921ff36ee07392f9276b674787206a294880e2b",
+        "pdbSha256": "eea92a8057bdc429dbed12ada393c35a5b89feda32b37b0b633ba86d2d8d54ce",
+        "moduleName": "KeyLoad.UnitTests.dll",
+        "compiledIdentityToolSha256": "baf2660772a551118067e33a0a7c62b8477722518561f27d5da2380be9a2d6bb",
+        "originalCompilationRoot": "/Users/ksemenenko/Developer/KeyLoad",
+        "inspectedSourceRoot": "/Users/ksemenenko/Developer/KeyLoad",
+        "mvid": "b2bb9d70-a859-4472-8bda-1f2cd6e5d2a1",
+        "pdbGuid": "1ee781f0-9dc2-4ea6-90e7-04d2a895386c",
+        "pdbStamp": 3876184143,
+        "sourceFilesWithoutPdbDocuments": [],
+        "compiledSourceBindingComplete": true,
+        "qualification": "static native identity inspection only; no test, coverage or build qualification"
+      },
+      "finalStaticGates": [
+        {
+          "command": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "startedAtUtc": "2026-10-10T23:52:50.512876+00:00",
+          "finishedAtUtc": "2026-10-10T23:52:50.716739+00:00",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "node",
+            "scripts/Features/RepositoryGovernance/verify.mjs"
+          ],
+          "startedAtUtc": "2026-10-10T23:52:50.716756+00:00",
+          "finishedAtUtc": "2026-10-10T23:52:51.252051+00:00",
+          "exitCode": 0,
+          "stdout": "PASS: preserved root prefix, 27 projects, 4 modules, required governance, local policies and unchanged empty skill inventory.\n",
+          "stderr": ""
+        }
+      ],
+      "original104Counts": {
+        "done": 17,
+        "in_progress": 87,
+        "pending": 0
+      },
+      "remainingKnownFailure": {
+        "case": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+        "nativeUid": "33ea5e75-45f7-45b1-eff1-98590d13d0a9",
+        "observed": "The two-RF3 membership profile is invalid.",
+        "expected": "EventVectorReservedProbeProfileInvalid",
+        "cause": "Negative test enrolled dependent read/query/movement capabilities without physical-owner registration; TwoRf3 validation preceded intended EventVector guard.",
+        "nextPreparedRepair": "Test fixture only; remove the three dependent capability selections in the no-registration branch, preserve EventVector refusal and repaired healthy operation. Original root failures retained; next-stage current-image regressions required."
+      },
+      "originalDetailedCheckpoint": {
+        "path": "/private/tmp/keyload-stage54-current-final-original-checkpoint-r1-20261011.json",
+        "sha256": "965c0a8ffd4000a7ccac2b65b2f2157f315d2b02f876800ff200140b964e25e9"
+      }
     }
   },
   "TIME-PROVIDER-001": {
@@ -56044,6 +56609,17 @@
       "currentWholeAffectedUnitNormalScalarPassed": true,
       "currentPublicRf3": "Initial ordinary fixture failed native principal authentication decoding; signed-purpose public current-main flow not executed. Independent R159 original2FAIL/cleanupFAILED and R160 correction remain separate private evidence.",
       "wholeTaskAccepted": false
+    },
+    "currentStageLIVDevelopment": {
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage54-current-final-original-checkpoint-r2-20261011.json",
+        "sha256": "f5f2e5136b082ed75298de444af439602399661ea5bfed55bdf831b2d8299b90"
+      },
+      "source": "Native MCP authentication decoder consumes actual persisted Teams fieldId11 with original membership bounds; no legacy or fallback.",
+      "currentOrdinaryPublicRf3NormalScalarPassed": true,
+      "realProcessRecoveryExecuted": 34,
+      "remaining": "Complete signed-purpose/current-format RF3 and original Linux qualification remain open.",
+      "wholeTaskAccepted": false
     }
   },
   "KL-044": {
@@ -56376,6 +56952,18 @@
       "nativeTaskLane": "Candidate-only additive KL065 census lane; thirteen original strict task objects exact. Actual Linux normal/scalar census and authenticated binding precede any execution graduation.",
       "nativeAuthTeamsClosure": "Confirmed OPEN: strict McpNativeAuthenticationReader consumes0..10 while generatedPrincipal has TeamsId11; initial RF3 startup failed atEnd. Owning candidate repair in progress, no public/RF3 success inferred.",
       "generationVisibilityIdSet": "Shared native budget/current exact cut cache private implementation and meaningful operations compiling; current-main integration/qualification open.",
+      "wholeTaskAccepted": false
+    },
+    "currentStageLIVDevelopment": {
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage54-current-final-original-checkpoint-r2-20261011.json",
+        "sha256": "f5f2e5136b082ed75298de444af439602399661ea5bfed55bdf831b2d8299b90"
+      },
+      "source": "Node-local RowVisibilityCache shares the native cache budget and validates exact physical incarnation, committed read generation, scoped cut, fresh principal and policy/document epochs; retired leases stay charged.",
+      "actualGenerationWholeOperationExecutionsNormalScalarPassed": 4,
+      "currentNativeGenerationCasesEnrolled": 2,
+      "nativeTeamsDecoderRepaired": true,
+      "remaining": "Linux, public generation/write/revocation RF3 and measured resource/coverage gates open. Extended write/cold proposal is next-stage source.",
       "wholeTaskAccepted": false
     }
   },
@@ -57144,6 +57732,17 @@
         "TASK-KL084-RESERVED-LOCAL-PROFILE-001"
       ],
       "scope": "Exact source-bound supporting whole local operations only; full original task acceptance remains open.",
+      "wholeTaskAccepted": false
+    },
+    "currentStageLIVDevelopment": {
+      "currentCoherentCheckpoint": {
+        "path": "/private/tmp/keyload-stage54-current-final-original-checkpoint-r2-20261011.json",
+        "sha256": "f5f2e5136b082ed75298de444af439602399661ea5bfed55bdf831b2d8299b90"
+      },
+      "source": "Bounded Offer/ACK/Abandon/Cleanup and native CQRS Tail paths with generated Orleans contracts, authorized cuts and exact terminal outcomes.",
+      "actualTailJsonWholeOperationExecutionsNormalScalarPassed": 6,
+      "currentNativeTailJsonCasesEnrolled": 3,
+      "remaining": "Six-owner public FirstOpen/Tail, pending-frontier reachability, recovery and original Linux qualification remain open. Stage54 negative-profile fixture failure is retained; its test-only repair is prepared.",
       "wholeTaskAccepted": false
     }
   },

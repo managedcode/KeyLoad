@@ -66,7 +66,7 @@ internal static class McpToolDescriptions
     private const string AdminPartitionPlacementBind = "Bind one atomic partition to the current physical shard using the expected placement directory revision; requires persisted cluster administrator authority.";
     private const string AdminPartitionPlacementRead = "Read one atomic partition placement and the committed default-shard identity from one authorized view; requires persisted cluster administrator authority.";
 
-    internal static string For(string name) => name switch
+    internal static string For(string name) => McpEventFeedDescriptions.Find(name) ?? name switch
     {
         McpToolNames.DocumentsGet => DocumentsGet,
         McpToolNames.DocumentsReadFollower => DocumentsReadFollower,

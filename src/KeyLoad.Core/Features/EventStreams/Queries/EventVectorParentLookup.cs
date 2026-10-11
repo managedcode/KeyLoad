@@ -12,11 +12,17 @@ internal static class EventVectorParentLookup
     internal static StoredOutcome? ReadTerminal(IKeyValueView view, IAuthorizationPolicy authorization, PrincipalRecord principal,
         EventFeedControlRequest request, Guid incarnation, IOptions<DatabaseLimits> options,
         CancellationToken cancellationToken)
-        => ReadTerminalDetails(view, authorization, principal, request, incarnation, options, cancellationToken)?.Outcome;
+        => ReadTerminalDetails(view, authorization, principal, request, incarnation, ReadOnlyMemory<byte>.Empty, options, cancellationToken)?.Outcome;
+
+    internal static (StoredOutcome Outcome, ReadOnlyMemory<byte> PhaseBytes, Guid PhaseId)? ReadTerminalDetails(
+        IKeyValueView view, IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request,
+        Guid incarnation, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        => ReadTerminalDetails(view, authorization, principal, request, incarnation,
+            ReadOnlyMemory<byte>.Empty, options, cancellationToken);
 
     internal static (StoredOutcome Outcome, ReadOnlyMemory<byte> PhaseBytes, Guid PhaseId)? ReadTerminalDetails(
         IKeyValueView view, IAuthorizationPolicy authorization, PrincipalRecord principal, EventFeedControlRequest request, Guid incarnation,
-        IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
+        ReadOnlyMemory<byte> freshSourceAuthorizationWitness, IOptions<DatabaseLimits> options, CancellationToken cancellationToken)
     {
         var admission = new EventVectorAdmissionPolicy(options);
         var budget = new EventVectorInventoryReadBudget(options);
@@ -32,6 +38,8 @@ internal static class EventVectorParentLookup
         { return null; }
         RequireIndex(index, principal, request, admission);
         EventVectorParentScopes.Authorize(authorization, principal, index.OriginalAuthorizedSourceScopes, admission);
+        var fresh = freshSourceAuthorizationWitness.IsEmpty ? null : EventVectorCurrentSourceAuthorization.Require(view,
+            principal, request, index.OriginalAuthorizedSourceScopes, freshSourceAuthorizationWitness, admission);
         cancellationToken.ThrowIfCancellationRequested();
         admission.RequireEncodedBytes(index.OriginalNativeTerminalPhaseBytes.Length);
         var phase = NativeSerialization.Deserialize<EventVectorControlPhase>(index.OriginalNativeTerminalPhaseBytes.Span);
@@ -41,6 +49,8 @@ internal static class EventVectorParentLookup
         { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidLookup); }
         EventVectorParentScopes.RequireExact(index.OriginalAuthorizedSourceScopes,
             EventVectorParentScopes.Derive(phase, null, admission));
+        if (fresh is not null)
+        { EventVectorCurrentSourceAuthorization.RequireOriginalFences(phase, fresh, admission); }
         var outcome = EventVectorParentOutcome.Require(view, principal, phase, index.ActualTerminalControlPhaseId,
             index.ActualTerminalOutcomeFingerprint, incarnation, admission);
         return (outcome, index.OriginalNativeTerminalPhaseBytes, index.ActualTerminalControlPhaseId);

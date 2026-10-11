@@ -35,6 +35,15 @@ internal static class McpCatalogExpectations
     internal static ImmutableArray<McpToolExpectation> Entries { get; } =
     [
         .. McpBlobCatalogExpectations.Entries,
+        new("keyload_tail_event_feed", true, true, false, McpExpectedBody.Object, false, [],
+            ["version", "publicCommandId", "mapId", "revision", "coverageGeneration", "released", "retained",
+                "cursor", "offerDigest", "pages", "receipt"]),
+        new("keyload_open_event_feed", false, false, true, McpExpectedBody.Object, false, [],
+            ["version", "publicCommandId", "mapId", "revision", "coverageGeneration", "released", "retained",
+                "cursor", "offerDigest", "pages", "receipt"]),
+        new("keyload_offer_event_feed", false, false, true, McpExpectedBody.Object, false, [],
+            ["version", "publicCommandId", "mapId", "revision", "coverageGeneration", "released", "retained",
+                "cursor", "offerDigest", "pages", "receipt"]),
         Read(AnnReadName, [.. AnnReadFields]),
         new(AnnMaintainName, false, false, true, McpExpectedBody.Object, false, [.. AnnRequiredFields]),
         new(TextMaintainName, false, false, true, McpExpectedBody.Object, false, [.. TextRequiredFields]),

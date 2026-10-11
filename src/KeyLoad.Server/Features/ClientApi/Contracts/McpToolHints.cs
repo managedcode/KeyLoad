@@ -54,6 +54,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
     internal static McpToolHints ForCommand(OperationKind kind) => kind switch
     {
         OperationKind.Batch => new(false, true, true),
+        OperationKind.EventFeedControl => new(false, false, true),
         OperationKind.MovePartition => new(false, true, true),
         OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex => new(false, false, true),
         OperationKind.MaintainOnlineTextIndex => new(false, true, true),

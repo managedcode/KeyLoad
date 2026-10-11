@@ -91,6 +91,14 @@ internal sealed class McpRequestAdmission : IDisposable
         owner.GrowTo(projection.ReplyScan(owner.RetainedBytes, bytes), cancellationToken);
     }
 
+    internal McpMemoryLease ReserveProgress(int bytes, CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (execution is null)
+        { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
+        return memory.Reserve(McpMemoryLane.Data, projection.ProgressNotification(bytes), cancellationToken);
+    }
+
     /// <summary>Releases ownership only after the native SDK transport has drained.</summary>
     public void Dispose()
     {
