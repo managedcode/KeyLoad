@@ -33,7 +33,7 @@ internal static class NativeTextMaintenanceRf3Flow
         await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.StaleSelected, () =>
             NativeTextSelectedRf3Assertions.StaleAsync(sdk, mcp, scenario, request, path, token));
         await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.OriginalPrefix, () =>
-            NativeTextMaintenanceRf3OriginalPrefix.VerifyAsync(sdk, mcp, request, built, path, token));
+            NativeTextMaintenanceRf3OriginalPrefix.VerifyAsync(sdk, mcp, request, built, scenario, path, token));
         var restore = request with { CommandId = Guid.NewGuid(), Mode = TextIndexMaintenanceMode.Restore };
         var updated = await observation.MeasureAsync(NativeTextMaintenanceFlowPhase.Restore, async () =>
         {

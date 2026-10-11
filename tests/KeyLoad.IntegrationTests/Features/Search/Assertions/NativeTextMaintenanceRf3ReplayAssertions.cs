@@ -101,14 +101,14 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
         return direct;
     }
 
-    private static async Task StableAsync(TextIndexMaintenanceResult actual, TextIndexMaintenanceResult original)
+    internal static async Task StableAsync(TextIndexMaintenanceResult actual, TextIndexMaintenanceResult original)
     {
         await Assert.That(JsonDefaults.Serialize(actual with { Source = null })
             .SequenceEqual(JsonDefaults.Serialize(original with { Source = null }))).IsTrue();
     }
 
-    private static async Task SourceAsync(TextIndexSourceCut actual, TextIndexSourceCut original,
-        NodeStatus before, NodeStatus after)
+    internal static async Task SourceAsync(TextIndexSourceCut actual, TextIndexSourceCut original,
+        NodeStatus before, NodeStatus after, long? expectedThroughSequence = null)
     {
         await Assert.That(actual.NodeId.ToString()).IsEqualTo(before.NodeId);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
@@ -116,7 +116,7 @@ internal static class NativeTextMaintenanceRf3ReplayAssertions
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
         await Assert.That(actual.NodeId).IsEqualTo(original.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(original.Incarnation);
-        await Assert.That(actual.ThroughSequence).IsEqualTo(original.ThroughSequence);
+        await Assert.That(actual.ThroughSequence).IsEqualTo(expectedThroughSequence ?? original.ThroughSequence);
         await Assert.That(actual.SchemaVersion).IsEqualTo(original.SchemaVersion);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(original.PolicyEpoch);
         await Assert.That(actual.ResourceSha256).IsEqualTo(original.ResourceSha256);

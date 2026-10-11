@@ -90,7 +90,7 @@ flowchart LR
 
 **Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-The current local checkpoint passed the full Release build, formatting, focused recovery checks and a genuine RF3 SDK/MCP flow in both CPU modes. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. One selected unit-test fixture still requires its prepared repair; complete Linux/RF3 qualification and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
+SIMD is enabled throughout the current execution path. The latest completed full Linux run at `ffab3ee4` passed all 328 process-recovery tests; its Unit suite passed 3,271 of 3,383 tests, with 112 failures under repair. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. The original full-text replay checks now preserve the complete original checkpoint while validating the actual current source cut; their owning build, scoped formatter and four original native test identities passed locally, with runtime qualification open. Complete Linux/RF3 acceptance and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|

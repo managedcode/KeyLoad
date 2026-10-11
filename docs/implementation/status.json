@@ -54991,6 +54991,48 @@
       "sameOriginalBuildRestoreBoundary": "Fresh committed checkpoint beyond original signed upper cut fails HistoryUnavailable before any old-session/index mutation.",
       "actualRf3ColdAndOfficialSdkQualified": false,
       "remaining": "Fresh delivered-source original9 complete genuine RF3 SDK/MCP/Q1 cold flows and required whole-task gates."
+    },
+    "currentStageLVIINativeOriginalPrefixDevelopment": {
+      "task": "TASK-KL029-CURRENT-SOURCE-PREFIX-002",
+      "scope": "test-only complete original replay result/checkpoint plus independently observed current scoped source; no product/API/provider/deadline/case change",
+      "originalLinuxFailure": {
+        "source": "ffab3ee49e65f7baa0e63ef9078910bd35df25da",
+        "runId": 38136695039,
+        "runAttempt": 1,
+        "jobId": 114461913497,
+        "logSha256": "c7eeed2099247086dd9ade969f7651546c56cafdafa7283e1fb73fb233c8dc62",
+        "firstFailure": "physical Applied33 to35 compared as unchanged; later BudgetExceeded original failures remain open"
+      },
+      "owningReleaseBuild": {
+        "errors": 0,
+        "warnings": 0,
+        "stdoutSha256": "707f00a2a6707143a94fd3ce23c717ca778c6a4ffdd25a66cf1c669d8c198325",
+        "scope": "affected Integration build with32 verified unchanged production references, not a fresh full solution build"
+      },
+      "canonicalFormatter": {
+        "scope": "three changed Integration source paths only",
+        "exitCode": 0,
+        "originalReceipt": "/private/tmp/keyload-stage57-fts-format-discovery-r2-20261011/format.process.original.json"
+      },
+      "originalNativeDiscovery": {
+        "count": 4,
+        "paths": [
+          "Sdk",
+          "Mcp",
+          "SdkSql",
+          "McpSql"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "335466e486c203790444c8f55f8264bd3dde54b16d2d13f8b101ca04ed0f6b97"
+      },
+      "unchangedInputs": {
+        "source": 7344,
+        "integrationImages": 412,
+        "productionReferences": 32
+      },
+      "actualRf3RuntimePassed": false,
+      "deliveredSourceLinuxQualified": false,
+      "wholeTaskAccepted": false
     }
   },
   "KL-030": {
