@@ -12,4 +12,6 @@ internal readonly record struct RequestCqrsReplicaSnapshotRecord(
     [property: JsonRequired] long SnapshotIndex,
     [property: JsonRequired] long MaterializedPosition,
     [property: JsonRequired] long CommittedIndex,
-    [property: JsonRequired] long LastIndex);
+    [property: JsonRequired] long LastIndex,
+    [property: JsonRequired] bool HasCheckpointPrefix,
+    [property: JsonRequired] bool CheckpointPending);

@@ -7,5 +7,7 @@ internal enum RemoteModelNativeChannel
     /// <summary>The unchanged document, controlled document/blob or queue-transfer envelope.</summary>
     DocumentEnvelope = 0,
     /// <summary>The unchanged event-vector wire and original proof.</summary>
-    EventVector = 1
+    EventVector = 1,
+    /// <summary>Read-only authenticated ANN root and original publication observation.</summary>
+    AnnProjectionObservation = 2
 }

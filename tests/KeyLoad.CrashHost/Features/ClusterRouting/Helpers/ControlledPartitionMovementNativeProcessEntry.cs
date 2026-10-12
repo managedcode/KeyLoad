@@ -11,7 +11,17 @@ internal static class ControlledPartitionMovementNativeProcessEntry
     private const string Duplicate = "The original movement command has multiple committed entries.";
     private const string Missing = "The original movement entry is not retained in the committed tail.";
 
-    internal static ReplicaEntry Read(ControlledPartitionMovementNativeHost owner, Guid commandId,
+    internal static async Task<ReplicaEntry> ReadAsync(ControlledPartitionMovementNativeHost owner, Guid commandId,
+        CancellationToken cancellationToken)
+    {
+        await owner.Partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
+        await owner.Log.ProtocolGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        { return Read(owner, commandId, cancellationToken); }
+        finally { owner.Log.ProtocolGate.Release(); }
+    }
+
+    private static ReplicaEntry Read(ControlledPartitionMovementNativeHost owner, Guid commandId,
         CancellationToken cancellationToken)
     {
         var state = owner.Log.State;

@@ -15,20 +15,14 @@ public sealed partial class QueryEngine
     private const int InitialSequence = 0;
     private const int DefaultDialectVersion = 1;
     private const int JoinDialectVersion = 2;
-    private const int FirstElementIndex = 0;
-    private const string QueryCursorIsInvalidDetail = "The query cursor is invalid.";
-    private const int InitialCursorOffset = 0;
-    private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
     private const long NoRetainedBytesLong = 0L;
 
-    private const string CursorPurpose = "query-page";
     internal const string ExplainId = "explain";
     internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private readonly TimeSpan cursorLifetime;
     private readonly QueryExecutionOptions execution;
     private readonly IOptions<QueryExecutionOptions> executionOptions;
     internal QueryExecutionOptions Execution => execution;
-    private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
     internal DatabaseEngine PartitionQueryOwner => database;
     private readonly SearchEngine graphSearch;
@@ -40,17 +34,8 @@ public sealed partial class QueryEngine
     /// <param name="options">Centrally validated continuation settings, frozen for this execution owner.</param>
     /// <param name="searchEngine">The shared authorized search executor.</param>
     public QueryEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options, SearchEngine? searchEngine = null)
+        : this(database, options, searchEngine, null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(options);
-        execution = options.Value;
-        execution.Validate();
-        executionOptions = options;
-        cursorLifetime = execution.CursorLifetime;
-        this.database = database;
-        graphSearch = searchEngine ?? new SearchEngine(database, options);
-        liveQueries = new(database, this);
-        modelQueries = new(database, this);
     }
 
     /// <summary>Executes a bounded SQL query against one authorized read cut.</summary>
@@ -112,7 +97,7 @@ public sealed partial class QueryEngine
         var query = request.Query;
         budget.Check();
         Bind(principal, resource, request);
-        var cursor = ResolveCursor(view, principal, resource, request, hash, clock);
+        var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock);
         var prepared = new PreparedQuery(query, cursor.Offset, database.Limits.MaxScanRecords);
         var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
         {
@@ -140,36 +125,8 @@ public sealed partial class QueryEngine
         return BuildPage(principal, resource, request, hash, cursor, prepared, accessPath, budget, clock);
     }
 
-    private CursorState ResolveCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
-        AstQueryRequest request, string hash, TimeProvider clock)
-    {
-        var offset = FirstElementIndex;
-        var cut = database.Store.Position;
-        var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
-        if (request.Cursor is { } cursor)
-        {
-            QueryCursorClaims claims;
-            try
-            { claims = database.Verify<QueryCursorClaims>(cursor); }
-            catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
-            { throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail); }
-            if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
-                || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
-                || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
-                || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < InitialSequence || claims.CutPosition > database.Store.Position
-                || claims.ExpiresAt < clock.GetUtcNow()
-                || claims.Offset < InitialCursorOffset || claims.Offset > database.Limits.MaxScanRecords)
-            {
-                throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
-            }
-            offset = claims.Offset;
-            cut = claims.CutPosition;
-        }
-        return new(offset, cut, sourceEpoch);
-    }
-
     private QueryPage BuildPage(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request,
-        string hash, CursorState cursor, PreparedQuery prepared, string accessPath, ReadExecutionBudget budget, TimeProvider clock)
+        string hash, QueryCursorExecution.State cursor, PreparedQuery prepared, string accessPath, ReadExecutionBudget budget, TimeProvider clock)
     {
         var query = request.Query;
         var rows = new List<QueryRow>();
@@ -186,10 +143,8 @@ public sealed partial class QueryEngine
             rows.Add(projected);
         }
         var next = cursor.Offset + rows.Count;
-        var token = next < prepared.EligibleCount ? database.Sign(new QueryCursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
-            database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
-            principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
-            clock.GetUtcNow().Add(cursorLifetime))) : null;
+        var token = QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,
+            cursor, next, prepared.EligibleCount, clock);
         var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
         budget.CheckResult(result);
         return result;

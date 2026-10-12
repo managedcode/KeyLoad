@@ -66,23 +66,10 @@ public sealed partial class GrainRequestCodec
         => GrainRequestPayloadVerification.Verify(this, database, maximumTokenCharacters, signedRequest);
 
     internal DecodedGrainRequest VerifyRead(string signedRequest, Guid actorId)
-    {
-        var request = VerifyRequest(signedRequest, actorId);
-        if (request.Envelope.ReadKind is null)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-
-        return request;
-    }
+        => GrainRequestPayloadVerification.VerifyRead(this, signedRequest, actorId);
 
     internal DecodedGrainRequest VerifyRequest(string signedRequest, Guid actorId)
-    {
-        var request = Verify(signedRequest);
-        GrainRequestScope.RequireRequestIdentity(request.Envelope, actorId);
-
-        return request;
-    }
+        => GrainRequestPayloadVerification.VerifyRequest(Verify(signedRequest), actorId);
 
     internal ValueTask ObservePhaseAsync(DecodedGrainRequest request, GrainRequestPhase phase,
         IGrainContext? context, CancellationToken cancellationToken)

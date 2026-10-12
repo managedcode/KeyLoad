@@ -30,6 +30,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly byte[] secret = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
     private readonly ConcurrentDictionary<string, RequestCqrsCohortNativeNode> nodes = new(StringComparer.Ordinal);
     private TestCluster cluster;
+    private readonly RequestCqrsCohortCheckpointScenario? checkpoints;
     private readonly Lock lifecycle = new();
     private Task? disposal;
     internal Guid Incarnation { get; } = Guid.NewGuid();
@@ -37,10 +38,12 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     internal IServiceProvider LocalServices { get; private set; } = null!;
     internal IReadOnlyList<string> RuntimeAddresses { get; private set; } = [];
 
-    internal RequestCqrsCohortRuntimeFixture()
+    internal RequestCqrsCohortRuntimeFixture(RequestCqrsCohortCheckpointScenario? checkpoints = null)
     {
+        this.checkpoints = checkpoints;
         RequestCqrsCohortOwners.Register(ownerId, this);
-        try { cluster = CreateCluster(); }
+        try
+        { cluster = CreateCluster(); }
         catch (Exception) { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); throw; }
     }
     private TestCluster CreateCluster()
@@ -64,7 +67,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
                 RpcTimeout = RequestCqrsCohortScenario.RpcTimeout,
                 LowerElectionTimeout = RequestCqrsCohortScenario.LowerElectionTimeout,
                 UpperElectionTimeout = RequestCqrsCohortScenario.UpperElectionTimeout
-            }, secret);
+            }, secret, checkpoints);
         if (nodes.TryAdd(voter, node))
         {
             return node;
@@ -94,7 +97,9 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
         catch (Exception primary)
         {
-            try { await DisposeAsync(); }
+            checkpoints?.Release();
+            try
+            { await DisposeAsync(); }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -152,6 +157,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
     }
     private async Task StopClusterAsync()
     {
+        checkpoints?.Release();
         using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
         var failures = new List<Exception>();
         foreach (var node in nodes.Values)
@@ -184,7 +190,8 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
 
     private async Task DisposeCoreAsync()
     {
-        try { await StopClusterAsync(); }
+        try
+        { await StopClusterAsync(); }
         finally { RequestCqrsCohortOwners.Release(ownerId); CryptographicOperations.ZeroMemory(secret); }
     }
 }

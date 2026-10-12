@@ -46,27 +46,6 @@ internal static class EmptyReplicaSnapshotStorage
         }
     }
 
-    internal static ReplicaHardState ReadInstalledState(ClusterFixture fixture, string node)
-    {
-        var root = RequireRoot(fixture, node);
-        NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, NodeOwner));
-        using var replica = new ZoneTreeStore(new(Path.Combine(root, ReplicaProtocol.ReplicaDirectory)),
-            IntegrationExecutionOptions.StorageExecution(), IntegrationExecutionOptions.PointCacheExecution());
-        return replica.Read(view =>
-        {
-            var bytes = view.ReadOwnedValue(KeyCodec.Encode(ReplicaProtocol.StateKey))
-                ?? throw new InvalidOperationException("The actual recovered replica metadata is absent.");
-            var state = ReplicaProtocolCodec.Deserialize<ReplicaHardState>(bytes);
-            var snapshot = state.Snapshot
-                ?? throw new InvalidOperationException("The actual installed snapshot is absent.");
-            var prefix = view.VisitRange(KeyCodec.Encode(ReplicaProtocol.EntryKey), 1, static (_, _) => false,
-                untilKey: ReplicaProtocol.EntryStorageKey(checked(snapshot.Index + 1L)));
-            if (prefix.Records > 0)
-            { throw new InvalidOperationException("The actual installed checkpoint prefix has not settled before the later tail."); }
-            return state;
-        });
-    }
-
     internal static EmptyReplicaSnapshotCut ReadReplicaState(ClusterFixture fixture, string node, long tailPosition, long installedSnapshot)
     {
         var root = RequireRoot(fixture, node);
@@ -83,6 +62,20 @@ internal static class EmptyReplicaSnapshotStorage
             {
                 var failure = new InvalidOperationException("The actual ordered tail entry is absent.");
                 RetainCutFailure(failure, installedSnapshot, state, tailPosition, hasEntry: false);
+                throw failure;
+            }
+            if (state.Snapshot is not { } snapshot)
+            {
+                var failure = new InvalidOperationException("The actual installed snapshot is absent.");
+                RetainCutFailure(failure, installedSnapshot, state, tailPosition, hasEntry: true);
+                throw failure;
+            }
+            var prefix = view.VisitRange(KeyCodec.Encode(ReplicaProtocol.EntryKey), 1, static (_, _) => false,
+                untilKey: ReplicaProtocol.EntryStorageKey(checked(snapshot.Index + 1L)));
+            if (prefix.Records > 0)
+            {
+                var failure = new InvalidOperationException("The actual checkpoint prefix has not settled at the strict retained-tail cut.");
+                RetainCutFailure(failure, installedSnapshot, state, tailPosition, hasEntry: true);
                 throw failure;
             }
             return new EmptyReplicaSnapshotCut(state, ReplicaProtocolCodec.Deserialize<ReplicaEntry>(entry));

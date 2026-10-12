@@ -148,5 +148,7 @@ public enum GrainReadKind
     /// <summary>Private authenticated complete bounded source-page read.</summary>
     EventVectorSources = 71,
     /// <summary>Privately observes source attempt state or an authenticated actual target capacity failure.</summary>
-    QueueTransferCoordination = 72
+    QueueTransferCoordination = 72,
+    /// <summary>Privately observes one authenticated native ANN root or its exact publication.</summary>
+    AnnProjectionObservation = 73
 }

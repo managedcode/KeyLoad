@@ -20,16 +20,21 @@ internal static class SqlCompositionInsert
     {
         if (request.AllowFullScan || request.Cursor is not null || request.Partition is null)
         { throw SqlOperationSyntax.InvalidInput(); }
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
+        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion
+            && request.QueryDialectVersion != SqlCompositionEndpointJoin.DialectVersion)
         { throw SqlOperationSyntax.UnsupportedInput(); }
         var parameters = new SqlCompositionParameters(request.Parameters, reader);
         Word(reader, Into);
         var target = reader.Identifier();
         Mutation mutation;
         if (target.Equals(GraphEdges, StringComparison.OrdinalIgnoreCase))
-        { mutation = Forward(reader, parameters); }
+        { mutation = Forward(request, reader, parameters); }
         else if (target.Equals(QueueMessages, StringComparison.OrdinalIgnoreCase))
-        { mutation = Reverse(reader, parameters); }
+        {
+            if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
+            { throw SqlOperationSyntax.UnsupportedInput(); }
+            mutation = Reverse(reader, parameters);
+        }
         else
         { throw SqlOperationSyntax.UnsupportedInput(); }
         Word(reader, With);
@@ -42,7 +47,8 @@ internal static class SqlCompositionInsert
         return new(id, request.Partition, [mutation]);
     }
 
-    private static QueueToGraph Forward(SqlOperationSyntaxReader reader, SqlCompositionParameters parameters)
+    private static QueueToGraph Forward(SqlOperationRequest request, SqlOperationSyntaxReader reader,
+        SqlCompositionParameters parameters)
     {
         reader.Need(SqlOperationSyntax.OpenParenthesis);
         var graph = parameters.Read<string>();
@@ -53,9 +59,11 @@ internal static class SqlCompositionInsert
         reader.Need(SqlOperationSyntax.OpenParenthesis);
         var queue = parameters.Read<string>();
         reader.Need(SqlOperationSyntax.CloseParenthesis);
+        (string FromCollection, string ToCollection)? joined = request.QueryDialectVersion == SqlCompositionEndpointJoin.DialectVersion
+            ? SqlCompositionEndpointJoin.Read(reader, parameters) : null;
         Word(reader, Limit);
         var maximum = parameters.Read<int>();
-        return new(graph, queue, prefix, maximum);
+        return new(graph, queue, prefix, maximum, joined?.FromCollection, joined?.ToCollection);
     }
 
     private static GraphToQueueMutation Reverse(SqlOperationSyntaxReader reader, SqlCompositionParameters parameters)

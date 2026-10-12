@@ -82,6 +82,11 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority);
         }
         var budget = new ReadExecutionBudget(OperationLimitsOptions, CompositionTimeProvider.Instance);
+        if (mutations.Any(mutation => mutation is QueueToGraph { FromCollection: not null }))
+        {
+            ValidateTypedEndpointOutcomeReferences(view, principal, partition, references, budget);
+            return;
+        }
         foreach (var reference in references)
         {
             ValidateCompositionReference(reference, partition);

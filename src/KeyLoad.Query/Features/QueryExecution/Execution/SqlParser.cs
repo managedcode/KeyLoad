@@ -63,7 +63,7 @@ public sealed class SqlParser
         var (collection, modelSource) = new ModelSqlSourceParser(cursor).Read();
         ReadAlias();
         var joinSyntax = new SqlJoinSyntax(cursor, dialectVersion);
-        var join = joinSyntax.ReadJoin(alias);
+        var join = joinSyntax.ReadJoin(alias, modelSource);
         if (join is not null && StringComparer.Ordinal.Equals(join.Collection, collection))
         {
             throw SqlSyntax.Invalid();
@@ -71,7 +71,7 @@ public sealed class SqlParser
         projection = projection.Select(p => join is null
             ? p with { Path = SqlJoinSyntax.BoundPath(p.Path, alias), SourceAlias = null }
             : SqlJoinSyntax.BindProjection(p, alias, join)).ToList();
-        var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias).Parse() : null;
+        var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias, join?.Alias).Parse() : null;
         var order = ReadOrder(join);
         var limit = ReadLimit();
         cursor.Eat(SqlSyntax.Semicolon);

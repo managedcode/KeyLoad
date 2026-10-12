@@ -10,6 +10,8 @@ internal static class ConnectionGrainGraphRegistration
         silo.AddOrleansGraph(configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IConnectionGrain>()
+                .AddGrainServiceTransition<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService, IConnectionGrain>(
+                    nameof(IConnectionGrain.ExecuteStreamAsync))
                 .AddGrainServiceTransition<global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementGrainService, IConnectionGrain>(
                     nameof(IConnectionGrain.ExecuteStreamAsync))
                 .AddGrainServiceTransition<SampleChunkGrainService, ISampleChunkCoordinatorGrain>(

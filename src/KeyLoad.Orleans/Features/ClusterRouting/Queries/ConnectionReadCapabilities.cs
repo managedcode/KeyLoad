@@ -25,14 +25,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock);
         }
 
-        if (codec.HasPhaseObserver)
-        {
-            await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
-                context, cancellationToken).ConfigureAwait(true);
-            ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
-        }
-
-        var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+        var principal = await ReloadPrincipalAsync(request, requestId, cancellationToken).ConfigureAwait(true);
         if (GrainControlledReadCapabilities.Handles(kind))
         {
             return GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
@@ -70,6 +63,12 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await remoteDocuments.ReadAsync(request.Envelope, principal,
                 GrainNativePayload.Read<GetDocumentRequest>(request.Payload), cancellationToken).ConfigureAwait(true);
         }
+        if (kind is GrainReadKind.WaitForAnnIndex or GrainReadKind.ApproximateSearch
+            && services.GetService<IRemoteAnnReadRouter>() is { } remoteAnn)
+        {
+            return await remoteAnn.ReadAnnAsync(request.Envelope, principal, kind, request.Payload,
+                services.GetRequiredService<SearchEngine>(), cancellationToken).ConfigureAwait(true);
+        }
         if (kind == GrainReadKind.PartitionQuery
             && services.GetService<IRemotePartitionQueryRouter>() is { } remoteQueries)
         {
@@ -79,9 +78,26 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         return await ReadNativeCapabilityAsync(kind, principal, request, requestId, cancellationToken).ConfigureAwait(true);
     }
 
+    private async Task<PrincipalRecord> ReloadPrincipalAsync(DecodedGrainRequest request, Guid requestId,
+        CancellationToken cancellationToken)
+    {
+        if (codec.HasPhaseObserver)
+        {
+            await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
+                context, cancellationToken).ConfigureAwait(true);
+            ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
+        }
+        return GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
+    }
+
     private async Task<object?> ReadNativeCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
     {
+        if (kind == GrainReadKind.AnnProjectionObservation)
+        {
+            return await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
+                principal, request, cancellationToken).ConfigureAwait(true);
+        }
         if (EventVectorRequestScope.HandlesRead(kind))
         {
             return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, cancellationToken);

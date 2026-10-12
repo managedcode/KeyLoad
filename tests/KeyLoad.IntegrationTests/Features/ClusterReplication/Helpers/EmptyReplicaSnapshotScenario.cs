@@ -16,7 +16,6 @@ internal static class EmptyReplicaSnapshotScenario
     private const string TailJson = "{\"tail\":true}";
     private const int NodeCount = 3;
     private const long NativeSnapshotThreshold = 16;
-    private const long TailCommandsBeforeNativeInspection = 1;
     private const string OtherResource = "other-snapshot-resource";
 
     internal static async Task RunAsync(ClusterFixture fixture)
@@ -40,13 +39,8 @@ internal static class EmptyReplicaSnapshotScenario
             var final = await ReplicateWhileStoppedAsync(fixture, state, index, timeout.Token);
             await fixture.RestartContainerAsync(node, timeout.Token);
             running = true;
-            var installed = await RequireInstalledReadinessAsync(fixture, state, index, node,
+            var (installed, installedSnapshot) = await RequireInstalledReadinessAsync(fixture, state, index, node,
                 final.Receipt, timeout.Token);
-            await fixture.KillContainerAsync(node, Fault, timeout.Token);
-            running = false;
-            var installedSnapshot = await RequireInstalledCutAsync(fixture, node, final.Receipt);
-            await fixture.RestartContainerAsync(node, timeout.Token);
-            running = true;
             var (tailCommand, tail, baseline) = await CreatePostInstallTailAsync(state, index, installed,
                 final.Receipt, timeout.Token);
             await fixture.KillContainerAsync(node, Fault, timeout.Token);
@@ -84,13 +78,13 @@ internal static class EmptyReplicaSnapshotScenario
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task<NodeStatus> RequireInstalledReadinessAsync(ClusterFixture fixture,
+    private static async Task<(NodeStatus Owner, long SnapshotIndex)> RequireInstalledReadinessAsync(ClusterFixture fixture,
         SnapshotState state, int index, string node, CommitReceipt final, CancellationToken token)
     {
         var installed = await RequireAppliedAsync(state.Clients[index], state.InitialStatuses[index], final, token);
         await Assert.That(installed.NodeId).IsNotEqualTo(state.InitialStatuses[index].NodeId);
-        await EmptyReplicaSnapshotReadiness.RequireAsync(fixture, node, installed, final, token);
-        return installed;
+        var snapshotIndex = await EmptyReplicaSnapshotReadiness.RequireAsync(fixture, node, installed, final, token);
+        return (installed, snapshotIndex);
     }
 
     private static async Task<(int Index, string Node, ChangeFeedPage Feed, NodeStatus Owner)> CaptureFollowerFeedAsync(
@@ -110,19 +104,6 @@ internal static class EmptyReplicaSnapshotScenario
         await Assert.That(owner.Applied).IsGreaterThanOrEqualTo(previous.Applied);
         await Assert.That(owner.ReadGeneration).IsGreaterThanOrEqualTo(previous.ReadGeneration);
         return (index, node, originalFeed, owner);
-    }
-
-    private static async Task<long> RequireInstalledCutAsync(ClusterFixture fixture, string node, CommitReceipt final)
-    {
-        var actual = EmptyReplicaSnapshotStorage.ReadInstalledState(fixture, node);
-        await Assert.That(actual.Incarnation).IsEqualTo(final.Token.Incarnation);
-        await Assert.That(actual.Snapshot).IsNotNull();
-        await Assert.That(actual.Snapshot!.Index).IsGreaterThan(0L);
-        await Assert.That(actual.CommittedIndex).IsGreaterThanOrEqualTo(final.Token.Position);
-        await Assert.That(actual.LastIndex).IsGreaterThanOrEqualTo(actual.CommittedIndex);
-        await Assert.That(checked(actual.LastIndex - actual.Snapshot.Index + TailCommandsBeforeNativeInspection)).IsLessThan(NativeSnapshotThreshold);
-        EmptyReplicaSnapshotStorage.RequireImage(fixture, node, actual.Snapshot);
-        return actual.Snapshot.Index;
     }
 
     private static async Task RequireNativeCutAsync(ClusterFixture fixture, string node,

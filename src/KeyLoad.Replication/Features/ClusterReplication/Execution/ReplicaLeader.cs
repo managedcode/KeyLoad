@@ -44,7 +44,8 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
 
     private void ReleaseRound(Exception? primary)
     {
-        try { rounds.Release(); }
+        try
+        { rounds.Release(); }
         catch (Exception cleanup)
         {
             state.Poison(cleanup);
@@ -57,6 +58,25 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     private async Task<OperationResult> SubmitOwnedAsync(ReplicatedOperation operation,
         ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (state.Materializer.Database.TryReadOrdinaryDocumentSubmission(operation) is { } command)
+        {
+            await state.LockedAsync(() =>
+            { state.RequireReadyLeader(); return true; }, cancellationToken).ConfigureAwait(false);
+            try
+            { state.Materializer.Database.ValidateSubmissionAdmission(operation, command); }
+            catch (KeyLoadException refusal) when (refusal.Code == ErrorCode.Conflict)
+            {
+                await state.LockedAsync(() =>
+                {
+                    state.RequireReadyLeader();
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(refusal).Throw();
+                    return false;
+                }, cancellationToken).ConfigureAwait(false);
+                throw;
+            }
+        }
+        cancellationToken.ThrowIfCancellationRequested();
         var admission = await state.LockedAsync(() => AppendOwned(operation, boundary, cancellationToken), cancellationToken).ConfigureAwait(false);
         if (admission.Outcome is { } originalOutcome)
         { return originalOutcome; }

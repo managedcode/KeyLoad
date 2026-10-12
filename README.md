@@ -92,7 +92,7 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current composition and model source record](docs/implementation/qualification-stage62-composition-and-models.md) tracks bounded SQL composition, model operation flows and repairs to the original unit/recovery failures; actual current-source qualification remains open. The [preceding coherent source record](docs/implementation/qualification-stage61-coherent-join.md) and [earlier native execution record](docs/implementation/qualification-stage60-native-execution.md) retain their original results and failures.
+KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current native composition source record](docs/implementation/qualification-stage63-native-composition.md) tracks bounded SQL composition, model operation flows and repairs to the original unit/recovery failures; actual current-source qualification remains open. The [preceding coherent source record](docs/implementation/qualification-stage61-coherent-join.md) and [earlier native execution record](docs/implementation/qualification-stage60-native-execution.md) retain their original results and failures.
 
 SIMD is enabled throughout the current execution path. The recorded Linux run at `001bed7` passed all 349 process-recovery tests; its Unit suite passed 3,469 of 3,480 tests, with 11 failures still requiring complete-source qualification. The local native Unit10 successor passed 10/10; Recovery10 passed 8/10 and retains two six-host startup failures. KL-065 passed its complete 78-case task acceptance lane: 45 Unit, 25 process recovery and 8 Aspire RF3 cases. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. The original full-text replay checks now preserve the complete original checkpoint while validating the actual current source cut; their owning build, scoped formatter and four original native test identities passed locally, with runtime qualification open. Complete Linux/RF3 acceptance and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
 
@@ -354,7 +354,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 
 ### Contributing
 
-Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `unit-scalar`, `recovery`, `rf3`, `analyzers` or `site`):
+Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `recovery`, `rf3`, `analyzers` or `site`):
 
 ```bash
 node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit

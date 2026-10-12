@@ -16,7 +16,8 @@ internal static class RequestCqrsReplicaSnapshotJson
         nameof(RequestCqrsReplicaSnapshotRecord.SessionId), nameof(RequestCqrsReplicaSnapshotRecord.ArmId),
         nameof(RequestCqrsReplicaSnapshotRecord.RequestId), nameof(RequestCqrsReplicaSnapshotRecord.SnapshotIndex),
         nameof(RequestCqrsReplicaSnapshotRecord.MaterializedPosition), nameof(RequestCqrsReplicaSnapshotRecord.CommittedIndex),
-        nameof(RequestCqrsReplicaSnapshotRecord.LastIndex)];
+        nameof(RequestCqrsReplicaSnapshotRecord.LastIndex), nameof(RequestCqrsReplicaSnapshotRecord.HasCheckpointPrefix),
+        nameof(RequestCqrsReplicaSnapshotRecord.CheckpointPending)];
 
     internal static RequestCqrsReplicaSnapshotRecord Read(RequestCqrsProbeJson json, ReadOnlySpan<byte> bytes)
     {
@@ -25,7 +26,8 @@ internal static class RequestCqrsReplicaSnapshotJson
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId)
             || value.ArmId == Guid.Empty || value.RequestId == Guid.Empty
             || value.SnapshotIndex < NoPosition || value.MaterializedPosition < NoPosition
-            || value.CommittedIndex < value.SnapshotIndex || value.LastIndex < value.CommittedIndex)
+            || value.CommittedIndex < value.SnapshotIndex || value.LastIndex < value.CommittedIndex
+            || value.HasCheckpointPrefix || value.CheckpointPending)
         { throw Invalid(); }
         return value;
     }

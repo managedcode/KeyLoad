@@ -155,6 +155,8 @@ public sealed record ReadBarrierReceipt(
 /// <param name="MaterializedPosition">Locally applied canonical prefix.</param>
 /// <param name="SnapshotIndex">Published checkpoint position, or zero before checkpointing.</param>
 /// <param name="TransportReady">Whether the node's native replica service is attached.</param>
+/// <param name="HasCheckpointPrefix"></param>
+/// <param name="CheckpointPending"></param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ReplicaSerializationAliases.ReplicaNodeState)]
 public sealed record ReplicaNodeState(
@@ -166,4 +168,6 @@ public sealed record ReplicaNodeState(
     [property: Orleans.Id(5)] long CommittedIndex,
     [property: Orleans.Id(6)] long MaterializedPosition,
     [property: Orleans.Id(7)] long SnapshotIndex,
-    [property: Orleans.Id(8)] bool TransportReady);
+    [property: Orleans.Id(8)] bool TransportReady,
+    [property: Orleans.Id(9)] bool? HasCheckpointPrefix = null,
+    [property: Orleans.Id(10)] bool? CheckpointPending = null);

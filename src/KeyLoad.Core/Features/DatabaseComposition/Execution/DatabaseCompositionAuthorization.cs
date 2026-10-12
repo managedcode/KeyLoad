@@ -34,6 +34,7 @@ public sealed partial class DatabaseEngine
             var target = BatchResource(view, partition, forward.Graph, admission, ResourceKind.Graph);
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
+            AuthorizeTypedEndpointJoin(view, principal, partition, forward, admission);
         }
         else if (mutation is GraphToQueueMutation reverse)
         {

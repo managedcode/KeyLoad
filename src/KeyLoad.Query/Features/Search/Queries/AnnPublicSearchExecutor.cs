@@ -25,6 +25,22 @@ internal static class AnnPublicSearchExecutor
             cancellationToken).ConfigureAwait(false);
     }
 
+    internal static async Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+        string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
+        ReadExecutionBudget budget, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(budget);
+        var execution = configured.Value;
+        if (!execution.EnableApproximateSearch)
+        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        QueryResultBudgetPolicy.Constrain(budget, execution);
+        budget.Check();
+        using var reservation = database.AdmitQuery(cancellationToken);
+        return await Task.Run(() => Execute(database, projection, principalId, request, budget, execution),
+            cancellationToken).ConfigureAwait(false);
+    }
+
     internal static AnnSearchPage Execute(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, ReadExecutionBudget budget,
         QueryExecutionOptions execution)

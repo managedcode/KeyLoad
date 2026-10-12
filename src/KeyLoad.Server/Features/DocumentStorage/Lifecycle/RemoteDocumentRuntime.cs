@@ -27,6 +27,8 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     internal RemoteDocumentEndpoint? Endpoint { get; private set; }
     internal global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime? EventVectors { get; private set; }
     internal IEventVectorParent? EventVectorParent { get; private set; }
+    internal global::KeyLoad.Server.Features.Search.AnnProjectionNativeReceiver? AnnObservations { get; private set; }
+    internal IRemoteAnnReadRouter? AnnReadRouter { get; private set; }
 
     internal static async Task<RemoteDocumentRuntime?> CreateAsync(OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, TimeProvider clock,
@@ -92,6 +94,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
                 options.Membership, options.GrainRouting, clock, transfer);
         }
         EventVectors = global::KeyLoad.Server.Features.EventStreams.EventVectorRuntime.Create(node, partition, options, work, clock);
+        AnnObservations = new(node, partition, options, clock);
+        AnnReadRouter = new global::KeyLoad.Server.Features.Search.RemoteAnnReadRouter(node, partition,
+            options.Node, options.Core.DatabaseLimits, options.Core.QueryExecution, work, clock);
         if (settings.Role == PhysicalGroupTrustRole.Control)
         {
             EventVectorParent = new global::KeyLoad.Server.Features.EventStreams.EventVectorFirstAdmitParent(node,
@@ -129,21 +134,7 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
 
     internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteNativeAsync(
         RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token)
-    {
-        if (request.Channel == RemoteModelNativeChannel.DocumentEnvelope)
-        { return (Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
-            .ExecuteAsync(request, effectBoundary, token); }
-        if (request.Channel == RemoteModelNativeChannel.EventVector)
-        {
-            var call = NativeSerialization.Deserialize<global::KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall>(request.Payload.Span);
-            if (!global::KeyLoad.Core.Features.ClusterRouting.Validation.PhysicalOwnerEntryValidation.SameOwner(call.Source, request.SourceOwner)
-                || call.ExpiresAt != request.ExpiresAt)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-            return (EventVectors?.Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
-                .ExecuteAsync(request.Payload, request.Signature, effectBoundary, token);
-        }
-        throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
-    }
+        => RemoteModelNativeDispatch.ExecuteAsync(this, request, effectBoundary, token);
 
     public ValueTask DisposeAsync()
     {

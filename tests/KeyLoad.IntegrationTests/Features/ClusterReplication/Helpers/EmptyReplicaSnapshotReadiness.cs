@@ -16,7 +16,7 @@ internal static class EmptyReplicaSnapshotReadiness
     internal static Task ProvisionAsync(ClusterFixture fixture, CancellationToken token)
         => RequireOwner(fixture).ProvisionAsync(fixture, token);
 
-    internal static async Task RequireAsync(ClusterFixture fixture, string node, NodeStatus installed,
+    internal static async Task<long> RequireAsync(ClusterFixture fixture, string node, NodeStatus installed,
         CommitReceipt final, CancellationToken token)
     {
         var owner = RequireOwner(fixture);
@@ -31,8 +31,12 @@ internal static class EmptyReplicaSnapshotReadiness
         var observed = controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.ReplicaSnapshotReadiness,
             RequestCqrsProbeOutcome.Observed, discovery, cancellation.Token);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => CompleteAsync(controls, node, installed, final,
-            arm, producer, observed, discovery, cancellation.Token), failures);
+        var snapshotIndex = NoSnapshot;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            snapshotIndex = await CompleteAsync(controls, node, installed, final,
+                arm, producer, observed, discovery, cancellation.Token);
+        }, failures);
         if (failures.Count != 0)
         {
             controls.RetainEvidence();
@@ -41,9 +45,10 @@ internal static class EmptyReplicaSnapshotReadiness
             await ServerFailureObserver.ObserveAsync(async () => { _ = await observed; }, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+        return snapshotIndex;
     }
 
-    private static async Task CompleteAsync(RequestCqrsProbeFixture controls, string node,
+    private static async Task<long> CompleteAsync(RequestCqrsProbeFixture controls, string node,
         NodeStatus installed, CommitReceipt final, Guid arm, Task<Result<NodeStatus>> producer,
         Task<RequestCqrsProbeMarkerRecord> observed, IReadOnlyList<ReplicaSiloDiscovery> discovery, CancellationToken token)
     {
@@ -63,6 +68,7 @@ internal static class EmptyReplicaSnapshotReadiness
         await Assert.That(current.Applied).IsEqualTo(native.MaterializedPosition);
         await Assert.That(current.ReadGeneration).IsGreaterThanOrEqualTo(installed.ReadGeneration);
         await controls.RetireArmAsync(arm, token);
+        return native.SnapshotIndex;
     }
 
     private static RequestCqrsReplicaSnapshotRecord ReadCut(RequestCqrsProbeFixture controls,
@@ -73,7 +79,7 @@ internal static class EmptyReplicaSnapshotReadiness
         _ = RequestCqrsProbeFileValidation.ValidateContents(owned.Directory);
         var identity = new RequestCqrsReplicaSnapshotRecord(RequestCqrsProbeProtocol.Version,
             RequestCqrsReplicaSnapshotJson.Kind, controls.SessionId, marker.ArmId, marker.RequestId,
-            NoSnapshot, NoSnapshot, NoSnapshot, NoSnapshot);
+            NoSnapshot, NoSnapshot, NoSnapshot, NoSnapshot, false, false);
         var value = RequestCqrsReplicaSnapshotJson.Read(controls.Json, RequestCqrsProbeFileStore.ReadRecord(
             Path.Combine(owned.Directory, RequestCqrsReplicaSnapshotJson.Name(identity))));
         if (value.SessionId != marker.SessionId || value.ArmId != marker.ArmId || value.RequestId != marker.RequestId)
@@ -84,6 +90,8 @@ internal static class EmptyReplicaSnapshotReadiness
     private static async Task RequireCutAsync(RequestCqrsReplicaSnapshotRecord native, CommitReceipt final)
     {
         await Assert.That(native.SnapshotIndex).IsGreaterThan(NoSnapshot);
+        await Assert.That(native.HasCheckpointPrefix).IsFalse();
+        await Assert.That(native.CheckpointPending).IsFalse();
         await Assert.That(native.MaterializedPosition).IsGreaterThanOrEqualTo(final.Token.Position);
         await Assert.That(native.CommittedIndex).IsGreaterThanOrEqualTo(final.Token.Position);
         await Assert.That(native.LastIndex).IsGreaterThanOrEqualTo(native.CommittedIndex);

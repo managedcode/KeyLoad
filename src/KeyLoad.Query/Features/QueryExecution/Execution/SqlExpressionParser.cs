@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Query.Features.QueryExecution;
 
 /// <summary>Parses Q1 predicates and operands with the established precedence and depth budget.</summary>
-internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<DatabaseLimits> limitsOptions, int maximumInValues, string? alias)
+internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<DatabaseLimits> limitsOptions, int maximumInValues, string? alias, string? rightAlias = null)
 {
     private const int LowestPrecedence = 0;
     private const int OrPrecedence = 1;
@@ -145,6 +145,10 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
     private FieldOperand Field()
     {
         var parts = cursor.Path();
+        if (rightAlias is not null && parts.Count > SinglePathSegment && parts[FirstPathSegment] == rightAlias)
+        {
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedJoinDetail);
+        }
         if (alias is not null && parts.Count > SinglePathSegment && parts[FirstPathSegment] == alias)
         {
             parts.RemoveAt(FirstPathSegment);

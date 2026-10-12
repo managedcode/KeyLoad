@@ -21,6 +21,7 @@ public sealed class ReadExecutionBudget
     private readonly long started;
     private TimeSpan lifetimeBound;
     private long bytes;
+    private ReadExecutionBudgetNativeWork nativeWork;
     private int resultBytesLimit;
     private long textTokens;
     private ReadExecutionBudgetStageCancellation? stageCancellation;
@@ -36,6 +37,7 @@ public sealed class ReadExecutionBudget
         limits.Validate();
         lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
         resultBytesLimit = limits.MaxBatchBytes;
+        nativeWork = new(limits.MaxQueryReadBytes, limits.MaxScanRecords);
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
         started = clock.GetTimestamp();
@@ -69,8 +71,25 @@ public sealed class ReadExecutionBudget
 
     internal CancellationToken Cancellation => cancellationToken;
     internal int MaximumResultBytes => resultBytesLimit;
-    internal long MaximumNativeReadBytes => limits.MaxQueryReadBytes;
-    internal int MaximumNativeScanRecords => limits.MaxScanRecords;
+    internal long MaximumNativeReadBytes => nativeWork.MaximumBytes;
+    internal int MaximumNativeScanRecords => nativeWork.MaximumRecords;
+    internal int ConstrainedNativeRecords => nativeWork.ExaminedRecords + (readGrants?.ExaminedRecords ?? EmptyClaimedRecords);
+
+    internal void ConstrainNativeWork(long maximumBytes, int maximumRecords)
+    {
+        Check();
+        nativeWork.Constrain(maximumBytes, maximumRecords, bytes + (readGrants?.ReservedBytes ?? NoReservedReadBytes),
+            readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
+    }
+
+    internal void ImportNativeObservation(long observedBytes, int observedRecords)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(observedBytes);
+        Check();
+        nativeWork.RequireObservation(observedRecords, RemainingReadGrantRecords);
+        ChargeBytes(observedBytes);
+        nativeWork.Record(observedRecords);
+    }
 
     internal void ConstrainResultBytes(int maximumBytes)
     {
@@ -113,7 +132,7 @@ public sealed class ReadExecutionBudget
     {
         Check();
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (count > limits.MaxQueryReadBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
+        if (count > nativeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }
@@ -214,8 +233,8 @@ public sealed class ReadExecutionBudget
         return counter.Length;
     }
     private ReadExecutionBudgetScopedReadGrants ReadGrants => readGrants ??= new(this);
-    internal long RemainingReadGrantBytes => limits.MaxQueryReadBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
-    internal int RemainingReadGrantRecords => limits.MaxScanRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
+    internal long RemainingReadGrantBytes => nativeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
+    internal int RemainingReadGrantRecords => nativeWork.MaximumRecords - nativeWork.ExaminedRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
     private const int EmptyClaimedRecords = 0;
     internal void AcceptReadGrantBytes(long count) => bytes += count;
     internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.CompleteReadGrant(grant);
@@ -236,7 +255,14 @@ public sealed class ReadExecutionBudget
         if (readGrants is { } grants)
         { grants.ChargeNativeReadRecord(count); }
         else
-        { ChargeBytes(count); }
+        { ChargeUnscopedNativeRecord(count); }
+    }
+
+    internal void ChargeUnscopedNativeRecord(long count)
+    {
+        nativeWork.RequireRecord(RemainingReadGrantRecords);
+        ChargeBytes(count);
+        nativeWork.Record(ReadExecutionBudgetNativeWork.SingleRecord);
     }
 
 }

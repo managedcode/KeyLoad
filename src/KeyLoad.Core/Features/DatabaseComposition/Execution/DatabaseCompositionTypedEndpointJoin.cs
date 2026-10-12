@@ -1,0 +1,98 @@
+using System.Collections.Immutable;
+using KeyLoad.Core.Features.RelationalStorage;
+using KeyLoad.Storage;
+
+namespace KeyLoad.Core;
+
+public partial class DatabaseEngine
+{
+    private const string TypedJoinRequiresRelationalCollections = "The endpoint join requires two distinct typed relational collections.";
+    private const string TypedJoinReferenceMismatch = "The queue link does not match its declared endpoint collections.";
+    private const string TypedJoinRecordMismatch = "The typed endpoint record has a different canonical identity.";
+
+    private void AuthorizeTypedEndpointJoin(IKeyValueView view, PrincipalRecord principal,
+        PartitionRef partition, QueueToGraph command, BatchResourceAdmission admission)
+    {
+        if (command.FromCollection is null && command.ToCollection is null)
+        { return; }
+        if (command.FromCollection is null || command.ToCollection is null
+            || StringComparer.Ordinal.Equals(command.FromCollection, command.ToCollection))
+        { throw Errors.Fail(ErrorCode.Validation, TypedJoinRequiresRelationalCollections); }
+        AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection, admission);
+        AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection, admission);
+    }
+
+    private void AuthorizeTypedEndpointResource(IKeyValueView view, PrincipalRecord principal,
+        PartitionRef partition, string collection, BatchResourceAdmission admission)
+    {
+        JsonData.Identifier(collection);
+        Authorization.Require(principal, partition, collection, Capability.DocumentsRead);
+        var resource = BatchResource(view, partition, collection, admission, ResourceKind.Collection);
+        if (resource.RelationalSchema is not { } schema)
+        { throw Errors.Fail(ErrorCode.UnsupportedCapability, TypedJoinRequiresRelationalCollections); }
+        RelationalRowValidation.ValidateSchema(resource);
+        Authorization.RequireFieldUse(principal, resource, JsonData.Path([schema.PrimaryKey]));
+    }
+
+    private bool SelectTypedEndpointPair(IKeyValueView view, PrincipalRecord principal,
+        QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget)
+    {
+        if (!StringComparer.Ordinal.Equals(link.From.Collection, command.FromCollection)
+            || !StringComparer.Ordinal.Equals(link.To.Collection, command.ToCollection))
+        { throw Errors.Fail(ErrorCode.Validation, TypedJoinReferenceMismatch); }
+        // Both genuine probes are charged, including absent and row-denied endpoints.
+        var from = ReadTypedEndpoint(view, principal, link.From, budget);
+        var to = ReadTypedEndpoint(view, principal, link.To, budget);
+        return from is not null && to is not null;
+    }
+
+    private DocumentRecord? ReadTypedEndpoint(IKeyValueView view, PrincipalRecord principal,
+        EntityRef reference, ReadExecutionBudget budget)
+    {
+        var record = budget.ReadRecord<DocumentRecord>(view,
+            DocumentKey(reference.Partition, reference.Collection, reference.Id));
+        if (record is null)
+        { return null; }
+        if (record.Reference != reference)
+        { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
+        return record.Deleted || !Authorization.CanReadRow(principal, record.Access) ? null : record;
+    }
+
+    private List<Mutation> ExpandQueueToGraph(IAtomicTransaction transaction, PrincipalRecord principal,
+        PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget)
+    {
+        if (command.FromCollection is null && command.ToCollection is null)
+        { return ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget, transaction); }
+        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
+        try
+        {
+            using var lease = budget.EnterReadGrant(grant);
+            return ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget,
+                budget.CreateView(transaction));
+        }
+        finally
+        {
+            // The using lease exits before settled completion, including failure paths.
+            budget.CompleteSettledReadGrant(grant);
+        }
+    }
+
+    private void ValidateTypedEndpointOutcomeReferences(IKeyValueView view, PrincipalRecord principal,
+        PartitionRef partition, ImmutableArray<EntityRef> references, ReadExecutionBudget budget)
+    {
+        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
+        try
+        {
+            using var lease = budget.EnterReadGrant(grant);
+            var chargedView = budget.CreateView(view);
+            foreach (var reference in references)
+            {
+                ValidateCompositionReference(reference, partition);
+                // The budgeted view charges the resource and document once; no second source scan.
+                VisibleVertex(chargedView, principal, reference);
+            }
+        }
+        finally
+        { budget.CompleteSettledReadGrant(grant); }
+    }
+}

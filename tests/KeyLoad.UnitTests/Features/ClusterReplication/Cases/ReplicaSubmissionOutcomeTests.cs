@@ -88,4 +88,113 @@ internal sealed class ReplicaSubmissionOutcomeTests
         await Assert.That(flow.Submit(following).Error).IsNull();
         await Assert.That(flow.Database.Database.ResolveSubmissionOutcome(following).Error).IsNull();
     }
+
+    [Test]
+    public async Task ActualStoredDocumentDenialRemainsExactAcrossReplayAndPolicyRestore()
+    {
+        await ReplicaSubmissionOutcomeFlow.RunAsync(async flow =>
+        {
+            await Assert.That(flow.Submit(flow.Create("retained", "{\"value\":1}")).Error).IsNull();
+            var retained = flow.Document("retained");
+            var revoked = flow.Principal with { Grants = [], PolicyEpoch = checked(flow.Principal.PolicyEpoch + 1) };
+            flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
+            var operation = flow.Create("retained", "{\"value\":2}", expectedRevision: 1);
+            var original = flow.Submit(operation);
+            await Assert.That(original.Error).IsEqualTo(ErrorCode.PermissionDenied);
+            var state = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var outcome = flow.Outcome(operation);
+            flow.Database.Database.ValidateSubmissionAdmission(operation);
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, flow.Database.Database.ResolveSubmissionOutcome(operation));
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, flow.Submit(operation));
+            await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(retained, flow.Document("retained"));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(outcome, flow.Outcome(operation));
+            var restored = flow.Principal with { PolicyEpoch = checked(revoked.PolicyEpoch + 1) };
+            flow.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(restored));
+            var restoredState = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.ResolveSubmissionOutcome(operation));
+            await Assert.That(rejected.Code).IsEqualTo(ErrorCode.PermissionDenied);
+            await Assert.That(rejected.Message).IsEqualTo("The principal policy changed since this command was evaluated.");
+            await restoredState.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(outcome, flow.Outcome(operation));
+            await Assert.That(flow.Submit(flow.Create("retained", "{\"value\":3}", expectedRevision: 1)).Error).IsNull();
+        });
+    }
+
+    [Test]
+    public async Task ChangedExistingDocumentIdentityRefusesBeforeAppendAndLeavesMatchingReplayAdmitted()
+    {
+        await ReplicaSubmissionOutcomeFlow.RunAsync(async flow =>
+        {
+            var operation = flow.Create("identity", "{\"value\":4}");
+            var original = flow.Submit(operation);
+            await Assert.That(original.Error).IsNull();
+            var outcome = flow.Outcome(operation);
+            var document = flow.Document("identity");
+            var changed = flow.Database.Database.CreateNativeOperation(OperationKind.Batch, operation.Id,
+                operation.PrincipalId, operation.EvaluatedAt, NativeSerialization.Serialize(new CommandRequest(operation.Id,
+                    flow.Database.Partition, [new PutDocument(ReplicaSubmissionOutcomeFlow.Resource, "identity", "{\"value\":5}")])));
+            var state = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.ValidateSubmissionAdmission(changed));
+            await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Conflict);
+            await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            flow.Database.Database.ValidateSubmissionAdmission(operation);
+            await state.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, flow.Submit(operation));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(outcome, flow.Outcome(operation));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(document, flow.Document("identity"));
+            await Assert.That(flow.Submit(flow.Create("following-identity", "{\"value\":6}")).Error).IsNull();
+        });
+    }
+
+    [Test]
+    public async Task ActualStaleOwnershipAdmissionFallsThroughAndRetainsNativeFailureId()
+    {
+        await ReplicaSubmissionOutcomeFlow.RunAsync(async flow =>
+        {
+            await Assert.That(flow.Submit(flow.Create("stale-owner", "{\"value\":1}")).Error).IsNull();
+            var originalDocument = flow.Document("stale-owner");
+            var placement = flow.Database.Store.Read(view =>
+                global::KeyLoad.Core.DatabaseEngine.ReadPlacementWitness(view, flow.Database.Partition));
+            var id = Guid.NewGuid();
+            var command = new CommandRequest(id, flow.Database.Partition,
+                [new PutDocument(ReplicaSubmissionOutcomeFlow.Resource, "stale-owner", "{\"value\":2}", 1)],
+                checked(placement.PlacementEpoch + 1));
+            var operation = flow.Database.Database.CreateNativeOperation(OperationKind.Batch, id,
+                ReplicaSubmissionOutcomeFlow.Writer, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command));
+            var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var candidate = flow.Database.Database.TryReadOrdinaryDocumentSubmission(operation)
+                ?? throw new InvalidOperationException("The genuine document command was not eligible.");
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(command),
+                NativeSerialization.Serialize(candidate));
+            var unrelated = flow.Database.Database.CreateNativeOperation(OperationKind.ConfigurePrincipal, Guid.NewGuid(),
+                ReplicaSubmissionOutcomeFlow.Writer, TimeProvider.System.GetUtcNow(),
+                NativeSerialization.Serialize(new ConfigurePrincipalRequest(flow.Principal)));
+            await Assert.That(flow.Database.Database.TryReadOrdinaryDocumentSubmission(unrelated)).IsNull();
+            flow.Database.Database.ValidateSubmissionAdmission(unrelated);
+            flow.Database.Database.ValidateSubmissionAdmission(operation);
+            await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            var original = flow.Submit(operation);
+            await Assert.That(original.Error).IsEqualTo(ErrorCode.OwnershipLost);
+            var outcome = flow.Outcome(operation);
+            var stored = flow.Database.Store.Read(view =>
+                KeyLoad.Core.Features.ClusterRouting.Execution.CommandOutcomeKeyResolver.Select(view,
+                    operation.PrincipalId, operation.Id,
+                    KeyLoad.Core.Features.ClusterRouting.Identity.CommandOutcomePartitionIdentity.Resolve(operation)).Outcome
+                    ?? throw new InvalidOperationException("The genuine stale-owner failure was not persisted."));
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, stored.Result);
+            await Assert.That(stored.PolicyEpoch).IsEqualTo(flow.Principal.PolicyEpoch);
+            var failed = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var strict = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.ResolveSubmissionOutcome(operation));
+            await Assert.That(strict.Code).IsEqualTo(original.Error!.Value);
+            await Assert.That(strict.Message).IsEqualTo(original.SafeDetail);
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, flow.Database.Database.ResolveOutcome(operation));
+            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original, flow.Submit(operation));
+            await failed.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(outcome, flow.Outcome(operation));
+            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(originalDocument, flow.Document("stale-owner"));
+            await Assert.That(flow.Submit(flow.Create("stale-owner", "{\"value\":3}", expectedRevision: 1)).Error).IsNull();
+        });
+    }
+
 }

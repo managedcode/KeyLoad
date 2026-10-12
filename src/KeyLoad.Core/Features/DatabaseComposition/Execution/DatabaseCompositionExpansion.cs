@@ -19,12 +19,13 @@ public sealed partial class DatabaseEngine
     private const string PartitionKeyJsonProperty = "partitionKey";
     private const string AtomicPartitionIdJsonProperty = "atomicPartitionId";
 
-    private List<Mutation> ExpandQueueToGraph(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget)
+    private List<Mutation> ExpandQueueToGraphSelection(IAtomicTransaction tx, PrincipalRecord principal,
+        PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget,
+        IKeyValueView authorityView)
     {
         const int ExpectedRevisionEmptyCount = 0;
 
-        AuthorizeComposition(tx, principal, partition, command);
+        AuthorizeComposition(authorityView, principal, partition, command);
         var lane = new QueueLaneRef(partition, command.Queue);
         var ids = new List<string>();
         var result = budget.VisitRange(tx, QueueKey(ReadyQueueSpace, lane), command.MaxMessages, (_, value) =>
@@ -56,8 +57,16 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Corruption, MissingReadyMessage);
             }
             var link = ReadLink(body.PayloadJson, partition);
-            VisibleVertex(tx, principal, link.From, budget);
-            VisibleVertex(tx, principal, link.To, budget);
+            if (command.FromCollection is not null)
+            {
+                if (!SelectTypedEndpointPair(tx, principal, command, link, budget))
+                { continue; }
+            }
+            else
+            {
+                VisibleVertex(tx, principal, link.From, budget);
+                VisibleVertex(tx, principal, link.To, budget);
+            }
             var edgeId = command.EdgeIdPrefix + id;
             JsonData.Identifier(edgeId);
             effects.Add(new UpsertEdge(command.Graph, edgeId, link.From, link.To, link.Label,

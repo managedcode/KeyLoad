@@ -4,6 +4,24 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainRequestPayloadVerification
 {
+    internal static DecodedGrainRequest VerifyRead(GrainRequestCodec codec, string signedRequest, Guid actorId)
+    {
+        var request = codec.VerifyRequest(signedRequest, actorId);
+        if (request.Envelope.ReadKind is null)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+        }
+
+        return request;
+    }
+
+    internal static DecodedGrainRequest VerifyRequest(DecodedGrainRequest request, Guid actorId)
+    {
+        GrainRequestScope.RequireRequestIdentity(request.Envelope, actorId);
+
+        return request;
+    }
+
     internal static DecodedGrainRequest Verify(GrainRequestCodec originalCodec, DatabaseEngine database,
         int maximumTokenCharacters, string signedRequest)
     {

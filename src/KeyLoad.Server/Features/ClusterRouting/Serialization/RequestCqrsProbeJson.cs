@@ -8,7 +8,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeJson
 {
-    private const string InvalidRecord = "The private request probe record is invalid.";
+    internal const string InvalidRecord = "The private request probe record is invalid.";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private readonly IOptions<RequestProbeExecutionOptions> executionOptions;
     private readonly RequestCqrsProbeJsonContext Context;
@@ -33,42 +33,7 @@ internal sealed class RequestCqrsProbeJson
     internal RequestCqrsProbeArmRecord ReadArm(ReadOnlySpan<byte> bytes)
     {
         var value = Read(bytes, RequestCqrsProbeRecordFields.Arm, Context.RequestCqrsProbeArmRecord);
-        var read = value.ReadKind.HasValue;
-        if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.ArmKind
-            || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty
-            || !ValidPrincipal(value.PrincipalId)
-            || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
-            || value.Phase is RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
-            || value.Phase == RequestCqrsProbePhase.TransferPageReturned
-                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.PartitionMovementTransferData
-                    || value.Action != RequestCqrsProbeAction.Hold)
-            || value.Phase is (RequestCqrsProbePhase.ParentTransferCloseFailed
-                or RequestCqrsProbePhase.ParentReceiverIssueAcknowledged or RequestCqrsProbePhase.ParentReceiverIssueObserved
-                or RequestCqrsProbePhase.ParentFinalInstallPreflight)
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
-            || value.Phase == RequestCqrsProbePhase.SampleChunkAdmissionRefused
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
-            || value.Phase == RequestCqrsProbePhase.NativeTextOriginalPostingRead
-                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.Search
-                    || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
-            || value.Phase == RequestCqrsProbePhase.DistributedSearchStatisticsCaptured
-                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.DistributedSearch
-                    || value.CommandId != Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
-            || value.Phase == RequestCqrsProbePhase.OnlineTextCaptured
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
-            || value.Phase == RequestCqrsProbePhase.ReplicaSnapshotReadiness
-                && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.NodeStatus
-                    || value.Action != RequestCqrsProbeAction.Hold || value.CommandId != Guid.Empty)
-            || value.Phase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold
-                    || value.Partition is not null || value.SourceRequestId is not null || value.SourceArmId is not null
-                    || value.TargetVoter is not null)
-            || value.Phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
-                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
-            || !RequestCqrsCanonicalArmValidation.Valid(value)
-            || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
-            || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))
-        { throw Invalid(); }
+        RequestCqrsProbeArmRecordValidation.Require(value, executionOptions, StrictUtf8);
         return value;
     }
 
@@ -149,44 +114,6 @@ internal sealed class RequestCqrsProbeJson
         return new RequestCqrsProbeJsonContext(options);
     }
 
-    private void ValidateShape(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields)
-    {
-        const int IndexOfValidationBoundary = 0;
-
-        if (bytes.IsEmpty || bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
-        try
-        { _ = StrictUtf8.GetCharCount(bytes); }
-        catch (EncoderFallbackException)
-        { throw Invalid(); }
-        catch (DecoderFallbackException)
-        { throw Invalid(); }
-        var reader = new Utf8JsonReader(bytes, new JsonReaderOptions
-        {
-            MaxDepth = executionOptions.Value.MaximumJsonDepth,
-            CommentHandling = JsonCommentHandling.Disallow,
-            AllowTrailingCommas = false
-        });
-        if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
-        { throw Invalid(); }
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-        {
-            if (reader.TokenType != JsonTokenType.PropertyName || reader.ValueIsEscaped)
-            { throw Invalid(); }
-            var name = reader.GetString();
-            if (name is null || fields.IndexOf(name) < IndexOfValidationBoundary || !seen.Add(name) || !reader.Read())
-            { throw Invalid(); }
-            if (name == nameof(RequestCqrsProbeArmRecord.Partition) && reader.TokenType == JsonTokenType.StartObject)
-            { RequestCqrsProbePartitionShape.Read(ref reader, executionOptions.Value.MaximumPrincipalBytes); }
-            else if (reader.TokenType is JsonTokenType.StartArray or JsonTokenType.StartObject
-                or JsonTokenType.EndArray or JsonTokenType.EndObject)
-            { throw Invalid(); }
-        }
-        if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != fields.Length)
-        { throw Invalid(); }
-    }
-
     internal System.Text.Json.Serialization.Metadata.JsonTypeInfo<RequestCqrsEventVectorExpiryRecord> EventVectorExpiryTypeInfo
         => Context.RequestCqrsEventVectorExpiryRecord;
 
@@ -197,7 +124,7 @@ internal sealed class RequestCqrsProbeJson
     {
         try
         {
-            ValidateShape(bytes, fields);
+            RequestCqrsProbeJsonShape.Require(bytes, fields, executionOptions, StrictUtf8);
             return JsonSerializer.Deserialize(bytes, typeInfo);
         }
         catch (JsonException)
@@ -208,15 +135,11 @@ internal sealed class RequestCqrsProbeJson
         { throw Invalid(); }
     }
 
-    private bool ValidPrincipal(string value)
-    {
-        if (!value.StartsWith(RequestCqrsProbeProtocol.PrincipalPrefix, StringComparison.Ordinal))
-        { return false; }
-        try
-        { return StrictUtf8.GetByteCount(value) <= executionOptions.Value.MaximumPrincipalBytes; }
-        catch (EncoderFallbackException)
-        { return false; }
-    }
+    internal JsonTypeInfo<RequestCqrsWaitForIndexReadCutWitness> WaitCutTypeInfo
+        => Context.RequestCqrsWaitForIndexReadCutWitness;
+
+    internal JsonTypeInfo<RequestCqrsQueryReadCutWitness> QueryCutTypeInfo
+        => Context.RequestCqrsQueryReadCutWitness;
 
     private static InvalidOperationException Invalid() => new(InvalidRecord);
 }

@@ -20,6 +20,11 @@ public sealed partial class DatabaseEngine
 
     internal ProjectionConsumerInfo ReadProjectionMaintenanceEligibility(global::KeyLoad.Storage.IKeyValueView view,
         ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget)
+        => ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, null);
+
+    private ProjectionConsumerInfo ReadProjectionMaintenanceEligibilityCore(global::KeyLoad.Storage.IKeyValueView view,
+        ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget,
+        ResourceDefinition? authorizedRemoteMetadata)
     {
         var bounded = budget.CreateView(view);
         var state = ProjectionConsumer(bounded, consumer);
@@ -36,7 +41,8 @@ public sealed partial class DatabaseEngine
         }
         RequireProjectionMaintenanceProfile(state.Definition, profile);
         Authorization.Require(principal, consumer.Partition, profile.Collection, Capability.VectorSearch);
-        var resource = Resource(bounded, consumer.Partition, profile.Collection, ResourceKind.Collection);
+        var resource = authorizedRemoteMetadata
+            ?? Resource(bounded, consumer.Partition, profile.Collection, ResourceKind.Collection);
         Authorization.RequireFieldUse(principal, resource, profile.Field);
         RequireProjectionMaintenanceResource(resource, profile);
         budget.Check();

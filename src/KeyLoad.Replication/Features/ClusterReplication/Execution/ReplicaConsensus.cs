@@ -97,6 +97,15 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         return await state.LockedAsync(state.Snapshot, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>Observes native checkpoint prefix and owned task state for the armed diagnostic readiness profile.</summary>
+    /// <param name="cancellationToken">Cancellation while waiting for the original protocol state gate.</param>
+    /// <returns>Local checkpoint metadata sampled with maintenance task registration; it does not fence future work.</returns>
+    public async Task<ReplicaNodeState> ReadCheckpointStateAsync(CancellationToken cancellationToken)
+    {
+        using var active = activity.Enter();
+        return await state.LockedAsync(maintenance.ReadState, cancellationToken).ConfigureAwait(false);
+    }
+
     /// <summary>Checks whether this physical replica owns current, committed-term leadership.</summary>
     /// <param name="cancellationToken">Cancellation while waiting for the protocol state gate.</param>
     /// <returns>True when this leader's current-term readiness entry is committed.</returns>

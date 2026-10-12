@@ -30,6 +30,10 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var query = request.Query;
         var source = query.ModelSource!;
         var modelResource = ModelQueryPolicies.Rebase(resource);
+        if (query.InnerJoin is not null)
+        {
+            return QueueEntityRefJoinExecutor.Execute(database, view, principal, resource, request, budget);
+        }
         queries.Bind(principal, modelResource, request);
         var accessPath = source.Kind switch
         {

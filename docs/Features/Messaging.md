@@ -1263,3 +1263,6 @@ flowchart LR
     Repair --> Replay[Same retained command and index]
     Replay --> Healthy[Original claim or expiry and healthy processing]
 ```
+### TASK-MSG-READY-REPAIRED-RECEIVE-REPLAY-001
+
+REQ/AC-MSG-001/004/005 and ADR-026 require the same original failed committed Receive, after exact fault-owned row repair and joined materializer recovery, to retain its complete successful native ReceiveResult on same-command replay without another lease, expiry or journal effect. Extend the original eight QueueReadyAuthorityTests arguments only: capture full native result bytes, entire canonical image, identity, position and journal cut immediately after successful recovered Receive, replay that identical retained signed operation, require all bytes and cuts unchanged, then retain every independent original delivery/empty expiry literal, Processing receipt/document/inbox/counter and fresh healthy processing assertion. The generic empty/multi-queue receive replay cases remain distinct from this failed-owner recovery boundary. No new UID, clock, timeout, policy, default, effect or product contract is introduced. Native semantic preview is source preparation; fresh matched-image compilation and full operations remain OPEN for this private successor.

@@ -28,6 +28,22 @@ internal static class AnnWaitExecution
         return await Task.Run(() => Read(database, projection, principalId, request, budget), cancellationToken).ConfigureAwait(false);
     }
 
+    internal static async Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
+        string principalId, WaitForAnnIndexRequest request, IOptions<QueryExecutionOptions> configured,
+        ReadExecutionBudget budget, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(budget);
+        var execution = configured.Value;
+        if (!execution.EnableApproximateSearch)
+        { throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled); }
+        QueryResultBudgetPolicy.Constrain(budget, execution);
+        budget.Check();
+        using var reservation = database.AdmitQuery(cancellationToken);
+        return await Task.Run(() => Read(database, projection, principalId, request, budget),
+            cancellationToken).ConfigureAwait(false);
+    }
+
     private static WaitForAnnIndexResult Read(DatabaseEngine database, IAnnProjection? projection,
         string principalId, WaitForAnnIndexRequest request, ReadExecutionBudget budget)
         => database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>

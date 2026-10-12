@@ -28,11 +28,13 @@ internal static class QueryCapabilityCatalog
     private const string ScalarLiveQueryCapability = "scalarLiveQuery";
     private const string ModelViewsCapability = "modelViewsV1";
     private const string InnerJoinCapability = "Q2.InnerJoin.v1";
+    private const string LeftPredicateJoinCapability = "Q2.InnerJoin.LeftPredicate.v1";
+    private const string QueueEntityRefJoinCapability = "Q2.QueueEntityRefJoin.v1";
     private static readonly ImmutableArray<int> SupportedVersions = [Q1DialectVersion, Q2DialectVersion];
     private static readonly ImmutableArray<int> SupportedDialects = [Q1DialectVersion, Q2DialectVersion];
 
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
         [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability], SupportedVersions, SupportedDialects);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability], SupportedVersions, SupportedDialects);
 }

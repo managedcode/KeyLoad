@@ -47,9 +47,8 @@ internal static class RelationalInnerJoinExecutor
         var query = request.Query;
         var leftSchema = leftResource.RelationalSchema;
         var rightSchema = rightResource.RelationalSchema;
-        if (leftSchema is null || rightSchema is null || query.Alias is null || query.ModelSource is not null || query.Filter is not null || query.Explain
+        if (leftSchema is null || rightSchema is null || query.Alias is null || query.ModelSource is not null || query.Explain
             || request.Cursor is not null || !request.AllowFullScan
-            || request.Parameters is { Count: > EmptyCount }
             || StringComparer.Ordinal.Equals(leftResource.Name, rightResource.Name)
             || StringComparer.Ordinal.Equals(query.Alias, join.Alias)
             || query.Order.Length != SingleOrder || query.Order[FirstElementIndex].Descending
@@ -73,6 +72,7 @@ internal static class RelationalInnerJoinExecutor
         }
         JsonData.Identifier(query.Alias!);
         ValidateSelections(query.Projection, query.Alias!, join.Alias, leftColumns, rightColumns);
+        RelationalInnerJoinLeftPredicate.Authorize(database, principal, leftResource, request, leftColumns);
         database.Authorization.RequireFieldUse(principal, leftResource, JsonData.Path([leftJoinColumn]));
         database.Authorization.RequireFieldUse(principal, rightResource, JsonData.Path([rightJoinColumn]));
         database.Authorization.RequireFieldUse(principal, leftResource, JsonData.Path([leftSchema.PrimaryKey]));
@@ -103,6 +103,10 @@ internal static class RelationalInnerJoinExecutor
                     return true;
                 }
                 using var leftJson = JsonDocument.Parse(left.Json);
+                if (!RelationalInnerJoinLeftPredicate.Matches(request, left, leftJson.RootElement))
+                {
+                    return true;
+                }
                 if (!leftJson.RootElement.TryGetProperty(leftJoinColumn, out var leftValue)
                     || leftValue.ValueKind != JsonValueKind.String)
                 {

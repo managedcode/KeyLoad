@@ -11,10 +11,15 @@ internal static class RequestCqrsProbeActivationValidation
             || value.GrainDigest.Length != RequestCqrsProbeActivationProtocol.DigestCharacters
             || value.GrainDigest.Any(character => !char.IsAsciiHexDigitLower(character)))
         { throw Invalid(); }
+        RequireActivationId(value.ActivationId);
+    }
+
+    internal static void RequireActivationId(string activationId)
+    {
         try
         {
-            var identity = ActivationId.FromParsableString(value.ActivationId);
-            if (identity.IsDefault || identity.ToParsableString() != value.ActivationId)
+            var identity = ActivationId.FromParsableString(activationId);
+            if (identity.IsDefault || identity.ToParsableString() != activationId)
             { throw Invalid(); }
         }
         catch (Exception error) when (error is FormatException or ArgumentException)

@@ -35,6 +35,8 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
             lifecycle.EnterGate();
             gate = true;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, stopping, applicationStopping);
+            state = await read(linked.Token).ConfigureAwait(true);
+            RequireClaim(claim, context, state);
             while (!Qualifies(state))
             {
                 linked.Token.ThrowIfCancellationRequested();
@@ -46,7 +48,7 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
             files.ReplicaSnapshot.Publish(claim, new(RequestCqrsProbeProtocol.Version,
                 RequestCqrsReplicaSnapshotJson.Kind, files.SessionId, claim.Arm.Record.ArmId,
                 claim.Identity.RequestId, state.SnapshotIndex, state.MaterializedPosition,
-                state.CommittedIndex, state.LastIndex));
+                state.CommittedIndex, state.LastIndex, state.HasCheckpointPrefix!.Value, state.CheckpointPending!.Value));
             files.WriteMarker(marker(claim, RequestCqrsProbePhase.ReplicaSnapshotReadiness, RequestCqrsProbeOutcome.Observed));
             await hold(claim, RequestCqrsProbePhase.ReplicaSnapshotReadiness, null, linked.Token).ConfigureAwait(true);
             return state;
@@ -69,6 +71,7 @@ internal sealed class RequestCqrsReplicaSnapshotObserver(RequestCqrsProbeFiles f
     }
 
     private bool Qualifies(ReplicaNodeState state) => state.SnapshotIndex > NoSnapshot
+        && state.HasCheckpointPrefix is false && state.CheckpointPending is false
         && state.MaterializedPosition >= state.CommittedIndex && state.LastIndex >= state.CommittedIndex
         && checked(state.LastIndex - state.SnapshotIndex + ReservedTailCommands) < replicaOptions.Value.SnapshotThreshold;
 }

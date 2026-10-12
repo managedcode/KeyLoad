@@ -23,6 +23,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool remotePartitionQueries;
     internal readonly bool queryProbe;
     internal readonly bool nativeMembershipDiagnostics;
+    internal Microsoft.Extensions.Options.IOptions<KeyLoad.Query.QueryExecutionOptions>? AnnReadExecution { get; init; }
     internal NativeMembershipDiagnosticFixture? nativeMembershipControls;
     internal bool nativeCanonicalCutsSelected;
     internal NativeCanonicalModelCutFixture? canonicalCutControls;
@@ -47,9 +48,14 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         if (nativeMembershipDiagnostics && (remote || query || probe || protectedDocument
             || isolateActivation || maximumBatchBytes is not null))
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
-        localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote;
-        remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument;
-        movementMaxBatchBytes = maximumBatchBytes; activationIsolation = isolateActivation;
+        localImageSelection = selection;
+        registerPhysicalOwners = register;
+        remoteDocumentReads = remote;
+        remotePartitionQueries = query;
+        queryProbe = probe;
+        protectedDocuments = protectedDocument;
+        movementMaxBatchBytes = maximumBatchBytes;
+        activationIsolation = isolateActivation;
         this.nativeMembershipDiagnostics = nativeMembershipDiagnostics;
     }
 
@@ -69,58 +75,42 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
 
     internal static Task<TwoRf3MembershipWave> StartAsync(CancellationToken cancellationToken)
-        => StartAsync(null, cancellationToken);
+        => TwoRf3MembershipWaveFactory.StartAsync(cancellationToken);
 
-    internal static async Task<TwoRf3MembershipWave> StartAsync(LocalRf3ImageSelection.Selection? selection,
+    internal static Task<TwoRf3MembershipWave> StartAsync(LocalRf3ImageSelection.Selection? selection,
         CancellationToken cancellationToken)
-    {
-        return await StartOwnedAsync(new TwoRf3MembershipWave(selection), cancellationToken).ConfigureAwait(false);
-    }
+        => TwoRf3MembershipWaveFactory.StartAsync(selection, cancellationToken);
 
     internal static Task<TwoRf3MembershipWave> StartRegistrationAsync(CancellationToken cancellationToken)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true), cancellationToken);
+        => TwoRf3MembershipWaveFactory.StartRegistrationAsync(cancellationToken);
 
     internal static Task<TwoRf3MembershipWave> StartRemoteDocumentsAsync(CancellationToken cancellationToken)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true), cancellationToken);
+        => TwoRf3MembershipWaveFactory.StartRemoteDocumentsAsync(cancellationToken);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
+        => TwoRf3MembershipWaveFactory.StartProtectedDocumentsAsync(token);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(Action<string> observe, CancellationToken token)
-        => TwoRf3MembershipWaveStartup.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true,
-            query: true, probe: true, protectedDocument: true), token, observe);
+        => TwoRf3MembershipWaveFactory.StartProtectedDocumentsAsync(observe, token);
 
     internal static Task<TwoRf3MembershipWave> StartNativeCapabilityOmissionAsync(CancellationToken token, LocalRf3ImageSelection.Selection? selection = null,
         Action<string>? observe = null, KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferStartupCallbacks? callbacks = null)
-        => TwoRf3MembershipWaveStartup.StartOwnedAsync(new TwoRf3MembershipWave(selection, register: true, remote: true, query: true,
-            probe: true, protectedDocument: true)
-        { nativeDiscoveryOmissionSelected = true, startupCallbacks = callbacks }, token, observe);
+        => TwoRf3MembershipWaveFactory.StartNativeCapabilityOmissionAsync(token, selection, observe, callbacks);
 
     internal static Task<TwoRf3MembershipWave> StartActivationIsolationAsync(CancellationToken token)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
-            probe: true, protectedDocument: true, isolateActivation: true), token);
+        => TwoRf3MembershipWaveFactory.StartActivationIsolationAsync(token);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(int maxBatchBytes, CancellationToken token)
-    {
-        new DatabaseLimits { MaxBatchBytes = maxBatchBytes }.Validate();
-        return StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
-            probe: true, protectedDocument: true, maximumBatchBytes: maxBatchBytes), token);
-    }
+        => TwoRf3MembershipWaveFactory.StartProtectedDocumentsAsync(maxBatchBytes, token);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedFramesAsync(int maxFrameBytes, CancellationToken token)
-    {
-        new KeyLoad.Storage.ZoneTree.ZoneTreeStorageExecutionOptions { MaxFrameBytes = maxFrameBytes }.Validate();
-        var wave = new TwoRf3MembershipWave(null, register: true, remote: true, query: true,
-            probe: true, protectedDocument: true)
-        { movementMaxFrameBytes = maxFrameBytes };
-        return StartOwnedAsync(wave, token);
-    }
+        => TwoRf3MembershipWaveFactory.StartProtectedFramesAsync(maxFrameBytes, token);
 
     internal static Task<TwoRf3MembershipWave> StartRemoteQueriesAsync(CancellationToken cancellationToken)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true), cancellationToken);
+        => TwoRf3MembershipWaveFactory.StartRemoteQueriesAsync(cancellationToken);
 
     internal static Task<TwoRf3MembershipWave> StartProbedRemoteQueriesAsync(CancellationToken token)
-        => StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true), token);
+        => TwoRf3MembershipWaveFactory.StartProbedRemoteQueriesAsync(token);
 
     internal RequestCqrsProbeFixture QueryControls => queryControls
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);

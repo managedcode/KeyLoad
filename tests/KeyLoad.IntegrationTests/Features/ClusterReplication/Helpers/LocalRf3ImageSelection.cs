@@ -35,6 +35,7 @@ internal static class LocalRf3ImageSelection
     private const string ProjectionReplayFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionRf3Tests/AcLineage001ExactReplayConflictAndStaleInputPreserveOnlyTheCommittedProjection";
     private const string ProjectionPolicyFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionRf3Tests/AcLineage002SourceHiddenFromPersistedReaderCannotProduceVisibleDerivedVector";
     private const string ProjectionColdFilterArgument = "--KeyLoadTests:Filter=/*/*/EventProjectionRf3Tests/AcLineage003CommittedProjectionReceiptAndLiveVectorSurviveLeaderLossAndRestart";
+    private const string RemoteAnnPublicationFilterArgument = "--KeyLoadTests:Filter=/*/*/RemoteAnnPublicationRf3Tests/DifferentVoterSdkAndOfficialMcpObserveActualPublicationAcrossMovePolicyRepairAndTwoColdRoots";
     private const string EnabledArgument = "--KeyLoadTests:LocalRf3Image:Enabled=true";
     private const string EnabledValue = "true";
     private const int MaximumNativeArgumentCharacters = 4096;
@@ -80,7 +81,7 @@ internal static class LocalRf3ImageSelection
         var arguments = JsonSerializer.Deserialize<string[]>(value);
         if (arguments is not [Rf3SuiteArgument, MembershipFilterArgument or StandardFilterArgument or RejectionFilterArgument or ConnectionFilterArgument or NativeTextFilterArgument or RemoteTransferFilterArgument or EmptySnapshotFilterArgument or CapabilityOmissionFilterArgument
                 or RetainedSnapshotFilterArgument or NullQueueDeadlineFilterArgument or GraphIncomingFilterArgument or SignedPurposeFilterArgument or EventFeedOpenFilterArgument or ResourcePolicyFilterArgument or McpCurrentAuthorityFilterArgument or McpCredentialAuthorityFilterArgument or McpInitialCredentialFilterArgument
-                or ProjectionReplayFilterArgument or ProjectionPolicyFilterArgument or ProjectionColdFilterArgument, EnabledArgument]
+                or ProjectionReplayFilterArgument or ProjectionPolicyFilterArgument or ProjectionColdFilterArgument or RemoteAnnPublicationFilterArgument, EnabledArgument]
             || Environment.GetEnvironmentVariable(NativeCoverageArgumentsEnvironment) is not null
             || HasAmbientGithubIdentity()
             || Environment.GetEnvironmentVariable(ProvenanceEnvironment) is not null

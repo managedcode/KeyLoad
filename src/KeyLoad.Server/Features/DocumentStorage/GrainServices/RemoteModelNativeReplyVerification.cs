@@ -18,7 +18,7 @@ internal static class RemoteModelNativeReplyVerification
         if (reply.Nonce != request.Nonce || !targetMac.VerifyNativeReply(reply)
             || reply.Error is null && !targetMac.Verify(reply.Payload.Span, reply.Signature, reply: true))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-        await client.RequireCurrentAsync(destination, request.DestinationSiloAddress, token).ConfigureAwait(false);
+        await client.RequireCurrentAsync(destination, request.DestinationVoter, request.DestinationSiloAddress, token).ConfigureAwait(false);
         await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (request.ExpiresAt <= clock.GetUtcNow() || local.Read().SiloAddress != request.CallerSiloAddress)

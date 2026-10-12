@@ -304,3 +304,8 @@ REQ/AC-ANN-ENROLL001/005/007 and ADR089 preserve the SAME original RequestCqrsAn
 # TASK-ANN-NATIVE-API-CLOSURE-010
 
 This current-main successor applies the already frozen optional native Request MaintenanceProfile init Id9 contract, preserving the original nine constructor arguments/IDs0..8/alias, property-level WhenWritingNull, complete nonnull native serialization/fingerprint identity and no compatibility reader. Existing XML summaries describe canonical ACK and bounded GrainService ownership without behavior changes. Native registered existing KeyLoad.Storage, KeyLoad.Query and TUnit.Enums imports are used. The real canonical whole-store oracle returns ordered string[] of complete hex key:value pairs; comparisons retain every row/full bytes with ordinal order rather than changing that API or adding generated stub overloads. Pending R8/R9 operations compose once, with the same actual string[] oracle corrected in new helpers. Their immutable original packets remain history. Build/runtime/source image/UID discovery remain OPEN.
+
+
+## Current native remote publication observation — R99
+
+The decision is refined by [Native ANN remote publication reads](../Features/Search/RemoteAnnPublicationReads.md), REQ/AC-KL097-REMOTE-001..004. Public Connection read consumers may locate the exact settled publisher through the existing native addressed MAC/lease/CQRS ownership, with fresh persisted authorization and source/target fences. Durable job RequireCurrent and unknown/pending identity never license rerouting or rebuilding an original intent. Private read73/channel2 are read-only additive contracts; persisted formats and ordinary query defaults remain unchanged. Complete migration/two-cold SDK/official MCP execution and Linux delivery are still OPEN.

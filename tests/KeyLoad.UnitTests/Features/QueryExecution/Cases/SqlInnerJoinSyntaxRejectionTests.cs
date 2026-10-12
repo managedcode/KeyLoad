@@ -17,7 +17,7 @@ internal sealed class SqlInnerJoinSyntaxRejectionTests
     [Arguments(Prefix + ", customers AS r " + Order, ErrorCode.UnsupportedCapability)]
     [Arguments(Prefix + "INNER JOIN customers AS r USING (customer_id) " + Order, ErrorCode.Validation)]
     [Arguments(Prefix + Join + "INNER JOIN untyped AS s ON l.customer_id = s.id " + Order, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + Join + "WHERE l.total = 7 " + Order, ErrorCode.UnsupportedCapability)]
+    [Arguments(Prefix + Join + "WHERE r.name = 'Ada' " + Order, ErrorCode.UnsupportedCapability)]
     [Arguments(Prefix + Join + "GROUP BY l.order_id", ErrorCode.UnsupportedCapability)]
     [Arguments("SELECT COUNT(l.order_id) AS count FROM orders AS l " + Join + Order, ErrorCode.Validation)]
     [Arguments("SELECT l.order_id AS order_id FROM (SELECT order_id FROM orders) AS l " + Join + Order, ErrorCode.Validation)]

@@ -19,7 +19,11 @@ internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection ele
             while (!cancellationToken.IsCancellationRequested)
             {
                 await TickAsync(cancellationToken).ConfigureAwait(false);
-                ScheduleCheckpoint(cancellationToken);
+                await state.LockedAsync(() =>
+                {
+                    ScheduleCheckpoint(cancellationToken);
+                    return true;
+                }, cancellationToken).ConfigureAwait(false);
                 await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -52,13 +56,28 @@ internal sealed class ReplicaMaintenance(ReplicaState state, ReplicaElection ele
         catch (Exception error) when (ReplicaRpcClient.Unavailable(error) && !cancellationToken.IsCancellationRequested) { }
     }
 
-    private void ScheduleCheckpoint(CancellationToken cancellationToken)
+    internal ReplicaNodeState ReadState()
+    {
+        RequireCheckpoint();
+        return state.Snapshot() with
+        {
+            HasCheckpointPrefix = state.Log.HasCheckpointPrefix,
+            CheckpointPending = checkpoint is { IsCompleted: false }
+        };
+    }
+
+    private void RequireCheckpoint()
     {
         if (checkpoint is { IsFaulted: true })
         {
             state.Poison(checkpoint.Exception!.GetBaseException());
             throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.InvalidSnapshot);
         }
+    }
+
+    private void ScheduleCheckpoint(CancellationToken cancellationToken)
+    {
+        RequireCheckpoint();
         if (checkpoint is { IsCompleted: false })
         {
             return;

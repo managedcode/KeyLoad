@@ -10,8 +10,13 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
     private const int FirstElementIndex = 0;
     private const int SinglePathSegment = 1;
     private const int QualifiedPathSegmentCount = 2;
+    private const int QualifiedQueueReferenceSegments = 3;
+    private const int PayloadSegment = 1;
+    private const int ReferenceSegment = 2;
+    private const string PayloadField = "payload";
+    private const string ReferenceField = "to";
 
-    internal InnerJoinClause? ReadJoin(string? leftAlias)
+    internal InnerJoinClause? ReadJoin(string? leftAlias, ModelQuerySource? leftSource)
     {
         if (!cursor.Eat(SqlSyntax.Inner))
         {
@@ -30,9 +35,9 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
             throw SqlSyntax.Invalid();
         }
         cursor.Need(SqlSyntax.On);
-        var leftKey = SourceKeyPath(leftAlias);
+        var leftKey = SourceKeyPath(leftAlias, leftSource);
         cursor.Need(SqlSyntax.Equals);
-        var rightKey = SourceKeyPath(rightAlias);
+        var rightKey = SourceKeyPath(rightAlias, null);
         if (!StringComparer.Ordinal.Equals(leftKey.SourceAlias, leftAlias)
             || !StringComparer.Ordinal.Equals(rightKey.SourceAlias, rightAlias))
         {
@@ -82,13 +87,17 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
             ? SqlSyntax.MetadataPrefix + parts[FirstElementIndex] : JsonData.Path(parts.ToArray());
     }
 
-    private (string SourceAlias, string Path) SourceKeyPath(string expectedAlias)
+    private (string SourceAlias, string Path) SourceKeyPath(string expectedAlias, ModelQuerySource? source)
     {
         var parts = cursor.Path();
-        if (parts.Count != QualifiedPathSegmentCount || !StringComparer.Ordinal.Equals(parts[FirstElementIndex], expectedAlias))
+        var queueReference = source?.Kind == ModelQuerySourceKind.QueueMessages
+            && parts.Count == QualifiedQueueReferenceSegments
+            && parts[PayloadSegment] == PayloadField && parts[ReferenceSegment] == ReferenceField;
+        if (parts.Count != QualifiedPathSegmentCount && !queueReference
+            || !StringComparer.Ordinal.Equals(parts[FirstElementIndex], expectedAlias))
         {
             throw SqlSyntax.Invalid();
         }
-        return (parts[FirstElementIndex], JsonData.Path([parts[parts.Count - SinglePathSegment]]));
+        return (parts[FirstElementIndex], JsonData.Path(parts.Skip(SinglePathSegment).ToArray()));
     }
 }

@@ -1,4 +1,75 @@
 {
+  "STAGE63-NATIVE-COMPOSITION-001": {
+    "record": "docs/implementation/qualification-stage63-native-composition.md",
+    "originalPlan": {
+      "done": 18,
+      "inProgress": 86,
+      "total": 104
+    },
+    "qualification": "Current full Release R19 passed0/0; focused native Unit250/256 and Recovery9/11 with two original recovery followup failures. No new task acceptance.",
+    "coverage": "unmeasured",
+    "additionalTask": "KL-105",
+    "confirmedSdkRepair": {
+      "operation": "WaitForAnnIndex",
+      "path": "src/KeyLoad.Server/Features/Search/Transport/SearchApi.cs",
+      "behavior": "Map the existing SDK/MCP protocol route to the original authorized Orleans read dispatch"
+    },
+    "format": {
+      "result": "passed",
+      "files": 190,
+      "receipt": "TestResults/stage61-native-join/stage63-format-current-unsandboxed.original.json"
+    },
+    "nativeDiagnostics": {
+      "previousErrors": 251,
+      "followupErrors": 49,
+      "latestObservedErrors": 5,
+      "latestWarnings": 0,
+      "latestRemaining": "Five Unit using/dispose diagnostics subsequently repaired; current final full build pending",
+      "receipt": "TestResults/stage61-native-join/stage63-native-diagnostics-3.original.json"
+    },
+    "fullReleaseR19": {
+      "result": "passed",
+      "errors": 0,
+      "warnings": 0,
+      "elapsedSeconds": 286.76637983322144,
+      "sourceCount": 9353,
+      "sourceDrift": [],
+      "receipt": "TestResults/stage60-native-originals/coherent-full-release-r19-completion.original.json"
+    },
+    "runtimeR19": {
+      "unit": {
+        "total": 256,
+        "passed": 250,
+        "failed": 6,
+        "skipped": 0,
+        "durationSeconds": 37.894,
+        "configuredParallelTests": 50,
+        "trxIntervalPeak": 51,
+        "trx": "TestResults/stage61-native-join/current-stage63-r19-focused-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "trxSha256": "ab8273a892864ede1f1ddf365c7089f76d74072748c64e63080fe9aa7731123c",
+        "original176Retained": true
+      },
+      "recovery": {
+        "total": 11,
+        "passed": 9,
+        "failed": 2,
+        "skipped": 0,
+        "receipt": "TestResults/stage61-native-join/recovery-r19-focused-current/completion.original.json"
+      },
+      "physicalRecoveryFollowup": {
+        "selectedOriginalFailures": 2,
+        "passed": 0,
+        "failed": 2,
+        "elapsedSeconds": 39.67416977882385,
+        "sourceDrift": [],
+        "imageDrift": [],
+        "receipt": "TestResults/stage61-native-join/recovery-r19-physical-path-followup/completion.original.json"
+      },
+      "fullCensus": "open; original sandbox IPC discovery failed and was joined; corrected focused census256 passed",
+      "coverage": "unmeasured",
+      "qualification": "Local development only; original failures retained; full Linux/RF3/endurance gates open"
+    }
+  },
   "STAGE62-COMPOSITION-AND-MODELS-001": {
     "status": "in_progress",
     "record": "docs/implementation/qualification-stage62-composition-and-models.md",

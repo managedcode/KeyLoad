@@ -51,6 +51,7 @@ internal static class QueueReadyAuthorityTrial
                 await Assert.That(recovered.Operation!.NativePayload.ToArray()).IsEquivalentTo(original.NativePayload.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 await QueueReadyAuthorityRefusalAssertions.RequireOriginalFailuresAsync(failures, expectedError);
                 var receive = fixture.SubmitIssued(original).Get<ReceiveResult>();
+                await QueueReadyAuthorityRefusalAssertions.RequireRepairedReplayAsync(fixture, original, receive);
                 await QueueReadyAuthorityHealthy.CompleteOriginalAsync(fixture, lane, receive, expired, now.AddSeconds(2));
                 await QueueReadyAuthorityHealthy.RunAsync(fixture, lane, now.AddSeconds(2), token);
             }, owningFailures);

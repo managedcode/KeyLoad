@@ -22,7 +22,7 @@ internal static class Q2CapabilityFixtures
     {
         "ast1" => request with { AstVersion = 1 },
         "ast3" => request with { AstVersion = 3 },
-        "filter" => request with { Query = request.Query with { Filter = new Comparison(new FieldOperand("/total"), "=", ValueOperand.Create(7)) } },
+        "filter" => request with { Query = request.Query with { Filter = new Comparison(new FieldOperand("/r/name"), "=", ValueOperand.Create("Ada")) } },
         "explain" => request with { Query = request.Query with { Explain = true } },
         "alias" => request with { Query = request.Query with { InnerJoin = request.Query.InnerJoin! with { Alias = "l" } } },
         "self" => request with { Query = request.Query with { InnerJoin = request.Query.InnerJoin! with { Collection = "orders" } } },

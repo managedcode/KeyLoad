@@ -7,6 +7,8 @@ internal static class RemoteModelNativeEffects
 {
     internal static bool MayHaveEffects(RemoteModelNativeChannel channel, ReadOnlyMemory<byte> original)
     {
+        if (channel == RemoteModelNativeChannel.AnnProjectionObservation)
+        { return false; }
         if (channel == RemoteModelNativeChannel.EventVector)
         { return NativeSerialization.Deserialize<EventVectorRemoteCall>(original.Span).Action == EventVectorRemoteAction.SourceEffect; }
         if (channel != RemoteModelNativeChannel.DocumentEnvelope)

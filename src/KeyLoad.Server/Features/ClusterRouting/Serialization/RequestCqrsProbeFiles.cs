@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using KeyLoad.Replication;
-using KeyLoad.Storage.IO;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
@@ -24,6 +23,8 @@ internal sealed class RequestCqrsProbeFiles
     internal readonly RequestCqrsProbeMigrationFiles Migration;
     internal readonly RequestCqrsNativeModelFiles NativeModel;
     internal readonly RequestCqrsNativeReplayFiles Replay;
+    internal readonly RequestCqrsQueryReadCutFiles QueryCuts;
+    internal readonly RequestCqrsWaitForIndexReadCutFiles WaitCuts;
 
     private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
         IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
@@ -42,6 +43,8 @@ internal sealed class RequestCqrsProbeFiles
         Migration = new(root, sessionId, new(json, executionOptions), records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
         NativeModel = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         Replay = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
+        QueryCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
+        WaitCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, IOptions<ReplicaConfiguration> replicaOptions, IOptions<RequestProbeExecutionOptions> executionOptions)
@@ -123,16 +126,7 @@ internal sealed class RequestCqrsProbeFiles
 
     private RequestCqrsProbeSnapshot ReadSnapshotLocked()
     {
-        const int MaximumFilesStep = 1;
-        const int AggregateBytesInitialValue = 0;
-
-        RequestCqrsProbePaths.RequireDirectory(root);
-        var currentOwner = ReadRecord(Path.Combine(root, RequestCqrsProbeProtocol.OwnerFile), executionOptions);
-        if (!CryptographicOperations.FixedTimeEquals(ownerBytes, currentOwner))
-        { throw Invalid(); }
-        var entries = Directory.EnumerateFileSystemEntries(root).Take(executionOptions.Value.MaximumFiles + MaximumFilesStep).ToArray();
-        if (entries.Length > executionOptions.Value.MaximumFiles)
-        { throw Invalid(); }
+        var entries = RequestCqrsProbeSnapshotFiles.RequireInventory(root, ownerBytes, executionOptions);
         var arms = new List<RequestCqrsProbeLoadedArm>();
         var releases = new List<RequestCqrsProbeReleaseRecord>();
         var markers = new List<RequestCqrsProbeMarkerRecord>();
@@ -143,16 +137,20 @@ internal sealed class RequestCqrsProbeFiles
         var replicaSnapshots = new List<RequestCqrsReplicaSnapshotRecord>();
         var eventVectorExpiries = new List<RequestCqrsEventVectorExpiryRecord>();
         var nativeModels = new List<RequestCqrsNativeModelWitness>();
+        var queryCuts = new List<RequestCqrsQueryReadCutWitness>();
+        var waitCuts = new List<RequestCqrsWaitForIndexReadCutWitness>();
         var replayPlans = new List<RequestCqrsNativeReplayPlan>();
         var replayWitnesses = new List<RequestCqrsNativeReplayWitness>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
-        long aggregateBytes = AggregateBytesInitialValue;
+        var aggregateBytes = RequestCqrsProbeSnapshotFiles.EmptyByteCount;
         foreach (var path in entries)
         {
             var name = Path.GetFileName(path);
-            aggregateBytes = checked(aggregateBytes + ValidateEntry(path, name));
-            if (aggregateBytes > executionOptions.Value.MaximumAggregateBytes)
-            { throw Invalid(); }
+            aggregateBytes = RequestCqrsProbeSnapshotFiles.ChargeEntry(path, name, aggregateBytes, executionOptions);
+            if (RequestCqrsWaitForIndexReadCutInventory.IsName(name))
+            { WaitCuts.Read(path, name, waitCuts, presentControls); continue; }
+            if (RequestCqrsQueryReadCutInventory.IsName(name))
+            { QueryCuts.Read(path, name, queryCuts, presentControls); continue; }
             if (RequestCqrsNativeReplayInventory.IsPlanName(name) || RequestCqrsNativeReplayInventory.IsWitnessName(name))
             { Replay.Read(path, name, replayPlans, replayWitnesses, presentControls); continue; }
             if (RequestCqrsNativeModelInventory.IsName(name))
@@ -171,6 +169,10 @@ internal sealed class RequestCqrsProbeFiles
             { activations.Read(path, name, witnesses, presentControls); continue; }
             records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
+        RequestCqrsWaitForIndexReadCutInventory.RequireInventory(waitCuts, markers);
+        WaitCuts.RequireArms(waitCuts, arms);
+        RequestCqrsQueryReadCutInventory.RequireInventory(queryCuts, markers);
+        QueryCuts.RequireArms(queryCuts, arms);
         RequestCqrsNativeModelInventory.RequireMarkers(nativeModels, markers);
         RequestCqrsNativeReplayInventory.RequireInventory(replayPlans, replayWitnesses, arms, markers, records.RetainedArm);
         RequestCqrsReplicaSnapshotFiles.RequireInventory(replicaSnapshots, arms, markers);
@@ -188,14 +190,7 @@ internal sealed class RequestCqrsProbeFiles
     }
 
     private long ValidateEntry(string path, string name)
-    {
-        var identity = OfflineRegularFile.Inspect(path);
-        RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
-        var length = identity.Length;
-        if (length > executionOptions.Value.MaximumRecordBytes || !RequestCqrsProbeKnownNames.KnownName(name))
-        { throw Invalid(); }
-        return length;
-    }
+        => RequestCqrsProbeSnapshotFiles.ValidateEntry(path, name, executionOptions);
 
     private void WriteAtomic(string destination, byte[] bytes)
         => RequestCqrsProbeAtomicFiles.Write(root, destination, bytes, executionOptions, ReadSnapshotLocked);

@@ -23,7 +23,7 @@ internal static class OrleansSiloConfiguration
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
         NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent,
         PhysicalOwnerProbeNativeRuntime? physicalProbe, NativeLocalhostClusteringOptions? localhostClustering,
-        CancellationToken startupCancellation)
+        IRemoteAnnReadRouter? remoteAnnReads, CancellationToken startupCancellation)
     {
         startupCancellation.ThrowIfCancellationRequested();
         var builder = Host.CreateApplicationBuilder();
@@ -68,6 +68,8 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(eventVectorParent); }
         runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock);
+        if (remoteAnnReads is not null)
+        { builder.Services.AddSingleton(remoteAnnReads); }
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
             runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting, runtimeOptions.Core.DatabaseLimits, localhostClustering));
         return builder.Build();
@@ -95,7 +97,8 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection, partition.AnnMaintenance));
+        services.AddSingleton(provider => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution,
+            partition.TextProjection, partition.AnnMaintenance, provider.GetService<IQueryReadCutObserver>()));
         global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeRegistration.Register(services, partition, options);
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
@@ -132,6 +135,8 @@ internal static class OrleansSiloConfiguration
                 provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton<IQueryReadCutObserver>(provider =>
+                provider.GetRequiredService<RequestCqrsProbeObserver>().QueryCuts);
             services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver>(
                 provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
             services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver>(

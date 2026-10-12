@@ -25,7 +25,8 @@ internal static class GrainRequestScope
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
 
-        if (!EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
+        if (!AnnProjectionObservationScope.Validate(request)
+            && !EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
             && !ControlledDocumentReadScope.Validate(request) && !ControlledBlobReadScope.Validate(request)
             && !RemoteTransferRequestScope.Validate(request))
         { RuntimeJournalRequestScope.Validate(request); }

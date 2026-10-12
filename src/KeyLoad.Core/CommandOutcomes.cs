@@ -35,24 +35,59 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(operation);
         var normalized = NormalizeOperation(operation);
-        return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized));
+        return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized, allowStoredDocumentDenial: true));
     }
 
-    private OperationResult ReadValidatedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation)
+    private OperationResult ReadValidatedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation,
+        bool allowStoredDocumentDenial = false)
     {
         var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
-        var retired = CaptureRetiredOriginalOutcomeReadScope(view, principal, operation);
-        if (retired is null)
-        { AuthorizeOperation(view, principal, operation); }
+        RetiredOriginalOutcomeReadScope? retired = null;
+        KeyLoadException? denied = null;
+        try
+        {
+            retired = CaptureRetiredOriginalOutcomeReadScope(view, principal, operation);
+            if (retired is null)
+            { AuthorizeOperation(view, principal, operation); }
+        }
+        catch (KeyLoadException refusal) when (allowStoredDocumentDenial && refusal.Code == ErrorCode.PermissionDenied)
+        {
+            if (!IsOrdinaryDocumentSubmission(view, operation))
+            { throw; }
+            denied = refusal;
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
         var outcome = selection.Outcome;
         if (outcome is null)
         {
+            if (denied is not null)
+            { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw(); }
             if (retired is not null)
             { AuthorizeOperation(view, principal, operation); }
             throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
         }
+        ValidateSubmissionOutcomeIdentity(view, principal, operation, selection, outcome);
+        if (denied is not null && (outcome.Result.Error != denied.Code
+            || !string.Equals(outcome.Result.SafeDetail, denied.Message, StringComparison.Ordinal)
+            || outcome.Result.Json is not null || outcome.Result.NativeValue is not null
+            || outcome.BlobAuthority is not null || outcome.CompositionAuthority is not null
+            || outcome.OnlineTextAuthority is not null || outcome.RemoteTransferFailureAuthority is not null
+            || outcome.RemoteTransferAuthority is not null))
+        { System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denied).Throw(); }
+        if (retired is { } retained)
+        {
+            if (outcome.Result.Error is not null)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
+                retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
+        }
+        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
+        return outcome.Result;
+    }
+    private void ValidateSubmissionOutcomeIdentity(IKeyValueView view, PrincipalRecord principal,
+        ReplicatedOperation operation, CommandOutcomeSelection selection, StoredOutcome outcome)
+    {
         if (outcome.PolicyEpoch != principal.PolicyEpoch)
         { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
         if (outcome.Incarnation != Store.Identity.Incarnation)
@@ -66,16 +101,8 @@ public sealed partial class DatabaseEngine
         }
 
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
-        if (retired is { } retained)
-        {
-            if (outcome.Result.Error is not null)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-            RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
-                retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
-        }
-        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
-        return outcome.Result;
     }
+
     private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)
     {
         if (previous.PolicyEpoch != principal.PolicyEpoch)

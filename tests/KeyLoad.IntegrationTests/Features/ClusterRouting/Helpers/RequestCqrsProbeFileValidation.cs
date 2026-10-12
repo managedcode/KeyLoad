@@ -56,6 +56,10 @@ internal static class RequestCqrsProbeFileValidation
 
     internal static bool IsAllowedFileName(string name)
     {
+        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsWaitForIndexReadCutInventory.IsName(name))
+        { return true; }
+        if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsQueryReadCutInventory.IsName(name))
+        { return true; }
         if (KeyLoad.Server.Features.ClusterRouting.RequestCqrsNativeReplayInventory.IsPlanName(name)
             || KeyLoad.Server.Features.ClusterRouting.RequestCqrsNativeReplayInventory.IsWitnessName(name))
         { return true; }

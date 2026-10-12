@@ -116,7 +116,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, physicalOwnerProbe?.Invoke(), localhostClustering, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, physicalOwnerProbe?.Invoke(), localhostClustering, RemoteDocuments?.AnnReadRouter, cancellationToken);
         Volatile.Write(ref host, built);
         // Capture the actual singleton owners before native startup; failed startup joins these same instances.
         Volatile.Write(ref nativeModelReceiver, built.Services.GetRequiredService<RemoteModelNativeRuntime>());

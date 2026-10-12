@@ -9,12 +9,15 @@ internal static class RelationalInnerJoinDispatch
         string hash, ReadExecutionBudget budget, TimeProvider clock)
     {
         var database = owner.PartitionQueryOwner;
-        return database.WithQueryView(principalId, request.Partition, request.Query.Collection,
+        QueryReadCutObservation? observation = null;
+        var result = database.WithQueryView(principalId, request.Partition, request.Query.Collection,
             (view, principal, leftResource) =>
             {
                 if (request.Query.InnerJoin is not { } join)
                 {
-                    return owner.ExecuteView(view, principal, leftResource, request, hash, budget, clock);
+                    var page = owner.ExecuteView(view, principal, leftResource, request, hash, budget, clock);
+                    observation = owner.CaptureQueryReadCut(principal, leftResource, request, hash, page, budget);
+                    return page;
                 }
                 database.Authorization.Require(principal, request.Partition, join.Collection,
                     Capability.Query | Capability.DocumentsRead);
@@ -22,5 +25,7 @@ internal static class RelationalInnerJoinDispatch
                 return RelationalInnerJoinExecutor.Execute(database, view, principal, leftResource, rightResource,
                     request, budget);
             });
+        owner.PublishQueryReadCut(observation, budget);
+        return result;
     }
 }

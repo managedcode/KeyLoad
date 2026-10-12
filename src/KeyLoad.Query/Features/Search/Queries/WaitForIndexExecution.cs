@@ -31,7 +31,8 @@ public sealed partial class SearchEngine
 
     private WaitForIndexResult WaitForIndexCore(string principalId, WaitForIndexRequest request, ReadExecutionBudget budget)
     {
-        return database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>
+        WaitForIndexReadCutObservation? observation = null;
+        var completed = database.WithQueryView(principalId, request.Partition, request.Collection, (view, principal, resource) =>
         {
             FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             if (string.IsNullOrEmpty(request.TextField) || request.MinimumToken is null)
@@ -55,7 +56,7 @@ public sealed partial class SearchEngine
             try
             {
                 database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget,
-                    document => PublishTextIndexRecord(lease, path, budget, document));
+                    document => NativeTextIndexPublication.Publish(lease, path, budget, document, execution));
                 lease.VerifyCandidates([], [], budget);
                 result = new WaitForIndexResult(DatabaseEngine.Token(authority, request.Partition, applied), resource.SchemaVersion, principal.PolicyEpoch);
                 budget.CheckResult(result);
@@ -65,7 +66,10 @@ public sealed partial class SearchEngine
             finally
             { TextProjectionLifecycle.Dispose(lease, primaryFailure); }
             budget.CheckResult(result);
+            observation = CaptureWaitForIndexReadCut(principal, resource, request, result, budget);
             return result;
         });
+        PublishWaitForIndexReadCut(observation, budget);
+        return completed;
     }
 }

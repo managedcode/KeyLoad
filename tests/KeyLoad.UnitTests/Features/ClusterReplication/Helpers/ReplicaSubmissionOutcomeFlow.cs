@@ -22,7 +22,8 @@ internal sealed class ReplicaSubmissionOutcomeFlow : IDisposable
         }
         catch (Exception primary)
         {
-            try { Database.Dispose(); }
+            try
+            { Database.Dispose(); }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -60,6 +61,21 @@ internal sealed class ReplicaSubmissionOutcomeFlow : IDisposable
 
     internal static async Task RequireBytesAsync(byte[] expected, byte[] actual)
         => await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
+
+    internal static async Task RunAsync(Func<ReplicaSubmissionOutcomeFlow, Task> body)
+    {
+        var failures = new List<Exception>();
+        try
+        {
+            using var flow = new ReplicaSubmissionOutcomeFlow();
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => body(flow), failures);
+        }
+        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
 
     public void Dispose() => Database.Dispose();
 }

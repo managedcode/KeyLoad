@@ -126,7 +126,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
     private void Charge(long bytes)
     {
         if (grant is null)
-        { budget.ChargeBytes(bytes); }
+        { budget.ChargeNativeReadRecord(bytes); }
         else
         { budget.ChargeReadGrant(grant, bytes); }
     }

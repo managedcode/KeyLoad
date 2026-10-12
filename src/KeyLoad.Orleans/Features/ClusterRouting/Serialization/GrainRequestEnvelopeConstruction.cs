@@ -8,7 +8,7 @@ internal static class GrainRequestEnvelopeConstruction
     internal static GrainRequestEnvelope Read(Guid requestId, Guid incarnation, string? principalId,
         GrainReadKind kind, ReadOnlyMemory<byte> payload, DateTimeOffset expiry)
     {
-        if (EventVectorRequestScope.HandlesRead(kind))
+        if (EventVectorRequestScope.HandlesRead(kind) || AnnProjectionObservationScope.Handles(kind))
         { throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired); }
         return new()
         {

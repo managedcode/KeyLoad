@@ -38,7 +38,9 @@ internal enum RequestCqrsProbePhase
     NativeModelAfterDispatch,
     NativeModelReplayBeforeDispatch,
     ReplicaEntryAcknowledged,
-    ReplicaEntryObserverDisposed
+    ReplicaEntryObserverDisposed,
+    QueryReadCutCaptured,
+    WaitForIndexReadCutCaptured
 }
 
 internal enum RequestCqrsProbeAction

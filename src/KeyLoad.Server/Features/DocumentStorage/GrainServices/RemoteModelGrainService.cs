@@ -5,6 +5,12 @@ internal sealed class RemoteModelGrainService(GrainId grainId, Silo silo, ILogge
 {
     private readonly RemoteModelNativeRuntime runtime = runtime;
 
-    public Task<RemoteModelNativeReply> ExchangeAsync(RemoteModelNativeRequest request, CancellationToken cancellationToken)
-        => runtime.ExchangeAsync(request, cancellationToken);
+    public async Task<RemoteModelNativeReply> ExchangeAsync(RemoteModelNativeRequest request, CancellationToken cancellationToken)
+    {
+        RemoteModelNativeReply? original = null;
+        await global::ManagedCode.Orleans.Graph.Extensions.RequestContextHelper.RunWithCurrentCallerAsync(
+            typeof(RemoteModelGrainService).FullName!, nameof(IRemoteModelGrainService.ExchangeAsync),
+            async () => { original = await runtime.ExchangeAsync(request, cancellationToken); });
+        return original ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteModelNativeProtocol.Unavailable);
+    }
 }

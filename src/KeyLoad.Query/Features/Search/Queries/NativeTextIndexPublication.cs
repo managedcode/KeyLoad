@@ -4,10 +4,10 @@ using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Query;
 
-public sealed partial class SearchEngine
+internal static class NativeTextIndexPublication
 {
-    private void PublishTextIndexRecord(ITextProjectionLease lease, string[] path,
-        ReadExecutionBudget budget, DocumentRecord document)
+    internal static void Publish(ITextProjectionLease lease, string[] path,
+        ReadExecutionBudget budget, DocumentRecord document, QueryExecutionOptions execution)
     {
         budget.Check();
         lease.BeginRecord(document.Reference, document.Revision);

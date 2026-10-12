@@ -48,6 +48,7 @@ internal static class TwoRf3MembershipWaveStartup
         await NativeBlobWireWaveLifecycle.PublishOwnerAsync(wave, builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         wave.capacity.RestoreOriginalEndpoints(builder.Resources.OfType<ContainerResource>());
         wave.canonicalCutControls?.Configure(builder);
+        KeyLoad.IntegrationTests.Features.Search.RemoteAnnPublicationRf3Enrollment.Configure(builder, wave.AnnReadExecution);
         KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferRf3Enrollment.Configure(builder,
             wave.remoteTransferPrincipalId, cancellationToken);
         if (wave.protectedDocuments)

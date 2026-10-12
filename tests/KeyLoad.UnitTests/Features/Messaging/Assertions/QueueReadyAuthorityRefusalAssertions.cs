@@ -32,6 +32,22 @@ internal static class QueueReadyAuthorityRefusalAssertions
         await Assert.That(inbox.Records.IsEmpty).IsTrue();
     }
 
+    internal static async Task RequireRepairedReplayAsync(TestDatabase fixture, ReplicatedOperation original,
+        ReceiveResult first)
+    {
+        var resultBytes = NativeSerialization.Serialize(first);
+        var image = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var position = fixture.Store.Position;
+        var cut = fixture.ReadJournalCut();
+        var replay = fixture.SubmitIssued(original).Get<ReceiveResult>();
+        await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(resultBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(fixture.Store.Position).IsEqualTo(position);
+        await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
+    }
+
     internal static async Task RequireOriginalFailuresAsync(List<Exception> failures, ErrorCode expectedError)
     {
         await Assert.That(failures.Count >= 3).IsTrue();

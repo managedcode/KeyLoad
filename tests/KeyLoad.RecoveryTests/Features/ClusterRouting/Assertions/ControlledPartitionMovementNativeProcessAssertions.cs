@@ -22,8 +22,8 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
     internal static async Task<(CommitReceipt Seed, DateTimeOffset RecordedAt)> SeedAsync(
         ControlledPartitionMovementNativeHost host, GrainOperationReply original, CancellationToken cancellationToken)
     {
-        var entry = ControlledPartitionMovementNativeProcessEntry.Read(host,
-            ControlledPartitionMovementProcessLiteralCorpus.SeedId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeProcessEntry.ReadAsync(host,
+            ControlledPartitionMovementProcessLiteralCorpus.SeedId, cancellationToken).ConfigureAwait(false);
         var operation = entry.Operation ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
         var expected = new CommitReceipt(ControlledPartitionMovementProcessLiteralCorpus.SeedId,
             new(host.Store.Identity.Incarnation, ControlledPartitionMovementProcessLiteralCorpus.Partition.AtomicPartitionId,
@@ -37,7 +37,7 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
     internal static async Task<BlobCommitResult<BlobMetadata>> BlobAsync(ControlledPartitionMovementNativeHost host,
         CompleteBlobUploadRequest request, GrainOperationReply original, CancellationToken cancellationToken)
     {
-        var entry = ControlledPartitionMovementNativeProcessEntry.Read(host, request.CommandId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeProcessEntry.ReadAsync(host, request.CommandId, cancellationToken).ConfigureAwait(false);
         var operation = entry.Operation ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
         var incarnation = host.Store.Identity.Incarnation;
         var metadata = new BlobMetadata(ControlledPartitionMovementProcessLiteralCorpus.Blob, FirstRevision,
@@ -55,7 +55,7 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
     internal static async Task<PartitionMovePhaseResult> PreparedAsync(ControlledPartitionMovementNativeHosts owners,
         PartitionMovementTransportRequest original, PartitionMovementAuthenticatedReply reply, CancellationToken cancellationToken)
     {
-        var entry = ControlledPartitionMovementNativeProcessEntry.Read(owners.Source, original.CommandId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeProcessEntry.ReadAsync(owners.Source, original.CommandId, cancellationToken).ConfigureAwait(false);
         var placement = original.Envelope.SourcePlacement;
         var intent = new PartitionMoveIntent(Version, ControlledPartitionMovementProcessPrepareRequest.MoveId,
             ControlledPartitionMovementProcessLiteralCorpus.Partition, Principal, FirstRevision, placement, owners.Destination.Owner, entry.Index);
@@ -91,7 +91,7 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
         var request = new CommandRequest(HealthyId, ControlledPartitionMovementProcessLiteralCorpus.Partition,
             [new PutDocument(ControlledPartitionMovementProcessLiteralCorpus.Collection, HealthyDocument, HealthyJson)]);
         var reply = await host.SubmitAsync(OperationKind.Batch, HealthyId, Principal, NativeSerialization.Serialize(request), cancellationToken);
-        var entry = ControlledPartitionMovementNativeProcessEntry.Read(host, HealthyId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeProcessEntry.ReadAsync(host, HealthyId, cancellationToken).ConfigureAwait(false);
         var expected = retained ?? new CommitReceipt(HealthyId,
             new(host.Store.Identity.Incarnation, request.Partition.AtomicPartitionId, entry.Index, FirstRevision),
             [new(PutDocumentKind, ControlledPartitionMovementProcessLiteralCorpus.Collection, HealthyDocument, FirstRevision)],

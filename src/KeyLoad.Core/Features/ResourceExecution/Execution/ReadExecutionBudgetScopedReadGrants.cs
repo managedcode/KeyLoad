@@ -22,6 +22,7 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
     internal ReadExecutionBudgetReadGrant? Current => scopedReadGrant;
 
     internal int ClaimedRecords => examinedGrantRecords + reservedGrantRecords;
+    internal int ExaminedRecords => examinedGrantRecords;
 
     internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant)
     {
@@ -66,7 +67,7 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         if (scopedReadGrant is { } grant)
         { ChargeReadGrant(grant, count); }
         else
-        { budget.ChargeBytes(count); }
+        { budget.ChargeUnscopedNativeRecord(count); }
     }
 
     internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant)

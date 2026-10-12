@@ -17,6 +17,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
     private readonly RequestCqrsProbeHeldCallback hold;
     private readonly NativeCanonicalModelCutAdmission canonicalCuts;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
+    internal RequestCqrsQueryReadCutObservation QueryCuts { get; }
     internal RequestCqrsReplicaLogObserver ReplicaLog { get; }
     internal RequestCqrsReplicaSnapshotObserver ReplicaSnapshot { get; }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
@@ -35,6 +36,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
         canonicalCuts = new(files, lifecycle, applicationLifetime, executionOptions, clock ?? TimeProvider.System, stopping.Token);
+        QueryCuts = new(files, lifecycle, replica.LocalId, siloAddress);
         nativeModel = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
         nativeReplay = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
         ReplicaSnapshot = new(files, lifecycle, replicaOptions, executionOptions, clock ?? TimeProvider.System,
@@ -113,6 +115,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         try
         {
             claim = Claim(identity, phase, files.ReadSnapshot());
+            if (claim is not null && identity.ReadKind is GrainReadKind.AstQuery or GrainReadKind.WaitForIndex
+                && phase == GrainRequestPhase.AuthorizationReload)
+            { claim.QueryReadContext = context; }
             if (claim is null)
             { return; }
             if (await receiverIssueAdjunct.TryObserveAsync(claim, phase, context, requestCancellation).ConfigureAwait(true))

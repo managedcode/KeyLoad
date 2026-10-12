@@ -22,7 +22,7 @@ internal sealed class RelationalSqlRf3JoinRejectionTests(ClusterFixture fixture)
     [Arguments(Prefix + "FULL JOIN joincustomers AS r ON l.title = r.id " + Order, Q2, ErrorCode.UnsupportedCapability)]
     [Arguments(Prefix + "CROSS JOIN joincustomers AS r " + Order, Q2, ErrorCode.UnsupportedCapability)]
     [Arguments(Prefix + "NATURAL JOIN joincustomers AS r " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + Join + "WHERE l.count = 1 " + Order, Q2, ErrorCode.UnsupportedCapability)]
+    [Arguments(Prefix + Join + "WHERE r.name = 'Ada' " + Order, Q2, ErrorCode.UnsupportedCapability)]
     [Arguments("SELECT * FROM agentrows AS l " + Join + Order, Q2, ErrorCode.Validation)]
     [Arguments("SELECT l.key AS repeated, r.name AS repeated FROM agentrows AS l " + Join + Order, Q2, ErrorCode.Validation)]
     [Arguments(Prefix + Join + "ORDER BY l.key DESC LIMIT 10", Q2, ErrorCode.Validation)]

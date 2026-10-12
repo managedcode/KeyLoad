@@ -85,7 +85,7 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     {
         var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
         if (services.GetRequiredService<OrleansNode>().ReplicaSnapshotObserver is { } observer)
-        { state = await observer.ObserveAsync(state, partition.Consensus.StateAsync, cancellationToken).ConfigureAwait(false); }
+        { state = await observer.ObserveAsync(state, partition.Consensus.ReadCheckpointStateAsync, cancellationToken).ConfigureAwait(false); }
         var identity = partition.Database.Store.Identity;
         return new(identity.NodeId.ToString(), identity.Incarnation, state.MaterializedPosition, state.LeaderId,
             partition.Configuration.VoterIds.Length, partition.Database.Durability,

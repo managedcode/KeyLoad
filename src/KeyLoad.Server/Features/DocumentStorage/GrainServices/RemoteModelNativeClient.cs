@@ -29,8 +29,12 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         IOptions<GrainRoutingOptions> routing, PartitionMovementGrainServiceClient movement,
         ReplicaSiloDiscoveryState local, TimeProvider clock) : base(services)
     {
-        this.partition = partition; this.options = options.Value; this.routing = routing.Value;
-        this.movement = movement; this.local = local; this.clock = clock;
+        this.partition = partition;
+        this.options = options.Value;
+        this.routing = routing.Value;
+        this.movement = movement;
+        this.local = local;
+        this.clock = clock;
         faultObserver = this.options.RequestCqrsProbe.Enabled
             ? services.GetService(typeof(IRemoteModelNativeFaultObserver)) as IRemoteModelNativeFaultObserver : null;
         replayObserver = this.options.RequestCqrsProbe.Enabled
@@ -42,8 +46,20 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         lifetime = new(stopping, DisposeOwnedResources);
     }
 
-    internal async Task<RemoteModelAuthenticatedReply> SendAsync(RegisteredPhysicalOwnerV1 destination,
+    internal Task<RemoteModelAuthenticatedReply> SendAsync(RegisteredPhysicalOwnerV1 destination,
         PhysicalShardRecord source, RemoteModelNativeChannel channel, ReadOnlyMemory<byte> payload,
+        string signature, DateTimeOffset expiry, long maximumReplyBytes, CancellationToken caller)
+        => SendCoreAsync(destination, source, SelectedVoter, channel, payload, signature, expiry,
+            maximumReplyBytes, caller);
+
+    internal Task<RemoteModelAuthenticatedReply> SendAnnProjectionAsync(RegisteredPhysicalOwnerV1 destination,
+        PhysicalShardRecord source, int voterIndex, ReadOnlyMemory<byte> payload,
+        string signature, DateTimeOffset expiry, long maximumReplyBytes, CancellationToken caller)
+        => SendCoreAsync(destination, source, voterIndex, RemoteModelNativeChannel.AnnProjectionObservation,
+            payload, signature, expiry, maximumReplyBytes, caller);
+
+    private async Task<RemoteModelAuthenticatedReply> SendCoreAsync(RegisteredPhysicalOwnerV1 destination,
+        PhysicalShardRecord source, int voterIndex, RemoteModelNativeChannel channel, ReadOnlyMemory<byte> payload,
         string signature, DateTimeOffset expiry, long maximumReplyBytes, CancellationToken caller)
     {
         using var operation = lifetime.TryEnter()
@@ -60,14 +76,14 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         token.ThrowIfCancellationRequested();
         _ = RemoteModelNativeIdentity.Secret(options, partition, source);
         _ = RemoteModelNativeIdentity.Secret(options, partition, destination.Owner);
-        var address = await movement.ResolveAsync(destination, SelectedVoter, token).ConfigureAwait(false);
+        var address = await movement.ResolveAsync(destination, voterIndex, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         var current = local.Read();
         if (!current.TransportReady || !source.VoterIds.Contains(current.VoterId, StringComparer.Ordinal))
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable); }
         await movement.RequireCallerAsync(current.VoterId, current.SiloAddress, token).ConfigureAwait(false);
         var request = new RemoteModelNativeRequest(channel, payload.ToArray(), signature, source, destination.Owner,
-            current.VoterId, current.SiloAddress, destination.Owner.VoterIds[SelectedVoter], address.ToParsableString(),
+            current.VoterId, current.SiloAddress, destination.Owner.VoterIds[voterIndex], address.ToParsableString(),
             Guid.NewGuid(), expiry, string.Empty);
         using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options, partition, source));
         request = request with { SenderSignature = sourceMac.SignNativeRequest(request) };
@@ -145,7 +161,7 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         RemoteModelNativeRequest request, RemoteDocumentMac sourceMac, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        await RequireCurrentAsync(destination, request.DestinationSiloAddress, token).ConfigureAwait(false);
+        await RequireCurrentAsync(destination, request.DestinationVoter, request.DestinationSiloAddress, token).ConfigureAwait(false);
         await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (!sourceMac.VerifyNativeRequest(request))
@@ -154,47 +170,20 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
     }
 
-    internal async Task<RemoteModelNativeReplayResult> ReplayCapturedAsync(RegisteredPhysicalOwnerV1 destination,
+    internal Task<RemoteModelNativeReplayResult> ReplayCapturedAsync(RegisteredPhysicalOwnerV1 destination,
         RemoteModelNativeRequest original, long maximumReplyBytes, RemoteModelNativeReplayVariation variation,
         RemoteModelNativeReplayExchange owner, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        if (original.DestinationOwner != destination.Owner || original.ExpiresAt <= clock.GetUtcNow()
-            || maximumReplyBytes is <= EmptyReplyBytes or > RemoteDocumentProtocol.MaximumBodyBytes)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-        using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(RemoteModelNativeIdentity.Secret(options, partition, original.SourceOwner));
-        if (!sourceMac.VerifyNativeRequest(original) || !sourceMac.Verify(original.Payload.Span, original.Signature, false))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-        var payload = RemoteModelNativeReplayPayload.Create(original, variation);
-        _ = RemoteModelNativeIdentity.Secret(options, partition, destination.Owner);
-        var address = await movement.ResolveAsync(destination, SelectedVoter, token).ConfigureAwait(false);
-        var current = local.Read();
-        token.ThrowIfCancellationRequested();
-        if (!current.TransportReady || !original.SourceOwner.VoterIds.Contains(current.VoterId, StringComparer.Ordinal))
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable); }
-        await movement.RequireCallerAsync(current.VoterId, current.SiloAddress, token).ConfigureAwait(false);
-        var request = original with { Payload = payload.ToArray(), CallerVoter = current.VoterId,
-            CallerSiloAddress = current.SiloAddress, DestinationVoter = destination.Owner.VoterIds[SelectedVoter],
-            DestinationSiloAddress = address.ToParsableString(), Nonce = Guid.NewGuid(), SenderSignature = string.Empty };
-        request = request with { SenderSignature = sourceMac.SignNativeRequest(request) };
-        token.ThrowIfCancellationRequested();
-        if (request.ExpiresAt <= clock.GetUtcNow())
-        { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
-        owner.MarkInvoked(variation);
-        var received = await DispatchAsync(address, request, token).ConfigureAwait(false);
-        RemoteModelNativeReply reply;
-        try
-        { reply = await VerifyReplyAsync(destination, request, received, maximumReplyBytes, token).ConfigureAwait(false); }
-        catch (Exception error) when (RemoteModelNativeEffects.MayHaveEffects(request.Channel, request.Payload)
-            && NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
-        // Preserve signed native terminal refusal as actual evidence; it is not an acknowledgement.
-        return new(request, reply);
-    }
+        => RemoteModelNativeReplayExecution.ExecuteAsync(this, destination, original, maximumReplyBytes,
+            variation, owner, options, partition, movement, local, clock, token);
 
-    internal async Task RequireCurrentAsync(RegisteredPhysicalOwnerV1 destination, string address, CancellationToken token)
+    internal Task RequireCurrentAsync(RegisteredPhysicalOwnerV1 destination, string address, CancellationToken token)
+        => RequireCurrentAsync(destination, destination.Owner.VoterIds[SelectedVoter], address, token);
+
+    internal async Task RequireCurrentAsync(RegisteredPhysicalOwnerV1 destination, string voter,
+        string address, CancellationToken token)
     {
-        var actual = await movement.ResolveAsync(destination, SelectedVoter, token).ConfigureAwait(false);
+        var index = destination.Owner.VoterIds.IndexOf(voter);
+        var actual = await movement.ResolveAsync(destination, index, token).ConfigureAwait(false);
         token.ThrowIfCancellationRequested();
         if (!string.Equals(actual.ToParsableString(), address, StringComparison.Ordinal))
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable); }
