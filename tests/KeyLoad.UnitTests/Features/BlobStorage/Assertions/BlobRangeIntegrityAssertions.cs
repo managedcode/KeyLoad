@@ -40,6 +40,7 @@ internal static class BlobRangeIntegrityAssertions
         var position = store.Position;
         var image = QueueWholeFlowStorage.Bytes(store);
         await NativeState(database, fixture);
+        await BlobRangeAdmissionAssertions.RefusedThenHealthy(database, store, fixture);
         await Range(database, fixture, BlobRangeIntegrityFixture.FirstOrdinal, BlobRangeIntegrityFixture.RawPartBytes);
         await Range(database, fixture, BlobRangeIntegrityFixture.RawPartBytes, BlobRangeIntegrityFixture.TailBytes);
         await Range(database, fixture, BlobRangeIntegrityFixture.CrossOffset, BlobRangeIntegrityFixture.RawPartBytes);

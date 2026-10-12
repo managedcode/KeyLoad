@@ -39,10 +39,11 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
         var firstAddress = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, deadline.Token);
         await Assert.That(firstAddress).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
         await Task.Delay(RequestCqrsCohortScenario.LowerElectionTimeout + TimeSpan.FromMilliseconds(50), TimeProvider.System, deadline.Token);
-        scenario.PublishCompatibleRemoteOne(2);
+        await runtime.RestartVoterAsync(RequestCqrsCohortScenario.FirstRemote, deadline.Token);
+        scenario.PublishCompatibleRemoteOne(1);
         var beforeExpiryRefresh = scenario.RemoteOne.Requests;
         var expiredAddress = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, deadline.Token);
-        await Assert.That(expiredAddress).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(2)));
+        await Assert.That(expiredAddress).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
         await Assert.That(scenario.RemoteOne.Requests).IsEqualTo(beforeExpiryRefresh + 1);
     }
 
@@ -110,8 +111,12 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
             GrainRoutingProtocol.RequestInterfaceVersion, ReplicaTransportProtocol.Version - 1, cancellationToken);
 
         scenario.PublishCompatibleRemoteOne(2);
+        var wrongAddress = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+            scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, cancellationToken));
+        await AssertFailureAsync(wrongAddress, InvalidDiscoveryDetail);
+        scenario.PublishCompatibleRemoteOne(1);
         var replacement = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, cancellationToken);
-        await Assert.That(replacement).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(2)));
+        await Assert.That(replacement).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
         await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
     }
 

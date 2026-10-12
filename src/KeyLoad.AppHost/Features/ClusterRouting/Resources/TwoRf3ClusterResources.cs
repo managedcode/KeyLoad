@@ -12,14 +12,13 @@ internal static class TwoRf3ClusterResources
     private const string AdminKeyParameterName = "admin-key";
     private const string MembershipPeerParameterName = "membership-peer-a";
     private const string PeerParameterName = "peer-b";
-    private const string TrustedGroupIncarnationEnvironment = "TrustedGroupIncarnation";
-    private const string TrustedGroupPeerSecretEnvironment = "TrustedGroupPeerSecret";
-    private const string TrustedGroupVotersEnvironment = "TrustedGroupVoterIds";
-    private const string TrustedGroupSiloEndpointsEnvironment = "TrustedGroupSiloEndpoints";
-    private const string AuthorityPhysicalShardEnvironment = "AuthorityPhysicalShardId";
-    private const string AuthorityIncarnationEnvironment = "AuthorityIncarnation";
-    private const string AuthorityPeerSecretEnvironment = "AuthorityPeerSecret";
-    private const string AuthorityEndpointsEnvironment = "AuthorityEndpoints";
+    private const string ForeignPhysicalEnvironment = "ForeignPhysicalShardId";
+    private const string ForeignIncarnationEnvironment = "ForeignIncarnation";
+    private const string ForeignSecretEnvironment = "ForeignPeerSecret";
+    private const string ForeignVotersEnvironment = "ForeignVoterIds";
+    private const string RoleEnvironment = "Role";
+    private const string ControlRole = "Control";
+    private const string DestinationRole = "Destination";
 
     private const string PublicOriginTemplate = "http://{0}:8080";
 
@@ -43,9 +42,8 @@ internal static class TwoRf3ClusterResources
     private const string SiloAddressEnvironment = "KeyLoad__SiloAddress";
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
     private const string PrivateHttpEnvironment = "KeyLoad__AllowPrivateNetworkHttp";
-    private const string AuthorityPrefix = "KeyLoad__MembershipAuthority__";
-    private const string AuthorityHealth = "/health/membership-authority";
-    private const string MembershipHealth = "/health/membership-ready";
+    private const string TrustPrefix = "KeyLoad__PhysicalGroupTrust__";
+    private const string NativeMembershipReadyPath = "/health/membership-ready";
     private const string True = "true";
     private static readonly string[] Nodes = [TwoRf3ProfileProtocol.FirstVoterName, TwoRf3ProfileProtocol.SecondVoterName, TwoRf3ProfileProtocol.ThirdVoterName, TwoRf3ProfileProtocol.FourthVoterName, TwoRf3ProfileProtocol.FifthVoterName, TwoRf3ProfileProtocol.SixthVoterName];
 
@@ -82,6 +80,9 @@ internal static class TwoRf3ClusterResources
         var discoveryOmission = NativeDiscoveryOmissionProfile.Create(builder, root, image, localImage);
         var resources = AddNodes(builder, profile, root, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId, image, localImage);
+        var tables = NativeClusteringResources.Add(builder);
+        foreach (var resource in resources)
+        { NativeClusteringResources.Apply(resource, tables); }
         TwoRf3QueryProbe.Apply(probe, resources, Nodes);
         frameObservation?.ApplyReceivers(resources, Nodes);
         discoveryOmission?.Apply(resources);
@@ -132,13 +133,12 @@ internal static class TwoRf3ClusterResources
                 .WithEnvironment(AdminEnvironment, admin).WithEnvironment(PrivateHttpEnvironment, True)
                 .WithEnvironment(PublicEnvironment, Origin(name)).WithEnvironment(SiloAddressEnvironment, name)
                 .WithEnvironment(SiloPortEnvironment, TwoRf3ProfileProtocol.SiloPort.ToString(CultureInfo.InvariantCulture))
-                .WithHttpHealthCheck(groupA ? AuthorityHealth : MembershipHealth, endpointName: Http);
+                .WithHttpHealthCheck(NativeMembershipReadyPath, endpointName: Http);
             TwoRf3TopologyResources.ApplyPeerEndpoints(resource, group);
-            ApplyAuthoritySettings(resource, groupA, profile, physicalB, incarnationB,
+            ApplyPhysicalTrustSettings(resource, groupA, profile, physicalB, incarnationB,
                 firstPeer, secondPeer, firstGroup, secondGroup);
             KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
-            TwoRf3TopologyResources.WaitForAuthority(resource, resources, firstGroup.Length, groupA);
             resources[index] = resource;
         }
         return resources;
@@ -157,43 +157,33 @@ internal static class TwoRf3ClusterResources
         resource.WithEnvironment(PhysicalEnvironment, physicalB).WithEnvironment(IncarnationEnvironment, incarnationB);
     }
 
-    private static void ApplyAuthoritySettings(IResourceBuilder<ContainerResource> resource, bool groupA,
+    private static void ApplyPhysicalTrustSettings(IResourceBuilder<ContainerResource> resource, bool groupA,
         LocalProfile profile, IResourceBuilder<ParameterResource> secondPhysical,
         IResourceBuilder<ParameterResource> secondIncarnation, IResourceBuilder<ParameterResource> firstSecret,
-        IResourceBuilder<ParameterResource> secondSecret,
-        string[] firstGroup, string[] secondGroup)
+        IResourceBuilder<ParameterResource> secondSecret, string[] firstGroup, string[] secondGroup)
     {
-        const string AuthorityModeSetting = "Mode";
-        const string AuthorityMode = "authority";
-        const string ProxyMode = "proxy";
-        const string TrustedPhysicalShardSetting = "TrustedGroupPhysicalShardId";
-        const string SiloPortSuffix = ":11111";
-
-        resource.WithEnvironment(AuthorityPrefix + AuthorityModeSetting, groupA ? AuthorityMode : ProxyMode);
+        resource.WithEnvironment(TrustPrefix + RoleEnvironment, groupA ? ControlRole : DestinationRole);
         if (groupA)
         {
-            resource.WithEnvironment(AuthorityPrefix + TrustedPhysicalShardSetting, secondPhysical)
-                .WithEnvironment(AuthorityPrefix + TrustedGroupIncarnationEnvironment, secondIncarnation)
-                .WithEnvironment(AuthorityPrefix + TrustedGroupPeerSecretEnvironment, secondSecret);
-            AddVector(resource, TrustedGroupVotersEnvironment, secondGroup.Select(Origin).ToArray());
-            AddVector(resource, TrustedGroupSiloEndpointsEnvironment, secondGroup.Select(name => name + SiloPortSuffix).ToArray());
+            resource.WithEnvironment(TrustPrefix + ForeignPhysicalEnvironment, secondPhysical)
+                .WithEnvironment(TrustPrefix + ForeignIncarnationEnvironment, secondIncarnation)
+                .WithEnvironment(TrustPrefix + ForeignSecretEnvironment, secondSecret);
         }
         else
         {
-            resource.WithEnvironment(AuthorityPrefix + AuthorityPhysicalShardEnvironment, profile.PhysicalShardId.ToString(ParameterIdentityFormat))
-                .WithEnvironment(AuthorityPrefix + AuthorityIncarnationEnvironment, profile.Incarnation.ToString(ParameterIdentityFormat))
-                .WithEnvironment(AuthorityPrefix + AuthorityPeerSecretEnvironment, firstSecret);
-            AddVector(resource, AuthorityEndpointsEnvironment, firstGroup.Select(Origin).ToArray());
+            resource.WithEnvironment(TrustPrefix + ForeignPhysicalEnvironment, profile.PhysicalShardId.ToString(ParameterIdentityFormat))
+                .WithEnvironment(TrustPrefix + ForeignIncarnationEnvironment, profile.Incarnation.ToString(ParameterIdentityFormat))
+                .WithEnvironment(TrustPrefix + ForeignSecretEnvironment, firstSecret);
         }
+        AddVector(resource, ForeignVotersEnvironment, (groupA ? secondGroup : firstGroup).Select(Origin).ToArray());
     }
 
     private static void AddVector(IResourceBuilder<ContainerResource> resource, string name, string[] values)
     {
         const int IndexInitialValue = 0;
         const string EnvironmentIndexSeparator = "__";
-
         for (var index = IndexInitialValue; index < values.Length; index++)
-        { resource.WithEnvironment(AuthorityPrefix + name + EnvironmentIndexSeparator + index.ToString(CultureInfo.InvariantCulture), values[index]); }
+        { resource.WithEnvironment(TrustPrefix + name + EnvironmentIndexSeparator + index.ToString(CultureInfo.InvariantCulture), values[index]); }
     }
 
     private static void ValidateMode(IDistributedApplicationBuilder builder, LocalProfile profile)

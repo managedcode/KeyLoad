@@ -35,13 +35,13 @@ internal static class MovementFrameObservationOptionsReader
             { throw Invalid(); }
             return;
         }
-        MembershipAuthoritySettingsValidator.Validate(node.MembershipAuthority, node);
+        PhysicalGroupTrustValidator.Validate(node.PhysicalGroupTrust, node);
         if (value.Root != MovementFrameObservationProtocol.FixedRoot
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId)
             || !node.AllowPrivateNetworkHttp || node.BenchmarkTopology || node.RequestCqrsProbe.Enabled
-            || node.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Proxy
-            || !node.MembershipAuthority.RegisterPhysicalOwners || !node.MembershipAuthority.RemoteDocumentReads
-            || !node.MembershipAuthority.RemotePartitionQueries)
+            || node.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination
+            || !node.PhysicalGroupTrust.RegisterPhysicalOwners || !node.PhysicalGroupTrust.RemoteDocumentReads
+            || !node.PhysicalGroupTrust.RemotePartitionQueries)
         { throw Invalid(); }
     }
 

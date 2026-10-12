@@ -33,14 +33,15 @@ internal sealed class ReplicaTermMetadataLifetime : IDisposable
     internal DatabaseEngine Database { get; }
     internal ReplicaConfiguration Configuration { get; }
 
-    internal static ReplicaTermMetadataLifetime Open(string directory, Action<CommitStage, long, int>? observer)
+    internal static ReplicaTermMetadataLifetime Open(string directory, Action<CommitStage, long, int>? observer,
+        ReplicaConfiguration? requested = null)
     {
         ZoneTreeStore? replica = null;
         ZoneTreeStore? canonical = null;
         DurableReplicaLog? log = null;
         try
         {
-            var configuration = new ReplicaConfiguration(ReplicaTermMetadataFixture.VoterA,
+            var configuration = requested ?? new ReplicaConfiguration(ReplicaTermMetadataFixture.VoterA,
                 [ReplicaTermMetadataFixture.VoterA, ReplicaTermMetadataFixture.VoterB, ReplicaTermMetadataFixture.VoterC],
                 Path.Combine(directory, ReplicaDirectory), Guid.NewGuid());
             replica = new(new(configuration.Directory) { Incarnation = configuration.Incarnation, FaultObserver = observer }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());

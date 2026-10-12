@@ -34,7 +34,13 @@ internal static class EventVectorSourceReplyAuthorization
             if (fresh is not null)
             { ServerFailureObserver.Observe(fresh.Dispose, failures); }
         }
-        ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        try
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            return result ?? throw Errors.Fail(ErrorCode.RecoveryRequired, EventVectorRemoteProtocol.Invalid);
+        }
+        catch (Exception error) when (result is null && call.Action == EventVectorRemoteAction.SourceEffect
+            && global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error); }
     }
 }

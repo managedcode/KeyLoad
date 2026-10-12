@@ -14,16 +14,16 @@ internal static class RemoteControlledBlobValidation
         TimeProvider clock, RemoteControlledBlobCall call, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var settings = options.Value.MembershipAuthority;
+        var settings = options.Value.PhysicalGroupTrust;
         var request = call.Request;
         var frame = request?.Frame;
         var now = clock.GetUtcNow();
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
-            || settings.Mode != MembershipAuthoritySettingsProtocol.Proxy
+            || settings.Role != PhysicalGroupTrustRole.Destination
             || call.Version != RemoteDocumentProtocol.Version || call.RequestId == Guid.Empty
-            || !ReplicaMembershipAuthorityValidation.ValidNonce(call.Nonce)
-            || !settings.AuthorityEndpoints.Contains(call.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(call.CallerSiloAddress, membership)
+            || !RemoteModelNativeIdentity.ValidNonce(call.Nonce)
+            || !PhysicalOwnerConfiguredTuples.Control(options.Value, partition).Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal)
+            || !PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membership)
             || request is null || frame is null || frame.ExpiresAt <= now || frame.ExpiresAt > now + routing.Value.RequestLifetime
             || call.Source is null || call.Destination is null
             || !PhysicalOwnerEntryValidation.SameOwner(call.Source, PhysicalOwnerConfiguredTuples.Control(options.Value, partition).Owner)

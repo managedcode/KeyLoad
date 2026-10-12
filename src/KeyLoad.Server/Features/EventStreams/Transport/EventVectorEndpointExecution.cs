@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -10,20 +9,27 @@ namespace KeyLoad.Server.Features.EventStreams;
 internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver receiver,
     EventVectorRemoteCallValidation authority, EventVectorRemoteEncoding encoding,
     RemoteDocumentMac originalCallerMac, RemoteDocumentMac originalReplyMac,
-    ReplicaMembershipAuthorityAddressPins originalPins, ReplicaMembershipAuthorityReplayCache originalReplay,
-    RemoteDocumentWorkOwner originalWork, IOptions<GrainRoutingOptions> routing, TimeProvider clock)
+    EventVectorReplayCache originalReplay, RemoteDocumentWorkOwner originalWork,
+    IOptions<GrainRoutingOptions> routing, TimeProvider clock)
 {
-    internal async Task HandleAsync(HttpContext context)
+    private const int NoCleanupFailures = 0;
+    internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
+        ReadOnlyMemory<byte> originalBytes, string originalSignature, CancellationToken originalCancellationToken)
+        => ExecuteAsync(originalBytes, originalSignature, null, originalCancellationToken);
+
+    internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
+        ReadOnlyMemory<byte> originalBytes, string originalSignature, RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context);
         var failures = new List<Exception>();
         RemoteDocumentWorkOwner.Operation? operation = null;
+        (ReadOnlyMemory<byte> Payload, string Signature)? result = null;
         try
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 operation = originalWork.Acquire(Guid.NewGuid());
-                await ExecuteAsync(context, operation).ConfigureAwait(false);
+                result = await ExecuteOwnedAsync(originalBytes, originalSignature, operation, boundary,
+                    originalCancellationToken).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
@@ -31,28 +37,33 @@ internal sealed class EventVectorEndpointExecution(EventVectorRemoteReceiver rec
             if (operation is not null)
             { ServerFailureObserver.Observe(operation.Dispose, failures); }
         }
+        if (failures.Count != NoCleanupFailures && result is { } abandoned)
+        { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(abandoned.Payload).Span); }
         ServerFailureObserver.ThrowIfAny(failures);
+        return result ?? throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }
 
-    private async Task ExecuteAsync(HttpContext context, RemoteDocumentWorkOwner.Operation operation)
+    private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteOwnedAsync(
+        ReadOnlyMemory<byte> originalBytes, string originalSignature,
+        RemoteDocumentWorkOwner.Operation operation, RemoteModelNativeEffectBoundary? boundary,
+        CancellationToken originalCancellationToken)
     {
         routing.Value.Validate();
         using var deadline = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted,
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(originalCancellationToken,
             operation.ShutdownToken, deadline.Token);
-        var verified = await EventVectorRemoteRequestRead.ReadAsync(context.Request,
-            originalCallerMac, encoding, linked.Token).ConfigureAwait(false);
+        var verified = EventVectorRemoteRequestRead.Read(originalBytes, originalSignature,
+            originalCallerMac, encoding, linked.Token);
         try
         {
-            var admitted = await EventVectorAdmittedCall.AdmitAsync(verified, authority,
-                originalPins, originalReplay, linked.Token).ConfigureAwait(false);
+            var admitted = EventVectorAdmittedCall.Admit(verified, authority, originalReplay, linked.Token);
             var remaining = admitted.Original.Call.ExpiresAt - clock.GetUtcNow();
             if (remaining <= TimeSpan.Zero)
             { throw Errors.Fail(ErrorCode.TokenInvalidated, EventVectorRemoteProtocol.Unavailable); }
-            using var originalExpiry = new CancellationTokenSource(remaining, clock);
-            using var original = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, originalExpiry.Token);
-            await EventVectorEndpointReply.WriteAsync(context, admitted, receiver, authority,
-                originalReplyMac, encoding, original.Token).ConfigureAwait(false);
+            using var expiry = new CancellationTokenSource(remaining, clock);
+            using var original = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, expiry.Token);
+            return await EventVectorEndpointReply.CreateAsync(admitted, receiver, authority,
+                originalReplyMac, encoding, boundary, original.Token).ConfigureAwait(false);
         }
         finally
         {

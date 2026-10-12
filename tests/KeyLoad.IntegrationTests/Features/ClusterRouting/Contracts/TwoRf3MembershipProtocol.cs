@@ -13,7 +13,6 @@ internal static class TwoRf3MembershipProtocol
     internal const string Node6 = "node6";
     internal const string HealthSilo = "health/silo";
     internal const string HealthReady = "health/ready";
-    internal const string HealthAuthority = "health/membership-authority";
     internal const string HealthMembership = "health/membership-ready";
     internal const string ImageMismatch = "The two-RF3 model did not bind all six resources to the verified immutable server image.";
     internal const string MissingState = "The two-RF3 AppHost did not reach its expected membership-only state.";

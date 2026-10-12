@@ -4,7 +4,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeAnnProtocol
 {
-    internal const int Version = 1;
+    internal const int Version = 2;
     internal const string RootDirectory = "ann-indexes";
     internal const string RootReceipt = "owner.bin";
     internal const string RootLock = ".owner.lock";
@@ -39,7 +39,8 @@ internal sealed record NativeAnnRootReceipt(
     [property: global::Orleans.Id(3)] Guid Incarnation,
     [property: global::Orleans.Id(4)] string[] OwnedGenerations,
     [property: global::Orleans.Id(5)] NativeAnnPublished[] Published,
-    [property: global::Orleans.Id(6)] NativeAnnPublished[] Pending);
+    [property: global::Orleans.Id(6)] NativeAnnPublished[] Pending,
+    [property: global::Orleans.Id(7)] NativeAnnOriginalOperation[] OriginalOperations);
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeAnnProtocol.OwnedKeyAlias)]
 internal sealed record NativeAnnOwnedKey(

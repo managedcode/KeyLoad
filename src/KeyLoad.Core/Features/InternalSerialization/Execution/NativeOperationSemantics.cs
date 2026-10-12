@@ -66,6 +66,7 @@ public sealed partial class DatabaseEngine
         return kind switch
         {
             OperationKind.OnlineTextPublicationPhase => NativeTypedFingerprint<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload.Value),
+            OperationKind.PartitionMovementPhase => NativeTypedFingerprint<PartitionMovePhaseCommand>(payload.Value),
             OperationKind.Batch => NativeTypedFingerprint<CommandRequest>(payload.Value),
             OperationKind.Receive => NativeTypedFingerprint<ReceiveRequest>(payload.Value),
             OperationKind.Delivery => NativeTypedFingerprint<DeliveryCommand>(payload.Value),

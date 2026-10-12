@@ -31,8 +31,6 @@ internal static class TwoRf3MembershipReadinessAssertions
         await RequireStatusAsync(http, TwoRf3MembershipProtocol.HealthSilo, 200, cancellationToken).ConfigureAwait(false);
         await RequireStatusAsync(http, TwoRf3MembershipProtocol.HealthMembership, 200, cancellationToken).ConfigureAwait(false);
         await RequireStatusAsync(http, TwoRf3MembershipProtocol.HealthReady, 503, cancellationToken).ConfigureAwait(false);
-        var authority = Array.IndexOf(TwoRf3MembershipProtocol.Nodes, node) < TwoRf3MembershipProtocol.MembersPerGroup ? 200 : 503;
-        await RequireStatusAsync(http, TwoRf3MembershipProtocol.HealthAuthority, authority, cancellationToken).ConfigureAwait(false);
     }
 
     internal static async Task VerifyPublicCallsClosedAsync(DistributedApplication app, string node,

@@ -45,8 +45,6 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<ReplicaExecutionOptions>()
             .Bind(configuration.GetSection(ReplicaExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaProtocol.InvalidLimits).ValidateOnStart();
-        services.AddOptions<PeerDiscoveryOptions>().Bind(configuration.GetSection(PeerDiscoveryOptions.SectionName))
-            .Validate(options => options.IsValid(), PeerDiscoveryOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaTransportOptions>().Bind(configuration.GetSection(ReplicaTransportOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaTransportOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<OrleansMembershipOptions>()
@@ -141,8 +139,7 @@ internal static class ServerRuntimeOptionsRegistration
     private static void ConfigureNode(NodeOptions node, IConfiguration configuration)
     {
         var section = configuration.GetSection(ServerProtocol.ConfigurationSection);
-        MembershipAuthoritySettingsValidator.ValidateSection(
-            section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
+        PhysicalGroupTrustValidator.ValidateConfiguration(section, node.PhysicalGroupTrust);
         node.RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
             node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp);
         node.MovementFrameObservation = MovementFrameObservationOptionsReader.Read(configuration, node);

@@ -31,8 +31,8 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                 var fence = partition.Database.CaptureRemoteDocumentRead(principal.Id, request.Reference, original.Token);
                 if (fence is null)
                 { document = partition.Database.GetDocument(principal.Id, request.Reference, request.MinimumToken, original.Token); return; }
-                var settings = nodeOptions.Value.MembershipAuthority;
-                if (!settings.RemoteDocumentReads || settings.Mode != MembershipAuthoritySettingsProtocol.Authority
+                var settings = nodeOptions.Value.PhysicalGroupTrust;
+                if (!settings.RemoteDocumentReads || settings.Role != PhysicalGroupTrustRole.Control
                     || !PhysicalOwnerEntryValidation.Same(fence.Destination,
                         PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition)))
                 { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }

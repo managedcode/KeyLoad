@@ -59,6 +59,24 @@ internal static class RequestCqrsAnnAssertions
         }
     }
 
+    internal static async Task RetainedFramesAsync(
+        List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> frames, Guid requestId)
+    {
+        await Assert.That(frames.Count).IsEqualTo(RequestCqrsAnnTestData.OrdinaryFrameCount + RequestCqrsAnnTestData.OneStep);
+        await BoundaryAsync(frames, requestId);
+        var progress = frames.Single(frame => frame.Kind == CqrsStreamChunkKind.Progress);
+        var result = progress.ProgressResult ?? throw new InvalidOperationException();
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.Problem).IsNull();
+        await EqualAsync(new GrainRequestProgress(requestId) { AnnPhase = AnnMaintenancePhase.Completed },
+            result.Value ?? throw new InvalidOperationException());
+        await Assert.That(progress.Message).IsEqualTo(AnnMaintenanceProgress.PhaseCompleted);
+        await Assert.That(progress.EventId).IsNull();
+        await Assert.That(progress.Final).IsNull();
+        await Assert.That(progress.EventType).IsEqualTo(
+            CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(progress.Kind));
+    }
+
     private static async Task BoundaryAsync(List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> frames,
         Guid requestId)
     {

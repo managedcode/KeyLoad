@@ -11,19 +11,22 @@ namespace KeyLoad.Server;
 /// <param name="nodeOptions">Validated fixed-voter silo settings.</param>
 /// <param name="administration">Borrowed node administration guarded by read actors.</param>
 /// <param name="loggerFactory">Shared process diagnostics, owned by the outer application.</param>
-/// <param name="membershipAuthority">Borrowed discovery authority, drained before the native silo stops.</param>
 /// <param name="runtimeOptions">Shared validated options snapshots borrowed by the native silo.</param>
 /// <param name="clock">Borrowed runtime clock for the silo and its shutdown deadlines.</param>
 /// <param name="physicalOwnerWork">Borrowed configured proof work owner, joined before native silo shutdown.</param>
 /// <param name="sealedObserver">Optional explicitly borrowed in-process observation, never execution authority.</param>
 /// <param name="blobWireObserver">Optional fixture-owned signed-byte borrow, joined with the original request.</param>
-/// <param name="discoveryOmission"></param>
+/// <param name="discoveryOmission">Optional fixture observer of actual native discovery replies.</param>
+/// <param name="physicalOwnerProbe">Borrowed probe runtime factory resolved after the outer node exists.</param>
+/// <param name="localhostClustering">Explicit fixture-only native endpoint tuple; production uses Aspire Azure membership.</param>
 internal sealed partial class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
-    INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
+    INodeAdministration administration, ILoggerFactory loggerFactory,
     ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
     IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
     IControlledBlobWireBorrowObserver? blobWireObserver = null,
-    NativeDiscoveryOmissionOwner? discoveryOmission = null) : IAsyncDisposable
+    NativeDiscoveryOmissionOwner? discoveryOmission = null,
+    Func<PhysicalOwnerProbeNativeRuntime>? physicalOwnerProbe = null,
+    NativeLocalhostClusteringOptions? localhostClustering = null) : IAsyncDisposable
 {
     internal NativeDiscoveryOmissionOwner? DiscoveryOmission => discoveryOmission;
     private NodeOptions Options => nodeOptions.Value;
@@ -42,6 +45,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     private PartitionMovementRuntime? movement;
     internal PartitionMovementRuntime? Movement => Volatile.Read(ref movement);
     private RemoteDocumentRuntime? remoteDocuments;
+    private RemoteModelNativeRuntime? nativeModelReceiver;
+    private RemoteModelNativeClient? nativeModelClient;
     internal RemoteDocumentRuntime? RemoteDocuments => Volatile.Read(ref remoteDocuments);
     private int siloJoined;
 
@@ -59,9 +64,9 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
 
     internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
 
-    internal bool DatabaseReady => (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
-        || Options.MembershipAuthority.RemoteDocumentReads
-            && (Options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority || OwnerRegistration?.Verified == true))
+    internal bool DatabaseReady => (Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled
+        || Options.PhysicalGroupTrust.RemoteDocumentReads
+            && (Options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control || OwnerRegistration?.Verified == true))
         && CatalogReady && Volatile.Read(ref host)?.Services.GetRequiredService<RuntimeJournalAdmission>().IsReady == true;
 
     internal PhysicalOwnerRegistrationObservation? OwnerRegistration => Volatile.Read(ref ownerRegistration)?.Observe();
@@ -82,30 +87,10 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     public bool HasCompatibleCohort => Grains is not null
         && Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryClient>().HasCompatibleCohort == true;
 
-    /// <summary>Checks all configured voters within the caller's deadline before routing or readiness.</summary>
-    /// <param name="cancellationToken">Bounds the actual discovery attempts and their cleanup.</param>
-    public Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
-        => RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryClient>().EnsureCompatibleCohortAsync(cancellationToken);
-
-    /// <summary>Admits and scopes persisted identity with this running silo's native serializers.</summary>
-    /// <param name="principal">The persisted subject, absent only for credential authentication.</param>
-    /// <param name="requestId">The fresh request identity.</param>
-    /// <param name="commandId">The stable command identity, empty for reads.</param>
-    /// <param name="cancellationToken">Cancels validation and actual native encoding.</param>
-    /// <param name="connectionId">Actual accepted transport owner, or the registered service owner when absent.</param>
-    public GrainRequestIdentityScope OpenRequestContext(PrincipalRecord? principal, Guid requestId, Guid commandId,
-        CancellationToken cancellationToken, Guid? connectionId = null)
-        => new(RuntimeServices, principal, requestId, commandId, cancellationToken,
-            connectionId: connectionId ?? NativeConnectionExecutionIdentity.Resolve(RuntimeServices));
-
     public Guid InternalConnectionId => connectionOwner.Id;
 
-    private IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
+    internal IServiceProvider RuntimeServices => Grains is not null && Volatile.Read(ref host) is { } running
         ? running.Services : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-
-    internal KeyLoad.Query.QueryEngine BorrowPartitionQueries() => RuntimeServices.GetRequiredService<KeyLoad.Query.QueryEngine>();
-
-    internal GrainRequestCodec CatalogRequestCodec() => RuntimeServices.GetRequiredService<GrainRequestCodec>();
 
     /// <summary>Starts the native transport before its quorum-backed membership provider initializes.</summary>
     /// <param name="cancellationToken">Application startup cancellation, shared with membership initialization.</param>
@@ -130,13 +115,18 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, physicalOwnerProbe?.Invoke(), localhostClustering, cancellationToken);
         Volatile.Write(ref host, built);
+        // Capture the actual singleton owners before native startup; failed startup joins these same instances.
+        Volatile.Write(ref nativeModelReceiver, built.Services.GetRequiredService<RemoteModelNativeRuntime>());
+        Volatile.Write(ref nativeModelClient, built.Services.GetRequiredService<RemoteModelNativeClient>());
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy
-            && !Options.MembershipAuthority.RemoteDocumentReads)
+        RemoteDocuments?.AttachNativeReceiver(Volatile.Read(ref nativeModelReceiver)
+            ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable));
+        if (Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Destination
+            && !Options.PhysicalGroupTrust.RemoteDocumentReads)
         { return; }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
             built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution,
@@ -145,8 +135,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
         await RuntimeJournalStartup.InitializeConfiguredAsync(built.Services, partition, administrator, Options,
             runtimeOptions, cancellationToken).ConfigureAwait(false);
-        PhysicalOwnerRegistrationRuntime.PublishAndAttachAuthority(ref ownerRegistration, this, partition,
-            Options, runtimeOptions, membershipAuthority, built.Services, runtimeClock);
+        PhysicalOwnerRegistrationRuntime.Attach(ref ownerRegistration, this, partition,
+            runtimeOptions, built.Services, runtimeClock);
     }
 
     /// <summary>Executes one signed operation through the corresponding GUID request actor.</summary>

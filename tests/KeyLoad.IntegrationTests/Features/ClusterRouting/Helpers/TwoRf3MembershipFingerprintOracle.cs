@@ -29,7 +29,7 @@ internal static class TwoRf3MembershipFingerprintOracle
             var observations = await ReadSixAsync(app, profile, identity, firstSecret, secondSecret,
                 cancellationToken).ConfigureAwait(false);
             var clusterId = ClusterPrefix + profile.Incarnation.ToString("N", CultureInfo.InvariantCulture);
-            await VerifyWrongContextsAsync(app, identity, clusterId, secondSecret, cancellationToken)
+            await VerifyWrongContextsAsync(app, identity, clusterId, secondSecret, profile.AdminKey, cancellationToken)
                 .ConfigureAwait(false);
             var expected = TwoRf3MembershipFingerprintAssertions.Fingerprint(observations.Select(value => value.SiloAddress));
             await TwoRf3MembershipFingerprintAssertions.VerifyHealthAsync(app, expected, cancellationToken)
@@ -79,31 +79,31 @@ internal static class TwoRf3MembershipFingerprintOracle
             var secret = firstGroup ? firstSecret : secondSecret;
             var incarnation = firstGroup ? profile.Incarnation : identity.Incarnation;
             observations[index] = await TwoRf3MembershipSignedDiscovery.ReadAsync(app,
-                TwoRf3MembershipProtocol.Nodes[index], clusterId, incarnation, secret, token).ConfigureAwait(false);
+                TwoRf3MembershipProtocol.Nodes[index], clusterId, incarnation, secret, profile.AdminKey, token).ConfigureAwait(false);
         }
         return observations;
     }
 
     private static async Task VerifyWrongContextsAsync(DistributedApplication app, TwoRf3MembershipIdentity identity,
-        string clusterId, byte[] secret, CancellationToken token)
+        string clusterId, byte[] secret, string adminCredential, CancellationToken token)
     {
         var wrongSecret = secret.ToArray();
         wrongSecret[0] ^= 1;
         try
         {
-            await RejectAsync(app, clusterId + "-wrong", identity.Incarnation, secret, token).ConfigureAwait(false);
-            await RejectAsync(app, clusterId, Guid.NewGuid(), secret, token).ConfigureAwait(false);
-            await RejectAsync(app, clusterId, identity.Incarnation, wrongSecret, token).ConfigureAwait(false);
+            await RejectAsync(app, clusterId + "-wrong", identity.Incarnation, secret, adminCredential, token).ConfigureAwait(false);
+            await RejectAsync(app, clusterId, Guid.NewGuid(), secret, adminCredential, token).ConfigureAwait(false);
+            await RejectAsync(app, clusterId, identity.Incarnation, wrongSecret, adminCredential, token).ConfigureAwait(false);
         }
         finally { CryptographicOperations.ZeroMemory(wrongSecret); }
     }
 
     private static async Task RejectAsync(DistributedApplication app, string clusterId, Guid incarnation,
-        byte[] secret, CancellationToken token)
+        byte[] secret, string adminCredential, CancellationToken token)
     {
         var failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             TwoRf3MembershipSignedDiscovery.ReadAsync(app, TwoRf3MembershipProtocol.Node4,
-                clusterId, incarnation, secret, token));
+                clusterId, incarnation, secret, adminCredential, token));
         await Assert.That(failure).IsNotNull();
     }
 

@@ -1,13 +1,10 @@
-using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using KeyLoad.Core;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
-using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -19,7 +16,8 @@ namespace KeyLoad.Server;
 internal static class ServerConfiguration
 {
     internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
-        IControlledBlobWireBorrowObserver? blobWireObserver = null)
+        IControlledBlobWireBorrowObserver? blobWireObserver = null,
+        NativeLocalhostClusteringOptions? localhostClustering = null)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
@@ -38,9 +36,10 @@ internal static class ServerConfiguration
         builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
             .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
                 ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
-        Register(builder.Services, blobWireObserver);
+        Register(builder.Services, blobWireObserver, localhostClustering);
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
+        DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();
         var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
@@ -51,15 +50,20 @@ internal static class ServerConfiguration
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
+        app.UseRouting();
+        app.MapWhen(context => !DatabaseAuthenticationComposition.IsProtected(context.Request),
+            branch =>
+            {
+                branch.UseRouting();
+                branch.UseEndpoints(_ => { });
+            });
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapDefaultEndpoints();
-        ReplicaDiscoveryEndpoints.Map(app);
+        ReplicaReadinessEndpoints.Map(app);
         ReplicaMembershipHealthEndpoints.Map(app);
-        ReplicaMembershipAuthorityEndpoints.Map(app);
-        RemoteDocumentEndpoints.Map(app);
-        global::KeyLoad.Server.Features.EventStreams.EventVectorEndpoints.Map(app);
-        PartitionMovementEndpoints.Map(app);
-        PhysicalOwnerRegistrationServices.Map(app);
+        NativeSiloDiscoveryDiagnosticEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
@@ -105,8 +109,11 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services, IControlledBlobWireBorrowObserver? blobWireObserver)
+    private static void Register(IServiceCollection services, IControlledBlobWireBorrowObserver? blobWireObserver,
+        NativeLocalhostClusteringOptions? localhostClustering)
     {
+        if (localhostClustering is not null)
+        { services.AddSingleton(localhostClustering); }
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
@@ -121,29 +128,11 @@ internal static class ServerConfiguration
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         PhysicalOwnerRegistrationServices.Add(services);
         services.AddSingleton(provider => NativeDiscoveryOmissionComposition.CreateNode(provider, blobWireObserver));
-        services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
-        services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(
-            provider.GetRequiredService<IOptions<NodeOptions>>(),
-            provider.GetRequiredService<ReplicaMembershipAuthorityOwner>(),
-            provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>()));
         services.AddSingleton(provider => new GrainRequestCodec(provider.GetRequiredService<DatabaseEngine>(),
             provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
         {
             PurposeObserver = provider.GetRequiredService<OrleansNode>().DiscoveryOmission?.PurposeObserver
         });
-        services.AddSingleton(provider => CreatePeerSecurity(
-            provider.GetRequiredService<IOptions<NodeOptions>>().Value, provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>()));
     }
 
-    private static PeerSecurity CreatePeerSecurity(NodeOptions options, TimeProvider clock, IOptions<PeerDiscoveryOptions> discovery)
-    {
-        var credential = Convert.FromBase64String(options.PeerSecret);
-        try
-        { return new(credential, clock, discovery); }
-        finally
-        { CryptographicOperations.ZeroMemory(credential); }
-    }
 }

@@ -20,6 +20,12 @@ internal static class RequestCqrsAuthorityFaultLifecycleAssertions
             RequestCqrsProbeOutcome.Observed, discovery, cancellationToken).ConfigureAwait(false);
         await Assert.That(disposed.RequestId).IsEqualTo(original.RequestId);
         await Assert.That(disposed.CommandId).IsEqualTo(commandId);
+        await Assert.That(disposed.SessionId).IsEqualTo(original.SessionId);
+        await Assert.That(disposed.ArmId).IsEqualTo(original.ArmId);
+        await Assert.That(disposed.Voter).IsEqualTo(original.Voter);
+        await Assert.That(disposed.SiloAddress).IsEqualTo(original.SiloAddress);
+        await Assert.That(disposed.EntryIndex).IsEqualTo(original.EntryIndex);
+        await Assert.That(disposed.EntryTerm).IsEqualTo(original.EntryTerm);
         await Assert.That(controls.ArmFor(armId).ProducerDisposedSeen).IsTrue();
     }
     internal static async Task VerifyRevocationStagesAsync(RequestCqrsLifecycleSnapshot snapshot)

@@ -81,7 +81,8 @@ public sealed partial class DatabaseEngine
 
         return page.Records.Select(record => NativeSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)).ToImmutableArray();
     }
-    private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request)
+    private ProjectionConsumerInfo ConfigureProjectionConsumer(IAtomicTransaction tx, ConfigureProjectionConsumerRequest request,
+        ProjectionMaintenanceAuthority? authority)
     {
         const int IndexGenerationValidationBoundary = 1;
         const string InvalidProjectionFilterDetail = "The projection generation or filter is invalid.";
@@ -121,6 +122,8 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Conflict, ConsumerIdentityRequiresNewGenerationDetail);
             }
 
+            RequireProjectionMaintenanceAuthority(previous, authority);
+            RequireInitialMaintenanceReservation(previous, request);
             return previous;
         }
         if (ProjectionConsumers(tx, request.Consumer.Partition).Length >= Limits.MaxProjectionConsumers)
@@ -131,7 +134,10 @@ public sealed partial class DatabaseEngine
         var head = ReadOutboxHead(tx, request.Consumer.Partition);
         var checkpoint = request.StartAfter ?? head.FirstAvailable - FirstAvailableStep;
         CheckOutboxPosition(head, checkpoint);
-        var state = new ProjectionConsumerInfo(request.Consumer, definition, checkpoint, false);
+        var state = new ProjectionConsumerInfo(request.Consumer, definition, checkpoint, false)
+        { MaintenanceAuthority = authority, InitialAnnMaintenance = request.InitialAnnMaintenance };
+        if (NativeSerialization.Measure(state) > Limits.MaxBatchBytes)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile); }
         tx.PutRecord(key, state);
         return state;
     }
@@ -251,7 +257,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.TokenInvalidated, ProjectionBatchScopeMismatchDetail);
         }
 
-        if (claims.ExpiresAt <= now && !(allowExpiredReceipt && view.ReadOwnedValue(ProjectionReceiptKey(claims)) is not null))
+        if (claims.ExpiresAt <= now && !(allowExpiredReceipt && view.ReadOwnedValue(ProjectionReceiptKey(claims, request)) is not null))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ExpiredProjectionBatchTokenDetail);
         }
@@ -269,9 +275,11 @@ public sealed partial class DatabaseEngine
         var claims = ProjectionClaims(tx, request, now, allowExpiredReceipt: true);
         AuthorizeBatch(tx, principal, new(request.CommandId, request.Consumer.Partition, request.Effects), allowEmpty: true);
         ReauthorizeEffects(tx, principal, request.Consumer.Partition, request.Effects);
-        var key = ProjectionReceiptKey(claims);
+        var key = ProjectionReceiptKey(claims, request);
         var fingerprint = JsonData.Fingerprint(request.Effects);
-        if (tx.GetRecord<ProjectionReceipt>(key) is { } completed)
+        var completed = tx.GetRecord<ProjectionReceipt>(key);
+        var enrollment = RequireAnnInitialSettlement(tx, principal, request, claims, now, completed is not null);
+        if (completed is not null)
         {
             if (fingerprint != completed.Fingerprint)
             {
@@ -295,7 +303,16 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, EmptyProjectionBatchEffectsDetail);
             }
 
-            return new(new(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability), false, state.Checkpoint);
+            var emptyReceipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability);
+            if (enrollment is not null)
+            {
+                var settled = enrollment with { InitialAnnMaintenanceSettled = true };
+                if (NativeSerialization.Measure(settled) > Limits.MaxBatchBytes)
+                { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement); }
+                tx.PutRecord(ConsumerKey(request.Consumer), settled);
+                tx.PutRecord(key, new ProjectionReceipt(fingerprint, emptyReceipt, state.Checkpoint));
+            }
+            return new(emptyReceipt, false, state.Checkpoint);
         }
         var effects = ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position,
             allowOutboxProgressReserve: state.LastProgressReservationCut != head.FirstAvailable);

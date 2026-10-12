@@ -88,6 +88,9 @@ public sealed partial class GrainRequestCodec
         IGrainContext? context, CancellationToken cancellationToken)
         => GrainRequestPhaseObservation.ObserveAsync(PhaseObserver, request, phase, context, cancellationToken);
 
+    internal ValueTask ObserveProducerDisposedAsync(GrainRequestProbeIdentity identity, Guid connectionId, IGrainContext? context)
+        => GrainRequestPhaseObservation.ProducerDisposedAsync(PhaseObserver, identity, connectionId, context);
+
     internal void ObserveProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext? context)
         => GrainRequestPhaseObservation.ProducerDisposed(PhaseObserver, identity, context);
 

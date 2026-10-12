@@ -14,26 +14,34 @@ internal static class ControlledPartitionMovementProcessModelAssertions
     private const int EventLimit = 1;
     private const string EventType = "knowledge.created";
 
-    internal static async Task ReadAsync(ControlledPartitionMovementNativeNode node, DateTimeOffset recordedAt,
+    internal static Task ReadAsync(ControlledPartitionMovementNativeNode node, DateTimeOffset recordedAt,
         long expectedCut, CancellationToken cancellationToken)
+        => ReadAsync(node.Database, node.Store, recordedAt, expectedCut, cancellationToken);
+
+    internal static Task ReadAsync(ControlledPartitionMovementNativeHost node, DateTimeOffset recordedAt,
+        long expectedCut, CancellationToken cancellationToken)
+        => ReadAsync(node.Database, node.Store, recordedAt, expectedCut, cancellationToken);
+
+    private static async Task ReadAsync(global::KeyLoad.Core.DatabaseEngine database, global::KeyLoad.Storage.IAtomicStore store,
+        DateTimeOffset recordedAt, long expectedCut, CancellationToken cancellationToken)
     {
-        await ControlledPartitionMovementProcessVectorAssertions.ReadAsync(node, cancellationToken);
+        await ControlledPartitionMovementProcessVectorAssertions.ReadAsync(database, store, cancellationToken);
         var partition = ControlledPartitionMovementProcessLiteralCorpus.Partition;
         var reference = new EntityRef(partition, ControlledPartitionMovementProcessLiteralCorpus.Collection,
             ControlledPartitionMovementProcessLiteralCorpus.DocumentId);
-        var document = node.Database.GetDocument(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
+        var document = database.GetDocument(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
             reference, cancellationToken: cancellationToken);
         await EqualAsync(document, new DocumentResult(reference, ControlledPartitionMovementProcessLiteralCorpus.InitialRevision,
             ControlledPartitionMovementProcessLiteralCorpus.OriginalJson, false, []));
         var lane = new QueueLaneRef(partition, ControlledPartitionMovementProcessLiteralCorpus.Queue);
-        var inspection = node.Database.InspectMessage(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
+        var inspection = database.InspectMessage(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
             lane, ControlledPartitionMovementProcessLiteralCorpus.MessageId);
         var metadata = new MessageMetadata(ControlledPartitionMovementProcessLiteralCorpus.MessageId, MessageState.Ready,
             EmptyAttempts, InitialStateVersion, FirstReadySequence, null, null);
         await EqualAsync(inspection, new MessageInspection(metadata, ControlledPartitionMovementProcessLiteralCorpus.CanonicalQueueJson,
             ControlledPartitionMovementProcessLiteralCorpus.EmptyHeaders));
         var source = new EventSourceRef(partition, ControlledPartitionMovementProcessLiteralCorpus.Topic, EventSourceKind.Topic);
-        var page = node.Database.ReadEventSource(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
+        var page = database.ReadEventSource(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
             new(source, Limit: EventLimit), cancellationToken);
         var expectedHead = new EventSourceHead(FirstEventPosition, FirstEventPosition, source.Generation);
         await EqualAsync(page.Source, source);
@@ -46,7 +54,7 @@ internal static class ControlledPartitionMovementProcessModelAssertions
         await Assert.That(page.CutPosition).IsEqualTo(expectedCut);
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(string.IsNullOrWhiteSpace(page.Cursor)).IsFalse();
-        var exhausted = node.Database.ReadEventSource(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
+        var exhausted = database.ReadEventSource(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
             new(source, Limit: EventLimit, Cursor: page.Cursor), cancellationToken);
         await EqualAsync(exhausted.Source, source);
         await EqualAsync(exhausted.Head, expectedHead);

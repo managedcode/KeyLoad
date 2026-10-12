@@ -24,7 +24,7 @@ internal static class SampleChunkGenerationWriter
             tx.Put(key, encoded);
             digests.Add(SHA256.HashData(encoded));
         }
-        var tags = records.ToArray().Select(record => record.TagsJson).Distinct(StringComparer.Ordinal).ToImmutableArray();
+        var tags = Tags(records);
         var manifest = new SampleChunkManifest(SampleChunkLifecycleProtocol.Version, window.WindowId,
             window.Generation, window.FromUtcTicks, window.UntilUtcTicks, window.SourceSequence, records.Length,
             digests.ToImmutable(), tags, window.RetentionBeforeUtcTicks);
@@ -34,5 +34,16 @@ internal static class SampleChunkGenerationWriter
         var bytes = NativeSerialization.Serialize(manifest);
         SampleChunkStorage.Write(tx, manifestKey, new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)), maximumBytes);
         return manifest;
+    }
+
+    private static ImmutableArray<string> Tags(ReadOnlySpan<SampleRecord> records)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var tags = ImmutableArray.CreateBuilder<string>();
+        foreach (var record in records)
+        {
+            if (seen.Add(record.TagsJson)) { tags.Add(record.TagsJson); }
+        }
+        return tags.ToImmutable();
     }
 }

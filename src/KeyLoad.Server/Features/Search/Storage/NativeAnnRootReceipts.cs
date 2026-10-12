@@ -21,7 +21,7 @@ internal static class NativeAnnRootReceipts
         }
         if (Directory.EnumerateFileSystemEntries(root).Any(path => Path.GetFileName(path) != NativeAnnProtocol.RootLock))
         { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership); }
-        var created = new NativeAnnRootReceipt(NativeAnnProtocol.Version, root, nodeId, incarnation, [], [], []);
+        var created = new NativeAnnRootReceipt(NativeAnnProtocol.Version, root, nodeId, incarnation, [], [], [], []);
         NativeAnnReceiptFiles.Write(receiptPath, created, options);
         return created;
     }
@@ -43,6 +43,8 @@ internal static class NativeAnnRootReceipts
     internal static void Replace(string root, NativeAnnRootReceipt receipt, NativeAnnExecutionOptions options)
     {
         var pending = Path.Combine(root, NativeAnnProtocol.RootPending);
+        if (global::KeyLoad.NativeSerialization.Measure(receipt) > options.MaximumManifestBytes)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
         NativeAnnReceiptFiles.Write(pending, receipt, options);
         File.Move(pending, Path.Combine(root, NativeAnnProtocol.RootReceipt), overwrite: true);
     }

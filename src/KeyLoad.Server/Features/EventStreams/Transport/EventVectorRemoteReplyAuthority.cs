@@ -1,5 +1,4 @@
 using KeyLoad.Orleans;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -13,12 +12,13 @@ internal static class EventVectorRemoteReplyAuthority
     {
         ArgumentNullException.ThrowIfNull(destination);
         ArgumentNullException.ThrowIfNull(options);
-        var configured = options.MembershipAuthority;
-        if (destination.Owner is null || destination.Endpoints.IsDefaultOrEmpty
-            || destination.Owner.PhysicalShardId != configured.TrustedGroupPhysicalShardId
-            || destination.Owner.Incarnation != configured.TrustedGroupIncarnation
-            || !destination.Owner.VoterIds.SequenceEqual(configured.TrustedGroupVoterIds, StringComparer.Ordinal)
-            || !destination.Endpoints.SequenceEqual(configured.TrustedGroupVoterIds.Select(
+        var configured = options.PhysicalGroupTrust;
+        if (configured.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control || !configured.RemoteDocumentReads
+            || !configured.RegisterPhysicalOwners || destination.Owner is null || destination.Endpoints.IsDefaultOrEmpty
+            || destination.Owner.PhysicalShardId != configured.ForeignPhysicalShardId
+            || destination.Owner.Incarnation != configured.ForeignIncarnation
+            || !destination.Owner.VoterIds.SequenceEqual(configured.ForeignVoterIds, StringComparer.Ordinal)
+            || !destination.Endpoints.SequenceEqual(configured.ForeignVoterIds.Select(
                 static voter => new Uri(voter, UriKind.Absolute).AbsoluteUri), StringComparer.Ordinal))
         { throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable); }
     }
@@ -38,11 +38,8 @@ internal static class EventVectorRemoteReplyAuthority
             || discovery.ApplicationRpcVersion != GrainRoutingProtocol.RequestInterfaceVersion
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership))
+            || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
-        var address = SiloAddress.FromParsableString(discovery.SiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }
-        return address;
+        return SiloAddress.FromParsableString(discovery.SiloAddress);
     }
 }

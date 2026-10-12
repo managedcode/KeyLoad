@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Net;
-using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Query;
@@ -22,20 +21,15 @@ internal static class OrleansSiloConfiguration
         ServerRuntimeOptions runtimeOptions, TimeProvider clock, INativePartitionMovementCapture? movementCapture, IPartitionMovementDispatcher? movementDispatcher,
         IRemoteDocumentReadRouter? remoteDocuments, IRemoteBlobReadRouter? remoteBlobs, IRemotePartitionQueryRouter? remoteQueries, IRemoteDistributedSearchRouter? distributedSearch,
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
-        NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent, CancellationToken startupCancellation)
+        NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent,
+        PhysicalOwnerProbeNativeRuntime? physicalProbe, NativeLocalhostClusteringOptions? localhostClustering,
+        CancellationToken startupCancellation)
     {
+        startupCancellation.ThrowIfCancellationRequested();
         var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddSingleton(loggerFactory);
-        builder.Services.AddSingleton(connectionOwner);
-        if (discoveryOmission is not null)
-        {
-            builder.Services.AddSingleton(discoveryOmission.CreateBorrowedProbe());
-            if (discoveryOmission.PurposeObserver is { } purposeObserver)
-            { builder.Services.AddSingleton(purposeObserver); }
-        }
-        if (sealedObserver is not null)
-        { builder.Services.AddSingleton(sealedObserver); }
-        if (options.MembershipAuthority.RemoteDocumentReads)
+        OrleansNativePeerServices.RegisterSiloOwners(builder, loggerFactory, connectionOwner,
+            discoveryOmission, sealedObserver, localhostClustering);
+        if (options.PhysicalGroupTrust.RemoteDocumentReads)
         {
             builder.Services.AddSingleton<IPhysicalRequestPlacement, PhysicalDocumentRequestPlacement>();
             if (remoteDocuments is not null)
@@ -55,20 +49,33 @@ internal static class OrleansSiloConfiguration
         { builder.Services.AddSingleton(sourceOwner.TransferReads); }
         if (movementDispatcher is not null)
         { builder.Services.AddSingleton(movementDispatcher); }
+        if (movementDispatcher is PartitionMovementRuntime { NativeReceiver: { } nativeMovement })
+        { builder.Services.AddSingleton(nativeMovement); }
+        OrleansNativePeerServices.RegisterPhysicalProbe(builder.Services, physicalProbe);
+        builder.Services.AddSingleton(provider => new PartitionMovementGrainServiceClient(provider, partition,
+            runtimeOptions.Node, runtimeOptions.Membership, runtimeOptions.GrainRouting,
+            provider.GetRequiredService<ISiloStatusOracle>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock));
+        builder.Services.AddSingleton(provider => new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRuntime(
+            partition, runtimeOptions.Node, runtimeOptions.Membership, runtimeOptions.GrainRouting,
+            provider.GetRequiredService<ISiloStatusOracle>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            clock, provider.GetRequiredService<ILogger<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRuntime>>()));
+        builder.Services.AddSingleton(provider => new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeClient(
+            provider, partition, runtimeOptions.Node, runtimeOptions.Membership, runtimeOptions.GrainRouting,
+            provider.GetRequiredService<PartitionMovementGrainServiceClient>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock));
         if (movementDispatcher is IPartitionMovementParent movementParent)
         { builder.Services.AddSingleton(movementParent); }
         if (eventVectorParent is not null)
         { builder.Services.AddSingleton(eventVectorParent); }
         runtimeOptions.RegisterBorrowed(builder.Services);
-        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
+        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
-            runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting));
+            runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting, runtimeOptions.Core.DatabaseLimits, localhostClustering));
         return builder.Build();
     }
 
     private static void RegisterBorrowedServices(IServiceCollection services, PartitionHost partition,
         INodeAdministration administration, NodeOptions options, NativeRequestWorkOwner requestWork,
-        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation)
+        ServerRuntimeOptions runtimeOptions, TimeProvider clock)
     {
         var peers = runtimeOptions.Peer.Value;
         peers.Validate(partition.Configuration);
@@ -104,54 +111,9 @@ internal static class OrleansSiloConfiguration
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<IOptions<ReplicaReplayLimits>>(),
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
-        services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
-            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
-            provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>(), provider.GetService<ReplicaDiscoveryProbe>()));
+        OrleansNativePeerServices.RegisterReplicaDiscovery(services);
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
-        RegisterMembershipTable(services, partition, options, startupCancellation);
-    }
-
-    private static void RegisterMembershipTable(IServiceCollection services, PartitionHost partition,
-        NodeOptions options, CancellationToken startupCancellation)
-    {
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
-        {
-            services.AddSingleton<IMembershipTable>(provider => CreateMembershipProxy(provider, options));
-            return;
-        }
-        services.AddSingleton<IMembershipTable>(provider => new ReplicaMembershipTable(partition.Database, partition.Coordinator,
-            partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, provider.GetRequiredService<TimeProvider>(),
-            options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
-                ? provider.GetRequiredService<IOptions<OrleansMembershipOptions>>().Value.MaximumRows
-                : ReplicaMembershipProtocol.UnboundedRows,
-            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>(), startupCancellation));
-    }
-
-    private static ReplicaMembershipAuthorityClientTable CreateMembershipProxy(IServiceProvider provider, NodeOptions options)
-    {
-        var authority = options.MembershipAuthority;
-        var callerSecret = Convert.FromBase64String(options.PeerSecret);
-        var authoritySecret = Convert.FromBase64String(authority.AuthorityPeerSecret!);
-        try
-        {
-            var local = provider.GetRequiredService<ILocalSiloDetails>();
-            var settings = new ReplicaMembershipAuthorityExchangeOptions(options.ClusterId,
-                authority.AuthorityPhysicalShardId, authority.AuthorityIncarnation, options.PhysicalShardId,
-                options.Incarnation, options.PublicEndpoint, local.SiloAddress.ToParsableString(),
-                authority.AuthorityEndpoints.Select(endpoint => new Uri(endpoint)).ToArray(), callerSecret,
-                authoritySecret, provider.GetRequiredService<TimeProvider>());
-            return new(settings, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-                provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>());
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(callerSecret);
-            CryptographicOperations.ZeroMemory(authoritySecret);
-        }
     }
 
     private static void RegisterRequestCodec(IServiceCollection services, PartitionHost partition, NodeOptions options)
@@ -169,6 +131,12 @@ internal static class OrleansSiloConfiguration
                 provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton<IGrainRequestProducerDisposedObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton(provider => new RequestCqrsProbeNativeRelay(provider,
+                provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
+                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<ISiloStatusOracle>(),
+                provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>()));
             services.AddSingleton<IGrainActivationMigrationObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()
                 .CreateMigration(provider.GetRequiredService<ReplicaSiloDiscoveryClient>()));
         }
@@ -188,26 +156,34 @@ internal static class OrleansSiloConfiguration
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
         OrleansMembershipOptions membershipOptions, IOptions<RuntimeJournalOptions> journal,
-        IOptions<NativeDurableJobOptions> jobs, IOptions<GrainRoutingOptions> routing)
+        IOptions<NativeDurableJobOptions> jobs, IOptions<GrainRoutingOptions> routing, IOptions<DatabaseLimits> databaseLimits,
+        NativeLocalhostClusteringOptions? localhostClustering)
     {
         silo.Configure<ClusterOptions>(cluster =>
         {
             cluster.ClusterId = options.ClusterId;
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
-        silo.ConfigureEndpoints(address, options.SiloPort, OrleansNodeProtocol.GatewayPort);
+        OrleansNativeClustering.Configure(silo, options, replica, address, localhostClustering);
         silo.Configure<ClusterMembershipOptions>(membership =>
         {
             membership.IAmAliveTablePublishTimeout = membershipOptions.MembershipRefresh;
             membership.TableRefreshTimeout = membershipOptions.MembershipRefresh;
         });
         silo.Configure<SiloMessagingOptions>(messaging => messaging.MaxMessageBodySize = Math.Max(
-            checked(replica.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
+            checked(databaseLimits.Value.MaxBatchBytes + ReplicaTransportProtocol.MaximumMetadataBytes
                 + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
-            checked(routing.Value.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
+            Math.Max(checked(replica.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
+                + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
+                checked(routing.Value.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes))));
         silo.AddGrainService<PartitionReplicaGrainService>();
+        silo.AddGrainService<PartitionMovementGrainService>();
+        silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
+        if (options.RequestCqrsProbe.Enabled)
+        { silo.AddGrainService<RequestCqrsProbeGrainService>(); }
         silo.AddGrainService<RecurringDueGrainService>();
         silo.AddGrainService<SampleChunkGrainService>();
+        silo.AddGrainService<AnnProjectionGrainService>();
         silo.AddActivityPropagation();
         // ADR-036: owner explicitly requires these two native experimental services.
 #pragma warning disable ORLEANSEXP003

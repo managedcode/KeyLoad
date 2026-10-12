@@ -35,14 +35,14 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         { return claims.GetValueOrDefault(requestId); }
     }
 
-    internal RequestCqrsProbeClaim AddClaim(GrainRequestProbeIdentity identity, RequestCqrsProbeLoadedArm arm)
+    internal RequestCqrsProbeClaim AddClaim(GrainRequestProbeIdentity identity, RequestCqrsProbeLoadedArm arm, Guid connectionId)
     {
         lock (sync)
         {
             if (stopAdmission || claims.ContainsKey(identity.RequestId)
                 || claims.Values.Any(existing => existing.Arm.Record.ArmId == arm.Record.ArmId))
             { throw Invalid(); }
-            var claim = new RequestCqrsProbeClaim(arm, identity);
+            var claim = new RequestCqrsProbeClaim(arm, identity) { ConnectionId = connectionId };
             claims.Add(identity.RequestId, claim);
             return claim;
         }

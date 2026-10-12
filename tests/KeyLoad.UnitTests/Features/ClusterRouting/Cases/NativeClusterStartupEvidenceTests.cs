@@ -25,7 +25,47 @@ internal sealed class NativeClusterStartupEvidenceTests
         await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(0);
         await Assert.That(evidence.RootElement.GetProperty(NativeClusterStartupProtocol.ExceptionTypes)[0].GetString())
             .IsEqualTo(typeof(OperationCanceledException).FullName);
+        await OperationFailureAsync();
         await HealthyAsync();
+    }
+
+    private static async Task OperationFailureAsync()
+    {
+        string? clusterId = null;
+        OperationCanceledException? initiating = null;
+        Exception? observed = null;
+        try
+        {
+            await ConnectionNativeScenario.RunAsync(async scenario =>
+            {
+                clusterId = scenario.Fixture.Cluster.Options.ClusterId;
+                using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+                await scenario.InitializeAsync(timeout.Token);
+                var principal = scenario.Principal();
+                using var cancelled = new CancellationTokenSource();
+                await cancelled.CancelAsync();
+                try
+                { await scenario.CommandAsync(principal, Guid.NewGuid(), scenario.Command(Document), cancelled.Token); }
+                catch (OperationCanceledException failure)
+                { initiating = failure; }
+                await Assert.That(initiating).IsNotNull();
+                await Assert.That(scenario.Stored(Document)).IsNull();
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(
+                    initiating ?? throw new InvalidOperationException("The signed operation did not cancel.")).Throw();
+            });
+        }
+        catch (OperationCanceledException failure) { observed = failure; }
+        await Assert.That(ReferenceEquals(observed, initiating)).IsTrue();
+        using var evidence = JsonDocument.Parse(await File.ReadAllBytesAsync(
+            NativeClusterStartupEvidence.OperationPathFor(clusterId
+                ?? throw new InvalidOperationException("The original operation owner was not created."))));
+        var record = evidence.RootElement;
+        await Assert.That(record.GetProperty("kind").GetString()).IsEqualTo(NativeClusterStartupProtocol.OperationKind);
+        await Assert.That(record.GetProperty(NativeClusterStartupProtocol.CleanupJoined).GetBoolean()).IsTrue();
+        await Assert.That(record.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(2);
+        await Assert.That(record.GetProperty("missingNativeFiles").GetInt32()).IsEqualTo(0);
+        await Assert.That(record.GetProperty("events").GetArrayLength()).IsGreaterThan(0);
+        await Assert.That(record.GetRawText().Contains(ConnectionNativeProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();
     }
 
     private static async Task HealthyAsync()
@@ -54,6 +94,8 @@ internal sealed class NativeClusterStartupEvidenceTests
             await Assert.That(document.Reference).IsEqualTo(scenario.Reference(Document));
             await ConnectionNativeAssertions.StoredAsync(scenario, Document, 1, ConnectionNativeProtocol.FirstJson);
             await scenario.CloseAsync(token);
+            await Assert.That(File.Exists(NativeClusterStartupEvidence.OperationPathFor(
+                scenario.Fixture.Cluster.Options.ClusterId))).IsFalse();
             await Assert.That(File.Exists(NativeClusterStartupEvidence.PathFor(
                 scenario.Fixture.Cluster.Options.ClusterId))).IsFalse();
         });

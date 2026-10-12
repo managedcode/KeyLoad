@@ -11,6 +11,18 @@ internal static class NativeAnnSlotRetention
             root.Remove(slot.Manifest.GenerationLeaf, options);
             slots.Remove(slot);
         }
+        var receipt = root.Receipt;
+        if (receipt.OwnedGenerations.Any(leaf => !slots.Any(slot => slot.Manifest.GenerationLeaf == leaf)
+            && !receipt.Published.Any(item => item.Pointer.GenerationLeaf == leaf)
+            && !receipt.Pending.Any(item => item.Pointer.GenerationLeaf == leaf)))
+        { return; }
+        foreach (var original in receipt.OriginalOperations.Where(entry => entry.Released))
+        {
+            if (!slots.Any(slot => SameKey(slot.Manifest, original.Key))
+                && !receipt.Published.Any(item => item.Key == original.Key)
+                && !receipt.Pending.Any(item => item.Key == original.Key))
+            { root.CompleteOriginalRelease(original.Key, options); }
+        }
     }
 
     internal static void RequireResident(List<NativeAnnGenerationSlot> slots,

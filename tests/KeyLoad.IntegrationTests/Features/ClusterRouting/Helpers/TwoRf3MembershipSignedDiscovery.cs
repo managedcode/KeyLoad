@@ -1,9 +1,11 @@
+using System.Globalization;
+using KeyLoad.Storage;
+using KeyLoad.Server;
 using System.Net;
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -13,34 +15,22 @@ internal static class TwoRf3MembershipSignedDiscovery
     private const int SignatureLength = 64;
 
     internal static async Task<ReplicaSiloDiscovery> ReadAsync(DistributedApplication app, string node,
-        string clusterId, Guid incarnation, ReadOnlyMemory<byte> secret, CancellationToken token)
+        string clusterId, Guid incarnation, ReadOnlyMemory<byte> secret, string adminCredential, CancellationToken token)
     {
-        using var security = new PeerSecurity(secret, TimeProvider.System, IntegrationRoutingOptions.Discovery());
+        ArgumentException.ThrowIfNullOrWhiteSpace(adminCredential);
+        var nonce = Guid.NewGuid();
         using var http = McpCallerHttp.Create(app, node);
         using var request = new HttpRequestMessage(HttpMethod.Get,
-            new Uri(http.BaseAddress ?? throw new InvalidOperationException(Invalid), ReplicaProtocol.DiscoveryPath));
-        security.Sign(request);
-        var nonce = ReadNonce(request);
+            new Uri(http.BaseAddress ?? throw new InvalidOperationException(Invalid), NativeSiloDiscoveryDiagnosticProtocol.Path + "?" + NativeSiloDiscoveryDiagnosticProtocol.NonceParameter + "=" + nonce.ToString(NativeSiloDiscoveryDiagnosticProtocol.NonceFormat, CultureInfo.InvariantCulture)).AbsoluteUri);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminCredential);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.OK)
+        { throw new InvalidOperationException(Invalid); }
+        if (response.Content.Headers.ContentType?.MediaType != NativeSiloDiscoveryDiagnosticProtocol.ContentType)
         { throw new InvalidOperationException(Invalid); }
         var payload = await ReadPayloadAsync(response, token).ConfigureAwait(false);
         VerifyMac(response, node, clusterId, incarnation, nonce, secret, payload);
         return ReadNative(clusterId, incarnation, node, payload);
-    }
-
-    private static Guid ReadNonce(HttpRequestMessage request)
-    {
-        if (!request.Headers.TryGetValues(ReplicaTransportProtocol.HttpNonceHeader, out var values))
-        { throw new InvalidOperationException(Invalid); }
-        using var iterator = values.GetEnumerator();
-        if (!iterator.MoveNext())
-        { throw new InvalidOperationException(Invalid); }
-        var value = iterator.Current;
-        if (iterator.MoveNext() || !Guid.TryParseExact(value, ReplicaTransportProtocol.NonceFormat, out var nonce)
-            || nonce == Guid.Empty)
-        { throw new InvalidOperationException(Invalid); }
-        return nonce;
     }
 
     private static async Task<byte[]> ReadPayloadAsync(HttpResponseMessage response, CancellationToken token)
@@ -67,7 +57,7 @@ internal static class TwoRf3MembershipSignedDiscovery
     private static void VerifyMac(HttpResponseMessage response, string node, string clusterId, Guid incarnation,
         Guid nonce, ReadOnlyMemory<byte> secret, byte[] payload)
     {
-        if (!response.Headers.TryGetValues(ReplicaTransportProtocol.DiscoverySignatureHeader, out var values))
+        if (!response.Headers.TryGetValues(NativeSiloDiscoveryDiagnosticProtocol.SignatureHeader, out var values))
         { throw new InvalidOperationException(Invalid); }
         using var iterator = values.GetEnumerator();
         if (!iterator.MoveNext())
@@ -98,7 +88,8 @@ internal static class TwoRf3MembershipSignedDiscovery
         var discovery = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(payload)
             ?? throw new InvalidOperationException(Invalid);
         if (discovery.VoterId != Voter(node) || discovery.ClusterId != clusterId || discovery.Incarnation != incarnation
-            || !discovery.TransportReady || discovery.SiloAddress.Length is 0 or > ReplicaTransportProtocol.MaximumAddressCharacters)
+            || !discovery.TransportReady || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
+            || discovery.SiloAddress.Length is 0 or > ReplicaTransportProtocol.MaximumAddressCharacters)
         { throw new InvalidOperationException(Invalid); }
         var address = SiloAddress.FromParsableString(discovery.SiloAddress);
         if (address.Endpoint.Port <= 0 || address.ToParsableString() != discovery.SiloAddress)

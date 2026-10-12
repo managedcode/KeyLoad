@@ -6,7 +6,7 @@ using TUnit.Assertions.Enums;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 /// <summary>AC-MSG-007: real native request actors and canonical ZoneTree independent claims.</summary>
-[RequestCqrsDataSource, NotInParallel]
+[RequestCqrsDataSource, NotInParallel(KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFixtureScheduling.SharedSession)]
 internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsClusterFixture fixture)
 {
     [Test]

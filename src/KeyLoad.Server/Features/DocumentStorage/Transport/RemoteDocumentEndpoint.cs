@@ -1,5 +1,4 @@
-using System.Globalization;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -10,126 +9,106 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
 {
-    private const string SiloSeparator = ":";
-    private readonly Lock disposalGate = new();
-    private Task? disposal;
+    private const int AbsentEnvelopeCount = 0;
+    private const int PresentEnvelopeCount = 1;
+    private const int RequiredEnvelopeCount = 1;
     private readonly NodeOptions options;
     private readonly RemoteDocumentReceiver receiver;
     private readonly RemoteControlledDocumentReceiver controlled;
     private readonly RemoteControlledBlobReceiver controlledBlob;
     private readonly RemoteTransferPeerReceiver? queueTransfer;
     private readonly RemoteDocumentWorkOwner owner;
-    private readonly ReplicaMembershipAuthorityAddressPins pins;
-    private readonly ReplicaMembershipAuthorityReplayCache replay;
+    private readonly PartitionMovementReplayCache replay;
     private readonly GrainRoutingOptions routing;
     private readonly TimeProvider clock;
 
     internal RemoteDocumentEndpoint(IOptions<NodeOptions> nodeOptions, RemoteDocumentReceiver receiver,
-        RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled, RemoteControlledBlobReceiver controlledBlob,
-        IOptions<OrleansMembershipOptions> membershipOptions,
-        IOptions<GrainRoutingOptions> routingOptions, TimeProvider clock,
-        RemoteTransferPeerReceiver? queueTransfer = null)
+        RemoteDocumentWorkOwner owner, RemoteControlledDocumentReceiver controlled,
+        RemoteControlledBlobReceiver controlledBlob, IOptions<OrleansMembershipOptions> membership,
+        IOptions<GrainRoutingOptions> routing, TimeProvider clock, RemoteTransferPeerReceiver? queueTransfer = null)
     {
-        options = nodeOptions.Value;
-        this.receiver = receiver;
-        this.controlled = controlled;
-        this.controlledBlob = controlledBlob;
-        this.queueTransfer = queueTransfer;
-        this.owner = owner;
-        this.clock = clock;
-        routing = routingOptions.Value;
-        var endpoints = options.MembershipAuthority.AuthorityEndpoints.Select(value =>
-            new Uri(value).DnsSafeHost + SiloSeparator + MembershipAuthoritySettingsProtocol.NativeSiloPort
-                .ToString(CultureInfo.InvariantCulture)).ToArray();
-        pins = new(endpoints, membershipOptions);
-        try
-        { replay = new(clock, membershipOptions); }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            try
-            { pins.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
+        options = nodeOptions.Value; this.receiver = receiver; this.owner = owner;
+        this.controlled = controlled; this.controlledBlob = controlledBlob;
+        this.queueTransfer = queueTransfer; this.routing = routing.Value; this.clock = clock;
+        replay = new(clock, membership);
     }
 
-    internal async Task HandleAsync(HttpContext context)
+    internal Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
+        RemoteModelNativeRequest request, CancellationToken caller)
+        => ExecuteAsync(request, null, caller);
+
+    internal async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(
+        RemoteModelNativeRequest request, RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller)
     {
-        if (!options.MembershipAuthority.RemoteDocumentReads
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Proxy)
-        { context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable; return; }
+        if (!options.PhysicalGroupTrust.RemoteDocumentReads
+            || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        RemoteDocumentWorkOwner.Operation? operation = null;
+        (ReadOnlyMemory<byte> Payload, string Signature)? result = null;
+        try
         {
-            RemoteDocumentWorkOwner.Operation operation;
-            try
-            { operation = owner.Acquire(Guid.NewGuid()); }
-            catch (KeyLoadException error) when (error.Code is ErrorCode.OwnershipLost or ErrorCode.ResourceExhausted)
-            { context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable; return; }
-            using (operation)
+            await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(context, operation), failures).ConfigureAwait(false);
-            }
-        }, failures).ConfigureAwait(false);
+                operation = owner.Acquire(Guid.NewGuid());
+                result = await ExecuteOwnedAsync(request, operation, effectBoundary, caller).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (operation is not null) { ServerFailureObserver.Observe(operation.Dispose, failures); }
+        }
         ServerFailureObserver.ThrowIfAny(failures);
+        return result ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
     }
 
-    private async Task ExecuteAsync(HttpContext context, RemoteDocumentWorkOwner.Operation operation)
+    private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteOwnedAsync(
+        RemoteModelNativeRequest request, RemoteDocumentWorkOwner.Operation operation,
+        RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken caller)
     {
         using var deadline = new CancellationTokenSource(routing.ExecutionLifetime, clock);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted,
-            operation.ShutdownToken, deadline.Token);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, operation.ShutdownToken, deadline.Token);
         var token = linked.Token;
+        using var mac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
+        if (!mac.Verify(request.Payload.Span, request.Signature, reply: false))
+        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        var transport = RemoteDocumentWire.DecodeCall(request.Payload.Span);
+        RequireEnvelope(request, transport);
+        if (transport.QueueTransfer is { } transfer)
         {
-            var body = await RemoteDocumentWire.ReadRequestAsync(context.Request, token).ConfigureAwait(false);
-            using var callerMac = RemoteDocumentMac.FromConfiguredSecret(options.MembershipAuthority.AuthorityPeerSecret);
-            if (!callerMac.Verify(body, RemoteDocumentWire.Signature(context.Request.Headers), reply: false))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-            var transport = RemoteDocumentWire.DecodeCall(body);
-            if (transport.QueueTransfer is { } transferCall)
-            {
-                if (transport.Document is not null || transport.Controlled is not null || transport.ControlledBlob is not null)
-                { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-                var transferReceiver = queueTransfer
-                    ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferPeerProtocol.Unavailable);
-                await RemoteTransferPeerEndpointExecution.ExecuteAsync(context, transferCall, body,
-                    RemoteDocumentWire.Signature(context.Request.Headers), transferReceiver, options,
-                    pins, replay, clock, token).ConfigureAwait(false);
-                return;
-            }
-            if (transport.ControlledBlob is { } blobCall)
-            {
-                if (transport.Document is not null || transport.Controlled is not null)
-                { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-                await RemoteControlledBlobEndpointExecution.ExecuteAsync(context, blobCall,
-                    controlledBlob, options, pins, replay, clock, token).ConfigureAwait(false);
-                return;
-            }
-            if ((transport.Document is null) == (transport.Controlled is null))
-            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-            if (transport.Controlled is { } controlledCall)
-            {
-                await RemoteControlledDocumentEndpointExecution.ExecuteAsync(context, controlledCall,
-                    controlled, options, pins, replay, clock, token).ConfigureAwait(false);
-                return;
-            }
-            await ExecuteDocumentCallAsync(context, transport.Document!, token).ConfigureAwait(false);
+            var actual = queueTransfer ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, Core.Features.Messaging.RemoteTransferPeerProtocol.Unavailable);
+            return await RemoteTransferPeerEndpointExecution.ExecuteAsync(transfer, request.Payload, request.Signature,
+                actual, options, replay, clock, effectBoundary, token).ConfigureAwait(false);
         }
+        if (transport.ControlledBlob is { } blob)
+        { return await RemoteControlledBlobEndpointExecution.ExecuteAsync(blob, controlledBlob, options, replay, clock, effectBoundary, token).ConfigureAwait(false); }
+        if (transport.Controlled is { } document)
+        { return await RemoteControlledDocumentEndpointExecution.ExecuteAsync(document, controlled, options, replay, clock, effectBoundary, token).ConfigureAwait(false); }
+        return await ExecuteDocumentCallAsync(transport.Document!, token).ConfigureAwait(false);
     }
 
-    private async Task ExecuteDocumentCallAsync(HttpContext context, RemoteDocumentCallV1 call, CancellationToken token)
+    private static void RequireEnvelope(RemoteModelNativeRequest request, RemoteDocumentTransportEnvelope transport)
+    {
+        var count = (transport.Document is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.Controlled is null ? AbsentEnvelopeCount : PresentEnvelopeCount)
+            + (transport.ControlledBlob is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.QueueTransfer is null ? AbsentEnvelopeCount : PresentEnvelopeCount);
+        if (count != RequiredEnvelopeCount)
+        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+        var source = transport.Document?.Source ?? transport.Controlled?.Source ?? transport.ControlledBlob?.Source
+            ?? transport.QueueTransfer!.SourceOwner.Owner;
+        var destination = transport.Document?.Fence.Destination.Owner ?? transport.Controlled?.Destination.Owner
+            ?? transport.ControlledBlob?.Destination.Owner ?? transport.QueueTransfer!.DestinationOwner.Owner;
+        var expiry = transport.Document?.ExpiresAt ?? transport.Controlled?.Request.Frame.ExpiresAt
+            ?? transport.ControlledBlob?.Request.Frame.ExpiresAt ?? transport.QueueTransfer!.ExpiresAt;
+        if (!PhysicalOwnerEntryValidation.SameOwner(source, request.SourceOwner)
+            || !PhysicalOwnerEntryValidation.SameOwner(destination, request.DestinationOwner) || expiry != request.ExpiresAt)
+        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+    }
+
+    private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteDocumentCallAsync( RemoteDocumentCallV1 call, CancellationToken token)
     {
         receiver.Validate(call, token);
         if (!replay.TryUse(call.Nonce))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-        var address = SiloAddress.FromParsableString(call.CallerSiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-        var voter = Array.IndexOf(options.MembershipAuthority.AuthorityEndpoints, call.CallerVoter);
-        await pins.PinCallerAsync(voter, address.Endpoint.Address, token).ConfigureAwait(false);
         var remaining = call.ExpiresAt - clock.GetUtcNow();
         if (remaining <= TimeSpan.Zero)
         { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteDocumentProtocol.Unavailable); }
@@ -158,30 +137,13 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         { reply = new(call.RequestId, call.Nonce, null, error.Code, error.Message, receiver.Discovery()); }
         var encoded = RemoteDocumentWire.Encode(reply, RemoteDocumentWire.ReplyMaximum(call));
         using var replyMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
-        context.Response.Headers[RemoteDocumentProtocol.SignatureHeader] = replyMac.Sign(encoded, reply: true);
-        context.Response.ContentType = RemoteDocumentProtocol.ContentType;
-        context.Response.ContentLength = encoded.Length;
-        await context.Response.Body.WriteAsync(encoded, original.Token).ConfigureAwait(false);
+        original.Token.ThrowIfCancellationRequested();
+        return (encoded, replyMac.Sign(encoded, reply: true));
     }
 
     public ValueTask DisposeAsync()
     {
-        lock (disposalGate)
-        { disposal ??= DisposeCoreAsync(); return new ValueTask(disposal); }
-    }
-
-    private async Task DisposeCoreAsync()
-    {
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(owner.StopAsync, failures).ConfigureAwait(false);
-        try
-        { pins.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { replay.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
+        replay.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

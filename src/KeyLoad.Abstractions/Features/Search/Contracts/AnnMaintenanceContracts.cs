@@ -31,7 +31,12 @@ public sealed record AnnMaintenanceRequest(
     [property: Orleans.Id(5)] long IndexGeneration,
     [property: Orleans.Id(6)] Guid NodeId,
     [property: Orleans.Id(7)] PhysicalShardRecord Placement,
-    [property: Orleans.Id(8)] AnnMaintenanceMode Mode);
+    [property: Orleans.Id(8)] AnnMaintenanceMode Mode)
+{
+    /// <summary>Gets the optional immutable committed-vector maintenance profile bound to this request.</summary>
+    [Orleans.Id(9), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public AnnProjectionMaintenanceProfile? MaintenanceProfile { get; init; }
+}
 
 /// <summary>Names bounded maintenance phases without payload or credentials.</summary>
 public enum AnnMaintenancePhase

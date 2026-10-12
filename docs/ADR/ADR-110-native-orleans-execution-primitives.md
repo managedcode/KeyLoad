@@ -185,3 +185,9 @@ provider replacement, synthetic telemetry, raw metadata or bound changes apply.
 Rollback and source-inventory constraints are in the owning feature contract.
 The original228/230 local result leaves the label and later assertions open;
 source reasoning is not runtime proof and this ADR is not fully implemented.
+
+## TASK-ANN-NATIVE-COMPILER-BOUNDS-001
+
+REQ/AC-ORL-013 and REQ/AC-ANN native maintenance retain the existing validated IOptions<RuntimeJournalOptions> and IOptions<DatabaseLimits> through the original coordinator/state owner and silo-local producer. Do not reconstruct options from a DatabaseEngine value inside execution. The original limits, cancellation, journal-before-effects and RF3 settlement contracts remain unchanged. The exact private ANN binding identity remains generated Orleans binary serialization with the original alias and Id0..2; its nested declaration is internal so the actual generated codec can access it. No public operation contract, field number, wire identity or compatibility fallback changes.
+
+The pre-authorized ADR-110 ORLEANSEXP005 opt-in is scoped to the native journal-backed ANN coordinator and state owner declarations only, restored immediately afterward; every other diagnostic and existing analyzer severity stays required. Generated codec accessibility, centrally bound read limits and original state corruption bounds are required compiler checks. The unchanged actual replay/settlement/retirement, durable scheduling, process and Aspire RF3 cohorts require fresh compiled source and Linux qualification. Source repair alone closes none of those runtime gates.

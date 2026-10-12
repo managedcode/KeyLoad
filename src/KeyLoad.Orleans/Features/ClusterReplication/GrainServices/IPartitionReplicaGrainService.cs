@@ -13,4 +13,10 @@ public interface IPartitionReplicaGrainService : IGrainService
     /// <returns>A signed reply bound to the request, including a typed safe error when dispatch fails.</returns>
     [Alias(ReplicaTransportProtocol.ExchangeAlias)]
     Task<ReplicaPeerReply> ExchangeAsync(ReplicaPeerEnvelope request, CancellationToken cancellationToken);
+    /// <summary>Returns authenticated initialized metadata from the exact current native silo generation.</summary>
+    /// <param name="request">The signed fixed-voter caller, destination, nonce and bounded expiry.</param>
+    /// <param name="cancellationToken">Cancellation of the joined native metadata callback.</param>
+    /// <returns>A signed exact native discovery payload or bounded typed error.</returns>
+    [Alias(ReplicaNativeDiscoveryProtocol.DiscoverAlias)]
+    Task<ReplicaNativeDiscoveryReply> DiscoverAsync(ReplicaNativeDiscoveryRequest request, CancellationToken cancellationToken);
 }

@@ -14,6 +14,32 @@ internal static class NativeClusterStartupEvidence
             NativeClusterStartupProtocol.DirectoryName, clusterId + ".json");
     }
 
+    internal static string OperationPathFor(string clusterId)
+        => PathFor(clusterId + NativeClusterStartupProtocol.OperationSuffix);
+
+    internal static void SaveOperationFailure(TestCluster cluster, string owner, string logRoot,
+        bool joined, IReadOnlyList<Exception> failures)
+    {
+        var trace = new NativeClusterStartupTrace();
+        var files = joined ? ReadOwnedFiles(cluster, logRoot, trace) : [];
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new
+        {
+            schemaVersion = NativeClusterStartupProtocol.SchemaVersion,
+            kind = NativeClusterStartupProtocol.OperationKind,
+            clusterId = cluster.Options.ClusterId,
+            owner,
+            cleanupJoined = joined,
+            exceptionTypes = failures.SelectMany(ExceptionTypes).ToArray(),
+            nativeFileLogging = cluster.Options.ConfigureFileLogging,
+            expectedNativeFiles = cluster.Options.InitialSilosCount + 1,
+            missingNativeFiles = cluster.Options.InitialSilosCount + 1 - files.Count,
+            files,
+            trace.Saturated,
+            events = trace.Events
+        });
+        Write(OperationPathFor(cluster.Options.ClusterId), bytes);
+    }
+
     internal static async Task ThrowAfterCleanupAsync(Exception original, TestCluster cluster,
         string owner, string logRoot, bool callerCancelled, bool deadlineCancelled, Func<Task> cleanup)
     {
@@ -56,6 +82,11 @@ internal static class NativeClusterStartupEvidence
             trace.Saturated,
             events = trace.Events
         });
+        Write(path, bytes);
+    }
+
+    private static void Write(string path, byte[] bytes)
+    {
         if (bytes.Length > NativeClusterStartupProtocol.MaximumOutputBytes)
         { throw new IOException("The native startup evidence exceeded its bound."); }
         Directory.CreateDirectory(Path.GetDirectoryName(path)

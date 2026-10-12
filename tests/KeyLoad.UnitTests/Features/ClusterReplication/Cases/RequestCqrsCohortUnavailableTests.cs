@@ -10,7 +10,7 @@ internal sealed class RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntime
     private static readonly TimeSpan TestBound = TimeSpan.FromSeconds(20);
 
     [Test]
-    public async Task StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority()
+    public async Task StoppedNativeMetadataOwnersRemoveFreshObservationsAndRequireACompatibleMajority()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using (var unavailable = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token))
@@ -53,7 +53,7 @@ internal sealed class RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntime
     private static async Task AssertUnavailableAsync(KeyLoadException? failure,
         string detail = ReplicaTransportProtocol.InvalidDiscovery)
     {
-        var observed = failure ?? throw new InvalidOperationException("The stopped socket was accepted.");
+        var observed = failure ?? throw new InvalidOperationException("The stopped native metadata owner was accepted.");
         await Assert.That(observed.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(observed.Message).IsEqualTo(detail);
     }

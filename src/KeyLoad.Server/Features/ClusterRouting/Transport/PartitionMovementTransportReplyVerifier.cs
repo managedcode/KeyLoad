@@ -5,65 +5,39 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-/// <summary>Owns reply transport responsibility while borrowing the original HTTP, native address pins and configured authority.</summary>
+/// <summary>Verifies the original purpose MAC and binds its exact signed reply to the addressed native silo.</summary>
 internal sealed class PartitionMovementTransportReplyVerifier(PartitionMovementTransportContext context)
 {
-    private const int FirstVoter = 0;
-    private const int SingleSignature = 1;
-    private const int MinimumBodyBytes = 1;
-    private const int NoEncodings = 0;
     internal enum ReceiverReplyPurpose { Effect, Outcome, ReceiverIssue, RetireCancellation }
-    internal Task<PartitionMovementAuthenticatedReply> ReadReplyAsync(HttpResponseMessage response, bool local,
-        CancellationToken cancellationToken)
-        => ReadReplyPurposeAsync(response, local, outcome: false, cancellationToken);
 
-    internal async Task<PartitionMovementAuthenticatedReply> ReadReplyPurposeAsync(HttpResponseMessage response, bool local,
-        bool outcome, CancellationToken cancellationToken)
-        => await ReadReplyMacPurposeAsync(response, local, outcome ? ReceiverReplyPurpose.Outcome
-            : ReceiverReplyPurpose.Effect, cancellationToken).ConfigureAwait(false);
-
-    internal async Task<PartitionMovementAuthenticatedReply> ReadReplyMacPurposeAsync(HttpResponseMessage response,
-        bool local, ReceiverReplyPurpose purpose, CancellationToken cancellationToken)
+    internal PartitionMovementAuthenticatedReply ReadReplyMacPurpose(PartitionMovementGrainServiceReply response,
+        bool local, ReceiverReplyPurpose purpose)
     {
-        if (response.StatusCode != System.Net.HttpStatusCode.OK
-            || response.Content.Headers.ContentType?.ToString() != PartitionMovementProtocol.ContentType
-            || response.Content.Headers.ContentLength is not >= MinimumBodyBytes
-            || response.Content.Headers.ContentLength > context.Partition.Database.Limits.MaxBatchBytes
-            || response.Content.Headers.ContentEncoding.Count != NoEncodings
-            || response.Headers.TransferEncoding.Count != NoEncodings)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
-        var body = new byte[checked((int)response.Content.Headers.ContentLength.Value)];
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            { await stream.ReadExactlyAsync(body, cancellationToken).ConfigureAwait(false); }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
-        var signatures = response.Headers.TryGetValues(PartitionMovementProtocol.SignatureHeader, out var values)
-            ? values.Take(SingleSignature + SingleSignature).ToArray() : [];
-        var key = Convert.FromBase64String((local ? context.Options.PeerSecret : context.Options.MembershipAuthority.TrustedGroupPeerSecret)
-            ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof));
+        if (response.Payload.IsEmpty || response.Payload.Length > context.Partition.Database.Limits.MaxBatchBytes
+            || string.IsNullOrEmpty(response.Signature))
+        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        var body = response.Payload.ToArray();
+        var key = Convert.FromBase64String(PartitionMovementNativeDiscoveryIdentity.ReplySecret(
+            context.Options, context.Partition.Configuration, local));
         try
         {
             using var mac = new PartitionMovementMac(key, context.Partition.Database.Limits.MaxBatchBytes);
-            if (signatures.Length != SingleSignature || !(purpose switch
+            if (!(purpose switch
             {
-                ReceiverReplyPurpose.Effect => mac.Verify(body, signatures[FirstVoter], reply: true),
-                ReceiverReplyPurpose.Outcome => mac.VerifyOutcome(body, signatures[FirstVoter], reply: true),
-                ReceiverReplyPurpose.ReceiverIssue => mac.VerifyReceiverIssue(body, signatures[FirstVoter], source: false),
-                ReceiverReplyPurpose.RetireCancellation => mac.VerifyRetireCancellationReply(body, signatures[FirstVoter]),
+                ReceiverReplyPurpose.Effect => mac.Verify(body, response.Signature, reply: true),
+                ReceiverReplyPurpose.Outcome => mac.VerifyOutcome(body, response.Signature, reply: true),
+                ReceiverReplyPurpose.ReceiverIssue => mac.VerifyReceiverIssue(body, response.Signature, source: false),
+                ReceiverReplyPurpose.RetireCancellation => mac.VerifyRetireCancellationReply(body, response.Signature),
                 _ => false
             }))
             { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
-        return new(NativeSerialization.Deserialize<PartitionMovementTransportReply>(body), body, signatures[FirstVoter]);
+        return new(NativeSerialization.Deserialize<PartitionMovementTransportReply>(body), body, response.Signature);
     }
 
-    internal async Task VerifyReplyAsync(int index, RegisteredPhysicalOwnerV1 receiver,
-        PartitionMovementTransportRequest request, PartitionMovementTransportReply reply, bool local,
+    internal Task VerifyReplyAsync(int index, RegisteredPhysicalOwnerV1 receiver,
+        PartitionMovementTransportRequest request, PartitionMovementTransportReply reply, SiloAddress target,
         string expectedPhaseIdentityDigest, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -78,13 +52,10 @@ internal sealed class PartitionMovementTransportReplyVerifier(PartitionMovementT
             || discovery.ApplicationRpcVersion != GrainRoutingProtocol.RequestInterfaceVersion
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, context.Membership))
+            || discovery.SiloAddress != target.ToParsableString()
+            || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, context.Membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         PartitionMovementTransportReplyValidation.RequireValue(reply.Reply);
-        var address = SiloAddress.FromParsableString(discovery.SiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
-        await (local ? context.Resources.ControlPins : context.Resources.DestinationPins).PinCallerAsync(index, address.Endpoint.Address,
-            cancellationToken).ConfigureAwait(false);
+        return Task.CompletedTask;
     }
 }

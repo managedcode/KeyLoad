@@ -18,19 +18,12 @@ internal static class ControlledPartitionMovementFreshAdmission
                 runtime.PartitionMovement, node.Database.EvaluationClock);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var key = Convert.FromBase64String(runtime.Node.Value.MembershipAuthority.Mode
-                    == MembershipAuthoritySettingsProtocol.Authority ? runtime.Node.Value.PeerSecret
-                    : runtime.Node.Value.MembershipAuthority.AuthorityPeerSecret!);
-                try
+                using var mac = admission.CreateControlMac();
+                await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    using var mac = new PartitionMovementMac(key, node.Database.Limits.MaxBatchBytes);
-                    await ServerFailureObserver.ObserveAsync(async () =>
-                    {
-                        var bytes = NativeSerialization.Serialize(original);
-                        verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), token);
-                    }, failures);
-                }
-                finally { System.Security.Cryptography.CryptographicOperations.ZeroMemory(key); }
+                    var bytes = NativeSerialization.Serialize(original);
+                    verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), token);
+                }, failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

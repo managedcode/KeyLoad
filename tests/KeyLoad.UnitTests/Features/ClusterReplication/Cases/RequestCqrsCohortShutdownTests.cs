@@ -9,7 +9,7 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
     private static readonly TimeSpan TestBound = TimeSpan.FromSeconds(20);
 
     [Test]
-    public async Task AsyncDisposeStopsAdmissionAndJoinsGatedHttpAttempt()
+    public async Task AsyncDisposeStopsAdmissionAndJoinsOriginalNativeAttempt()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
@@ -26,7 +26,7 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
 
     private static async Task VerifyShutdownAsync(RequestCqrsCohortScenario scenario, bool synchronous)
     {
-        var gate = new RequestCqrsCohortHttpGate();
+        var gate = new RequestCqrsCohortNativeGate();
         scenario.RemoteOne.SetHeaderGate(gate);
         var attempt = scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, CancellationToken.None);
         Task? disposal = null;

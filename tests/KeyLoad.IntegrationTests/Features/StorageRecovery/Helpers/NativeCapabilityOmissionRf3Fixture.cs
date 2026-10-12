@@ -86,6 +86,11 @@ internal sealed class NativeCapabilityOmissionRf3Fixture
         await Assert.That(source.ChildRequestId).IsNotEqualTo(Guid.Empty);
         await Assert.That(source.Nonce).IsNotEqualTo(Guid.Empty);
         await Assert.That(source.HttpTraceId).IsNotNullOrEmpty();
+        await Assert.That(source.SourceSiloAddress).IsNotNullOrEmpty();
+        await Assert.That(source.TargetSiloAddress).IsNotNullOrEmpty();
+        await Assert.That(SiloAddress.FromParsableString(source.SourceSiloAddress).ToParsableString()).IsEqualTo(source.SourceSiloAddress);
+        await Assert.That(SiloAddress.FromParsableString(source.TargetSiloAddress).ToParsableString()).IsEqualTo(source.TargetSiloAddress);
+        await Assert.That(source.SourceSiloAddress).IsNotEqualTo(source.TargetSiloAddress);
         await Assert.That(source.Stage).IsEqualTo(NativeDiscoveryOmissionProtocol.SourceStage);
         await Assert.That(source.RuntimeJournalReaderContract).IsNull();
         await Assert.That(source.ProducerVoter).IsNull();

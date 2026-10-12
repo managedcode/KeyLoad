@@ -74,8 +74,8 @@ internal static class PartitionMovementClientDispatchOperations
         if (originalRequestNonce != Guid.Empty && action is not (PartitionMovementPeerAction.Apply
             or PartitionMovementPeerAction.Capture or PartitionMovementPeerAction.Release))
         { throw Errors.Fail(ErrorCode.Validation, PartitionMovementProtocol.InvalidProof); }
-        if (owner.options.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
-            || !owner.options.Value.MembershipAuthority.RegisterPhysicalOwners || original.ExpiresAt <= owner.clock.GetUtcNow())
+        if (owner.options.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control
+            || !owner.options.Value.PhysicalGroupTrust.RegisterPhysicalOwners || original.ExpiresAt <= owner.clock.GetUtcNow())
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
         var receiver = original.Grant?.ReceiverOwner ?? original.ControlOwner;
         var control = PhysicalOwnerConfiguredTuples.Control(owner.options.Value, owner.partition);

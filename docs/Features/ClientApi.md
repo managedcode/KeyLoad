@@ -1234,3 +1234,61 @@ Implementation order: public projection validates the original native true ACK; 
 REQ/AC-CLIENT-STATUS-ACK-001 and the named successful-absence contract apply to the existing isolated public regression and live-query-cut workflows. ConfigureApiKey observes the genuine non-generic success with no Problem; the original persisted principal and grants remain independently checked. Invalid blob-part/completion operations retain complete original upload-state equality and both SDK/official MCP successful metadata absence, by checking the existing Upload/Metadata fields. The live query compares its independently literal full DocumentResult or null to DocumentReadResult.Document and preserves every owner, receipt, query-page and before/after read-cut assertion.
 
 No persisted receipt, alias, field, command, clock, bound or public route changes. Three actual Main CS0411 code-fix preflights returned NotSupported; the exact native consumer correction preview returned applied=N. Root owns integrated compiler/runtime qualification. The ongoing private credential RF3 cohort remains source/image-frozen and is not changed by this proposal.
+
+
+### TASK-CLIENT-CONNECTION-CLOSE-ADMISSION-001
+
+REQ/AC-CLIENT-CONNECTION-001/002: Unit native signed close is observed while the actual original successful command ProducerDisposed callback is still held by the joined SOURCE9 observer. Under the existing configured one-operation grant, a fresh second-principal operation must refuse ResourceExhausted without queued execution, canonical position change or outcome. An already cancelled independent attempt also cannot create effects. No queue is invented: connection admission remains rejection-only.
+
+The actual CloseAsync original task must remain unsettled while that same callback and both original work leases remain held. Release the original callback, join command and signed close, independently require native activation removal, then execute through a fresh fixture-owned connection GUID on the SAME persisted store with the separately persisted second principal. Verify full native success/replay bytes, unchanged position on replay, complete stored document and exact current principal/request/connection context. A final signed close joins that fresh owner. Every failed path releases the original callback and joins original command/close tasks before native fixture disposal, retaining initiating and cleanup failures. This is the existing IConnectionGrain CloseAsync/ExecuteStreamAsync and SOURCE9 observer/producer, not a new runtime/dispatcher/authority or mocked callback.
+
+Original eight native cases and SOURCE9 awaited-settlement case remain unchanged and required; keyed shared-fixture scheduling is preserved. No blanket NotInParallel attribute is introduced. SDK/MCP disconnect/idle, Docker RF3/Linux and abrupt-loss unknown-outcome acceptance remain separate; this fixture flow adds no fake idle timer or transport claim. New native UID requires actual compiled native discovery.
+
+## TASK-KL015-STANDARD-ASPNET-AUTH-001
+
+Native snapshot 135dd266dcb24f519b6e254009589803 proves ServerConfiguration has no Authentication/Authorization registration or middleware. DatabaseIdentityMiddleware currently authenticates by native signed connection request and stores PrincipalRecord only in Items.
+
+REQ-AUTH-ASPNET-001: one ASP.NET Core authentication scheme resolves the credential through the existing DatabaseCredentialResolver, actual connection-owned Orleans Authenticate request and persisted quorum authority. Its ticket contains only the actual persisted principal identifier, never role/capability claims.
+AC-AUTH-ASPNET-001: genuine SDK/MCP valid, absent, malformed, revoked and expired credentials retain original success/problem/no-effects oracles; standard authentication is observable on the actual public request, credential resolution happens once.
+
+REQ-AUTH-ASPNET-002: standard authorization requires authenticated identity on the existing public database/MCP boundary. Static GET/HEAD allowlist, health and internal signed-peer boundaries retain their exact existing scope.
+AC-AUTH-ASPNET-002: supplied role headers or ClaimsPrincipal cannot create database authority; persisted revoke/repair affects the SAME SDK/MCP connection; health/internal visibility cannot grant public data access.
+
+REQ-AUTH-ASPNET-003: existing Core signed authorization, current policy epoch and native Orleans RequestContext remain authoritative for every operation.
+AC-AUTH-ASPNET-003: exact denied business outcome, unchanged canonical models/receipt, authorized repair, fresh operation, original replay and same-volume cold remain full independent oracles.
+
+Implementation reservations:
+- existing ServerConfiguration.cs: AddAuthentication/AddAuthorization; explicit UseRouting before owned identity admission, explicit global UseAuthentication after it (prevents WebApplication implicit earlier authentication), root UseAuthorization after exact exempt MapWhen/EndpointMiddleware branch. Both standard extension methods are explicit on the root builder; implicit earlier middleware must not escape admission.
+- existing DatabaseIdentityMiddleware.cs: original HTTP lease/body/error owner calls standard AuthenticateAsync, binds actual native principal; no direct alternate authenticator.
+- existing McpHttpPipeline.cs: retain original McpRequestState, register private state before authentication, reuse its Authenticate once inside scheme; retain body/header/admission/disposal.
+- new Authorization/Identity/DatabaseAuthenticationHandler.cs: native three-argument AuthenticationHandler<AuthenticationSchemeOptions>, original decoder/current token/errors.
+- new Authorization/Identity/DatabaseAuthenticatedPrincipal.cs: private nonserialized feature contains only native principal; no trusted caller flag.
+- new Authorization/Hosting/DatabaseAuthenticationComposition.cs: one scheme/default fallback RequireAuthenticatedUser and original closed public path classification.
+No new packages, persisted fields, public routes, issuer, serializer aliases, user store, Azure Identity, parallel policy dispatcher, role authority or deadline.
+ASP.NET authentication is HTTP admission only; tickets do not cache persisted permissions. Current native operation/receipt authorization is unchanged.
+Runtime gates: owning compiler, actual standard-pipeline Unit operations, existing credential/context SDK/MCP RF3 cold/replay on exact new source, Linux qualification all OPEN. No previous cohorts promoted.
+
+
+
+## TASK-CRS-OPERATION-EVIDENCE-001 — joined failure-only native capture (2026-10-12)
+
+REQ-CRS-OPERATION-EVIDENCE-001: An actual failed ConnectionNativeScenario body or cleanup retains the original initiating exception followed by every cleanup and capture failure. After the original memoized RequestCqrsClusterFixture disposal task completes successfully, capture only that owner’s existing native silo/client logs through NativeClusterStartupTrace. An unsuccessful disposal records cleanupJoined=false and reads no native files. No logger, provider, retry, timeout, authority or scheduling contract changes.
+
+AC-CRS-OPERATION-EVIDENCE-001: Extend the existing OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy declaration with a genuinely deployed signed cancelled command, no persisted document effect, exact initiating exception identity, joined native operation evidence, and a fresh signed literal write/read/same-command replay/close. The successful continuation creates no failure archive. Original startup evidence stays byte-shape compatible; operation evidence has the distinct NativeTestClusterOperationFailure kind and -operation path, unchanged bounded sanitizer, file ownership, CreateNew and output/error/close ledger. Caller/deadline facts are not fabricated for an operation archive.
+
+Source map: ClusterRouting/Fixtures/ConnectionNativeScenario.cs, RequestCqrsFixture.cs; Diagnostics/NativeClusterStartupEvidence.cs and NativeClusterStartupProtocol.cs; Cases/NativeClusterStartupEvidenceTests.cs. Canonical Aspire-owned ordinary Unit entry, native50 and SIMD remain mandatory. Original nine Linux cancellation causes remain unproven; source delivery is not runtime qualification or a causal repair.
+
+
+### TASK-CLIENT-CONNECTION-CLOSE-FAILURE-RETENTION-001
+
+REQ/AC-CLIENT-CONNECTION-001/002: the existing signed-close admission whole operation retains the actual initiating exception before joining the original command/callback/close and fresh second-principal owner. Its two capture boundaries explicitly partition native fatal/nonfatal exceptions with the existing KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal predicate; both retain the same exception instance in the same ordered failure list. Neither filter bypasses finally, clears failures or converts cancellation into quota. ServerFailureObserver continues to join original tasks and rethrow the original single exception or complete ordered aggregate. The native signed-close whole case, its held callback/charged lease, refused admission/no effects, fresh owner/current principal and exact replay oracles are unchanged. No new UID, timer, limit, public API, serialized contract, scheduling attribute or execution claim is added. This is source-only analyzer closure; current-source compiler and whole-operation qualification remain required.
+
+
+### TASK-CLIENT-CANCELLED-COMMAND-RECONNECT-001
+
+REQ/AC-CLIENT-CONNECTION-002 and REQ/AC-CLIENT-005: the original AC-CRS-054 wrong-owner refusal, held command cancellation, joined original producer, absent document/outcome and zero-activation checks remain unchanged. After them, a genuine fresh native connection owner executes the SAME original cancelled CommandRequest/CommandId under the same current persisted principal. Independently require its complete literal document and mutation receipt, actual fresh owner identity and producer join; same-ID replay must return exact original native payload with complete canonical key/value image and position unchanged, followed by signed fresh close and native activation removal. Close does not create a persisted closed-owner history or permanently prohibit reactivation of an old grain key. Existing cancellation/deadline/capacity/native50/normal SIMD rules are unchanged. The existing test declaration and UID remain; compiler, actual native discovery/runtime and Linux/RF3 qualification are OPEN until executed.
+
+
+## TASK-CLIENT005-COMMITTED-RESPONSE-001 — committed write interrupted during decode
+
+REQ/AC-CLIENT-002/005, AC-MP-009 and ADR083/125: `CommittedResponseInterruptionTests.OriginalCommittedWriteSurvivesInterruptedBodyThenExactReplayConflictAndHealthyRevision` retains two explicit caller-cancel/connection-abort instances. Unlike existing read interruption and predetermined write-response controls, its actual signed ConnectionGrain Batch commits and disposes the original producer before a real Kestrel socket flushes one byte of that canonical receipt. Both interrupted SDK decodes must remain UnknownWriteOutcome. Persisted credential authentication occurs on every test-adapter request and the signed grain freshly validates persisted authority. Same-ID/body returns full original receipt/native result bytes with complete bounded store image and position unchanged; changed body refuses Conflict/no effects; a fresh revision2 operation and its exact replay complete with independent literal models/receipts. Original caller, first handler, HTTP host and native connection are joined with ordered primary/cleanup retention under unchanged native completion bound. This is a test-only real-network/native-owner composition, not public middleware, official MCP, RF3 or Linux qualification. Those existing mandatory long-operation/current-policy/disconnect gates remain open. No product dispatcher, ACK, timing, limit, schema or persistence changes; new compiled UIDs/runtime/coverage remain OPEN.

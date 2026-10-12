@@ -62,7 +62,7 @@ internal static class PartitionMovementTransferProofVerifier
         PhysicalShardRecord source, ReadOnlySpan<byte> originalReply, string signature, NodeOptions options)
     {
         var key = Convert.FromBase64String(PhysicalOwnerEntryValidation.SameOwner(control, source)
-            ? options.PeerSecret : options.MembershipAuthority.TrustedGroupPeerSecret
+            ? options.PeerSecret : options.PhysicalGroupTrust.ForeignPeerSecret
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof));
         try
         {

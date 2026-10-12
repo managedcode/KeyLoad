@@ -6,9 +6,25 @@ namespace KeyLoad.Orleans;
 internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
 {
     private GrainRequestProbeIdentity? identity;
+    private Guid connectionId;
 
     internal void SetIdentity(DecodedGrainRequest request)
-        => identity = GrainRequestProbeIdentity.From(request.Envelope);
+    {
+        identity = GrainRequestProbeIdentity.From(request.Envelope);
+        if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState context
+            && context.RequestId == request.Envelope.RequestId && context.CommandId == request.Envelope.CommandId)
+        { connectionId = context.ConnectionId; }
+    }
+
+    internal async ValueTask SettleAsync(IGrainContext? context)
+    {
+        var observed = identity;
+        identity = null;
+        var connection = connectionId;
+        connectionId = Guid.Empty;
+        if (observed is { } value)
+        { await codec.ObserveProducerDisposedAsync(value, connection, context).ConfigureAwait(true); }
+    }
 
     internal void Settle(IGrainContext? context, Action? deactivate = null)
     {

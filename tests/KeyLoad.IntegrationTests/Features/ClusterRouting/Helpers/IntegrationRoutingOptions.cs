@@ -1,5 +1,4 @@
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -20,13 +19,6 @@ internal static class IntegrationRoutingOptions
         var value = configured ?? new GrainRoutingOptions();
         if (!value.IsValid())
         { throw new OptionsValidationException(Options.DefaultName, typeof(GrainRoutingOptions), [GrainRoutingOptions.ValidationMessage]); }
-        return Options.Create(value);
-    }
-
-    internal static IOptions<PeerDiscoveryOptions> Discovery(PeerDiscoveryOptions? configured = null)
-    {
-        var value = configured ?? new PeerDiscoveryOptions();
-        value.Validate();
         return Options.Create(value);
     }
 

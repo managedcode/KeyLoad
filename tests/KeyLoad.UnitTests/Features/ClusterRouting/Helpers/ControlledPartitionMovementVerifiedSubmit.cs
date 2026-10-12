@@ -19,12 +19,8 @@ internal static class ControlledPartitionMovementVerifiedSubmit
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var key = Convert.FromBase64String(runtime.Node.Value.MembershipAuthority.Mode
-                == MembershipAuthoritySettingsProtocol.Authority ? runtime.Node.Value.PeerSecret
-                : runtime.Node.Value.MembershipAuthority.AuthorityPeerSecret!);
-            try
             {
-                using var mac = new PartitionMovementMac(key, receiver.Database.Limits.MaxBatchBytes);
+                using var mac = admission.CreateControlMac();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var bytes = NativeSerialization.Serialize(original);
@@ -48,7 +44,6 @@ internal static class ControlledPartitionMovementVerifiedSubmit
                     result = receiver.Journal.Submit(operation, cancellationToken);
                 }, failures);
             }
-            finally { System.Security.Cryptography.CryptographicOperations.ZeroMemory(key); }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The original verified native phase has no result.");

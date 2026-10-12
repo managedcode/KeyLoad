@@ -57,7 +57,7 @@ internal static class RequestCqrsAnnResultAssertions
             request.Space, RequestCqrsAnnTestData.Records(changed)));
     }
 
-    private static async Task SearchAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
+    internal static async Task SearchAsync(RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request,
         bool changed, CancellationToken token)
     {
         var native = fixture.NativeAnnMaintenance ?? throw new InvalidOperationException();

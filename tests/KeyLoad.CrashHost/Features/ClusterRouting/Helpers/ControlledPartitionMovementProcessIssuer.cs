@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -18,27 +17,20 @@ internal static class ControlledPartitionMovementProcessIssuer
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var key = Convert.FromBase64String(runtime.Node.Value.MembershipAuthority.Mode
-                == MembershipAuthoritySettingsProtocol.Authority ? runtime.Node.Value.PeerSecret
-                : runtime.Node.Value.MembershipAuthority.AuthorityPeerSecret!);
-            try
+            using var mac = admission.CreateControlMac();
+            await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var mac = new PartitionMovementMac(key, receiver.Database.Limits.MaxBatchBytes);
-                await ServerFailureObserver.ObserveAsync(async () =>
-                {
-                    var bytes = NativeSerialization.Serialize(original);
-                    var verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), cancellationToken);
-                    if (verified.Action != PartitionMovementTransportAction.Apply)
-                    { throw new InvalidOperationException(Missing); }
-                    var id = PartitionMovementControlPrincipal.Resolve(receiver.Database, verified.Envelope);
-                    var principal = receiver.Store.Read(view => receiver.Database.Principal(view, id,
-                        receiver.Database.EvaluationClock.GetUtcNow()));
-                    GrainRequestAuthority.RequireAdministrator(principal);
-                    operation = receiver.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
-                        principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
-                }, failures);
-            }
-            finally { CryptographicOperations.ZeroMemory(key); }
+                var bytes = NativeSerialization.Serialize(original);
+                var verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), cancellationToken);
+                if (verified.Action != PartitionMovementTransportAction.Apply)
+                { throw new InvalidOperationException(Missing); }
+                var id = PartitionMovementControlPrincipal.Resolve(receiver.Database, verified.Envelope);
+                var principal = receiver.Store.Read(view => receiver.Database.Principal(view, id,
+                    receiver.Database.EvaluationClock.GetUtcNow()));
+                GrainRequestAuthority.RequireAdministrator(principal);
+                operation = receiver.Database.CreateVerifiedPartitionMovementOperation(verified.CommandId,
+                    principal.Id, receiver.Database.EvaluationClock.GetUtcNow(), verified.Envelope);
+            }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return operation ?? throw new InvalidOperationException(Missing);

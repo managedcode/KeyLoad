@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using KeyLoad.Orleans;
 using Microsoft.Extensions.Options;
@@ -7,19 +6,18 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class ReplicaMembershipReadiness
 {
-    private const char HostColonCharacter = ':';
-    private const string EndpointKeyComparisonText = ":";
-
     private const int ExpectedActiveSilos = 6;
+    private const int SnapshotVersion = 1;
+    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
+
     internal static async Task<MembershipReadinessSnapshot?> ReadNodeAsync(bool siloJoined, IHost? host,
         IOptions<NodeOptions> nodeOptions, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
-        var options = nodeOptions.Value;
-        if (!siloJoined || host is null || options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local)
+        if (!siloJoined || host is null)
         { return null; }
         try
         {
-            return await ReadAsync(host.Services.GetRequiredService<IMembershipTable>(), nodeOptions,
+            return await ReadAsync(host.Services.GetRequiredService<ReplicaNativeDiscoveryRuntime>(), nodeOptions,
                 host.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress, membershipOptions, token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -28,62 +26,65 @@ internal static class ReplicaMembershipReadiness
         { return null; }
     }
 
-    internal static async Task<MembershipReadinessSnapshot?> ReadAsync(IMembershipTable table, IOptions<NodeOptions> nodeOptions,
-        SiloAddress localAddress, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
+    private static Task<MembershipReadinessSnapshot?> ReadAsync(ReplicaNativeDiscoveryRuntime runtime,
+        IOptions<NodeOptions> nodeOptions, SiloAddress localAddress,
+        IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
-        const int IndexInitialValue = 0;
-        const int EmptyCanonicalLength = 0;
-        const int VersionSingleItemCount = 1;
+        token.ThrowIfCancellationRequested();
+        var view = runtime.ReadActiveMembership();
+        return Task.FromResult(ReadView(view, nodeOptions.Value, localAddress, membershipOptions.Value, token));
+    }
 
-        var bounds = membershipOptions.Value;
+    internal static MembershipReadinessSnapshot? ReadView(
+        System.Collections.Immutable.ImmutableArray<ReplicaNativeMembershipEntry> view, NodeOptions options,
+        SiloAddress localAddress, OrleansMembershipOptions bounds, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
         bounds.Validate();
-        var expected = await ExpectedEndpointsAsync(nodeOptions.Value, token).ConfigureAwait(false);
-        if (expected.Count != ExpectedActiveSilos)
+        if (view.IsDefault || view.Length != ExpectedActiveSilos || view.Length > bounds.MaximumRows)
         { return null; }
-        var view = await table.ReadAllAsync(token).ConfigureAwait(false);
-        var active = view.Members.Where(member => member.Item1.Status == SiloStatus.Active).ToArray();
-        if (view.Members.Count < ExpectedActiveSilos || view.Members.Count > bounds.MaximumRows
-            || active.Length != ExpectedActiveSilos || active.All(member => member.Item1.SiloAddress != localAddress))
+        var expected = ExpectedNames(options, bounds);
+        if (expected is null)
         { return null; }
-        var addresses = new string[ExpectedActiveSilos];
-        var observedEndpoints = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = IndexInitialValue; index < active.Length; index++)
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        var addresses = new HashSet<string>(StringComparer.Ordinal);
+        var local = localAddress.ToParsableString();
+        foreach (var entry in view)
         {
-            var address = active[index].Item1.SiloAddress;
-            var canonical = address.ToParsableString();
-            if (SiloAddress.FromParsableString(canonical).ToParsableString() != canonical)
+            token.ThrowIfCancellationRequested();
+            if (!Bounded(entry.SiloName, bounds) || !Bounded(entry.SiloAddress, bounds)
+                || !expected.Contains(entry.SiloName) || !names.Add(entry.SiloName)
+                || !addresses.Add(entry.SiloAddress)
+                || SiloAddress.FromParsableString(entry.SiloAddress).ToParsableString() != entry.SiloAddress)
             { return null; }
-            if (canonical.Length == EmptyCanonicalLength || Encoding.UTF8.GetByteCount(canonical) > bounds.MaximumAddressBytes
-                || !expected.Contains(EndpointKey(address.Endpoint.Address, address.Endpoint.Port))
-                || !observedEndpoints.Add(EndpointKey(address.Endpoint.Address, address.Endpoint.Port)))
-            { return null; }
-            addresses[index] = canonical;
         }
-        if (!observedEndpoints.SetEquals(expected))
+        token.ThrowIfCancellationRequested();
+        if (!names.SetEquals(expected) || !addresses.Contains(local))
         { return null; }
-        var fingerprint = ReplicaMembershipFingerprint.Compute(addresses);
-        return new(VersionSingleItemCount, ExpectedActiveSilos, view.Members.Count, fingerprint);
+        return new(SnapshotVersion, view.Length, view.Length, ReplicaMembershipFingerprint.Compute(addresses));
     }
 
-    private static async Task<HashSet<string>> ExpectedEndpointsAsync(NodeOptions options, CancellationToken token)
+    private static HashSet<string>? ExpectedNames(NodeOptions options, OrleansMembershipOptions bounds)
     {
-        var hosts = options.Peers.Select(origin => new Uri(origin).DnsSafeHost).ToList();
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
-        { hosts.AddRange(options.MembershipAuthority.TrustedGroupSiloEndpoints.Select(Host)); }
-        else if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
-        { hosts.AddRange(options.MembershipAuthority.AuthorityEndpoints.Select(origin => new Uri(origin).DnsSafeHost)); }
-        var endpoints = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var host in hosts)
+        const int GroupVoters = 3;
+        if (options.Peers.Count != GroupVoters || options.PhysicalGroupTrust.ForeignVoterIds.Length != GroupVoters)
+        { return null; }
+        var expected = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var name in options.Peers.Concat(options.PhysicalGroupTrust.ForeignVoterIds))
         {
-            var addresses = await Dns.GetHostAddressesAsync(host, token).ConfigureAwait(false);
-            foreach (var address in addresses.Where(address => address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork))
-            { endpoints.Add(EndpointKey(address, MembershipAuthoritySettingsProtocol.NativeSiloPort)); }
+            if (!Bounded(name, bounds) || !expected.Add(name))
+            { return null; }
         }
-        return endpoints;
+        return expected;
     }
 
-    private static string Host(string endpoint) => endpoint[..endpoint.LastIndexOf(HostColonCharacter)];
-
-    private static string EndpointKey(IPAddress address, int port) => address + EndpointKeyComparisonText +
-        port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    private static bool Bounded(string value, OrleansMembershipOptions bounds)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        { return false; }
+        try
+        { return StrictUtf8.GetByteCount(value) <= bounds.MaximumAddressBytes; }
+        catch (EncoderFallbackException)
+        { return false; }
+    }
 }

@@ -15,10 +15,10 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class TwoRf3MembershipEnvironmentTests
 {
     private const string ConfigurationSeparator = ":";
+    private const string RetiredAuthorityModeKey = "KeyLoad:MembershipAuthority:Mode";
     private const string NodeSection = "KeyLoad";
-    private const string MembershipSection = NodeSection + ":MembershipAuthority";
     private const string EnvironmentSeparator = "__";
-    private const string AuthoritySection = "KeyLoad__MembershipAuthority__";
+    private const string AuthoritySection = "KeyLoad__PhysicalGroupTrust__";
     private const string FormerNestedTrustedGroupPrefix = AuthoritySection + "TrustedGroup__";
 
     [Test]
@@ -41,13 +41,12 @@ internal sealed class TwoRf3MembershipEnvironmentTests
                 var checks = resources[index].Resource.Annotations.OfType<HealthCheckAnnotation>()
                     .Select(annotation => annotation.Key).ToArray();
                 var name = resources[index].Resource.Name;
-                var authority = index < TwoRf3ProfileProtocol.MembersPerGroup;
                 await Assert.That(checks.Contains(name + "_http_/health/ready_200_check", StringComparer.Ordinal))
-                    .IsEqualTo(!authority);
+                    .IsFalse();
                 await Assert.That(checks.Contains(name + "_http_/health/membership-authority_200_check", StringComparer.Ordinal))
-                    .IsEqualTo(authority);
+                    .IsFalse();
                 await Assert.That(checks.Contains(name + "_http_/health/membership-ready_200_check", StringComparer.Ordinal))
-                    .IsEqualTo(!authority);
+                    .IsTrue();
             }
         });
     }
@@ -78,41 +77,81 @@ internal sealed class TwoRf3MembershipEnvironmentTests
         configuration.AddInMemoryCollection(values);
         var node = configuration.GetSection(NodeSection).Get<NodeOptions>()
             ?? throw new InvalidOperationException("The emitted membership node configuration did not bind.");
-        MembershipAuthoritySettingsValidator.ValidateSection(
-            configuration.GetSection(MembershipSection), node.MembershipAuthority);
+        PhysicalGroupTrustValidator.ValidateConfiguration(configuration.GetSection(NodeSection), node.PhysicalGroupTrust);
         node.Validate();
         await Assert.That(environment.Keys.Any(key => key.StartsWith(FormerNestedTrustedGroupPrefix, StringComparison.Ordinal)))
             .IsFalse();
         var isAuthority = index < TwoRf3ProfileProtocol.MembersPerGroup;
-        await Assert.That(node.MembershipAuthority.Mode)
-            .IsEqualTo(isAuthority ? MembershipAuthoritySettingsProtocol.Authority : MembershipAuthoritySettingsProtocol.Proxy);
-        await VerifyFlatPropertyNamesAsync(environment, isAuthority);
+        await Assert.That(node.PhysicalGroupTrust.Role)
+            .IsEqualTo(isAuthority ? PhysicalGroupTrustRole.Control : PhysicalGroupTrustRole.Destination);
+        await VerifyFlatPropertyNamesAsync(environment);
+        await VerifyRefusedAndRepairedAsync(node);
+        await VerifyRetiredSectionRefusalAsync(configuration, node);
     }
 
-    private static async Task VerifyFlatPropertyNamesAsync(IReadOnlyDictionary<string, string> environment, bool isAuthority)
+    private static async Task VerifyFlatPropertyNamesAsync(IReadOnlyDictionary<string, string> environment)
     {
-        var properties = isAuthority
-            ? new[]
-            {
-                nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId),
-                nameof(MembershipAuthoritySettings.TrustedGroupIncarnation),
-                nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret),
-                nameof(MembershipAuthoritySettings.TrustedGroupVoterIds),
-                nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints)
-            }
-            : new[]
-            {
-                nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId),
-                nameof(MembershipAuthoritySettings.AuthorityIncarnation),
-                nameof(MembershipAuthoritySettings.AuthorityPeerSecret),
-                nameof(MembershipAuthoritySettings.AuthorityEndpoints)
-            };
+        string[] properties =
+        [
+            nameof(PhysicalGroupTrustOptions.ForeignPhysicalShardId),
+            nameof(PhysicalGroupTrustOptions.ForeignIncarnation),
+            nameof(PhysicalGroupTrustOptions.ForeignPeerSecret),
+            nameof(PhysicalGroupTrustOptions.ForeignVoterIds)
+        ];
         foreach (var property in properties)
         {
             var prefix = AuthoritySection + property;
             await Assert.That(environment.Keys.Any(key => key == prefix
                 || key.StartsWith(prefix + EnvironmentSeparator, StringComparison.Ordinal))).IsTrue();
         }
+        await Assert.That(environment.Keys.Any(key => key.StartsWith("KeyLoad__MembershipAuthority__", StringComparison.Ordinal)))
+            .IsFalse();
+    }
+
+    private static async Task VerifyRefusedAndRepairedAsync(NodeOptions node)
+    {
+        var original = node.PhysicalGroupTrust;
+        PhysicalGroupTrustOptions[] denied =
+        [
+            original with { ForeignPhysicalShardId = node.PhysicalShardId },
+            original with { ForeignIncarnation = node.Incarnation },
+            original with { ForeignPeerSecret = node.PeerSecret },
+            original with { ForeignVoterIds = node.Peers.ToArray() }
+        ];
+        foreach (var candidate in denied)
+        {
+            try
+            {
+                PhysicalGroupTrustValidator.Validate(candidate, node);
+            }
+            catch (InvalidOperationException error)
+            {
+                await Assert.That(error.Message).IsEqualTo(PhysicalGroupTrustProtocol.Invalid);
+                PhysicalGroupTrustValidator.Validate(original, node);
+                node.Validate();
+                continue;
+            }
+            throw new InvalidOperationException("Foreign RF3 trust unexpectedly admitted the local owner or credential.");
+        }
+    }
+
+    private static async Task VerifyRetiredSectionRefusalAsync(ConfigurationManager original, NodeOptions node)
+    {
+        using var denied = new ConfigurationManager();
+        denied.AddInMemoryCollection(original.AsEnumerable()
+            .Append(new KeyValuePair<string, string?>(RetiredAuthorityModeKey, "authority")));
+        try
+        {
+            PhysicalGroupTrustValidator.ValidateConfiguration(denied.GetSection(NodeSection), node.PhysicalGroupTrust);
+        }
+        catch (InvalidOperationException error)
+        {
+            await Assert.That(error.Message).IsEqualTo(PhysicalGroupTrustProtocol.Invalid);
+            PhysicalGroupTrustValidator.ValidateConfiguration(original.GetSection(NodeSection), node.PhysicalGroupTrust);
+            node.Validate();
+            return;
+        }
+        throw new InvalidOperationException("Retired membership-provider settings unexpectedly admitted a native node.");
     }
 
     private static IDistributedApplicationBuilder CreateBuilder()
@@ -132,7 +171,7 @@ internal sealed class TwoRf3MembershipEnvironmentTests
 
     private static string CreateSecret()
     {
-        var bytes = RandomNumberGenerator.GetBytes(MembershipAuthoritySettingsProtocol.SecretBytes);
+        var bytes = RandomNumberGenerator.GetBytes(PhysicalGroupTrustProtocol.SecretBytes);
         try
         { return Convert.ToBase64String(bytes); }
         finally { CryptographicOperations.ZeroMemory(bytes); }

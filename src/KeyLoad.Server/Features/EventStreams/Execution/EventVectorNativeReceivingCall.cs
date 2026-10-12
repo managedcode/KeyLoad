@@ -30,8 +30,13 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
             : throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid);
     }
 
-    internal async Task SubmitAsync(EventVectorRemoteCall originalCall, PrincipalRecord actualPrincipal,
+    internal Task SubmitAsync(EventVectorRemoteCall originalCall, PrincipalRecord actualPrincipal,
         EventVectorSourcePhase originalPhase, ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        => SubmitAsync(originalCall, actualPrincipal, originalPhase, work, null, originalCancellationToken);
+
+    internal async Task SubmitAsync(EventVectorRemoteCall originalCall, PrincipalRecord actualPrincipal,
+        EventVectorSourcePhase originalPhase, ReadExecutionBudget work, global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary,
+        CancellationToken originalCancellationToken)
     {
         authority.Require(originalCall, originalCancellationToken);
         var database = partition.Database;
@@ -41,6 +46,7 @@ internal sealed class EventVectorNativeReceivingCall(OrleansNode node, Partition
         var signed = node.CatalogRequestCodec().CreateEventVectorPhase(requestId, operation,
             originalPhase.FirstExpiresAt);
         using var identity = node.OpenRequestContext(actualPrincipal, requestId, operation.Id, originalCancellationToken);
+        boundary?.Begin(originalCancellationToken);
         var reply = await node.ExecuteAsync(requestId, signed, command: true,
             cancellationToken: originalCancellationToken).ConfigureAwait(false);
         authority.Require(originalCall, originalCancellationToken);

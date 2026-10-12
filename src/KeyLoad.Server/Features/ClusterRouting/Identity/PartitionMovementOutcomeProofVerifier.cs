@@ -54,7 +54,7 @@ internal static class PartitionMovementOutcomeProofVerifier
         { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
         var key = Convert.FromBase64String(original.OriginalReceiverOwner.PhysicalShardId == options.PhysicalShardId
             && original.OriginalReceiverOwner.Incarnation == database.Store.Identity.Incarnation
-            ? options.PeerSecret : options.MembershipAuthority.TrustedGroupPeerSecret
+            ? options.PeerSecret : options.PhysicalGroupTrust.ForeignPeerSecret
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof));
         try
         {

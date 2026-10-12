@@ -15,8 +15,8 @@ internal static class RuntimeJournalStartup
         PrincipalRecord administrator, NodeOptions options, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
     {
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
-            || options.MembershipAuthority.RemoteDocumentReads)
+        if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled
+            || options.PhysicalGroupTrust.RemoteDocumentReads)
         {
             return InitializeAsync(services, partition, administrator, options, runtime, cancellationToken);
         }

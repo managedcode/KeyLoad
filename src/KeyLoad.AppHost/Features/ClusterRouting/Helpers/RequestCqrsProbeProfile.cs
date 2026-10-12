@@ -24,6 +24,8 @@ internal sealed class RequestCqrsProbeProfile
 
     internal string SessionId { get; }
 
+    internal int MemberCount => nodeRoots.Count;
+
     internal static void ValidateMode(IConfiguration configuration)
     { _ = RequestCqrsProbeProfileSettingsReader.Read(configuration); }
 
@@ -52,6 +54,26 @@ internal sealed class RequestCqrsProbeProfile
         ArgumentNullException.ThrowIfNull(image);
         var settings = ReadSettings(builder, dataRoot, ephemeral, benchmarkNodeCount);
         return settings is null ? null : Create(builder, dataRoot, settings);
+    }
+
+    internal static RequestCqrsProbeProfile? ReadDiagnosticSix(IDistributedApplicationBuilder builder,
+        string dataRoot, RuntimeContainerImage? image, LocalDevelopmentContainerImage? local)
+    {
+        var settings = ReadSettings(builder, dataRoot, ephemeral: true, benchmarkNodeCount: null);
+        if (settings is null)
+        { return null; }
+        var control = AppHostOptionsRegistration.Get(builder).Control.Value;
+        if (!control.TwoRf3 || control.RemoteDocumentReads || control.RemotePartitionQueries
+            || (image is null) == (local is null)
+            || (image is not null && string.IsNullOrWhiteSpace(image.Reference)))
+        { throw new InvalidOperationException(InvalidConfiguration); }
+        string[] voters = [TwoRf3ProfileProtocol.FirstVoterName, TwoRf3ProfileProtocol.SecondVoterName,
+            TwoRf3ProfileProtocol.ThirdVoterName, TwoRf3ProfileProtocol.FourthVoterName,
+            TwoRf3ProfileProtocol.FifthVoterName, TwoRf3ProfileProtocol.SixthVoterName];
+        var roots = RequestCqrsProbeProfilePaths.Validate(settings.Root, settings.SessionId, dataRoot,
+            AppHostOptionsRegistration.Get(builder).RequestProbeFiles, voters,
+            RequestCqrsProbeOwnerReader.OwnerVersion, RequestCqrsProbeOwnerReader.OwnerKind);
+        return new(settings.SessionId, roots);
     }
 
     private static RequestCqrsProbeProfileSettings? ReadSettings(IDistributedApplicationBuilder builder,

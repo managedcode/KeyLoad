@@ -81,7 +81,7 @@ internal sealed class PartitionMovementReceiverCheckpointProofs(IOptions<NodeOpt
         var node = options.Value;
         var key = Convert.FromBase64String(original.OriginalReceiverOwner.PhysicalShardId == node.PhysicalShardId
             && original.OriginalReceiverOwner.Incarnation == database.Store.Identity.Incarnation
-            ? node.PeerSecret : node.MembershipAuthority.TrustedGroupPeerSecret
+            ? node.PeerSecret : node.PhysicalGroupTrust.ForeignPeerSecret
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof));
         try
         {

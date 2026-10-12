@@ -5,6 +5,10 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class ReadExecutionBudgetSettledGrantTests
 {
     [Test]
+    public async Task AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead()
+        => await ReadGrantFailureSettlementFlow.RunAsync();
+
+    [Test]
     public async Task SettledNativeReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger()
     {
         var firstBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;

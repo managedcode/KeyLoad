@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +15,8 @@ internal sealed class NativeDiscoveryOmissionJson
         nameof(NativeDiscoveryOmissionWitness.ArmId), nameof(NativeDiscoveryOmissionWitness.SourceVoter), nameof(NativeDiscoveryOmissionWitness.TargetVoter),
         nameof(NativeDiscoveryOmissionWitness.Route), nameof(NativeDiscoveryOmissionWitness.HttpTraceId), nameof(NativeDiscoveryOmissionWitness.ConnectionId),
         nameof(NativeDiscoveryOmissionWitness.ChildRequestId), nameof(NativeDiscoveryOmissionWitness.CommandId), nameof(NativeDiscoveryOmissionWitness.Nonce),
-        nameof(NativeDiscoveryOmissionWitness.Stage), nameof(NativeDiscoveryOmissionWitness.ProducerVoter), nameof(NativeDiscoveryOmissionWitness.RuntimeJournalReaderContract)];
+        nameof(NativeDiscoveryOmissionWitness.Stage), nameof(NativeDiscoveryOmissionWitness.ProducerVoter), nameof(NativeDiscoveryOmissionWitness.RuntimeJournalReaderContract),
+        nameof(NativeDiscoveryOmissionWitness.SourceSiloAddress), nameof(NativeDiscoveryOmissionWitness.TargetSiloAddress)];
     private readonly IOptions<RequestProbeExecutionOptions> options;
     private readonly RequestCqrsProbeJson shape;
     private readonly NativeDiscoveryOmissionJsonContext context;
@@ -43,6 +45,8 @@ internal sealed class NativeDiscoveryOmissionJson
         if (value.ConnectionId == Guid.Empty || value.ChildRequestId == Guid.Empty || value.CommandId != Guid.Empty
             || value.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(value.HttpTraceId)
             || Utf8.GetByteCount(value.HttpTraceId) > options.Value.MaximumPrincipalBytes
+            || !CanonicalAddress(value.SourceSiloAddress) || !CanonicalAddress(value.TargetSiloAddress)
+            || value.SourceSiloAddress == value.TargetSiloAddress
             || value.Stage is not (NativeDiscoveryOmissionProtocol.SourceStage
                 or NativeDiscoveryOmissionProtocol.OmittedStage or NativeDiscoveryOmissionProtocol.VerifiedStage))
         { throw Invalid(); }
@@ -67,6 +71,13 @@ internal sealed class NativeDiscoveryOmissionJson
             || Utf8.GetByteCount(value.SourceVoter) > options.Value.MaximumPrincipalBytes
             || Utf8.GetByteCount(value.TargetVoter) > options.Value.MaximumPrincipalBytes)
         { throw Invalid(); }
+    }
+    private static bool CanonicalAddress(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > ReplicaTransportProtocol.MaximumAddressCharacters)
+        { return false; }
+        try { return SiloAddress.FromParsableString(value).ToParsableString() == value; }
+        catch (Exception error) when (error is ArgumentException or FormatException) { return false; }
     }
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);
 }

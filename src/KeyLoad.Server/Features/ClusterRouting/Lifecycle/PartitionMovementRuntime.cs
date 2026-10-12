@@ -21,7 +21,7 @@ internal sealed partial class PartitionMovementRuntime : IPartitionMovementDispa
     private bool joined;
     internal bool IsJoined { get { lock (gate) { return joined; } } }
     internal INativePartitionMovementCapture Source => source ?? throw new InvalidOperationException();
-    internal PartitionMovementEndpoint? Endpoint { get; private set; }
+    internal PartitionMovementNativeReceiver? NativeReceiver { get; private set; }
 
     internal PartitionMovementRuntime(NativeRequestWorkOwner work)
         => execution = new(gate, stopping, active, work, () => closed);
@@ -44,7 +44,7 @@ internal sealed partial class PartitionMovementRuntime : IPartitionMovementDispa
         parentClock = clock;
         parent = new(receiver, client, clock, options.GrainRouting,
             options.Core.DatabaseLimits, options.Node.Value.ClusterId);
-        Endpoint = new(this, admission, receiver, options.Node,
+        NativeReceiver = new(this, admission, receiver, node, options.Node,
             options.GrainRouting, options.Core.DatabaseLimits, clock);
     }
 

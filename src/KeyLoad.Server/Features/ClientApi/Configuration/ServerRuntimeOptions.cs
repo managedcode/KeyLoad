@@ -16,7 +16,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<DueCoordinationOptions> DueCoordination,
     IOptions<NativeDurableJobOptions> DurableJobs,
     IOptions<ReplicaExecutionOptions> ReplicaExecution,
-    IOptions<PeerDiscoveryOptions> PeerDiscovery,
     IOptions<ReplicaTransportOptions> ReplicaTransport,
     IOptions<ReplicaPeerOptions> Peer,
     IOptions<ReplicaReplayLimits> Replay,
@@ -46,7 +45,6 @@ internal sealed record ServerRuntimeOptions(
         _ = DueCoordination.Value;
         _ = DurableJobs.Value;
         _ = ReplicaExecution.Value;
-        _ = PeerDiscovery.Value;
         _ = ReplicaTransport.Value;
         _ = Replay.Value;
         _ = Peer.Value;
@@ -77,7 +75,6 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(DueCoordination);
         services.AddSingleton(DurableJobs);
         services.AddSingleton(ReplicaExecution);
-        services.AddSingleton(PeerDiscovery);
         services.AddSingleton(ReplicaTransport);
         services.AddSingleton(Peer);
         services.AddSingleton(Replay);

@@ -68,12 +68,12 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         ArgumentNullException.ThrowIfNull(call);
         var options = nodeOptions.Value;
         var now = clock.GetUtcNow();
-        if (!options.MembershipAuthority.RegisterPhysicalOwners
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Proxy
+        if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination
             || call.Version != PhysicalOwnerProbeProtocol.Version || call.RequestId == Guid.Empty
-            || !ReplicaMembershipAuthorityValidation.ValidNonce(call.Nonce)
-            || !options.MembershipAuthority.AuthorityEndpoints.Contains(call.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
+            || !PhysicalOwnerProbeNativeIdentity.ValidNonce(call.Nonce)
+            || !PhysicalOwnerConfiguredTuples.Control(options, partition).Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal)
+            || !PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
             || !PhysicalOwnerEntryValidation.Valid(call.Control) || !PhysicalOwnerEntryValidation.Valid(call.Destination)
             || call.ExpiresAt <= now || call.IssuedAt - now > membershipOptions.Value.ClockSkew || call.ExpiresAt <= call.IssuedAt
             || call.ExpiresAt - call.IssuedAt > routingOptions.Value.ExecutionLifetime

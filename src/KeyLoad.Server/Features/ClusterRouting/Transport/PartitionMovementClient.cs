@@ -23,7 +23,7 @@ internal sealed class PartitionMovementClient : IPartitionMovementDispatcher, ID
         this.node = node;
         this.partition = partition;
         this.clock = clock;
-        transport = new(options, partition, membership, clock);
+        transport = new(options, node, partition, membership, clock);
     }
 
     public void Dispose() => transport.Dispose();

@@ -31,4 +31,5 @@ public sealed partial class KeyLoadClient
         ArgumentNullException.ThrowIfNull(request);
         return Send<AdminQueuePage>(AdminDashboardProtocol.QueuePath, request, false, null, cancellationToken);
     }
+
 }

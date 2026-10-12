@@ -18,6 +18,7 @@ internal static class AnnProjectionPinValidation
         var consumer = request.Consumer;
         var state = DatabaseEngine.RequireActiveProjectionConsumer(view, principal, consumer, request.IndexGeneration);
         RequireOwner(database, view, principal, partition, request);
+        RequireMaintenanceProfile(database, state, principal, request);
         if (consumer.Partition != partition || !state.Definition.Resources.IsEmpty
             || !state.Definition.MutationKinds.SequenceEqual(Kinds))
         {
@@ -25,6 +26,30 @@ internal static class AnnProjectionPinValidation
         }
         return state.Checkpoint;
     }
+    private static void RequireMaintenanceProfile(DatabaseEngine database, ProjectionConsumerInfo state,
+        PrincipalRecord principal, AnnMaintenanceRequest request)
+    {
+        if (state.Definition.AnnMaintenance != request.MaintenanceProfile)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+        }
+        if (state.Definition.AnnMaintenance is null)
+        {
+            if (state.MaintenanceAuthority is not null)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+            }
+            return;
+        }
+        var authority = state.MaintenanceAuthority;
+        if (authority is null || authority.ConfigureCommandId == Guid.Empty
+            || authority.PrincipalId != principal.Id || authority.PolicyEpoch != principal.PolicyEpoch
+            || authority.Incarnation != database.Store.Identity.Incarnation)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+        }
+    }
+
     internal static void RequireOwner(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, PartitionRef partition, AnnMaintenanceRequest request)
     {

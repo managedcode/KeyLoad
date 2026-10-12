@@ -17,15 +17,15 @@ internal sealed class RemoteDocumentReceiver(OrleansNode node, PartitionHost par
     internal void Validate(RemoteDocumentCallV1 call, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var settings = nodeOptions.Value.MembershipAuthority;
+        var settings = nodeOptions.Value.PhysicalGroupTrust;
         var now = clock.GetUtcNow();
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
             || (call.QueryLeaf is not null || call.SearchLeaf is not null) && !settings.RemotePartitionQueries
-            || settings.Mode != MembershipAuthoritySettingsProtocol.Proxy
+            || settings.Role != PhysicalGroupTrustRole.Destination
             || call.Version != RemoteDocumentProtocol.Version || call.RequestId == Guid.Empty
-            || !ReplicaMembershipAuthorityValidation.ValidNonce(call.Nonce)
-            || !settings.AuthorityEndpoints.Contains(call.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
+            || !RemoteModelNativeIdentity.ValidNonce(call.Nonce)
+            || !PhysicalOwnerConfiguredTuples.Control(nodeOptions.Value, partition).Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal)
+            || !PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
             || call.ExpiresAt <= now || call.ExpiresAt > now + routingOptions.Value.RequestLifetime
             || call.Source is null || call.Fence is null || !RemotePartitionQueryScope.Valid(call)
             || !PhysicalOwnerEntryValidation.SameOwner(call.Source,

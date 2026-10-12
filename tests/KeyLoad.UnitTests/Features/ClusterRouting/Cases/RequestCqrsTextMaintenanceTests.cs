@@ -1,7 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 [RequestCqrsDataSource(nativeTextMaintenance: true)]
-[NotInParallel]
 internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsClusterFixture fixture)
 {
     [Test]

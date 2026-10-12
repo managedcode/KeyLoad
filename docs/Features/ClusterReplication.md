@@ -763,3 +763,89 @@ Use existing native ZoneTreeStore/DurableReplicaLog and ReplicaMaterializerLifec
 ## KL-035 recorded-source snapshot acceptance
 
 All three original KL-035 criteria passed in the authenticated49-case Linux lane at `b1f57eb8d487270983b428d835c922701dd14ed7`: empty-disk follower install plus ordered tail through actual SDK/official MCP, interrupted installation recovery, and retention of the last snapshot/tail recovery path during log reclamation. [Exact task/job/artifact/REQ/AC evidence](../implementation/qualification-stage57-kl035-kl079.md) distinguishes this recorded-source acceptance from later joins and the broader cluster, endurance and power-loss gates. Historical failures are retained.
+
+
+## TASK-KL009-NATIVE-ORLEANS-MOVEMENT-004 — owner correction2026-10-11
+
+The owner now requires actual Orleans startup for movement tests and rejects custom network listeners, fabricated silo generations, loopback aliases and test networking substitutes. This direction supersedes the earlier private lane constraint to preserve its manual listener topology. The original KL009 source8 and actual macOS Socket.Bind failure remain immutable historical evidence, not acceptance. Current main base: f0d869c08f1a9efe30e93911c4631ad26eb87fb0.
+
+REQ-REP-NATIVE-MOVEMENT-001 / AC-REP-NATIVE-MOVEMENT-001: the retained native writer regression starts existing TwoRf3MembershipWave, whose TUnit-owned AppHost starts/readies all six real Orleans nodes as two genuineRF3 groups. Real SDK and official MCP calls execute the existing complete linked-model seed and public parent movement. Require actual terminal receipt and placement, original committed model/output assertions, actual stopped original roots with every owner lock released, changed outerGUID refusal through native DurableReplicaLog without writes, then exact original same-index append, joined same-directory cold observations and real restart plus public original result/model replay. Preserve original deadlines, bounds, signed per-operation identity, connection-owner execution and cleanup; no skip, retry, increased retention, fake authority or topology fallback. Failure to retain the needed actual entry is a native failure, not permission to synthesize one.
+
+REQ-REP-NATIVE-MOVEMENT-002 / AC-REP-NATIVE-MOVEMENT-002: clustering and inter-node database coordination use native Orleans grain/grain-service APIs. Existing PartitionReplicaGrainService/ReplicaGrainServiceClient demonstrate the selected native per-silo endpoint and SiloAddress discovery shape. PartitionMovementClient currently owns separate HTTP effect/outcome/receiver-issue/retire-cancellation/transfer-data transport, and membership authority uses HTTP too; replacing a listener alone cannot qualify this criterion. Native movement transport must borrow the same production PartitionMovementReceiver, PartitionMovementPeerAdmission and bounded PartitionMovementRuntime, preserve exact-byte authentication, purpose/freshness/correlation, persisted authorization and native connection execution, and use actual runtime-generation discovery. Root owns this prerequisite product contract and registration; a test-only dispatcher, embedded HttpContext, parallel command implementation or sidecarTestCluster does not satisfy it.
+
+Slice map: ClusterReplication docs; Core InternalSerialization existing typed comparison; IntegrationTests Features/ClusterReplication Cases/Helpers/Assertions/Contracts/Models own the native writer AppHost regression; existing movement fixtures retain their ClusterRouting ownership and are reused through their actual contracts. Existing manual movement listeners/direct journal fixtures must be retired through the complete mapped caller closure once native counterparts preserve their whole-flow oracles. No partial source-only fixture addition claims that retirement complete. Backend/public formats, stable aliases/Ids, native journals and atomic ownership remain unchanged.
+
+```mermaid
+flowchart LR
+  T[TUnit] --> A[Existing Aspire two RF3 AppHost]
+  A --> O[Six native Orleans nodes and PartitionHosts]
+  T --> C[Real SDK and official MCP]
+  C --> G[Connection owner and movement grains]
+  G --> O
+  O --> S[Joined stopped native roots]
+  S --> N[Actual retained native append and complete images]
+  N --> R[Native restart and public replay]
+```
+
+Source/API proof is recorded in the private native-Orleans packet. Compilation, authentic discovery, operation execution, original control, Linux/RF3, coverage and complete custom-network retirement remain OPEN until original exact-source evidence exists.
+
+
+## Native discovery admission and resource-owner closure
+
+# TASK-REP-NATIVE-DISCOVERY-CLOSURE-001
+
+REQ-REP-NATIVE-DISCOVERY-CLOSURE-001 / AC-REP-NATIVE-DISCOVERY-CLOSURE-001: preserve native membership alias/Ids and exact authenticated caller/destination full generation, payload, nonce and expiry verification. Auth consumes the SAME centrally bound validated IOptions<ReplicaConfiguration> supplied by its genuine authenticator owner, not a new configuration reader or ConfigurationBinding exception. The one original caller argument must pass configurationOptions; root composes that adjacent one-line hunk separately.
+
+REQ-REP-NATIVE-DISCOVERY-CLOSURE-002 / AC-REP-NATIVE-DISCOVERY-CLOSURE-002: native discovery admission remains zero-time, configured MaximumAdmissions, no queue or timer. Use native WaitAsync(ImmediateAdmissionMilliseconds, original token). The synchronous membership metadata owner consumes only the immediately completed zero-time bool task; command execution awaits it. Read uses original lifetime shutdown token, Execute uses original caller token. Every admitted finally releases before operation lease exits.
+
+REQ-REP-NATIVE-DISCOVERY-CLOSURE-003 / AC-REP-NATIVE-DISCOVERY-CLOSURE-003: validate all constructor arguments before allocating owned resources. Close admission, cancel original callbacks, join actual original leases, then idempotently dispose admission semaphore and owned stopping source through the SAME lifetime callback. Explicit DisposeAsync path invokes the same guarded semaphore cleanup after original lifetime settlement for analyzer ownership visibility; no early disposal or borrowed authentication disposal. Keep original error mapping and cleanup exception retention.
+
+Existing genuine native tests, not duplicated getters: PeerDiscoveryOwnershipTests all3 original methods; PeerDiscoveryReplayTests and PeerDiscoverySecurityTests complete original declarations/Args; original native fixture obtains actual ISiloStatusOracle/TestCluster, never a mocked membership table. Root coherent compiler/analyzers, original native50/SIMD operation execution, exact source/image Linux and Aspire RF3 gates remain OPEN. No limit/default/schema/public identity/provider, retry, trusted role, timeout or global analyzer change.
+
+```mermaid
+flowchart LR
+ Authenticated --> Admitted --> Callback --> Released --> Drained --> Disposed
+```
+
+
+## TASK-PEER-DISCOVERY-LIFETIME-001 — native recovery owner closure (2026-10-12)
+
+REQ-PEER-DISCOVERY-LIFETIME-001: The original recovery discovery fixture owns its acquired authenticators/runtime; the native cluster owns its TestCluster and nodes; each node owns its materializer and term-metadata lifetime. Partial construction must release every acquired owner and original private directory while preserving the initiating and cleanup exceptions. Borrowed cluster references remain borrowed. Successful construction transfers ownership once; the original memoized disposal task joins runtime/consensus before storage and directory disposal. No deadline, capacity, secret, serialization or transport contract changes.
+
+AC-PEER-DISCOVERY-LIFETIME-001: Preserve every original discovery security/ownership/replay operation and declaration. The lexical fixture RunAsync captures operation errors before implicit disposal and records acquisition/disposal errors afterward; no exception is lost. Direct materializer/journal/TestCluster disposal stays in the same original ordered shutdown. Required canonical recovery execution and native analyzer recognition remain OPEN until the source is compiled/executed; source review does not qualify process/power-loss or Linux gates.
+
+Source map: RecoveryTests/Features/ClusterReplication/Fixtures/PeerDiscoveryFixture.cs, PeerDiscoveryNativeCluster.cs, PeerDiscoveryNativeNode.cs. Original actual cohort, signed caller authentication, real silo registration and original startup/shutdown limits remain unchanged.
+
+
+## TASK-CQRS-COHORT-LIFETIME-001 — native detached-owner join (2026-10-12)
+
+REQ-CQRS-COHORT-LIFETIME-001: RequestCqrsCohortRuntimeFixture disposal returns the same original shutdown task to every caller, including concurrent/repeated callers. It joins original runtime/consensus/cluster/node operations before releasing fixture registration and clearing the owned secret. During genuine voter restart, the actual detached node is lexically owned: restart failure remains first, disposal failure follows, and both settle before any fresh membership observation. An unexpected detached owner is rejected; both detached and original node owners are joined, never silently lost. A failed removal leaves the original dictionary-owned node for fixture cleanup.
+
+AC-CQRS-COHORT-LIFETIME-001: Preserve existing RequestCqrsCohort whole-flow declarations, exact native voter/incarnation/address, signed calls, generation-change oracle, startup/shutdown bounds and actual healthy/rejected/replay operations. Direct cluster disposal stays in the original ordered shutdown and every fatal/nonfatal error is retained. Required native Unit50 SIMD execution, compiled discovery and analyzer recognition are OPEN. This source-only correction does not prove causes for historical Linux cancellation or introduce a retry, timeout, authority, topology or synthetic-success seam.
+
+Source map: UnitTests/Features/ClusterReplication/Fixtures/RequestCqrsCohortRuntimeFixture.cs. Existing original scenario/native node owners remain unchanged.
+
+
+## Authenticated native caller cancellation and healthy continuation
+
+# TASK-REP-NATIVE-CALLER-CANCELLATION-001
+
+REQ-REP-NATIVE-CALLER-CANCELLATION-001 / AC-REP-NATIVE-CALLER-CANCELLATION-001: the existing native callback executes only after genuine group MAC, configured voter/full generation/current local membership and replay admission. A bounded one-shot observer retains original native bytes and SAME cancellation; its Entered task causally marks that authenticated cut. Cancel the real original caller CTS, retain exact signed OwnershipLost/empty payload/error-only shape, independently verify the sender's real MAC/nonce.
+
+REQ-REP-NATIVE-CALLER-CANCELLATION-002 / AC-REP-NATIVE-CALLER-CANCELLATION-002: cancellation releases the one configured original admission slot before a fresh request under SAME receiver owner. Preserve real membership view/full actual metadata, fresh healthy original generated bytes, and exact duplicate-nonce refusal. Close the SAME original Stop task, join callbacks before resource disposal; repeated Dispose/Stop keeps the original task and borrowed authenticator usable on a genuine native GrainService call.
+
+Implementation ownership is one appended PeerDiscoveryOwnershipTests declaration plus two feature-local helpers. Existing3 declarations and every original assertion unchanged. Real existing PeerDiscoveryNativeCluster/ISiloStatusOracle, generated serialization, original Replay nonce and signer; no fake oracle, fabricated payload/MAC, provider/dispatcher, production hook, retry, new timer/deadline or budget widening. Independently configured test owner MaximumAdmissions1 and ReplayNonceCapacity2, existing centrally validated bounds. Runtime/code after R2 coherent predecessor, compiler/native UID/actual native50 SIMD operation/RF3/Linux OPEN. This native owner support does not substitute for public Aspire RF3 or current-format cold qualification.
+
+```mermaid
+flowchart LR
+ MAC --> CurrentGeneration --> Entered --> CallerCancel --> SignedRefusal --> Released --> Healthy --> ReplayDenied --> JoinedStop
+```
+
+### Native current-generation refusal and original nonce continuation
+
+REQ-REPL-NATIVE-GENERATION-001 and AC-REPL-NATIVE-GENERATION-001 require the existing AuthenticatedNativeCapacityDoesNotHideReplayOrForgedInput operation to prove genuine signed caller-generation refusal before nonce admission, unchanged complete native membership, and same-original-nonce full native result success. Original forgery/replay/capacity controls and bounds remain. This native TestCluster scope does not qualify process cold or public RF3; runtime and Linux gates remain open.
+
+
+### TASK-REP-NATIVE-DISCOVERY-COHERENT-UNION-001
+
+The current native RequireCurrent authenticates configured voter and complete caller/destination SiloAddress generation before replay admission. A genuine re-signed changed caller generation returns Unauthenticated; the unchanged original generation with SAME nonce must then succeed. OwnershipLost remains the separate original canceled admitted callback result. Both typed errors retain exact signed nonce/empty payload/empty discovery signature. All original case declarations, capacity/forgery/replay controls and all eight generated discovery fields remain required. Cancellation closes/releases the original one-slot owner, joins the actual original task and SAME memoized Stop before direct disposal in finally; fatal/nonfatal original disposal errors remain ordered and retained. The receiver authenticator is borrowed and must remain usable for the subsequent genuine native GrainService call. No fake membership, generation adoption, timeout/capacity change, retry, UID inference or runtime PASS. Current compiler/native50/LINUX/public RF3 remain OPEN.

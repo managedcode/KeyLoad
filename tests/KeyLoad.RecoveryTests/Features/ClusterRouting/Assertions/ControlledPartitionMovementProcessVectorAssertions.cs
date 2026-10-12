@@ -13,10 +13,14 @@ internal static class ControlledPartitionMovementProcessVectorAssertions
     private const string VectorKeyFamily = "vector";
     private const double SingleRank = 1.0 / 61.0;
 
-    internal static async Task ReadAsync(ControlledPartitionMovementNativeNode node, CancellationToken cancellationToken)
+    internal static Task ReadAsync(ControlledPartitionMovementNativeNode node, CancellationToken cancellationToken)
+        => ReadAsync(node.Database, node.Store, cancellationToken);
+
+    internal static async Task ReadAsync(global::KeyLoad.Core.DatabaseEngine database, global::KeyLoad.Storage.IAtomicStore store,
+        CancellationToken cancellationToken)
     {
         var partition = ControlledPartitionMovementProcessLiteralCorpus.Partition;
-        var vector = node.Store.Read(view => view.GetRecord<VectorRecord>(KeySpace.Partition(VectorKeyFamily,
+        var vector = store.Read(view => view.GetRecord<VectorRecord>(KeySpace.Partition(VectorKeyFamily,
             partition, ControlledPartitionMovementProcessLiteralCorpus.Collection, ControlledPartitionMovementProcessLiteralCorpus.VectorField,
             ControlledPartitionMovementProcessLiteralCorpus.DocumentId)));
         var expected = new VectorRecord(ControlledPartitionMovementProcessLiteralCorpus.DocumentId,
@@ -24,7 +28,7 @@ internal static class ControlledPartitionMovementProcessVectorAssertions
             ControlledPartitionMovementProcessLiteralCorpus.InitialRevision);
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(vector, JsonDefaults.Options)
             .SequenceEqual(JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options))).IsTrue();
-        var rows = await new SearchEngine(node.Database, CrashExecutionOptions.QueryExecution()).SearchAsync(
+        var rows = await new SearchEngine(database, CrashExecutionOptions.QueryExecution()).SearchAsync(
             ControlledPartitionMovementProcessLiteralCorpus.PrincipalId, new(partition, ControlledPartitionMovementProcessLiteralCorpus.Collection,
                 VectorField: ControlledPartitionMovementProcessLiteralCorpus.VectorField, Vector: [1f, 0f],
                 Space: ControlledPartitionMovementProcessLiteralCorpus.Space), cancellationToken);

@@ -20,9 +20,16 @@ internal static class AnnMaintenanceParentFlow
         { throw Errors.Fail(ErrorCode.Validation, AnnMaintenanceOptions.ValidationMessage); }
         if (request.Mode == AnnMaintenanceMode.Release)
         { return await ReleaseAsync(children, request, token).ConfigureAwait(true); }
+        var initial = await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true);
         var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Configure, EmptySequence);
-        _ = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(OperationKind.ConfigureProjectionConsumer,
-            new(configureId, request.Consumer, new(request.IndexGeneration, [], [.. MutationKinds])), configureId, token).ConfigureAwait(true);
+        var configured = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(OperationKind.ConfigureProjectionConsumer,
+            new(configureId, request.Consumer, new(request.IndexGeneration, [], [.. MutationKinds])
+            { AnnMaintenance = request.MaintenanceProfile })
+            { InitialAnnMaintenance = initial }, configureId, token).ConfigureAwait(true);
+        var originalState = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.AdmitOriginal,
+            token, originalConfigure: configured).ConfigureAwait(true);
+        if (originalState.OriginalResult is { } retained)
+        { return await ReplayOriginalAsync(children, request, configured, originalState, retained, writer).ConfigureAwait(true); }
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Configure).ConfigureAwait(true);
         var state = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Begin, token).ConfigureAwait(true);
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Capture).ConfigureAwait(true);
@@ -48,9 +55,29 @@ internal static class AnnMaintenanceParentFlow
         else
         { checkpoint = replayed.Checkpoint; }
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Checkpoint).ConfigureAwait(true);
+        var result = new AnnMaintenanceResult(request.CommandId, request.Consumer, request.IndexGeneration,
+            AnnMaintenancePhase.Completed, state.Source, state.Count, state.IndexSha256, checkpoint);
+        return await CompleteAsync(children, request, configured, result, writer).ConfigureAwait(true);
+    }
+
+    private static async Task<AnnMaintenanceResult> ReplayOriginalAsync(AnnMaintenanceChildCalls children,
+        AnnMaintenanceRequest request, ProjectionConsumerInfo configured, AnnMaintenanceCapabilityResult state,
+        AnnMaintenanceResult retained, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+    {
+        await AnnMaintenanceEnrollmentAck.CommitAsync(children, request, configured, state, writer.CancellationToken).ConfigureAwait(true);
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Completed).ConfigureAwait(true);
-        return new(request.CommandId, request.Consumer, request.IndexGeneration, AnnMaintenancePhase.Completed,
-            state.Source, state.Count, state.IndexSha256, checkpoint);
+        return retained;
+    }
+
+    private static async Task<AnnMaintenanceResult> CompleteAsync(AnnMaintenanceChildCalls children,
+        AnnMaintenanceRequest request, ProjectionConsumerInfo configured, AnnMaintenanceResult result,
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+    {
+        var settled = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.SettleOriginalResult,
+            writer.CancellationToken, fullResult: result).ConfigureAwait(true);
+        await AnnMaintenanceEnrollmentAck.CommitAsync(children, request, configured, settled, writer.CancellationToken).ConfigureAwait(true);
+        await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Completed).ConfigureAwait(true);
+        return result;
     }
 
     private static async Task<AnnMaintenanceReplayResult> ReplayAsync(AnnMaintenanceChildCalls children,
@@ -68,7 +95,8 @@ internal static class AnnMaintenanceParentFlow
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)
                 { throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest); }
                 var intent = request.Mode == AnnMaintenanceMode.Build || checkpoint is null
-                    ? new CommitProjectionBatchRequest(Guid.NewGuid(), request.Consumer, page.Token, []) : null;
+                    ? new CommitProjectionBatchRequest(AnnMaintenanceChildIdentity.Create(request.CommandId,
+                        AnnMaintenancePhase.Publish, page.ThroughSequence), request.Consumer, page.Token, []) : null;
                 return new(checkpoint, intent);
             }
             var id = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Checkpoint, page.ThroughSequence);

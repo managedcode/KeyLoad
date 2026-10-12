@@ -103,6 +103,10 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         return new HttpClientTransport(options, connection);
     }
 
+    /// <summary>Adds untrusted caller claims to the same genuine transport for the current-authority whole flow.</summary>
+    internal void AddUntrustedIdentityHeaders()
+        => global::KeyLoad.IntegrationTests.Features.Authorization.StandardAspNetAuthorityTrial.AddHeaders(http);
+
     private async Task InitializeAsync(string protocolVersion, string node, CancellationToken cancellationToken)
     {
         try

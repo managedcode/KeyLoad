@@ -1962,3 +1962,78 @@ Original evidence: `/private/tmp/keyload-stage57-inventory-affected-build-r1-202
 REQ/AC-PMOVE-001/003 and ADR106 retain control-owned native outcomes rather than copying them as partition model records. One additive supporting whole operation freezes all eight actual seed entries at literal indexes3..10: Collection/Topic/WorkQueue configuration, mixed Batch, BlobStore configuration, Begin/Part/Complete. Their original IDs, typed complete values/receipts, global versus partition scope, source incarnation, blob lifetime stamp and scoped locator remain exact through genuine capture/install/finalize/publication/retirement and two joined same-root cold reopen cuts. Destination must contain none of these original outcome/locator keys; installed complete model images and blob quotas remain covered by the original terminal operation.
 
 After retirement, replay only the four global configurations and original mixed Batch through their current authoritative source seam. The three retained blob outcomes are byte/state authority evidence, not a promise that a retired source can execute blob-lifetime replay after its model state has moved. A changed body under an original global ID returns Conflict with no full-image, committed cut or replica-index effect. Fresh authorized global configuration succeeds, then its complete result and all eight retained records survive the second cold cut and original-ID replay. Existing cases, counts, deadlines, admissions, cleanup, native SIMD and public RF3 gates are unchanged. Optional test-only audit hooks default to absent; Core0. New whole operation: ControlledPartitionMovementRetainedOutcomesTests.AllEightSeedOutcomesRemainSourceOwnedThroughTerminalWorkAndTwoColdCuts. Source review is not native qualification; compiler, canonical formatter, native discovery/execution and delivered Linux gates remain pending.
+
+## Native Orleans movement transport, owner correction 2026-10-11
+
+[NativePeerTransport](../Features/ClusterRouting/NativePeerTransport.md) freezes the generated
+GrainService contracts, actual native discovery, independently authenticated
+current sender and immutable historical operation bytes, typed failures,
+resource/replay bounds, lifecycle and real Aspire RF3 regression gates. The
+owner selected native Orleans Azure Storage/localhost membership for Aspire;
+the actual RF3 topology uses AppHost-owned Azurite and Azure Table clustering.
+The replaced custom HTTP/TCP peer transport, bootstrap and inferred silo
+addresses must be retired without an active fallback. Public SDK/SQL/MCP
+protocols retain their client contracts. Source is being authored; no new
+compilation, native execution, Linux coverage or qualification pass is claimed.
+
+
+## Genuine native Prepare operation companion (2026-10-11)
+
+REQ-PMOVE-NATIVE-PREPARE-001 / AC-PMOVE-NATIVE-PREPARE-001: retain all old direct-storage Prepare11/Capture19 cases unchanged as scoped support; add a dedicated real six-host native Orleans companion. Session R44 plus R44R3 and Root native localhost composition are exact prerequisites. Actual hosts own PartitionHost, OrleansNode, CQRS, materializer, roots and all startup/shutdown. Default product/Aspire Azure membership remains unchanged. No new provider or trusted caller claims.
+
+Startup owns Control/Destination registration. Independently compare complete actual persisted directory to Version1/Revision1 and exactly those two immutable entries before any business seed and after each cold reopen. Missing/conflicting rows fail; never repair with duplicate RegisterPhysicalOwner.
+
+Seed the original document/vector/event/queue plus chunked blob through the existing host signed SubmitAsync using the original IDs and payloads. Inspect the genuine original committed log entry under fixed-tail record/byte bounds. Expected receipt index derives independently from that retained entry, term must be positive, original principal root and native QuorumProcessDurable remain exact. Full literal model, event page, blob metadata/full/partial reads and receipts are compared, not observed values relabeled expected.
+
+Send a production-signed outer request with deliberately invalid INNER proof through the actual native sender. Require Unauthenticated and both complete original native store images, positions and log tails unchanged; this is authentic outer/inner-proof refusal, not evidence of a different gate. Then genuine Prepare, original replay, authorized changed-body Conflict and exact original replay use production owner/MAC/inner bytes. No wire detail adoption: the native transport's safe Unavailable detail remains distinct from Core direct-control Conflict detail.
+
+Two same-root all-six cold cuts join original owners before reopen. Phase original expiry is preserved because it belongs to the original dispatch digest. Fresh independently authorized native Outcome reads reconcile that original phase, with all witness record/byte/result bounds. Original seed/blob and fresh healthy command receipts survive exact same-ID replay; full literal models and original evaluatedAt survive both cuts.
+
+Refusal requires exact full raw no-effects. Background election/log progress is not automatically classified as a command effect: retain any actual failing observation and identify its precise original entry before proposing a narrower oracle. Never vary IDs, expiry, clock, quotas, quiet barriers, deadlines or assertions to make a test pass.
+
+R1 preparation remains immutable but is superseded by this complete source proposal (R1 NativeRequest/NativeSend bytes are unchanged; R2 NativeReplyAssertions returns the independently constructed expected phase after proving full equality, rather than returning observed data). No compiler, runtime, native UID, Azure qualification or Linux PASS is claimed. Root owns integrated compile/discovery/native50/SIMD and original process/public RF3 gates. This companion does not replace all 27 substantive retired transport declarations; cancellation/host-stop/process and further phase ports remain explicit gates.
+
+
+## Retained support MAC owner (2026-10-11)
+
+REQ-PMOVE-NATIVE-SUPPORT-MAC-001 / AC-PMOVE-NATIVE-SUPPORT-MAC-001: retire the removed MembershipAuthority.Mode/AuthorityPeerSecret key selection from retained direct-storage support. ControlledPartitionMovementVerifiedSubmit, ControlledPartitionMovementPeerVerification and ControlledMovementOwnerAdmissionAssertions borrow the SAME production admission.CreateControlMac factory. It validates current configured local/control/destination tuples before selecting the own or foreign secret, bounds the MAC with the same database MaxBatchBytes and zeroes transient decoded key bytes. Original owned MAC disposal remains joined by the existing ServerFailureObserver ledger.
+
+No parent process branch, administrator verification, native signed bytes, original nonce, action check, checkpoint/parent-effect factory, local journal submission, result shape, malformed proof assertion, OwnershipLost or full raw no-effects/cold assertion changes. Original cases/Args/UIDs remain declared unchanged. This is direct-storage support, not a native transport/RF3 replacement; genuine native Prepare15 independently connects the actual six hosts and sender. Existing process owner and native transport cancellation/stop/outcome coverage remain qualification gates.
+
+Dependencies: Prepare15 R2 doc append, Root typed physical trust/provider composition, Session native host closure. Three existing CS guarded intent patches and two additive docs; no new public/persisted API, key copies, dispatcher, custom membership or fallback. Compilation/runtime/native UIDs are pending Root coherent integrated gate; source preview is not PASS.
+
+
+## Native original-packet replay (2026-10-11)
+
+REQ-PMOVE-NATIVE-NONCE-001 / AC-PMOVE-NATIVE-NONCE-001: extend the already declared Prepare15 whole method, not create another fixture or getter test. After authentic Prepare/replay/Conflict, issue its unchanged command/body with a fresh inner nonce through the SAME production context.Sign, native client.CreateRequest/ExchangeAsync and production reply verifier. Require genuine successful first outer packet, both MACs and complete addressed identity/result before the exact immutable outer packet is resent. Require current identical sender/destination silo generation and unexpired original outer and inner admission; expiry, changed MAC/shape or startup failures receive no nonce qualification.
+
+Exact duplicate fails Unauthenticated/Unavailable with both full source/target native images, store positions and replica tails unchanged. The original full expected phase remains unchanged. The existing two same-root cold cuts, original Outcome reconciliation, exact seed/blob/healthy receipt replay and full literal model oracles run afterwards. Original Prepare11/Capture19 and all original declarations are preserved as supporting controls. No synthetic response, role, packet MAC, clock, deadline, trusted flag, new dispatcher, endpoint or producer hook. All borrowed transport verification and actual six-host shutdown remain original owned/joined lifetimes.
+
+Dependencies: Prepare15 R2 + supportMAC5 exact docs append. New helper creation is previewed as exact NS; planned existing case postimage is guarded against Prepare15 rather than pretending it is already integrated. No compiler/native UID/runtime/Linux qualification is claimed.
+
+## Retained movement typed policy and native outcome codec closure
+
+REQ-PMOVE-TYPED-TRUST-001 / AC-PMOVE-TYPED-TRUST-001: every retained movement proof MAC keeps its exact original domain/body/nonce/expiry/outcome checks and key zeroing; replace the removed trusted foreign peer secret field with PhysicalGroupTrust.ForeignPeerSecret. Preserve existing full owner checks and storage incarnation. Client dispatch/outcome/receiver/transfer admission requires current typed Control role and RegisterPhysicalOwners; runtime requires original register + remote document grant. Protected frame observation requires validated Destination role and all original explicit grants, session/root and benchmark/private-network exclusions. FreshAdmission uses the actual admission.CreateControlMac same owner/bounds/disposal rather than duplicating retired mode logic.
+
+REQ-PMOVE-NATIVE-OUTCOME-CODEC-001 / AC-PMOVE-NATIVE-OUTCOME-CODEC-001: retain original OutcomePathReadsExactOriginalBytesAndWrongPurposeRejectsBeforeHealthyNextRequest declaration. Retire its exclusively HTTP in-memory request wrapper, not its operation purpose. Genuine persisted mixed seed + original Prepare/receipt/conflict creates a native outcome request. Native canonical binary codec preserves complete original request bytes; production MAC admission refuses cross-purpose signatures before state changes. Exact both native images/positions/journal tails remain unchanged, proper same outcome succeeds, phase succeeds, original receipt replay and same-root cold retain full models/blob/authority. The literal four-byte codec source remains independently roundtripped. No HTTP/legacy alias, fake membership or fabricated result, quotas/clock/deadline/schema change. This is local storage/native codec support, not native RPC/RF3 completion credit.
+
+Dependencies: SupportMAC5 and Prepare15 actual ordered join; genuine native six-host Prepare/Nonce companion separately remains runtime OPEN. Native codefix candidates solely regenerate retired APIs and are rejected against the explicit retirement instruction. Main is unchanged; compiler and all runtime gates OPEN.
+
+
+## REQ-PMOVE-NATIVE-RETIRE-LIFETIME-001 — original receiver borrow and owned stop
+
+AC-PMOVE-NATIVE-RETIRE-LIFETIME-001 connects the genuine native MovePartition parent and six production hosts to the existing Retire-only sealed-operation observer. Cancel the same original caller, require exact UnknownWriteOutcome/Problem and actual receiver join before the signed original expiry, then require all six complete raw images/positions/tails unchanged across that selected cancellation. Retain every earlier genuine Capture/Install/Publish effect; bind the actual installed receipt to its committed native Install entry, original parent phase ID, physical owner/incarnation and ownership epoch.
+
+The existing authenticated expired-Retire reconciliation permits fresh Resume under the same MoveId; capture its distinct native cleanup generation, stop/join the same six owners and original producer/observer, then reopen those same roots. Verify the complete retained original pending phase and absence of its native outcome before fresh authorized reconciliation. Complete Retired result uses exact input owners, original source cut, genuine installed receipt and independently literal publication. Original mixed document/vector/event/queue/blob records, complete original commit receipts and literal healthy continuation must survive two genuine cold cuts and exact terminal replay.
+
+Automated source: ControlledPartitionMovementNativeRetireTests.OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners. No UID is assigned before native discovery. This native six-host Unit scope does not claim Docker/Aspire RF3, process-kill or Linux acceptance. Compiler/runtime remain OPEN. Direct-storage Prepare11/Capture19 controls and pre-send cancellation are preserved separately. No new public/persisted contract, product hook, expiry/deadline, provider, command-ID algorithm or scalar profile.
+
+
+### Native companion execution-token closure
+
+The genuine six-host Prepare and Retire companion declarations borrow the original TUnit Execution.CancellationToken, matching all existing retained movement cases. Do not invent TestContext-level cancellation APIs or overloads to repair unresolved calls. Preserve all original native calls, bounded grants, actual committed-entry receipts, parent cancellation/UnknownWriteOutcome, joined six-owner Stop and two same-root cold continuations. This is an API binding correction, not native execution or RF3 acceptance evidence.
+
+
+### Native Prepare initiating-failure roots
+
+A fixture operation recorded by ServerFailureObserver is an original initiating failure even though its observation callback returns normally. Before original six-host await-using disposal, a nonempty shared ledger must mark the existing host owner RetainRoots. Actual host disposal and exception joining remain mandatory. This prevents successful shutdown from erasing evidence before the original operation failure reaches its caller; it neither claims shutdown success nor changes movement state or authority.

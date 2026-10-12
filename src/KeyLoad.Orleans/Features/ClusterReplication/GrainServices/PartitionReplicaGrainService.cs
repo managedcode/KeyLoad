@@ -11,11 +11,12 @@ namespace KeyLoad.Orleans;
 /// <param name="endpoint">Node-owned replica operations and transport readiness.</param>
 /// <param name="discovery">Local runtime-generation discovery state.</param>
 /// <param name="authentication">Peer-envelope authentication and bounded replay admission.</param>
+/// <param name="nativeDiscovery">Silo-owned bounded native metadata callback and joined shutdown.</param>
 /// <param name="diagnostics">Operational logging for unexpected endpoint failures.</param>
 /// <param name="observation">Optional construction-owned observation of actual authenticated exchanges.</param>
 public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
     IReplicaEndpoint endpoint, ReplicaSiloDiscoveryState discovery, ReplicaEnvelopeAuthenticator authentication,
-    ILogger<PartitionReplicaGrainService> diagnostics, IReplicaTransportObservation? observation = null)
+    ReplicaNativeDiscoveryRuntime nativeDiscovery, ILogger<PartitionReplicaGrainService> diagnostics, IReplicaTransportObservation? observation = null)
     : GrainService(id, silo, loggerFactory), IPartitionReplicaGrainService
 {
     private const int FailureEventId = 3;
@@ -67,6 +68,13 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
             return authentication.CreateReply(request, ReadOnlyMemory<byte>.Empty, ErrorCode.OwnershipLost, ReplicaTransportProtocol.EndpointFailure);
         }
     }
+
+    /// <summary>Discovers actual initialized silo metadata without depending on replication quorum.</summary>
+    /// <param name="request">The signed fixed-voter caller and exact addressed native generation.</param>
+    /// <param name="cancellationToken">Cancellation joined by the native metadata callback owner.</param>
+    /// <returns>The original signed typed metadata reply task.</returns>
+    public Task<ReplicaNativeDiscoveryReply> DiscoverAsync(ReplicaNativeDiscoveryRequest request, CancellationToken cancellationToken)
+        => nativeDiscovery.DiscoverAsync(request, cancellationToken);
 
     /// <summary>Consensus remains available until the later RuntimeStorageServices shutdown callback.</summary>
     /// <returns>The base grain-service shutdown task.</returns>

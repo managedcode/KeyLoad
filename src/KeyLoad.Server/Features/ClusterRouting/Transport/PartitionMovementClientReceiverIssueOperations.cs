@@ -103,8 +103,8 @@ internal static class PartitionMovementClientReceiverIssueOperations
 
     internal static RegisteredPhysicalOwnerV1 ReceiverIssueOwner(PartitionMovementClient owner, PartitionMoveParentPhase original)
     {
-        if (owner.options.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
-            || !owner.options.Value.MembershipAuthority.RegisterPhysicalOwners || original.OriginalGrant is not { RequireReceiverIssuance: true })
+        if (owner.options.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control
+            || !owner.options.Value.PhysicalGroupTrust.RegisterPhysicalOwners || original.OriginalGrant is not { RequireReceiverIssuance: true })
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
         var control = PhysicalOwnerConfiguredTuples.Control(owner.options.Value, owner.partition);
         var destination = PhysicalOwnerConfiguredTuples.Destination(owner.options.Value, owner.partition);

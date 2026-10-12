@@ -1,5 +1,4 @@
-using System.Collections.Immutable;
-using System.Security.Cryptography;
+using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
@@ -8,19 +7,15 @@ namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
 internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
 {
-    internal const string LocalVoter = "http://cohort-local:8080";
-    internal const string FirstRemote = "http://cohort-remote-one:8080";
-    internal const string SecondRemote = "http://cohort-remote-two:8080";
+    internal const string LocalVoter = "Primary";
+    internal const string FirstRemote = "Secondary_1";
+    internal const string SecondRemote = "Secondary_2";
     internal const string ClusterId = "request-cqrs-cohort-unit";
     internal static readonly TimeSpan RpcTimeout = TimeSpan.FromSeconds(1);
     internal static readonly TimeSpan ConnectTimeout = TimeSpan.FromMilliseconds(200);
     internal static readonly TimeSpan LowerElectionTimeout = TimeSpan.FromMilliseconds(1_500);
     internal static readonly TimeSpan UpperElectionTimeout = TimeSpan.FromSeconds(2);
     private readonly RequestCqrsCohortRuntimeFixture runtime;
-    private readonly byte[] secret = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
-    private readonly List<RequestCqrsCohortEndpoint> endpoints = [];
-    private readonly List<ReplicaEnvelopeAuthenticator> authenticators = [];
-    private readonly Dictionary<string, ReplicaEnvelopeAuthenticator> serverAuthenticators = new(StringComparer.Ordinal);
     private ReplicaSiloDiscoveryClient? client;
 
     private RequestCqrsCohortScenario(RequestCqrsCohortRuntimeFixture runtime)
@@ -88,62 +83,31 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
 
     private async Task StartCoreAsync(CancellationToken token)
     {
-        var local = await RequestCqrsCohortEndpoint.StartAsync(LocalVoter, token);
-        endpoints.Add(local);
-        var remoteOne = await RequestCqrsCohortEndpoint.StartAsync(FirstRemote, token);
-        endpoints.Add(remoteOne);
-        var remoteTwo = await RequestCqrsCohortEndpoint.StartAsync(SecondRemote, token);
-        endpoints.Add(remoteTwo);
-        Configuration = new(LocalVoter, ImmutableArray.Create(LocalVoter, FirstRemote, SecondRemote),
-            Path.Combine(Path.GetTempPath(), "keyload-request-cqrs-cohort", Guid.NewGuid().ToString("N")),
-            Guid.NewGuid())
-        {
-            RpcTimeout = RpcTimeout,
-            HeartbeatInterval = TimeSpan.FromMilliseconds(100),
-            LowerElectionTimeout = LowerElectionTimeout,
-            UpperElectionTimeout = UpperElectionTimeout
-        };
-        Options = new(new(StringComparer.Ordinal)
-        {
-            [LocalVoter] = local.Origin,
-            [FirstRemote] = remoteOne.Origin,
-            [SecondRemote] = remoteTwo.Origin
-        }, secret, ClusterId)
-        { ConnectTimeout = ConnectTimeout };
-        Configuration.Validate();
-        Options.Validate(Configuration);
-        ConfigureSigner(local);
-        ConfigureSigner(remoteOne);
-        ConfigureSigner(remoteTwo);
+        token.ThrowIfCancellationRequested();
+        await runtime.RestartIfStoppedAsync();
+        var local = runtime.Node(LocalVoter);
+        Configuration = local.Journal.Configuration;
+        Options = local.Peers;
+        runtime.Node(FirstRemote).Observation.Reset();
+        runtime.Node(SecondRemote).Observation.Reset();
         PublishCompatibleRemoteOne(1);
-        remoteTwo.SetDiscovery(Authenticator(SecondRemote),
-            Discovery(SecondRemote, 2, runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
-        var localState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(Configuration),
-            UnitRoutingOptions.Peers(Configuration, Options), runtime.LocalSilo, StoreReaderContract.RuntimeJournal);
-        localState.MarkTransportReady();
-        var localAuthenticator = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), localState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
-        authenticators.Add(localAuthenticator);
-        client = new ReplicaSiloDiscoveryClient(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), localState, localAuthenticator, TimeProvider.System, UnitRoutingOptions.Discovery());
-    }
-
-    private void ConfigureSigner(RequestCqrsCohortEndpoint endpoint)
-    {
-        var remoteConfiguration = Configuration with { LocalId = endpoint.VoterId };
-        var remoteState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration),
-            UnitRoutingOptions.Peers(remoteConfiguration, Options), runtime.LocalSilo, StoreReaderContract.RuntimeJournal);
-        var authentication = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration), UnitRoutingOptions.Peers(remoteConfiguration, Options), remoteState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
-        authenticators.Add(authentication);
-        serverAuthenticators.Add(endpoint.VoterId, authentication);
-        endpoint.SetDiscovery(authentication,
-            Discovery(endpoint.VoterId, endpoint.VoterId == LocalVoter ? 0 : endpoint.VoterId == FirstRemote ? 1 : 2,
-                runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
+        PublishRemoteTwoRecord(Discovery(SecondRemote, 2));
+        var probe = new ReplicaDiscoveryProbe(
+            (request, cancellation) => Find(request.DestinationVoter).BeforeSend(request, cancellation),
+            static (_, _, _, _) => { },
+            (request, reply, cancellation) => Find(request.DestinationVoter).Receive(reply, cancellation),
+            (request, cancellation) => Find(request.DestinationVoter).BeforeSendAsync(cancellation));
+        client = new(UnitExecutionOptions.ReplicaConfiguration(Configuration),
+            UnitRoutingOptions.Peers(Configuration, Options), local.Discovery, local.Authentication,
+            TimeProvider.System, runtime.LocalServices,
+            runtime.LocalServices.GetRequiredService<ISiloStatusOracle>(), UnitRoutingOptions.Membership(), probe);
     }
 
     private ReplicaEnvelopeAuthenticator Authenticator(string voter)
-        => serverAuthenticators[voter];
+        => runtime.Node(voter).Authentication;
 
     private RequestCqrsCohortEndpoint Find(string voter)
-        => endpoints.Single(endpoint => endpoint.VoterId == voter);
+        => runtime.Node(voter).Observation;
 
     public async ValueTask DisposeAsync()
     {
@@ -168,18 +132,8 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
             }
         }
 
-        foreach (var authentication in authenticators)
-        {
-            RequestCqrsCohortCleanup.CaptureSync(authentication.Dispose, failures);
-        }
-        authenticators.Clear();
-        serverAuthenticators.Clear();
-        foreach (var endpoint in endpoints)
-        {
-            await RequestCqrsCohortCleanup.CaptureAsync(() => endpoint.DisposeAsync().AsTask(), failures);
-        }
-        endpoints.Clear();
-        CryptographicOperations.ZeroMemory(secret);
+        runtime.Node(FirstRemote).Observation.Reset();
+        runtime.Node(SecondRemote).Observation.Reset();
         RequestCqrsCohortCleanup.ThrowIfAny(failures);
     }
 }

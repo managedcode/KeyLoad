@@ -10,22 +10,17 @@ internal static class PhysicalOwnerRegistrationServices
         services.AddSingleton<PhysicalOwnerProbeWorkOwner>();
         services.AddSingleton<PhysicalOwnerStartupRequests>();
         services.AddSingleton<PhysicalOwnerProbeReceiver>();
-        services.AddSingleton(static provider => new PhysicalOwnerProbeEndpoint(
+        services.AddSingleton(static provider => new PhysicalOwnerProbeNativeRuntime(
             provider.GetRequiredService<IOptions<NodeOptions>>(),
+            provider.GetRequiredService<OrleansNode>(),
+            provider.GetRequiredService<PartitionHost>(),
             provider.GetRequiredService<PhysicalOwnerProbeReceiver>(),
             provider.GetRequiredService<PhysicalOwnerProbeWorkOwner>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
             provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<ILogger<PhysicalOwnerProbeEndpoint>>()));
-    }
-
-    internal static void Map(WebApplication app)
-    {
-        var settings = app.Services.GetRequiredService<IOptions<NodeOptions>>().Value.MembershipAuthority;
-        if (!settings.RegisterPhysicalOwners || settings.Mode != MembershipAuthoritySettingsProtocol.Proxy)
-        { return; }
-        app.MapPost(PhysicalOwnerProbeProtocol.Path,
-            static (HttpContext context, PhysicalOwnerProbeEndpoint endpoint) => endpoint.HandleAsync(context));
+            provider.GetRequiredService<ILogger<PhysicalOwnerProbeNativeRuntime>>()));
+        services.AddSingleton<Func<PhysicalOwnerProbeNativeRuntime>>(
+            static provider => () => provider.GetRequiredService<PhysicalOwnerProbeNativeRuntime>());
     }
 }

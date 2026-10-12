@@ -45,7 +45,8 @@ internal static class PartitionMovementRetireCancellationPeerAdmission
 
     internal static byte[] VerifyRetireCancellationMac(PartitionMovementPeerAdmission peer, ReadOnlyMemory<byte> body, string signature, bool query)
     {
-        if (!peer.Execution.Enabled || !peer.Options.MembershipAuthority.RegisterPhysicalOwners)
+        if (!peer.Execution.Enabled || !peer.Options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || peer.Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementPeerAdmission.InvalidProof); }
         if (body.IsEmpty || body.Length > peer.Database.Limits.MaxBatchBytes)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }

@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class RequestCqrsAnnInvocation
 {
     internal static async Task<(AnnMaintenanceResult Result, GrainOperationReply Reply)> RunAsync(
-        RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request, CancellationToken token)
+        RequestCqrsClusterFixture fixture, AnnMaintenanceRequest request, CancellationToken token, bool retainedReplay = false)
     {
         var id = Guid.NewGuid();
         var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
@@ -29,7 +29,10 @@ internal static class RequestCqrsAnnInvocation
         await Assert.That(reply.SafeDetail).IsNull();
         var result = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as AnnMaintenanceResult
             ?? throw new InvalidOperationException();
-        await RequestCqrsAnnAssertions.FramesAsync(frames, request, id);
+        if (retainedReplay)
+        { await RequestCqrsAnnAssertions.RetainedFramesAsync(frames, id); }
+        else
+        { await RequestCqrsAnnAssertions.FramesAsync(frames, request, id); }
         await Assert.That(NativeSerialization.Serialize(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span))
             .AsSpan().SequenceEqual(reply.Payload.Span)).IsTrue();
         return (result, reply);

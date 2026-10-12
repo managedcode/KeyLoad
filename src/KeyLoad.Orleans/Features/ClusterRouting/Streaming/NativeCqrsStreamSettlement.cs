@@ -13,6 +13,21 @@ internal static class NativeCqrsStreamSettlement
         return Combine(primary, disposal, activation);
     }
 
+    internal static async ValueTask<Exception?> SettleAwaitedAsync<T>(IAsyncEnumerator<T>? enumerator, Func<ValueTask> settled,
+        Exception? primary)
+    {
+        var disposal = await CaptureDisposalAsync(enumerator).ConfigureAwait(true);
+        var activation = await CaptureActivationAsync(settled).ConfigureAwait(true);
+        return Combine(primary, disposal, activation);
+    }
+
+    private static async ValueTask<Exception?> CaptureActivationAsync(Func<ValueTask> settled)
+    {
+        try { await settled().ConfigureAwait(true); return null; }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
+    }
+
     private static async ValueTask<Exception?> CaptureDisposalAsync<T>(IAsyncEnumerator<T>? enumerator)
     {
         if (enumerator is null)

@@ -1,3 +1,4 @@
+using KeyLoad.Server;
 using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
@@ -5,7 +6,6 @@ using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using KeyLoad.Storage;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -13,18 +13,18 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsRf3SignedDiscovery
 {
     private const string ClusterPrefix = "keyload-";
-    private const string DiscoveryPath = ReplicaProtocol.DiscoveryPath;
+    private const string DiscoveryPath = NativeSiloDiscoveryDiagnosticProtocol.Path;
     private const string InvalidSignedObservation = "The actual signed RF3 discovery observation is invalid.";
     private const string BodyTooLarge = "The signed RF3 discovery observation exceeded its native byte bound.";
     private const int SignatureCharacters = 64;
 
     internal static async Task<ReplicaSiloDiscovery> ReadAsync(DistributedApplication app, string nodeName,
-        Guid incarnation, ReadOnlyMemory<byte> peerSecret, CancellationToken cancellationToken)
+        Guid incarnation, ReadOnlyMemory<byte> peerSecret, string adminCredential, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(app);
         if (peerSecret.Length != ReplicaTransportProtocol.SecretBytes)
         { throw new InvalidOperationException(InvalidSignedObservation); }
-        return await ReadOwnedAsync(app, nodeName, incarnation, peerSecret, cancellationToken).ConfigureAwait(false);
+        return await ReadOwnedAsync(app, nodeName, incarnation, peerSecret, adminCredential, cancellationToken).ConfigureAwait(false);
     }
 
     internal static async Task<ReplicaSiloDiscovery> ReadForProfileAsync(DistributedApplication app,
@@ -32,42 +32,29 @@ internal static class RequestCqrsRf3SignedDiscovery
     {
         var credential = Convert.FromBase64String(profile.PeerSecret);
         try
-        { return await ReadAsync(app, nodeName, profile.Incarnation, credential, cancellationToken).ConfigureAwait(false); }
+        { return await ReadAsync(app, nodeName, profile.Incarnation, credential, profile.AdminKey, cancellationToken).ConfigureAwait(false); }
         finally
         { CryptographicOperations.ZeroMemory(credential); }
     }
 
     private static async Task<ReplicaSiloDiscovery> ReadOwnedAsync(DistributedApplication app, string nodeName,
-        Guid incarnation, ReadOnlyMemory<byte> credential, CancellationToken cancellationToken)
+        Guid incarnation, ReadOnlyMemory<byte> credential, string adminCredential, CancellationToken cancellationToken)
     {
-        using var signer = new PeerSecurity(credential, TimeProvider.System, IntegrationRoutingOptions.Discovery());
+        ArgumentException.ThrowIfNullOrWhiteSpace(adminCredential);
+        var nonce = Guid.NewGuid();
         using var http = McpCallerHttp.Create(app, nodeName);
         using var request = new HttpRequestMessage(HttpMethod.Get,
-            new Uri(http.BaseAddress ?? throw new InvalidOperationException(InvalidSignedObservation), DiscoveryPath));
-        signer.Sign(request);
-        var nonce = ReadNonce(request);
+            new Uri(http.BaseAddress ?? throw new InvalidOperationException(InvalidSignedObservation), DiscoveryPath + "?" + NativeSiloDiscoveryDiagnosticProtocol.NonceParameter + "=" + nonce.ToString(NativeSiloDiscoveryDiagnosticProtocol.NonceFormat, CultureInfo.InvariantCulture)));
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminCredential);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.OK)
         { throw new InvalidOperationException(InvalidSignedObservation); }
+        if (response.Content.Headers.ContentType?.MediaType != NativeSiloDiscoveryDiagnosticProtocol.ContentType)
+        { throw new InvalidOperationException(InvalidSignedObservation); }
         var payload = await ReadBoundedPayloadAsync(response, cancellationToken).ConfigureAwait(false);
         VerifySignature(response, incarnation, nodeName, nonce, credential, payload);
         return ValidateNativeRecord(incarnation, nodeName, payload);
-    }
-
-    private static Guid ReadNonce(HttpRequestMessage request)
-    {
-        if (!request.Headers.TryGetValues(ReplicaTransportProtocol.HttpNonceHeader, out var values))
-        { throw new InvalidOperationException(InvalidSignedObservation); }
-        using var iterator = values.GetEnumerator();
-        if (!iterator.MoveNext())
-        { throw new InvalidOperationException(InvalidSignedObservation); }
-        var text = iterator.Current;
-        if (iterator.MoveNext()
-            || !Guid.TryParseExact(text, ReplicaTransportProtocol.NonceFormat, out var nonce)
-            || nonce == Guid.Empty)
-        { throw new InvalidOperationException(InvalidSignedObservation); }
-        return nonce;
     }
 
     private static async Task<byte[]> ReadBoundedPayloadAsync(HttpResponseMessage response,
@@ -95,7 +82,7 @@ internal static class RequestCqrsRf3SignedDiscovery
     private static void VerifySignature(HttpResponseMessage response, Guid incarnation, string nodeName,
         Guid nonce, ReadOnlyMemory<byte> credential, byte[] payload)
     {
-        if (!response.Headers.TryGetValues(ReplicaTransportProtocol.DiscoverySignatureHeader, out var values))
+        if (!response.Headers.TryGetValues(NativeSiloDiscoveryDiagnosticProtocol.SignatureHeader, out var values))
         { throw new InvalidOperationException(InvalidSignedObservation); }
         using var iterator = values.GetEnumerator();
         if (!iterator.MoveNext())

@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -9,7 +8,7 @@ namespace KeyLoad.Server.Features.EventStreams;
 // This owner records local encoding/MAC, never an observed network exchange.
 internal sealed class EventVectorLocalExchange(OrleansNode node, EventVectorRemoteReceiver receiver,
     EventVectorRemoteCallValidation authority, EventVectorRemoteEncoding encoding,
-    RemoteDocumentMac originalLocalMac, ReplicaMembershipAuthorityReplayCache originalReplay)
+    RemoteDocumentMac originalLocalMac, EventVectorReplayCache originalReplay)
 {
     internal async Task<EventVectorAuthenticatedExchange> SendAsync(EventVectorRemoteCall originalCall,
         ReadExecutionBudget work, CancellationToken originalCancellationToken)

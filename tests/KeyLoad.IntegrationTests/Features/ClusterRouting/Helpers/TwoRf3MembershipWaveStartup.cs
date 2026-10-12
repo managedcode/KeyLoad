@@ -33,24 +33,10 @@ internal static class TwoRf3MembershipWaveStartup
         if (firstStart)
         { observe?.Invoke("ProfileCreate"); wave.Profile = (await NodeEpochRf3Profile.CreatePriorAsync(root, cancellationToken).ConfigureAwait(false)).Profile; }
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
-        string? githubReference = null;
-        if (wave.localImageSelection is null)
-        {
-            observe?.Invoke("VerifiedImageRead");
-            githubReference = await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken)
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            observe?.Invoke("VerifiedImageRead");
-            _ = await LocalRf3ImageIdentity.ReadVerifiedAsync(repository, wave.localImageSelection, cancellationToken)
-                .ConfigureAwait(false) ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch);
-        }
-        if (wave.queryProbe && wave.queryControls is null)
-        { wave.queryControls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid()); }
-        if (wave.nativeDiscoveryOmissionSelected && wave.nativeDiscoveryOmission is null)
-        { wave.nativeDiscoveryOmission = KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture.Create(root, cancellationToken); }
-        var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission, wave.EventVectorReservedProbe);
+        var githubReference = await TwoRf3MembershipImageAdmission.ReadReferenceAsync(wave, repository,
+            observe, cancellationToken).ConfigureAwait(false);
+        NativeMembershipDiagnosticWaveLifecycle.PrepareControls(wave, root, cancellationToken);
+        var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission, wave.EventVectorReservedProbe, wave.nativeMembershipControls);
         observe?.Invoke("BuilderCreate");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             (_, settings) => wave.capacity.BindOriginalParameters(settings), cancellationToken).ConfigureAwait(false);

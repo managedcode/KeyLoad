@@ -12,8 +12,8 @@ internal static class PartitionMovementClientTransferReadOperations
     {
         work.Check();
         cancellationToken.ThrowIfCancellationRequested();
-        if (owner.options.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
-            || !owner.options.Value.MembershipAuthority.RegisterPhysicalOwners || expiry <= owner.clock.GetUtcNow())
+        if (owner.options.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control
+            || !owner.options.Value.PhysicalGroupTrust.RegisterPhysicalOwners || expiry <= owner.clock.GetUtcNow())
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
         var authorityReply = NativeSerialization.Deserialize<PartitionMovementTransferAuthorityReply>(originalAuthority.ReplyBytes);
         if (authorityReply.Reply.Error is not null)
@@ -40,7 +40,7 @@ internal static class PartitionMovementClientTransferReadOperations
         if (NativeSerialization.Measure(request) > owner.partition.Database.Limits.MaxBatchBytes)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionMovementProtocol.Unavailable); }
         var reply = await owner.transport.ExchangeTransferDataAsync(PartitionMovementClient.FirstVoter, selected, request,
-            NativeSerialization.Serialize(request), local, cancellationToken).ConfigureAwait(false);
+            NativeSerialization.Serialize(request), cancellationToken).ConfigureAwait(false);
         work.Check();
         if (reply.Reply.Error is { } code)
         { throw Errors.Fail(code, reply.Reply.SafeDetail ?? PartitionMovementProtocol.Unavailable); }

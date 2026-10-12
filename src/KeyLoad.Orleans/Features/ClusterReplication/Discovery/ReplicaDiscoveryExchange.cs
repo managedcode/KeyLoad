@@ -1,192 +1,65 @@
-using System.Net;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
-/// <summary>Performs one bounded authenticated HTTP discovery without retaining response bodies.</summary>
-internal sealed class ReplicaDiscoveryExchange : IDisposable
+/// <summary>Authenticates exact metadata through the unique current native silo generation.</summary>
+internal sealed class ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions,
+    IOptions<ReplicaPeerOptions> peerSettings, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+    ReplicaNativeDiscoveryClient native, ReplicaNativeDiscoveryMembership membership, ReplicaDiscoveryProbe? probe = null)
+    : IDisposable
 {
-    private readonly ReplicaConfiguration configuration;
-    private readonly ReplicaPeerOptions options;
-    private readonly ReplicaEnvelopeAuthenticator authentication;
-    private readonly TimeProvider clock;
-    private readonly Dictionary<string, Uri> endpoints;
-    private readonly PeerSecurity security;
-    private readonly HttpClient http;
-    private readonly ReplicaDiscoveryProbe? probe;
+    private const int Open = 0;
+    private const int Closed = 1;
+    private int disposed;
 
-    internal ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
-        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe = null)
+    internal async Task<ReplicaDiscoveryObservation?> DiscoverAsync(string voterId, CancellationToken token)
     {
-        var configuration = configurationOptions.Value;
-        var options = peerSettings.Value;
-        ArgumentNullException.ThrowIfNull(configuration);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(authentication);
-        ArgumentNullException.ThrowIfNull(clock);
-        this.configuration = configurationOptions.Value;
-        this.options = peerSettings.Value;
-        this.authentication = authentication;
-        this.clock = clock;
-        this.probe = probe;
-        endpoints = new(options.Endpoints, StringComparer.Ordinal);
-        security = new PeerSecurity(options.Secret, clock, peerOptions);
-        http = new HttpClient(probe is null ? security.CreateHandler() : security.CreateProtectedHandler(probe.BeforeSend), disposeHandler: true) { Timeout = Timeout.InfiniteTimeSpan };
-    }
-
-    internal async Task<ReplicaDiscoveryObservation?> DiscoverAsync(string voterId, CancellationToken cancellationToken)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Get,
-            new Uri(endpoints[voterId], ReplicaProtocol.DiscoveryPath));
-        var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
-        if (response is null)
-        {
-            return null;
-        }
-
-        using (response)
-        {
-            if (!TryReadAuthentication(request, response, out var nonce, out var signature))
-            {
-                return null;
-            }
-
-            var bytes = await ReadPayloadAsync(response, cancellationToken).ConfigureAwait(false);
-            if (bytes is null)
-            {
-                return null;
-            }
-
-            authentication.VerifyDiscovery(voterId, bytes, nonce, signature);
-            var discovered = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(bytes);
-            var observation = ReplicaDiscoveryIdentity.CreateObservation(voterId, discovered, configuration, options, clock);
-            probe?.Verified(voterId, nonce, discovered, cancellationToken);
-            return observation;
-        }
-    }
-
-    private async Task<HttpResponseMessage?> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
-    {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != Open, this);
+        token.ThrowIfCancellationRequested();
+        var address = membership.Resolve(voterId);
+        if (address is null)
+        { return null; }
+        var request = authentication.CreateNativeDiscoveryRequest(voterId, address.ToParsableString());
+        probe?.BeforeSend(request, token);
+        if (probe?.BeforeSendAsync is { } beforeSend)
+        { await beforeSend(request, token).ConfigureAwait(false); }
+        token.ThrowIfCancellationRequested();
+        if (!membership.IsCurrent(voterId, address))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
+        ReplicaNativeDiscoveryReply? received;
         try
+        { received = await native.DiscoverAsync(address, request, token).ConfigureAwait(false); }
+        catch (Exception error) when (error is OrleansException or TimeoutException or ObjectDisposedException)
         {
-            return await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (HttpRequestException)
-        {
+            token.ThrowIfCancellationRequested();
             return null;
         }
-        catch (IOException)
-        {
-            return null;
-        }
-        catch (TimeoutException)
-        {
-            return null;
-        }
-        catch (KeyLoadException error) when (IsUnavailableTransport(error))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return null;
-        }
+        token.ThrowIfCancellationRequested();
+        if (received is null)
+        { throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery); }
+        if (!membership.IsCurrent(voterId, address))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
+        if (probe?.Received is { } transform)
+        { received = transform(request, received, token)
+            ?? throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery); }
+        token.ThrowIfCancellationRequested();
+        var reply = authentication.VerifyNativeDiscoveryReply(request, received);
+        if (!membership.IsCurrent(voterId, address))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
+        if (reply.Error is { } failure)
+        { throw Errors.Fail(failure, ReplicaTransportProtocol.InvalidDiscovery); }
+        var discovered = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(reply.Payload.Span);
+        var observation = ReplicaDiscoveryIdentity.CreateObservation(voterId, discovered,
+            configurationOptions.Value, peerSettings.Value, clock);
+        if (!observation.Address.Equals(address))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
+        probe?.Verified(voterId, request.Nonce, discovered, token);
+        token.ThrowIfCancellationRequested();
+        if (!membership.IsCurrent(voterId, address))
+        { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
+        return observation;
     }
 
-    private static bool IsUnavailableTransport(KeyLoadException error)
-        => error.Code == ErrorCode.OwnershipLost
-            && error.Message == PeerDiscoveryProtocol.Unavailable;
-
-    private static bool TryReadAuthentication(HttpRequestMessage request, HttpResponseMessage response,
-        out Guid nonce, out string signature)
-    {
-        nonce = Guid.Empty;
-        signature = string.Empty;
-        if (response.StatusCode != HttpStatusCode.OK
-            || !request.Headers.TryGetValues(ReplicaTransportProtocol.HttpNonceHeader, out var nonces)
-            || !Guid.TryParseExact(SingleHeader(nonces), ReplicaTransportProtocol.NonceFormat, out nonce)
-            || !response.Headers.TryGetValues(ReplicaTransportProtocol.DiscoverySignatureHeader, out var signatures))
-        {
-            return false;
-        }
-
-        signature = SingleHeader(signatures);
-        return true;
-    }
-
-    private static async Task<byte[]?> ReadPayloadAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return await ReadBoundedAsync(response, cancellationToken).ConfigureAwait(false);
-        }
-        catch (HttpRequestException)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return null;
-        }
-        catch (IOException)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return null;
-        }
-        catch (TimeoutException)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return null;
-        }
-    }
-
-    private static async Task<byte[]> ReadBoundedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        const int MaximumDiscoveryBytesStep = 1;
-        const int CountInitialValue = 0;
-        const int EmptyRead = 0;
-        const int StartEmptyCount = 0;
-
-        if (response.Content.Headers.ContentLength > ReplicaTransportProtocol.MaximumDiscoveryBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
-        }
-
-        var bytes = new byte[ReplicaTransportProtocol.MaximumDiscoveryBytes + MaximumDiscoveryBytesStep];
-        await using var ownedStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        var count = CountInitialValue;
-        while (count < bytes.Length)
-        {
-            var read = await ownedStream.ReadAsync(bytes.AsMemory(count), cancellationToken).ConfigureAwait(false);
-            if (read == EmptyRead)
-            {
-                return bytes.AsSpan(StartEmptyCount, count).ToArray();
-            }
-
-            count += read;
-        }
-
-        throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
-    }
-
-    private static string SingleHeader(IEnumerable<string> values)
-    {
-        using var entries = values.GetEnumerator();
-        if (!entries.MoveNext())
-        {
-            return string.Empty;
-        }
-
-        var value = entries.Current;
-        return entries.MoveNext() ? string.Empty : value;
-    }
-
-    public void Dispose()
-    {
-        try
-        {
-            http.Dispose();
-        }
-        finally
-        {
-            security.Dispose();
-        }
-    }
+    public void Dispose() => Volatile.Write(ref disposed, Closed);
 }

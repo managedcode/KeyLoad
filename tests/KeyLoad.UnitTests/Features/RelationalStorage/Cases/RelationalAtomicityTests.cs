@@ -67,6 +67,7 @@ internal sealed class RelationalAtomicityTests
         var rows = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
         await Assert.That(rows.Rows[0].EntityId).IsEqualTo(RelationalTestData.Second);
         await Assert.That(rows.Rows[0].Revision).IsEqualTo(2);
+        await RelationalUniqueReplayContinuation.RunAsync(database);
     }
 
     [Test]

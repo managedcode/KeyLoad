@@ -10,15 +10,17 @@ internal sealed class ReplicaDiscoveryObservationCache
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaSiloDiscoveryState local;
     private readonly TimeProvider clock;
+    private readonly ReplicaNativeDiscoveryMembership membership;
     private readonly ConcurrentDictionary<string, ReplicaDiscoveryObservation> observations;
 
     internal ReplicaDiscoveryObservationCache(IOptions<ReplicaConfiguration> configurationOptions, ReplicaSiloDiscoveryState local,
-        TimeProvider clock)
+        TimeProvider clock, ReplicaNativeDiscoveryMembership membership)
     {
         var configuration = configurationOptions.Value;
         this.configuration = configurationOptions.Value;
         this.local = local;
         this.clock = clock;
+        this.membership = membership;
         observations = new(configuration.VoterIds.Length, configuration.VoterIds.Length, StringComparer.Ordinal);
     }
 
@@ -28,7 +30,9 @@ internal sealed class ReplicaDiscoveryObservationCache
 
         var current = local.Read();
         var address = SiloAddress.FromParsableString(current.SiloAddress);
-        if (address.Endpoint.Port <= PortValidationBoundary || address.ToParsableString() != current.SiloAddress)
+        if (address.Endpoint.Port <= PortValidationBoundary || address.ToParsableString() != current.SiloAddress
+            || current.VoterId != configuration.LocalId || current.Incarnation != configuration.Incarnation
+            || !membership.IsCurrent(configuration.LocalId, address))
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidDiscovery);
         }
@@ -55,7 +59,8 @@ internal sealed class ReplicaDiscoveryObservationCache
             return ReplicaObservationFreshness.Missing;
         }
 
-        if (clock.GetElapsedTime(found.ObservedTimestamp) >= configuration.LowerElectionTimeout)
+        if (!membership.IsCurrent(voterId, found.Address)
+            || clock.GetElapsedTime(found.ObservedTimestamp) >= configuration.LowerElectionTimeout)
         {
             ((ICollection<KeyValuePair<string, ReplicaDiscoveryObservation>>)observations)
                 .Remove(new(voterId, found));

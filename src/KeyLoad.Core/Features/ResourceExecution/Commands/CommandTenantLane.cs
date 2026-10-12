@@ -32,6 +32,7 @@ internal sealed class CommandTenantLane
         var tenant = turns.Dequeue();
         var queue = tenants[tenant];
         var command = queue.Dequeue();
+        command.TransferFromQueue();
         if (queue.Count == EmptyElementCount)
         {
             tenants.Remove(tenant);

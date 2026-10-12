@@ -9,6 +9,15 @@ internal static class ControlledPartitionMovementProcessScenario
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
+        if (args.Length == ArgumentCount && args[ModeArgument] is
+            (ControlledPartitionMovementNativeProcessProtocol.Hold or ControlledPartitionMovementNativeProcessProtocol.Observe))
+        {
+            var nativeRoot = Path.GetFullPath(args[RootArgument]);
+            var nativeInput = await ControlledPartitionMovementProcessFiles.ReadAsync<ControlledPartitionMovementNativeProcessInput>(
+                nativeRoot, ControlledPartitionMovementNativeProcessProtocol.InputFile, CancellationToken.None);
+            await ControlledPartitionMovementNativeProcessChild.RunAsync(nativeRoot, args[ModeArgument], nativeInput, CancellationToken.None);
+            return true;
+        }
         if (args.Length != ArgumentCount || args[ModeArgument] is not
             (ControlledPartitionMovementProcessProtocol.Prepare or ControlledPartitionMovementProcessProtocol.Fault
             or ControlledPartitionMovementProcessProtocol.Recover or ControlledPartitionMovementProcessProtocol.Verify))

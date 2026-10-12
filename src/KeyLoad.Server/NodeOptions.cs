@@ -56,8 +56,8 @@ internal sealed record NodeOptions
     internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty);
     internal NativeDiscoveryOmissionOptions NativeDiscoveryOmission { get; set; } = NativeDiscoveryOmissionOptions.Disabled;
     internal MovementFrameObservationOptions MovementFrameObservation { get; set; } = MovementFrameObservationOptions.Disabled;
-    /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
-    public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
+    /// <summary>Explicit physical-group trust independent of the native Orleans membership provider.</summary>
+    public PhysicalGroupTrustOptions PhysicalGroupTrust { get; init; } = new();
     /// <summary>Optional existing persisted technical subject for distinct-owner queue transfer admission; null is unavailable.</summary>
     public string? RemoteTransferPrincipalId { get; init; }
 
@@ -68,7 +68,7 @@ internal sealed record NodeOptions
         ArgumentNullException.ThrowIfNull(HttpAdmission);
         ArgumentNullException.ThrowIfNull(ReplayAdmission);
         ArgumentNullException.ThrowIfNull(McpMemory);
-        ArgumentNullException.ThrowIfNull(MembershipAuthority);
+        ArgumentNullException.ThrowIfNull(PhysicalGroupTrust);
         CommandAdmission.Validate();
         HttpAdmission.Validate();
         McpMemory.Validate();
@@ -84,7 +84,7 @@ internal sealed record NodeOptions
         }
         var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
         configuration.Validate();
-        MembershipAuthoritySettingsValidator.Validate(MembershipAuthority, this);
+        PhysicalGroupTrustValidator.Validate(PhysicalGroupTrust, this);
         if (RemoteTransferPrincipalId is not null)
         { global::KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId); }
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);

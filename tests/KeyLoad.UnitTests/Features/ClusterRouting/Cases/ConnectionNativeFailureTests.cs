@@ -101,6 +101,7 @@ internal sealed class ConnectionNativeFailureTests
             await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
             await ConnectionNativeAssertions.MissingOutcomeAsync(scenario, principal, command, "closed-original");
             await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.AbsentActivations, token);
+            await ConnectionClosedCommandContinuation.RunAsync(scenario, principal, command, requestId, token);
         });
     }
 

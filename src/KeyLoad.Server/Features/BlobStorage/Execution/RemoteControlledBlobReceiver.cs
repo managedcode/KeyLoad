@@ -14,7 +14,11 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
     internal void Validate(RemoteControlledBlobCall call, CancellationToken token)
         => RemoteControlledBlobValidation.Require(node, partition, options, membership, routing, clock, call, token);
 
-    internal async Task<ControlledBlobReadResult> ReadAsync(RemoteControlledBlobCall call, CancellationToken token)
+    internal Task<ControlledBlobReadResult> ReadAsync(RemoteControlledBlobCall call, CancellationToken token)
+        => ReadAsync(call, null, token);
+
+    internal async Task<ControlledBlobReadResult> ReadAsync(RemoteControlledBlobCall call,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary, CancellationToken token)
     {
         Validate(call, token);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(view,
@@ -29,8 +33,12 @@ internal sealed class RemoteControlledBlobReceiver(OrleansNode node, PartitionHo
             using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
+                boundary?.Begin(token);
                 var reply = await node.ExecuteAsync(requestId, signed, command: false, cancellationToken: token).ConfigureAwait(false);
                 Validate(call, token);
+                if (boundary is not null && reply.Error is { } terminal && terminal != ErrorCode.Corruption)
+                { throw new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeTerminalException(
+                    Errors.Fail(terminal, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable)); }
                 if (reply.Error is { } error)
                 { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
                 result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as ControlledBlobReadResult

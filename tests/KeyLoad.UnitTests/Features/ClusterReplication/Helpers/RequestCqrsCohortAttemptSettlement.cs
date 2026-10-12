@@ -7,7 +7,7 @@ internal static class RequestCqrsCohortAttemptSettlement
     private const string UnexpectedReturn = "A cancelled discovery attempt returned successfully.";
     private const string UnexpectedShutdownReturn = "A shutdown discovery attempt returned successfully.";
 
-    internal static async Task JoinCancelledAsync(Task? attempt, RequestCqrsCohortHttpGate gate,
+    internal static async Task JoinCancelledAsync(Task? attempt, RequestCqrsCohortNativeGate gate,
         List<Exception> failures, CancellationToken cancellationToken)
     {
         if (attempt is not null)
@@ -33,7 +33,7 @@ internal static class RequestCqrsCohortAttemptSettlement
         return ServerFailureObserver.ObserveAsync(() => actualDisposal, failures);
     }
 
-    internal static async Task JoinShutdownAsync(Task? attempt, RequestCqrsCohortHttpGate gate,
+    internal static async Task JoinShutdownAsync(Task? attempt, RequestCqrsCohortNativeGate gate,
         List<Exception> failures)
     {
         if (attempt is not null)

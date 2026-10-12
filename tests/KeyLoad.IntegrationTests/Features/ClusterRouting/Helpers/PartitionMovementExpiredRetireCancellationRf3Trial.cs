@@ -1,3 +1,4 @@
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Client;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
@@ -66,13 +67,19 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         { await Task.Delay(remaining, TimeProvider.System, cancellationToken); }
         await Assert.That(original.OriginalExpiresAt <= TimeProvider.System.GetUtcNow()).IsTrue();
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
+        var initialDiscovery = discovery;
         discovery = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave, cancellationToken);
+        await PartitionMovementHistoricalPacketAssertions.RestartedAsync(initialDiscovery, discovery, original);
         var cancellationId = PartitionMovementParentPhaseIds.For(seed.FirstRequest, Administrator,
             PartitionMovementParentPhaseRole.RetireCancellation, original.PageOrdinal, original.CleanupGeneration);
         await InterruptAsync(cancellationId, cancellationPhase, cancellationToken);
         var interrupted = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, originalId, cancellationToken);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, cancellationToken);
+        var cancellationDiscovery = discovery;
         discovery = await PartitionMovementExpiredRetireSealedOperationRf3Trial.ReadDiscoveryAsync(wave, cancellationToken);
+        var retainedAttempt = RequirePending(interrupted, originalId);
+        await PartitionMovementHistoricalPacketAssertions.ExactAsync(original, retainedAttempt);
+        await PartitionMovementHistoricalPacketAssertions.CancellationAsync(cancellationDiscovery, discovery, retainedAttempt);
         if (cancellationPhase == RequestCqrsProbePhase.BeforeSubmit)
         { await RequireUnknownAsync(original, interrupted, cancellationToken); }
         else
@@ -168,6 +175,8 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         var replay = await McpCallerAssertions.SdkSuccessAsync(await clients.Source.MovePartitionAsync(
             clients.FirstRequest, cancellationToken));
         await SqlRf3Protocol.EqualAsync(healthy, replay);
+        await PartitionMovementPublicCallerReplay.RequireAsync(clients.Source, clients.Official,
+            clients.FirstRequest, healthy, cancellationToken);
         await Assert.That(cancellationId).IsNotEqualTo(original.OriginalPhaseCommandId);
     }
 
@@ -187,7 +196,7 @@ internal sealed class PartitionMovementExpiredRetireCancellationRf3Trial
         await SqlRf3Protocol.EqualAsync(original.OriginalPhase, actual.OriginalPhase);
         await SqlRf3Protocol.EqualAsync(original.OriginalGrant, actual.OriginalGrant);
         await SqlRf3Protocol.EqualAsync(original.OriginalAuthorization, actual.OriginalAuthorization);
-        await SqlRf3Protocol.EqualAsync(original.OriginalReceiverIssuePacket, actual.OriginalReceiverIssuePacket);
+        await PartitionMovementHistoricalPacketAssertions.ExactAsync(original, actual);
         await Assert.That(actual.OriginalRequestNonce).IsEqualTo(original.OriginalRequestNonce);
         await Assert.That(actual.OriginalExpiresAt).IsEqualTo(original.OriginalExpiresAt);
         await Assert.That(actual.OriginalIssuancePolicyEpoch).IsEqualTo(original.OriginalIssuancePolicyEpoch);

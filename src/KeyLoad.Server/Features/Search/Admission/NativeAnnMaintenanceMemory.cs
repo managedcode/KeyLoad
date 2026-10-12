@@ -89,7 +89,8 @@ internal sealed class NativeAnnMaintenanceMemory(Lock gate, List<NativeAnnGenera
         }
     }
 
-    private long Available() => checked(configured.Value.MaximumResidentBytes - readers.Bytes
+    private long Available() => checked(configured.Value.MaximumResidentBytes
+        - NativeAnnRootLease.ReceiptReservation(configured.Value) - readers.Bytes
         - slots.Sum(item => item.Index.RetainedBytesUpperBound));
     private void Require(NativeAnnMaintenanceMemoryLease lease)
     {

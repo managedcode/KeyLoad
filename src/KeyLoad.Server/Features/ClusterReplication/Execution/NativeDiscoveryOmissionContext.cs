@@ -17,7 +17,8 @@ internal static class NativeDiscoveryOmissionContext
             && (DocumentApi.IsCommandPath(context.Request.Path) || context.Request.Path == McpFramingProtocol.Path);
     }
     internal static NativeDiscoveryOmissionWitness? Read(IHttpContextAccessor accessor,
-        NativeDiscoveryOmissionArm arm, string localVoter, string targetVoter, Guid nonce, CancellationToken token)
+        NativeDiscoveryOmissionArm arm, string localVoter, string targetVoter, string sourceSiloAddress, string targetSiloAddress,
+        Guid nonce, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var context = accessor.HttpContext;
@@ -32,7 +33,8 @@ internal static class NativeDiscoveryOmissionContext
         return new(NativeDiscoveryOmissionProtocol.Version, arm.SessionId, arm.ArmId,
             arm.SourceVoter, arm.TargetVoter, arm.Route, context.TraceIdentifier, connection.Id,
             state.RequestId, state.CommandId, nonce, NativeDiscoveryOmissionProtocol.SourceStage,
-            null, null);
+            null, null)
+        { SourceSiloAddress = sourceSiloAddress, TargetSiloAddress = targetSiloAddress };
     }
     private static bool Route(PathString path, string route) => route switch
     {

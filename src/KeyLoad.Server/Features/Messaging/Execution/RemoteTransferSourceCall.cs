@@ -13,8 +13,8 @@ internal static class RemoteTransferSourceCall
         NodeOptions options, GrainRequestEnvelope envelope, RemoteTransferSourceDispatch context,
         RemoteQueueTransferPeerStage stage, int maximumReplyBytes)
     {
-        if (!options.MembershipAuthority.RemoteDocumentReads
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
+        if (!options.PhysicalGroupTrust.RemoteDocumentReads
+            || options.PhysicalGroupTrust.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control
             || !PhysicalOwnerEntryValidation.Same(context.Target.DestinationOwner,
                 PhysicalOwnerConfiguredTuples.Destination(options, partition)))
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable); }

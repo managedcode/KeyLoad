@@ -5,10 +5,12 @@ public sealed class AdmittedCommand : IDisposable
 {
     private const int SingleElementCount = 1;
     private const int EqualOrder = 0;
+    private const string QueueOwnsCommand = "The command remains owned by its admission queue.";
 
     private readonly TaskCompletionSource<OperationResult> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private CommandAdmissionLease? lease;
     private int finalized;
+    private int dequeued;
 
     /// <summary>Gets the admitted immutable operation.</summary>
     public ReplicatedOperation Operation { get; }
@@ -28,7 +30,9 @@ public sealed class AdmittedCommand : IDisposable
         this.lease = lease;
     }
 
-    /// <summary>Completes the command and releases its reservation exactly once.</summary>
+    internal void TransferFromQueue() => Volatile.Write(ref dequeued, SingleElementCount);
+
+    /// <summary>Completes the dequeued command and releases its reservation exactly once.</summary>
     /// <param name="result">The operation result returned to the submitting caller.</param>
     public void Complete(OperationResult result)
     {
@@ -41,7 +45,7 @@ public sealed class AdmittedCommand : IDisposable
         completion.TrySetResult(result);
     }
 
-    /// <summary>Fails the command and releases its reservation exactly once.</summary>
+    /// <summary>Fails the dequeued command and releases its reservation exactly once.</summary>
     /// <param name="exception">The failure returned to the submitting caller.</param>
     public void Fail(Exception exception)
     {
@@ -54,9 +58,13 @@ public sealed class AdmittedCommand : IDisposable
         completion.TrySetException(exception);
     }
 
-    /// <summary>Reports an unknown outcome when disposed before completion and releases its reservation once.</summary>
+    /// <summary>Retains queue-owned work; reports an unknown outcome for an unresolved dequeued command and releases once.</summary>
     public void Dispose()
     {
+        if (Volatile.Read(ref dequeued) == EqualOrder)
+        {
+            return;
+        }
         if (!TryFinalize())
         {
             return;
@@ -67,6 +75,10 @@ public sealed class AdmittedCommand : IDisposable
 
     private bool TryFinalize()
     {
+        if (Volatile.Read(ref dequeued) == EqualOrder)
+        {
+            throw new InvalidOperationException(QueueOwnsCommand);
+        }
         if (Interlocked.CompareExchange(ref finalized, SingleElementCount, EqualOrder) != EqualOrder)
         {
             return false;

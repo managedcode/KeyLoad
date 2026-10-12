@@ -1,4 +1,4 @@
-using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -9,7 +9,7 @@ internal static class ControlledPartitionMovementRawImage
     private const int MaximumPages = 16;
     private const int EqualKeys = 0;
 
-    internal static string[] Bytes(ZoneTreeStore store) => store.Read(view =>
+    internal static string[] Bytes(IAtomicStore store) => store.Read(view =>
     {
         var image = new List<string>();
         byte[]? after = null;

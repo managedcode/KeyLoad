@@ -1,0 +1,11 @@
+# Native physical-owner probe
+
+Canonical slice: ClusterRouting. Parent: [ClusterRouting](../ClusterRouting.md). Original operation and RF3 gates remain OPEN.
+
+| Requirement | Acceptance | Existing oracle |
+|---|---|---|
+| REQ-NATIVE-PROBE-001: discover and address original physical-owner probe through Orleans. | AC-NATIVE-PROBE-001: match configured canonical voter to actual unique Active SiloName/full generation; no HTTP endpoint, DNS pin, fixed port, custom membership table or movement readiness dependency selects that receiver. | Original physical-owner registration, refusal/repair and native six-silo membership cases; runtime OPEN. |
+| REQ-NATIVE-PROBE-002: preserve the original complete proof and read stages. | AC-NATIVE-PROBE-002: original request/reply native bytes, inner probe MAC domains, request GUID, 16-byte nonce, expiry, control/destination tuples, consensus/read/admin/cold/fingerprint and joined cleanup remain unchanged. A fresh current caller/target/nonce outer envelope authenticates the native hop. | Actual original SDK/MCP RF3 owner probe and registration flows; no substitute invocation. |
+| REQ-NATIVE-PROBE-003: probe bootstrap is independent of movement enablement. | AC-NATIVE-PROBE-003: dedicated addressed ProbeOwnerAsync method validates channel5/querytrue and joins its original owner before service shutdown; fail-closed admission does not infer database readiness from native presence. | Existing registration/startup scopes and joined cleanup; runtime OPEN. |
+
+Append PhysicalOwnerProbe=5 and method alias probe-owner to the existing native partition-movement Grain Service without changing existing aliases/IDs/channels0..4. Reuse the existing generated request/reply and fresh native MAC domains; the authenticated request channel distinguishes this operation. Preserve original probe bytes and original inner signature. A dedicated PhysicalOwnerProbeNativeRuntime handles the original task independently of movement dispatch. Runtime membership observations borrow ReplicaNativeDiscoveryRuntime.ReadActiveMembership and retain actual names/full generations. Native failure diagnostics use nullable ErrorCode and original bounded stage/category, with no fabricated HTTP status. Frontend/public API N/A.

@@ -7,34 +7,34 @@ internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntim
     private static readonly TimeSpan TestBound = TimeSpan.FromSeconds(20);
 
     [Test]
-    public async Task CallerCancellationDuringHeadersAndBodySettlesBeforeHealthyLookup()
+    public async Task CallerCancellationBeforeDispatchAndInsideNativePayloadSettlesBeforeHealthyLookup()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
-        await VerifyCancellationAtHeadersAsync(scenario);
-        await VerifyCancellationAtBodyAsync(scenario);
+        await VerifyCancellationBeforeDispatchAsync(scenario);
+        await VerifyCancellationInsideNativePayloadAsync(scenario);
         scenario.PublishCompatibleRemoteOne(1);
         var address = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, deadline.Token);
         await Assert.That(address).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
     }
 
-    private static Task VerifyCancellationAtHeadersAsync(RequestCqrsCohortScenario scenario)
+    private static Task VerifyCancellationBeforeDispatchAsync(RequestCqrsCohortScenario scenario)
     {
-        var gate = new RequestCqrsCohortHttpGate();
+        var gate = new RequestCqrsCohortNativeGate();
         scenario.RemoteOne.SetHeaderGate(gate);
         return VerifyCancellationAsync(scenario, gate);
     }
 
-    private static Task VerifyCancellationAtBodyAsync(RequestCqrsCohortScenario scenario)
+    private static Task VerifyCancellationInsideNativePayloadAsync(RequestCqrsCohortScenario scenario)
     {
-        var gate = new RequestCqrsCohortHttpGate();
+        var gate = new RequestCqrsCohortNativeGate();
         scenario.PublishCompatibleRemoteOne(1);
         scenario.RemoteOne.SetBodyGate(gate);
         return VerifyCancellationAsync(scenario, gate);
     }
 
     private static async Task VerifyCancellationAsync(
-        RequestCqrsCohortScenario scenario, RequestCqrsCohortHttpGate gate)
+        RequestCqrsCohortScenario scenario, RequestCqrsCohortNativeGate gate)
     {
         using var cancellation = new CancellationTokenSource(TestBound, TimeProvider.System);
         Task<SiloAddress>? attempt = null;
@@ -52,7 +52,7 @@ internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntim
     }
 
     private static async Task AssertCancelledAttemptAsync(
-        Task<SiloAddress> attempt, RequestCqrsCohortHttpGate gate, CancellationTokenSource cancellation)
+        Task<SiloAddress> attempt, RequestCqrsCohortNativeGate gate, CancellationTokenSource cancellation)
     {
         await gate.Entered.WaitAsync(TestBound, TimeProvider.System);
         await cancellation.CancelAsync();

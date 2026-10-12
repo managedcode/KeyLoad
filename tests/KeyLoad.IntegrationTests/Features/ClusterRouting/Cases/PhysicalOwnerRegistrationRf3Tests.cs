@@ -19,7 +19,8 @@ internal sealed class PhysicalOwnerRegistrationRf3Tests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             evidence.Enter(PhysicalOwnerRegistrationRf3Phase.WaveStart);
-            wave = await TwoRf3MembershipWave.StartRegistrationAsync(deadline.Token).ConfigureAwait(false);
+            wave = await TwoRf3MembershipWave.StartOwnedAsync(
+                new TwoRf3MembershipWave(null, register: true, nativeMembershipDiagnostics: true), deadline.Token).ConfigureAwait(false);
             await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, evidence, deadline.Token).ConfigureAwait(false);
             evidence.Enter(PhysicalOwnerRegistrationRf3Phase.Fingerprint);
             await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, deadline.Token).ConfigureAwait(false);

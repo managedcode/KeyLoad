@@ -1,15 +1,15 @@
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class PartitionMovementOutcomePeerAdmission
 {
-    internal static async Task<PartitionMovementOutcomeTransportRequest> VerifyOutcomeAsync(PartitionMovementPeerAdmission peer,
+    internal static Task<PartitionMovementOutcomeTransportRequest> VerifyOutcomeAsync(PartitionMovementPeerAdmission peer,
         ReadOnlyMemory<byte> originalBody, string signature, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!peer.Execution.Enabled || !peer.Options.MembershipAuthority.RegisterPhysicalOwners)
+        if (!peer.Execution.Enabled || !peer.Options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || peer.Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementPeerAdmission.InvalidProof); }
         if (originalBody.Length <= PartitionMovementPeerAdmission.EmptyBodyBytes || originalBody.Length > peer.Database.Limits.MaxBatchBytes)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
@@ -29,18 +29,13 @@ internal static class PartitionMovementOutcomePeerAdmission
         if (!PhysicalOwnerEntryValidation.SameOwner(envelope.ControlOwner, control.Owner)
             || !PartitionMovementConfiguredOwners.RequirePair(envelope, control.Owner, destination.Owner)
             || !control.Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(request.CallerSiloAddress, peer.Membership))
+            || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, peer.Membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
         RequireOutcomeJournal(request, control.Owner, local.Owner);
-        var address = SiloAddress.FromParsableString(request.CallerSiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
-        await peer.Pins.PinCallerAsync(control.Owner.VoterIds.IndexOf(request.CallerVoter), address.Endpoint.Address,
-            cancellationToken).ConfigureAwait(false);
         if (!peer.Replay.TryUse(query.Nonce.ToString(PartitionMovementPeerAdmission.NonceFormat)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementPeerAdmission.InvalidProof); }
         peer.Database.VerifyPhysicalCommandOwner(local.Owner, false, cancellationToken);
-        return query;
+        return Task.FromResult(query);
     }
 
     private static void RequireOutcomeJournal(PartitionMovementTransportRequest request,

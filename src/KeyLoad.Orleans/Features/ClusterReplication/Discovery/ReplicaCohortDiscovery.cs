@@ -15,7 +15,7 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
 
     internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-        IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe = null)
+        ReplicaNativeDiscoveryClient native, ReplicaNativeDiscoveryMembership membership, ReplicaDiscoveryProbe? probe = null)
     {
         var configuration = configurationOptions.Value;
         var options = peerSettings.Value;
@@ -26,8 +26,8 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(clock);
         this.configuration = configurationOptions.Value;
         this.clock = clock;
-        observations = new(configurationOptions, local, clock);
-        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, peerOptions, probe);
+        observations = new(configurationOptions, local, clock, membership);
+        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, native, membership, probe);
         resources = new(ownedResources);
         admission = new(configurationOptions, observations, GetObservationAsync);
         lifetime = new(ownedResources);

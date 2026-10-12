@@ -137,7 +137,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
             await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
-            ReadPrivateProfile();
+            (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
+            diagnosticIncarnation = ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation;
             if (isolationOwner is not null)
             { await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false); }
         }
@@ -171,7 +172,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     public Task SaveFailureDiagnosticsAsync() => SaveFailureDiagnosticsAsync(RequireDiagnostics().LifetimeToken);
 
     internal Task SaveReplicaIsolationFailureDiagnosticsAsync(string nativeCase)
-        => RequireDiagnostics().SaveOwnedAsync(peerSecret, RequireReplicaIsolation().CreateFailureDirectory(nativeCase),
+        => RequireDiagnostics().SaveOwnedAsync(peerSecret, AdminKey, diagnosticIncarnation, RequireReplicaIsolation().CreateFailureDirectory(nativeCase),
             RequireDiagnostics().LifetimeToken);
 
     /// <summary>Kills the inspected Aspire-managed Docker container for a named test scenario.</summary>
@@ -208,7 +209,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         var failures = new List<Exception>();
         if (isolationOwner is not null)
         { await CollectCleanupAsync(deadline, () => isolationOwner.RestoreAsync(token), failures).ConfigureAwait(false); }
-        await SaveDiagnosticsAsync(diagnostics, peerSecret, deadline, failures).ConfigureAwait(false);
+        await SaveDiagnosticsAsync(diagnostics, peerSecret, AdminKey, diagnosticIncarnation, deadline, failures).ConfigureAwait(false);
         if (diagnostics is not null)
         {
             var disposal = diagnostics.DisposeAsync().AsTask();
@@ -260,15 +261,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
 
     internal Task<KeyLoad.Orleans.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
         => RequestCqrsRf3SignedDiscovery.ReadAsync(RequireApp(), node,
-            ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation, peerSecret, token);
+            ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation, peerSecret, AdminKey, token);
 
-    private void ReadPrivateProfile()
-    {
-        (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
-    }
+    private Guid diagnosticIncarnation;
 
     internal Task SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
-        RequireDiagnostics().SaveAsync(peerSecret, cancellationToken);
+        RequireDiagnostics().SaveAsync(peerSecret, AdminKey, diagnosticIncarnation, cancellationToken);
 
     private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics
         ?? throw new InvalidOperationException(DiagnosticsUnavailable);

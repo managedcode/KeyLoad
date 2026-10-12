@@ -15,6 +15,7 @@ internal static class DiscoveryAuthorityClients
             await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, state.Identity.Secret, token);
             try
             {
+                session.AddUntrustedIdentityHeaders();
                 var firstRequest = await DiscoveryAuthorityValues.FirstAsync(session, state, token);
                 await WithHttpAsync(fixture, session, state, firstRequest, changePolicy, token);
             }
@@ -35,8 +36,10 @@ internal static class DiscoveryAuthorityClients
             using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
             try
             {
+                StandardAspNetAuthorityTrial.AddHeaders(http);
                 var root = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
                 var reader = new KeyLoadClient(http, state.Identity.Secret, IntegrationClientOptions.Execution());
+                await StandardAspNetAuthorityTrial.RunAsync(http, root, reader, session, state, token);
                 if (changePolicy)
                 { await DiscoveryAuthorityFlow.WarmAsync(fixture, root, reader, session, state, firstRequest, token); }
                 else

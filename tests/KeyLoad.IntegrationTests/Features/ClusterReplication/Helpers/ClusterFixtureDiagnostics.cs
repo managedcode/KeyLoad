@@ -58,14 +58,16 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
 
     /// <summary>Writes bounded resource states, signed discovery replies and recent node logs.</summary>
     /// <param name="peerSecret">The fixture's private shared discovery credential.</param>
+    /// <param name="adminCredential">The actual persisted administrator credential for authenticated diagnostics.</param>
+    /// <param name="incarnation">The original configured RF3 incarnation bound to signed discovery.</param>
     /// <param name="cancellationToken">The caller's test deadline, linked to the diagnostic request bound.</param>
-    internal async Task SaveAsync(ReadOnlyMemory<byte> peerSecret, CancellationToken cancellationToken)
-        => await SaveCoreAsync(peerSecret, null, cancellationToken).ConfigureAwait(false);
+    internal async Task SaveAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, CancellationToken cancellationToken)
+        => await SaveCoreAsync(peerSecret, adminCredential, incarnation, null, cancellationToken).ConfigureAwait(false);
 
-    internal Task SaveOwnedAsync(ReadOnlyMemory<byte> peerSecret, string output, CancellationToken cancellationToken)
-        => SaveCoreAsync(peerSecret, output, cancellationToken);
+    internal Task SaveOwnedAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string output, CancellationToken cancellationToken)
+        => SaveCoreAsync(peerSecret, adminCredential, incarnation, output, cancellationToken);
 
-    private async Task SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string? ownedOutput, CancellationToken cancellationToken)
+    private async Task SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string? ownedOutput, CancellationToken cancellationToken)
     {
         var nodeGroups = new List<IEnumerable<string>>();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
@@ -75,7 +77,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
                 ? string.Format(CultureInfo.InvariantCulture, ResourceStateTemplate, current.ResourceId,
                     current.Snapshot.State?.Text, current.Snapshot.ExitCode, current.Snapshot.HealthStatus)
                 : ResourceStateUnavailable;
-            var evidence = await new ClusterNodeHttpEvidence(app).ReadAsync(name, peerSecret, cancellationToken).ConfigureAwait(false);
+            var evidence = await new ClusterNodeHttpEvidence(app).ReadAsync(name, peerSecret, adminCredential, incarnation, cancellationToken).ConfigureAwait(false);
             var lines = new List<string>
             {
                 string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state),

@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 
 internal static class BlobReclaimHealthyContinuation
 {
-    internal static async Task Run(DatabaseEngine database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture,
+    internal static async Task<(CompleteBlobUploadRequest Request, OperationResult Result, BlobMetadata Metadata)> Run(DatabaseEngine database, ZoneTreeStore store, BlobReclaimWholeFlowFixture fixture,
         ReclaimBlobRequest first, ReclaimBlobRequest final)
     {
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId,
@@ -41,6 +41,7 @@ internal static class BlobReclaimHealthyContinuation
             BlobReclaimWholeFlowFixture.SingleCount, BlobReclaimWholeFlowFixture.EmptyCount);
         await BlobReclaimWholeFlow.Replay(database, store, OperationKind.CompleteBlobUpload, complete, complete.CommandId, result);
         await Ranges(database, store, expected);
+        return (complete, result, expected);
     }
 
     private static async Task RefusedOldLifetime<T>(DatabaseEngine database, ZoneTreeStore store,

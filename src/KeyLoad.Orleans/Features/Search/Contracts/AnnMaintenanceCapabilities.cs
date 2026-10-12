@@ -9,7 +9,9 @@ internal enum AnnMaintenanceCapabilityKind
     Verify,
     Publish,
     Abort,
-    Release
+    Release,
+    AdmitOriginal,
+    SettleOriginalResult
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnMaintenanceCapabilityAliases.Request)]
@@ -18,7 +20,9 @@ internal sealed record AnnMaintenanceCapabilityRequest(
     [property: global::Orleans.Id(1)] Guid SessionId,
     [property: global::Orleans.Id(2)] AnnMaintenanceCapabilityKind Kind,
     [property: global::Orleans.Id(3)] ProjectionBatch? Page,
-    [property: global::Orleans.Id(4)] CommitProjectionBatchRequest? CheckpointIntent);
+    [property: global::Orleans.Id(4)] CommitProjectionBatchRequest? CheckpointIntent,
+    [property: global::Orleans.Id(5)] AnnMaintenanceResult? FullOriginalResult = null,
+    [property: global::Orleans.Id(6)] ProjectionConsumerInfo? OriginalConfigure = null);
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnMaintenanceCapabilityAliases.Result)]
 internal sealed record AnnMaintenanceCapabilityResult(
@@ -29,7 +33,12 @@ internal sealed record AnnMaintenanceCapabilityResult(
     [property: global::Orleans.Id(4)] CommitProjectionBatchRequest? OriginalCheckpointIntent,
     [property: global::Orleans.Id(5)] string? IndexSha256,
     [property: global::Orleans.Id(6)] long CheckpointAfter,
-    [property: global::Orleans.Id(7)] bool Pending);
+    [property: global::Orleans.Id(7)] bool Pending,
+    [property: global::Orleans.Id(8)] AnnMaintenanceResult? OriginalResult = null)
+{
+    [global::Orleans.Id(9)]
+    public CommitProjectionBatchRequest? EnrollmentSettlementIntent { get; init; }
+}
 
 internal static class AnnMaintenanceCapabilityAliases
 {

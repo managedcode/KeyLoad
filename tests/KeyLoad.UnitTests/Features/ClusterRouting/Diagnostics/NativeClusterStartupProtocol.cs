@@ -16,6 +16,8 @@ internal static class NativeClusterStartupProtocol
     internal const string DeadlineCancelled = "deadlineCancelled";
     internal const string Files = "files";
     internal const string ExceptionTypes = "exceptionTypes";
+    internal const string OperationKind = "NativeTestClusterOperationFailure";
+    internal const string OperationSuffix = "-operation";
     internal const string Kind = "NativeTestClusterStartupFailure";
 
     internal static bool Identifier(string value)

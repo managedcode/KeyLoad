@@ -35,25 +35,15 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
 
     internal static void RequireProbeWork(NodeOptions options, PhysicalOwnerProbeWorkOwner? work)
     {
-        if (options.MembershipAuthority.RegisterPhysicalOwners && work is null)
+        if (options.PhysicalGroupTrust.RegisterPhysicalOwners && work is null)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
-    }
-
-    internal static void PublishAndAttachAuthority(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
-        PartitionHost partition, NodeOptions nodeOptions, ServerRuntimeOptions options,
-        ReplicaMembershipAuthorityOwner authority, IServiceProvider services, TimeProvider clock)
-    {
-        if (nodeOptions.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
-        { return; }
-        authority.Publish(services.GetRequiredService<IMembershipTable>());
-        Attach(ref slot, node, partition, options, services, clock);
     }
 
     internal static void Attach(ref PhysicalOwnerRegistrationRuntime? slot, OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, IServiceProvider services, TimeProvider clock)
     {
-        if (!options.Node.Value.MembershipAuthority.RegisterPhysicalOwners
-            || options.Node.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+        if (!options.Node.Value.PhysicalGroupTrust.RegisterPhysicalOwners
+            || options.Node.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
         { return; }
         slot = new PhysicalOwnerRegistrationRuntime(node, partition, options,
             services.GetRequiredService<ISiloStatusOracle>(), clock,
@@ -79,8 +69,8 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
     internal static Task WaitForRegistrationAsync(PhysicalOwnerRegistrationRuntime? registration,
         NodeOptions options, CancellationToken cancellationToken)
     {
-        if (!options.MembershipAuthority.RegisterPhysicalOwners
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+        if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
         { return Task.CompletedTask; }
         return (registration ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable))
             .WaitForRegistrationAsync(cancellationToken);

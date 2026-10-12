@@ -11,6 +11,38 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     private const int Empty = 0;
     private readonly NativeAnnExecutionOptions options = configured.Value;
 
+    internal global::KeyLoad.Orleans.AnnProjectionEnrollment? ReadEnrollment(AnnMaintenanceRequest request)
+    {
+        var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
+        var entry = root.Receipt.OriginalOperations.SingleOrDefault(item => item.Key == key);
+        if (entry is null) { return null; }
+        NativeAnnOriginalResults.Require(entry);
+        if (!NativeAnnOriginalResults.SameRequest(entry.InitialRequest, request))
+        { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
+        if (entry.Released || !entry.InitialSettled || entry.PendingRequest is not null)
+        { return null; }
+        return new(entry.InitialRequest,
+            entry.LastRequest ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt),
+            entry.LastResult ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt));
+    }
+
+    internal AnnMaintenanceResult? AdmitOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
+        ProjectionConsumerInfo configured, AnnSeed current)
+        => root.AdmitOriginal(principal, request, configured, current, options);
+
+    internal CommitProjectionBatchRequest? OriginalSettlementIntent(AnnMaintenanceRequest request)
+    {
+        var entry = root.Receipt.OriginalOperations.SingleOrDefault(value => value.Key == new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration));
+        return entry is not null && NativeAnnOriginalResults.SameRequest(entry.InitialRequest, request)
+            ? entry.InitialSettlementIntent : null;
+    }
+
+    internal void StartOriginal(AnnMaintenanceRequest request) => root.StartOriginal(request, options);
+
+    internal void SettleOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
+        AnnMaintenanceResult result, AnnSeed current, CommitProjectionBatchRequest? settlementIntent)
+        => root.SettleOriginal(principal, request, result, current, options, settlementIntent);
+
     internal NativeAnnManifest Describe(AnnMaintenanceRequest request, AnnSeed current)
     {
         var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
@@ -31,6 +63,11 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
         RequireProgress(manifest, current);
         return manifest;
     }
+
+    internal NativeAnnManifest ReadPublished(AnnMaintenanceRequest request, AnnSeed current,
+        AnnSeedOptions seeds, long maximumPeak, AnnWorkBudget budget, ReadExecutionBudget readBudget)
+        => NativeAnnProjectionAuthority.ReadPublished(root, request, current, policy, storage,
+            options, seeds, maximumPeak, budget, readBudget);
 
     internal NativeAnnReplaySource LoadPending(AnnMaintenanceRequest request, AnnSeed current,
         AnnSeedOptions seeds, AnnWorkBudget budget, ReadExecutionBudget readBudget)
@@ -86,7 +123,7 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     internal void Release(NativeAnnOwnedKey key)
     {
         var pending = root.Receipt.Pending.SingleOrDefault(item => item.Key == key);
-        root.Unpublish(key, options);
+        root.Unpublish(key, options, releaseOriginal: true);
         if (pending is not null)
         { root.Remove(pending.Pointer.GenerationLeaf, options); }
     }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-/// <summary>Owns one original native transport resource context and purpose-specific authenticated channels.</summary>
+/// <summary>Owns one original native Orleans transport context and purpose-specific authenticated channels.</summary>
 internal sealed class PartitionMovementTransportOwner : IDisposable
 {
     private readonly PartitionMovementTransportContext context;
@@ -11,10 +11,10 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
     private readonly PartitionMovementReceiverIssueTransport issue;
     private readonly PartitionMovementTransferDataTransport transfer;
 
-    internal PartitionMovementTransportOwner(IOptions<NodeOptions> options, PartitionHost partition,
+    internal PartitionMovementTransportOwner(IOptions<NodeOptions> options, OrleansNode node, PartitionHost partition,
         IOptions<OrleansMembershipOptions> membership, TimeProvider clock)
     {
-        context = new(options, partition, membership, clock);
+        context = new(options, node, partition, membership, clock);
         var reply = new PartitionMovementTransportReplyVerifier(context);
         effect = new(context, reply);
         issue = new(context, reply);
@@ -40,8 +40,8 @@ internal sealed class PartitionMovementTransportOwner : IDisposable
 
     internal Task<PartitionMovementTransferDataReply> ExchangeTransferDataAsync(int index,
         RegisteredPhysicalOwnerV1 source, PartitionMovementTransferDataRequest original, byte[] body,
-        bool local, CancellationToken cancellationToken)
-        => transfer.ExchangeTransferDataAsync(index, source, original, body, local, cancellationToken);
+        CancellationToken cancellationToken)
+        => transfer.ExchangeTransferDataAsync(index, source, original, body, cancellationToken);
 
     internal Task<PartitionMovementAuthenticatedReply> ExchangeAsync(int index, RegisteredPhysicalOwnerV1 receiver,
         PartitionMovementTransportRequest original, byte[] body, bool local, CancellationToken cancellationToken)

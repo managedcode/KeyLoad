@@ -40,6 +40,8 @@ internal static class NativeJobGraphRegistration
             new GrainTransition(RuntimeJournalClient.SendCommandCallerMethod, nameof(IConnectionGrain.ExecuteStreamAsync)));
         graph.AddTransition(typeof(SampleChunkCoordinatorGrain).FullName!, typeof(IConnectionGrain).FullName!,
             new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IConnectionGrain.ExecuteStreamAsync)));
+        graph.AddTransition(typeof(AnnProjectionCoordinatorGrain).FullName!, typeof(IConnectionGrain).FullName!,
+            new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IConnectionGrain.ExecuteStreamAsync)));
         services.Remove(descriptor);
         services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }

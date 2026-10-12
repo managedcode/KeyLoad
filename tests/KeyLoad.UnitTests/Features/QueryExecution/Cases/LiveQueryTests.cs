@@ -169,6 +169,8 @@ internal sealed class LiveQueryTests
         await Assert.That(fresh.Rows).IsEmpty();
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader with { PolicyEpoch = 2 })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("reader", new(query, fresh.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
+        await global::KeyLoad.UnitTests.Features.Authorization.LivePolicyEpochContinuation.RunAsync(db, query,
+            snapshot.Cursor, fresh.Cursor, reader);
     }
     [Test]
     public async Task UnsupportedRankingIncompleteSnapshotsAndDifferentQueryCursorsAreRejected()
@@ -200,5 +202,6 @@ internal sealed class LiveQueryTests
         db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(id, db.Partition, 1), id: id).Get<OutboxHead>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("root", new(query, snapshot.Cursor))).Code).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(engine.ReadLiveQuery("root", new(query, page.Cursor)).Changes).IsEmpty();
+        await LiveQueryRetentionContinuation.RunAsync(db, engine, query, snapshot.Cursor);
     }
 }

@@ -50,7 +50,7 @@ internal static class PartitionMovementReceiverIssueFailoverRf3Healthy
             var source = await RequestCqrsRf3SignedDiscovery.ReadForProfileAsync(wave.Application,
                 TwoRf3MembershipProtocol.Node1, wave.Profile, cancellationToken).ConfigureAwait(false);
             return await TwoRf3MembershipSignedDiscovery.ReadAsync(wave.Application, TwoRf3MembershipProtocol.Node5,
-                source.ClusterId, actualIncarnation, secret, cancellationToken).ConfigureAwait(false);
+                source.ClusterId, actualIncarnation, secret, wave.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
         }
         finally { CryptographicOperations.ZeroMemory(secret); }
     }

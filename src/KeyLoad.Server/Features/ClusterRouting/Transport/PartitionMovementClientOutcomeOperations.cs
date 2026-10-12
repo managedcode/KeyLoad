@@ -13,8 +13,8 @@ internal static class PartitionMovementClientOutcomeOperations
     {
         work.Check();
         cancellationToken.ThrowIfCancellationRequested();
-        if (owner.options.Value.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority
-            || !owner.options.Value.MembershipAuthority.RegisterPhysicalOwners || requestExpiry <= owner.clock.GetUtcNow())
+        if (owner.options.Value.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control
+            || !owner.options.Value.PhysicalGroupTrust.RegisterPhysicalOwners || requestExpiry <= owner.clock.GetUtcNow())
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
         var remaining = requestExpiry - owner.clock.GetUtcNow();
         var bounded = remaining < work.RemainingLifetime ? remaining : work.RemainingLifetime;

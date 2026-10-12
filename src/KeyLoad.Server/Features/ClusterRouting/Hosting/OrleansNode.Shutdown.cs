@@ -12,16 +12,17 @@ internal sealed partial class OrleansNode
         Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
+        // Do not resolve services during cleanup: owners were captured by the original startup path.
+        if (Volatile.Read(ref nativeModelReceiver) is { } nativeReceiver)
+        { await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false); }
+        if (Volatile.Read(ref nativeModelClient) is { } nativeClient)
+        { await ServerFailureObserver.ObserveAsync(nativeClient.StopAsync, failures).ConfigureAwait(false); }
         if (Movement is { } moving)
         { await ServerFailureObserver.ObserveAsync(() => moving.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         if (RemoteDocuments is { } remote)
         { await ServerFailureObserver.ObserveAsync(() => remote.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(Volatile.Read(ref ownerRegistration),
             physicalOwnerWork, failures).ConfigureAwait(false);
-        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
-        {
-            await membershipAuthority.StopAdmissionJoinAndClearProviderAsync(failures).ConfigureAwait(false);
-        }
         if (RemoteDocuments is { IsJoined: false } || Movement is { IsJoined: false })
         {
             ServerFailureObserver.ThrowIfAny(failures);

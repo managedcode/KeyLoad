@@ -1,224 +1,119 @@
-using System.Net;
+using System.Collections.Concurrent;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
-internal sealed class RequestCqrsCohortEndpoint : IAsyncDisposable
+internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserver
 {
-    private readonly WebApplication application;
-    private RequestCqrsCohortEndpointState state = RequestCqrsCohortEndpointState.Unavailable;
-    private long requests;
-    private bool stopped;
+    private const int MaximumControlledRequests = 8;
+    private readonly ConcurrentDictionary<Guid, byte> requests = new();
+    private volatile ReplicaSiloDiscovery? selected;
+    private volatile RequestCqrsCohortNativeGate? dispatchGate;
+    private volatile RequestCqrsCohortNativeGate? payloadGate;
+    private volatile bool unavailable;
+    private volatile bool malformed;
+    private long count;
+    internal ReplicaNativeDiscoveryRuntime? Runtime { get; set; }
+    internal bool Stopped { get; private set; }
+    internal long Requests => Interlocked.Read(ref count);
 
-    private RequestCqrsCohortEndpoint(WebApplication application, string voterId)
+    internal void BeforeSend(ReplicaNativeDiscoveryRequest request, CancellationToken token)
     {
-        this.application = application;
-        VoterId = voterId;
-    }
-
-    internal string VoterId { get; }
-    internal Uri Origin { get; private set; } = null!;
-    internal long Requests => Interlocked.Read(ref requests);
-
-    internal static async Task<RequestCqrsCohortEndpoint> StartAsync(string voterId, CancellationToken token)
-    {
-        var builder = WebApplication.CreateBuilder();
-        builder.Logging.ClearProviders();
-        builder.WebHost.ConfigureKestrel(static options =>
+        token.ThrowIfCancellationRequested();
+        if (requests.Count >= MaximumControlledRequests || !requests.TryAdd(request.Nonce, 0))
         {
-            options.AddServerHeader = false;
-            options.Listen(IPAddress.Loopback, 0);
-        });
-        var application = builder.Build();
-        var endpoint = new RequestCqrsCohortEndpoint(application, voterId);
-        application.MapGet(ReplicaProtocol.DiscoveryPath, endpoint.HandleAsync);
-        try
-        {
-            await application.StartAsync(token);
-            var addresses = application.Services.GetRequiredService<IServer>()
-                .Features.Get<IServerAddressesFeature>()?.Addresses;
-            var address = addresses?.SingleOrDefault();
-            if (address is null || !Uri.TryCreate(address, UriKind.Absolute, out var origin)
-                || origin.Port <= 0)
-            {
-                throw new InvalidOperationException("The owned Kestrel endpoint did not publish a loopback origin.");
-            }
-
-            endpoint.Origin = origin;
-            return endpoint;
-        }
-        catch (Exception startupFailure)
-        {
-            var failures = new List<Exception> { startupFailure };
-            using var cleanup = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
-            await RequestCqrsCohortCleanup.CaptureAsync(() => application.StopAsync(cleanup.Token), failures);
-            await RequestCqrsCohortCleanup.CaptureAsync(() => application.DisposeAsync().AsTask(), failures);
-            RequestCqrsCohortCleanup.ThrowIfAny(failures);
-            throw;
+            throw new InvalidOperationException("Native controlled discovery admission exceeded its bound.");
         }
     }
+    internal async ValueTask BeforeSendAsync(CancellationToken token)
+    {
+        if (dispatchGate is { } gate)
+        {
+            await gate.WaitAsync(token);
+        }
 
+        token.ThrowIfCancellationRequested();
+    }
+    public async ValueTask<ReadOnlyMemory<byte>> TransformNativeDiscoveryAsync(ReplicaNativeDiscoveryRequest request,
+        ReplicaSiloDiscovery actual, ReadOnlyMemory<byte> payload, CancellationToken token)
+    {
+        if (requests.ContainsKey(request.Nonce) && payloadGate is { } gate)
+        {
+            await gate.WaitAsync(token);
+        }
+
+        token.ThrowIfCancellationRequested();
+        return TransformNativeDiscovery(request, actual, payload, token);
+    }
+    public ReadOnlyMemory<byte> TransformNativeDiscovery(ReplicaNativeDiscoveryRequest request,
+        ReplicaSiloDiscovery actual, ReadOnlyMemory<byte> payload, CancellationToken token)
+    {
+        // Only nonce-enrolled scenario requests are transformed; actual consensus discovery remains untouched.
+        if (!requests.TryRemove(request.Nonce, out _))
+        {
+            return payload;
+        }
+
+        Interlocked.Increment(ref count);
+        token.ThrowIfCancellationRequested();
+        if (unavailable)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
+        }
+
+        var result = selected is { } state ? NativeSerialization.Serialize(state) : payload.ToArray();
+        return result;
+    }
+    internal ReplicaNativeDiscoveryReply Receive(ReplicaNativeDiscoveryReply reply, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (!malformed || reply.Error is not null)
+        {
+            return reply;
+        }
+
+        var copy = reply.Payload.ToArray();
+        if (copy.Length == 0)
+        {
+            throw new InvalidOperationException("The genuine reply payload is empty.");
+        }
+
+        copy[0] ^= 1;
+        return reply with { Payload = copy };
+    }
     internal void SetDiscovery(ReplicaEnvelopeAuthenticator authentication, ReplicaSiloDiscovery discovery)
-        => Volatile.Write(ref state, new(authentication, discovery, null, null, false, true));
-
-    internal void SetTamperedPayload()
     {
-        var current = Volatile.Read(ref state);
-        Volatile.Write(ref state, current with { TamperPayload = true, Available = true });
+        ArgumentNullException.ThrowIfNull(authentication);
+        selected = discovery; unavailable = false; malformed = false;
+        ReleaseAll(); dispatchGate = null; payloadGate = null;
     }
-
-    internal void SetHeaderGate(RequestCqrsCohortHttpGate gate)
-    {
-        var current = Volatile.Read(ref state);
-        Volatile.Write(ref state, current with { HeaderGate = gate, Available = true });
-    }
-
-    internal void SetBodyGate(RequestCqrsCohortHttpGate gate)
-    {
-        var current = Volatile.Read(ref state);
-        Volatile.Write(ref state, current with { BodyGate = gate, Available = true });
-    }
-
-    internal void SetUnavailable()
-    {
-        var current = Volatile.Read(ref state);
-        Volatile.Write(ref state, current with { Available = false, HeaderGate = null, BodyGate = null });
-    }
-
+    internal void SetTamperedPayload() => malformed = true;
+    internal void SetHeaderGate(RequestCqrsCohortNativeGate gate) => dispatchGate = gate;
+    internal void SetBodyGate(RequestCqrsCohortNativeGate gate) => payloadGate = gate;
+    internal void SetUnavailable() { unavailable = true; ReleaseAll(); dispatchGate = null; payloadGate = null; }
     internal async Task StopListeningAsync(CancellationToken token)
     {
-        if (stopped)
-        {
-            return;
-        }
-
-        await application.StopAsync(token);
-        stopped = true;
+        token.ThrowIfCancellationRequested();
+        await (Runtime ?? throw new InvalidOperationException("The actual native runtime is absent.")).StopAsync();
+        Stopped = true;
+        token.ThrowIfCancellationRequested();
     }
-
-    private async Task HandleAsync(HttpContext context)
-    {
-        Interlocked.Increment(ref requests);
-        var selected = Volatile.Read(ref state);
-        if (!selected.Available)
-        {
-            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-            return;
-        }
-
-        if (!TryReadNonce(context, out var nonce))
-        {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            return;
-        }
-
-        try
-        {
-            if (selected.HeaderGate is not null)
-            {
-                await selected.HeaderGate.WaitAsync(context.RequestAborted);
-            }
-
-            var payload = NativeSerialization.Serialize(selected.Discovery!);
-            var signature = selected.Authentication!.SignDiscovery(payload, nonce);
-            if (selected.TamperPayload)
-            {
-                payload = payload.ToArray();
-                payload[0] ^= 1;
-            }
-            context.Response.Headers[ReplicaTransportProtocol.DiscoverySignatureHeader] = signature;
-            context.Response.ContentType = "application/octet-stream";
-            context.Response.ContentLength = payload.Length;
-            if (selected.BodyGate is not null)
-            {
-                var firstCount = Math.Max(1, payload.Length / 2);
-                await context.Response.Body.WriteAsync(payload.AsMemory(0, firstCount), context.RequestAborted);
-                await context.Response.Body.FlushAsync(context.RequestAborted);
-                await selected.BodyGate.WaitAsync(context.RequestAborted);
-                await context.Response.Body.WriteAsync(payload.AsMemory(firstCount), context.RequestAborted);
-                return;
-            }
-
-            await context.Response.Body.WriteAsync(payload, context.RequestAborted);
-        }
-        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
-        {
-            selected.HeaderGate?.MarkAborted();
-            selected.BodyGate?.MarkAborted();
-            throw;
-        }
-    }
-
-    private static bool TryReadNonce(HttpContext context, out Guid nonce)
-    {
-        nonce = Guid.Empty;
-        var values = context.Request.Headers[ReplicaTransportProtocol.HttpNonceHeader];
-        return values.Count == 1
-            && Guid.TryParseExact(values[0], ReplicaTransportProtocol.NonceFormat, out nonce)
-            && nonce != Guid.Empty;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        var current = Volatile.Read(ref state);
-        current.HeaderGate?.Release();
-        current.BodyGate?.Release();
-        using var deadline = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
-        var failures = new List<Exception>();
-        if (!stopped)
-        {
-            var failureCount = failures.Count;
-            await RequestCqrsCohortCleanup.CaptureAsync(() => application.StopAsync(deadline.Token), failures);
-            stopped = failures.Count == failureCount;
-        }
-
-        await RequestCqrsCohortCleanup.CaptureAsync(() => application.DisposeAsync().AsTask(), failures);
-        RequestCqrsCohortCleanup.ThrowIfAny(failures);
-    }
+    internal void ReleaseAll() { dispatchGate?.Release(); payloadGate?.Release(); }
+    internal void Reset() { ReleaseAll(); selected = null; dispatchGate = null; payloadGate = null; unavailable = false; malformed = false; requests.Clear(); }
 }
 
-internal sealed record RequestCqrsCohortEndpointState(
-    ReplicaEnvelopeAuthenticator? Authentication,
-    ReplicaSiloDiscovery? Discovery,
-    RequestCqrsCohortHttpGate? HeaderGate,
-    RequestCqrsCohortHttpGate? BodyGate,
-    bool TamperPayload,
-    bool Available)
-{
-    internal static RequestCqrsCohortEndpointState Unavailable { get; } = new(null, null, null, null, false, false);
-}
-
-internal sealed class RequestCqrsCohortHttpGate
+internal sealed class RequestCqrsCohortNativeGate
 {
     private readonly TaskCompletionSource entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource aborted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource released = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
     internal Task Entered => entered.Task;
     internal Task Aborted => aborted.Task;
-
     internal async Task WaitAsync(CancellationToken token)
     {
         entered.TrySetResult();
-        try
-        {
-            await released.Task.WaitAsync(token);
-        }
-        catch (OperationCanceledException) when (token.IsCancellationRequested)
-        {
-            aborted.TrySetResult();
-            throw;
-        }
+        try { await released.Task.WaitAsync(token); }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { aborted.TrySetResult(); throw; }
     }
-
-    internal void MarkAborted() => aborted.TrySetResult();
     internal void Release() => released.TrySetResult();
 }

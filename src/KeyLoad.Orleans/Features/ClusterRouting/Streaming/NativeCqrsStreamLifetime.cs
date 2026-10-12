@@ -23,7 +23,7 @@ internal static class NativeCqrsStreamLifetime
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Action settled, IOptions<GrainRoutingOptions> options,
         NativeRequestWorkOwner? owner, CancellationToken cancellationToken)
-        => RunCore(createStream, serializer, requestId, clock, settled, owner, options, options.Value.ExecutionLifetime,
+        => RunCore(createStream, serializer, requestId, clock, () => { settled(); return ValueTask.CompletedTask; }, owner, options, options.Value.ExecutionLifetime,
             null, cancellationToken, CancellationToken.None);
 
     internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunWithPurpose(
@@ -31,13 +31,21 @@ internal static class NativeCqrsStreamLifetime
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Action settled, IOptions<GrainRoutingOptions> options,
         NativeRequestWorkOwner? owner, NativeCqrsStreamPurpose purpose, CancellationToken cancellationToken)
+        => RunCore(createStream, serializer, requestId, clock, () => { settled(); return ValueTask.CompletedTask; }, owner, options, options.Value.ExecutionLifetime,
+            purpose, cancellationToken, CancellationToken.None);
+
+    internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunWithAwaitedSettlement(
+        Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
+        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
+        Guid requestId, TimeProvider clock, Func<ValueTask> settled, IOptions<GrainRoutingOptions> options,
+        NativeRequestWorkOwner? owner, NativeCqrsStreamPurpose purpose, CancellationToken cancellationToken)
         => RunCore(createStream, serializer, requestId, clock, settled, owner, options, options.Value.ExecutionLifetime,
             purpose, cancellationToken, CancellationToken.None);
 
     private static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunCore(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner, IOptions<GrainRoutingOptions> options, TimeSpan executionLifetime,
+        Guid requestId, TimeProvider clock, Func<ValueTask> settled, NativeRequestWorkOwner? owner, IOptions<GrainRoutingOptions> options, TimeSpan executionLifetime,
         NativeCqrsStreamPurpose? purpose, CancellationToken cancellationToken, [EnumeratorCancellation] CancellationToken enumerationToken)
     {
         using var deadline = new CancellationTokenSource(executionLifetime, clock);
@@ -47,7 +55,7 @@ internal static class NativeCqrsStreamLifetime
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest?.Token ?? request.Token,
             deadline.Token);
         var admission = new NativeCqrsStreamAdmission(serializer: serializer, requestId: requestId, options: options, purpose: purpose);
-        var workLease = await NativeRequestWorkStreamSettlement.AcquireOrSettleAsync(owner, requestId, settled)
+        var workLease = await NativeRequestWorkStreamSettlement.AcquireOrSettleAwaitedAsync(owner, requestId, settled)
             .ConfigureAwait(true);
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;
         Exception? primary = null;
@@ -72,7 +80,7 @@ internal static class NativeCqrsStreamLifetime
         }
         finally
         {
-            var settlementFailure = await NativeRequestWorkStreamSettlement.SettleAndReleaseAsync(enumerator,
+            var settlementFailure = await NativeRequestWorkStreamSettlement.SettleAndReleaseAwaitedAsync(enumerator,
                 settled, primary, workLease).ConfigureAwait(true);
             NativeRequestWorkSettlement.Rethrow(settlementFailure);
         }

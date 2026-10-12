@@ -24,11 +24,11 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
     private int disposed;
 
     internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
-        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions, ReplicaDiscoveryProbe? probe = null)
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, ReplicaNativeDiscoveryClient native, ReplicaNativeDiscoveryMembership membership, ReplicaDiscoveryProbe? probe = null)
     {
         const int DiscoveryMutexPermits = 1;
 
-        exchange = new(configurationOptions, options, authentication, clock, peerOptions, probe);
+        exchange = new(configurationOptions, options, authentication, clock, native, membership, probe);
         discoveryGate = new(DiscoveryMutexPermits, DiscoveryMutexPermits);
         stopping = new();
     }

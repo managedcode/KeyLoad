@@ -35,7 +35,7 @@ internal static class ControlledPartitionMovementProcessOptions
             AllowLoopbackHttp = true,
             AllowPrivateNetworkHttp = true,
             SiloAddress = new Uri(local.VoterIds.First()).DnsSafeHost,
-            MembershipAuthority = Settings(corpus, controlPeerSecret, destinationPeerSecret, control)
+            PhysicalGroupTrust = Settings(corpus, controlPeerSecret, destinationPeerSecret, control)
         };
         options.Validate();
         var services = new ServiceCollection();
@@ -49,24 +49,23 @@ internal static class ControlledPartitionMovementProcessOptions
         return runtime;
     }
 
-    private static MembershipAuthoritySettings Settings(ControlledPartitionMovementProcessOwners corpus,
+    private static PhysicalGroupTrustOptions Settings(ControlledPartitionMovementProcessOwners corpus,
         string controlPeerSecret, string destinationPeerSecret, bool control)
         => control ? new()
         {
-            Mode = MembershipAuthoritySettingsProtocol.Authority,
+            Role = PhysicalGroupTrustRole.Control,
             RegisterPhysicalOwners = true,
-            TrustedGroupPhysicalShardId = corpus.Destination.Owner.PhysicalShardId,
-            TrustedGroupIncarnation = corpus.Destination.Owner.Incarnation,
-            TrustedGroupVoterIds = [.. corpus.Destination.Owner.VoterIds],
-            TrustedGroupSiloEndpoints = corpus.DestinationSiloEndpoints,
-            TrustedGroupPeerSecret = destinationPeerSecret
+            ForeignPhysicalShardId = corpus.Destination.Owner.PhysicalShardId,
+            ForeignIncarnation = corpus.Destination.Owner.Incarnation,
+            ForeignVoterIds = [.. corpus.Destination.Owner.VoterIds],
+            ForeignPeerSecret = destinationPeerSecret
         } : new()
         {
-            Mode = MembershipAuthoritySettingsProtocol.Proxy,
+            Role = PhysicalGroupTrustRole.Destination,
             RegisterPhysicalOwners = true,
-            AuthorityPhysicalShardId = corpus.Control.Owner.PhysicalShardId,
-            AuthorityIncarnation = corpus.Control.Owner.Incarnation,
-            AuthorityEndpoints = [.. corpus.Control.Owner.VoterIds],
-            AuthorityPeerSecret = controlPeerSecret
+            ForeignPhysicalShardId = corpus.Control.Owner.PhysicalShardId,
+            ForeignIncarnation = corpus.Control.Owner.Incarnation,
+            ForeignVoterIds = [.. corpus.Control.Owner.VoterIds],
+            ForeignPeerSecret = controlPeerSecret
         };
 }

@@ -8,6 +8,10 @@ internal static class NativeRequestWorkStreamSettlement
 {
     internal static async ValueTask<NativeRequestWorkLease?> AcquireOrSettleAsync(
         NativeRequestWorkOwner? owner, Guid requestId, Action settled)
+        => await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; }).ConfigureAwait(true);
+
+    internal static async ValueTask<NativeRequestWorkLease?> AcquireOrSettleAwaitedAsync(
+        NativeRequestWorkOwner? owner, Guid requestId, Func<ValueTask> settled)
     {
         var (lease, error) = TryAcquire(owner, requestId);
         if (error is null)
@@ -15,7 +19,7 @@ internal static class NativeRequestWorkStreamSettlement
             return lease;
         }
 
-        var failure = await SettleAndReleaseAsync<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>(
+        var failure = await SettleAndReleaseAwaitedAsync<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>(
             null, settled, error, null).ConfigureAwait(true);
         ExceptionDispatchInfo.Capture(failure ?? error).Throw();
         return null;
@@ -45,12 +49,16 @@ internal static class NativeRequestWorkStreamSettlement
 
     internal static async ValueTask<Exception?> SettleAndReleaseAsync<T>(IAsyncEnumerator<T>? enumerator,
         Action settled, Exception? primary, NativeRequestWorkLease? lease)
+        => await SettleAndReleaseAwaitedAsync(enumerator, () => { settled(); return ValueTask.CompletedTask; }, primary, lease).ConfigureAwait(true);
+
+    internal static async ValueTask<Exception?> SettleAndReleaseAwaitedAsync<T>(IAsyncEnumerator<T>? enumerator,
+        Func<ValueTask> settled, Exception? primary, NativeRequestWorkLease? lease)
     {
         Exception? failure = null;
         Exception? settlementError = null;
         try
         {
-            failure = await NativeCqrsStreamSettlement.SettleAsync(enumerator, settled, primary).ConfigureAwait(true);
+            failure = await NativeCqrsStreamSettlement.SettleAwaitedAsync(enumerator, settled, primary).ConfigureAwait(true);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {

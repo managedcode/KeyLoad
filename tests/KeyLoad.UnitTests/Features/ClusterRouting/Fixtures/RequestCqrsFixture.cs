@@ -123,6 +123,15 @@ internal sealed partial class RequestCqrsClusterFixture : IAsyncInitializer, IAs
         }
     }
 
+    internal bool IsDisposalJoined
+    {
+        get
+        {
+            lock (disposalGate)
+            { return disposal is { IsCompletedSuccessfully: true }; }
+        }
+    }
+
     public ValueTask DisposeAsync()
     {
         var task = GetDisposalTask();

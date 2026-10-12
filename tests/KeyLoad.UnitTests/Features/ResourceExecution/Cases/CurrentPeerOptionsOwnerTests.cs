@@ -1,5 +1,6 @@
 using System.Globalization;
-using KeyLoad.Replication;
+using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,47 +12,43 @@ internal sealed class CurrentPeerOptionsOwnerTests
 {
     private const int CredentialBytes = 32;
     private const int RpcDeadlineMilliseconds = 2_000;
-    private const int ValidDiscoveryDeadlineMilliseconds = 250;
+    private const int ValidNativeAdmissions = 4;
     private const int MinimumAdminSuffixCharacters = 32;
     private const string AdministratorPrefix = "root.";
     private const string VoterOne = "https://127.0.0.1:5501";
     private const string VoterTwo = "https://127.0.0.1:5502";
     private const string VoterThree = "https://127.0.0.1:5503";
     private const string TestDataDirectoryPrefix = "keyload-peer-options-owner-";
-    private const string TimeSpanFormat = "c";
 
     [Test]
-    public async Task AcNativePeerDiscoveryConfigurationReachesSocketBeforePhysicalOwnership()
+    public async Task AcNativeDiscoveryAdmissionConfigurationReachesNativeOwnerBeforePhysicalOwnership()
     {
         var dataDirectory = NewDataDirectory();
-        using var configuration = Configuration(dataDirectory, TimeSpan.FromMilliseconds(ValidDiscoveryDeadlineMilliseconds));
+        using var configuration = Configuration(dataDirectory, ValidNativeAdmissions);
         using var provider = Provider(configuration);
         var runtime = provider.GetRequiredService<ServerRuntimeOptions>();
 
         runtime.ValidateBeforePhysicalOwnership();
-        using var security = new PeerSecurity(runtime.Peer.Value.Secret, TimeProvider.System, runtime.PeerDiscovery);
-        using var handler = (DelegatingHandler)security.CreateHandler();
-        var sockets = (SocketsHttpHandler)handler.InnerHandler!;
-
-        await Assert.That(sockets.ConnectTimeout).IsEqualTo(TimeSpan.FromMilliseconds(ValidDiscoveryDeadlineMilliseconds));
+        await Assert.That(runtime.Membership.Value.MaximumAdmissions).IsEqualTo(ValidNativeAdmissions);
+        runtime.Membership.Value.Validate();
         await Assert.That(runtime.ReplicaConfiguration.Value.RpcTimeout)
             .IsEqualTo(TimeSpan.FromMilliseconds(RpcDeadlineMilliseconds));
         await Assert.That(Directory.Exists(dataDirectory)).IsFalse();
     }
 
     [Test]
-    public async Task AcNativeDiscoveryDeadlineAtRpcBoundaryRejectsBeforePhysicalOwnership()
+    public async Task AcNativeDiscoveryZeroAdmissionRejectsBeforePhysicalOwnership()
     {
         var dataDirectory = NewDataDirectory();
-        using var configuration = Configuration(dataDirectory, TimeSpan.FromMilliseconds(RpcDeadlineMilliseconds));
+        using var configuration = Configuration(dataDirectory, 0);
         using var provider = Provider(configuration);
         var runtime = provider.GetRequiredService<ServerRuntimeOptions>();
 
-        Assert.ThrowsExactly<InvalidOperationException>(runtime.ValidateBeforePhysicalOwnership);
+        Assert.ThrowsExactly<OptionsValidationException>(runtime.ValidateBeforePhysicalOwnership);
         await Assert.That(Directory.Exists(dataDirectory)).IsFalse();
     }
 
-    private static ConfigurationManager Configuration(string dataDirectory, TimeSpan connectTimeout)
+    private static ConfigurationManager Configuration(string dataDirectory, int nativeAdmissions)
     {
         var values = new Dictionary<string, string?>
         {
@@ -65,8 +62,8 @@ internal sealed class CurrentPeerOptionsOwnerTests
             [NodeKey(nameof(NodeOptions.SigningKey))] = Convert.ToBase64String(new byte[CredentialBytes]),
             [NodeKey(nameof(NodeOptions.PeerSecret))] = Convert.ToBase64String(new byte[CredentialBytes]),
             [NodeKey(nameof(NodeOptions.AdminKey))] = AdministratorPrefix + new string('x', MinimumAdminSuffixCharacters),
-            [PeerDiscoveryKey(nameof(PeerDiscoveryOptions.ConnectTimeout))]
-                = connectTimeout.ToString(TimeSpanFormat, CultureInfo.InvariantCulture)
+            [NativeMembershipKey(nameof(OrleansMembershipOptions.MaximumAdmissions))]
+                = nativeAdmissions.ToString(CultureInfo.InvariantCulture)
         };
         var configuration = new ConfigurationManager();
         configuration.AddInMemoryCollection(values);
@@ -76,8 +73,8 @@ internal sealed class CurrentPeerOptionsOwnerTests
     private static string NodeKey(string property)
         => ServerProtocol.ConfigurationSection + ConfigurationPath.KeyDelimiter + property;
 
-    private static string PeerDiscoveryKey(string property)
-        => PeerDiscoveryOptions.SectionName + ConfigurationPath.KeyDelimiter + property;
+    private static string NativeMembershipKey(string property)
+        => OrleansMembershipOptions.SectionName + ConfigurationPath.KeyDelimiter + property;
 
     private static ServiceProvider Provider(IConfiguration configuration)
     {

@@ -36,10 +36,18 @@ internal static class ControlledPartitionMovementProcessBlobAssertions
         return metadata;
     }
 
-    internal static async Task ReadAsync(ControlledPartitionMovementNativeNode node, BlobMetadata expected,
+    internal static Task ReadAsync(ControlledPartitionMovementNativeNode node, BlobMetadata expected,
+        CancellationToken cancellationToken)
+        => ReadAsync(node.Database, expected, cancellationToken);
+
+    internal static Task ReadAsync(ControlledPartitionMovementNativeHost node, BlobMetadata expected,
+        CancellationToken cancellationToken)
+        => ReadAsync(node.Database, expected, cancellationToken);
+
+    private static async Task ReadAsync(global::KeyLoad.Core.DatabaseEngine database, BlobMetadata expected,
         CancellationToken cancellationToken)
     {
-        var operations = new BlobStorageOperations(node.Database);
+        var operations = new BlobStorageOperations(database);
         var metadata = operations.Metadata(ControlledPartitionMovementProcessLiteralCorpus.PrincipalId,
             new(expected.Blob), cancellationToken);
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(metadata, JsonDefaults.Options)

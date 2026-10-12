@@ -59,8 +59,6 @@ public static class ReplicaProtocol
     public const string LocalVoter = "local-voter";
     /// <summary>Reserved bootstrap membership directory name.</summary>
     public const string BootstrapDirectory = "bootstrap-membership";
-    /// <summary>Only authenticated internal HTTP discovery route.</summary>
-    public const string DiscoveryPath = "/internal/silo";
     /// <summary>Safe rejection detail for invalid scope, signature, expiry or replay.</summary>
     public const string InvalidPeer = "The internal replica envelope is invalid, expired or replayed.";
     internal static readonly byte[] StateStorageKey = KeyCodec.Encode(StateKey);

@@ -17,12 +17,12 @@ internal static class PhysicalOwnerConfiguredTuples
 
     internal static RegisteredPhysicalOwnerV1 Control(NodeOptions options, ReplicaConfiguration configuration)
     {
-        var settings = options.MembershipAuthority;
-        return settings.Mode switch
+        var settings = options.PhysicalGroupTrust;
+        return settings.Role switch
         {
-            MembershipAuthoritySettingsProtocol.Authority => Local(options, configuration),
-            MembershipAuthoritySettingsProtocol.Proxy => Entry(settings.AuthorityPhysicalShardId,
-                settings.AuthorityIncarnation, settings.AuthorityEndpoints.ToImmutableArray()),
+            PhysicalGroupTrustRole.Control => Local(options, configuration),
+            PhysicalGroupTrustRole.Destination => Entry(settings.ForeignPhysicalShardId,
+                settings.ForeignIncarnation, settings.ForeignVoterIds.ToImmutableArray()),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable)
         };
     }
@@ -32,12 +32,12 @@ internal static class PhysicalOwnerConfiguredTuples
 
     internal static RegisteredPhysicalOwnerV1 Destination(NodeOptions options, ReplicaConfiguration configuration)
     {
-        var settings = options.MembershipAuthority;
-        return settings.Mode switch
+        var settings = options.PhysicalGroupTrust;
+        return settings.Role switch
         {
-            MembershipAuthoritySettingsProtocol.Authority => Entry(settings.TrustedGroupPhysicalShardId,
-                settings.TrustedGroupIncarnation, settings.TrustedGroupVoterIds.ToImmutableArray()),
-            MembershipAuthoritySettingsProtocol.Proxy => Local(options, configuration),
+            PhysicalGroupTrustRole.Control => Entry(settings.ForeignPhysicalShardId,
+                settings.ForeignIncarnation, settings.ForeignVoterIds.ToImmutableArray()),
+            PhysicalGroupTrustRole.Destination => Local(options, configuration),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable)
         };
     }

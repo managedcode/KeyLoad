@@ -29,7 +29,8 @@ internal sealed class BlobReclaimWholeFlowTests
         await BlobReclaimWholeFlow.Replay(owner, reopened, OperationKind.ReclaimBlob,
             first.Request, first.Request.CommandId, first.Result);
         var final = await BlobReclaimWholeFlow.Finish(owner, reopened, fixture);
-        await BlobReclaimHealthyContinuation.Run(owner, reopened, fixture, first.Request, final);
+        var published = await BlobReclaimHealthyContinuation.Run(owner, reopened, fixture, first.Request, final);
+        await BlobOrphanReclaimContinuation.Cold(database, reopened, fixture, first.Request, final, published);
     }
 
     [Test]
@@ -57,7 +58,9 @@ internal sealed class BlobReclaimWholeFlowTests
         await BlobReclaimWholeFlow.Replay(owner, reopened, OperationKind.ReclaimBlob,
             first.Request, first.Request.CommandId, first.Result);
         var final = await BlobReclaimWholeFlow.Finish(owner, reopened, fixture);
-        await BlobReclaimHealthyContinuation.Run(owner, reopened, fixture, first.Request, final);
+        await BlobOrphanReclaimContinuation.RefusedRepairHealthy(owner, reopened, fixture);
+        var published = await BlobReclaimHealthyContinuation.Run(owner, reopened, fixture, first.Request, final);
+        await BlobOrphanReclaimContinuation.Cold(database, reopened, fixture, first.Request, final, published);
     }
 
     private static async Task RejectedReclaimPreservesEntireStore(TestDatabase database, BlobReclaimWholeFlowFixture fixture)

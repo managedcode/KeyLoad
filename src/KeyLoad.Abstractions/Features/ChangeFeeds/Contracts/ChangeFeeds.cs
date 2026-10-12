@@ -39,7 +39,12 @@ public sealed record ProjectionConsumerRef([property: Orleans.Id(0)] PartitionRe
 /// <param name="MutationKinds">The mutation kinds consumed by the projection.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ProjectionConsumerDefinition)]
-public sealed record ProjectionConsumerDefinition([property: Orleans.Id(0)] long IndexGeneration, [property: Orleans.Id(1)] ImmutableArray<string> Resources, [property: Orleans.Id(2)] ImmutableArray<string> MutationKinds);
+public sealed record ProjectionConsumerDefinition([property: Orleans.Id(0)] long IndexGeneration, [property: Orleans.Id(1)] ImmutableArray<string> Resources, [property: Orleans.Id(2)] ImmutableArray<string> MutationKinds)
+{
+    /// <summary>Gets the explicit native committed-vector maintenance selector.</summary>
+    [Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public AnnProjectionMaintenanceProfile? AnnMaintenance { get; init; }
+}
 
 /// <summary>Reports a projection consumer's definition and progress.</summary>
 /// <param name="Consumer">The consumer identity.</param>
@@ -56,6 +61,18 @@ public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] Projection
     /// <summary>Gets the latest reserve-using commit cut recorded for this consumer.</summary>
     [Orleans.Id(4)]
     public long LastProgressReservationCut { get; init; } = NoProgressReservationCut;
+
+    /// <summary>Gets the authenticated immutable original maintenance configuration authority.</summary>
+    [Orleans.Id(5), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public ProjectionMaintenanceAuthority? MaintenanceAuthority { get; init; }
+
+    /// <summary>Gets the immutable initial manual ANN reservation for this generation.</summary>
+    [Orleans.Id(6), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public AnnMaintenanceRequest? InitialAnnMaintenance { get; init; }
+    /// <summary>Gets whether the exact initial native full result was acknowledged by canonical settlement.</summary>
+    [Orleans.Id(7), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public bool InitialAnnMaintenanceSettled { get; init; }
+
 }
 
 /// <summary>Requests creation or replacement of a projection consumer.</summary>
@@ -66,7 +83,12 @@ public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] Projection
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.ConfigureProjectionConsumerRequest)]
 public sealed record ConfigureProjectionConsumerRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] ProjectionConsumerRef Consumer,
-    [property: Orleans.Id(2)] ProjectionConsumerDefinition Definition, [property: Orleans.Id(3)] long? StartAfter = null);
+    [property: Orleans.Id(2)] ProjectionConsumerDefinition Definition, [property: Orleans.Id(3)] long? StartAfter = null)
+{
+    /// <summary>Gets the original manual Build reserved atomically with initial configuration.</summary>
+    [Orleans.Id(4), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public AnnMaintenanceRequest? InitialAnnMaintenance { get; init; }
+}
 
 /// <summary>Requests a bounded projection batch.</summary>
 /// <param name="Consumer">The projection consumer to read for.</param>
@@ -100,7 +122,12 @@ public sealed record ProjectionBatch([property: Orleans.Id(0)] ProjectionConsume
 /// <param name="Effects">The mutations produced by projection processing.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.CommitProjectionBatchRequest)]
-public sealed record CommitProjectionBatchRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] ProjectionConsumerRef Consumer, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] ImmutableArray<Mutation> Effects);
+public sealed record CommitProjectionBatchRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] ProjectionConsumerRef Consumer, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] ImmutableArray<Mutation> Effects)
+{
+    /// <summary>Gets the signed proof binding the original full ANN result to this canonical settlement.</summary>
+    [Orleans.Id(4), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? InitialAnnMaintenanceSettlement { get; init; }
+}
 
 /// <summary>Reports the commit result and updated projection checkpoint.</summary>
 /// <param name="Receipt">The commit receipt for the projection effects.</param>

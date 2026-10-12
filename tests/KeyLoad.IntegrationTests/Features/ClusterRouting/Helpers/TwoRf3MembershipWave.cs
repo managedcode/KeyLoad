@@ -22,6 +22,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool remoteDocumentReads;
     internal readonly bool remotePartitionQueries;
     internal readonly bool queryProbe;
+    internal readonly bool nativeMembershipDiagnostics;
+    internal NativeMembershipDiagnosticFixture? nativeMembershipControls;
     internal readonly bool protectedDocuments;
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
@@ -36,8 +38,16 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
 
-    internal TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false)
-    { localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote; remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument; movementMaxBatchBytes = maximumBatchBytes; activationIsolation = isolateActivation; }
+    internal TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false, bool nativeMembershipDiagnostics = false)
+    {
+        if (nativeMembershipDiagnostics && (remote || query || probe || protectedDocument
+            || isolateActivation || maximumBatchBytes is not null))
+        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
+        localImageSelection = selection; registerPhysicalOwners = register; remoteDocumentReads = remote;
+        remotePartitionQueries = query; queryProbe = probe; protectedDocuments = protectedDocument;
+        movementMaxBatchBytes = maximumBatchBytes; activationIsolation = isolateActivation;
+        this.nativeMembershipDiagnostics = nativeMembershipDiagnostics;
+    }
 
     internal string OwnedDataRoot => dataRoot
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
@@ -128,6 +138,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         var failures = new List<Exception>();
         if (queryControls is { } controls)
         { ServerFailureObserver.Observe(controls.StopAdmission, failures); }
+        NativeMembershipDiagnosticWaveLifecycle.StopAdmission(this, failures);
         if (IsolationOwner is { } namespaceOwner)
         { await ServerFailureObserver.ObserveAsync(() => namespaceOwner.RestoreAsync(CancellationToken.None), failures); }
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
@@ -144,6 +155,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { ServerFailureObserver.Observe(() => joinedFrames.DeleteAfterOwnerJoin(this), failures); }
         if (applicationDisposed && nodeLocksReleased && nativeDiscoveryOmission is { } joinedDiscovery)
         { await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false); }
+        await NativeMembershipDiagnosticWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;
@@ -156,17 +168,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal async Task<string> StopForDirectoryReadAsync()
-    {
-        var failures = new List<Exception>();
-        await DisposeApplicationAsync(failures).ConfigureAwait(false);
-        if (CanCheckLocks)
-        { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
-        ServerFailureObserver.ThrowIfAny(failures);
-        if (!nodeLocksReleased)
-        { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
-        return dataRoot ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.InvalidRoot);
-    }
+    internal Task<string> StopForDirectoryReadAsync()
+        => NativeMembershipDiagnosticWaveLifecycle.StopForDirectoryReadAsync(this);
 
     internal async Task DisposeApplicationAsync(List<Exception> failures)
     {
@@ -192,6 +195,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     {
         retainRoots = true;
         queryControls?.RetainEvidence();
+        nativeMembershipControls?.RetainEvidence();
     }
 
     private bool CanDeleteRoot(List<Exception> failures)

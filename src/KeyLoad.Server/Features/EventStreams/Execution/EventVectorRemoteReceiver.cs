@@ -21,6 +21,11 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
 
     internal Task<ReadOnlyMemory<byte>> ExecuteAsync(EventVectorAdmittedCall admitted,
         ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        => ExecuteAsync(admitted, work, null, originalCancellationToken);
+
+    internal Task<ReadOnlyMemory<byte>> ExecuteAsync(EventVectorAdmittedCall admitted,
+        ReadExecutionBudget work, global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary,
+        CancellationToken originalCancellationToken)
     {
         ArgumentNullException.ThrowIfNull(admitted);
         ArgumentNullException.ThrowIfNull(work);
@@ -30,8 +35,8 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
         return call.Action switch
         {
             EventVectorRemoteAction.Coverage => CoverageAsync(call, work, originalCancellationToken),
-            EventVectorRemoteAction.SourceEffect => SourceAsync(call, submit: true, work, originalCancellationToken),
-            EventVectorRemoteAction.OriginalOutcome => SourceAsync(call, submit: false, work, originalCancellationToken),
+            EventVectorRemoteAction.SourceEffect => SourceAsync(call, submit: true, work, boundary, originalCancellationToken),
+            EventVectorRemoteAction.OriginalOutcome => SourceAsync(call, submit: false, work, null, originalCancellationToken),
             EventVectorRemoteAction.SourceRead => SourceReadAsync(call, work, originalCancellationToken),
             EventVectorRemoteAction.ParentOutcome => ParentOutcomeAsync(call, work, originalCancellationToken),
             EventVectorRemoteAction.FirstIssuanceOutcome => FirstIssuanceAsync(call, work, originalCancellationToken),
@@ -143,13 +148,14 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
     }
 
     private async Task<ReadOnlyMemory<byte>> SourceAsync(EventVectorRemoteCall call, bool submit,
-        ReadExecutionBudget work, CancellationToken originalCancellationToken)
+        ReadExecutionBudget work, global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary,
+        CancellationToken originalCancellationToken)
     {
         var phase = NativeSerialization.Deserialize<EventVectorSourcePhase>(call.OriginalNativeRequest.Span);
         RequireSource(phase);
         var principal = native.Principal(phase.PrincipalId, originalCancellationToken);
         if (submit)
-        { await native.SubmitAsync(call, principal, phase, work, originalCancellationToken).ConfigureAwait(false); }
+        { await native.SubmitAsync(call, principal, phase, work, boundary, originalCancellationToken).ConfigureAwait(false); }
         var request = new EventVectorOutcomeReadRequest(EventVectorRemoteProtocol.Version, phase);
         var observation = await EventVectorReceivingRead.ExecuteAsync<EventVectorSourceObservation, EventVectorOutcomeReadRequest>(native, call, principal,
             GrainReadKind.EventVectorOriginalOutcome, request, encoding, work, originalCancellationToken).ConfigureAwait(false);

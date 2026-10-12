@@ -46,17 +46,15 @@ internal static class NativeAnnPublication
         return next;
     }
 
-    internal static NativeAnnRootReceipt Unpublish(string root, NativeAnnRootReceipt receipt,
-        NativeAnnOwnedKey key, NativeAnnExecutionOptions options)
+    internal static NativeAnnRootReceipt PrepareUnpublish(NativeAnnRootReceipt receipt,
+        NativeAnnOwnedKey key, bool releaseOriginal)
     {
-        NativeAnnRootInventory.Require(root, receipt, receipt.NodeId, receipt.Incarnation, options);
-        var next = receipt with
+        return receipt with
         {
             Published = receipt.Published.Where(item => item.Key != key).ToArray(),
-            Pending = receipt.Pending.Where(item => item.Key != key).ToArray()
+            Pending = receipt.Pending.Where(item => item.Key != key).ToArray(),
+            OriginalOperations = releaseOriginal ? NativeAnnOriginalOperations.Release(receipt, key) : receipt.OriginalOperations
         };
-        NativeAnnRootReceipts.Replace(root, next, options);
-        return next;
     }
 
     internal static NativeAnnRootReceipt Remove(string root, NativeAnnRootReceipt receipt,

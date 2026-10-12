@@ -14,8 +14,10 @@ internal static class TwoRf3WaveArguments
     internal static string[] Create(string root, LocalRf3ImageSelection.Selection? selection,
         bool registerPhysicalOwners, bool remoteDocumentReads, bool remotePartitionQueries,
         RequestCqrsProbeFixture? controls = null, bool protectedDocuments = false, int? movementMaxBatchBytes = null, int? movementMaxFrameBytes = null, MovementFrameObservationFixture? frameObservation = null,
-        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false)
+        KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission = null, bool eventVectorReservedProbe = false, NativeMembershipDiagnosticFixture? nativeMembershipControls = null)
     {
+        NativeMembershipDiagnosticWaveArguments.RequireSelection(nativeMembershipControls, controls,
+            remoteDocumentReads, remotePartitionQueries, protectedDocuments, nativeDiscoveryOmission, eventVectorReservedProbe);
         var args = new List<string>
         {
             TwoRf3MembershipProtocol.DataRootPrefix + root,
@@ -36,6 +38,8 @@ internal static class TwoRf3WaveArguments
         { args.Add(RemoteQueryArgument); }
         if (controls is not null)
         { args.Add(ProbeEnabled); args.Add(ProbeRoot + controls.Root); args.Add(ProbeSession + controls.SessionId); }
+        if (nativeMembershipControls is not null)
+        { args.Add(ProbeEnabled); args.Add(ProbeRoot + nativeMembershipControls.Root); args.Add(ProbeSession + nativeMembershipControls.SessionId); }
         if (frameObservation is not null)
         {
             args.Add(MovementFrameObservationFixtureProtocol.EnabledArgument);

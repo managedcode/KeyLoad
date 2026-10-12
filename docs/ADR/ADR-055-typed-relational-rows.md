@@ -77,3 +77,16 @@ reopen, graph/vector row linkage, RF3 SDK/MCP SQL equivalence. CI only, no doubl
 GitHub build/format/analyzer/governance/units/recovery/RF3 and coverage evidence
 join through root. Performance is validation of one final image plus existing
 native indexes; speed/scale requires dedicated same-workload GitHub measurements.
+
+
+## TASK-REL-UNIQUE-ROLLBACK-REPLAY-COLD-001
+
+REQ-REL-002 / AC-AISQL-004 under ADR055 extend SAME AcAisql004PatchConflictAndDeleteRetainNativeUniqueAndRevisionContract after all original conflict, stale revision, delete and unique-name reuse assertions. This typed-row stage does not claim foreign keys/defaults/cascades/arbitrary joins/full SQL.
+
+Original canonical state is first deleted, second revision2/namealpha/count1. A genuine Batch first stages second's count1→2 PATCH at expectedrevision2, then tries absent third row with occupied unique alpha. Exact Conflict has no successful receipt/private row; full indexed literal second row, missing third, deleted first and complete OutboxStatus remain unchanged. A definitive first rejection may persist its original failed outcome/clock; do not assert nonexistent global pre-failure byte equality. Capture complete bounded native key/value image and physical position AFTER that original failure. Retry same exact command/time returns complete original OperationResult and changes no native byte/position.
+
+Corrected fresh command retains original PATCH and inserts third/namegamma under the SAME real unique index. Require independent complete mutation receipts patchDocument/second/revision3 + putDocument/third/revision1, native ProcessDurable, exact original commandId and real original receipt token. Full indexed alpha page is second/revision3 with independently literal canonical PATCH JSON including all typed values; gamma page is third/revision1 with exact original literal PUT JSON. Full authorized query returns those two literal rows, null cursor and actual current local cut. Same-ID full receipt replay retains all native bytes/position; original failed command still returns its original Conflict after healthy state changed, with no effects.
+
+Join original store, same-directory native reopen with original validated options and configured factory, exact NodeId/incarnation/nondecreasing ReadGeneration/full native bytes/physical cut. Reuse both exact original commands/time: old failed result and healthy full receipt remain byte-equal without new domain effects/outcome writes. Full typed SQL indexed rows remain independently literal. Then genuine revision3→4 PATCH of second count2→3 proves cold write health and produces new independent patchDocument receipt, original new-ID replay and complete final SQL rows/outbox horizon; cold store joins before original fixture cleanup. Retain initiating and cleanup failures with original observer/lexical store ownership.
+
+No product/API/serializer/format/limits/deadline/trust/provider change; no migration/fallback/source-oracle expectation. Core atomic gate remains authoritative. Native checkOnly + pernewpath NS/reconstruction are source only. Exact original Unit method/UID/deadline unchanged; required normal SIMD native50 compilation/formatter/analyzers/fresh discovery/runtime and Linux/process/RF3/coverage gates remain OPEN.

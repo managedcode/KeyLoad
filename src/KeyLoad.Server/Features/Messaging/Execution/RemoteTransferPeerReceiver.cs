@@ -11,8 +11,12 @@ internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost
     internal ReplicaSiloDiscovery Discovery() => node.Discovery?.Read()
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
 
-    internal async Task<RemoteQueueTransferPeerResult> ExecuteAsync(RemoteQueueTransferPeerCall call,
+    internal Task<RemoteQueueTransferPeerResult> ExecuteAsync(RemoteQueueTransferPeerCall call,
         ReadOnlyMemory<byte> envelope, string signature, CancellationToken token)
+        => ExecuteAsync(call, envelope, signature, null, token);
+
+    internal async Task<RemoteQueueTransferPeerResult> ExecuteAsync(RemoteQueueTransferPeerCall call,
+        ReadOnlyMemory<byte> envelope, string signature, global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? effectBoundary, CancellationToken token)
     {
         var database = partition.Database;
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
@@ -39,6 +43,7 @@ internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost
                 command ? call.OriginalCommandId : Guid.Empty, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
+                if (command) { effectBoundary?.Begin(token); }
                 var reply = await node.ExecuteAsync(requestId, signed, command, token).ConfigureAwait(false);
                 work.Check();
                 result = reply.Error is { } error

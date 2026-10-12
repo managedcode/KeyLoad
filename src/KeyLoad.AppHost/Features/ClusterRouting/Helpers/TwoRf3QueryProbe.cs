@@ -27,6 +27,8 @@ internal static class TwoRf3QueryProbe
             return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
                 benchmarkNodeCount: null, local);
         }
+        if (control.TwoRf3 && !control.RemoteDocumentReads && !control.RemotePartitionQueries)
+        { return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local); }
         if (!control.TwoRf3 || local is not null || image is null
             || !control.RemoteDocumentReads
             || !control.RemotePartitionQueries)
@@ -40,7 +42,12 @@ internal static class TwoRf3QueryProbe
     {
         if (probe is null)
         { return; }
-        for (var index = FirstProbeIndex; index < TwoRf3ProfileProtocol.MembersPerGroup; index++)
+        if ((probe.MemberCount != TwoRf3ProfileProtocol.MembersPerGroup
+            && probe.MemberCount != TwoRf3ProfileProtocol.TotalNodes)
+            || resources.Count != TwoRf3ProfileProtocol.TotalNodes
+            || nodes.Count != TwoRf3ProfileProtocol.TotalNodes)
+        { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
+        for (var index = FirstProbeIndex; index < probe.MemberCount; index++)
         { probe.Apply(resources[index], nodes[index]); }
     }
 }

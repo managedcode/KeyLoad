@@ -12,6 +12,8 @@ internal static class ConnectionGrainGraphRegistration
             graph.AllowClientCallGrain<IConnectionGrain>()
                 .AddGrainServiceTransition<SampleChunkGrainService, ISampleChunkCoordinatorGrain>(
                     nameof(ISampleChunkCoordinatorGrain.ScheduleAsync))
+                .AddGrainServiceTransition<AnnProjectionGrainService, IAnnProjectionCoordinatorGrain>(
+                    nameof(IAnnProjectionCoordinatorGrain.ScheduleAsync))
                 .AddGrainServiceTransition<RecurringDueGrainService, IRecurringDueCoordinatorGrain>(
                     nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
                 .AddGrainTransition<IRecurringDueCoordinatorGrain, IConnectionGrain>()

@@ -15,18 +15,4 @@ internal static class TwoRf3TopologyResources
         }
     }
 
-    internal static void WaitForAuthority(IResourceBuilder<ContainerResource> resource,
-        IResourceBuilder<ContainerResource>[] resources, int authorityCount, bool groupA)
-    {
-        const int FirstAuthorityIndex = 0;
-        if (groupA)
-        {
-            return;
-        }
-        for (var index = FirstAuthorityIndex; index < authorityCount; index++)
-        {
-            resource.WaitFor(resources[index]);
-        }
-    }
-
 }

@@ -14,7 +14,7 @@ internal static class PartitionDatabaseComposition
         var core = runtimeOptions.Core;
         RuntimeJournalStorePreparation.Prepare(stores);
         var options = runtimeOptions.Node.Value;
-        var physicalOwner = options.MembershipAuthority.RemoteDocumentReads
+        var physicalOwner = options.PhysicalGroupTrust.RemoteDocumentReads
             ? new PhysicalShardRecord(options.PhysicalShardId, configuration.Incarnation,
                 configuration.VoterIds, PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch) : null;
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,

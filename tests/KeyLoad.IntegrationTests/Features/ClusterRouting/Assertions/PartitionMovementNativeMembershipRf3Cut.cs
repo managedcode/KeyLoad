@@ -2,7 +2,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -11,13 +10,15 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Accounts only actual native membership CAS and its own native outcome; every model row stays exact.</summary>
 internal sealed class PartitionMovementNativeMembershipRf3Cut
 {
+    private const string MembershipSpace = "membership";
+    private const string MembershipTableKey = "orleans-membership";
     private const long InitialVersion = 0;
     private const long VersionStep = 1;
     private readonly PartitionMovementPublicParentRf3NativeCut after;
     private readonly HashSet<string> allowed;
     private readonly PrincipalRecord principal;
     private readonly Guid incarnation;
-    private readonly byte[] membershipKey = KeyCodec.Encode(ReplicaMembershipProtocol.StorageSpace, ReplicaMembershipProtocol.TableKey);
+    private readonly byte[] membershipKey = KeyCodec.Encode(MembershipSpace, MembershipTableKey);
     private MembershipRecord? expected;
     internal DateTimeOffset ExpectedClock { get; private set; }
 
@@ -51,7 +52,7 @@ internal sealed class PartitionMovementNativeMembershipRf3Cut
         await Assert.That(principal.Id).IsEqualTo(operation.PrincipalId);
         await Assert.That(principal.ClusterAdministrator).IsTrue();
         var mutation = NativeCommandPayload.Read<MembershipMutation>(operation);
-        await Assert.That(mutation.Key).IsEqualTo(ReplicaMembershipProtocol.TableKey);
+        await Assert.That(mutation.Key).IsEqualTo(MembershipTableKey);
         var key = KeySpace.GlobalOutcome(operation.PrincipalId, operation.Id);
         var outcome = PartitionMovementCapturePointerRf3Fault.Read<StoredOutcome>(after, key);
         await Assert.That(outcome.Fingerprint).IsEqualTo(NativeOperationFingerprint.Compute(operation));

@@ -7,8 +7,8 @@ internal sealed class PhysicalOwnerProbeWorkOwner(IOptions<GrainRoutingOptions> 
     IOptions<NodeOptions> nodeOptions, IOptions<PhysicalOwnerExecutionOptions> executionOptions) : IAsyncDisposable
 {
     private readonly Lock gate = new();
-    private readonly NativeRequestWorkOwner? work = nodeOptions.Value.MembershipAuthority.RegisterPhysicalOwners ? new(routingOptions) : null;
-    private readonly SemaphoreSlim? admissions = nodeOptions.Value.MembershipAuthority.RegisterPhysicalOwners
+    private readonly NativeRequestWorkOwner? work = nodeOptions.Value.PhysicalGroupTrust.RegisterPhysicalOwners ? new(routingOptions) : null;
+    private readonly SemaphoreSlim? admissions = nodeOptions.Value.PhysicalGroupTrust.RegisterPhysicalOwners
         ? new(executionOptions.Value.MaximumAdmissions, executionOptions.Value.MaximumAdmissions) : null;
     private bool closed;
     private Task? disposal;

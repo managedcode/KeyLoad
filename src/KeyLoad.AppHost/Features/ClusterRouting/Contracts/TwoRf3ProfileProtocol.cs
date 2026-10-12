@@ -17,11 +17,11 @@ internal static class TwoRf3ProfileProtocol
     internal const string MovementMaxBatchBytesEnvironment = "KeyLoad__DatabaseLimits__MaxBatchBytes";
     internal const string MovementEnvironment = "KeyLoad__PartitionMovementExecution__Enabled";
     internal const string RemoteQuerySetting = Section + ":RemotePartitionQueries";
-    internal const string RemoteQueryEnvironment = "KeyLoad__MembershipAuthority__RemotePartitionQueries";
+    internal const string RemoteQueryEnvironment = "KeyLoad__PhysicalGroupTrust__RemotePartitionQueries";
     internal const string RemoteDocumentSetting = Section + ":RemoteDocumentReads";
-    internal const string RemoteDocumentEnvironment = "KeyLoad__MembershipAuthority__RemoteDocumentReads";
+    internal const string RemoteDocumentEnvironment = "KeyLoad__PhysicalGroupTrust__RemoteDocumentReads";
     internal const string RegistrationSetting = Section + ":RegisterPhysicalOwners";
-    internal const string RegistrationEnvironment = "KeyLoad__MembershipAuthority__RegisterPhysicalOwners";
+    internal const string RegistrationEnvironment = "KeyLoad__PhysicalGroupTrust__RegisterPhysicalOwners";
     internal const string Enabled = "true";
     internal const string Disabled = "false";
     internal const string Profile = "two-rf3";

@@ -35,17 +35,17 @@ internal sealed class EventVectorRemoteCallValidation(PartitionHost partition,
     {
         ArgumentNullException.ThrowIfNull(call);
         originalCancellationToken.ThrowIfCancellationRequested();
-        var settings = nodeOptions.Value.MembershipAuthority;
+        var settings = nodeOptions.Value.PhysicalGroupTrust;
         var control = ControlOwner;
         var now = clock.GetUtcNow();
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
-            || settings.Mode is not (MembershipAuthoritySettingsProtocol.Authority
-                or MembershipAuthoritySettingsProtocol.Proxy)
+            || settings.Role is not (global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control
+                or global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Destination)
             || call.Version != EventVectorRemoteProtocol.Version
             || call.Purpose != EventVectorRemoteProtocol.Purpose || !Enum.IsDefined(call.Action)
-            || call.RequestId == Guid.Empty || !ReplicaMembershipAuthorityValidation.ValidNonce(call.Nonce)
+            || call.RequestId == Guid.Empty || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalOwnerProbeNativeIdentity.ValidNonce(call.Nonce)
             || !control.Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
+            || !global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membershipOptions)
             || call.ExpiresAt <= now || call.ExpiresAt > now + routingOptions.Value.RequestLifetime
             || call.Source is null || !PhysicalOwnerEntryValidation.SameOwner(call.Source, control.Owner))
         { throw Errors.Fail(ErrorCode.Unauthenticated, EventVectorRemoteProtocol.Invalid); }

@@ -60,16 +60,16 @@ internal sealed class RemoteTransferPeerVerificationOwner : IDisposable
         if (node.RemoteTransferPrincipalId is null)
         { return null; }
         JsonData.Identifier(node.RemoteTransferPrincipalId);
-        if (!node.MembershipAuthority.RemoteDocumentReads
-            || node.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Proxy)
+        if (!node.PhysicalGroupTrust.RemoteDocumentReads
+            || node.PhysicalGroupTrust.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Destination)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferPeerProtocol.Unavailable); }
         var source = PhysicalOwnerConfiguredTuples.Control(node, options.ReplicaConfiguration.Value);
         var destination = PhysicalOwnerConfiguredTuples.Destination(node, options.ReplicaConfiguration.Value);
-        var mac = RemoteDocumentMac.FromConfiguredSecret(node.MembershipAuthority.AuthorityPeerSecret);
+        var mac = RemoteDocumentMac.FromConfiguredSecret(node.PhysicalGroupTrust.ForeignPeerSecret);
         try
         {
             var registration = new RemoteTransferPeerOwner(source, destination, node.RemoteTransferPrincipalId,
-                (bytes, signature) => Verify(mac, source, bytes, signature));
+                (bytes, signature) => Verify(mac, source, options.Membership, bytes, signature));
             database.RegisterRemoteTransferPeerOwner(registration);
             return new(database, mac, registration);
         }
@@ -83,18 +83,17 @@ internal sealed class RemoteTransferPeerVerificationOwner : IDisposable
     }
 
     private static RemoteQueueTransferPeerCall Verify(RemoteDocumentMac mac, RegisteredPhysicalOwnerV1 source,
-        ReadOnlyMemory<byte> bytes, string signature)
+        global::Microsoft.Extensions.Options.IOptions<OrleansMembershipOptions> membership, ReadOnlyMemory<byte> bytes, string signature)
     {
         if (!mac.Verify(bytes.Span, signature, reply: false))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
         var envelope = RemoteDocumentWire.DecodeCall(bytes.Span);
         var call = envelope.QueueTransfer;
-        if (call is null || envelope.Document is not null || envelope.Controlled is not null
+        if (call is null || !RemoteTransferPeerNonce.Valid(call.Nonce) || envelope.Document is not null || envelope.Controlled is not null
             || envelope.ControlledBlob is not null
             || !source.Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
-        var address = SiloAddress.FromParsableString(call.CallerSiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
+        if (!global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupAddress.CanonicalAddress(call.CallerSiloAddress, membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid); }
         return call;
     }

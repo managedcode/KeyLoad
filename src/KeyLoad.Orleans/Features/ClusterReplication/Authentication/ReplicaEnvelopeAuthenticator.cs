@@ -7,12 +7,13 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Orleans;
 
 /// <summary>Authenticates exact-byte RPCs and replies within the configured fixed-voter scope.</summary>
-public sealed class ReplicaEnvelopeAuthenticator : IDisposable
+public sealed partial class ReplicaEnvelopeAuthenticator : IDisposable
 {
     private readonly ReplicaConfiguration configuration;
     private readonly ReplicaSiloDiscoveryState local;
     private readonly ReplicaEnvelopeFreshness freshness;
     private readonly ReplicaMessageMac mac;
+    private readonly ReplicaNativeDiscoveryAuthentication nativeDiscovery;
     private readonly ReplicaReplayWindow replay;
     private readonly HashSet<string> voters;
     private readonly int maximumControlPayloadBytes;
@@ -54,6 +55,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         this.canonicalDatabase = canonicalDatabase;
         voters = new(configuration.VoterIds, StringComparer.Ordinal);
         mac = new(options.Secret, options.ClusterId);
+        nativeDiscovery = new(this, configurationOptions, local, freshness, mac, voters);
         replay = new(configuration.VoterIds, replayOptions, transportOptions);
         maximumControlPayloadBytes = options.MaxControlPayloadBytes;
         if (logger is not null)
@@ -79,6 +81,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <returns>A signed request with a fresh nonce and timestamp.</returns>
     public ReplicaPeerEnvelope SignRequest(string recipient, ReplicaRpc method, string runtimeAddress, ReadOnlyMemory<byte> payload)
     {
+        mac.RequireOpen();
         ReplicaEnvelopeValidation.Payload(payload, MaximumPayloadBytes);
         if (!voters.Contains(recipient) || !Enum.IsDefined(method) || !ReplicaEnvelopeValidation.Address(runtimeAddress))
         {
@@ -110,6 +113,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     // The same production pre-copy stage is independently measurable; no nonce is retained here.
     internal ReplicaReplayPool ClassifyBorrowedRequest(ReplicaPeerEnvelope request)
     {
+        mac.RequireOpen();
         ArgumentNullException.ThrowIfNull(request);
         ValidateRequestScope(request);
         replay.RejectReplay(request.Sender, request.Nonce, freshness.Now());
@@ -149,6 +153,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <returns>A reply signed for the selected recipient and originating request.</returns>
     public ReplicaPeerReply CreateReply(ReplicaPeerEnvelope? request, ReadOnlyMemory<byte> payload, ErrorCode? error = null, string? detail = null)
     {
+        mac.RequireOpen();
         ReplicaEnvelopeValidation.Payload(payload, MaximumPayloadBytes);
         var recipient = request is not null && voters.Contains(request.Sender) ? request.Sender : configuration.LocalId;
         var method = request is not null && Enum.IsDefined(request.Method) ? request.Method : ReplicaRpc.ReadBarrier;
@@ -165,6 +170,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <param name="reply">The candidate response envelope.</param>
     public void VerifyReply(ReplicaPeerEnvelope request, ReplicaPeerReply reply)
     {
+        mac.RequireOpen();
         ArgumentNullException.ThrowIfNull(reply);
         ArgumentNullException.ThrowIfNull(request);
         ReplicaEnvelopeValidation.Payload(reply.Payload, MaximumPayloadBytes);
@@ -187,6 +193,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <returns>A hexadecimal HMAC signature for the discovery response.</returns>
     public string SignDiscovery(ReadOnlySpan<byte> payload, Guid requestNonce)
     {
+        mac.RequireOpen();
         ReplicaEnvelopeValidation.Discovery(payload, requestNonce);
         return Convert.ToHexStringLower(mac.Discovery(configuration.Incarnation, configuration.LocalId, requestNonce, payload));
     }
@@ -198,6 +205,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <param name="signature">The response signature supplied by the endpoint.</param>
     public void VerifyDiscovery(string voterId, ReadOnlySpan<byte> payload, Guid requestNonce, string signature)
     {
+        mac.RequireOpen();
         ReplicaEnvelopeValidation.Discovery(payload, requestNonce);
         if (!voters.Contains(voterId) || signature is null
             || signature.Length != ReplicaTransportProtocol.HashHexCharacters || !signature.All(Uri.IsHexDigit)

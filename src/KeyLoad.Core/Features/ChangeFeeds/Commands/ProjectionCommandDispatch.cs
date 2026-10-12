@@ -8,7 +8,8 @@ public sealed partial class DatabaseEngine
     {
         var request = Payload<ConfigureProjectionConsumerRequest>(operation);
         RequireEnvelopeId(operation, request.CommandId);
-        return Result(ConfigureProjectionConsumer(transaction, request));
+        var authority = CaptureProjectionMaintenanceAuthority(transaction, request, operation);
+        return Result(ConfigureProjectionConsumer(transaction, request, authority));
     }
 
     private OperationResult ExecuteProjectionBatch(IAtomicTransaction transaction, PrincipalRecord principal,

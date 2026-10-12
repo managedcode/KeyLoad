@@ -10,8 +10,8 @@ internal static class PartitionMovementRuntimeFactory
     {
         if (!options.PartitionMovement.Value.Enabled)
         { return null; }
-        if (!options.Node.Value.MembershipAuthority.RegisterPhysicalOwners
-            || !options.Node.Value.MembershipAuthority.RemoteDocumentReads)
+        if (!options.Node.Value.PhysicalGroupTrust.RegisterPhysicalOwners
+            || !options.Node.Value.PhysicalGroupTrust.RemoteDocumentReads)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable); }
         var runtime = new PartitionMovementRuntime(work);
         try

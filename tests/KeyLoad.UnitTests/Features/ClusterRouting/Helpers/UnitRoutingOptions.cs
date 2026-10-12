@@ -28,13 +28,6 @@ internal static class UnitRoutingOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<PeerDiscoveryOptions> Discovery(PeerDiscoveryOptions? configured = null)
-    {
-        var value = configured ?? new PeerDiscoveryOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
-
     internal static IOptions<ReplicaReplayLimits> Replay(ReplicaReplayLimits? configured = null)
     {
         var value = configured ?? new ReplicaReplayLimits();

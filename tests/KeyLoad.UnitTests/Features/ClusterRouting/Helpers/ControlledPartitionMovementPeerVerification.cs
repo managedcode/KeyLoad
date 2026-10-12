@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -17,17 +16,14 @@ internal static class ControlledPartitionMovementPeerVerification
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var key = Convert.FromBase64String(runtime.Node.Value.PeerSecret);
-            try
             {
-                using var mac = new PartitionMovementMac(key, source.Database.Limits.MaxBatchBytes);
+                using var mac = admission.CreateControlMac();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var bytes = NativeSerialization.Serialize(original);
                     verified = await admission.VerifyAsync(bytes, mac.Sign(bytes, reply: false), cancellationToken);
                 }, failures);
             }
-            finally { CryptographicOperations.ZeroMemory(key); }
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return verified ?? throw new InvalidOperationException("The original native capability was not admitted.");

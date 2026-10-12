@@ -26,6 +26,7 @@ internal sealed class AnnMaintenanceStreamShape(Guid requestId)
     private bool Next(AnnMaintenancePhase next) => (phase, next) switch
     {
         (null, AnnMaintenancePhase.Configure) => true,
+        (null, AnnMaintenancePhase.Completed) => true,
         (AnnMaintenancePhase.Configure, AnnMaintenancePhase.Capture) => true,
         (AnnMaintenancePhase.Capture or AnnMaintenancePhase.Replay, AnnMaintenancePhase.Replay) => true,
         (AnnMaintenancePhase.Capture or AnnMaintenancePhase.Replay, AnnMaintenancePhase.Verify) => true,

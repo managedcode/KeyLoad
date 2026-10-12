@@ -123,12 +123,7 @@ internal static class RecoveryExecutionOptions
         return Options.Create(settings);
     }
 
-    internal static IOptions<PeerDiscoveryOptions> PeerDiscovery(PeerDiscoveryOptions? configured = null)
-    {
-        var settings = configured ?? new PeerDiscoveryOptions();
-        settings.Validate();
-        return Options.Create(settings);
-    }
+
 
     internal static IOptions<ReplicaConfiguration> Configuration(ReplicaConfiguration configured)
     {

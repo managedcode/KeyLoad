@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
@@ -9,11 +8,10 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Authenticates configured A movement traffic before any receiver-local native capability is issued.</summary>
-internal sealed class PartitionMovementPeerAdmission : IDisposable
+internal sealed partial class PartitionMovementPeerAdmission : IDisposable
 {
     internal const int EmptyBodyBytes = 0;
     internal const string NonceFormat = "N";
-    private const string SiloSeparator = ":";
     internal const string InvalidProof = "The partition movement peer proof is invalid.";
     private readonly NodeOptions options;
     private readonly DatabaseEngine database;
@@ -22,8 +20,8 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
     private readonly IOptions<OrleansMembershipOptions> membership;
     private readonly PartitionMovementExecutionOptions execution;
     private readonly TimeProvider clock;
-    private readonly ReplicaMembershipAuthorityAddressPins pins;
-    private readonly ReplicaMembershipAuthorityReplayCache replay;
+    private readonly PartitionMovementReplayCache replay;
+    private readonly PartitionMovementReplayCache nativeReplay;
 
     internal PartitionMovementPeerAdmission(IOptions<NodeOptions> options, DatabaseEngine database, IOptions<ReplicaConfiguration> configuration,
         IOptions<GrainRoutingOptions> routing, IOptions<OrleansMembershipOptions> membership,
@@ -42,17 +40,12 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
         this.membership = membership;
         this.execution = execution.Value;
         this.clock = clock;
-        var control = PhysicalOwnerConfiguredTuples.Control(this.options, this.configuration);
-        var endpoints = control.Endpoints.Select(value => new Uri(value).DnsSafeHost + SiloSeparator
-            + MembershipAuthoritySettingsProtocol.NativeSiloPort.ToString(CultureInfo.InvariantCulture)).ToArray();
-        pins = new(endpoints, membership);
-        try
-        { replay = new(clock, membership); }
+        replay = new(clock, membership);
+        try { nativeReplay = new(clock, membership); }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            try
-            { pins.Dispose(); }
+            try { replay.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);
@@ -60,11 +53,12 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
         }
     }
 
-    internal async Task<PartitionMovementTransportRequest> VerifyAsync(ReadOnlyMemory<byte> originalBody,
+    internal Task<PartitionMovementTransportRequest> VerifyAsync(ReadOnlyMemory<byte> originalBody,
         string signature, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!execution.Enabled || !options.MembershipAuthority.RegisterPhysicalOwners)
+        if (!execution.Enabled || !options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidProof); }
         if (originalBody.Length <= EmptyBodyBytes || originalBody.Length > database.Limits.MaxBatchBytes)
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
@@ -86,28 +80,34 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
             || !PhysicalOwnerEntryValidation.SameOwner(envelope.ControlOwner, control.Owner)
             || !PartitionMovementConfiguredOwners.RequirePair(envelope, control.Owner, destination.Owner)
             || !control.Owner.VoterIds.Contains(request.CallerVoter, StringComparer.Ordinal)
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(request.CallerSiloAddress,
-                membership))
+            || !PhysicalGroupAddress.CanonicalAddress(request.CallerSiloAddress, membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
         if (!PartitionMoveGrantValidation.IsLocalControl(envelope.Stage))
         { PartitionMovementGrantProof.Require(request, control.Owner, local.Owner, now); }
         else if (!PhysicalOwnerEntryValidation.SameOwner(control.Owner, local.Owner))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
-        var address = SiloAddress.FromParsableString(request.CallerSiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
-        await pins.PinCallerAsync(control.Owner.VoterIds.IndexOf(request.CallerVoter), address.Endpoint.Address,
-            cancellationToken).ConfigureAwait(false);
         if (!replay.TryUse(envelope.Nonce.ToString(NonceFormat)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
         database.VerifyPhysicalCommandOwner(local.Owner, false, cancellationToken);
-        return request;
+        return Task.FromResult(request);
     }
 
     internal PartitionMovementMac CreateControlMac()
     {
-        var configured = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
-            ? options.PeerSecret : options.MembershipAuthority.AuthorityPeerSecret;
+        var control = PhysicalOwnerConfiguredTuples.Control(options, configuration);
+        var destination = PhysicalOwnerConfiguredTuples.Destination(options, configuration);
+        var local = PhysicalOwnerConfiguredTuples.Local(options, configuration);
+        if (!PhysicalOwnerEntryValidation.Valid(control) || !PhysicalOwnerEntryValidation.Valid(destination)
+            || !PhysicalOwnerEntryValidation.Valid(local))
+        { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        var configured = options.PhysicalGroupTrust.Role switch
+        {
+            PhysicalGroupTrustRole.Control when PhysicalOwnerEntryValidation.SameOwner(local.Owner, control.Owner)
+                && !PhysicalOwnerEntryValidation.SameOwner(local.Owner, destination.Owner) => options.PeerSecret,
+            PhysicalGroupTrustRole.Destination when PhysicalOwnerEntryValidation.SameOwner(local.Owner, destination.Owner)
+                && !PhysicalOwnerEntryValidation.SameOwner(local.Owner, control.Owner) => options.PhysicalGroupTrust.ForeignPeerSecret,
+            _ => throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof)
+        };
         var key = Convert.FromBase64String(configured
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof));
         try
@@ -119,7 +119,7 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
     {
         var failures = new List<Exception>();
         try
-        { pins.Dispose(); }
+        { nativeReplay.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
@@ -136,8 +136,7 @@ internal sealed class PartitionMovementPeerAdmission : IDisposable
     internal TimeProvider Clock => clock;
     internal GrainRoutingOptions Routing => routing;
     internal IOptions<OrleansMembershipOptions> Membership => membership;
-    internal ReplicaMembershipAuthorityAddressPins Pins => pins;
-    internal ReplicaMembershipAuthorityReplayCache Replay => replay;
+    internal PartitionMovementReplayCache Replay => replay;
 
     internal Task<PartitionMovementOutcomeTransportRequest> VerifyOutcomeAsync(ReadOnlyMemory<byte> body, string signature, CancellationToken token)
         => PartitionMovementOutcomePeerAdmission.VerifyOutcomeAsync(this, body, signature, token);

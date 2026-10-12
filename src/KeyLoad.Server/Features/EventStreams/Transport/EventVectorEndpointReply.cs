@@ -7,12 +7,17 @@ namespace KeyLoad.Server.Features.EventStreams;
 
 internal static class EventVectorEndpointReply
 {
-    internal static async Task WriteAsync(HttpContext context, EventVectorAdmittedCall admitted,
-        EventVectorRemoteReceiver receiver, EventVectorRemoteCallValidation authority,
+    internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> CreateAsync(
+        EventVectorAdmittedCall admitted, EventVectorRemoteReceiver receiver, EventVectorRemoteCallValidation authority,
         RemoteDocumentMac originalReplyMac, EventVectorRemoteEncoding encoding,
         CancellationToken originalCancellationToken)
+        => CreateAsync(admitted, receiver, authority, originalReplyMac, encoding, null, originalCancellationToken);
+
+    internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> CreateAsync(
+        EventVectorAdmittedCall admitted, EventVectorRemoteReceiver receiver, EventVectorRemoteCallValidation authority,
+        RemoteDocumentMac originalReplyMac, EventVectorRemoteEncoding encoding,
+        RemoteModelNativeEffectBoundary? boundary, CancellationToken originalCancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(admitted);
         ArgumentNullException.ThrowIfNull(receiver);
         ArgumentNullException.ThrowIfNull(authority);
@@ -23,10 +28,13 @@ internal static class EventVectorEndpointReply
         var result = ReadOnlyMemory<byte>.Empty;
         ErrorCode? errorCode = null;
         try
-        { result = await receiver.ExecuteAsync(admitted, work, originalCancellationToken).ConfigureAwait(false); }
+        { result = await receiver.ExecuteAsync(admitted, work, boundary, originalCancellationToken).ConfigureAwait(false); }
+        catch (KeyLoadException error) when (boundary?.IsStarted == true)
+        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, EventVectorRemoteProtocol.Unavailable, error); }
         catch (KeyLoadException error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         { errorCode = error.Code; }
         byte[]? originalBytes = null;
+        var transferred = false;
         try
         {
             authority.Require(call, originalCancellationToken);
@@ -35,14 +43,14 @@ internal static class EventVectorEndpointReply
                 errorCode, errorCode is null ? null : EventVectorRemoteProtocol.Unavailable);
             work.ChargeBytes(RemoteDocumentProtocol.SignatureCharacters);
             originalBytes = EventVectorWorkEncoding.Encode(reply, encoding, work);
-            context.Response.Headers[RemoteDocumentProtocol.SignatureHeader] = originalReplyMac.Sign(originalBytes, reply: true);
-            context.Response.ContentType = RemoteDocumentProtocol.ContentType;
-            context.Response.ContentLength = originalBytes.LongLength;
-            await context.Response.Body.WriteAsync(originalBytes, originalCancellationToken).ConfigureAwait(false);
+            var signature = originalReplyMac.Sign(originalBytes, reply: true);
+            authority.Require(call, originalCancellationToken);
+            transferred = true;
+            return (originalBytes, signature);
         }
         finally
         {
-            if (originalBytes is not null)
+            if (!transferred && originalBytes is not null)
             { CryptographicOperations.ZeroMemory(originalBytes); }
             CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);
         }

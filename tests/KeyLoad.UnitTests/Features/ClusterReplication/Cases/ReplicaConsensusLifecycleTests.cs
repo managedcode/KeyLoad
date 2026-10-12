@@ -80,10 +80,11 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     private readonly ZoneTreeStore canonical;
 
     internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null,
-        Action<CommitStage, long, int>? canonicalObserver = null)
+        Action<CommitStage, long, int>? canonicalObserver = null, ReplicaConfiguration? configuration = null)
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
-        Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
+        Configuration = (configuration ?? new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid()))
+            with { Directory = directory };
         if (maximumAppendEntries is { } maximum)
         {
             Configuration = Configuration with { MaxAppendEntries = maximum };
@@ -116,19 +117,15 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        try
-        { await Consensus.DisposeAsync(); }
-        finally
-        {
-            try
-            { await Materializer.DisposeAsync(); }
-            finally
-            {
-                Log.Dispose();
-                ReplicaStore.Dispose();
-                canonical.Dispose();
-                Directory.Delete(directory, true);
-            }
-        }
+        var failures = new List<Exception>();
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Consensus.DisposeAsync().AsTask(), failures);
+        await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Materializer.DisposeAsync().AsTask(), failures);
+        KeyLoad.Server.ServerFailureObserver.Observe(Log.Dispose, failures);
+        KeyLoad.Server.ServerFailureObserver.Observe(ReplicaStore.Dispose, failures);
+        try { canonical.Dispose(); }
+        catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        KeyLoad.Server.ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

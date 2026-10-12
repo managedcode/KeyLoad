@@ -1,7 +1,7 @@
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 [RequestCqrsDataSource]
-[NotInParallel]
+[NotInParallel(KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsFixtureScheduling.SharedSession)]
 internal sealed class RequestCqrsFatalSettlementTests(RequestCqrsClusterFixture fixture)
 {
     [Test]

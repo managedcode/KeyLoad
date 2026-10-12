@@ -1,113 +1,107 @@
+using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Orleans;
 using KeyLoad.Storage;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class PhysicalOwnerProbeClient : IDisposable
+internal sealed class PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions, OrleansNode node,
+    PartitionHost partition, IOptions<OrleansMembershipOptions> membershipOptions, TimeProvider clock) : IDisposable
 {
     private const int FirstVoter = 0;
-    private const int UnobservedHttpStatus = 0;
-    private int lastHttpStatus;
-
-    internal int LastHttpStatus => Volatile.Read(ref lastHttpStatus);
-    private const int NoFailures = 0;
+    private const int ActiveResource = 0;
+    private const int DisposedResource = 1;
+    private const int EmptyErrorSignatureLength = 0;
     private const long EmptyApplied = 0;
-    private const int SingleSignature = 1;
-    private readonly NodeOptions options;
-    private readonly IOptions<OrleansMembershipOptions> membershipOptions;
-    private readonly OrleansNode node;
-    private readonly PartitionHost partition;
-    private readonly TimeProvider clock;
-    private readonly HttpClient http;
-    private readonly SocketsHttpHandler handler;
-    private readonly ReplicaMembershipAuthorityAddressPins pins;
-
-    internal PhysicalOwnerProbeClient(IOptions<NodeOptions> nodeOptions, OrleansNode node,
-        PartitionHost partition, IOptions<OrleansMembershipOptions> membershipOptions, TimeProvider clock)
-    {
-        options = nodeOptions.Value;
-        this.membershipOptions = membershipOptions;
-        this.node = node;
-        this.partition = partition;
-        this.clock = clock;
-        pins = new(options.MembershipAuthority.TrustedGroupSiloEndpoints, membershipOptions);
-        var failures = new List<Exception>();
-        HttpClient? created = null;
-        handler = new()
-        { AllowAutoRedirect = false, UseCookies = false, AutomaticDecompression = System.Net.DecompressionMethods.None };
-        ServerFailureObserver.Observe(() => created = new HttpClient(handler, disposeHandler: false)
-        { Timeout = Timeout.InfiniteTimeSpan }, failures);
-        if (failures.Count != NoFailures)
-        {
-            try
-            { handler.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            try
-            { pins.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            ServerFailureObserver.ThrowIfAny(failures);
-        }
-        http = created ?? throw new InvalidOperationException(PhysicalOwnerProbeProtocol.Unavailable);
-    }
+    private readonly NodeOptions options = nodeOptions.Value;
+    private int disposed;
+    internal ErrorCode? LastNativeError { get; private set; }
 
     internal async Task<string> VerifyAllAsync(DateTimeOffset expiresAt, CancellationToken cancellationToken)
     {
-        if (!options.MembershipAuthority.RegisterPhysicalOwners
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
-        { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
-        var control = PhysicalOwnerConfiguredTuples.Control(options, partition);
-        var destination = PhysicalOwnerConfiguredTuples.Destination(options, partition);
-        var discovery = node.Discovery?.Read()
-            ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
-        string? fingerprint = null;
-        for (var index = FirstVoter; index < PhysicalOwnerDirectoryProtocol.VoterCount; index++)
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != ActiveResource, this);
+        LastNativeError = null;
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var call = new PhysicalOwnerProbeCallV1(PhysicalOwnerProbeProtocol.Version, Guid.NewGuid(),
-                control, destination, partition.Configuration.LocalId, discovery.SiloAddress,
-                Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(
-                    System.Security.Cryptography.RandomNumberGenerator.GetBytes(ReplicaMembershipAuthorityProtocol.NonceBytes)), clock.GetUtcNow(), expiresAt);
-            var observed = await ReadAsync(index, call, cancellationToken).ConfigureAwait(false);
-            if (fingerprint is not null && fingerprint != observed)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
-            fingerprint = observed;
+            if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
+                || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
+            { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
+            var control = PhysicalOwnerConfiguredTuples.Control(options, partition);
+            var destination = PhysicalOwnerConfiguredTuples.Destination(options, partition);
+            var discovery = node.Discovery?.Read()
+                ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+            string? fingerprint = null;
+            for (var index = FirstVoter; index < PhysicalOwnerDirectoryProtocol.VoterCount; index++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var call = new PhysicalOwnerProbeCallV1(PhysicalOwnerProbeProtocol.Version, Guid.NewGuid(),
+                    control, destination, partition.Configuration.LocalId, discovery.SiloAddress,
+                    WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(PhysicalOwnerProbeNativeIdentity.NonceBytes)),
+                    clock.GetUtcNow(), expiresAt);
+                var observed = await ReadAsync(index, call, cancellationToken).ConfigureAwait(false);
+                if (fingerprint is not null && fingerprint != observed)
+                { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
+                fingerprint = observed;
+            }
+            return fingerprint ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
         }
-        return fingerprint ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        catch (KeyLoadException error) { LastNativeError = error.Code; throw; }
     }
 
-    private async Task<string> ReadAsync(int index, PhysicalOwnerProbeCallV1 call, CancellationToken cancellationToken)
+    private async Task<string> ReadAsync(int index, PhysicalOwnerProbeCallV1 call, CancellationToken token)
     {
+        var voter = call.Destination.Owner.VoterIds[index];
+        var address = PhysicalOwnerProbeNativeIdentity.Resolve(node, voter, membershipOptions);
+        PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, call.CallerVoter, call.CallerSiloAddress, membershipOptions, token);
         var body = PhysicalOwnerProbeWire.Encode(call);
         using var sourceMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PeerSecret);
-        using var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(new Uri(call.Destination.Endpoints[index]), PhysicalOwnerProbeProtocol.Path));
-        request.Content = new ByteArrayContent(body);
-        request.Content.Headers.ContentType = new(PhysicalOwnerProbeProtocol.ContentType);
-        request.Headers.Add(PhysicalOwnerProbeProtocol.SignatureHeader, sourceMac.Sign(body, reply: false));
-        Volatile.Write(ref lastHttpStatus, UnobservedHttpStatus);
-        using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken).ConfigureAwait(false);
-        Volatile.Write(ref lastHttpStatus, (int)response.StatusCode);
-        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+        var request = new PartitionMovementGrainServiceRequest(PartitionMovementGrainServiceChannel.PhysicalOwnerProbe,
+            true, body, sourceMac.Sign(body, reply: false), call.CallerVoter, call.CallerSiloAddress,
+            voter, address.ToParsableString(), Guid.NewGuid(), call.ExpiresAt, string.Empty);
+        using var outer = CreateOuterMac();
+        request = request with { SenderSignature = outer.SignNativeRequest(request) };
+        PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, voter, request.DestinationSiloAddress, membershipOptions, token);
+        var received = await node.BorrowPhysicalOwnerProbeTransport().ProbeOwnerAsync(address, request, token).ConfigureAwait(false);
+        token.ThrowIfCancellationRequested();
+        if (received is null || received.Nonce != request.Nonce
+            || received.Payload.Length > PhysicalOwnerProbeProtocol.MaximumBodyBytes
+            || received.SenderSignature is not { Length: PhysicalOwnerProbeProtocol.SignatureCharacters })
+        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        var reply = received with { Payload = received.Payload.ToArray() };
+        if (!outer.VerifyNativeReply(reply))
+        { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+        PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, call.CallerVoter, call.CallerSiloAddress, membershipOptions, token);
+        PhysicalOwnerProbeNativeIdentity.RequireCurrent(node, voter, request.DestinationSiloAddress, membershipOptions, token);
+        if (call.ExpiresAt <= clock.GetUtcNow())
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable); }
-        var encoded = await PhysicalOwnerProbeWire.ReadReplyAsync(response.Content, cancellationToken).ConfigureAwait(false);
-        var signatures = response.Headers.TryGetValues(PhysicalOwnerProbeProtocol.SignatureHeader, out var values)
-            ? values.Take(SingleSignature + SingleSignature).ToArray() : [];
-        using var targetMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.MembershipAuthority.TrustedGroupPeerSecret);
-        if (signatures.Length != SingleSignature || !targetMac.Verify(encoded, signatures[FirstVoter], reply: true))
+        if (reply.Error is { } error)
+        {
+            if (!Enum.IsDefined(error) || !reply.Payload.IsEmpty || reply.Signature is not { Length: EmptyErrorSignatureLength }
+                || reply.SafeDetail != PartitionMovementProtocol.Unavailable)
+            { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
+            throw Errors.Fail(error, PhysicalOwnerProbeProtocol.Unavailable);
+        }
+        using var targetMac = PhysicalOwnerProbeMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
+        if (reply.Payload.IsEmpty || reply.SafeDetail is not null || reply.Signature is null
+            || !targetMac.Verify(reply.Payload.Span, reply.Signature, reply: true))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
-        var reply = NativeSerialization.Deserialize<PhysicalOwnerProbeReplyV1>(encoded);
-        Verify(index, call, reply, cancellationToken);
-        var address = SiloAddress.FromParsableString(reply.EndpointDiscovery.SiloAddress);
-        if (address.Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort)
+        var original = NativeSerialization.Deserialize<PhysicalOwnerProbeReplyV1>(reply.Payload.Span);
+        Verify(index, call, original, token);
+        if (original.EndpointDiscovery.SiloAddress != request.DestinationSiloAddress)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
-        await pins.PinCallerAsync(index, address.Endpoint.Address, cancellationToken).ConfigureAwait(false);
-        return reply.MembershipFingerprint;
+        return original.MembershipFingerprint;
+    }
+
+    private PartitionMovementMac CreateOuterMac()
+    {
+        var control = PhysicalOwnerConfiguredTuples.Control(options, partition.Configuration);
+        var secret = PartitionMovementNativeDiscoveryIdentity.Secret(options, partition.Configuration, control);
+        var key = Convert.FromBase64String(secret);
+        try { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        finally { CryptographicOperations.ZeroMemory(key); }
     }
 
     private void Verify(int index, PhysicalOwnerProbeCallV1 call, PhysicalOwnerProbeReplyV1 reply,
@@ -124,27 +118,11 @@ internal sealed class PhysicalOwnerProbeClient : IDisposable
             || discovery.ApplicationRpcVersion != GrainRoutingProtocol.RequestInterfaceVersion
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membershipOptions)
+            || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membershipOptions)
             || reply.MembershipFingerprint is not { Length: PhysicalOwnerProbeProtocol.SignatureCharacters }
             || reply.MembershipFingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PhysicalOwnerProbeProtocol.InvalidProof); }
     }
 
-    public void Dispose()
-    {
-        var failures = new List<Exception>();
-        try
-        { http.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { handler.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { pins.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+    public void Dispose() => Interlocked.Exchange(ref disposed, DisposedResource);
 }

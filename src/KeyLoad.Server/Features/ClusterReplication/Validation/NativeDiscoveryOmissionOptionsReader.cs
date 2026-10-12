@@ -34,8 +34,8 @@ internal static class NativeDiscoveryOmissionOptionsReader
         if (options.Root != NativeDiscoveryOmissionProtocol.FixedRoot
             || !RequestCqrsProbeOptionsReader.IsSessionId(options.SessionId)
             || !node.RequestCqrsProbe.Enabled || !node.AllowPrivateNetworkHttp
-            || !node.MembershipAuthority.RemoteDocumentReads || !node.MembershipAuthority.RemotePartitionQueries
-            || node.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+            || !node.PhysicalGroupTrust.RemoteDocumentReads || !node.PhysicalGroupTrust.RemotePartitionQueries
+            || node.PhysicalGroupTrust.Role != global::KeyLoad.Server.Features.ClusterRouting.PhysicalGroupTrustRole.Control)
         { throw Invalid(); }
     }
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);

@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
@@ -9,20 +8,18 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ControlledMovementOwnerAdmissionAssertions
 {
     internal static async Task<DatabaseEngine> RejectAsync(ControlledPartitionMovementNode source,
-        ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
+        PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest request, CancellationToken token)
     {
         var image = ControlledPartitionMovementRawImage.Bytes(source.Store);
         var position = source.Store.Position;
         var index = source.Journal.Log.State.LastIndex;
-        var key = Convert.FromBase64String(runtime.Node.Value.PeerSecret);
         var failures = new List<Exception>();
         DatabaseEngine? retained = null;
-        try
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var mac = new PartitionMovementMac(key, source.Database.Limits.MaxBatchBytes);
+                using var mac = admission.CreateControlMac();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var bytes = NativeSerialization.Serialize(request with
@@ -40,7 +37,6 @@ internal static class ControlledMovementOwnerAdmissionAssertions
                 }, failures);
             }, failures);
         }
-        finally { CryptographicOperations.ZeroMemory(key); }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(source.Store.Position).IsEqualTo(position);
         await Assert.That(source.Journal.Log.State.LastIndex).IsEqualTo(index);

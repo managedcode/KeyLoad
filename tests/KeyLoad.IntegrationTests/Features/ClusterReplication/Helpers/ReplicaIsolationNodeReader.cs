@@ -51,7 +51,7 @@ internal sealed class ReplicaIsolationNodeReader(ReplicaIsolationBuildPlan plan,
         try
         {
             return await TwoRf3MembershipSignedDiscovery.ReadAsync(app, resource,
-            ClusterPrefix + profile.Incarnation.ToString(CompactGuid, CultureInfo.InvariantCulture), incarnation, secret, cancellationToken);
+            ClusterPrefix + profile.Incarnation.ToString(CompactGuid, CultureInfo.InvariantCulture), incarnation, secret, profile.AdminKey, cancellationToken);
         }
         finally { CryptographicOperations.ZeroMemory(secret); }
     }

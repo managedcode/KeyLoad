@@ -6,6 +6,8 @@ namespace KeyLoad.Orleans;
 internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string clusterId) : IDisposable
 {
     private readonly byte[] secret = credential.ToArray();
+    private readonly Lock lifecycle = new();
+    private bool disposed;
 
     public byte[] Request(ReplicaPeerEnvelope request) => Message(ReplicaTransportProtocol.RequestPurpose,
         request.Incarnation, request.Sender, request.Recipient, request.Method, request.RuntimeAddress,
@@ -17,6 +19,7 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
 
     public byte[] Discovery(Guid incarnation, string voterId, Guid requestNonce, ReadOnlySpan<byte> payload)
     {
+        RequireOpen();
         using var buffer = new MemoryStream();
         using var writer = new BinaryWriter(buffer, ReplicaTransportProtocol.Utf8, leaveOpen: true);
         writer.Write(ReplicaTransportProtocol.DiscoveryPurpose);
@@ -34,6 +37,7 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
     private byte[] Message(string purpose, Guid incarnation, string sender, string recipient, ReplicaRpc method,
         string address, long timestamp, Guid nonce, ReadOnlySpan<byte> payload, ErrorCode? error, string? detail)
     {
+        RequireOpen();
         using var buffer = new MemoryStream();
         using var writer = new BinaryWriter(buffer, ReplicaTransportProtocol.Utf8, leaveOpen: true);
         writer.Write(purpose);
@@ -63,8 +67,25 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
             throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidPeer);
         }
 
-        return HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(StartEmptyCount, checked((int)buffer.Length)));
+        lock (lifecycle)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            return HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(StartEmptyCount, checked((int)buffer.Length)));
+        }
     }
 
-    public void Dispose() => CryptographicOperations.ZeroMemory(secret);
+    internal void RequireOpen()
+    {
+        lock (lifecycle) { ObjectDisposedException.ThrowIf(disposed, this); }
+    }
+
+    public void Dispose()
+    {
+        lock (lifecycle)
+        {
+            if (disposed) { return; }
+            disposed = true;
+            CryptographicOperations.ZeroMemory(secret);
+        }
+    }
 }

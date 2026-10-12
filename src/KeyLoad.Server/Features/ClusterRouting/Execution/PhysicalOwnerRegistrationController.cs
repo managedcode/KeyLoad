@@ -18,8 +18,8 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
     {
         cancellationToken.ThrowIfCancellationRequested();
         var options = nodeOptions.Value;
-        if (!options.MembershipAuthority.RegisterPhysicalOwners
-            || options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Authority)
+        if (!options.PhysicalGroupTrust.RegisterPhysicalOwners
+            || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Control)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalOwnerProbeProtocol.Unavailable); }
         var initial = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
@@ -66,11 +66,11 @@ internal sealed class PhysicalOwnerRegistrationController(OrleansNode node, Part
         { stage = value; }
     }
 
-    internal (PhysicalOwnerRegistrationStage Stage, bool DeadlineCancelled, bool StoppingCancelled, int LastProbeHttpStatus) ObserveFailure(
+    internal (PhysicalOwnerRegistrationStage Stage, bool DeadlineCancelled, bool StoppingCancelled, ErrorCode? LastProbeNativeError) ObserveFailure(
         CancellationTokenSource deadline, CancellationTokenSource stopping)
     {
         lock (state)
-        { return (stage, deadline.IsCancellationRequested, stopping.IsCancellationRequested, probes.LastHttpStatus); }
+        { return (stage, deadline.IsCancellationRequested, stopping.IsCancellationRequested, probes.LastNativeError); }
     }
 
     private const int FirstOwner = 0;

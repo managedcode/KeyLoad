@@ -7,8 +7,8 @@ internal sealed class RemoteDocumentWorkOwner(IOptions<GrainRoutingOptions> rout
     IOptions<NodeOptions> nodeOptions, IOptions<RemoteDocumentExecutionOptions> executionOptions) : IAsyncDisposable
 {
     private readonly Lock gate = new();
-    private readonly NativeRequestWorkOwner? work = nodeOptions.Value.MembershipAuthority.RemoteDocumentReads ? new(routingOptions) : null;
-    private readonly SemaphoreSlim? admissions = nodeOptions.Value.MembershipAuthority.RemoteDocumentReads
+    private readonly NativeRequestWorkOwner? work = nodeOptions.Value.PhysicalGroupTrust.RemoteDocumentReads ? new(routingOptions) : null;
+    private readonly SemaphoreSlim? admissions = nodeOptions.Value.PhysicalGroupTrust.RemoteDocumentReads
         ? new(executionOptions.Value.MaximumAdmissions, executionOptions.Value.MaximumAdmissions) : null;
     internal bool IsJoined => work is null || work.IsJoined;
     private bool closed;

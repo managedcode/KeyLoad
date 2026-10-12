@@ -18,9 +18,10 @@ internal sealed class AnnMaintenanceChildCalls(DecodedGrainRequest parent, Func<
 
     internal Task<AnnMaintenanceCapabilityResult> CapabilityAsync(AnnMaintenanceRequest request,
         AnnMaintenanceCapabilityKind kind, CancellationToken token, ProjectionBatch? page = null,
-        CommitProjectionBatchRequest? intent = null)
+        CommitProjectionBatchRequest? intent = null, AnnMaintenanceResult? fullResult = null,
+        ProjectionConsumerInfo? originalConfigure = null)
         => ReadAsync<AnnMaintenanceCapabilityRequest, AnnMaintenanceCapabilityResult>(GrainReadKind.AnnMaintenance,
-            new(request, SessionId, kind, page, intent), token);
+            new(request, SessionId, kind, page, intent, fullResult, originalConfigure), token);
 
     internal Task<TResult> ReadAsync<TRequest, TResult>(GrainReadKind kind, TRequest request, CancellationToken token)
         where TResult : class

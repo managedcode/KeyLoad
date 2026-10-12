@@ -41,9 +41,9 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 operationToken).ConfigureAwait(true);
             var result = await SubmitCommandAsync(kind, request, principal, context, operationToken)
                 .ConfigureAwait(true);
+            stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
                 .ConfigureAwait(true);
-            stage = GrainFailureStage.ReplyEncoding;
             return GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
@@ -100,6 +100,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     {
         if (GrainBoundaryErrors.Handles(error))
         {
+            if (stage == GrainFailureStage.ReplyEncoding)
+            { error.Data[GrainFailureDiagnostics.StageMetadataKey] = stage; }
             GrainFailureDiagnostics.Mark(error, stage);
         }
         return error;

@@ -15,6 +15,18 @@ internal static class GrainRequestPhaseObservation
         return observer.ObserveAsync(GrainRequestProbeIdentity.From(request.Envelope), phase, context, cancellationToken);
     }
 
+    internal static ValueTask ProducerDisposedAsync(IGrainRequestPhaseObserver? observer,
+        GrainRequestProbeIdentity identity, Guid connectionId, IGrainContext? context)
+    {
+        if (observer is null)
+        { return ValueTask.CompletedTask; }
+        ArgumentNullException.ThrowIfNull(context);
+        if (observer is IGrainRequestProducerDisposedObserver asynchronous)
+        { return asynchronous.ProducerDisposedAsync(identity, connectionId, context); }
+        observer.ProducerDisposed(identity, context);
+        return ValueTask.CompletedTask;
+    }
+
     internal static void ProducerDisposed(IGrainRequestPhaseObserver? observer,
         GrainRequestProbeIdentity identity, IGrainContext? context)
     {

@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 
@@ -11,8 +10,7 @@ internal static class EventVectorRemoteExchange
 {
     private const int NoFailures = 0;
 
-    internal static async Task<EventVectorAuthenticatedExchange> SendAsync(HttpClient http,
-        ReplicaMembershipAuthorityAddressPins pins, NodeOptions options,
+    internal static async Task<EventVectorAuthenticatedExchange> SendAsync(RemoteDocumentClient client, NodeOptions options,
         IOptions<OrleansMembershipOptions> membership, TimeProvider clock,
         RegisteredPhysicalOwnerV1 destination, EventVectorRemoteCall originalCall,
         EventVectorRemoteEncoding encoding, ReadExecutionBudget work, CancellationToken originalCancellationToken)
@@ -31,7 +29,7 @@ internal static class EventVectorRemoteExchange
         {
             if (body.Length != measuredRequestBytes)
             { throw Errors.Fail(ErrorCode.Corruption, EventVectorRemoteProtocol.Invalid); }
-            await EventVectorRemoteRequestSend.SendAsync(http, pins, options, membership, clock,
+            await EventVectorRemoteRequestSend.SendAsync(client, options, membership, clock,
                 destination, originalCall, body, encoding, work, failures,
                 (checkedReply, signature) => { result = checkedReply; originalRequestSignature = signature; },
                 originalCancellationToken).ConfigureAwait(false);

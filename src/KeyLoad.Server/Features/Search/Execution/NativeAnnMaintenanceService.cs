@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
 using KeyLoad.Orleans;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
@@ -9,8 +8,6 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngine database,
     ServerRuntimeOptions configured, TimeProvider clock) : INativeAnnMaintenance, IAnnProjection, IAsyncDisposable
 {
-    private const int Empty = 0;
-    private const int BuildRetentionFrames = 2;
     private readonly Lock gate = new();
     private readonly NativeAnnMaintenanceAdmissions admitted = new();
     private NativeAnnGenerationOwner? owner;
@@ -19,9 +16,56 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
     private bool closed;
     private Task? disposal;
 
+    public Task<AnnProjectionEnrollment?> ReadEnrollmentAsync(PrincipalRecord principal,
+        AnnMaintenanceRequest initialRequest, CancellationToken cancellationToken)
+        => NativeAnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
+            clock, admitted, EnsureOwner, cancellationToken);
+
+    public async Task<AnnMaintenanceResult?> AdmitOriginalAsync(PrincipalRecord principal,
+        AnnMaintenanceRequest request, ProjectionConsumerInfo originalConfigure, CancellationToken cancellationToken)
+        => (await NativeAnnOriginalOperationExecution.ExecuteAsync(database, principal, request, originalConfigure,
+            null, configured, clock, admitted, EnsureOwner, cancellationToken).ConfigureAwait(false)).Result;
+
+    public async Task SettleOriginalResultAsync(PrincipalRecord principal, AnnMaintenanceRequest request,
+        AnnMaintenanceResult originalResult, CancellationToken cancellationToken)
+        => _ = await NativeAnnOriginalOperationExecution.ExecuteAsync(database, principal, request, null,
+            originalResult, configured, clock, admitted, EnsureOwner, cancellationToken,
+            RequireOriginalSession(request)).ConfigureAwait(false);
+
+    internal Task<(AnnMaintenanceResult? Result, CommitProjectionBatchRequest? Intent)> ExecuteOriginalCapabilityAsync(
+        PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, CancellationToken token)
+        => NativeAnnOriginalOperationExecution.ExecuteAsync(database, principal, request.Maintenance,
+            request.OriginalConfigure, request.FullOriginalResult, configured, clock, admitted, EnsureOwner, token,
+            request.Kind == AnnMaintenanceCapabilityKind.SettleOriginalResult ? RequireOriginalSession(request.Maintenance) : null);
+
+    internal void RequireOriginalCapabilitySession(PrincipalRecord principal, AnnMaintenanceCapabilityRequest request)
+    {
+        lock (gate)
+        {
+            ObjectDisposedException.ThrowIf(closed, this);
+            (session ?? throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership))
+                .Require(request.SessionId, request.Maintenance, principal.Id);
+        }
+    }
+
+    private NativeAnnMaintenanceSession RequireOriginalSession(AnnMaintenanceRequest request)
+    {
+        lock (gate)
+        {
+            ObjectDisposedException.ThrowIf(closed, this);
+            var current = session ?? throw Errors.Fail(ErrorCode.OwnershipLost, NativeAnnProtocol.Ownership);
+            if (!NativeAnnOriginalResults.SameRequest(current.Request, request))
+            { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }
+            return current;
+        }
+    }
+
     public async Task<AnnMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
     {
+        NativeAnnOriginalCapabilityExecution.Require(request);
+        if (request.Kind is AnnMaintenanceCapabilityKind.AdmitOriginal or AnnMaintenanceCapabilityKind.SettleOriginalResult)
+        { return await NativeAnnOriginalCapabilityExecution.ExecuteAsync(this, principal, request, cancellationToken).ConfigureAwait(false); }
         using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
         cancellationToken.ThrowIfCancellationRequested();
         if (!principal.ClusterAdministrator || principal.Revoked)
@@ -44,6 +88,11 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             stages, currentSession, principal, request, configured, clock, cancellationToken)).ConfigureAwait(false);
     }
 
+    public Task<AnnProjectionPublication> ReadPublishedAsync(PrincipalRecord principal,
+        AnnMaintenanceRequest request, CancellationToken cancellationToken)
+        => NativeAnnProjectionPublicationRead.ReadAsync(database, principal, request, configured,
+            clock, admitted, EnsureOwner, cancellationToken);
+
     public IAnnProjectionLease Acquire(IKeyValueView view, AnnProjectionSelection request,
         ReadExecutionBudget budget)
     {
@@ -58,30 +107,18 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         return NativeAnnPublicAcquisition.Acquire(database, view, actual, request, configured, budget);
     }
 
-    private async Task<AnnMaintenanceCapabilityResult> ReleaseAsync(PrincipalRecord principal,
+    private Task<AnnMaintenanceCapabilityResult> ReleaseAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken token)
+        => NativeAnnMaintenanceLifecycle.ReleaseAsync(database, principal, request, directory,
+            GetOwner, EnsureOwner, token);
+
+    private NativeAnnGenerationOwner? GetOwner()
     {
-        if (request.Maintenance.Mode != AnnMaintenanceMode.Release)
-        { throw Errors.Fail(ErrorCode.Validation, NativeAnnProtocol.InvalidSource); }
-        NativeAnnReleaseValidation.Require(database, principal, request.Maintenance, token);
-        NativeAnnGenerationOwner? actual;
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            actual = owner;
+            return owner;
         }
-        if (actual is null && Directory.Exists(Path.Combine(directory, NativeAnnProtocol.RootDirectory)))
-        { actual = EnsureOwner(); }
-        if (actual is not null)
-        {
-            await actual.RunAsync(_ =>
-            {
-                NativeAnnReleaseValidation.Require(database, principal, request.Maintenance, token);
-                actual.ReleaseGeneration(new(request.Maintenance.Consumer, request.Maintenance.IndexGeneration));
-                return true;
-            }).ConfigureAwait(false);
-        }
-        return new(request.SessionId, null, Empty, Empty, null, null, Empty, false);
     }
 
     private async Task<AnnMaintenanceCapabilityResult> BeginAsync(PrincipalRecord principal,
@@ -94,66 +131,13 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
             { throw Errors.Fail(ErrorCode.ResourceExhausted, NativeAnnProtocol.Bound); }
             beginning = true;
         }
-        NativeAnnMaintenanceMemoryLease? memory = null;
         try
         {
-            var read = new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
-            long available;
-            lock (gate)
-            {
-                memory = owner?.MaintenanceMemory.Reserve();
-                available = memory?.Bytes ?? configured.NativeAnn.Value.MaximumResidentBytes;
-            }
-            var seedAvailable = request.Maintenance.Mode == AnnMaintenanceMode.Build
-                ? available / BuildRetentionFrames : available;
-            var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, seedAvailable);
-            var captured = AnnSeedCollector.CapturePinned(database, principal.Id, request.Maintenance, seeds, read);
-            var actualOwner = CaptureOwner(captured, ref memory);
-            var retainedMemory = memory ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
-            var completed = await actualOwner.RunAsync(stages => CreateSession(stages, actualOwner,
-                retainedMemory, principal, request, captured, seeds, read)).ConfigureAwait(false);
-            memory = null;
-            return completed;
-        }
-        catch (Exception primary)
-        {
-            try
-            { memory?.Dispose(); }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
-            throw;
+            return await NativeAnnMaintenanceBeginning.RunAsync(database, principal, request, configured,
+                clock, gate, () => owner, EnsureOwner, created => { lock (gate) { session = created; } }, token)
+                .ConfigureAwait(false);
         }
         finally { lock (gate) { beginning = false; } }
-    }
-
-    private NativeAnnGenerationOwner CaptureOwner(AnnSeed captured, ref NativeAnnMaintenanceMemoryLease? memory)
-    {
-        lock (gate)
-        {
-            var actual = EnsureOwner();
-            memory ??= actual.MaintenanceMemory.Reserve();
-            _ = actual.MaintenanceMemory.Remaining(captured.PeakBytesUpperBound);
-            return actual;
-        }
-    }
-
-    private AnnMaintenanceCapabilityResult CreateSession(NativeAnnStageStore stages, NativeAnnGenerationOwner actualOwner,
-        NativeAnnMaintenanceMemoryLease memory, PrincipalRecord principal, AnnMaintenanceCapabilityRequest request,
-        AnnSeed captured, Microsoft.Extensions.Options.IOptions<AnnSeedOptions> seeds, ReadExecutionBudget read)
-    {
-        var original = request.Maintenance.Mode == AnnMaintenanceMode.Restore
-            ? stages.Describe(request.Maintenance, captured) : null;
-        var created = new NativeAnnMaintenanceSession(request.SessionId, request.Maintenance,
-            principal.Id, captured, original, memory);
-        if (request.Maintenance.Mode == AnnMaintenanceMode.Build)
-        {
-            _ = actualOwner.MaintenanceMemory.Remaining(checked(captured.OwnedBytesUpperBound + seeds.Value.MaxPeakBytes));
-            NativeAnnSessionOperations.BeginBuild(created, seeds, read);
-        }
-        actualOwner.MaintenanceMemory.Retain(memory, created.RetainedBytes);
-        var result = NativeAnnSessionOperations.Result(created, captured, original?.CheckpointIntent);
-        lock (gate)
-        { session = created; }
-        return result;
     }
 
     private NativeAnnGenerationOwner EnsureOwner()
@@ -198,19 +182,14 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
         lock (gate)
         {
             closed = true;
-            disposal ??= DisposeCoreAsync(admitted.CloseAndJoinAsync());
+            disposal ??= NativeAnnMaintenanceLifecycle.DisposeAsync(admitted.CloseAndJoinAsync(),
+                GetDisposingOwner, () => { lock (gate) { session = null; } });
             return new(disposal);
         }
     }
 
-    private async Task DisposeCoreAsync(Task originalOperations)
+    private NativeAnnGenerationOwner? GetDisposingOwner()
     {
-        await originalOperations.ConfigureAwait(false);
-        NativeAnnGenerationOwner? actual;
-        lock (gate)
-        { actual = owner; }
-        try
-        { if (actual is not null) { await actual.DisposeAsync().ConfigureAwait(false); } }
-        finally { lock (gate) { session = null; } }
+        lock (gate) { return owner; }
     }
 }

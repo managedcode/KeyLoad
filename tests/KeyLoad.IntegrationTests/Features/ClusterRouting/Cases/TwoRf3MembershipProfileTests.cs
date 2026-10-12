@@ -17,7 +17,8 @@ internal sealed class TwoRf3MembershipProfileTests
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             localImage = await LocalRf3ImageTestSession.StartIfSelectedAsync(deadline.Token).ConfigureAwait(false);
-            var startedWave = await TwoRf3MembershipWave.StartAsync(localImage?.Selection, deadline.Token)
+            var startedWave = await TwoRf3MembershipWave.StartOwnedAsync(
+                new TwoRf3MembershipWave(localImage?.Selection, nativeMembershipDiagnostics: true), deadline.Token)
                 .ConfigureAwait(false);
             wave = startedWave;
             await VerifyMembershipAsync(startedWave, deadline.Token).ConfigureAwait(false);

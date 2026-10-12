@@ -17,15 +17,14 @@ internal static class McpHttpPipeline
         var capacity = Capacity(context.Request, governor.Limits.MaxBodyBytes);
         using var state = new McpRequestState(governor: governor, memory: context.RequestServices.GetRequiredService<McpMemoryBudget>(),
             capacity: capacity, cancellationToken: context.RequestAborted, options: executionOptions);
-        var principal = await DatabaseCredentialResolver.ReadAsync(context).ConfigureAwait(false);
-        state.Authenticate(principal, context.RequestAborted);
         var originalBody = context.Request.Body;
         McpFrameBody? pendingBody = null;
         try
         {
+            context.Items[StateItem] = state;
+            _ = await DatabaseAuthenticationComposition.AuthenticateAsync(context).ConfigureAwait(false);
             var headers = McpTransportGuard.ReadHeaders(context.Request.Headers, executionOptions);
             context.Items[ServerProtocol.PrincipalItem] = state.Principal;
-            context.Items[StateItem] = state;
             if (HttpMethods.IsPost(context.Request.Method))
             {
                 SetBodyLimit(context, governor.Limits.MaxBodyBytes);

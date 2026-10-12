@@ -8,48 +8,44 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.DocumentStorage;
 
-internal sealed class RemoteDocumentClient : IDisposable
+internal sealed class RemoteDocumentClient : IAsyncDisposable
 {
-    private const int NoFailures = 0;
     private const int SelectedVoter = 0;
-    private const int SignatureCount = 1;
     private const long EmptyApplied = 0;
     private readonly NodeOptions options;
     private readonly IOptions<OrleansMembershipOptions> membership;
     private readonly TimeProvider clock;
     private readonly IControlledBlobWireBorrowObserver? wireObserver;
-    private readonly HttpClient http;
-    private readonly SocketsHttpHandler handler;
-    private readonly ReplicaMembershipAuthorityAddressPins pins;
+    private readonly Func<RemoteModelNativeClient> borrowNative;
+    private RemoteModelNativeClient? native;
 
     internal RemoteDocumentClient(IOptions<NodeOptions> options,
         IOptions<OrleansMembershipOptions> membership, TimeProvider clock,
-        IControlledBlobWireBorrowObserver? wireObserver = null)
+        Func<RemoteModelNativeClient> borrowNative, IControlledBlobWireBorrowObserver? wireObserver = null)
     {
-        this.options = options.Value;
-        this.membership = membership;
-        this.clock = clock;
-        this.wireObserver = wireObserver;
-        pins = new(this.options.MembershipAuthority.TrustedGroupSiloEndpoints, membership);
-        var failures = new List<Exception>();
-        HttpClient? created = null;
-        handler = new()
-        { AllowAutoRedirect = false, UseCookies = false, AutomaticDecompression = System.Net.DecompressionMethods.None };
-        ServerFailureObserver.Observe(() => created = new HttpClient(handler, disposeHandler: false)
-        { Timeout = Timeout.InfiniteTimeSpan }, failures);
-        if (failures.Count != NoFailures)
+        this.options = options.Value; this.membership = membership;
+        this.clock = clock; this.borrowNative = borrowNative; this.wireObserver = wireObserver;
+    }
+
+    internal Task<RemoteModelAuthenticatedReply> SendNativeAsync(RegisteredPhysicalOwnerV1 destination,
+        PhysicalShardRecord source, RemoteModelNativeChannel channel, ReadOnlyMemory<byte> payload,
+        string signature, DateTimeOffset expiresAt, long maximumReplyBytes, CancellationToken token)
+        => Native.SendAsync(destination, source, channel, payload, signature, expiresAt, maximumReplyBytes, token);
+
+    internal async Task RequireCurrentReplyAsync(RegisteredPhysicalOwnerV1 destination,
+        RemoteModelAuthenticatedReply original, string innerAddress, CancellationToken token)
+    {
+        try
         {
-            try
-            { handler.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            try
-            { pins.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            ServerFailureObserver.ThrowIfAny(failures);
+            token.ThrowIfCancellationRequested();
+            if (!PhysicalGroupAddress.CanonicalAddress(innerAddress, membership)
+                || !string.Equals(original.DispatchSiloAddress, innerAddress, StringComparison.Ordinal))
+            { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
+            await Native.RequireCurrentAsync(destination, original.DispatchSiloAddress, token).ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
         }
-        http = created ?? throw new InvalidOperationException(RemoteDocumentProtocol.Unavailable);
+        catch (Exception error) when (original.MayHaveEffects && NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error); }
     }
 
     internal async Task<OwnedDocumentReadResultV1> ReadAsync(RemoteDocumentCallV1 call,
@@ -75,22 +71,22 @@ internal sealed class RemoteDocumentClient : IDisposable
 
     internal Task<ControlledDocumentReadResult> ReadControlledAsync(RemoteControlledDocumentCall call,
         CancellationToken cancellationToken)
-        => RemoteControlledDocumentExchange.ReadAsync(http, pins, options, membership, clock, call, cancellationToken);
+        => RemoteControlledDocumentExchange.ReadAsync(this, options, membership, clock, call, cancellationToken);
 
     internal Task<ControlledBlobReadResult> ReadControlledBlobAsync(RemoteControlledBlobCall call,
         CancellationToken cancellationToken)
-        => RemoteControlledBlobExchange.ReadAsync(http, pins, options, membership, clock, call, wireObserver, cancellationToken);
+        => RemoteControlledBlobExchange.ReadAsync(this, options, membership, clock, call, wireObserver, cancellationToken);
 
     internal Task<KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendEventVectorAsync(
         RegisteredPhysicalOwnerV1 destination, KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall,
         KeyLoad.Server.Features.EventStreams.EventVectorRemoteEncoding encoding,
         KeyLoad.Core.ReadExecutionBudget work, CancellationToken originalCancellationToken)
-        => KeyLoad.Server.Features.EventStreams.EventVectorRemoteExchange.SendAsync(http, pins, options,
+        => KeyLoad.Server.Features.EventStreams.EventVectorRemoteExchange.SendAsync(this, options,
             membership, clock, destination, originalCall, encoding, work, originalCancellationToken);
 
     internal Task<KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerResult> TransferAsync(
         KeyLoad.Core.Features.Messaging.RemoteQueueTransferPeerCall call, CancellationToken token)
-        => KeyLoad.Server.Features.Messaging.RemoteTransferPeerExchange.SendAsync(http, pins, options, membership, clock, call, token);
+        => KeyLoad.Server.Features.Messaging.RemoteTransferPeerExchange.SendAsync(this, options, membership, clock, call, token);
 
     private async Task<RemoteDocumentReplyV1> ReadReplyAsync(RemoteDocumentCallV1 call,
         CancellationToken cancellationToken)
@@ -99,25 +95,16 @@ internal sealed class RemoteDocumentClient : IDisposable
         var destination = call.Fence.Destination;
         var body = RemoteDocumentWire.Encode(new RemoteDocumentTransportEnvelope(call, null));
         using var sourceMac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);
-        using var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(new Uri(destination.Endpoints[SelectedVoter]), RemoteDocumentProtocol.Path));
-        request.Content = new ByteArrayContent(body);
-        request.Content.Headers.ContentType = new(RemoteDocumentProtocol.ContentType);
-        request.Headers.Add(RemoteDocumentProtocol.SignatureHeader, sourceMac.Sign(body, reply: false));
-        using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
+        var original = await SendNativeAsync(destination, call.Source, RemoteModelNativeChannel.DocumentEnvelope,
+            body, sourceMac.Sign(body, reply: false), call.ExpiresAt, RemoteDocumentWire.ReplyMaximum(call),
             cancellationToken).ConfigureAwait(false);
-        if (response.StatusCode != System.Net.HttpStatusCode.OK)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
-        var encoded = await RemoteDocumentWire.ReadReplyAsync(response.Content, cancellationToken, RemoteDocumentWire.ReplyMaximum(call)).ConfigureAwait(false);
-        var signatures = response.Headers.TryGetValues(RemoteDocumentProtocol.SignatureHeader, out var values)
-            ? values.Take(SignatureCount + SignatureCount).ToArray() : [];
-        using var targetMac = RemoteDocumentMac.FromConfiguredSecret(options.MembershipAuthority.TrustedGroupPeerSecret);
-        if (signatures.Length != SignatureCount || !targetMac.Verify(encoded, signatures[SelectedVoter], reply: true))
+        using var targetMac = RemoteDocumentMac.FromConfiguredSecret(options.PhysicalGroupTrust.ForeignPeerSecret);
+        if (!targetMac.Verify(original.Payload.Span, original.Signature, reply: true))
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
-        var reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(encoded);
+        var reply = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(original.Payload.Span);
         Verify(call, reply, cancellationToken);
-        var address = SiloAddress.FromParsableString(reply.EndpointDiscovery.SiloAddress);
-        await pins.PinCallerAsync(SelectedVoter, address.Endpoint.Address, cancellationToken).ConfigureAwait(false);
+        await RequireCurrentReplyAsync(destination, original, reply.EndpointDiscovery.SiloAddress,
+            cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } error)
         { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
         return reply;
@@ -135,8 +122,7 @@ internal sealed class RemoteDocumentClient : IDisposable
             || discovery.ApplicationRpcVersion != GrainRoutingProtocol.RequestInterfaceVersion
             || discovery.PeerEnvelopeVersion != ReplicaTransportProtocol.Version
             || discovery.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
-            || !ReplicaMembershipAuthorityValidation.CanonicalAddress(discovery.SiloAddress, membership)
-            || SiloAddress.FromParsableString(discovery.SiloAddress).Endpoint.Port != MembershipAuthoritySettingsProtocol.NativeSiloPort
+            || !PhysicalGroupAddress.CanonicalAddress(discovery.SiloAddress, membership)
             || reply.Controlled is not null || reply.ControlledBlob is not null || reply.QueueTransfer is not null
             || (reply.Error is null) != (reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
             || reply.Result is not null && (call.Request is null || reply.QueryLeaf is not null || reply.SearchLeaf is not null)
@@ -163,21 +149,17 @@ internal sealed class RemoteDocumentClient : IDisposable
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
     }
 
-    public void Dispose()
+    private RemoteModelNativeClient Native
     {
-        var failures = new List<Exception>();
-        try
-        { http.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { handler.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try
-        { pins.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
+        get
+        {
+            var existing = Volatile.Read(ref native);
+            if (existing is not null) { return existing; }
+            var borrowed = borrowNative();
+            return Interlocked.CompareExchange(ref native, borrowed, null) ?? borrowed;
+        }
     }
+
+    public ValueTask DisposeAsync()
+        => Volatile.Read(ref native)?.DisposeAsync() ?? ValueTask.CompletedTask;
 }

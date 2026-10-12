@@ -51,10 +51,10 @@ internal sealed class ControlledDocumentSourceRead(OrleansNode node, PartitionHo
 
     private RegisteredPhysicalOwnerV1 RequireDestination(PartitionControlDocumentReadFrame frame)
     {
-        var settings = nodeOptions.Value.MembershipAuthority;
+        var settings = nodeOptions.Value.PhysicalGroupTrust;
         var destination = PhysicalOwnerConfiguredTuples.Destination(nodeOptions.Value, partition);
         if (!settings.RemoteDocumentReads || !settings.RegisterPhysicalOwners
-            || settings.Mode != MembershipAuthoritySettingsProtocol.Authority
+            || settings.Role != PhysicalGroupTrustRole.Control
             || !PhysicalOwnerEntryValidation.SameOwner(frame.Publication.Destination, destination.Owner))
         { throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentProtocol.Unavailable); }
         return destination;

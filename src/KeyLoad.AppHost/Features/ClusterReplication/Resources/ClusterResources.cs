@@ -63,8 +63,12 @@ internal static class ClusterResources
             coverageImage);
         ClusterProfileStore.PrepareDirectory(root);
         var identity = AddIdentityParameters(builder, profile);
-        return AddNodes(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames, coverageImage,
+        var nodes = AddNodes(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames, coverageImage,
             localImage, images, probes, identity);
+        var tables = KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Add(builder);
+        foreach (var node in nodes)
+        { KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Apply(node, tables); }
+        return nodes;
     }
 
     private static IResourceBuilder<ContainerResource>[] AddNodes(IDistributedApplicationBuilder builder,

@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server.Features.EventStreams;
@@ -45,7 +44,7 @@ internal sealed class EventVectorOutgoingCall : IDisposable
         try
         {
             var nonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(
-                ReplicaMembershipAuthorityProtocol.NonceBytes)).TrimEnd(Base64Padding)
+                EventVectorRemoteProtocol.NonceBytes)).TrimEnd(Base64Padding)
                 .Replace(Base64Plus, UrlMinus).Replace(Base64Slash, UrlUnderscore);
             var actualCall = new EventVectorRemoteCall(EventVectorRemoteProtocol.Version, Guid.NewGuid(), nonce, originalExpiresAt,
                 discovery.VoterId, discovery.SiloAddress, control.Owner,

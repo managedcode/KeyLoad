@@ -133,7 +133,7 @@ internal sealed class PartitionMovementRetireCancellationVerifier(IOptions<NodeO
         var owner = original.OriginalReceiverOwner;
         var key = Convert.FromBase64String(owner.PhysicalShardId == node.PhysicalShardId
             && owner.Incarnation == database.Store.Identity.Incarnation ? node.PeerSecret
-                : node.MembershipAuthority.TrustedGroupPeerSecret
+                : node.PhysicalGroupTrust.ForeignPeerSecret
                     ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof));
         try
         {

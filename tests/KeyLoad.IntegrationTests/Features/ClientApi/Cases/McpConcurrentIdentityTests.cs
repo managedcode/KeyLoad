@@ -27,6 +27,8 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
         var secondIdentity = await McpPersistedIdentity.CreateAsync(fixture, second.Partition, Capability.DocumentsRead, deadline.Token);
         await using var firstClient = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, firstIdentity.Secret, deadline.Token);
         await using var secondClient = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, secondIdentity.Secret, deadline.Token);
+        var before = await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
+            fixture, first, second, deadline.Token);
         var calls = await Task.WhenAll(
             firstClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(first.Reference), deadline.Token),
             secondClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(second.Reference), deadline.Token),
@@ -36,11 +38,21 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
         var secondRead = await PublicReadAssertions.RequiredDocumentAsync(calls[SecondSuccess]);
         var firstDenied = await McpCallerAssertions.ErrorAsync(calls[FirstDenial], ErrorCode.PermissionDenied, dispatched: true);
         var secondDenied = await McpCallerAssertions.ErrorAsync(calls[SecondDenial], ErrorCode.PermissionDenied, dispatched: true);
+        await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(first, firstRead.Value);
+        await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(second, secondRead.Value);
         await Assert.That(firstRead.Value.Reference).IsEqualTo(first.Reference);
         await Assert.That(secondRead.Value.Reference).IsEqualTo(second.Reference);
         await Assert.That(new Guid?[] { firstRead.RequestId, secondRead.RequestId, firstDenied, secondDenied }.Distinct().Count())
             .IsEqualTo(OperationCount);
         await McpCallerAssertions.DoesNotDiscloseAsync(calls[FirstDenial], firstIdentity.Secret, McpDocumentProtocol.PrivateValue);
         await McpCallerAssertions.DoesNotDiscloseAsync(calls[SecondDenial], secondIdentity.Secret, McpDocumentProtocol.PrivateValue);
+        await SqlRf3Protocol.EqualAsync(before,
+            await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
+                fixture, first, second, deadline.Token));
+        await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.FollowingAsync(
+            firstClient, secondClient, first, second, deadline.Token);
+        await SqlRf3Protocol.EqualAsync(before,
+            await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
+                fixture, first, second, deadline.Token));
     }
 }

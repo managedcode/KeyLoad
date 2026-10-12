@@ -34,9 +34,9 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         var requestId = OperationRequestId(signedRequest);
         var purpose = new NativeCqrsStreamPurpose();
         var phaseSettlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
-        Action settled = phaseSettlement is null ? static () => { }
-        : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext);
-        return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.RunWithPurpose(
+        Func<ValueTask> settled = phaseSettlement is null ? static () => ValueTask.CompletedTask
+            : () => phaseSettlement.SettleAsync(((IGrainBase)this).GrainContext);
+        return NativeConnectionOperationStream.Run(operations, requestId, executionToken => NativeCqrsStreamLifetime.RunWithAwaitedSettlement(
             createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement, purpose), token),
             serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: executionToken, options: options, owner: workOwner, purpose: purpose), cancellationToken);
