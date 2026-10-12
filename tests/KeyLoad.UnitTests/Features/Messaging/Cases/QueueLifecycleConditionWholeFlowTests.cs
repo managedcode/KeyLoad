@@ -37,4 +37,12 @@ internal sealed class QueueLifecycleConditionWholeFlowTests
         int persistedState)
         => QueueUnknownStateInspectionWholeFlow.RunAsync(persistedState,
             TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task AcMsg088MissingMetadataRetainedBodyRefusesReadAndOriginalReceiveThenExactRepairTwoColdHealthyAck()
+        => QueueMissingMetadataWholeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task AcMsg088EmptyOriginalReceiveKeepsNewReadyWorkUnclaimedAcrossColdThenFreshClaimsAckAndReplayExactly()
+        => QueueEmptyReceiveReplayWholeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

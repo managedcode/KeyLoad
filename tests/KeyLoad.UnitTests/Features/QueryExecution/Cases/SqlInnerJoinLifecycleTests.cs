@@ -70,6 +70,32 @@ internal sealed class SqlInnerJoinLifecycleTests
         }
     }
 
+    [Test]
+    public async Task AcQ2RetainedIdentityFaultsRefuseWithoutEffectsAndRepairAcrossTwoColdCuts()
+    {
+        var failures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var database = new TestDatabase();
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                Configure(database);
+                const int FirstSeedGeneration = 7;
+                const string SecondLeftId = "z";
+                const string SecondRightId = "c2";
+                var id = Guid.NewGuid();
+                var seed = new CommandRequest(id, database.Partition,
+                    [new PutDocument(Left, LeftEntityId, LeftRow(FirstSeedGeneration)),
+                     new PutDocument(Right, RightEntityId, RightRow(FirstSeedGeneration)),
+                     new PutDocument(Left, SecondLeftId, "{\"order_id\":\"z\",\"customer_id\":\"c2\",\"total\":8}"),
+                     new PutDocument(Right, SecondRightId, "{\"id\":\"c2\",\"name\":\"8\"}")]);
+                var receipt = database.Submit(OperationKind.Batch, seed, id: id).Get<CommitReceipt>();
+                await SqlInnerJoinRetainedIdentityFlow.RunAsync(database, seed, receipt);
+            }, failures);
+        }, failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
     private static QueryRequest JoinRequest(TestDatabase database)
         => new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
 

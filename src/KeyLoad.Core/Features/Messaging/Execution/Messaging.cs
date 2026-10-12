@@ -212,6 +212,8 @@ public sealed partial class DatabaseEngine
         var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessagingMessageMetadataKeySpace, lane, id));
         if (metadata is null)
         {
+            if (view.ReadOwnedValue(QueueKey(MessagingMessageBodyKeySpace, lane, id)) is not null)
+            { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata); }
             return null;
         }
 

@@ -24,11 +24,6 @@ internal static class TwoRf3QueryProbe
         }
         if (control.TwoRf3 && !control.RemoteDocumentReads && !control.RemotePartitionQueries)
         { return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local); }
-        if (control.TwoRf3 && control.RemoteDocumentReads && control.RemotePartitionQueries
-            && local is not null && image is null)
-        {
-            return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
-        }
         if (!control.TwoRf3 || local is not null || image is null
             || !control.RemoteDocumentReads
             || !control.RemotePartitionQueries)

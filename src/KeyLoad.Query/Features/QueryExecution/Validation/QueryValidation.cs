@@ -26,6 +26,9 @@ internal static class QueryValidation
     private const int EmptyElementCount = 0;
 
     private const string InvalidPath = "The query field path is invalid.";
+    private const string InvalidTypedJoinSource = "The bounded relational join is invalid.";
+    private const string InvalidQueueJoinSource = "The queue entity-reference join is unsupported.";
+    private const string InvalidEventJoinSource = "The event entity-reference join is unsupported.";
 
     public static AstQueryRequest Normalize(AstQueryRequest request, DatabaseLimits limits, QueryExecutionOptions execution)
     {
@@ -56,6 +59,7 @@ internal static class QueryValidation
         var join = NormalizeJoin(query.InnerJoin, limits);
         if (join is not null)
         {
+            JsonData.Identifier(query.Alias!);
             order = NormalizeJoinOrder(order, limits);
         }
 
@@ -91,6 +95,22 @@ internal static class QueryValidation
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryASTVersionIsUnsupportedDetail);
         }
+        ValidateJoinSources(query, projection);
+    }
+
+    private static void ValidateJoinSources(SelectQuery query, ImmutableArray<Selection> projection)
+    {
+        if (query.InnerJoin is not { } join
+            || projection.All(selection => selection.SourceAlias == query.Alias || selection.SourceAlias == join.Alias))
+        {
+            return;
+        }
+        if (query.ModelSource is null)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTypedJoinSource);
+        }
+        throw Errors.Fail(ErrorCode.UnsupportedCapability,
+            query.ModelSource.Kind == ModelQuerySourceKind.Events ? InvalidEventJoinSource : InvalidQueueJoinSource);
     }
 
     private static InnerJoinClause? NormalizeJoin(InnerJoinClause? join, DatabaseLimits limits)

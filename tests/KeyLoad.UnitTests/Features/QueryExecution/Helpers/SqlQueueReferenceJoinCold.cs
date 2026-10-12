@@ -35,6 +35,7 @@ internal static class SqlQueueReferenceJoinCold
                 await Assert.That(reopened.Identity.Incarnation).IsEqualTo(incarnation);
                 await Assert.That(reopened.Position).IsEqualTo(position);
                 var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
+                await ModelJoinAliasAdmissionFlow.RunAsync(engine, reopened, database.Partition, events: false, repaired: true);
                 await SqlQueueReferenceJoinAssertions.PageAsync(engine.Execute("root",
                     SqlQueueReferenceJoinFixture.Request(database.Partition)), position, repaired: true);
                 await SqlQueueReferenceJoinAssertions.PageAsync(engine.Execute(SqlQueueReferenceJoinFixture.Reader,

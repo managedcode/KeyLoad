@@ -11,6 +11,25 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 internal sealed class DatabaseCompositionReplayTests
 {
     [Test]
+    public async Task AcComp005SavedCanonicalEndpointFaultRefusesReplayAndOutcomeThenRepairsAcrossTwoColdOwners()
+    {
+        foreach (var from in new[] { true, false })
+        {
+            foreach (var component in new[] { 0, 1, 2 })
+            {
+                var failures = new List<Exception>();
+                await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    using var db = new TestDatabase();
+                    await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                        () => QueueGraphReplayFlow.RunAsync(db, from, component), failures);
+                }, failures);
+                global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            }
+        }
+    }
+
+    [Test]
     public async Task AcComp005ForwardRetryKeepsOriginalReceiptAfterSourceChanges()
     {
         using var db = NewDatabase();

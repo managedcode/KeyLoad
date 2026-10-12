@@ -81,3 +81,17 @@ internal sealed class RelationalSqlRf3JoinCancellationTests(ClusterFixture fixtu
         await Assert.That(errorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
     }
 }
+
+[NotInParallel]
+internal sealed class RelationalSqlRf3JoinAdmittedCancellationTests
+{
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public Task SdkAndOfficialMcpQ2CancellationAfterActualAdmissionSettlesAndContinuesAtTheOriginalCut(
+        bool officialMcp, bool ast)
+        => RelationalSqlRf3JoinAdmissionFlow.RunAsync(officialMcp, ast,
+            TestContext.Current!.Execution.CancellationToken);
+}

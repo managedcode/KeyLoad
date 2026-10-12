@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R27 full native diagnostics: 0 errors and 0 warnings. Whole-solution formatter and full Release passed with 0 errors and 0 warnings; all 9623 source inputs unchanged. Two source/DLL/PDB/native UID-bound focused Unit lanes ran in parallel with maximum 50: 276 executed, 265 passed, 11 failed, no skips. Main 215/215, actual peak 50; additional 50/61, actual peak 22. All processes/readers/disposal joined. Eight new replay oracles conflict with frozen current-lease authorization; two explicit local enrollment refusals expose an introduced bypass; original BM25 InvalidScope remains. Next N repairs are unapplied. Original counts 19 done and 85 in progress, KL-105 separate. Local focused results are not Linux acceptance; functional coverage unmeasured.",
+    "qualification": "R30 final whole-solution format verification, native analyzers and full Release passed zero errors/warnings. Four frozen-source/image native50 local lanes executed94 unique cases:85 passed,9 failed,0 skipped. SQL39/39, messaging24/28, cluster19/23, search/blob/document3/4; every process/readers/disposal joined. Actual discovery3751 (3217functional/534required controls) and canonical inventory validation passed; discovery is not execution or coverage. Immutable R28/R29/R30 records retain actual failures. Next complete source batches are reviewed separately. Original plan19/104 done,85 in progress; KL-105 separate, coverage unmeasured, exact-source Linux/RF3/fault/endurance/performance qualification open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -1136,6 +1136,29 @@
         "termination": "EOF to owned helper PTY; no app target termination"
       },
       "limits": "Aggregate concurrent functional test-runner window; no per-operation stack attribution, measured diagnostics overhead, matched before/after, benchmark or speed qualification."
+    },
+    "runtimeObservedR29": {
+      "record": "docs/implementation/stage64-r29-development-20261012.json",
+      "executedInstances": 163,
+      "passed": 156,
+      "failed": 7,
+      "skipped": 0,
+      "uniqueCases": 162,
+      "nativeMaximumParallelTests": 50,
+      "allOwnersJoined": true,
+      "newTaskAcceptance": false,
+      "coverage": "unmeasured"
+    },
+    "runtimeObservedR30": {
+      "record": "docs/implementation/stage64-r30-development-20261012.json",
+      "executedUniqueCases": 94,
+      "passed": 85,
+      "failed": 9,
+      "skipped": 0,
+      "nativeMaximumParallelTests": 50,
+      "allOwnersJoined": true,
+      "newTaskAcceptance": false,
+      "coverage": "unmeasured"
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

@@ -60,6 +60,8 @@ internal sealed class QueueLeaseReuseTests
         await Assert.That(Counters(db).InFlightBytes).IsEqualTo(0);
         await Assert.That(Counters(db).StoredBytes).IsEqualTo(0);
         await Assert.That(db.Database.InspectMessage(Root, lane, MessageId)!.Metadata.State).IsEqualTo(MessageState.Acked);
+        await QueueVisibilityBoundaryWholeFlow.RunAsync(db, now.AddSeconds(4),
+            TestContext.Current!.Execution.CancellationToken);
     }
 
     [Test]

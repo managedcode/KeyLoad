@@ -159,6 +159,28 @@ REQ-NGR-LARGE-CLEANUP-001: retain the initiating native stream, runner, cancella
 
 AC-NGR-LARGE-CLEANUP-001 maps to REQ-NGR-LARGE-CLEANUP-001 and the six existing AC-ISO-007 cases: retain the existing joined IsolatedAggregateNodeProcess owner and all six original length/writer cases; an initiating body failure marks only its own ImageBundleTestDirectory for retention and rethrows the original exception. A successful body still deletes that original directory normally. This is a test artifact ownership repair; the stream transport and error classifications are unchanged. Original Linux Benchmarks execution remains required and OPEN.
 
-AC-NGR-LARGE-CLEANUP-002 maps to REQ-NGR-LARGE-CLEANUP-001: inject an initiating body failure with a subsequent directory-deletion failure and verify original exception identity plus retained original fixture bytes; separately verify a successful body with deletion failure reports that cleanup failure. Explicit manual verification exception: these adverse disposal flows are not yet automated or executed, remain OPEN, and require retained original Linux fault evidence before qualification. Source/native patch receipts alone do not satisfy either acceptance criterion.
+AC-NGR-LARGE-CLEANUP-002 maps to REQ-NGR-LARGE-CLEANUP-001: inject an initiating body failure with a subsequent directory-deletion failure and verify original exception identity plus retained original fixture bytes; separately verify a successful body with deletion failure reports that cleanup failure. Historical initial state used an explicit manual verification exception because these adverse flows were not automated. Current automated mapping is LargeStreamCleanupPermissionTests.ActualLinuxPermissionFaultPreservesInitiatingEvidenceAndSurfacesCleanupOnlyFailure, Arguments(true) and Arguments(false). Source is joined; current compiled-image execution remains OPEN and requires retained original Linux fault evidence before qualification. These two cases supersede only the manual-only mapping, not the original fault criteria. Source/native patch receipts alone do not satisfy either acceptance criterion.
 
 Owning map: existing ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Helpers/ImageBundleTestDirectory.cs and Cases/IsolatedGitHubFileTests.cs, under this feature's existing native runner and artifact ownership. Existing bounded joins and explicit deferred-release failure ledgers remain authoritative; this retention marker does not prove that every exceptional process join has completed. Other fixture users keep their current successful cleanup behavior.
+
+
+## Native Linux disposal permission fault control
+
+REQ-NGR-LARGE-CLEANUP-001 → AC-NGR-LARGE-CLEANUP-002 additionally maps to proposed LargeStreamCleanupPermissionTests.ActualLinuxPermissionFaultPreservesInitiatingEvidenceAndSurfacesCleanupOnlyFailure, Arguments(true) and Arguments(false). The actual existing LargeSource 219259/async control completes and joins its exact-limit, one-over and healthy children before the fault is armed. This is a native artifact control, not a performance cell; the original six length/writer cases and original process cancellation/inclusion contracts are unchanged.
+
+Only the exact owned fixture root changes from0700 to0500. Its existing native sealed0400 healthy capture then rejects actual FileAccess.Write with UnauthorizedAccessException; the retained case marks the original fixture and rethrows the same initiating exception. Successful body disposal must independently surface its real directory-deletion UnauthorizedAccessException. Both cases require an actual external recursive-delete refusal and complete original fixture bytes/modes equality before finally restoring0700 and joining deletion of that exact root. Permission-bypass environments must fail the refusal assertion, never skip, normalize or synthesize a fault. Unexpected pre-fault native operation failures remain initiating errors; restoration/deletion failures follow them in the existing ordered observer ledger.
+
+```mermaid
+flowchart LR
+  Native[Original joined stream children] --> Fault[Only owned root mode0500]
+  Fault --> Body[Actual sealed file write refusal]
+  Fault --> Disposal[Actual cleanup-only deletion refusal]
+  Body --> Retained[Same exception and original files retained]
+  Disposal --> Retained
+  Retained --> Proof[Actual external deletion refuses]
+  Proof --> Cleanup[Restore0700 and join exact owned cleanup]
+```
+
+The exact baseline inventory consists only of complete.bin/complete.pid, one-over.bin/one-over.pid and healthy.bin/healthy.pid, as produced by the original LargeSource. Capture refuses any other entry, directory or symlink and requires nonempty healthy capture data before arming the fault.
+
+Joined source and two declared arguments do not close the existing AC002 gate. Actual compiler and both original Linux native comparison executions with fault evidence remain OPEN; no local execution or effective-UID assumption qualifies them.

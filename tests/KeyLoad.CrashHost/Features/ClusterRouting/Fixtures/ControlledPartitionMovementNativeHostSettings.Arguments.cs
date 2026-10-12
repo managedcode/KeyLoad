@@ -6,7 +6,8 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal sealed partial class ControlledPartitionMovementNativeHostSettings
 {
-    private const string NodeArgumentPrefix = "--KeyLoad:";
+    private const string ConfigurationArgumentPrefix = "--";
+    private const string NodeArgumentPrefix = ConfigurationArgumentPrefix + "KeyLoad:";
     private const string UrlArgumentPrefix = "--urls=";
     private const string KeySeparator = ":";
     private const string Assignment = "=";
@@ -32,7 +33,8 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         Set(nameof(NodeOptions.SiloPort), silos[index].Port.ToString(CultureInfo.InvariantCulture));
         Set(nameof(NodeOptions.AllowLoopbackHttp), Enabled);
         Set(nameof(NodeOptions.AllowPrivateNetworkHttp), Enabled);
-        Set(PartitionMovementExecutionOptions.SectionName + KeySeparator + nameof(PartitionMovementExecutionOptions.Enabled), Enabled);
+        arguments.Add(ConfigurationArgumentPrefix + PartitionMovementExecutionOptions.SectionName + KeySeparator
+            + nameof(PartitionMovementExecutionOptions.Enabled) + Assignment + Enabled);
         var trust = nameof(NodeOptions.PhysicalGroupTrust) + KeySeparator;
         Set(trust + nameof(PhysicalGroupTrustOptions.Role),
             (control ? PhysicalGroupTrustRole.Control : PhysicalGroupTrustRole.Destination).ToString());

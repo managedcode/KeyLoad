@@ -25,7 +25,12 @@ internal static class OrleansNativePeerServices
             { builder.Services.AddSingleton(purposeObserver); }
         }
         if (sealedObserver is not null)
-        { builder.Services.AddSingleton(sealedObserver); }
+        {
+            builder.Services.AddSingleton(sealedObserver);
+            if (sealedObserver is IGrainRequestPurposeObserver purposeObservation
+                && !builder.Services.Any(registration => registration.ServiceType == typeof(IGrainRequestPurposeObserver)))
+            { builder.Services.AddSingleton(purposeObservation); }
+        }
     }
 
     internal static void RegisterReplicaDiscovery(IServiceCollection services)

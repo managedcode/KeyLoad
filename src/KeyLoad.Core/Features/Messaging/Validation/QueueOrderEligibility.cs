@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
         var headBody = StoredMessageBody.Read(view, QueueKey(MessageBodySpace, lane, head.Id))
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
-        if (RequireQueueOrderingKey(headBody.Body) != orderingKey
+        if (headBody.Body.Id != head.Id || RequireQueueOrderingKey(headBody.Body) != orderingKey
             || head.State is not (MessageState.Ready or MessageState.Scheduled or MessageState.Leased
                 or MessageState.PendingDeadLetter or MessageState.DeadLettered)
             || policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue

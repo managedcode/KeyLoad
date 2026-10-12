@@ -57,7 +57,7 @@ function Invoke-WorkflowDiscovery([string] $Root, [string] $Evidence, [object] $
     $censusPath = Join-Path $directory 'native-list.json'
     Write-WorkflowOriginal $censusPath ([string] $original.stdout)
     Write-WorkflowOriginal (Join-Path $directory 'native-list.stderr.txt') ([string] $original.stderr)
-    Write-WorkflowOriginal (Join-Path $directory 'native-process.json') (ConvertTo-Json ([ordered]@{ suite = $Suite; groupId = $groupId; arguments = $arguments; timeoutSeconds = 1800; settlementSeconds = 30; nativeResult = $original }) -Depth 12)
+    Write-WorkflowOriginal (Join-Path $directory 'native-process.json') (ConvertTo-Json ([ordered]@{ suite = $Suite; groupId = $groupId; arguments = $arguments; timeoutSeconds = 1800; settlementSeconds = 30; nativeResult = (ConvertTo-FcCoverageProcessEvidence $original) }) -Depth 12)
     $after = Get-WorkflowNativeObservation $Root
     Write-WorkflowOriginal (Join-Path $directory 'native-image-after.json') (ConvertTo-Json $after -Depth 32)
     if ((ConvertTo-Json $before -Depth 32 -Compress) -cne (ConvertTo-Json $after -Depth 32 -Compress) -or

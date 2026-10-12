@@ -167,10 +167,14 @@
       2
     ],
     "q2Profile": "Q2.InnerJoin.v1",
-    "q2Scope": "Explicit projection, one same-partition INNER equijoin from a Text column to the second typed collection's nonnullable Text primary key; left primary-key ordinal ascending order, explicit full-scan opt-in and bounded LIMIT",
-    "sourceStage": "guarded Q2 source joined; local owning normal/scalar606/606pass with exact native source/DLL/PDB binding; current public RF3/Linux qualification pending",
+    "q2Profiles": ["Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1"],
+    "q2Scope": "Explicit source projection; one same-partition typed Text-primary-key INNER JOIN with declared top-level left predicates, or QUEUE_MESSAGES/EVENTS payload.to canonical reference JOIN to one typed target. Left ordinal primary-key/message-id or event revision order, explicit full-scan consent, bounded LIMIT and one authorized native read cut",
+    "sourceStage": "Current source contains the four finite Q2 profiles; current-source public RF3/Linux and complete SQL/client qualification remain pending. The preserved normal/scalar606 receipts below are immutable historical development evidence, not current-source qualification",
     "q2Unsupported": [
-      "WHERE/cursor",
+      "right-source WHERE predicates",
+      "nested or metadata predicates on typed left tables",
+      "arbitrary model sources/reference paths",
+      "cursor",
       "self or multiple joins",
       "outer/cross joins",
       "non-primary-key right key",

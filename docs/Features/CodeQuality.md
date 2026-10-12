@@ -1510,6 +1510,29 @@ input, and publish no successful merge output or receipt. Its original parent
 observes that native failure and retains Aspire/TUnit ownership of tree cleanup;
 an unsettled process is never labelled joined or converted into coverage proof.
 
+
+TASK-CQ-NATIVE-PROCESS-EVIDENCE-046 retains REQ-CQ-009 and AC-CQ-046 under
+the original-child settlement contract. Keep the original in-memory Exception
+objects for existing native aggregate callers; evidence JSON exports only the
+unchanged exitCode/stdout/stderr/exitJoined/outputJoined/errorJoined/disposed
+and the closed primitive failure array exceptionType/hResult/text, where text
+is the original Exception.ToString(). Never serialize the live exception graph,
+replace its subtype or identity, omit a failure, increase a limit or report an
+unsettled owner as joined.
+
+AC-CQ-046 process-evidence control: NativeProcessEvidenceWholeFlowTests.
+AcCq046ActualFailureProjectionPreservesOriginalExceptionsThenHealthyChildAndFullManifestSettle
+must execute the actual canonical native process helper on a genuinely missing
+executable and a real failed child, preserve original exception references,
+subtypes, HResult and complete text plus independently literal exit/stdout/stderr,
+serialize and parse the actual closed export within the existing outer native
+operation budget, then join a healthy child through the same owner. Continue the
+existing full ProductionSourceManifestScenario prepare/admission/tamper/exact
+restoration/create-only/healthy operation with its original readers, exit,
+disposal and owned-root cleanup. Classify this as requiredToolingControl, never
+a product functional-coverage contributor. Native source alone is not runtime
+acceptance; exact-source Linux and existing coverage/recovery/RF3 gates remain.
+
 TASK-CQ-ORIGINAL-SETTLEMENT-008 retains REQ-CQ-009 and AC-CQ-045/047. The
 native R72 cancellation/output workflows passed3/3, but source review found
 reset cleanup timers, a second original-task capture and an unlimited exit poll.

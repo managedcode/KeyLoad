@@ -900,3 +900,36 @@ flowchart LR
   Destination --> Join
   Join --> Cleanup[Validate and delete six owned roots]
 ```
+
+
+## Exact local diagnostic producer enrollment
+
+REQ-CRS-LOCAL-ENROLLMENT-001 → AC-CRS-LOCAL-ENROLLMENT-001: a local-development image with both remote-document and remote-query selectors and a request probe must not enroll six producers through a generic branch. It requires the exact existing validated NativeDiscoveryOmission or EventVectorReservedProbe selection. Removing a selection refuses with the original membership-invalid detail before owned-file mutation. False/foreign/nested settings keep their existing fixed profile refusal, and restoring the original owned profile admits exactly six members. This is test-profile admission, not public capability or runtime authority.
+
+Canonical owner: AppHost ClusterRouting Helpers/TwoRf3QueryProbe.Create; existing native option validators and RequestCqrsProbeProfile.ReadDiagnosticSix retain all file/privacy/bounds checks. Automated mapping: EventVectorReservedLocalProfileTests.ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile and the original NativeCapabilityLocalProfileTests local-profile declaration (Root/A owns its exact native selector mapping). Preserve no-probe, exact diagnostic selections, no-remote registered probe enrollment and authenticated image selection, plus original unchanged-file and healthy-profile continuation. No selectors, limits, images, timeouts, provisioning, arming or resource lifecycle are added.
+
+```mermaid
+flowchart LR
+  Request[Original local diagnostic request] --> Selection{Exact validated profile selected}
+  Selection -->|yes| Enrollment[Original bounded six-producer enrollment]
+  Selection -->|absent or foreign| Refusal[Original profile refusal before file changes]
+  Refusal --> Repair[Restore same owned profile]
+  Repair --> Enrollment
+```
+
+Original R27 local development failure is retained as a missing expected enrollment refusal; it is not a signature/storage/movement issuer failure. Source-only native check does not qualify runtime or Linux RF3. Exact-source compiler and original complete TUnit operation execution remain OPEN until Main-owned evidence.
+
+## Native borrowed purpose-observer registration
+
+REQ-SILO-PURPOSE-REGISTRATION-001 / AC-SILO-PURPOSE-REGISTRATION-001: actual OrleansNativePeerServices.RegisterSiloOwners borrows the SAME sealed-operation observer as IGrainRequestPurposeObserver only when it implements that existing interface and no explicit purpose-observer descriptor is registered. An original explicit observer wins when both owners are supplied; an unrelated sealed observer does not enroll a purpose callback. Registration invokes no callback, selects no borrow and grants no authority. Existing ownership, startup, native request validation and joined shutdown remain unchanged.
+
+Automated mapping: KeyLoad.UnitTests.Features.ClusterRouting.SiloOwnerPurposeRegistrationTests.ActualSiloRegistrationPreservesBorrowedAndExplicitPurposeOwnerIdentity, Arguments(0), Arguments(1), Arguments(2), verifies real ServiceProvider reference identities and exact interface-descriptor counts after actual registration. It reuses existing functional observer owners. These are three DI unit cases, not authenticated producer, scope refusal, lifetime, RF3 or Docker qualification. Compiler/runtime execution remains OPEN. The privacy-safe original Move failure ledger is mapped separately in Search/Bm25PortableMovement.md REQ/AC-BM25-MOVE-006 and does not retain arbitrary purpose text or claim independently retained signed terminal replies.
+
+```mermaid
+flowchart LR
+    Owners[Original explicit and borrowed owners] --> Register[Actual silo registration]
+    Register --> Existing{Purpose descriptor exists?}
+    Existing -->|yes| Explicit[Keep exact explicit owner]
+    Existing -->|no and dual interface| Borrowed[Register same borrowed object]
+    Existing -->|no and unrelated| Absent[No purpose callback]
+```

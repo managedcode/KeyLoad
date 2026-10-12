@@ -112,6 +112,7 @@ internal static class SqlEventReferenceJoinCold
                     await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                     await Assert.That(reopened.Position).IsEqualTo(position);
                     var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
+                    await ModelJoinAliasAdmissionFlow.RunAsync(engine, reopened, database.Partition, events: true, repaired: true);
                     await SqlEventReferenceJoinAssertions.PageAsync(engine.Execute("root",
                         SqlEventReferenceJoinFixture.Request(database.Partition)), position, repaired: true);
                     await SqlEventReferenceJoinAssertions.PageAsync(engine.Execute(SqlEventReferenceJoinFixture.Reader,

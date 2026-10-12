@@ -19,3 +19,5 @@ flowchart LR
 ```
 
 Source, compiler, native test execution, Linux, process recovery and RF3 gates remain separately OPEN until authentic Main-owned evidence is retained. No quota is raised; no fabricated head or direct canonical transaction is used.
+
+- REQ-BM25-QUOTA004 → AC-BM25-QUOTA004: known capacity-minus-one fresh capture refusal also preserves exact complete native retained ReplicaEntry values for each of the seven actual admitted publication command IDs. Bm25ConfiguredQuotaRetainedEntries bounds this set by the existing HeadCount, bounds original LastIndex by existing MaxScanRecords and charges serialized observations to original read work. This supplements canonical image/position/applied and journal CUT; it does not inventory all seed/membership entries or raw replica storage bytes. The before/after original native entry comparisons include Index, Term and the full original ReplicatedOperation with NativePayload.

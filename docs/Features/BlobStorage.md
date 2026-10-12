@@ -357,3 +357,23 @@ Native reference audit found exactly the two existing case calls for the interna
 ### Ordered Blob whole-flow union review
 
 The R58 → R59 → R60 source union retains every original method and fault argument and all three original native chains. Native BlobMetadata.Length and BlobUploadInfo.StoredBytes are Int64; the unchanged independently expected payload length is explicitly widened to Int64 in the rejected-command oracle, including its original retained assertion. This changes no numeric value, quota or bound and does not compare an observed value against itself. Failed StoredOutcome rows remain separate from domain no-effects; both cold reopens preserve the complete original outcome, native row image and cut. Fresh compiler/native discovery/whole-case runtime remain OPEN; no new UID or PASS is manufactured.
+
+## TASK-BLOB-PUBLISHED-INTEGRITY-001 — native published record refusal and repair
+
+REQ-BLOB-PUBLISHED-INTEGRITY-001 refines REQ-BLOB-002/004/007: a genuine two-part publication must fail closed when its actual head or complete state is a scoped malformed committed record. This is a controlled native storage fault, not an authenticated RPC corruption or RF3 claim.
+
+AC-BLOB-PUBLISHED-INTEGRITY-001 maps to BlobPublishedRecordIntegrityTests.AcBlobPublishedRecordsRefuseThenExactRepairSurvivesTwoColdOwners Arguments0..3: unsupported head format, inconsistent head part count, unsupported complete-state format, and mismatched complete-state integrity hash. Original successful upload receipts, independently expected multipart bytes and full native image precede the fault. Warm and first same-root cold reads repeat exact FormatUnsupported/Corruption code and safe detail, including zero-length reads at the published end; each preserves the complete damaged image and applied position.
+
+AC-BLOB-PUBLISHED-INTEGRITY-002 requires exact original raw-row repair, complete original image equality at the actual repair cut, healthy first/last/cross-part/zero and boundary/cancellation reads, all original successful command/result replay, second same-root cold image/cut parity and literal byte continuation. Body and both store/fixture disposal failures retain their ordered original ledger. Existing scope, revision, quota, checksum and read limits remain unchanged.
+
+```mermaid
+flowchart LR
+  P[Actual multipart publication and receipts] --> F[Scoped committed head or state fault]
+  F --> W[Warm refusal and unchanged full image]
+  W --> C[Joined close and same-root cold refusal]
+  C --> R[Exact original raw-row repair]
+  R --> H[Healthy ranges and original command replay]
+  H --> S[Second joined cold full image and byte parity]
+```
+
+Source joined; current-image execution, compiler, native runtime, Linux and public Aspire SDK/MCP qualification remain OPEN. This additional native store case preserves all existing BlobRangeIntegrity whole cases.

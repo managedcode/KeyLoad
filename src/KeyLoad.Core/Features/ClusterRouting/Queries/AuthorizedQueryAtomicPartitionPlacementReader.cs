@@ -35,6 +35,8 @@ public sealed partial class DatabaseEngine
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
+        if (row is not null)
+        { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
         var owner = row is null ? catalog.DefaultShard
             : ResolveRegisteredPlacementOwner(view, catalog.DefaultShard, row.PhysicalShardId,
                 ErrorCode.Corruption, grant);

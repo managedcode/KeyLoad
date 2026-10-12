@@ -29,6 +29,9 @@ Status: source-present baseline documented; complete product and GitHub qualific
 
 ## Purpose and actors
 
+The [native late-patch atomicity and retained replay control](DocumentStorage/NativePatchAtomicityReplay.md)
+extends REQ-DSTORE-001/002/007 with original native replica admission and two joined same-owner cold reopens.
+
 DocumentStorage owns tenant/database/domain-scoped JSON documents, revisions, mutations, scalar index maintenance, and authorized reads. Actors are database clients, the server command boundary, and internal query operators. Concrete current operations are `DatabaseEngine.GetDocument` and mutation application for `PutDocument`, `PatchDocument`, and `DeleteDocument`; these flow through the server/replicated command path. This document describes the observed Core contract and its target slice, not an unqualified production guarantee.
 
 ## Canonical slice map and boundaries

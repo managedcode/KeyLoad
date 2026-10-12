@@ -18,4 +18,4 @@ flowchart LR
   E --> F
 ```
 
-Fresh capture count isolation remains OPEN: capture metadata and family reads share the request scan budget. These cases make no full-cut no-effect claim for atomic quota failure. Complete canonical inspection has original source bounds distinct from lower operation count; complete raw replica journal inventory remains OPEN. Compiler, native execution, Linux and RF3 gates remain OPEN until Main-owned authentic evidence.
+Fresh capture count isolation remains OPEN: capture metadata and family reads share the request scan budget. These cases make no full-cut no-effect claim for atomic quota failure. Complete canonical inspection has original source bounds distinct from lower operation count; complete raw replica journal inventory remains OPEN. Both arguments passed in the exact source-bound R27 local native run on 2026-10-12. Every later source image requires its own compilation/rerun; Linux and RF3 gates remain OPEN; an earlier local pass is not a result for a later source image.

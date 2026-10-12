@@ -29,3 +29,24 @@ flowchart LR
     Repair --> Release[Release and directly join original parent]
     Release --> Healthy[Exact destination bytes, receipt replay and healthy native Batch]
 ```
+
+## Bounded original native scope evidence
+
+REQ-BM25-MOVE-006 / AC-BM25-MOVE-006: the existing original six-host sealed observer may also implement the existing native IGrainRequestPurposeObserver. Silo DI borrows that SAME object; BeforeSign returns null and never rewrites purpose, payload, expiry, context or authority. Each actual node retains at most its last original issuance and first MAC-verified scope rejection, with only node index, fixed UnclassifiedPurpose label and integer original-purpose length, capability kind, operation IDs, incarnation, expiry, actual receiving cut and domain error. No principal, signing key, native payload or credential is copied or printed.
+
+After the original Move task and all original cleanup join, failure output includes this bounded evidence and the initiating KeyLoadException Code/safe Message. The existing Executor maps actual terminal reply Error/SafeDetail to these values; this is surfaced terminal-failure evidence, NOT an independently retained signed reply, RPC stage, or inferred child rejection when no MAC-verified rejection callback occurred. Original exceptions stay in the same ordered failure ledger; output failure is secondary, and successful cases emit no diagnostic inventory. The case and all existing operation, full-image, receipt, authorization and cleanup assertions remain unchanged. Actual native rerun must identify the observed rejector; current R26 TRX has insufficient ErrorCode/stage provenance and does not prove BM25 caused Move failure.
+
+```mermaid
+flowchart LR
+    Original[Same native Move task] --> Issuance[Existing BeforeSign returns null]
+    Issuance --> Validation[Original MAC and scope validation]
+    Validation --> Rejected[Existing RejectedAfterMac first safe metadata]
+    Original --> Join[Original task and six owned shutdowns join]
+    Rejected --> Evidence[Bounded failure-only evidence]
+    Join --> Evidence
+    Evidence --> Failure[Original initiating failure ledger retained]
+```
+
+Privacy refinement: purpose text is neither retained nor printed. The ledger stores only a fixed UnclassifiedPurpose label and its original integer length; equal lengths do not establish equal protocols. Scope/rejection record formatting cannot emit original purpose content, principal, credentials, payload or signing material. This deliberately lower-observability metadata is not proof of a matched purpose or exact rejector.
+
+Explicit purpose-observer precedence: the diagnostic borrowed interface is registered only when the silo service collection contains no existing IGrainRequestPurposeObserver descriptor. An original explicit omission observer remains selected and is not combined, replaced or silently bypassed. The native Build signature allows both owners, so mutual exclusion is not assumed.

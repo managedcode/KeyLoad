@@ -31,9 +31,10 @@ internal static class QueueTerminalInspectionWholeFlow
             state.Lane.Queue, QueueLifecycleConditionOperations.Source);
         var body = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         await QueueTerminalInspectionAssertions.OriginalBodyAsync(body, terminalState, state);
-        await TransitionAsync(fixture.Database, state, terminalState);
+        await TransitionAsync(fixture.Database, fixture.Store, state, terminalState);
         var expected = QueueTerminalInspectionAssertions.Expected(terminalState, state);
         await QueueTerminalInspectionAssertions.TerminalAsync(fixture.Database, fixture.Store, state, expected, false);
+        await QueueTerminalInspectionAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         var injected = foreignBody
             ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(body) with { Id = "foreign-terminal-body" })
@@ -57,6 +58,7 @@ internal static class QueueTerminalInspectionWholeFlow
                 await QueueTerminalInspectionAssertions.TerminalAsync(owner, cold, state, expected, false);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await HealthyAsync(owner, state);
+                await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await QueueTerminalInspectionAssertions.TerminalAsync(owner, cold, state, expected, true);
                 healthy = QueueLifecycleConditionAssertions.Capture(cold);
             }, failures);
@@ -96,7 +98,8 @@ internal static class QueueTerminalInspectionWholeFlow
         return state;
     }
 
-    private static async Task TransitionAsync(DatabaseEngine owner, QueueLifecycleTestState state, MessageState terminalState)
+    private static async Task TransitionAsync(DatabaseEngine owner, ZoneTreeStore store,
+        QueueLifecycleTestState state, MessageState terminalState)
     {
         if (terminalState == MessageState.Cancelled)
         {
@@ -112,6 +115,7 @@ internal static class QueueTerminalInspectionWholeFlow
         { await Assert.That(resultReceived.Deliveries).IsEmpty(); return; }
         var delivery = await Assert.That(resultReceived.Deliveries).HasSingleItem();
         await QueueTerminalInspectionAssertions.DeliveryAsync(delivery, QueueLifecycleConditionOperations.Source, state.Time);
+        await QueueTerminalInspectionAssertions.ReplayAsync(owner, store, state, QueueLifecycleConditionOperations.Source);
         QueueLifecycleOperations.Complete(owner, state, delivery, DeliveryAction.Ack).Get<CommitReceipt>();
     }
 

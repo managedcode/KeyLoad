@@ -17,7 +17,7 @@ internal static class QueueLifecycleTrial
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueLifecycleImage.SameAsync(reopened, state.Lane, initial);
-        await QueueLifecycleOperations.ReplayAsync(database, state);
+        await QueueLifecycleOperations.ReplayAsync(database, state, QueueLifecycleTestProtocol.Held);
         await QueueLifecycleContinuation.RunAsync(database, reopened, state, token);
         var terminal = QueueLifecycleImage.Capture(reopened, state.Lane);
         reopened.Dispose();

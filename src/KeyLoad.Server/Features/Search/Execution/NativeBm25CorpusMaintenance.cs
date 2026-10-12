@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
+using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using Microsoft.Extensions.Options;
@@ -9,17 +10,20 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeBm25CorpusMaintenance
 {
-    internal static Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
+    internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
         string administratorId, string subjectId, SearchRequest query, Guid commandId,
         Guid? expectedGeneration, DateTimeOffset originalExpiry, ReadExecutionBudget work,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         work.Check();
+        work.ConstrainLifetime(originalExpiry);
+        await ReadCurrentViewAsync(partition, originalExpiry, work, token).ConfigureAwait(false);
+        work.Check();
         var operation = Bm25CorpusCapture.Create(partition.Database, administratorId, subjectId,
             query, commandId, expectedGeneration, originalExpiry, work,
             node.RuntimeServices.GetRequiredService<IOptions<QueryExecutionOptions>>());
-        return PublishAsync(node, partition, operation, originalExpiry, work, token);
+        return await PublishAsync(node, partition, operation, originalExpiry, work, token).ConfigureAwait(false);
     }
 
     internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
@@ -40,5 +44,31 @@ internal static class NativeBm25CorpusMaintenance
         var signed = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
         return await NativeBm25CorpusCall.ExecuteAsync(node, partition, principal, requestId,
             actual.Id, signed, work, token).ConfigureAwait(false);
+    }
+
+    private static async Task ReadCurrentViewAsync(PartitionHost partition, DateTimeOffset originalExpiry,
+        ReadExecutionBudget work, CancellationToken token)
+    {
+        var clock = partition.Database.EvaluationClock;
+        var remaining = originalExpiry - clock.GetUtcNow();
+        var lifetime = work.RemainingLifetime;
+        var bounded = remaining < lifetime ? remaining : lifetime;
+        if (bounded <= TimeSpan.Zero)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed); }
+        var failures = new List<Exception>();
+        try
+        {
+            using var deadline = new CancellationTokenSource(bounded, clock);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(token,
+                work.Cancellation, deadline.Token);
+            await ServerFailureObserver.ObserveAsync(() =>
+                partition.Coordinator.ReadBarrierAsync(caller.Token), failures).ConfigureAwait(false);
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        { failures.Add(failure); }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        { failures.Add(failure); }
+        ServerFailureObserver.ThrowIfAny(failures);
+        work.Check();
     }
 }

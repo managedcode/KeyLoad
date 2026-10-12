@@ -141,6 +141,33 @@ internal sealed class DatabaseCompositionSafetyTests
         await Assert.That(StoredEdge(db)).IsNotNull();
     }
 
+    [Test]
+    public async Task AcComp002RetainedQueueAndEndpointIdentityRefuseAtomicallyThenRepairAcrossTwoColdOwners()
+    {
+        foreach (var from in new[] { true, false })
+        {
+            foreach (var component in new[] { 0, 1, 2 })
+            {
+                var failures = new List<Exception>();
+                await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    using var db = NewDatabase(withVertices: false);
+                    await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                        () => QueueGraphIdentityFlow.RunAsync(db, from, component), failures);
+                }, failures);
+                global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+            }
+        }
+        var readyFailures = new List<Exception>();
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var readyDb = NewDatabase(withVertices: false);
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                () => QueueGraphIdentityFlow.RunReadyAsync(readyDb), readyFailures);
+        }, readyFailures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(readyFailures);
+    }
+
     private static TestDatabase NewDatabase(bool protectedQueue = false, bool withVertices = true)
     {
         var db = new TestDatabase();

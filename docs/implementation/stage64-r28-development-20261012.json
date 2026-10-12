@@ -1,0 +1,90 @@
+{
+  "stage": "Stage64 R28 immutable local development checkpoint",
+  "parentCommit": "db14ebb4340bcde936c6c63fab92a70eca89b805",
+  "originalPlan": {
+    "done": 19,
+    "inProgress": 85,
+    "total": 104
+  },
+  "additionalTask": "KL-105",
+  "qualification": "LOCAL_DEVELOPMENT_ONLY",
+  "coverage": "UNMEASURED",
+  "messaging": {
+    "executed": 72,
+    "passed": 72,
+    "failed": 0,
+    "skippedOrOther": 0,
+    "configuredMaximumParallelTests": 50,
+    "actualPeakOverlappingTrxIntervals": 21,
+    "nativeJoins": {
+      "exitJoined": true,
+      "outputJoined": true,
+      "errorJoined": true,
+      "disposed": true
+    },
+    "sourceImageDrift": false,
+    "originalBoundSummary": {
+      "path": "TestResults/stage61-native-join/current-stage64-r28-messaging-runtime-completion.original-bound.json",
+      "sha256": "133ca2a7a4293a4d87d143ba82699951d25f2ce47c25aea9886392a0ea2d4ebc"
+    }
+  },
+  "cluster": {
+    "executed": 26,
+    "passed": 24,
+    "failed": 2,
+    "skippedOrOther": 0,
+    "configuredMaximumParallelTests": 50,
+    "actualPeakOverlappingTrxIntervals": 18,
+    "nativeJoins": {
+      "exitJoined": true,
+      "outputJoined": true,
+      "errorJoined": true,
+      "disposed": true
+    },
+    "sourceImageDrift": [],
+    "originalBoundSummary": {
+      "path": "TestResults/stage61-native-join/current-stage64-r28-cluster-runtime-completion.original-bound.json",
+      "sha256": "092dd42108e3a8bb7361116f94307ce3ee4e978588d09e583fb671060d7f390d"
+    }
+  },
+  "releaseBuild": {
+    "mode": "build",
+    "startedAt": "2026-10-12T18:30:06.685062+00:00",
+    "completedAt": "2026-10-12T18:33:22.834614+00:00",
+    "elapsedSeconds": 196.14799208403565,
+    "pid": 84362,
+    "exitCode": 0,
+    "processJoined": true,
+    "sourceCount": 9644,
+    "sourceDrift": [],
+    "logSha256": "14bc9b97dcc1f8c8913c2e9650e24c83f12c562020ecf4b6e41a7e456f0d05a6",
+    "errors": 0,
+    "warnings": 0
+  },
+  "formatterVerification": {
+    "mode": "verify",
+    "startedAt": "2026-10-12T18:27:14.946857+00:00",
+    "completedAt": "2026-10-12T18:30:05.812278+00:00",
+    "elapsedSeconds": 170.86401125008706,
+    "pid": 83729,
+    "exitCode": 0,
+    "processJoined": true,
+    "sourceCount": 9644,
+    "sourceDrift": [],
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sql": {
+    "execution": "NOT_EXECUTED",
+    "discovery": "FAILED_CAPTURE_PARENT_TERMINATED",
+    "parentExitCode": 143,
+    "originalFailureSubtype": "UNRETAINED_UNKNOWN",
+    "settlementBefore": "TestResults/stage61-native-join/current-stage64-r28-sql-census/scoped-settlement-before.original.json",
+    "settlementAfter": "TestResults/stage61-native-join/current-stage64-r28-sql-census/scoped-settlement-after.original.json"
+  },
+  "remainingFailures": [
+    "Placement exact assertion compares Int32 and Int64; same-value typed repair is new unexecuted source.",
+    "BM25 original private maintenance conflicts on current corpus/generation before movement; bounded application read barrier is new unexecuted source.",
+    "Unfiltered native inventory discovery has seven DataGenerationError nodes; focused original-image JSON preserves genuine13 constructor instances, underlying full-context cause remains under investigation."
+  ],
+  "successor": "R29 complete independent source batches remain unqualified until fresh build and original native execution; R28 originals are never relabelled."
+}

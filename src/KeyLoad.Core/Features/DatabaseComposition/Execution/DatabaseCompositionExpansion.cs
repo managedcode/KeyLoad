@@ -27,10 +27,10 @@ public sealed partial class DatabaseEngine
 
         AuthorizeComposition(authorityView, principal, partition, command);
         var lane = new QueueLaneRef(partition, command.Queue);
-        var ids = new List<string>();
-        var result = budget.VisitRange(tx, QueueKey(ReadyQueueSpace, lane), command.MaxMessages, (_, value) =>
+        var ids = new List<(string Id, byte[] ReadyKey)>();
+        var result = budget.VisitRange(tx, QueueKey(ReadyQueueSpace, lane), command.MaxMessages, (key, value) =>
         {
-            ids.Add(NativeSerialization.Deserialize<string>(value));
+            ids.Add((NativeSerialization.Deserialize<string>(value), key.ToArray()));
             return true;
         });
         if (result.HasMore)
@@ -38,7 +38,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.BudgetExceeded, CompositionLimit);
         }
         var effects = new List<Mutation>(ids.Count);
-        foreach (var id in ids)
+        foreach (var (id, readyKey) in ids)
         {
             var metadata = budget.ReadRecord<MessageMetadata>(tx, QueueKey(MessageMetadataSpace, lane, id))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyMessage);
@@ -56,6 +56,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Corruption, MissingReadyMessage);
             }
+            RequireQueueReadyAuthority(lane, id, readyKey, metadata, body);
             var link = ReadLink(body.PayloadJson, partition);
             if (command.FromCollection is not null)
             {
@@ -64,8 +65,10 @@ public sealed partial class DatabaseEngine
             }
             else
             {
-                VisibleVertex(tx, principal, link.From, budget);
-                VisibleVertex(tx, principal, link.To, budget);
+                var from = VisibleVertex(tx, principal, link.From, budget);
+                var to = VisibleVertex(tx, principal, link.To, budget);
+                if (from.Reference != link.From || to.Reference != link.To)
+                { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
             }
             var edgeId = command.EdgeIdPrefix + id;
             JsonData.Identifier(edgeId);

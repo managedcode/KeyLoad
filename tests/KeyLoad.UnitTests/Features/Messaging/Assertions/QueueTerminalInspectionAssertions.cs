@@ -43,16 +43,20 @@ internal static class QueueTerminalInspectionAssertions
         }
     }
 
-    internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state)
+    internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state,
+        string? currentMessageId = null)
     {
         var before = QueueLifecycleConditionAssertions.Capture(store);
         foreach (var (operation, result) in state.Successes)
         {
-            var actual = owner.Apply(operation);
             if (operation.Kind == OperationKind.Receive)
-            { await NativeReplayResultAssertions.Same<ReceiveResult>(actual, result); }
+            {
+                var current = result.Get<ReceiveResult>().Deliveries.All(item => item.Id == currentMessageId);
+                await QueueReceiveReplayAssertions.SameAsync(store, state.Partition, operation, result, current,
+                    () => owner.Apply(operation));
+            }
             else
-            { await NativeReplayResultAssertions.Same<CommitReceipt>(actual, result); }
+            { await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result); }
             await QueueLifecycleConditionAssertions.Same(store, before);
         }
     }

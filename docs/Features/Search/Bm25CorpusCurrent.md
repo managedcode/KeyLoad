@@ -75,3 +75,15 @@ flowchart LR
 ```
 
 Root owns contract/doc integration and shared handoff. Distinct writers own private protocol/type relocation, native family delivery, and Core/Query publication/reuse. Main owns coherent build, native test discovery, original runtime reports, Git checkpoint and final delivery. Every criterion remains OPEN until its own original native evidence exists.
+
+## Native maintenance current local view
+
+REQ/AC-BM25-CURRENT-001/002 require the fresh Server maintenance query overload to join the existing node-local Coordinator.Application read barrier before reading the canonical corpus and its outbox/resource/placement dependencies. A public routed write receipt alone does not prove the selected local follower has applied that write. The barrier uses the smaller of remaining original expiry and existing work.RemainingLifetime with the actual database EvaluationClock. A genuine linked token carries original caller cancellation, work.Cancellation and that deadline into the same barrier; post-wait work.Check remains. Lexical CTS cleanup and actual barrier failures retain the ordered original failure ledger. Preserve original expiry, authorization and all first-run dependency/CAS refusals. Original pre-captured phase retry overload never recaptures, retries or mutates the retained phase.
+Existing Bm25PortableMovementTests.ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects is the genuine six-host original private maintenance invocation regression: acknowledged source workload -> maintenance local barrier -> phase45 complete authentic receipt/head bytes -> original move/no-effects controls/head ineligibility/read/healthy continuation. R28 observed Conflict before move supports the need to inspect this boundary but does not independently identify which dependency differed; runtime causal closure remains OPEN.
+```mermaid
+flowchart LR
+  A[Original routed seed ACK] --> B[Existing application barrier and local apply join]
+  B --> C[Same-view authorized corpus capture]
+  C --> D[Native signed publication]
+  D --> E[Unchanged dependency and generation CAS]
+```

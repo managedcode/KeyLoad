@@ -1,0 +1,77 @@
+using KeyLoad.Core;
+using KeyLoad.Storage;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal static class SubscriptionReceiveSlotAuthorityAssertions
+{
+    internal static async Task RefusalAsync(DatabaseEngine db, ZoneTreeStore store,
+        ReceiveSubscriptionRequest request, CancellationToken token)
+    {
+        var bytes = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeSerialization.Serialize(store.Identity);
+        for (var repeat = 0; repeat < 2; repeat++)
+        {
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => SubscriptionReceiveSlotAuthorityFlow.Apply(
+                db, OperationKind.ReceiveSubscription, request, request.RequestId, token));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
+            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
+                KeySpace.PartitionOutcome(request.Subscription.Source.Partition, "root", request.RequestId)))).IsNull();
+        }
+    }
+
+    internal static async Task ReplayEmptyAsync(DatabaseEngine db, ZoneTreeStore store,
+        ReceiveSubscriptionRequest request, OperationResult original, CancellationToken token)
+    {
+        var bytes = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeSerialization.Serialize(store.Identity);
+        var result = SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
+            request, request.RequestId, token);
+        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(result, original);
+        await Assert.That(NativeSerialization.Serialize(result).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+    }
+
+    internal static async Task SettledAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
+        ReceiveSubscriptionRequest request, OperationResult result, ReceiveSubscriptionRequest claimRequest,
+        OperationResult original, (SubscriptionDeliveryCommand Command, OperationResult Result)[] receipts,
+        CancellationToken token)
+    {
+        await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
+        await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
+        foreach (var receipt in receipts)
+        { await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, receipt.Command, receipt.Result, token); }
+        await ReplayEmptyAsync(db, store, request, result, token);
+        await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, claimRequest, original, token);
+    }
+
+    internal static async Task HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
+        CancellationToken token)
+    {
+        var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
+            [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
+        SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.Batch, publish, publish.CommandId, token).Get<CommitReceipt>();
+        var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 1);
+        var result = SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, token);
+        var delivery = await Assert.That(result.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
+        await Assert.That(delivery.Event.Position).IsEqualTo(4L);
+        await Assert.That(delivery.Event.Data).IsEqualTo(new EventData("event4", "Created", "{\"n\":4}"));
+        await Assert.That(delivery.Attempt).IsEqualTo(1);
+        await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
+        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+            SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, token), result);
+        var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
+        var receipt = SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token);
+        await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(receipt, ack, 4);
+        await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 4, 4, 4);
+        await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
+        await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(db, store, ack, receipt, token);
+        await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, result, token);
+    }
+}

@@ -90,7 +90,9 @@ public sealed partial class DatabaseEngine
         foreach (var reference in references)
         {
             ValidateCompositionReference(reference, partition);
-            VisibleVertex(view, principal, reference, budget);
+            var document = VisibleVertex(view, principal, reference, budget);
+            if (document.Reference != reference)
+            { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
         }
     }
 

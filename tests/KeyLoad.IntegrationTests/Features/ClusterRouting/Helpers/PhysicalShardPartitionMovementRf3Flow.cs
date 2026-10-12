@@ -39,6 +39,12 @@ internal static class PhysicalShardPartitionMovementRf3Flow
         await VerifyAsync(seeds, token);
         await PhysicalShardPartitionMovementRf3Cold.ReplayAsync(wave, seeds, original, terminals, token);
         await RejectChangedOriginalAsync(seeds, original, token);
+        await MergeAsync(wave, seeds, token).ConfigureAwait(false);
+    }
+
+    internal static async Task MergeAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed[] seeds,
+        CancellationToken token)
+    {
         var reverse = await ReverseAsync(seeds, token).ConfigureAwait(false);
         var merged = await ExecuteAsync(seeds, reverse.Requests, token).ConfigureAwait(false);
         for (var index = FirstEntry; index < seeds.Length; index++)

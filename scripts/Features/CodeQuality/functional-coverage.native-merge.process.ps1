@@ -216,6 +216,16 @@ function Invoke-FcCoverageProcess([string] $Executable, [string[]] $Arguments, [
         errorJoined = $state.errorJoined; disposed = $disposed }
 }
 
+function ConvertTo-FcCoverageProcessEvidence([Collections.IDictionary] $Result) {
+    $failures = @(foreach ($failure in $Result.failures) {
+        [ordered]@{ exceptionType = $failure.GetType().FullName
+            hResult = $failure.HResult; text = $failure.ToString() }
+    })
+    [ordered]@{ exitCode = $Result.exitCode; stdout = $Result.stdout; stderr = $Result.stderr
+        failures = $failures; exitJoined = $Result.exitJoined; outputJoined = $Result.outputJoined
+        errorJoined = $Result.errorJoined; disposed = $Result.disposed }
+}
+
 function Invoke-FcCoverageMerge([string] $ToolRoot, [string[]] $Inputs, [string] $Output,
     [string] $LogPath, [string] $Format, [int] $TimeoutSeconds, [int] $MaximumOutputCharacters, [long] $MaximumOutputBytes) {
     if ([IO.File]::Exists($Output) -or [IO.Directory]::Exists($Output)) { throw 'A native coverage output path already exists.' }

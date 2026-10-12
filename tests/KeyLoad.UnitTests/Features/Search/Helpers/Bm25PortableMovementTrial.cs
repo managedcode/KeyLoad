@@ -9,6 +9,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class Bm25PortableMovementTrial
 {
     private readonly Bm25PortableMovementBorrow borrow = new();
+    private readonly List<Bm25PortableMovementPurposeEvidence> purposeEvidence = [];
     private ControlledPartitionMovementNativeHosts? owners;
     private Task<KeyLoad.Orleans.GrainOperationReply>? original;
 
@@ -18,12 +19,19 @@ internal sealed class Bm25PortableMovementTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => trial.ExecuteAsync(token), failures);
         await trial.CloseAsync(failures);
+        if (failures.Count != 0)
+        { ServerFailureObserver.Observe(() => trial.WriteEvidence(failures[0]), failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private async Task ExecuteAsync(CancellationToken token)
     {
-        owners = await ControlledPartitionMovementNativeHosts.CreateAsync(_ => borrow, token);
+        owners = await ControlledPartitionMovementNativeHosts.CreateAsync(index =>
+        {
+            var evidence = new Bm25PortableMovementPurposeEvidence(index, borrow);
+            purposeEvidence.Add(evidence);
+            return evidence;
+        }, token);
         var published = await Bm25PortableMovementSeed.CreateAsync(owners, token);
         var seededAt = ControlledPartitionMovementNativeEntryReader.Read(owners.Source,
             ControlledPartitionMovementCorpus.SeedId, token).Operation!.EvaluatedAt;
@@ -54,6 +62,12 @@ internal sealed class Bm25PortableMovementTrial
         await ControlledPartitionMovementNativeModels.ReadAsync(owners.Target, seededAt, token);
         await Bm25PortableMovementAssertions.HistoricalAsync(owners, published.Head, published.Bytes, token);
         await Bm25PortableMovementAssertions.HealthyAsync(owners.Target, token);
+    }
+
+    private void WriteEvidence(Exception primary)
+    {
+        foreach (var evidence in purposeEvidence)
+        { evidence.Write(Console.Error, primary); }
     }
 
     private async Task CloseAsync(List<Exception> failures)

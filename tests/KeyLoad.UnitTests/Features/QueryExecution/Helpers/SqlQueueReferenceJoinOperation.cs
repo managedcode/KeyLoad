@@ -11,6 +11,7 @@ internal static class SqlQueueReferenceJoinOperation
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
+        await ModelJoinAliasAdmissionFlow.RunAsync(engine, database.Store, database.Partition, events: false, repaired: repaired);
         var request = SqlQueueReferenceJoinFixture.Request(database.Partition);
         var page = engine.Execute("root", request);
         await SqlQueueReferenceJoinAssertions.PageAsync(page, position, repaired: repaired);

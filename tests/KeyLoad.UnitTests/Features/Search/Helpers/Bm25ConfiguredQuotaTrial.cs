@@ -33,10 +33,13 @@ internal static class Bm25ConfiguredQuotaTrial
         if (oneByteUnder)
         {
             var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var admitted = originals[..^1];
+            var retained = Bm25ConfiguredQuotaRetainedEntries.Read(flow.Database, admitted);
             var error = Assert.ThrowsExactly<KeyLoadException>(() => flow.Capture(originals.Length - 1));
             await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(error.Message).IsEqualTo(Bm25CorpusProtocol.Capacity);
             await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await retained.RequireAsync(flow.Database, admitted);
             await RequireReplacementAsync(flow, originals[0], capacity, false);
             return;
         }
