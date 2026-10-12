@@ -53,7 +53,8 @@ internal static class ConnectionAwaitedSettlementFlow
         catch (Exception error) { primary = error; throw; }
         finally
         {
-            phase.Release.TrySetResult(); callback.Release.TrySetResult();
+            phase.Release.TrySetResult();
+            callback.Release.TrySetResult();
             await ConnectionAwaitedSettlementCalls.JoinOriginalAsync(original, primary, allowCancellation: true);
         }
     }

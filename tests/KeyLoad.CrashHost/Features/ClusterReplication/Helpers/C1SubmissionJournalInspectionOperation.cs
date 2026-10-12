@@ -48,11 +48,13 @@ internal static class C1SubmissionJournalInspectionOperation
                 cut.NodeId, cut.Incarnation, openedCanonical.Position, cut.Position,
                 cut.NativeHardState, cut.NativeEntry);
         }, failures);
-        if (failures.Count > NoFailures) { evidence?.Capture(failures[FirstFailureIndex]); }
+        if (failures.Count > NoFailures)
+        { evidence?.Capture(failures[FirstFailureIndex]); }
         evidence?.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         ServerFailureObserver.Observe(() => replica?.Dispose(), failures);
         ServerFailureObserver.Observe(() => canonical?.Dispose(), failures);
-        if (failures.Count > NoFailures) { evidence?.Capture(failures[FirstFailureIndex]); }
+        if (failures.Count > NoFailures)
+        { evidence?.Capture(failures[FirstFailureIndex]); }
         ServerFailureObserver.ThrowIfAny(failures);
         return receipt ?? throw C1SubmissionJournalInspectionValidation.Invalid();
     }

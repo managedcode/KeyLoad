@@ -48,7 +48,8 @@ internal static class NativeSubmissionOutcomeBudgetFlow
             {
                 var actual = view.ReadOwnedValue(key);
                 exact &= actual is not null && actual.AsSpan().SequenceEqual(original);
-                if (actual is not null) { reads++; }
+                if (actual is not null)
+                { reads++; }
             }
             else
             {

@@ -19,7 +19,8 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
     internal void RequireOwner(NativeBlobWireOwner owner)
     {
         Version(owner.Version);
-        if (!RequestCqrsProbeOptionsReader.IsSessionId(owner.SessionId)) { throw Invalid(); }
+        if (!RequestCqrsProbeOptionsReader.IsSessionId(owner.SessionId))
+        { throw Invalid(); }
         Text(owner.ClusterId);
         Tuple(owner.ControlOwner);
         Tuple(owner.SourceOwner);
@@ -51,7 +52,8 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
         {
             var arm = arms.Arms[index] ?? throw Invalid();
             NativeBlobWireIdentityRules.Require(arm);
-            if ((int)arm.Identity != index) { throw Invalid(); }
+            if ((int)arm.Identity != index)
+            { throw Invalid(); }
             Text(arm.BlobId);
         }
         if (arms.Arms.Select(arm => arm.ArmId).Distinct().Count() != arms.Arms.Length
@@ -83,7 +85,8 @@ internal sealed class NativeBlobWireShape(IOptions<RequestProbeExecutionOptions>
         if (tuple is null || tuple.PhysicalShardId == Guid.Empty || tuple.Incarnation == Guid.Empty
             || tuple.VoterIds is not { Length: Rf3VoterCount } || tuple.VoterIds.Distinct(StringComparer.Ordinal).Count() != Rf3VoterCount)
         { throw Invalid(); }
-        foreach (var voter in tuple.VoterIds) { Text(voter); }
+        foreach (var voter in tuple.VoterIds)
+        { Text(voter); }
     }
 
     private static void Version(int version)

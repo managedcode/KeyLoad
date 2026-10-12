@@ -51,7 +51,8 @@ internal sealed record NativeSubmissionJournalProcessCut(long CanonicalPosition,
     private static byte[] ReadRows(ZoneTreeStore store, StorageReadObserver observe, ref int records)
     {
         var remaining = MaximumRecords - records;
-        if (remaining <= 0) { throw new InvalidDataException("The complete both-store record budget is exhausted."); }
+        if (remaining <= 0)
+        { throw new InvalidDataException("The complete both-store record budget is exhausted."); }
         var rows = new List<KeyValueRecord>();
         store.Read(view =>
         {

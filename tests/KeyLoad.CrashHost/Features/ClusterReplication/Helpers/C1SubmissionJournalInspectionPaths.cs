@@ -18,7 +18,8 @@ internal static class C1SubmissionJournalInspectionPaths
         _ = ExistingDirectory(request.NodeDirectory);
         var owner = Owner(request);
         RequireRegularFile(owner);
-        if (new FileInfo(owner).Length != EmptyLength) { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        if (new FileInfo(owner).Length != EmptyLength)
+        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
     }
     internal static string Identity(string directory)
     {

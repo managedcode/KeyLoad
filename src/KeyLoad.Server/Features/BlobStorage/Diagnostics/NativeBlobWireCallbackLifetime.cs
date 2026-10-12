@@ -21,9 +21,11 @@ internal sealed class NativeBlobWireCallbackLifetime
     {
         lock (gate)
         {
-            if (active <= NoActiveCallbacks) { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
+            if (active <= NoActiveCallbacks)
+            { throw new InvalidOperationException(NativeBlobWireProbeProtocol.InvalidEvidence); }
             active--;
-            if (closed && active == NoActiveCallbacks) { joined.TrySetResult(); }
+            if (closed && active == NoActiveCallbacks)
+            { joined.TrySetResult(); }
         }
     }
 
@@ -32,7 +34,8 @@ internal sealed class NativeBlobWireCallbackLifetime
         lock (gate)
         {
             closed = true;
-            if (active == NoActiveCallbacks) { joined.TrySetResult(); }
+            if (active == NoActiveCallbacks)
+            { joined.TrySetResult(); }
             return joined.Task;
         }
     }

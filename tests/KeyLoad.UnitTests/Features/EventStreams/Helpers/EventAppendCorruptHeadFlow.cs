@@ -28,7 +28,8 @@ internal static class EventAppendCorruptHeadFlow
         }
         finally
         {
-            if (fixture is not null) { ServerFailureObserver.Observe(fixture.Dispose, failures); }
+            if (fixture is not null)
+            { ServerFailureObserver.Observe(fixture.Dispose, failures); }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

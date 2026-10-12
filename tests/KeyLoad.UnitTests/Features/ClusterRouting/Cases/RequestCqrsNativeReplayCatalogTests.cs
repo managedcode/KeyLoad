@@ -49,7 +49,8 @@ internal sealed class RequestCqrsNativeReplayCatalogTests
         _ = Assert.ThrowsExactly<InvalidOperationException>(() => RemoteModelNativeReplayCatalog.At(RemoteModelNativeReplayVariation.Original2, 3));
         foreach (var mode in Enum.GetValues<RemoteModelNativeReplayVariation>().Where(RemoteModelNativeReplayCatalog.IsIndividual))
         {
-            if (mode == RemoteModelNativeReplayVariation.Original2) { continue; }
+            if (mode == RemoteModelNativeReplayVariation.Original2)
+            { continue; }
             await Assert.That(RemoteModelNativeReplayCatalog.Count(mode)).IsEqualTo(1);
             _ = Assert.ThrowsExactly<InvalidOperationException>(() => RemoteModelNativeReplayCatalog.At(mode, 2));
         }

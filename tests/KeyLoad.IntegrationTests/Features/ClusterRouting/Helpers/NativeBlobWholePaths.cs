@@ -8,11 +8,13 @@ internal static class NativeBlobWholePaths
 {
     internal static string RequireNode(string root, string node)
     {
-        if (!TwoRf3MembershipProtocol.Nodes.Contains(node, StringComparer.Ordinal)) { throw Invalid(); }
+        if (!TwoRf3MembershipProtocol.Nodes.Contains(node, StringComparer.Ordinal))
+        { throw Invalid(); }
         var directory = ExistingDirectory(Path.Combine(root, node));
         var owner = Path.Combine(directory, PartitionStoreProtocol.OwnershipFile);
         RequireRegular(owner);
-        if (new FileInfo(owner).Length != 0) { throw Invalid(); }
+        if (new FileInfo(owner).Length != 0)
+        { throw Invalid(); }
         return directory;
     }
     internal static string Canonical(string node)
@@ -27,10 +29,12 @@ internal static class NativeBlobWholePaths
     }
     private static string ExistingDirectory(string path)
     {
-        if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != path) { throw Invalid(); }
+        if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != path)
+        { throw Invalid(); }
         for (var current = new DirectoryInfo(path); current is not null; current = current.Parent)
         {
-            if (!current.Exists || (current.Attributes & FileAttributes.ReparsePoint) != 0) { throw Invalid(); }
+            if (!current.Exists || (current.Attributes & FileAttributes.ReparsePoint) != 0)
+            { throw Invalid(); }
         }
         return path;
     }

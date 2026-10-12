@@ -88,8 +88,11 @@ internal sealed class NativeDiscoveryOmissionOwner : IReplicaNativeDiscoveryObse
         { throw Invalid(); }
         var omitted = NativeDiscoveryCapabilityOmission.Omit(originalPayload.ToArray(), actualState);
         files.Write(NativeDiscoveryOmissionProtocol.OmittedFile, source.Value with
-        { Stage = NativeDiscoveryOmissionProtocol.OmittedStage, ProducerVoter = localVoter,
-            RuntimeJournalReaderContract = StoreReaderContract.Unspecified });
+        {
+            Stage = NativeDiscoveryOmissionProtocol.OmittedStage,
+            ProducerVoter = localVoter,
+            RuntimeJournalReaderContract = StoreReaderContract.Unspecified
+        });
         token.ThrowIfCancellationRequested();
         return omitted;
     }
@@ -113,14 +116,20 @@ internal sealed class NativeDiscoveryOmissionOwner : IReplicaNativeDiscoveryObse
                 source.Value.SourceSiloAddress, state.SiloAddress, nonce, token);
             var omitted = files.Witness(NativeDiscoveryOmissionProtocol.OmittedFile);
             if (current != source || omitted != (source.Value with
-                { Stage = NativeDiscoveryOmissionProtocol.OmittedStage, ProducerVoter = voter,
-                    RuntimeJournalReaderContract = StoreReaderContract.Unspecified })
+            {
+                Stage = NativeDiscoveryOmissionProtocol.OmittedStage,
+                ProducerVoter = voter,
+                RuntimeJournalReaderContract = StoreReaderContract.Unspecified
+            })
                 || state.VoterId != voter || state.SiloAddress != source.Value.TargetSiloAddress
                 || state.RuntimeJournalReaderContract != StoreReaderContract.Unspecified)
             { throw Invalid(); }
             files.Write(NativeDiscoveryOmissionProtocol.VerifiedFile, source.Value with
-            { Stage = NativeDiscoveryOmissionProtocol.VerifiedStage, ProducerVoter = state.VoterId,
-                RuntimeJournalReaderContract = StoreReaderContract.Unspecified });
+            {
+                Stage = NativeDiscoveryOmissionProtocol.VerifiedStage,
+                ProducerVoter = state.VoterId,
+                RuntimeJournalReaderContract = StoreReaderContract.Unspecified
+            });
             return true;
         });
     }

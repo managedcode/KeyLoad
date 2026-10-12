@@ -36,14 +36,17 @@ internal static class C1SubmissionJournalInspectionValidation
     private static bool DirectoryValid(string directory)
     {
         try
-        { return Path.IsPathFullyQualified(directory) && string.Equals(Path.GetFullPath(directory), directory,
-            StringComparison.Ordinal) && Directory.Exists(directory); }
+        {
+            return Path.IsPathFullyQualified(directory) && string.Equals(Path.GetFullPath(directory), directory,
+            StringComparison.Ordinal) && Directory.Exists(directory);
+        }
         catch (ArgumentException) { return false; }
         catch (IOException) { return false; }
     }
     private static bool VoterValid(string? voter)
     {
-        if (string.IsNullOrWhiteSpace(voter)) { return false; }
+        if (string.IsNullOrWhiteSpace(voter))
+        { return false; }
         try
         { return StrictUtf8.GetByteCount(voter) is > EmptyCount and <= C1SubmissionJournalInspectionProtocol.MaximumVoterBytes; }
         catch (EncoderFallbackException) { return false; }

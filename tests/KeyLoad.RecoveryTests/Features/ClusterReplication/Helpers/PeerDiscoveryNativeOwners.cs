@@ -8,7 +8,8 @@ internal static class PeerDiscoveryNativeOwners
     private static readonly ConcurrentDictionary<string, PeerDiscoveryNativeCluster> Owners = new(StringComparer.Ordinal);
     internal static void Register(string id, PeerDiscoveryNativeCluster owner)
     {
-        if (!Owners.TryAdd(id, owner)) { throw new InvalidOperationException("Duplicate discovery fixture owner."); }
+        if (!Owners.TryAdd(id, owner))
+        { throw new InvalidOperationException("Duplicate discovery fixture owner."); }
     }
     internal static PeerDiscoveryNativeCluster Resolve(IConfiguration configuration)
         => Owners.TryGetValue(configuration[Key] ?? string.Empty, out var owner) ? owner

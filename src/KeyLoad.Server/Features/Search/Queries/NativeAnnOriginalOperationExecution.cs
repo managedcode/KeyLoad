@@ -54,7 +54,8 @@ internal static class NativeAnnOriginalOperationExecution
                 var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
                 if (!fresh.ClusterAdministrator || fresh.Revoked || fresh.PolicyEpoch != principal.PolicyEpoch)
                 { throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource); }
-                if (originalSession is not null) { owner.MaintenanceMemory.Expand(originalSession.Memory); }
+                if (originalSession is not null)
+                { owner.MaintenanceMemory.Expand(originalSession.Memory); }
                 var retained = originalSession?.RetainedBytes ?? EmptyBytes;
                 var available = owner.MaintenanceMemory.Remaining(retained);
                 var seeds = NativeAnnMaintenanceAdmission.Seeds(configured.Core.AnnSeed, available / CaptureFrames);
@@ -67,8 +68,10 @@ internal static class NativeAnnOriginalOperationExecution
                 { throw Errors.Fail(ErrorCode.PermissionDenied, NativeAnnProtocol.InvalidSource); }
                 (result, settlement) = ApplyOriginal(database, fresh, request, originalConfigure, originalResult,
                     stages, owner, current, seeds.Value, retained, read);
-                if (result is not null) { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result)); }
-                if (settlement is not null) { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(settlement)); }
+                if (result is not null)
+                { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(result)); }
+                if (settlement is not null)
+                { read.ChargeBytes(global::KeyLoad.NativeSerialization.Measure(settlement)); }
                 read.Check();
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

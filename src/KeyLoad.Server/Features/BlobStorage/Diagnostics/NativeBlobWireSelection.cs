@@ -9,9 +9,11 @@ internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeB
     {
         token.ThrowIfCancellationRequested();
         var snapshot = state.Read();
-        if (snapshot.Arms is not { } arms || snapshot.ArmsDigest is not { } armsDigest) { return false; }
+        if (snapshot.Arms is not { } arms || snapshot.ArmsDigest is not { } armsDigest)
+        { return false; }
         var arm = NativeBlobWireScope.Match(snapshot.Owner, arms, call);
-        if (arm is null) { return false; }
+        if (arm is null)
+        { return false; }
         var expected = NativeBlobWireClaims.Create(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, call);
         claims.Require(snapshot.Owner, snapshot.OwnerDigest, armsDigest, arm, expected);
         var name = NativeBlobWireNames.Claim(arm.Identity);
@@ -28,7 +30,8 @@ internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeB
                     ServerFailureObserver.Observe(() =>
                     {
                         token.ThrowIfCancellationRequested();
-                        if (files.Exists(name)) { RequireExisting(snapshot, arm, name); }
+                        if (files.Exists(name))
+                        { RequireExisting(snapshot, arm, name); }
                         else
                         {
                             files.WriteLocked(name, codec.Encode(expected));
@@ -39,7 +42,8 @@ internal sealed class NativeBlobWireSelection(NativeBlobWireFiles files, NativeB
             }
             catch (IOException) when (!acquired)
             {
-                if (!files.Exists(name)) { throw; }
+                if (!files.Exists(name))
+                { throw; }
                 RequireExisting(snapshot, arm, name);
             }
         }

@@ -32,16 +32,19 @@ internal static class RemoteTransferNativeReplayAssertions
             .IsEqualTo(mode == RemoteModelNativeReplayVariation.Original2);
         using var receiver = RemoteDocumentMac.FromConfiguredSecret(destinationSecret);
         await Assert.That(receiver.VerifyNativeReply(reply)).IsTrue();
-        if (reply.Nonce != request.Nonce) { throw Missing(); }
+        if (reply.Nonce != request.Nonce)
+        { throw Missing(); }
         if (mode != RemoteModelNativeReplayVariation.Original2 || ordinal == 2)
         { RequireRefusal(request, reply, receiver); }
         else if (reply.Error is not null || reply.SafeDetail is not null || reply.Payload.IsEmpty
-            || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true)) { throw Missing(); }
+            || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true))
+        { throw Missing(); }
         if (reply.Error is null)
         {
             var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);
             var signedTarget = destination.Single(value => value.VoterId == request.DestinationVoter);
-            if (!Exact(inner.EndpointDiscovery, signedTarget)) { throw Missing(); }
+            if (!Exact(inner.EndpointDiscovery, signedTarget))
+            { throw Missing(); }
         }
         token.ThrowIfCancellationRequested();
         return (original, request, reply);
@@ -68,7 +71,8 @@ internal static class RemoteTransferNativeReplayAssertions
         if (reply.Error is not null)
         {
             if (reply.Error != ErrorCode.Unauthenticated || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 }
-                || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable) { throw Missing(); }
+                || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable)
+            { throw Missing(); }
             return;
         }
         if (reply.SafeDetail is not null || reply.Payload.IsEmpty || !mac.Verify(reply.Payload.Span, reply.Signature, reply: true))

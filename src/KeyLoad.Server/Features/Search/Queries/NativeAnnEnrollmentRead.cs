@@ -26,7 +26,8 @@ internal static class NativeAnnEnrollmentRead
                 var eligible = database.ReadProjectionMaintenanceEligibility(original.Consumer,
                     original.IndexGeneration, read);
                 RequireReservation(eligible, principal, original);
-                if (!eligible.InitialAnnMaintenanceSettled) { return null; }
+                if (!eligible.InitialAnnMaintenanceSettled)
+                { return null; }
                 var owner = owningRoot();
                 result = await owner.RunAsync(stages => ReadOwned(database, principal, original,
                     configured, clock, owner, stages, eligible, read)).ConfigureAwait(false);

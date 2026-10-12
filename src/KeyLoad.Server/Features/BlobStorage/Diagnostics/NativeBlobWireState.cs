@@ -17,8 +17,11 @@ internal sealed class NativeBlobWireState
     internal NativeBlobWireState(NativeBlobWireFiles files, NativeBlobWireCodec codec,
         NativeBlobWireShape shape, IOptions<NodeOptions> options, PartitionHost partition)
     {
-        this.files = files; this.codec = codec; this.shape = shape;
-        this.options = options; this.partition = partition;
+        this.files = files;
+        this.codec = codec;
+        this.shape = shape;
+        this.options = options;
+        this.partition = partition;
         var bytes = files.Read(NativeBlobWireProbeProtocol.OwnerFile);
         ownerDigest = NativeBlobWireCodec.Digest(bytes);
         RequireOwner(codec.Read<NativeBlobWireOwner>(bytes));
@@ -29,17 +32,20 @@ internal sealed class NativeBlobWireState
         lock (gate)
         {
             var bytes = files.Read(NativeBlobWireProbeProtocol.OwnerFile);
-            if (NativeBlobWireCodec.Digest(bytes) != ownerDigest) { throw Invalid(); }
+            if (NativeBlobWireCodec.Digest(bytes) != ownerDigest)
+            { throw Invalid(); }
             var owner = codec.Read<NativeBlobWireOwner>(bytes);
             RequireOwner(owner);
             if (!files.Exists(NativeBlobWireProbeProtocol.ArmsFile))
             {
-                if (armsDigest is not null) { throw Invalid(); }
+                if (armsDigest is not null)
+                { throw Invalid(); }
                 return new(owner, ownerDigest, null, null);
             }
             var armed = files.Read(NativeBlobWireProbeProtocol.ArmsFile);
             var digest = NativeBlobWireCodec.Digest(armed);
-            if (armsDigest is not null && armsDigest != digest) { throw Invalid(); }
+            if (armsDigest is not null && armsDigest != digest)
+            { throw Invalid(); }
             var arms = codec.Read<NativeBlobWireArms>(armed);
             shape.RequireArms(owner, ownerDigest, arms);
             armsDigest = digest;

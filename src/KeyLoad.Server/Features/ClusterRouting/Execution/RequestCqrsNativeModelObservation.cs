@@ -20,7 +20,8 @@ internal sealed class RequestCqrsNativeModelObservation(RequestCqrsProbeFiles fi
         {
             cancellationToken.ThrowIfCancellationRequested();
             var claim = Claim(original, phase);
-            if (claim is null) { return; }
+            if (claim is null)
+            { return; }
             files.RequireActiveArm(claim.Arm);
             lifecycle.EnterGate();
             gate = true;
@@ -30,7 +31,8 @@ internal sealed class RequestCqrsNativeModelObservation(RequestCqrsProbeFiles fi
         }
         finally
         {
-            if (gate) { lifecycle.ExitGate(); }
+            if (gate)
+            { lifecycle.ExitGate(); }
             lifecycle.ExitCallback();
         }
     }
@@ -42,16 +44,21 @@ internal sealed class RequestCqrsNativeModelObservation(RequestCqrsProbeFiles fi
         if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState context)
         { return null; }
         var claim = lifecycle.FindClaim(context.RequestId);
-        if (claim is null || claim.Arm.Record.Phase != phase) { return null; }
+        if (claim is null || claim.Arm.Record.Phase != phase)
+        { return null; }
         if (context.ConnectionId == Guid.Empty || claim.ConnectionId != context.ConnectionId
             || claim.Identity.RequestId != context.RequestId || claim.Identity.CommandId != context.CommandId
             || claim.Identity.ReadKind is not null || claim.Arm.Record.Action != RequestCqrsProbeAction.Hold
-            || original.CallerVoter != voter || original.CallerSiloAddress != address) { throw Invalid(); }
-        if (original.Channel != RemoteModelNativeChannel.DocumentEnvelope) { return null; }
+            || original.CallerVoter != voter || original.CallerSiloAddress != address)
+        { throw Invalid(); }
+        if (original.Channel != RemoteModelNativeChannel.DocumentEnvelope)
+        { return null; }
         var call = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span).QueueTransfer;
-        if (call is null || call.Stage != RemoteQueueTransferPeerStage.Accept) { return null; }
+        if (call is null || call.Stage != RemoteQueueTransferPeerStage.Accept)
+        { return null; }
         if (call.RequestId != context.RequestId || call.OriginalCommandId != context.CommandId
-            || call.LogicalPrincipalId != claim.Identity.PrincipalId) { throw Invalid(); }
+            || call.LogicalPrincipalId != claim.Identity.PrincipalId)
+        { throw Invalid(); }
         return claim;
     }
 
@@ -61,7 +68,8 @@ internal sealed class RequestCqrsNativeModelObservation(RequestCqrsProbeFiles fi
         var maximum = options.Value.MaximumRecordBytes;
         var requestBytes = NativeSerialization.Measure(original);
         var replyBytes = actual is null ? NoReplyBytes : NativeSerialization.Measure(actual);
-        if (checked(requestBytes + replyBytes) > maximum) { throw Invalid(); }
+        if (checked(requestBytes + replyBytes) > maximum)
+        { throw Invalid(); }
         return new(RequestCqrsProbeProtocol.Version, files.SessionId, claim.Arm.Record.ArmId,
             claim.Identity.RequestId, claim.Identity.CommandId, claim.ConnectionId, phase, voter, address,
             NativeSerialization.Serialize(original), actual is null ? null : NativeSerialization.Serialize(actual));

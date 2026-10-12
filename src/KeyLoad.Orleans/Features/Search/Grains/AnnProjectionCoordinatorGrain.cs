@@ -39,14 +39,17 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         if (current is null)
         {
             current = await execution.InitializeAsync(work, token).ConfigureAwait(true);
-            if (current is null) { return; }
+            if (current is null)
+            { return; }
             await WriteAsync(current, token).ConfigureAwait(true);
         }
         var next = await execution.NextAsync(current, work, token).ConfigureAwait(true);
-        if (next is null) { return; }
+        if (next is null)
+        { return; }
         if (next != current)
         { await WriteAsync(next, token).ConfigureAwait(true); current = next; }
-        if (current.JobId is not null) { return; }
+        if (current.JobId is not null)
+        { return; }
         var request = current.PendingRequest
             ?? throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);
         var scheduled = await jobs.ScheduleJobAsync(AnnProjectionJobMetadata.Create(this.GetGrainId(),
@@ -64,7 +67,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         var original = owner.Current
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, AnnProjectionJobProtocol.Unresolved);
         AnnProjectionJobMetadata.Require(context, this.GetGrainId(), original);
-        if (original.PendingRequest is null) { return; }
+        if (original.PendingRequest is null)
+        { return; }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
@@ -84,13 +88,19 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             catch (Exception cleanup) { throw new AggregateException(failure, cleanup); }
             throw;
         }
-        await WriteAsync(original with { JobId = context.Job.Id, LastRequest = original.PendingRequest,
-            PendingRequest = null, LastResult = result }, token).ConfigureAwait(true);
+        await WriteAsync(original with
+        {
+            JobId = context.Job.Id,
+            LastRequest = original.PendingRequest,
+            PendingRequest = null,
+            LastResult = result
+        }, token).ConfigureAwait(true);
     }
 
     private async Task WriteAsync(AnnProjectionJobState value, CancellationToken token)
     {
-        try { await owner.WriteAsync(value, token).ConfigureAwait(true); }
+        try
+        { await owner.WriteAsync(value, token).ConfigureAwait(true); }
         catch (Exception) { DeactivateOnIdle(); throw; }
     }
 

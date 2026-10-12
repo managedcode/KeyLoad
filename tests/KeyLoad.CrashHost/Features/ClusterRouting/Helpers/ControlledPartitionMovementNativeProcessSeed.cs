@@ -27,7 +27,8 @@ internal static class ControlledPartitionMovementNativeProcessSeed
             var reply = await source.SubmitAsync(OperationKind.ConfigureResource, Guid.Parse(original.Item1),
                 PrincipalId, NativeSerialization.Serialize(request), cancellationToken).ConfigureAwait(false);
             outcomes.Add(reply);
-            if (reply.Error is not null) { return outcomes.ToImmutable(); }
+            if (reply.Error is not null)
+            { return outcomes.ToImmutable(); }
         }
         outcomes.Add(await source.SubmitAsync(OperationKind.Batch,
             ControlledPartitionMovementProcessCorpus.SeedId, PrincipalId,

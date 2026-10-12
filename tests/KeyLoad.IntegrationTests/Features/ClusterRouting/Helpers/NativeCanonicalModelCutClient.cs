@@ -100,7 +100,8 @@ internal static class NativeCanonicalModelCutClient
         while (count < payload.Length)
         {
             var read = await stream.ReadAsync(payload.AsMemory(count), token).ConfigureAwait(false);
-            if (read == 0) { break; }
+            if (read == 0)
+            { break; }
             count += read;
         }
         if (count > maximum || response.Content.Headers.ContentLength is { } expected && expected != count)
@@ -114,12 +115,14 @@ internal static class NativeCanonicalModelCutClient
         if (!response.Headers.TryGetValues(NativeCanonicalModelCutDiagnosticProtocol.SignatureHeader, out var values))
         { throw new InvalidDataException(Invalid); }
         using var iterator = values.GetEnumerator();
-        if (!iterator.MoveNext()) { throw new InvalidDataException(Invalid); }
+        if (!iterator.MoveNext())
+        { throw new InvalidDataException(Invalid); }
         var signature = iterator.Current;
         if (iterator.MoveNext() || signature.Length != SignatureCharacters)
         { throw new InvalidDataException(Invalid); }
         byte[] supplied;
-        try { supplied = Convert.FromHexString(signature); }
+        try
+        { supplied = Convert.FromHexString(signature); }
         catch (FormatException) { throw new InvalidDataException(Invalid); }
         using var mac = new ReplicaMessageMac(secret, owner.ClusterId);
         var expected = mac.Discovery(owner.Incarnation, owner.VoterId, nonce,

@@ -1,4 +1,5 @@
 using KeyLoad.Orleans;
+using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests;
@@ -74,9 +75,15 @@ internal sealed class PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster clus
                     voter, cluster.Receiver.Discovery.RuntimeAddress));
                 await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
             }
-            var invalid = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.CreateNativeDiscoveryRequest(
-                PeerDiscoveryNativeCluster.ReceiverVoter, "invalid-native-address"));
-            await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
+            foreach (var address in new[] { string.Empty, " ", "invalid-native-address",
+                cluster.Receiver.Discovery.RuntimeAddress + " ",
+                new string('x', ReplicaTransportProtocol.MaximumAddressCharacters + 1) })
+            {
+                var invalid = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Sender.CreateNativeDiscoveryRequest(
+                    PeerDiscoveryNativeCluster.ReceiverVoter, address));
+                await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
+                await Assert.That(invalid.Message).IsEqualTo(ReplicaProtocol.InvalidPeer);
+            }
             await Assert.That((await fixture.ReceiveAsync(fixture.Sign())).Error).IsNull();
         });
     }

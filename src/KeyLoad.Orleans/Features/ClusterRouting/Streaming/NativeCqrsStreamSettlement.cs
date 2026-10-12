@@ -23,7 +23,8 @@ internal static class NativeCqrsStreamSettlement
 
     private static async ValueTask<Exception?> CaptureActivationAsync(Func<ValueTask> settled)
     {
-        try { await settled().ConfigureAwait(true); return null; }
+        try
+        { await settled().ConfigureAwait(true); return null; }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
     }

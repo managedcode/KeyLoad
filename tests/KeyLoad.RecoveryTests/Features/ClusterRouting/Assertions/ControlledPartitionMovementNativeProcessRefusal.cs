@@ -32,6 +32,8 @@ internal static class ControlledPartitionMovementNativeProcessRefusal
         var failure = await Assert.ThrowsAsync<KeyLoadException>(() => sender.ExchangeAsync(address, signed, cancellationToken))
             ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
+        if (expectedDetail == PartitionMovementProtocol.Unavailable)
+        { await Assert.That(failure.Data[PartitionMovementGrainServiceClient.InvalidReplyStage]).IsNull(); }
         await Assert.That(failure.Message).IsEqualTo(expectedDetail);
         var after = await owners.CaptureAsync(cancellationToken);
         await ControlledPartitionMovementNativeProcessColdAssertions.ExactAsync(before, after);

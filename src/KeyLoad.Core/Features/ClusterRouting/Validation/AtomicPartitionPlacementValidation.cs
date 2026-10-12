@@ -15,8 +15,10 @@ internal static class AtomicPartitionPlacementValidation
     {
         const int EncodedLengthValidationBoundary = 0;
 
-        if (encodedLength < EncodedLengthValidationBoundary || encodedLength > AtomicPartitionPlacementProtocol.MaximumEncodedBytes)
+        if (encodedLength < EncodedLengthValidationBoundary)
         { throw Errors.Fail(ErrorCode.Validation, OversizedRequest); }
+        if (encodedLength > AtomicPartitionPlacementProtocol.MaximumEncodedBytes)
+        { throw Errors.Fail(ErrorCode.BudgetExceeded, OversizedRequest); }
     }
 
     internal static void ValidateRequest(BindAtomicPartitionPlacementRequest? request)

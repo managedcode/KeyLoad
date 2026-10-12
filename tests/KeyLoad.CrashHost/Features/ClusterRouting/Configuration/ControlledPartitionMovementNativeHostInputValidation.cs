@@ -33,7 +33,8 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
         var silos = ImmutableArray.CreateBuilder<IPEndPoint>();
         foreach (var arguments in input.Arguments)
         {
-            if (arguments.IsDefaultOrEmpty) { throw Invalid(); }
+            if (arguments.IsDefaultOrEmpty)
+            { throw Invalid(); }
             var origin = Require(arguments, UrlPrefix);
             if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
                 || uri.Scheme != Uri.UriSchemeHttp || !uri.IsLoopback

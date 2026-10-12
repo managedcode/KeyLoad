@@ -1,41 +1,31 @@
 using System.Collections.Immutable;
 using System.Net;
-using System.Net.Sockets;
 using KeyLoad.Server;
-using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
-/// <summary>Owns actual listener-discovered origins for direct native movement admission fixtures.</summary>
+/// <summary>Owns native Orleans port reservations for the original six movement owner slots.</summary>
 internal sealed class ControlledPartitionMovementLoopbackListeners : IDisposable
 {
     private const int VotersPerOwner = 3;
     private const int Owners = 2;
     private const int FirstControlVoter = 0;
-    private const int NativeSiloPort = 11_111;
-    private const int EphemeralPort = 0;
-    private const int ListenerBacklog = 1;
-    private const byte LoopbackNetworkOctet = 127;
-    private const byte EmptyOctet = 0;
-    private const int AddressStep = 1;
-    private readonly List<Socket> listeners = [];
+    private readonly global::Orleans.TestingHost.TestClusterPortAllocator ports = new();
     private readonly ImmutableArray<IPEndPoint> siloEndpoints;
     private bool closed;
 
-    /// <summary>Binds original native listeners and discovers every admitted loopback origin.</summary>
+    /// <summary>Retains native Orleans port reservations for the original six owner slots.</summary>
     public ControlledPartitionMovementLoopbackListeners()
     {
         try
         {
+            var (siloPort, httpPort) = ports.AllocateConsecutivePortPairs(VotersPerOwner * Owners);
             var native = ImmutableArray.CreateBuilder<IPEndPoint>(VotersPerOwner * Owners);
             var origins = ImmutableArray.CreateBuilder<string>(VotersPerOwner * Owners);
             for (var index = FirstControlVoter; index < VotersPerOwner * Owners; index++)
             {
-                var address = new IPAddress(new byte[] {LoopbackNetworkOctet, EmptyOctet, EmptyOctet,
-                    checked((byte)(index + AddressStep))});
-                native.Add((IPEndPoint)CreateListener(address, NativeSiloPort).LocalEndPoint!);
-                var endpoint = (IPEndPoint)CreateListener(address, EphemeralPort).LocalEndPoint!;
-                origins.Add(new UriBuilder(Uri.UriSchemeHttp, endpoint.Address.ToString(), endpoint.Port)
+                native.Add(new(IPAddress.Loopback, checked(siloPort + index)));
+                origins.Add(new UriBuilder(Uri.UriSchemeHttp, IPAddress.Loopback.ToString(), checked(httpPort + index))
                     .Uri.GetLeftPart(UriPartial.Authority));
             }
             siloEndpoints = native.MoveToImmutable();
@@ -45,77 +35,40 @@ internal sealed class ControlledPartitionMovementLoopbackListeners : IDisposable
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            try
-            { Dispose(); }
-            catch (Exception cleanup) when (CqrsRuntimeFailures.FindFatal(cleanup) is null) { failures.Add(cleanup); }
-            catch (Exception cleanup) when (CqrsRuntimeFailures.FindFatal(cleanup) is not null) { failures.Add(cleanup); }
+            ServerFailureObserver.Observe(Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
     }
 
-    /// <summary>Three actual distinct control-owner HTTP origins, in immutable voter order.</summary>
+    /// <summary>Three distinct original control-owner origins in immutable voter order.</summary>
     public ImmutableArray<string> ControlOrigins { get; }
-    /// <summary>Three actual distinct destination-owner HTTP origins, in immutable voter order.</summary>
+    /// <summary>Three distinct original destination-owner origins in immutable voter order.</summary>
     public ImmutableArray<string> DestinationOrigins { get; }
-    /// <summary>The actual bound native source-caller silo-port endpoint used by peer pins.</summary>
+    /// <summary>The original native primary endpoint reservation; no generation is inferred.</summary>
     public IPEndPoint SiloEndpoint => NativeEndpoint(FirstControlVoter);
 
-    /// <summary>Returns an actual discovered native endpoint for one immutable voter slot.</summary>
-    /// <param name="index">The original control-then-destination listener slot.</param>
+    /// <summary>Returns one immutable endpoint allocated by the native Orleans owner.</summary>
+    /// <param name="index">The original control-then-destination slot.</param>
     public IPEndPoint NativeEndpoint(int index)
     {
+        ObjectDisposedException.ThrowIf(closed, this);
         var actual = siloEndpoints[index];
         return new(actual.Address, actual.Port);
     }
 
-    /// <summary>Joins every discovered listener before a child owns the physical roots.</summary>
-    internal void JoinForChild()
-    {
-        ObjectDisposedException.ThrowIf(closed, this);
-        var failures = new List<Exception>();
-        foreach (var socket in listeners)
-        { ServerFailureObserver.Observe(socket.Dispose, failures); }
-        ServerFailureObserver.ThrowIfAny(failures);
-        listeners.Clear();
-    }
+    /// <summary>Checks the retained native reservations before the original child opens its hosts.</summary>
+    internal void JoinForChild() => ObjectDisposedException.ThrowIf(closed, this);
 
-    /// <summary>Rebinds only the original immutable origins after all children have joined.</summary>
-    internal void OpenAfterChild()
-    {
-        ObjectDisposedException.ThrowIf(closed, this);
-        foreach (var endpoint in siloEndpoints)
-        { CreateListener(endpoint.Address, endpoint.Port); }
-        foreach (var origin in ControlOrigins.Concat(DestinationOrigins))
-        {
-            var uri = new Uri(origin);
-            CreateListener(IPAddress.Parse(uri.Host), uri.Port);
-        }
-    }
+    /// <summary>Checks the same native reservations after the original child has joined.</summary>
+    internal void OpenAfterChild() => ObjectDisposedException.ThrowIf(closed, this);
 
-    private Socket CreateListener(IPAddress address, int port)
-    {
-        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        listeners.Add(socket);
-        socket.Bind(new IPEndPoint(address, port));
-        socket.Listen(ListenerBacklog);
-        return socket;
-    }
-
-    /// <summary>Closes every original native listener, retaining all disposal failures.</summary>
+    /// <summary>Releases the original native allocator after the owning callers and hosts join.</summary>
     public void Dispose()
     {
         if (closed)
         { return; }
         closed = true;
-        var failures = new List<Exception>();
-        foreach (var socket in listeners)
-        {
-            try
-            { socket.Dispose(); }
-            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }
-            catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is not null) { failures.Add(error); }
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        ports.Dispose();
     }
 }

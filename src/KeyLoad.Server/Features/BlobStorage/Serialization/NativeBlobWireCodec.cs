@@ -36,7 +36,8 @@ internal sealed class NativeBlobWireCodec(IOptions<RequestProbeExecutionOptions>
         if (bytes.IsEmpty || bytes.Length > limits.Value.MaximumRecordBytes)
         { throw Invalid(); }
         var value = JsonSerializer.Deserialize(bytes, Type<T>()) ?? throw Invalid();
-        if (!bytes.SequenceEqual(Encode(value))) { throw Invalid(); }
+        if (!bytes.SequenceEqual(Encode(value)))
+        { throw Invalid(); }
         return value;
     }
 

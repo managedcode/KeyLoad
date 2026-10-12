@@ -52,7 +52,8 @@ internal static class NativeCanonicalModelCutHttpRefusal
         while (total < bytes.Length)
         {
             var count = await stream.ReadAsync(bytes.AsMemory(total), token).ConfigureAwait(false);
-            if (count == 0) { break; }
+            if (count == 0)
+            { break; }
             total += count;
         }
         if (total <= 0 || total > maximum

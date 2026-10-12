@@ -35,8 +35,11 @@ internal static class RequestCqrsAnnOriginalReplay
 
     internal static Task RefuseChangedAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest original, CancellationToken token)
-        => RefuseAsync(fixture, original with { Mode = original.Mode == AnnMaintenanceMode.Build
-            ? AnnMaintenanceMode.Restore : AnnMaintenanceMode.Build }, ErrorCode.Conflict, token);
+        => RefuseAsync(fixture, original with
+        {
+            Mode = original.Mode == AnnMaintenanceMode.Build
+            ? AnnMaintenanceMode.Restore : AnnMaintenanceMode.Build
+        }, ErrorCode.Conflict, token);
 
     private static async Task RefuseAsync(RequestCqrsClusterFixture fixture,
         AnnMaintenanceRequest original, ErrorCode expected, CancellationToken token)
@@ -72,7 +75,9 @@ internal static class RequestCqrsAnnOriginalReplay
         await Assert.That(Directory.Exists(Path.Combine(fixture.Database.Directory,
             global::KeyLoad.Server.Features.Search.NativeAnnProtocol.RootDirectory))).IsEqualTo(nativeRoot);
         if (nativeRoot)
-        { await Assert.That(NativeAnnFixtureFileSnapshot.Capture(fixture.Database.Directory))
-            .IsEquivalentTo(files, CollectionOrdering.Matching); }
+        {
+            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(fixture.Database.Directory))
+            .IsEquivalentTo(files, CollectionOrdering.Matching);
+        }
     }
 }

@@ -460,3 +460,28 @@ REQ/AC-KL095-QUEUE-SELECT-001..003 map to the two complete operation cases in Qu
 ## Explicit right predicate alias refusal
 
 REQ/AC-KL095-JOIN-ALIAS-001 closes a parser-origin ambiguity: preserve the current declared right alias inside the expression parser and refuse right-qualified operands before lowering left paths. An alias named payload or headers cannot acquire left-source meaning. Existing left-qualified nested roots and unqualified left semantics remain supported. This is a causal UnsupportedCapability guard, not implementation of right-side WHERE or a new serialized AST contract.
+
+## KL095 event-reference SELECT extension
+
+Supersede only the blanket event-source INNER JOIN refusal for the closed Q2.EventEntityRefJoin.v1 shape in REQ/AC-KL095-EVENT-SELECT-001..003. Reuse native retained stream generation/contiguous-history/event-id checks and cumulative single-view budget. Full canonical reference resolves only the declared typed target; revision order, fresh field Use even on empty stream, no remote probe and all current authority remain mandatory. Source-only tests/compiler/RF3/Linux are distinct; no aliases/IDs/defaults/storage format or compatibility path changes.
+
+
+
+## Composed projection lineage qualification
+
+REQ/AC-KL048-COMPOSED-LINEAGE-001 and KL049-COMPOSED-PLAN-001 add whole-operation qualification for existing source-aware SQL/AST projections. Use authority to resolve a canonical reference does not grant Read authority to expose its nested fields. Project current persisted policies independently on both original source records before scalar selection; preserve explicit aliases and exact redaction/source metadata. No new right-predicate capability or serialized contract is introduced. Masked/forged/current-policy/repair/replay/cold proof remains separate from compiler and authentic RF3/Linux qualification.
+
+
+## KL048/049 composed projection and predicate authority successor
+REQ-KL048-COMPOSED-LINEAGE-002 / AC-KL048-COMPOSED-LINEAGE-002: Preserve the original single Unit declaration and all forged-source/no-effect/seed+repair-replay/two-cold assertions. Add a genuine queue score field policy with independent score.read and score.use. Current reference Use permits resolution without reference Read; each source projection masks only its denied fields. Revoking predicate Use while keeping predicate Read and reference Use must refuse PermissionDenied without changing complete source bytes or cut. Repair the persisted principal with a higher epoch, then independently revoke reference Use and repair it. Current source aliases remain explicit; right WHERE remains unsupported before left lowering. No production changes are justified by this acceptance gap.
+REQ-KL049-COMPOSED-PLAN-002 / AC-KL049-COMPOSED-PLAN-002: ComposedProjectionLineageRf3Tests uses the existing Aspire ClusterFixture and actual SDK ExecuteSql/official MCP Sql tool, persisted resource+principal updates and original QueueReferenceSelect corpus. Independently assert every projected field, both source identities/revisions, ordinal order, redaction metadata and bounded page before transport parity. Predicate/ref-use refusals and forged right WHERE must retain all original source documents, all queue metadata/payload/headers, and exact original seed receipt replay. Repair the missing target with a genuine acknowledged command; preserve the seed receipt at the first same-volume all-node cold continuation and both seed+repair receipts at the second using existing ModelSqlRf3Cold. No fake storage, dispatcher, caller roles, right-predicate capability, new limit/deadline, public schema or package change. New case UID/compilation/native50/SIMD/RF3/Linux remain OPEN.
+
+```mermaid
+flowchart LR
+  A[Persisted source policies] --> B[Masked SQL and AST or SDK and MCP pages]
+  B --> C[Predicate Use revoke and no effects]
+  C --> D[Fresh principal repair]
+  D --> E[Reference Use revoke and repair]
+  E --> F[Real missing target command]
+  F --> G[Two strict cold continuations and exact original receipts]
+```

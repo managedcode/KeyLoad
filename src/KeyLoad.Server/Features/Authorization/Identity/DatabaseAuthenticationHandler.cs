@@ -6,13 +6,14 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    ILoggerFactory logger, UrlEncoder encoder,
+    IDatabaseAuthenticationExecutionObserver? executionObserver = null) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!DatabaseAuthenticationComposition.IsProtected(Context.Request))
         { return AuthenticateResult.NoResult(); }
-        var reply = await DatabaseCredentialResolver.ReadAsync(Context).ConfigureAwait(false);
+        var reply = await DatabaseCredentialResolver.ReadAsync(Context, executionObserver).ConfigureAwait(false);
         PrincipalRecord principal;
         if (Context.Items[McpHttpPipeline.StateItem] is McpRequestState state)
         {
@@ -27,7 +28,10 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
         Context.Features.Set(new DatabaseAuthenticatedPrincipal(principal));
         var identity = new ClaimsIdentity(
             [new Claim(ClaimTypes.NameIdentifier, principal.Id)], Scheme.Name);
-        return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name));
+        var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
+        executionObserver?.Ticket(Context.TraceIdentifier, principal.Id,
+            DatabaseAuthenticationTicketObservation.Capture(ticket, principal.Id));
+        return AuthenticateResult.Success(ticket);
     }
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)

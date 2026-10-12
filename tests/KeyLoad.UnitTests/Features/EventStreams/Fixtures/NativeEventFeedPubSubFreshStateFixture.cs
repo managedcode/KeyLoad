@@ -45,8 +45,10 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
         void FailHandoff(Exception original)
         {
             var failures = new List<Exception> { original };
-            if (acquiredStorage is not null) { ServerFailureObserver.Observe(acquiredStorage.Dispose, failures); }
-            if (acquiredServices is not null) { ServerFailureObserver.Observe(acquiredServices.Dispose, failures); }
+            if (acquiredStorage is not null)
+            { ServerFailureObserver.Observe(acquiredStorage.Dispose, failures); }
+            if (acquiredServices is not null)
+            { ServerFailureObserver.Observe(acquiredServices.Dispose, failures); }
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -99,7 +101,8 @@ internal sealed class NativeEventFeedPubSubFreshStateFixture : IDisposable
     {
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Storage.Dispose, failures);
-        try { services.Dispose(); }
+        try
+        { services.Dispose(); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);

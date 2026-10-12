@@ -33,8 +33,10 @@ internal sealed class ReplicaAppendBoundaryFixture : IDisposable
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            if (acquiredLog is not null) { ServerFailureObserver.Observe(acquiredLog.Dispose, failures); }
-            if (acquiredStore is not null) { ServerFailureObserver.Observe(acquiredStore.Dispose, failures); }
+            if (acquiredLog is not null)
+            { ServerFailureObserver.Observe(acquiredLog.Dispose, failures); }
+            if (acquiredStore is not null)
+            { ServerFailureObserver.Observe(acquiredStore.Dispose, failures); }
             ServerFailureObserver.Observe(Canonical.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;

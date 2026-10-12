@@ -669,3 +669,70 @@ Automated whole flows are SqlQueueReferenceJoinTests.AcKl095QueueEntityReference
 REQ-KL095-JOIN-ALIAS-001 / AC-KL095-JOIN-ALIAS-001: SQL WHERE parsing retains the actual declared right INNER JOIN alias long enough to reject every explicitly right-qualified operand with UnsupportedCapability before any left-path lowering or storage enumeration. This includes right aliases named payload or headers; they must not be interpreted as left model roots. Preserve explicit left alias-qualified nested paths and existing unqualified left semantics. No right-predicate capability, AST field, public schema, quota, default or compatibility path is introduced.
 
 The whole native SqlJoinAliasCollisionTests.AcKl095RightAliasCollisionRefusesWithoutEffectsThenLeftPredicateReplaysAcrossTwoColdCuts seeds the existing actual queue/typed document fixture, proves both collision refusals with complete raw bytes and cut unchanged, checks full literal e.payload healthy rows, performs existing persisted policy/missing-target repair, then replays the SAME original seed receipt and repeats full refusal/healthy assertions across two joined strict existing-store cold cuts. Existing Queue26 case and its lifecycle successor remain unchanged. UID/compiler/runtime/Linux qualification remains pending real discovery and execution.
+
+## TASK-KL095-EVENT-ENTITY-SELECT-001 — bounded canonical reference SELECT
+
+REQ-KL095-EVENT-SELECT-001 / AC-KL095-EVENT-SELECT-001 extends only Q2/AST2 with Q2.EventEntityRefJoin.v1:
+SELECT e.eventId AS event_id, d.name AS customer_name, e.payload.score AS score
+FROM EVENTS('joinedevents','source',1) AS e INNER JOIN eventcustomers AS d
+ON e.payload.to = d.entity_ref WHERE e.payload.score >= @minimum ORDER BY e.revision ASC LIMIT 10.
+One native retained StreamSet source and one declared typed Collection in the request's full PartitionRef; ON is exactly /payload/to to logical /entity_ref. Right native ValidateSchema requires its existing nonnullable Text PK. Explicit scalar projection, native left-only bounded predicates and all existing scalar parameters, full-scan consent, revision ascending, no cursor/explain/star. Queue-reference and typed joins remain unchanged. Topic/eventfeed/vector joins, right-source predicates, multiple/outer joins, arbitrary reference paths, cross-partition execution and full SQL conformance remain unsupported.
+
+REQ-KL095-EVENT-SELECT-002 / AC-KL095-EVENT-SELECT-002: use the SAME WithModelQueryView and ReadExecutionBudget for current persisted principal, Query|EventsRead StreamSet authority, actual resource/head/generation/contiguous retained events and event-id identity, plus declared right Query|DocumentsRead and current right schema/PK Use. Rebased payload/header reference and predicate Use checks run before enumeration, including a configured empty stream. Full EntityRef Partition/Collection/Id validation precedes any target point read; never derive target authority from ID alone or probe another partition. Missing/null reference, missing/deleted/row-denied target omit the pair; missing declared resource, denied declared field, malformed or mismatched reference fail the whole request. Source event RowAccess is a virtual adapter and cannot substitute for native stream authority. Project both resources through their current policies, with complete original source IDs/revisions/redaction; event ordering uses native revision rather than lexicographic event IDs.
+
+REQ-KL095-EVENT-SELECT-003 / AC-KL095-EVENT-SELECT-003: every native principal/catalog/head/retained event/identity/probe record and byte stays charged; LIMIT bounds candidate memory without suppressing full retained-history validation. Existing cancellation/deadline/result admission and corruption/stale-generation refusals remain exact. One read gate/cut; no source mutation, append, outcome restamp, dispatcher, provider, schema/alias/ID/default/quota changes. Actual seed append and missing-target repair retain their original same-ID receipts across two joined strict existing-store cold cuts. Unit covers complete raw images/positions, SQL/AST full pages, persisted deny/revoke/repair and empty-source preauthorization, malformed/foreign reference, stale generation, budget and original caller cancellation, then literal healthy results. RF3 uses actual SDK and official MCP with full native StreamPage/event-data/head/record metadata and document oracles, current persisted credentials, all original owners joined before two same-volume cold cuts. Source review/native preview is not compiler/runtime/Linux acceptance.
+
+The current event-reference join constrains its existing native read budget before
+`WithModelQueryView` reads the principal or resource catalog. The configured
+`MaxScanRecords` therefore bounds cumulative native records, including event
+identity validation and target probes, rather than each individual range alone.
+The same original whole-operation test keeps its fixed ten-record owner and
+requires `BudgetExceeded` for the ordinary predicate, an always-false predicate
+and `LIMIT 1`, then checks unchanged complete storage and a healthy literal page.
+The original local R21 failure is retained: this case returned no exception at
+the first budget refusal. The scoped source repair does not qualify the case;
+fresh native execution, RF3 and exact-source Linux gates remain required.
+
+| Criterion | Automated whole operation | Required oracle |
+| --- | --- | --- |
+| AC-KL095-EVENT-SELECT-001 | SqlEventReferenceJoinTests.AcKl095EventEntityReferenceJoinRefusesThenRepairsPersistedPolicyAndReplaysLiteralRowsAcrossTwoColdCuts | SQL/AST parity; nonlexical event IDs ordered by revisions; unsupported right filter |
+| AC-KL095-EVENT-SELECT-002 | same Unit + EventReferenceSelectRf3Tests.AcKl095EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts | empty denied Use; genuine policy repair/revoke; full canonical ref refusal/noeffects; literal row ACL/masks |
+| AC-KL095-EVENT-SELECT-003 | same Unit + RF3 case | native budget/caller cancellation/stale generation; full source histories, exact original receipts, healthy repair and two cold |
+
+Ordered implementation: contract before source; QueryExecution parser/bind/executor/capability extension after actual queue-reference predecessor; distinct full Unit/public operation helpers; root native previews/compiler/discovery then native50/SIMD full owning controls and real RF3; exact-source Linux required. EventStreams production remains independently owned. New declarations have no assigned native UID until real discovery. No migration/legacy reader. Rollback removes this operator and its cohesive new operation flows together.
+
+```mermaid
+flowchart LR
+    A[Fresh persisted Query and EventsRead] --> B[Declared target and payload Use before empty scan]
+    B --> C[Same-view generation and complete native history validation]
+    C --> D[Full canonical EntityRef guarded target probe]
+    D --> E[Revision ordered safely projected bounded page]
+    E --> F[Original receipt replay and two joined cold cuts]
+```
+
+
+
+## KL048/049 composed projection source lineage
+
+REQ-KL048-COMPOSED-LINEAGE-001 / AC-KL048-COMPOSED-LINEAGE-001: Q2/AST2 queue-to-typed INNER JOIN projections retain exact declared SourceAlias on every selection. Unknown source, right nested model path and left path forged from a right typed column refuse UnsupportedCapability without storage effects; source alias cannot grant field read authority. The existing projector applies current persisted left rebased and right typed field policies BEFORE resolving scalar paths. A denied parent reference masks its selected nested ID; a denied right name remains null, with exact alias-qualified redaction and source ID/revision metadata. Use may allow joining without Read, and repair/revoke must be observed from the current same-view persisted principal.
+
+REQ-KL049-COMPOSED-PLAN-001 / AC-KL049-COMPOSED-PLAN-001: equivalent existing SQL and AST projections consume the SAME native bounded queue/reference query plan, declared typed target and cut; no alternate dispatcher, source inference, right WHERE, AST field/alias/Id, defaults, quotas or optimization permission shortcuts. Complete independently literal rows/metadata are required in both paths before page parity is compared. Missing target and row-denied target remain distinct authorized omissions.
+
+ComposedProjectionLineageTests.AcKl048ComposedProjectionMasksSourceFieldsRefusesForgedLineageThenRepairsAndReplaysAcrossTwoColdCuts uses actual Queue26 seed, persisted restricted principal, simultaneous nested-left/right masks, forged AST source/path refusals, genuine current grant repair/revoke, missing-target repair and full SQL/AST results. It replays BOTH exact original seed and repair receipts after two joined strict same-root cold cuts, preserving raw bytes and positions and all initiating/disposal failures. Existing Queue26/Event24/product source remains unchanged. Native declaration UID, compiler/runtime/RF3/Linux qualifications are OPEN until original discovery/execution; this source proof does not close the broader binder/optimizer task.
+
+
+## KL048/049 composed projection and predicate authority successor
+REQ-KL048-COMPOSED-LINEAGE-002 / AC-KL048-COMPOSED-LINEAGE-002: Preserve the original single Unit declaration and all forged-source/no-effect/seed+repair-replay/two-cold assertions. Add a genuine queue score field policy with independent score.read and score.use. Current reference Use permits resolution without reference Read; each source projection masks only its denied fields. Revoking predicate Use while keeping predicate Read and reference Use must refuse PermissionDenied without changing complete source bytes or cut. Repair the persisted principal with a higher epoch, then independently revoke reference Use and repair it. Current source aliases remain explicit; right WHERE remains unsupported before left lowering. No production changes are justified by this acceptance gap.
+REQ-KL049-COMPOSED-PLAN-002 / AC-KL049-COMPOSED-PLAN-002: ComposedProjectionLineageRf3Tests uses the existing Aspire ClusterFixture and actual SDK ExecuteSql/official MCP Sql tool, persisted resource+principal updates and original QueueReferenceSelect corpus. Independently assert every projected field, both source identities/revisions, ordinal order, redaction metadata and bounded page before transport parity. Predicate/ref-use refusals and forged right WHERE must retain all original source documents, all queue metadata/payload/headers, and exact original seed receipt replay. Repair the missing target with a genuine acknowledged command; preserve the seed receipt at the first same-volume all-node cold continuation and both seed+repair receipts at the second using existing ModelSqlRf3Cold. No fake storage, dispatcher, caller roles, right-predicate capability, new limit/deadline, public schema or package change. New case UID/compilation/native50/SIMD/RF3/Linux remain OPEN.
+
+```mermaid
+flowchart LR
+  A[Persisted source policies] --> B[Masked SQL and AST or SDK and MCP pages]
+  B --> C[Predicate Use revoke and no effects]
+  C --> D[Fresh principal repair]
+  D --> E[Reference Use revoke and repair]
+  E --> F[Real missing target command]
+  F --> G[Two strict cold continuations and exact original receipts]
+```
+
+REQ-KL048-COMPOSED-LINEAGE-003 / AC-KL048-COMPOSED-LINEAGE-003: Installing the independent score policy must use the current persisted queue schema version as `ExpectedSchemaVersion` and increment that version exactly once. The existing Unit whole-flow must require a successful native resource result and compare its complete definition with the persisted resource before exercising predicate Use refusal; every principal revoke/repair must require success and full result/persisted-policy equality. The existing SDK/MCP RF3 whole-flow must discover the current queue schema through the real SDK, require the native CAS result's complete definition to match, verify its persisted catalog version, and compare every successful principal policy result in full. Preserve the original forged-source rejection, independent score Read/Use and reference Use contracts, unchanged source bytes/cuts after denial, literal projections, original seed and missing-target repair receipts, and both cold continuations. The original local R21 no-exception failure came from an unchecked policy installation rejected for failing to increment the schema; it does not justify weakening product authorization or adding a parser workaround. Both existing whole-flow declarations remain the mapped regressions; repaired-source execution and exact-source Linux/RF3 qualification remain open until original successful evidence exists.

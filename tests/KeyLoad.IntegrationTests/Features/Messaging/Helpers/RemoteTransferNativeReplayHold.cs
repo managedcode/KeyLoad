@@ -27,14 +27,16 @@ internal sealed class RemoteTransferNativeReplayHold
     internal async Task<IReadOnlyList<RequestCqrsNativeReplayWitness>> WaitAsync(Task original,
         IReadOnlyList<ReplicaSiloDiscovery> source, int count, CancellationToken token)
     {
-        if (count is not (2 or 6)) { throw Missing(); }
+        if (count is not (2 or 6))
+        { throw Missing(); }
         using var waiting = CancellationTokenSource.CreateLinkedTokenSource(token);
         var observed = fixture.WaitForMarkerAsync(ArmId, RequestCqrsProbePhase.NativeModelReplayBeforeDispatch,
             RequestCqrsProbeOutcome.Observed, source, waiting.Token);
         if (await Task.WhenAny(observed, original).ConfigureAwait(false) == original)
         {
             await waiting.CancelAsync().ConfigureAwait(false);
-            try { _ = await observed.ConfigureAwait(false); }
+            try
+            { _ = await observed.ConfigureAwait(false); }
             catch (OperationCanceledException) when (waiting.IsCancellationRequested) { }
             await original.ConfigureAwait(false);
             throw Missing();

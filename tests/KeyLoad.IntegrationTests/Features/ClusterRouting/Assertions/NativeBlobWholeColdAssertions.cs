@@ -85,7 +85,8 @@ internal static class NativeBlobWholeColdAssertions
         foreach (var key in left.Keys.Concat(right.Keys).Distinct(StringComparer.Ordinal))
         {
             token.ThrowIfCancellationRequested();
-            if (allowed.Contains(key)) { continue; }
+            if (allowed.Contains(key))
+            { continue; }
             if (!left.TryGetValue(key, out var original) || !right.TryGetValue(key, out var actual) || original != actual)
             { throw new InvalidOperationException("The complete original Blob journal changed outside native membership authority."); }
         }

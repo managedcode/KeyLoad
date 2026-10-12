@@ -50,12 +50,14 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     private global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeObserver? nativeBlobWireObserver;
     internal RemoteDocumentRuntime? RemoteDocuments => Volatile.Read(ref remoteDocuments);
     private int siloJoined;
+    internal global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphNodeResources GraphResources { get; } = new();
 
     /// <summary>Factory published only after native silo startup completes.</summary>
     public IGrainFactory? Grains => Volatile.Read(ref grains);
 
     /// <summary>Allows physical cleanup only after every admitted native frame has actually joined.</summary>
-    internal bool HasJoinedRequestWork => requestWork.IsJoined && (RemoteDocuments?.IsJoined ?? true) && (Movement?.IsJoined ?? true);
+    internal bool HasJoinedRequestWork => requestWork.IsJoined && (RemoteDocuments?.IsJoined ?? true)
+        && (Movement?.IsJoined ?? true) && GraphResources.IsJoined;
 
     /// <summary>Early runtime discovery remains available during membership bootstrap.</summary>
     public ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaSiloDiscoveryState>();
@@ -113,20 +115,23 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         var address = await OrleansNodeAddressResolver.ResolveAsync(Options, cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref remoteDocuments, await RemoteDocumentRuntime.CreateAsync(this, partition,
             runtimeOptions, runtimeClock, blobWireObserver).ConfigureAwait(false));
+        await GraphResources.InitializeAsync(this, partition, runtimeOptions, runtimeClock).ConfigureAwait(false);
         Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(this, partition,
             runtimeOptions, requestWork, runtimeClock).ConfigureAwait(false));
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork, connectionOwner,
-            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, physicalOwnerProbe?.Invoke(), localhostClustering, RemoteDocuments?.AnnReadRouter, cancellationToken);
+            address, runtimeOptions, runtimeClock, Movement?.Source, Movement, RemoteDocuments?.Router, RemoteDocuments?.BlobRouter, RemoteDocuments?.QueryRouter, RemoteDocuments?.DistributedSearchRouter, RemoteDocuments?.CommandRouter, sealedObserver, discoveryOmission, RemoteDocuments?.EventVectorParent, physicalOwnerProbe?.Invoke(), localhostClustering, RemoteDocuments?.AnnReadRouter, GraphResources.Runtime, cancellationToken);
         Volatile.Write(ref host, built);
         // Capture the actual singleton owners before native startup; failed startup joins these same instances.
         Volatile.Write(ref nativeModelReceiver, built.Services.GetRequiredService<RemoteModelNativeRuntime>());
         Volatile.Write(ref nativeBlobWireObserver, built.Services.GetService<global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeObserver>());
         Volatile.Write(ref nativeModelClient, built.Services.GetRequiredService<RemoteModelNativeClient>());
+        GraphResources.Capture(built.Services);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
         RemoteDocuments?.AttachNativeReceiver(Volatile.Read(ref nativeModelReceiver)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable));
+        GraphResources.Attach();
         if (Options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Destination
             && !Options.PhysicalGroupTrust.RemoteDocumentReads)
         { return; }
@@ -181,15 +186,8 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
 
     internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog, string principalId,
         CancellationToken cancellationToken)
-    {
-        lock (lifecycle)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (shutdown is not null || !ReferenceEquals(Volatile.Read(ref physicalShardCatalog), catalog))
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-            catalog.OpenAdmission(principalId);
-        }
-    }
+        => OrleansNodeCatalogAdmission.Open(lifecycle, ref shutdown, ref physicalShardCatalog,
+            catalog, principalId, cancellationToken);
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()

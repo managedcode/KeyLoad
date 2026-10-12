@@ -19,10 +19,16 @@ internal sealed class RequestCqrsProbeMacTests
             requestBytes, RequestCqrsProbeNativeWireValues.RequestPurpose));
         await Assert.That(mac.SignProbeReply(reply)).IsEqualTo(RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
             replyBytes, RequestCqrsProbeNativeWireValues.ReplyPurpose));
-        var wrongRequest = request with { Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
-            requestBytes, RequestCqrsProbeNativeWireValues.ReplyPurpose) };
-        var wrongReply = reply with { Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
-            replyBytes, RequestCqrsProbeNativeWireValues.RequestPurpose) };
+        var wrongRequest = request with
+        {
+            Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
+            requestBytes, RequestCqrsProbeNativeWireValues.ReplyPurpose)
+        };
+        var wrongReply = reply with
+        {
+            Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
+            replyBytes, RequestCqrsProbeNativeWireValues.RequestPurpose)
+        };
         await Assert.That(mac.VerifyProbeRequest(wrongRequest)).IsFalse();
         await Assert.That(mac.VerifyProbeReply(wrongReply)).IsFalse();
         await Assert.That(mac.VerifyProbeRequest(request with { Signature = mac.Sign(requestBytes, reply: false) })).IsFalse();
@@ -60,7 +66,8 @@ internal sealed class RequestCqrsProbeMacTests
         request = request with { Signature = mac.SignProbeRequest(request) };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
         reply = reply with { Signature = mac.SignProbeReply(reply) };
-        mac.Dispose(); mac.Dispose();
+        mac.Dispose();
+        mac.Dispose();
         Assert.ThrowsExactly<ObjectDisposedException>(() => mac.SignProbeRequest(request));
         Assert.ThrowsExactly<ObjectDisposedException>(() => mac.VerifyProbeRequest(request));
         Assert.ThrowsExactly<ObjectDisposedException>(() => mac.SignProbeReply(reply));

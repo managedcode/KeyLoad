@@ -35,7 +35,8 @@ internal static class NativeAnnOriginalOperations
         { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
         if (entry is not null)
         {
-            if (entry.Released) { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+            if (entry.Released)
+            { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
             NativeAnnOriginalResults.RequireCurrent(entry, principal, request, current);
             if (entry.LastRequest is { } last && last.CommandId == request.CommandId)
             {
@@ -102,17 +103,23 @@ internal static class NativeAnnOriginalOperations
             NativeAnnProtocol.Interrupted), request);
         if (!entry.PendingStarted || result.Source is not { } source || current.ProjectionCheckpoint != source.ThroughSequence)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
-        return Replace(receipt, entry with { PendingRequest = null, PendingStarted = false,
-            LastRequest = request, LastResult = result,
+        return Replace(receipt, entry with
+        {
+            PendingRequest = null,
+            PendingStarted = false,
+            LastRequest = request,
+            LastResult = result,
             InitialSettled = entry.InitialSettled || entry.InitialRequest.CommandId == request.CommandId,
             InitialSettlementIntent = entry.InitialSettlementIntent ?? settlementIntent,
-            RetiredOriginals = RetirePrevious(entry, options) });
+            RetiredOriginals = RetirePrevious(entry, options)
+        });
     }
 
     private static NativeAnnRetiredOriginalIdentity[] RetirePrevious(NativeAnnOriginalOperation entry,
         NativeAnnExecutionOptions options)
     {
-        if (entry.LastRequest is not { } previous) { return entry.RetiredOriginals; }
+        if (entry.LastRequest is not { } previous)
+        { return entry.RetiredOriginals; }
         if (checked(((long)entry.RetiredOriginals.Length + NewRetiredOriginalCount) * System.Security.Cryptography.SHA256.HashSizeInBytes)
             > options.MaximumManifestBytes)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
@@ -124,7 +131,8 @@ internal static class NativeAnnOriginalOperations
     private static void RequireNotRetired(NativeAnnOriginalOperation entry, AnnMaintenanceRequest request)
     {
         var retired = entry.RetiredOriginals.SingleOrDefault(value => value.CommandId == request.CommandId);
-        if (retired is null) { return; }
+        if (retired is null)
+        { return; }
         var digest = System.Security.Cryptography.SHA256.HashData(global::KeyLoad.NativeSerialization.Serialize(request));
         if (!System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(retired.RequestSha256, digest))
         { throw Errors.Fail(ErrorCode.Conflict, NativeAnnProtocol.InvalidSource); }

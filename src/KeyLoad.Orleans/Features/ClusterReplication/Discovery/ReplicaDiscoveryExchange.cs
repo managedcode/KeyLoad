@@ -41,8 +41,10 @@ internal sealed class ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> co
         if (!membership.IsCurrent(voterId, address))
         { throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery); }
         if (probe?.Received is { } transform)
-        { received = transform(request, received, token)
-            ?? throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery); }
+        {
+            received = transform(request, received, token)
+            ?? throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaTransportProtocol.InvalidDiscovery);
+        }
         token.ThrowIfCancellationRequested();
         var reply = authentication.VerifyNativeDiscoveryReply(request, received);
         if (!membership.IsCurrent(voterId, address))

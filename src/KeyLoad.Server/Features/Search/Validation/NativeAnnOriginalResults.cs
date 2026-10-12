@@ -29,7 +29,8 @@ internal static class NativeAnnOriginalResults
         if (!entry.InitialSettled && (entry.LastResult is not null
             || entry.PendingRequest is null || !SameRequest(entry.InitialRequest, entry.PendingRequest)))
         { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }
-        if (entry.PendingRequest is { } pending) { RequireRequest(entry.Key, pending); }
+        if (entry.PendingRequest is { } pending)
+        { RequireRequest(entry.Key, pending); }
         if (entry.LastRequest is { } settled && entry.LastResult is { } result)
         { RequireRequest(entry.Key, settled); RequireResult(settled, result); }
     }

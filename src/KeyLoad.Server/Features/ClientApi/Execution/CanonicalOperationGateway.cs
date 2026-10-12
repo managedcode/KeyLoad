@@ -35,12 +35,17 @@ internal static class CanonicalOperationGateway
         try
         {
             var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
+            global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphPublicResult.RequireComplete(commandKind, commandId, reply, value.Value);
             cancellationToken.ThrowIfCancellationRequested();
             return new(requestId, McpBoundedJson.Serialize(PublicReadResponse.Create(readKind, commandKind, value.Value),
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
-        catch (Exception failure) when (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition
-            && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException)
+        catch (Exception failure) when (
+            (global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.HandlesCommand(commandKind)
+                && NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            || (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
+                or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition
+                && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException))
         {
             GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
                 failure, requestId, GrainFailureStage.ReplyEncoding, ErrorCode.UnknownWriteOutcome);
@@ -99,6 +104,8 @@ internal static class CanonicalOperationGateway
 
     private static string Interrupted(OperationKind? commandKind) => commandKind switch
     {
+        OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge
+            or OperationKind.DeliverRemoteGraphEdge => global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Interrupted,
         OperationKind.MovePartition => PartitionMovePublicProtocol.Interrupted,
         OperationKind.MaintainTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainOnlineTextIndex => TextIndexMaintenanceProtocol.Interrupted,

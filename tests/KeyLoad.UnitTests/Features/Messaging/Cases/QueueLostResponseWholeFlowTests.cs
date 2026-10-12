@@ -7,6 +7,10 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class QueueLostResponseWholeFlowTests
 {
     [Test]
+    public Task ExactLeaseExpiryRefusesAckAndRenewBeforeSweepThenColdReclaimFencesOldTokensAndHealthyReceiptReplays()
+        => QueueLeaseExpiryEqualityTrial.RunAsync();
+
+    [Test]
     public async Task AcMsg001ClaimAndAckResponsesReplayExactlyAcrossRealStoreReopen()
     {
         using var fixture = new TestDatabase();

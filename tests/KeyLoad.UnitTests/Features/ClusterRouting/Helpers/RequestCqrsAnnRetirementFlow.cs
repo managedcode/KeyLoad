@@ -23,9 +23,12 @@ internal static class RequestCqrsAnnRetirementFlow
         await Assert.That(canonical.Released).IsTrue();
         await Assert.That(canonical.InitialAnnMaintenanceSettled).IsTrue();
         await RequestCqrsAnnAssertions.EqualAsync(original, canonical.InitialAnnMaintenance);
-        var next = original with { CommandId = Guid.NewGuid(),
+        var next = original with
+        {
+            CommandId = Guid.NewGuid(),
             Consumer = new(original.Consumer.Partition, original.Consumer.Name + NextConsumerSuffix),
-            IndexGeneration = checked(original.IndexGeneration + NextGenerationStep) };
+            IndexGeneration = checked(original.IndexGeneration + NextGenerationStep)
+        };
         var before = fixture.Database.Store.Position;
         var built = await RequestCqrsAnnInvocation.RunAsync(fixture, next, token);
         await RequestCqrsAnnResultAssertions.RequireAsync(fixture, next, built.Result, before, changed: true, token);

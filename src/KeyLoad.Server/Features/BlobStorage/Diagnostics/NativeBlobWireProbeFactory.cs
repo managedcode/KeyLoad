@@ -12,7 +12,8 @@ internal static class NativeBlobWireProbeFactory
         PartitionHost partition, NodeOptions options)
     {
         var selected = options.NativeBlobWireProbe;
-        if (selected.Root is null && selected.SessionId is null) { return null; }
+        if (selected.Root is null && selected.SessionId is null)
+        { return null; }
         if (!options.RequestCqrsProbe.Enabled || selected.Root != FixedRoot
             || selected.SessionId != options.RequestCqrsProbe.SessionId
             || !RequestCqrsProbeOptionsReader.IsSessionId(selected.SessionId)

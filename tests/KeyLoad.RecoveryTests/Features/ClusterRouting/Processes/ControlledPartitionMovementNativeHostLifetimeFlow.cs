@@ -35,7 +35,8 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
         }, failures);
         if (hosts is not null)
         {
-            if (failures.Count != 0) { hosts.RetainRoots(); }
+            if (failures.Count != 0)
+            { hosts.RetainRoots(); }
             await ServerFailureObserver.ObserveAsync(() => hosts.DisposeAsync().AsTask(), failures);
             if (failures.Count != 0)
             { foreach (var failure in failures) { failure.Data[RetainedRoot] = hosts.Root; } }
@@ -50,13 +51,16 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
         var initiating = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => hosts.StopAsync(selectedCaller.Token), initiating);
         await Assert.That(initiating.Count).IsGreaterThan(FirstOwner);
-        foreach (var failure in initiating) { await Assert.That(IsCancellation(failure)).IsTrue(); }
+        foreach (var failure in initiating)
+        { await Assert.That(IsCancellation(failure)).IsTrue(); }
         var closing = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => hosts.CloseRetainingRootAsync().AsTask(), closing);
         await Assert.That(closing.Count).IsGreaterThan(FirstOwner);
-        foreach (var failure in closing) { await Assert.That(IsCancellation(failure)).IsTrue(); }
+        foreach (var failure in closing)
+        { await Assert.That(IsCancellation(failure)).IsTrue(); }
         await Assert.That(hosts.Nodes.Count).IsEqualTo(Owners);
-        foreach (var host in hosts.Nodes) { await Assert.That(host.IsJoined).IsTrue(); }
+        foreach (var host in hosts.Nodes)
+        { await Assert.That(host.IsJoined).IsTrue(); }
         await Assert.That(Directory.Exists(hosts.Root)).IsTrue();
     }
 

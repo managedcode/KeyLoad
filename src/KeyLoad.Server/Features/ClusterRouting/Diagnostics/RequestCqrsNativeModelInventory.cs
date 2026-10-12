@@ -22,7 +22,8 @@ internal static class RequestCqrsNativeModelInventory
     internal static bool IsName(string name)
     {
         if (!name.StartsWith(Prefix, StringComparison.Ordinal)
-            || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)) { return false; }
+            || !name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal))
+        { return false; }
         var parts = name[Prefix.Length..^RequestCqrsProbeProtocol.JsonFileSuffix.Length].Split(Separator, StringSplitOptions.None);
         return parts.Length == NameComponentCount && CanonicalGuid(parts[ArmComponent]) && CanonicalGuid(parts[RequestComponent])
             && parts[PhaseComponent] is nameof(RequestCqrsProbePhase.NativeModelBeforeDispatch)
@@ -35,7 +36,8 @@ internal static class RequestCqrsNativeModelInventory
 
     internal static RequestCqrsNativeModelWitness Read(ReadOnlySpan<byte> bytes)
     {
-        if (bytes.IsEmpty || bytes.Length > MaximumBytes) { throw Invalid(); }
+        if (bytes.IsEmpty || bytes.Length > MaximumBytes)
+        { throw Invalid(); }
         var value = JsonSerializer.Deserialize(bytes, RequestCqrsNativeModelJsonContext.Default.RequestCqrsNativeModelWitness)
             ?? throw Invalid();
         Require(value);
@@ -46,7 +48,8 @@ internal static class RequestCqrsNativeModelInventory
     {
         Require(value);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, RequestCqrsNativeModelJsonContext.Default.RequestCqrsNativeModelWitness);
-        if (bytes.Length > MaximumBytes) { throw Invalid(); }
+        if (bytes.Length > MaximumBytes)
+        { throw Invalid(); }
         return bytes;
     }
 
@@ -64,7 +67,8 @@ internal static class RequestCqrsNativeModelInventory
             var marker = markers.SingleOrDefault(item => item.ArmId == value.ArmId && item.RequestId == value.RequestId
                 && item.Phase == value.Phase && item.Outcome == RequestCqrsProbeOutcome.Observed);
             if (marker.SessionId != value.SessionId || marker.CommandId != value.CommandId
-                || marker.Voter != value.Voter || marker.SiloAddress != value.SiloAddress) { throw Invalid(); }
+                || marker.Voter != value.Voter || marker.SiloAddress != value.SiloAddress)
+            { throw Invalid(); }
         }
     }
 
@@ -77,14 +81,17 @@ internal static class RequestCqrsNativeModelInventory
             || value.NativeRequest is not { Length: > EmptyNativeBytes } || value.NativeRequest.Length > MaximumBytes
             || (value.Phase == RequestCqrsProbePhase.NativeModelBeforeDispatch ? value.NativeReply is not null
                 : value.NativeReply is not { Length: > EmptyNativeBytes })
-            || value.NativeReply is { } bytes && bytes.Length > MaximumBytes) { throw Invalid(); }
+            || value.NativeReply is { } bytes && bytes.Length > MaximumBytes)
+        { throw Invalid(); }
         var request = Request(value);
         if (request is null || request.CallerVoter != value.Voter || request.CallerSiloAddress != value.SiloAddress
-            || request.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(request.SenderSignature)) { throw Invalid(); }
+            || request.Nonce == Guid.Empty || string.IsNullOrWhiteSpace(request.SenderSignature))
+        { throw Invalid(); }
         if (value.NativeReply is not null)
         {
             var reply = Reply(value);
-            if (reply is null || reply.Nonce != request.Nonce) { throw Invalid(); }
+            if (reply is null || reply.Nonce != request.Nonce)
+            { throw Invalid(); }
         }
     }
 

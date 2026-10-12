@@ -54,7 +54,7 @@ internal static class QueueReadyAuthorityRefusalAssertions
         for (var index = 0; index < failures.Count; index++)
         {
             var failure = failures[index];
-            var actualExpectedError = index == RetainedReplayFailureIndex ? ErrorCode.RecoveryRequired : expectedError;
+            var actualExpectedError = index <= RetainedReplayFailureIndex ? ErrorCode.RecoveryRequired : expectedError;
             var errors = failure is AggregateException aggregate ? aggregate.Flatten().InnerExceptions.ToArray() : [failure];
             foreach (var error in errors)
             {

@@ -20,13 +20,17 @@ internal sealed class NativeBlobWireFileInventory(string root, IOptions<RequestP
         var bytes = InitialAggregateBytes;
         foreach (var path in Directory.EnumerateFileSystemEntries(root))
         {
-            if (++count > limits.Value.MaximumFiles) { throw Invalid(); }
+            if (++count > limits.Value.MaximumFiles)
+            { throw Invalid(); }
             var name = Path.GetFileName(path);
-            if (!names.Contains(name) && !Temporary(name)) { throw Invalid(); }
+            if (!names.Contains(name) && !Temporary(name))
+            { throw Invalid(); }
             var length = RequireFile(path);
-            if (length > limits.Value.MaximumRecordBytes) { throw Invalid(); }
+            if (length > limits.Value.MaximumRecordBytes)
+            { throw Invalid(); }
             bytes = checked(bytes + length);
-            if (bytes > limits.Value.MaximumAggregateBytes) { throw Invalid(); }
+            if (bytes > limits.Value.MaximumAggregateBytes)
+            { throw Invalid(); }
             if (name.EndsWith(NativeBlobWireProbeProtocol.LockSuffix, StringComparison.Ordinal) && length != EmptyLockBytes)
             { throw Invalid(); }
         }
@@ -46,7 +50,8 @@ internal sealed class NativeBlobWireFileInventory(string root, IOptions<RequestP
     {
         var result = new HashSet<string>(StringComparer.Ordinal)
         { NativeBlobWireProbeProtocol.OwnerFile, NativeBlobWireProbeProtocol.ArmsFile, NativeBlobWireProbeProtocol.PublicationFile };
-        for (var slot = FirstSlot; slot < slots; slot++) { result.Add(NativeBlobWireNames.Slot(slot)); }
+        for (var slot = FirstSlot; slot < slots; slot++)
+        { result.Add(NativeBlobWireNames.Slot(slot)); }
         foreach (var identity in Enum.GetValues<NativeBlobWireIdentity>())
         {
             result.Add(NativeBlobWireNames.Claim(identity));

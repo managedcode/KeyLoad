@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.CrashHost.Features.ClusterRouting;
+using KeyLoad.Server;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -21,6 +23,7 @@ internal sealed class PartitionMovementLateNativeSettings(ControlledPartitionMov
     private readonly string signing = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes));
     private readonly string sourcePeer = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes));
     private readonly string destinationPeer = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes));
+    internal NativeLocalhostClusteringOptions LocalhostClustering => new(listeners.SiloEndpoint);
     internal string AdministratorKey { get; } = "root." + Convert.ToHexString(RandomNumberGenerator.GetBytes(SecretBytes));
     internal string Origin(int index) => index < GroupSize ? listeners.ControlOrigins[index]
         : listeners.DestinationOrigins[index - GroupSize];
@@ -40,13 +43,14 @@ internal sealed class PartitionMovementLateNativeSettings(ControlledPartitionMov
         Set(PartitionMovementLateNativeProtocol.PeerSecret, source ? sourcePeer : destinationPeer);
         Set(PartitionMovementLateNativeProtocol.AdminKey, AdministratorKey);
         Set(PartitionMovementLateNativeProtocol.SiloAddress, listeners.NativeEndpoint(index).Address.ToString());
+        Set(PartitionMovementLateNativeProtocol.SiloPort, listeners.NativeEndpoint(index).Port.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Set(PartitionMovementLateNativeProtocol.AllowLoopbackHttp, Enabled);
         Set(PartitionMovementLateNativeProtocol.AllowPrivateNetworkHttp, Enabled);
         Set(PartitionMovementLateNativeProtocol.PartitionMovementExecutionEnabled, Enabled);
-        Set(PartitionMovementLateNativeProtocol.MembershipAuthorityMode, source ? "authority" : "proxy");
-        Set(PartitionMovementLateNativeProtocol.MembershipAuthorityRegisterPhysicalOwners, Enabled);
-        Set(PartitionMovementLateNativeProtocol.MembershipAuthorityRemoteDocumentReads, Enabled);
-        Set(PartitionMovementLateNativeProtocol.MembershipAuthorityRemotePartitionQueries, Enabled);
+        Set(PartitionMovementLateNativeProtocol.PhysicalGroupTrustRole, source ? nameof(PhysicalGroupTrustRole.Control) : nameof(PhysicalGroupTrustRole.Destination));
+        Set(PartitionMovementLateNativeProtocol.RegisterPhysicalOwners, Enabled);
+        Set(PartitionMovementLateNativeProtocol.RemoteDocumentReads, Enabled);
+        Set(PartitionMovementLateNativeProtocol.RemotePartitionQueries, Enabled);
         AddScope(args, source);
         for (var voter = FirstVoter; voter < GroupSize; voter++)
         { Set(PartitionMovementLateNativeProtocol.Peers + voter.ToString(System.Globalization.CultureInfo.InvariantCulture), Origin((source ? FirstVoter : GroupSize) + voter)); }
@@ -55,26 +59,15 @@ internal sealed class PartitionMovementLateNativeSettings(ControlledPartitionMov
 
     private void AddScope(List<string> args, bool source)
     {
-        var prefix = PartitionMovementLateNativeProtocol.MembershipArgumentPrefix;
+        var prefix = PartitionMovementLateNativeProtocol.TrustArgumentPrefix;
         void Set(string key, string value) => args.Add(prefix + key + "=" + value);
-        if (source)
-        {
-            Set(PartitionMovementLateNativeProtocol.TrustedGroupPhysicalShardId, Destination.ToString("D"));
-            Set(PartitionMovementLateNativeProtocol.TrustedGroupIncarnation, destinationIncarnation.ToString("D"));
-            Set(PartitionMovementLateNativeProtocol.TrustedGroupPeerSecret, destinationPeer);
-        }
-        else
-        {
-            Set(PartitionMovementLateNativeProtocol.AuthorityPhysicalShardId, Source.ToString("D"));
-            Set(PartitionMovementLateNativeProtocol.AuthorityIncarnation, sourceIncarnation.ToString("D"));
-            Set(PartitionMovementLateNativeProtocol.AuthorityPeerSecret, sourcePeer);
-        }
+        Set(PartitionMovementLateNativeProtocol.ForeignPhysicalShardId, (source ? Destination : Source).ToString("D"));
+        Set(PartitionMovementLateNativeProtocol.ForeignIncarnation, (source ? destinationIncarnation : sourceIncarnation).ToString("D"));
+        Set(PartitionMovementLateNativeProtocol.ForeignPeerSecret, source ? destinationPeer : sourcePeer);
         for (var voter = FirstVoter; voter < GroupSize; voter++)
         {
             var suffix = voter.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            Set((source ? PartitionMovementLateNativeProtocol.TrustedGroupVoterIds : PartitionMovementLateNativeProtocol.AuthorityEndpoints) + suffix, Origin((source ? GroupSize : 0) + voter));
-            if (source)
-            { Set(PartitionMovementLateNativeProtocol.TrustedGroupSiloEndpoints + suffix, listeners.NativeEndpoint(GroupSize + voter).ToString()); }
+            Set(PartitionMovementLateNativeProtocol.ForeignVoterIds + suffix, Origin((source ? GroupSize : FirstVoter) + voter));
         }
     }
 }

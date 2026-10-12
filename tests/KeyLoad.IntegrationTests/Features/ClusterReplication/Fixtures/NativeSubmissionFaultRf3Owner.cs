@@ -41,7 +41,8 @@ internal sealed class NativeSubmissionFaultRf3Owner
             await owner.InitializeAsync(bounded.Token).ConfigureAwait(false);
             await NativeSubmissionFaultRf3Flow.ExecuteAsync(owner, officialMcp, bounded.Token).ConfigureAwait(false);
         }, owner.Failures).ConfigureAwait(false);
-        if (owner.Failures.Count > 0) { owner.Controls?.RetainEvidence(); }
+        if (owner.Failures.Count > 0)
+        { owner.Controls?.RetainEvidence(); }
         await ServerFailureObserver.ObserveAsync(owner.CleanupAsync, owner.Failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(owner.Failures);
     }

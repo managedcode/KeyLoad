@@ -33,6 +33,10 @@ internal static class PartitionRecordFamilies
     internal const string GraphCrossPartitionIntent = "graph-cross-partition-intent";
     internal const string GraphCrossReverseAdjacency = "graph-cross-reverse-adjacency";
     internal const string GraphEdgeOwnerVersion = "graph-edge-owner-version";
+    internal const string GraphRemoteIntent = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.IntentFamily;
+    internal const string GraphRemoteReceiver = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.ReceiverFamily;
+    internal const string GraphRemoteCapacity = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.CapacityFamily;
+    internal const string GraphRemoteCompletion = global::KeyLoad.Core.Features.GraphTraversal.Serialization.RemoteGraphProtocol.CompletionFamily;
     internal const string Inbox = "inbox";
     internal const string Index = "index";
     internal const string Lease = "lease";
@@ -114,6 +118,10 @@ internal static class PartitionRecordFamilies
         GraphCrossPartitionIntent,
         GraphCrossReverseAdjacency,
         GraphEdgeOwnerVersion,
+        GraphRemoteCapacity,
+        GraphRemoteCompletion,
+        GraphRemoteIntent,
+        GraphRemoteReceiver,
         Inbox,
         Index,
         Lease,

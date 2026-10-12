@@ -14,7 +14,8 @@ internal sealed class NativeBlobWireEvidence(NativeBlobWireFiles files, NativeBl
         byte[] original, NativeControlledBlobFaultResult actual, int ordinal, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (actual.Ordinal != ordinal || (int)actual.Variation != ordinal - FirstOrdinal) { throw Invalid(); }
+        if (actual.Ordinal != ordinal || (int)actual.Variation != ordinal - FirstOrdinal)
+        { throw Invalid(); }
         var record = new NativeBlobWireResult(NativeBlobWireProbeProtocol.Version, claim.SessionId,
             claimDigest, claim.Identity, ordinal, actual.Variation, original,
             EncodeNative(actual.Request), EncodeNative(actual.Reply));
@@ -33,28 +34,30 @@ internal sealed class NativeBlobWireEvidence(NativeBlobWireFiles files, NativeBl
         token.ThrowIfCancellationRequested();
         var expected = (int)claim.Identity < (int)NativeBlobWireIdentity.Metadata
             ? NativeBlobWireProbeProtocol.MaximumFaultCount : NativeBlobWireProbeProtocol.CommonFaultCount;
-        if (results.Length != expected) { throw Invalid(); }
+        if (results.Length != expected)
+        { throw Invalid(); }
         var record = new NativeBlobWireCompletion(NativeBlobWireProbeProtocol.Version,
             claim.SessionId, claimDigest, claim.Identity, results.Length, results);
         var bytes = codec.Encode(record);
         files.WithPublication(() =>
         {
-        token.ThrowIfCancellationRequested();
-        for (var index = FirstIndex; index < results.Length; index++)
-        {
-            var entry = results[index];
-            if (entry.Ordinal != index + FirstOrdinal || (int)entry.Variation != index
-                || NativeBlobWireCodec.Digest(files.Read(NativeBlobWireNames.Result(claim.Identity, entry.Ordinal))) != entry.RecordDigest)
-            { throw Invalid(); }
-        }
-        files.WriteLocked(NativeBlobWireNames.Completion(claim.Identity), bytes);
+            token.ThrowIfCancellationRequested();
+            for (var index = FirstIndex; index < results.Length; index++)
+            {
+                var entry = results[index];
+                if (entry.Ordinal != index + FirstOrdinal || (int)entry.Variation != index
+                    || NativeBlobWireCodec.Digest(files.Read(NativeBlobWireNames.Result(claim.Identity, entry.Ordinal))) != entry.RecordDigest)
+                { throw Invalid(); }
+            }
+            files.WriteLocked(NativeBlobWireNames.Completion(claim.Identity), bytes);
         });
     }
 
     internal byte[] EncodeNative<T>(T value)
     {
         var bytes = NativeSerialization.Measure(value);
-        if (bytes <= EmptyPayloadBytes || bytes > limits.Value.MaximumRecordBytes) { throw Invalid(); }
+        if (bytes <= EmptyPayloadBytes || bytes > limits.Value.MaximumRecordBytes)
+        { throw Invalid(); }
         return NativeSerialization.Serialize(value);
     }
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);

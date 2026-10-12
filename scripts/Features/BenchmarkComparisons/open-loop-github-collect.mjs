@@ -5,6 +5,7 @@ import { AGGREGATE } from './aggregate-contracts.mjs';
 import { createDirectory, requireDirectory } from './image-bundle-files.mjs';
 import { writeCapture, writeJson, readJson } from './isolated-github-files.mjs';
 import { downloadArtifact } from './isolated-github-api.mjs';
+import { initializeTransport } from './isolated-github-transport.mjs';
 import { contextForProfile, createGitHubContext } from './isolated-github-context.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { flattenPages, validateWorkflowRun } from './isolated-github-validation.mjs';
@@ -42,7 +43,7 @@ export async function collectOpenLoopGitHubEvidence(environment = process.env, a
   const planBytes = await readBytes(paths.planPath, AGGREGATE.metadataBytes);
   const plan = validateOpenLoopPlan(parseBytes(planBytes));
   const selected = selectOpenLoopWorkers(capture, context, plan);
-  await createIntake(paths.output, paths.capture, context, selected, plan, planBytes);
+  await createIntake(paths.output, context, selected, plan, planBytes);
 }
 
 function requireDisjoint(left, right) {
@@ -61,11 +62,12 @@ async function readCapturedRun(root, context) {
   return { run, jobs: flattenPages(pages[0], 'jobs'), artifacts: flattenPages(pages[1], 'artifacts') };
 }
 
-async function createIntake(output, captureRoot, context, selected, plan, planBytes) {
+async function createIntake(output, context, selected, plan, planBytes) {
   await createDirectory(output);
   const cellsRoot = await createDirectory(path.join(output, 'cells'));
   const archivesRoot = await createDirectory(path.join(output, 'archives'));
-  const githubRoot = await requireDirectory(captureRoot);
+  const githubRoot = await createDirectory(path.join(output, 'github'));
+  await initializeTransport(context, output, githubRoot);
   await writeCapture(path.join(output, PLAN_FILE), planBytes);
   const { intake } = createOpenLoopIntakeHeader(context, plan, planBytes);
   const verifiedCells = [];

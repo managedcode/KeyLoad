@@ -46,7 +46,8 @@ internal static class PartitionMovementNativeBlobFaultAssertions
         if (reply.Error is not null)
         {
             if (reply.Error != ErrorCode.Unauthenticated || reply.SafeDetail != RemoteModelNativeProtocol.Unavailable
-                || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 }) { throw Missing(); }
+                || !reply.Payload.IsEmpty || reply.Signature is not { Length: 0 })
+            { throw Missing(); }
             return;
         }
         if (reply.SafeDetail is not null || reply.Payload.IsEmpty || !receiver.Verify(reply.Payload.Span, reply.Signature, reply: true))

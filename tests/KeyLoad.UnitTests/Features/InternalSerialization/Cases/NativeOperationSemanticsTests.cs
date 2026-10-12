@@ -62,7 +62,8 @@ internal sealed class NativeOperationSemanticsTests
         {
             if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex
                 or OperationKind.MovePartition or OperationKind.MaintainOnlineTextIndex
-                or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase)
+                or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase
+                or OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge)
             {
                 await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
             }

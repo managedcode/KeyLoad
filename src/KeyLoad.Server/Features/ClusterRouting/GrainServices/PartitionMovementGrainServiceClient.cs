@@ -58,24 +58,46 @@ internal sealed class PartitionMovementGrainServiceClient : GrainServiceClient<I
         PartitionMovementGrainServiceRequest request, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var reply = await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false);
-        if (reply is null || !HasBoundedShape(reply) || reply.Payload.Length > partition.Database.Limits.MaxBatchBytes
-            || string.IsNullOrEmpty(reply.SenderSignature) || reply.SenderSignature.Length != ReplicaTransportProtocol.HashHexCharacters)
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        var reply = await GetGrainService(address).ExchangeAsync(request, token).ConfigureAwait(false) ?? throw InvalidReply(ReplyNullStage);
+        if (!HasBoundedShape(reply))
+        { throw InvalidReply(ReplyBodyStage); }
+        if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes)
+        { throw InvalidReply(ReplyPayloadStage); }
+        if (string.IsNullOrEmpty(reply.SenderSignature) || reply.SenderSignature.Length != ReplicaTransportProtocol.HashHexCharacters)
+        { throw InvalidReply(ReplyOuterSignatureLengthStage); }
         reply = reply with { Payload = reply.Payload.ToArray() };
         using var mac = CreateMac(ControlSecret());
-        if (reply.Nonce != request.Nonce || !mac.VerifyNativeReply(reply))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        if (reply.Nonce != request.Nonce)
+        { throw InvalidReply(ReplyNonceStage); }
+        if (!mac.VerifyNativeReply(reply))
+        { throw InvalidReply(ReplySignatureStage); }
         if (reply.Error is { } error)
         {
             if (!Enum.IsDefined(error) || !reply.Payload.IsEmpty || reply.Signature is not { Length: EmptyErrorSignatureLength }
                 || reply.SafeDetail != PartitionMovementProtocol.Unavailable)
-            { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+            { throw InvalidReply(ReplyErrorStage); }
             throw Errors.Fail(error, PartitionMovementProtocol.Unavailable);
         }
         if (reply.Payload.IsEmpty || reply.SafeDetail is not null || string.IsNullOrEmpty(reply.Signature))
-        { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
+        { throw InvalidReply(ReplySuccessStage); }
         return reply;
+    }
+
+    private const string ReplyNullStage = "null";
+    private const string ReplyBodyStage = "body";
+    private const string ReplyPayloadStage = "payload";
+    private const string ReplyOuterSignatureLengthStage = "outer-signature-length";
+    private const string ReplyNonceStage = "nonce";
+    private const string ReplySignatureStage = "signature";
+    private const string ReplyErrorStage = "error";
+    private const string ReplySuccessStage = "success";
+    internal const string InvalidReplyStage = "KeyLoad.PartitionMovement.InvalidReplyStage";
+
+    private static KeyLoadException InvalidReply(string stage)
+    {
+        var failure = Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
+        failure.Data[InvalidReplyStage] = stage;
+        return failure;
     }
 
     private static bool HasBoundedShape(PartitionMovementGrainServiceReply reply)

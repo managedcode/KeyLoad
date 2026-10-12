@@ -16,7 +16,7 @@ internal sealed class RequestCqrsNativeReplayFrameCase : IDisposable
     {
         Mac = new(security.Options.Secret.Span);
         database.AddPrincipal(new(Principal, RemoteTransferDatabase.TenantId, [new("*", "*", Capability.All)], ["*"])
-            { ClusterAdministrator = true });
+        { ClusterAdministrator = true });
     }
 
     internal RequestCqrsNativeReplayWitness Create(RemoteModelNativeReplayVariation mode = RemoteModelNativeReplayVariation.Original2)
@@ -30,7 +30,8 @@ internal sealed class RequestCqrsNativeReplayFrameCase : IDisposable
         var claims = database.Database.Verify<RemoteTransferIntentClaims>(intent.IntentToken);
         var owner = new PhysicalShardRecord(Guid.NewGuid(), security.Configuration.Incarnation, security.Configuration.VoterIds, 1);
         var registered = new RegisteredPhysicalOwnerV1(owner, security.Configuration.VoterIds);
-        var requestId = Guid.NewGuid(); var commandId = Guid.NewGuid();
+        var requestId = Guid.NewGuid();
+        var commandId = Guid.NewGuid();
         var expiry = TimeProvider.System.GetUtcNow().AddSeconds(1);
         var call = new RemoteQueueTransferPeerCall(RemoteTransferPeerProtocol.Version, requestId, Guid.NewGuid().ToString("N"),
             expiry, security.Configuration.LocalId, security.Discovery.RuntimeAddress, registered, registered,

@@ -860,3 +860,50 @@ REQ-REP-004/005 / AC-REP-004/005 / AC-KL035-RETAINED-COLD-001: retain the origin
 Before either cut and after each, real SDK and official MCP independently replay the unchanged final command, original subscription-processing command and original projection command with their original IDs. Compare each complete public outcome to the retained original acknowledgement, not only Token/AlreadyProcessed. Read all40 independently literal doc-0..39 records (revision1, exact numeric JSON/reference/deletion/fields) and the literal projection record, retaining exact41-change history and subscription/outbox checkpoint checks. After second cold, a fresh command must return a genuine later same-authority RF3 receipt, full literal mutation result and exact same-ID SDK/MCP replay; old original receipt remains byte-exact.
 
 The existing outer retained-follower failure owner tracks each actual stop/restart, joins original official MCP scopes and propagates initiating plus disposal failures; a failed cold cut reuses original failed-replica restore path and its unchanged cleanup deadline. No clocks, limits, receipt fields, caller roles, aliases, schema, provider, selector or TUnit declaration/UID change. No strict stopped store opener or READY115 dependency is introduced. This strengthens an existing complete public snapshot case and does not duplicate its process-install/GC controls. Source/preview is not compiler, runtime, Linux, endurance or power-loss qualification. Historical49-case receipts remain source-specific.
+
+
+## TASK-KL021-NATIVE-DISCOVERY-PROFILE-001 — original namespace fixture admission
+
+REQ-KL021-DISCOVERY-001: The explicitly selected native namespace-isolation fixture owns one existing bounded RequestCqrsProbeFixture before Aspire model construction. Reuse ClusterFixtureSnapshotReadiness.Create/Apply/JoinAfterStop; no arm or principal provisioning is needed for the original persisted administrator signed discovery. Default and unrelated fixture profiles remain uninstrumented. The diagnostic endpoint remains fixture-only; health/readiness is independent of signed discovery authentication.
+
+AC-KL021-DISCOVERY-001: The original Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm reaches VerifyStartedAsync with authenticated native discovery for every actual owned voter before namespace mutation, then retains its complete original SDK/official MCP authority, refusal, restoration and healthy assertions. Current owner/generation, nonce, cluster/incarnation and original MAC checks remain unchanged. A non-200 response is not a signature failure. Original run38223377791/job114724826120 failed before scenario entry; its actual response status/body was not retained. Current source predicts the absent route when both enable settings are false, independently of readiness200; a future exact-source runtime must verify this causal repair.
+
+REQ-KL021-DISCOVERY-002: Existing owning cleanup joins the actual Aspire application before deleting the probe owner tree; failed stop or owner cleanup retains evidence under the existing ClusterFixture rules. No duplicate lifecycle, timeout increase, public endpoint widening or diagnostic authority substitute is permitted.
+
+AC-KL021-DISCOVERY-002: Original namespace resources/image rules and every initiating/cleanup failure remain preserved. Successful cleanup removes the actual owned probe tree after app stop; a failed join retains it. Compiler, Linux whole-flow and original cold/replay gates remain OPEN until Main executes them.
+
+Canonical slice map: IntegrationTests Features/ClusterReplication/Helpers/ClusterFixtureComposition.cs selects the explicit profile; Helpers/ClusterFixtureSnapshotReadiness.cs creates/applies the existing owner; ClusterFixture.cs owns unchanged startup/JoinAfterStop; ClusterRouting/Helpers/RequestCqrsRf3SignedDiscovery.cs verifies original signed observations; Server ClusterReplication/Diagnostics/NativeSiloDiscoveryDiagnosticEndpoints.cs retains unchanged fixture-only mapping and fresh persisted administrator/current native generation admission.
+
+```mermaid
+flowchart TD
+    A[Explicit namespace isolation profile] --> B[Create actual bounded probe owner]
+    B --> C[Apply existing profile before Aspire build]
+    C --> D[Join real RF3 resources and verify signed native discovery]
+    D --> E[Original namespace fault and SDK MCP assertions]
+    E --> F[Stop and join original Aspire resources]
+    F --> G{Cleanup succeeded}
+    G -->|yes| H[Delete exact owned probe tree]
+    G -->|no| I[Retain original evidence and failures]
+```
+
+
+## Native discovery contract before transport and after owner settlement
+
+REQ-REP-NATIVE-DISCOVERY-CONTRACT-001: Outbound discovery accepts only the configured voter and a bounded canonical full Orleans SiloAddress, including its generation. Parse with the pinned native Orleans TryParse and require exact ToParsableString roundtrip before constructing or signing the request or entering transport. Blank, malformed, oversized and noncanonical caller addresses produce Validation/InvalidPeer; valid native authentication bytes remain unchanged. This does not relax inbound membership, current generation or replay admission.
+
+AC-REP-NATIVE-DISCOVERY-CONTRACT-001: PeerDiscoverySecurityTests.OutboundNativeContractErrorsAreTypedBeforeTransport retains its original voter refusals, exercises every bad-address class, and then completes the genuine healthy exchange with the same native owners. Transport must not receive invalid requests. Compiler and exact-source Linux runtime evidence remain required.
+
+REQ-REP-NATIVE-DISCOVERY-CONTRACT-002: A settled/disposed native discovery runtime rejects its original asynchronous operation with ObjectDisposedException before borrowed authentication or membership work. Observe the original returned faulted Task asynchronously; preserve each synchronous signer/verifier disposal check and joined owner cleanup.
+
+AC-REP-NATIVE-DISCOVERY-CONTRACT-002: NativeDiscoveryDisposedOwnerTests.ActualDisposedNativeSignerAndVerifierRefuseEveryDiscoveryEntry observes that exact asynchronous exception and retains its entire healthy/disposal flow. PeerDiscoveryOwnershipTests.ClosedNativeRuntimeRejectsBeforeBorrowedAuthenticationOrMembership remains the independent original ownership control. No test declaration, UID, production lifetime or disposal contract is removed.
+
+Existing native movement peer-refusal diagnostics now distinguish only closed shape stages null, body, payload and outer-signature-length, followed by the original nonce, MAC, error and success validation. This attribution carries no caller content or credentials and changes no wire/authentication contract. The original R21 bad64 failures reached shape before prepare/cold recovery; their issuer cause and full recovery acceptance remain open.
+
+```mermaid
+flowchart LR
+    A[Configured voter and full native address] --> B[Bounded native parse and exact roundtrip]
+    B --> C[Unchanged native signature and transport]
+    C --> D[Genuine authenticated discovery result]
+    D --> E[Join actual original owner]
+    E --> F[Original disposed Task refuses before borrowed work]
+```

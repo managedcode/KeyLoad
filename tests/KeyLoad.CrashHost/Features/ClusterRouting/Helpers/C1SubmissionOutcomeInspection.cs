@@ -13,11 +13,13 @@ internal static class C1SubmissionOutcomeInspection
         if (args.Length == NoArguments || !string.Equals(args[ModeArgumentIndex], C1SubmissionOutcomeInspectionProtocol.Mode, StringComparison.Ordinal))
         { return false; }
         var evidence = new C1OutcomeInspectionFailureEvidence();
-        Console.SetOut(TextWriter.Null); Console.SetError(TextWriter.Null);
+        Console.SetOut(TextWriter.Null);
+        Console.SetError(TextWriter.Null);
         try
         {
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
-            if (args.Length != OnlyModeArgumentCount) { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+            if (args.Length != OnlyModeArgumentCount)
+            { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ReadInput);
             var input = await C1OutcomeInspection.ReadRequestBytesAsync().ConfigureAwait(false);
             evidence.SetPhase(C1OutcomeInspectionFailurePhase.ValidateRequest);
@@ -34,7 +36,8 @@ internal static class C1SubmissionOutcomeInspection
             var failures = new List<Exception> { failure };
             await ServerFailureObserver.ObserveAsync(() => C1OutcomeInspection.WriteBytesAsync(evidence.Bytes(),
                 standardError: true), failures).ConfigureAwait(false);
-            if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal)) { ServerFailureObserver.ThrowIfAny(failures); }
+            if (failures.Any(C1OutcomeInspectionFailures.ContainsFatal))
+            { ServerFailureObserver.ThrowIfAny(failures); }
             Environment.ExitCode = C1OutcomeInspectionProtocol.FailureExitCode;
             GC.KeepAlive(failures);
         }

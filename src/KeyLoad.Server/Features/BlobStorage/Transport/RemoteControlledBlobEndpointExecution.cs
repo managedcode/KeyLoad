@@ -5,12 +5,12 @@ namespace KeyLoad.Server.Features.BlobStorage;
 
 internal static class RemoteControlledBlobEndpointExecution
 {
-    internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync( RemoteControlledBlobCall call,
+    internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteControlledBlobCall call,
         RemoteControlledBlobReceiver receiver, NodeOptions options,
         PartitionMovementReplayCache replay, TimeProvider clock, CancellationToken token)
         => ExecuteAsync(call, receiver, options, replay, clock, null, token);
 
-    internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync( RemoteControlledBlobCall call,
+    internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteControlledBlobCall call,
         RemoteControlledBlobReceiver receiver, NodeOptions options,
         PartitionMovementReplayCache replay, TimeProvider clock,
         global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary, CancellationToken token)

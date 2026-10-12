@@ -27,7 +27,7 @@ internal sealed class NativeDiscoveryDisposedOwnerTests(PeerDiscoveryNativeClust
             Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Receiver.CreateNativeDiscoveryReply(request, reply.Payload));
             Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Sender.VerifyNativeDiscoveryReply(request, reply));
             await fixture.Runtime.StopAsync();
-            Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Runtime.DiscoverAsync(request, PeerDiscoveryFixture.Cancellation));
+            await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => fixture.Runtime.DiscoverAsync(request, PeerDiscoveryFixture.Cancellation));
         });
     }
 
@@ -64,7 +64,8 @@ internal sealed class NativeDiscoveryDisposedOwnerTests(PeerDiscoveryNativeClust
             var calls = Enumerable.Range(0, 16).Select(_ => Task.Run(async () =>
             {
                 await begin.Task;
-                try { return fixture.Sender.SignDiscovery(original.Payload.Span, nonce); }
+                try
+                { return fixture.Sender.SignDiscovery(original.Payload.Span, nonce); }
                 catch (ObjectDisposedException) { return null; }
             }, PeerDiscoveryFixture.Cancellation)).ToArray();
             var close = Task.Run(async () =>

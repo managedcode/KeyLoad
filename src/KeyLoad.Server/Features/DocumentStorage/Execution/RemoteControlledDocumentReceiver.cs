@@ -36,8 +36,10 @@ internal sealed class RemoteControlledDocumentReceiver(OrleansNode node, Partiti
                 var reply = await node.ExecuteAsync(requestId, signed, command: false, cancellationToken: token).ConfigureAwait(false);
                 Validate(call, token);
                 if (boundary is not null && reply.Error is { } terminal && terminal != ErrorCode.Corruption)
-                { throw new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeTerminalException(
-                    Errors.Fail(terminal, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable)); }
+                {
+                    throw new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeTerminalException(
+                    Errors.Fail(terminal, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable));
+                }
                 if (reply.Error is { } error)
                 { throw Errors.Fail(error, reply.SafeDetail ?? RemoteDocumentProtocol.Unavailable); }
                 result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as ControlledDocumentReadResult

@@ -14,7 +14,7 @@ internal static class TestDatabaseReplicaRecovery
     internal static ReplicaMaterializer Recover(ReplicaMaterializer original, DatabaseEngine database,
         DurableReplicaLog log, IReplicaSnapshotStore snapshots, IOptions<ReplicaExecutionOptions> options,
         ReplicatedOperation operation, Action restoreFaultOwnedRow, Action retireJoinedOwner, List<Exception> originalFailures,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, ErrorCode? expectedApplyError = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var entry = log.ReadEntry(log.State.CommittedIndex);
@@ -23,7 +23,7 @@ internal static class TestDatabaseReplicaRecovery
             || database.ResolveOutcome(operation).Error != ErrorCode.RecoveryRequired)
         { throw new InvalidOperationException(InvalidRecovery); }
         RequireFailed(original);
-        var expectedError = RequireOriginalError(originalFailures);
+        var expectedError = RequireOriginalError(originalFailures, expectedApplyError);
         var joined = new List<Exception>();
         try
         { original.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
@@ -51,13 +51,15 @@ internal static class TestDatabaseReplicaRecovery
         throw new InvalidOperationException(InvalidRecovery);
     }
 
-    private static ErrorCode RequireOriginalError(List<Exception> failures)
+    private static ErrorCode RequireOriginalError(List<Exception> failures, ErrorCode? expectedApplyError)
     {
         if (failures.Count != RequiredSubmissionFailures || failures[0] is not KeyLoadException
-                { Code: ErrorCode.Corruption or ErrorCode.RecoveryRequired } first
-            || !IsOriginalFailure(failures[RetainedReplayFailureIndex], ErrorCode.RecoveryRequired))
+            { Code: ErrorCode.Corruption or ErrorCode.RecoveryRequired } first
+            || !IsOriginalFailure(failures[RetainedReplayFailureIndex], ErrorCode.RecoveryRequired)
+            || expectedApplyError is not (null or ErrorCode.Corruption or ErrorCode.RecoveryRequired)
+            || expectedApplyError is not null && first.Code != ErrorCode.RecoveryRequired)
         { throw new InvalidOperationException(InvalidRecovery); }
-        return first.Code;
+        return expectedApplyError ?? first.Code;
     }
 
     private static bool IsOriginalFailure(Exception error, ErrorCode expectedError)

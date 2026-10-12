@@ -23,7 +23,8 @@ internal static class OrleansSiloConfiguration
         IControlledDocumentCommandRouter? controlledDocuments, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
         NativeDiscoveryOmissionOwner? discoveryOmission, IEventVectorParent? eventVectorParent,
         PhysicalOwnerProbeNativeRuntime? physicalProbe, NativeLocalhostClusteringOptions? localhostClustering,
-        IRemoteAnnReadRouter? remoteAnnReads, CancellationToken startupCancellation)
+        IRemoteAnnReadRouter? remoteAnnReads,
+        global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphRuntime? remoteGraphs, CancellationToken startupCancellation)
     {
         startupCancellation.ThrowIfCancellationRequested();
         var builder = Host.CreateApplicationBuilder();
@@ -62,6 +63,8 @@ internal static class OrleansSiloConfiguration
         builder.Services.AddSingleton(provider => new global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeClient(
             provider, partition, runtimeOptions.Node, runtimeOptions.Membership, runtimeOptions.GrainRouting,
             provider.GetRequiredService<PartitionMovementGrainServiceClient>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(), clock));
+        global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphNativeHosting.Register(
+            builder.Services, partition, runtimeOptions, clock, remoteGraphs);
         if (movementDispatcher is IPartitionMovementParent movementParent)
         { builder.Services.AddSingleton(movementParent); }
         if (eventVectorParent is not null)
@@ -189,6 +192,7 @@ internal static class OrleansSiloConfiguration
         silo.AddGrainService<PartitionReplicaGrainService>();
         silo.AddGrainService<PartitionMovementGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
+        silo.AddGrainService<global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGrainService>();
         if (options.RequestCqrsProbe.Enabled)
         { silo.AddGrainService<RequestCqrsProbeGrainService>(); }
         silo.AddGrainService<RecurringDueGrainService>();

@@ -43,7 +43,8 @@ internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost
                 command ? call.OriginalCommandId : Guid.Empty, token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                if (command) { effectBoundary?.Begin(token); }
+                if (command)
+                { effectBoundary?.Begin(token); }
                 var reply = await node.ExecuteAsync(requestId, signed, command, token).ConfigureAwait(false);
                 work.Check();
                 result = reply.Error is { } error

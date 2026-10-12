@@ -41,7 +41,8 @@ internal sealed class NativeCanonicalModelCutFixture
             { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
             NativeCanonicalModelCutOriginalArm.RequireOwners(original);
             files.RequireInventory(arms);
-            try { NativeCanonicalModelCutMounts.Configure(builder, files, SessionId); }
+            try
+            { NativeCanonicalModelCutMounts.Configure(builder, files, SessionId); }
             catch (Exception) { admissionStopped = true; retained = true; throw; }
             configured = true;
         }
@@ -54,7 +55,8 @@ internal sealed class NativeCanonicalModelCutFixture
             RequireAdmission();
             if (!configured)
             { throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); }
-            try { MirrorOriginal(originalArmId); }
+            try
+            { MirrorOriginal(originalArmId); }
             catch (Exception) { admissionStopped = true; retained = true; throw; }
         }
     }
@@ -113,7 +115,8 @@ internal sealed class NativeCanonicalModelCutFixture
             NativeCanonicalModelCutFiles.RequireJoinedOwners(wave);
             if (retained)
             { return Task.CompletedTask; }
-            try { files.Delete(arms); cleaned = true; }
+            try
+            { files.Delete(arms); cleaned = true; }
             catch (Exception) { retained = true; throw; }
             return Task.CompletedTask;
         }

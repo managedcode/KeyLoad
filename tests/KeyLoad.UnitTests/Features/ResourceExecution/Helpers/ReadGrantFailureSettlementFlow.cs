@@ -21,25 +21,25 @@ internal static class ReadGrantFailureSettlementFlow
         {
             using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximum, MaxScanRecords = NativeRecords });
             ZoneTreeStore? cold = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            var original = TenantAdmissionAssertions.State(fixture.Store);
-            var position = fixture.Store.Position;
-            using var cancellation = new CancellationTokenSource();
-            var actual = fixture.Store.Read(view => FailAndSettle(view, fixture, cancellation));
-            await AssertFailureAsync(actual, cancellation.Token);
-            await HealthyAsync(fixture.Store, maximum);
-            await Assert.That(TenantAdmissionAssertions.State(fixture.Store).SequenceEqual(original)).IsTrue();
-            await Assert.That(fixture.Store.Position).IsEqualTo(position);
-            fixture.Store.Dispose();
-            cold = new(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
-            await Assert.That(TenantAdmissionAssertions.State(cold).SequenceEqual(original)).IsTrue();
-            await Assert.That(cold.Position).IsEqualTo(position);
-            await HealthyAsync(cold, maximum);
-            await Assert.That(TenantAdmissionAssertions.State(cold).SequenceEqual(original)).IsTrue();
-            await Assert.That(cold.Position).IsEqualTo(position);
-        }, failures);
-        ServerFailureObserver.Observe(() => cold?.Dispose(), failures);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                var original = TenantAdmissionAssertions.State(fixture.Store);
+                var position = fixture.Store.Position;
+                using var cancellation = new CancellationTokenSource();
+                var actual = fixture.Store.Read(view => FailAndSettle(view, fixture, cancellation));
+                await AssertFailureAsync(actual, cancellation.Token);
+                await HealthyAsync(fixture.Store, maximum);
+                await Assert.That(TenantAdmissionAssertions.State(fixture.Store).SequenceEqual(original)).IsTrue();
+                await Assert.That(fixture.Store.Position).IsEqualTo(position);
+                fixture.Store.Dispose();
+                cold = new(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+                await Assert.That(TenantAdmissionAssertions.State(cold).SequenceEqual(original)).IsTrue();
+                await Assert.That(cold.Position).IsEqualTo(position);
+                await HealthyAsync(cold, maximum);
+                await Assert.That(TenantAdmissionAssertions.State(cold).SequenceEqual(original)).IsTrue();
+                await Assert.That(cold.Position).IsEqualTo(position);
+            }, failures);
+            ServerFailureObserver.Observe(() => cold?.Dispose(), failures);
         }
         catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

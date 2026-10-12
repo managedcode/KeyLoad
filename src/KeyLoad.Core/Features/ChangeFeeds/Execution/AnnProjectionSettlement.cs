@@ -24,7 +24,8 @@ public sealed partial class DatabaseEngine
         AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId)
     {
         var initial = Store.Read(view => ProjectionConsumer(view, original.Consumer));
-        if (initial.InitialAnnMaintenance is not { } reserved) { return null; }
+        if (initial.InitialAnnMaintenance is not { } reserved)
+        { return null; }
         if (!NativeSerialization.Serialize(reserved).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
         {
             if (!initial.InitialAnnMaintenanceSettled)
@@ -84,7 +85,8 @@ public sealed partial class DatabaseEngine
     private ProjectionConsumerInfo? RequireAnnInitialSettlement(IKeyValueView view, PrincipalRecord principal,
         CommitProjectionBatchRequest request, ProjectionBatchClaims batch, DateTimeOffset now, bool completed)
     {
-        if (request.InitialAnnMaintenanceSettlement is not { } token) { return null; }
+        if (request.InitialAnnMaintenanceSettlement is not { } token)
+        { return null; }
         var proof = Verify<AnnProjectionSettlementClaims>(token);
         var state = ProjectionConsumer(view, request.Consumer);
         var authority = RequireAnnSettlementAuthority(state, principal);

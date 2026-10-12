@@ -33,7 +33,7 @@ export async function captureCurrentJob(environment = process.env, argv = proces
   await requireOutputFile(environment.GITHUB_ENV);
   await verifySourceCheckout(context.native);
   const directory = await createDirectory(path.join(context.native.runnerTemp, GH.captureDirectory + (finalizing ? '-finalize' : '')));
-  await initializeTransport(context, directory, directory);
+  await initializeTransport(profileContext, directory, directory);
   const discovered = validateJobIdentity(await captureCurrentJobPages(directory, profileContext, name), profileContext.cohort, name);
   const job = await captureFreshCurrentJob(discovered, directory, profileContext, name);
   await writeJson(path.join(directory, 'job.json'), job);

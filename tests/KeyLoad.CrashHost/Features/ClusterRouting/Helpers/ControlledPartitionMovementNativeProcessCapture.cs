@@ -54,7 +54,8 @@ internal static class ControlledPartitionMovementNativeProcessCapture
                 rows.Add(Convert.ToHexString(row.Key.Span) + RowSeparator + Convert.ToHexString(row.Value.Span));
                 after = row.Key.ToArray();
             }
-            if (!result.HasMore) { return rows.ToImmutable(); }
+            if (!result.HasMore)
+            { return rows.ToImmutable(); }
             if (result.Records.IsEmpty)
             { throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid); }
         }

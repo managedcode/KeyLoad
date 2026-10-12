@@ -23,9 +23,13 @@ internal static class CanonicalOperationRequestPreparation
         { payload = ClusterBackupCredentialCapability.Wrap(context, payload); }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var signed = readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)
-            : global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning.Create(
-                codec, requestId, principal.Id, commandKind!.Value, commandId, payload);
+        var signed = global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Handles(readKind, commandKind)
+            ? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Create(codec,
+                context.RequestServices.GetRequiredService<TimeProvider>(), requestId, principal.Id,
+                readKind, commandKind, commandId, payload)
+            : readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)
+                : global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning.Create(
+                    codec, requestId, principal.Id, commandKind!.Value, commandId, payload);
         var receivingOnly = global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning
             .IsReceivingOnly(commandKind, payload);
         var command = commandKind.HasValue && !receivingOnly;

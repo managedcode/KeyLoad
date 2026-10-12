@@ -46,17 +46,21 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
     {
         var failures = new List<Exception>();
         Task? stopped = null;
-        try { stopped = base.Stop(); }
+        try
+        { stopped = base.Stop(); }
         catch (Exception failure) when (GrainBoundaryErrors.Handles(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!GrainBoundaryErrors.Handles(failure)) { failures.Add(failure); }
-        if (stopped is not null) { await JoinStopAsync(stopped, failures).ConfigureAwait(true); }
-        if (producer is { } active) { await JoinStopAsync(active, failures).ConfigureAwait(true); }
+        if (stopped is not null)
+        { await JoinStopAsync(stopped, failures).ConfigureAwait(true); }
+        if (producer is { } active)
+        { await JoinStopAsync(active, failures).ConfigureAwait(true); }
         AnnProjectionJobFailures.ThrowIfAny(failures);
     }
 
     private static async Task JoinStopAsync(Task original, List<Exception> failures)
     {
-        try { await original.ConfigureAwait(true); }
+        try
+        { await original.ConfigureAwait(true); }
         catch (Exception failure) when (GrainBoundaryErrors.Handles(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!GrainBoundaryErrors.Handles(failure)) { failures.Add(failure); }
     }
@@ -89,9 +93,11 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
     {
         try
         {
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true)) { return null; }
+            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
+            { return null; }
             await consensus.ReadBarrierAsync(token).ConfigureAwait(true);
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true)) { return null; }
+            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
+            { return null; }
             var budget = new ReadExecutionBudget(limits, clock, token);
             var page = database.ReadAnnProjectionWorkPage(after, budget);
             foreach (var rejection in page.Rejected)
@@ -118,10 +124,12 @@ public sealed class AnnProjectionGrainService(GrainId id, Silo silo, ILoggerFact
 
     private static async Task JoinAsync(Task original, CancellationToken token)
     {
-        try { await original.WaitAsync(token).ConfigureAwait(true); }
+        try
+        { await original.WaitAsync(token).ConfigureAwait(true); }
         catch (OperationCanceledException initiating) when (token.IsCancellationRequested)
         {
-            try { await original.ConfigureAwait(true); }
+            try
+            { await original.ConfigureAwait(true); }
             catch (Exception cleanup) { throw new AggregateException(initiating, cleanup); }
             throw;
         }

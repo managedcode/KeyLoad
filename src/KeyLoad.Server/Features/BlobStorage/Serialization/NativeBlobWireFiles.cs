@@ -18,7 +18,8 @@ internal sealed class NativeBlobWireFiles(string root, IOptions<RequestProbeExec
         _ = inventory.Read();
         var path = PathFor(name);
         var length = NativeBlobWireFileInventory.RequireFile(path);
-        if (length <= EmptyRecordBytes || length > limits.Value.MaximumRecordBytes) { throw Invalid(); }
+        if (length <= EmptyRecordBytes || length > limits.Value.MaximumRecordBytes)
+        { throw Invalid(); }
         var failures = new List<Exception>();
         byte[] bytes = [];
         try
@@ -71,8 +72,11 @@ internal sealed class NativeBlobWireFiles(string root, IOptions<RequestProbeExec
             + Guid.NewGuid().ToString(RequestCqrsProbeProtocol.SessionIdFormat) + NativeBlobWireNames.TemporarySuffix);
         var streamOptions = new FileStreamOptions
         {
-            Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None,
-            BufferSize = limits.Value.FileBufferBytes, Options = FileOptions.WriteThrough
+            Mode = FileMode.CreateNew,
+            Access = FileAccess.Write,
+            Share = FileShare.None,
+            BufferSize = limits.Value.FileBufferBytes,
+            Options = FileOptions.WriteThrough
         };
         if (!OperatingSystem.IsWindows())
         { streamOptions.UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode; }
@@ -91,7 +95,8 @@ internal sealed class NativeBlobWireFiles(string root, IOptions<RequestProbeExec
 
     internal void RemoveLocked(string name, byte[] expected)
     {
-        if (!Read(name).AsSpan().SequenceEqual(expected)) { throw Invalid(); }
+        if (!Read(name).AsSpan().SequenceEqual(expected))
+        { throw Invalid(); }
         File.Delete(PathFor(name));
         _ = inventory.Read();
     }
@@ -100,17 +105,21 @@ internal sealed class NativeBlobWireFiles(string root, IOptions<RequestProbeExec
     {
         _ = inventory.Read();
         var path = PathFor(name);
-        if (NativeBlobWireFileInventory.RequireFile(path) != EmptyLockBytes) { throw Invalid(); }
+        if (NativeBlobWireFileInventory.RequireFile(path) != EmptyLockBytes)
+        { throw Invalid(); }
         return new FileStream(path, new FileStreamOptions
         {
-            Mode = FileMode.Open, Access = FileAccess.ReadWrite, Share = FileShare.None,
+            Mode = FileMode.Open,
+            Access = FileAccess.ReadWrite,
+            Share = FileShare.None,
             BufferSize = limits.Value.FileBufferBytes
         });
     }
 
     private string PathFor(string name)
     {
-        if (name != Path.GetFileName(name)) { throw Invalid(); }
+        if (name != Path.GetFileName(name))
+        { throw Invalid(); }
         return Path.Combine(root, name);
     }
     private static InvalidOperationException Invalid() => new(NativeBlobWireProbeProtocol.InvalidEvidence);

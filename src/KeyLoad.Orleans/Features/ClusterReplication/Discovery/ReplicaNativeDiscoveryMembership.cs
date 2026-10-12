@@ -73,7 +73,8 @@ internal sealed class ReplicaNativeDiscoveryMembership(ISiloStatusOracle oracle,
     {
         if (string.IsNullOrWhiteSpace(value))
         { return false; }
-        try { return Utf8.GetByteCount(value) <= options.Value.MaximumAddressBytes; }
+        try
+        { return Utf8.GetByteCount(value) <= options.Value.MaximumAddressBytes; }
         catch (EncoderFallbackException) { return false; }
     }
 }

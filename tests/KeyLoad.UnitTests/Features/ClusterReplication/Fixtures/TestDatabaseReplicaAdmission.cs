@@ -127,7 +127,7 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
     }
 
     internal ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original, Action restoreFaultOwnedRow,
-        List<Exception> failures, CancellationToken cancellationToken)
+        List<Exception> failures, CancellationToken cancellationToken, ErrorCode? expectedApplyError = null)
     {
         lock (admission)
         {
@@ -135,7 +135,8 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
             var entry = log.ReadEntry(log.State.CommittedIndex) ?? throw new InvalidOperationException(MissingEntry);
             materializer = TestDatabaseReplicaRecovery.Recover(RequireMaterializer(), database, log, snapshots, ExecutionOptions,
-                database.NormalizeOperation(original), restoreFaultOwnedRow, () => materializer = null, failures, cancellation.Token);
+                database.NormalizeOperation(original), restoreFaultOwnedRow, () => materializer = null, failures, cancellation.Token,
+                expectedApplyError);
             RequireMaterializer().WaitForApplyAsync(entry.Index, cancellation.Token).GetAwaiter().GetResult();
             return entry;
         }

@@ -41,7 +41,8 @@ internal static class NativeCanonicalModelCutRejectionAssertions
     }
     private static void RequireDuplicateRefusal(Action operation)
     {
-        try { operation(); }
+        try
+        { operation(); }
         catch (InvalidDataException) { return; }
         catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted) { return; }
         throw new InvalidOperationException(MissingRealData);

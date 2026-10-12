@@ -84,7 +84,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = (configuration ?? new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid()))
-            with { Directory = directory };
+            with
+        { Directory = directory };
         if (maximumAppendEntries is { } maximum)
         {
             Configuration = Configuration with { MaxAppendEntries = maximum };
@@ -122,7 +123,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => Materializer.DisposeAsync().AsTask(), failures);
         KeyLoad.Server.ServerFailureObserver.Observe(Log.Dispose, failures);
         KeyLoad.Server.ServerFailureObserver.Observe(ReplicaStore.Dispose, failures);
-        try { canonical.Dispose(); }
+        try
+        { canonical.Dispose(); }
         catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         KeyLoad.Server.ServerFailureObserver.Observe(() => Directory.Delete(directory, true), failures);

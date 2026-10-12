@@ -90,7 +90,7 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
     private (string SourceAlias, string Path) SourceKeyPath(string expectedAlias, ModelQuerySource? source)
     {
         var parts = cursor.Path();
-        var queueReference = source?.Kind == ModelQuerySourceKind.QueueMessages
+        var queueReference = source?.Kind is ModelQuerySourceKind.QueueMessages or ModelQuerySourceKind.Events
             && parts.Count == QualifiedQueueReferenceSegments
             && parts[PayloadSegment] == PayloadField && parts[ReferenceSegment] == ReferenceField;
         if (parts.Count != QualifiedPathSegmentCount && !queueReference

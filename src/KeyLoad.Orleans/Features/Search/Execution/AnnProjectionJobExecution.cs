@@ -27,7 +27,8 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionJobProtocol.Invalid);
         if (work.Consumer.InitialAnnMaintenance is { } reserved)
         {
-            if (!work.Consumer.InitialAnnMaintenanceSettled) { return null; }
+            if (!work.Consumer.InitialAnnMaintenanceSettled)
+            { return null; }
             if (reserved.NodeId != work.NodeId || reserved.Placement.PhysicalShardId != work.Placement.PhysicalShardId
                 || reserved.Placement.Incarnation != work.Placement.Incarnation
                 || reserved.Placement.PlacementEpoch != work.Placement.PlacementEpoch
@@ -37,7 +38,8 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
                 return new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null);
             }
             var enrollment = await native.ReadEnrollmentAsync(work.Principal, reserved, token).ConfigureAwait(true);
-            if (enrollment is null) { return null; }
+            if (enrollment is null)
+            { return null; }
             var adopted = new AnnProjectionJobState(authority, enrollment.InitialRequest, null, null,
                 enrollment.LastResult, null, enrollment.LastResult.Source?.ThroughSequence
                     ?? throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid), enrollment.LastRequest);
@@ -76,8 +78,12 @@ internal sealed class AnnProjectionJobExecution(DatabaseEngine database, INative
         if (publication.Source.ThroughSequence >= work.ThroughSequence)
         { return null; }
         var restore = original.InitialRequest with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore };
-        return original with { PendingRequest = restore, JobId = null,
-            RequiredThroughSequence = work.ThroughSequence };
+        return original with
+        {
+            PendingRequest = restore,
+            JobId = null,
+            RequiredThroughSequence = work.ThroughSequence
+        };
     }
 
     internal async Task<AnnMaintenanceResult> ExecuteAsync(global::Orleans.IGrainFactory grains,

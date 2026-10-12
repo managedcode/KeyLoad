@@ -19,6 +19,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     private string dataRoot = string.Empty;
     private RequestCqrsProbeFixture? controls;
     private RequestCqrsRf3Wave? wave;
+    private global::KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageTestSession? localImageSession;
     private RequestCqrsRf3Callers? administrator;
     private RequestCqrsRf3Callers? caller;
     private RequestCqrsAuthorityFaultIdentity? identity;
@@ -44,7 +45,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         try
         {
             await RequestCqrsAuthorityFaultCleanup.RunAsync(root, rootCreated, waveStartupAttempted,
-            controls, wave, caller, administrator, discovery, operationDeadline, sdkCall, mcpCall,
+            localImageSession, dataRoot, controls, wave, caller, administrator, discovery, operationDeadline, sdkCall, mcpCall,
             armId, originalStarted, outcomeOracle, commandId, Failures, lifecycle.RecordOwnerFailure).ConfigureAwait(false);
         }
         finally
@@ -81,13 +82,16 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         dataRoot = Path.Combine(root, "data");
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, cancellationToken).ConfigureAwait(false)).Profile;
-        var proof = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken).ConfigureAwait(false);
+        localImageSession = await global::KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageTestSession
+            .StartIfSelectedAsync(cancellationToken).ConfigureAwait(false);
+        var proof = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken, localImageSession?.Selection)
+            .ConfigureAwait(false);
         controls = RequestCqrsProbeFixture.Create(dataRoot, Guid.NewGuid());
         waveStartupAttempted = true;
         lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         wave = await RequestCqrsRf3Wave.StartProbedAsync(dataRoot,
             RequestCqrsAuthorityFaultProvisioning.CurrentImages(proof.Current), controls, cancellationToken,
-            lifecycle).ConfigureAwait(false);
+            lifecycle, selection: localImageSession?.Selection).ConfigureAwait(false);
         var app = (wave ?? throw new InvalidOperationException(MissingOwner)).App;
         discovery = await RequestCqrsAuthorityFaultDiscovery.ReadAsync(app, profile, cancellationToken).ConfigureAwait(false);
         administrator = await RequestCqrsRf3Callers.ConnectAsync(app, RequestCqrsRf3Protocol.Node1,

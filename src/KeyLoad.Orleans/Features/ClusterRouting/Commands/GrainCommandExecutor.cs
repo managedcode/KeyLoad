@@ -68,6 +68,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     {
         return kind switch
         {
+            OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
+                => await GrainRemoteGraphCommand.SubmitAsync(database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => await GrainEventVectorSourceCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(

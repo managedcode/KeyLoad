@@ -14,7 +14,8 @@ internal sealed class NativeBlobWireFileCases
             var original = candidates.Select(bytes => Task.Run(async () =>
             {
                 await start.Task;
-                try { fixture.Publish(name, bytes); return true; }
+                try
+                { fixture.Publish(name, bytes); return true; }
                 catch (IOException) { return false; }
                 catch (InvalidOperationException failure) when (failure.Message == NativeBlobWireProbeProtocol.InvalidEvidence)
                 { return false; }
@@ -53,14 +54,16 @@ internal sealed class NativeBlobWireFileCases
             await Assert.That(Directory.GetFiles(fixture.Root).Sum(path => new FileInfo(path).Length)).IsEqualTo(1048576L);
             Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Publish(NativeBlobWireFileFixture.Temporary(), [1]));
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(129);
-            foreach (var name in names) { await Assert.That(fixture.Files.Read(name).Length).IsEqualTo(8192); }
+            foreach (var name in names)
+            { await Assert.That(fixture.Files.Read(name).Length).IsEqualTo(8192); }
         });
 
     [Test]
     public Task AllActualZeroLengthTemporaryFilesChargeTheOriginalFileCeiling()
         => NativeBlobWireFileFixture.RunOwnedAsync(async fixture =>
         {
-            for (var index = 0; index < 399; index++) { fixture.Publish(NativeBlobWireFileFixture.Temporary(), []); }
+            for (var index = 0; index < 399; index++)
+            { fixture.Publish(NativeBlobWireFileFixture.Temporary(), []); }
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(400);
             Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Publish(NativeBlobWireFileFixture.Temporary(), [1]));
             await Assert.That(Directory.GetFiles(fixture.Root).Length).IsEqualTo(400);

@@ -14,7 +14,8 @@ internal static class NativeAnnWaitRf3Cold
 
     internal static async Task RunAsync(ClusterFixture fixture, string readerSecret,
         NativeTextRf3Scenario scenario, AnnMaintenanceRequest pin, WaitForAnnIndexRequest request,
-        CommandRequest original, CommitReceipt receipt, NodeStatus beforeStop, CancellationToken token)
+        CommandRequest original, CommitReceipt receipt, CommitToken indexedBeforeStop,
+        NodeStatus beforeStop, CancellationToken token)
     {
         var stopped = await Task.WhenAll(Nodes.Select(node => ObserveAsync(
             () => fixture.KillContainerAsync(node, Scenario, token))));
@@ -36,7 +37,7 @@ internal static class NativeAnnWaitRf3Cold
                 await Assert.That(recovered.Applied).IsGreaterThanOrEqualTo(beforeStop.Applied);
                 await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, readerSecret, token);
                 await ServerFailureObserver.ObserveAsync(async () =>
-                { await ContinueAsync(administrator, reader, scenario, pin, request, original, receipt, token); }, failures);
+                { await ContinueAsync(administrator, reader, scenario, pin, request, original, receipt, indexedBeforeStop, token); }, failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -44,12 +45,16 @@ internal static class NativeAnnWaitRf3Cold
 
     private static async Task ContinueAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers reader,
         NativeTextRf3Scenario scenario, AnnMaintenanceRequest pin, WaitForAnnIndexRequest request,
-        CommandRequest original, CommitReceipt receipt, CancellationToken token)
+        CommandRequest original, CommitReceipt receipt, CommitToken indexedBeforeStop, CancellationToken token)
     {
         await NativeAnnWaitRf3Assertions.RejectedAsync(administrator.Sdk, reader, request, ErrorCode.HistoryUnavailable, token);
         var restored = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.MaintainAnnIndexAsync(
             pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, token));
-        await NativeAnnWaitRf3Assertions.AllPathsAsync(reader, request, restored.Source!.AppliedPosition, token);
+        await Assert.That(indexedBeforeStop).IsEqualTo(request.MinimumToken with { Position = indexedBeforeStop.Position });
+        await Assert.That(restored.Source!.NodeId).IsEqualTo(pin.NodeId);
+        await Assert.That(restored.Source.Incarnation).IsEqualTo(indexedBeforeStop.Incarnation);
+        await Assert.That(restored.Source.AppliedPosition).IsGreaterThanOrEqualTo(indexedBeforeStop.Position);
+        await NativeAnnWaitRf3Assertions.AllPathsAsync(reader, request, indexedBeforeStop.Position, token);
         await NativeAnnWaitRf3Assertions.LiteralAsync(reader, scenario, pin, true, token);
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
         await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(original, token)));

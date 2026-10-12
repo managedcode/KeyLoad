@@ -146,13 +146,15 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
         var control = PhysicalOwnerConfiguredTuples.Control(options, partition.Configuration);
         var secret = PartitionMovementNativeDiscoveryIdentity.Secret(options, partition.Configuration, control);
         var key = Convert.FromBase64String(secret);
-        try { return new(key, partition.Database.Limits.MaxBatchBytes); }
+        try
+        { return new(key, partition.Database.Limits.MaxBatchBytes); }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
 
     internal Task StopAsync()
     {
-        lock (stopping) { return shutdown ??= StopCoreAsync(); }
+        lock (stopping)
+        { return shutdown ??= StopCoreAsync(); }
     }
     private async Task StopCoreAsync()
     {

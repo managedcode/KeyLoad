@@ -17,7 +17,8 @@ internal sealed class RequestCqrsProbeNativeTransport(RequestCqrsProbeNativeTrus
                 var reply = await client.ExchangeAsync(address, request, token).ConfigureAwait(false);
                 token.ThrowIfCancellationRequested();
                 var verified = authentication.VerifyReply(request, reply);
-                if (verified.Claim is { } claim) { claims.Add(claim); }
+                if (verified.Claim is { } claim)
+                { claims.Add(claim); }
             }
         }
         foreach (var claim in claims)

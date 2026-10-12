@@ -63,7 +63,7 @@ internal static class QueryValidation
             value => JsonData.Validate(value, limits, false));
         var filter = query.Filter is null ? null : predicates.Filter(query.Filter, RootPredicateDepth);
         var parameters = NormalizeParameters(request.Parameters, predicates);
-        global::KeyLoad.Query.Features.QueryExecution.QueueEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
+        global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
         var normalized = request with
         {
             Query = query with { Alias = join is null ? null : query.Alias, Projection = projection, Order = order, Filter = filter, InnerJoin = join },
@@ -82,6 +82,7 @@ internal static class QueryValidation
         if (request.AstVersion == VersionOne && hasJoin
             || hasJoin && (query.Alias is null || query.ModelSource is not null
                 && !global::KeyLoad.Query.Features.QueryExecution.QueueEntityRefJoinBinding.IsSupportedSource(query)
+                && !global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.IsSupportedSource(query)
                 || request.Cursor is not null || query.Explain
                 || !request.AllowFullScan || projection.Any(selection => selection.SourceAlias is null)
                 || StringComparer.Ordinal.Equals(query.Collection, query.InnerJoin!.Collection)

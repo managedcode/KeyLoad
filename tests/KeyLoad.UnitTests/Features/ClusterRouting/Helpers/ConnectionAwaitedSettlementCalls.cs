@@ -64,7 +64,8 @@ internal static class ConnectionAwaitedSettlementCalls
 
     internal static async Task<Exception?> FailureAsync(Task<GrainOperationReply> original)
     {
-        try { await original; return null; }
+        try
+        { await original; return null; }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
     }
     internal static async Task JoinOriginalAsync(Task original, Exception? primary,

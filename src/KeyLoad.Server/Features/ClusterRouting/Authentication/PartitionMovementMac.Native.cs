@@ -21,7 +21,7 @@ internal sealed partial class PartitionMovementMac
     internal bool VerifyNativeReply(PartitionMovementGrainServiceReply reply)
         => VerifyNative(NativeSerialization.Serialize(reply with { SenderSignature = string.Empty }), reply.SenderSignature, NativeReplyDomain);
 
-    private bool VerifyNative(ReadOnlySpan<byte> body, string signature, ReadOnlySpan<byte> domain)
+    internal bool VerifyNative(ReadOnlySpan<byte> body, string signature, ReadOnlySpan<byte> domain)
     {
         if (signature is null || signature.Length != SignatureCharacters
             || signature.Any(character => !char.IsAsciiHexDigitLower(character)))
@@ -29,7 +29,7 @@ internal sealed partial class PartitionMovementMac
         return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(signature), DigestNative(body, domain));
     }
 
-    private byte[] DigestNative(ReadOnlySpan<byte> body, ReadOnlySpan<byte> domain)
+    internal byte[] DigestNative(ReadOnlySpan<byte> body, ReadOnlySpan<byte> domain)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != Active, this);
         var maximum = checked(maximumBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes);

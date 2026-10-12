@@ -4,12 +4,12 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal static class RemoteControlledDocumentEndpointExecution
 {
-    internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync( RemoteControlledDocumentCall call,
+    internal static Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteControlledDocumentCall call,
         RemoteControlledDocumentReceiver receiver, NodeOptions options,
         PartitionMovementReplayCache replay, TimeProvider clock, CancellationToken token)
         => ExecuteAsync(call, receiver, options, replay, clock, null, token);
 
-    internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync( RemoteControlledDocumentCall call,
+    internal static async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteAsync(RemoteControlledDocumentCall call,
         RemoteControlledDocumentReceiver receiver, NodeOptions options,
         PartitionMovementReplayCache replay, TimeProvider clock,
         global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeEffectBoundary? boundary, CancellationToken token)

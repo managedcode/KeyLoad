@@ -56,7 +56,8 @@ internal sealed class NativeEventFeedPubSubFreshStateTests
         { ETag = originalTag, RecordExists = true };
         await fixture.Storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, current, token);
         InconsistentStateException? conflict = null;
-        try { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, stale, token); }
+        try
+        { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, stale, token); }
         catch (InconsistentStateException actual) { conflict = actual; }
         await Assert.That(conflict).IsNotNull();
         await Assert.That(ReferenceEquals(stale.State, retained)).IsTrue();
@@ -65,7 +66,8 @@ internal sealed class NativeEventFeedPubSubFreshStateTests
         var wrong = new GrainState<string>(NativeEventFeedPubSubFreshStateFixture.Original)
         { ETag = current.ETag, RecordExists = true };
         KeyLoadException? mismatch = null;
-        try { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, wrong, token); }
+        try
+        { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, wrong, token); }
         catch (KeyLoadException actual) { mismatch = actual; }
         await Assert.That(mismatch).IsNotNull();
         await Assert.That(mismatch!.Code).IsEqualTo(ErrorCode.Validation);
@@ -96,8 +98,10 @@ internal sealed class NativeEventFeedPubSubFreshStateTests
         OperationCanceledException? failure = null;
         try
         {
-            if (clear) { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, cancelled.Token); }
-            else { await fixture.Storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, cancelled.Token); }
+            if (clear)
+            { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, cancelled.Token); }
+            else
+            { await fixture.Storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, cancelled.Token); }
         }
         catch (OperationCanceledException actual) { failure = actual; }
         await Assert.That(failure).IsNotNull();
@@ -112,8 +116,10 @@ internal sealed class NativeEventFeedPubSubFreshStateTests
         ObjectDisposedException? closed = null;
         try
         {
-            if (clear) { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token); }
-            else { await fixture.Storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token); }
+            if (clear)
+            { await fixture.Storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token); }
+            else
+            { await fixture.Storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, fixture.Id, state, token); }
         }
         catch (ObjectDisposedException actual) { closed = actual; }
         await Assert.That(closed).IsNotNull();

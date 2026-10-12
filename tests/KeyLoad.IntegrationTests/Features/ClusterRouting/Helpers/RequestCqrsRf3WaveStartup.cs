@@ -102,7 +102,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         await RequestCqrsRf3ImageProof.VerifyStartedContainersAsync(localImageIdentity, containers, cancellationToken)
             .ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
-            ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
+            ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, selection);
         diagnostics = nativeAdmission.Diagnostics;
         if (nativeAdmission.AdmittedNodeCount != RequestCqrsRf3Protocol.NodeCount)
         { throw new InvalidOperationException(IncompleteNativeAdmission); }

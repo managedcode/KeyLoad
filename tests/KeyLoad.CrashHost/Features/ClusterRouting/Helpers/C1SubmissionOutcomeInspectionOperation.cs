@@ -28,17 +28,20 @@ internal static class C1SubmissionOutcomeInspectionOperation
                 var view = new C1SubmissionOutcomeInspectionView(original);
                 var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Partition);
                 var selected = CommandOutcomeKeyResolver.Select(view, request.PrincipalId, request.CommandId, scope);
-                if (selected.Outcome is null) { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
+                if (selected.Outcome is null)
+                { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
                 var raw = view.ReadOwnedValue(selected.Key) ?? throw C1SubmissionOutcomeInspectionValidation.Invalid();
                 return new C1SubmissionOutcomeInspectionReceipt(C1SubmissionOutcomeInspectionProtocol.Version,
                     opened.Identity.NodeId, opened.Identity.Incarnation, opened.Identity.FormatVersion,
                     opened.Position, selected.Key, raw);
             });
         }, failures);
-        if (failures.Count > NoFailures) { evidence?.Capture(failures[FirstFailureIndex]); }
+        if (failures.Count > NoFailures)
+        { evidence?.Capture(failures[FirstFailureIndex]); }
         evidence?.SetPhase(C1OutcomeInspectionFailurePhase.DisposeStore);
         ServerFailureObserver.Observe(() => store?.Dispose(), failures);
-        if (failures.Count > NoFailures) { evidence?.Capture(failures[FirstFailureIndex]); }
+        if (failures.Count > NoFailures)
+        { evidence?.Capture(failures[FirstFailureIndex]); }
         ServerFailureObserver.ThrowIfAny(failures);
         return receipt ?? throw C1SubmissionOutcomeInspectionValidation.Invalid();
     }

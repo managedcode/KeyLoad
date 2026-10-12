@@ -10,7 +10,8 @@ internal static class AnnMaintenanceInitialEnrollment
         var actual = await children.ReadAsync<GetOutboxStatusRequest, OutboxStatus>(GrainReadKind.OutboxStatus,
             new(request.Consumer.Partition), token).ConfigureAwait(true);
         var configured = actual.Consumers.SingleOrDefault(value => value.Consumer == request.Consumer);
-        if (configured is null) { return request; }
+        if (configured is null)
+        { return request; }
         if (configured.InitialAnnMaintenance is { } original
             && NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(request)))
         { return original; }

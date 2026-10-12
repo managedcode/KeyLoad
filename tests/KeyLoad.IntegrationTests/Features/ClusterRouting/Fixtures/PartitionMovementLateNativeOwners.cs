@@ -55,7 +55,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
         for (var index = FirstOwner; index < PartitionMovementLateNativeSettings.OwnerCount; index++)
         {
             nodes.Add(new(Arguments(index), index < PartitionMovementLateNativeSettings.GroupSize ? Borrow.ForOwner(index) : null,
-                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null));
+                index < PartitionMovementLateNativeSettings.GroupSize ? blobWireObserver : null, Settings.LocalhostClustering));
             configureApplication?.Invoke(index, nodes[index].Application);
         }
         shutdownTimeout = nodes.First().ShutdownTimeout;
@@ -120,7 +120,7 @@ internal sealed class PartitionMovementLateNativeOwners : IAsyncDisposable
     {
         if (!stopped)
         { throw new InvalidOperationException("Native locks remain owned by the live cohort."); }
-        var owned = new PartitionMovementLateNativeNode(Arguments(index), null);
+        var owned = new PartitionMovementLateNativeNode(Arguments(index), null, localhostClustering: Settings.LocalhostClustering);
         coldNodes.Add(owned);
         return owned;
     }

@@ -1,5 +1,17 @@
 # TestInfrastructure
 
+## Native Aspire startup stage evidence, 2026-10-12
+
+REQ-TEST-ASPIRE-STARTUP-001: the actual RF3 fixture enables the pinned Aspire native profiling source for its own private random session. Before genuine AppHost Start, resolve one AppHost-DI-owned synchronous ActivityListener for only native DcpEnsureKubernetesClient and DcpKubernetesApi operations. Admit activities only when their native session tag equals that actual configuration. Preserve every original timeout, parallelism, image, public SDK/MCP, readiness, fault and stop/disposal contract.
+
+REQ-TEST-ASPIRE-STARTUP-002: keep fixed-size counters, closed phase flags and only native nonnegative long timings/retry counts, plus known/exists booleans. Ignore every other tag, event payload, exception message, stack, path, URL, credential, caller payload, inventory and profiling identity. Retain the first observed native error/timeout projection and the latest projection, with no activity objects or per-event backlog. Save exactly two bounded lines (each less than 1,024 UTF-8 bytes) to one closed-name file in the existing original fixture results directory. Existing 32 original receipts, node fairness and 80-line/8-KiB files stay unchanged. Missing observations are explicitly unavailable and do not establish a cause.
+
+AC-TEST-ASPIRE-STARTUP-001 maps both requirements to the unchanged genuine ClusterFixture startup, public client operations and disposal flow, including failure cleanup. The original source-bound native report must retain the same first-failure projection and original startup outcome; another fixture session cannot populate it. Native source/lifetime/privacy review is the explicit manual verification for this environmental diagnostic boundary; actual current-image RF3 artifacts and exact-source Linux execution remain OPEN. No synthetic ActivitySource, provider, Docker failure, successful lifecycle or root-cause inference qualifies it.
+
+Slice map: Integration ClusterReplication Contracts/ClusterFixtureStartupProfile owns exact pinned first-party keys; Helpers/ClusterFixtureStartupEvidence owns only bounded passive projection; existing ClusterFixtureComposition.ConfigureLogging configures this native profile without enabling raw Debug logs; ClusterFixtureDiagnostics.Start resolves the observer before actual start and SaveCoreAsync writes its separate projection after the original receipt. AppHost DI disposes the listener after the unchanged genuine application shutdown. Its synchronous callback checks the same lock/disposed boundary; no background task or alternative network/lifecycle owner exists. Public API, persistence, backend, SDK/MCP and frontend changes are N/A.
+
+Authenticated original run38223377791/job114724825828/source bab8d9b07c5574f9552273ccaefc3d80929c8f34 retained the native initialization timeout and 19 failed tests. The underlying Dcp controller/kubeconfig/runner cause was not retained and remains unproven; the new projection supplies stage evidence only. The original archive/digest and failures remain immutable.
+
 ### Native process settlement and complete CI suite budget
 
 REQ/AC-TEST-015 requires the local-image lifetime helpers to await already

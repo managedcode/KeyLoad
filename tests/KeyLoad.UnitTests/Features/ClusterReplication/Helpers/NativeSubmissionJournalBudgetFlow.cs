@@ -34,8 +34,10 @@ internal static class NativeSubmissionJournalBudgetFlow
         var budget = new C1SubmissionJournalInspectionReadBudget(token);
         using var inspection = C1SubmissionJournalInspectionDatabase.Open(fixture.Canonical.Store, budget, token);
         var database = inspection.Database;
-        if (exhaustCanonical) { await RequireSharedRefusalAsync(fixture, database, original, budget); }
-        else { await RequireReadAsync(fixture, database, original, budget); }
+        if (exhaustCanonical)
+        { await RequireSharedRefusalAsync(fixture, database, original, budget); }
+        else
+        { await RequireReadAsync(fixture, database, original, budget); }
         await before.RequireUnchangedAsync(fixture);
         await RequireFreshReadAsync(fixture, original);
         var following = Append(fixture, "shared-budget-following");
@@ -79,7 +81,8 @@ internal static class NativeSubmissionJournalBudgetFlow
             }
             catch (InvalidDataException failure)
             {
-                if (failure.Message != C1SubmissionJournalInspectionProtocol.Invalid || callback) { throw; }
+                if (failure.Message != C1SubmissionJournalInspectionProtocol.Invalid || callback)
+                { throw; }
                 denied = true;
             }
         }

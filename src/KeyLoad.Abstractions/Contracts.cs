@@ -306,7 +306,19 @@ public enum OperationKind
     /// <summary>Reserves private verified event-feed source phases; excluded from generic public operation factories.</summary>
     EventFeedSourcePhase = 37,
     /// <summary>Commits target-only inbox identity and effects without source acknowledgement.</summary>
-    CommitInbox = 38
+    CommitInbox = 38,
+    /// <summary>Commits a freshly verified remote graph source effect through its physical owner.</summary>
+    RemoteGraphSource = 39,
+    /// <summary>Commits a freshly verified remote graph receiving effect through its physical owner.</summary>
+    RemoteGraphReceive = 40,
+    /// <summary>Commits a freshly verified remote graph receipt completion through its source owner.</summary>
+    RemoteGraphComplete = 41,
+    /// <summary>Coordinates an explicit remote graph edge upsert through separate owner requests.</summary>
+    UpsertRemoteGraphEdge = 42,
+    /// <summary>Coordinates an explicit remote graph edge deletion through separate owner requests.</summary>
+    DeleteRemoteGraphEdge = 43,
+    /// <summary>Coordinates an explicit remote graph delivery through separate owner receipts.</summary>
+    DeliverRemoteGraphEdge = 44
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

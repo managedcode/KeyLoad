@@ -30,7 +30,8 @@ internal sealed class RemoteTransferNativeResponseHold
         if (await Task.WhenAny(observed, original).ConfigureAwait(false) == original)
         {
             await waiting.CancelAsync().ConfigureAwait(false);
-            try { _ = await observed.ConfigureAwait(false); }
+            try
+            { _ = await observed.ConfigureAwait(false); }
             catch (OperationCanceledException) when (waiting.IsCancellationRequested) { }
             await original.ConfigureAwait(false);
             throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);

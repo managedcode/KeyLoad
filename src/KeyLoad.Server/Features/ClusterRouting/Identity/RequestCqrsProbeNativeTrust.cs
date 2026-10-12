@@ -99,7 +99,8 @@ internal sealed class RequestCqrsProbeNativeTrust : IDisposable
     private void Add(PhysicalShardRecord owner, string secret)
     {
         var key = Convert.FromBase64String(secret);
-        try { groups.Add((owner, new(key, bounds.Value.MaximumRequestBytes))); }
+        try
+        { groups.Add((owner, new(key, bounds.Value.MaximumRequestBytes))); }
         finally { CryptographicOperations.ZeroMemory(key); }
     }
 

@@ -107,3 +107,31 @@ passes; the missing old raw body is not reconstructed as runtime evidence.
 Strict exact equality and rejection remain; no alternate-version acceptance or
 compatibility fallback is introduced. Current native operations and whole
 cohort are still required before claiming the repair qualified.
+
+## Selected profile transport ownership, 2026-10-12
+
+REQ-NGR-SELECTED-001: initialize the native GitHub transport on the exact context returned by `selectCurrentJob`; that same object owns all discovery and current-job refresh calls, the selected cohort and the retained request sequence. Image selection retains its original context. Every admitted matrix selection retains its exact canonical profile and native source/run/attempt identity. Do not initialize an unused pre-selection copy, share transport through unrelated global state, relax any provenance guard, or retry a workload to conceal failed setup.
+
+AC-NGR-SELECTED-001 maps to REQ-NGR-SELECTED-001 and existing AC-NGR-001: existing real production-selection positive/negative TUnit cases remain required. Exact-source Linux image and matrix preflight/worker execution must retain native authenticated request headers/bodies, the same actual current job and selected cohort, and append only that current identity before allocating or timing a target. Include an intensive control/preflight and a vector profile from the same original run/attempt; malformed, missing, wrong source/profile/job or terminal state still refuses before workload effects. The existing image-only native TUnit case does not independently prove matrix-context transport propagation. Genuine matrix entry points and their original capture artifacts are the regression gate; source text comparisons and fabricated HTTP providers are insufficient.
+
+The original `bab8d9b07c5574f9552273ccaefc3d80929c8f34`, Benchmarks run `38223377551` attempt 1, failed RabbitMQ job `114732100886` and KeyLoad vector job `114732117792` before native workload execution. Their retained artifacts `11736461262` (SHA-256 `74d91b5f944a136895aa61fc9a6b92273a3a28471c1f0e76da190e19c29148d4`) and `11736258456` (SHA-256 `3cddc6bde9df1488dd5f4673ddfce5e3b47970fc20b6c995051340a1e1e26dbb`) contain successful native gh help captures and no HTTP request capture. Exact source selects a copied profile context before initializing transport only on the original context; native request admission then rejects the selected context's missing transport. This verified source failure explains those pre-HTTP refusals; it does not explain separate ingestion ResourceExhausted or Website truncated-response failures.
+
+Owning map: `scripts/Features/BenchmarkComparisons/isolated-github-job.mjs` joins the existing context selector, native transport, page discovery and same-ID refresh. Existing `CurrentGitHubJobSelectionTests` and `IsolatedGitHubCurrentJobTests` remain unchanged; exact-source matrix execution supplies the missing native profile path. No target adapter, topology, workload, profile, API/format, resource bound or measurement inventory changes. Source apply, compiler/repository checks and new original Linux runtime captures remain OPEN.
+
+```mermaid
+flowchart LR
+    Context[Authenticated native run context] --> Select[Exact canonical image or matrix selection]
+    Select --> Transport[Initialize the selected context transport]
+    Transport --> Discover[Bounded native job pages]
+    Discover --> Refresh[Same ID and selected cohort refresh]
+    Refresh --> Admit[Current executing job admits target setup]
+```
+
+
+## Open-loop collector transport ownership, 2026-10-12
+
+REQ-NGR-OPENLOOP-TRANSPORT-001: initialize the bounded native GitHub transport on the exact context passed to open-loop archive downloads before the first request. Its request/header/body captures, native gh help output and ZIP inventories belong to a newly created `output/github` directory inside the owned intake tree. The supplied authenticated capture remains read-only; retain all source/run/attempt/profile, archive digest/size, terminal and complete-cohort checks.
+
+AC-NGR-OPENLOOP-TRANSPORT-001 maps to REQ-NGR-OPENLOOP-TRANSPORT-001: the real Benchmarks `collect-open-loop` entry must retain its bounded authenticated downloads and native ZIP inventory under the owned output, preserve the original metadata bytes, and validate every selected job and terminal against the exact source/run/attempt/profile. Wrong, incomplete, oversized, mismatched or malformed evidence still refuses; no workload retry or historical fallback. Existing genuine native transport/collector TUnit coverage and exact-source Linux intake are required. Source review and a check-only patch do not qualify actual GitHub intake.
+
+The current collector creates a fresh context but never initialized its transport before calling `downloadArtifact`; `requestNative` rejects that missing transport before launching an HTTP request. The original `bab8d9b` run stopped earlier at matrix job admission, so this confirmed source defect is a later prerequisite and is not claimed as its observed failure. Other reviewed collector profile copies use cohort-only validation or initialize their actual network context before requests. Owning map: `scripts/Features/BenchmarkComparisons/open-loop-github-collect.mjs`, existing native transport/ZIP helpers and the real Benchmarks collection step. Archive/capture immutability, bounds, cancellation, cohort and publication guards remain mandatory; exact-source runtime and full qualification remain OPEN.

@@ -70,7 +70,8 @@ internal static class NativeMembershipAddressAdmissionFlow
             await HealthyAsync(fixture, membership, handles, token).ConfigureAwait(false);
         }).ToArray();
         var joined = Task.WhenAll(calls);
-        try { await joined.ConfigureAwait(false); }
+        try
+        { await joined.ConfigureAwait(false); }
         catch (Exception primary) { throw joined.Exception ?? new AggregateException(primary); }
         await Assert.That(calls.Length).IsEqualTo(ConcurrentCalls);
         await Assert.That(JsonDefaults.Serialize(before).AsSpan().SequenceEqual(JsonDefaults.Serialize(membership.ReadActive()))).IsTrue();

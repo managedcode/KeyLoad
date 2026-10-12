@@ -22,7 +22,8 @@ internal sealed class PhysicalOwnerProbeNativeLifetimeTests
         await Assert.That(first.ShutdownToken.IsCancellationRequested).IsTrue();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => owner.Acquire(Guid.NewGuid())).Code)
             .IsEqualTo(ErrorCode.OwnershipLost);
-        first.Dispose(); first.Dispose();
+        first.Dispose();
+        first.Dispose();
         await stopped;
         await owner.StopAsync();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => owner.Acquire(Guid.NewGuid())).Code)
@@ -34,7 +35,8 @@ internal sealed class PhysicalOwnerProbeNativeLifetimeTests
     {
         await using var owner = Create(enabled: true);
         var first = owner.Acquire(Guid.NewGuid());
-        first.Dispose(); first.Dispose();
+        first.Dispose();
+        first.Dispose();
         using var next = owner.Acquire(Guid.NewGuid());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => owner.Acquire(Guid.NewGuid())).Code)
             .IsEqualTo(ErrorCode.ResourceExhausted);

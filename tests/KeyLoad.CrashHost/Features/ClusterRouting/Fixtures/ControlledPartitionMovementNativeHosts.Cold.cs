@@ -21,7 +21,8 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
 
     private async Task RestartCoreAsync(Task? originalStop, CancellationToken cancellationToken)
     {
-        if (originalStop is not null) { await JoinOriginalAsync(originalStop).ConfigureAwait(false); }
+        if (originalStop is not null)
+        { await JoinOriginalAsync(originalStop).ConfigureAwait(false); }
         await JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.StopAsync(cancellationToken)))).ConfigureAwait(false);
         if (nodes.Any(node => !node.IsJoined))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
@@ -32,7 +33,8 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
 
     internal void RetainRoots()
     {
-        lock (lifecycle) { Volatile.Write(ref retainRoots, true); }
+        lock (lifecycle)
+        { Volatile.Write(ref retainRoots, true); }
     }
 
     internal Task StopAsync(CancellationToken cancellationToken)
@@ -46,7 +48,8 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
 
     private async Task StopCoreAsync(Task? originalRestart, CancellationToken cancellationToken)
     {
-        if (originalRestart is not null) { await JoinOriginalAsync(originalRestart).ConfigureAwait(false); }
+        if (originalRestart is not null)
+        { await JoinOriginalAsync(originalRestart).ConfigureAwait(false); }
         await JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.StopAsync(cancellationToken)))).ConfigureAwait(false);
         if (nodes.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount || nodes.Any(node => !node.IsJoined))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }

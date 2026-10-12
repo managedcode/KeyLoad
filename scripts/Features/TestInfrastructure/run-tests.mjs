@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { accessSync, constants, realpathSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,7 +27,9 @@ const localImageFilters = new Set(['/*/*/EventProjectionRf3Tests/AcLineage001Exa
   '/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*',
   '/*/*/RelationalSqlRf3JoinRejectionTests/*',
   '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*',
-  '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*']);
+  '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*',
+  '/*/*/(AuthenticationExecutionTests*)|(EventReferenceSelectRf3Tests*)|(NativeRemoteGraphRf3Tests*)|(ComposedProjectionLineageRf3Tests*)/(RealHttpSdkAndOfficialMcpAuthenticateOncePerRequestThenFreshPolicyRefusalRepairReplayAndTwoColdCuts)|(AcKl095EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts)|(GenuineSixOwnerCurrentSourceRightsRefusalRestoresOriginalGraphRequestThenFullReceiptsSurviveTwoColdReopens)|(AcKl048ComposedSourceProjectionAndPredicateUseRevokeRepairPreserveSdkMcpRowsAndReceiptsAcrossTwoColdCuts)',
+  '/*/*/(AuthenticationExecutionTests*)|(EventReferenceSelectRf3Tests*)|(NativeRemoteGraphRf3Tests*)|(ComposedProjectionLineageRf3Tests*)|(CrossTenantRf3WholeFlowTests)|(RequestCqrsAuthorityFaultTests)/(RealHttpSdkAndOfficialMcpAuthenticateOncePerRequestThenFreshPolicyRefusalRepairReplayAndTwoColdCuts)|(AcKl095EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts)|(GenuineSixOwnerCurrentSourceRightsRefusalRestoresOriginalGraphRequestThenFullReceiptsSurviveTwoColdReopens)|(AcKl048ComposedSourceProjectionAndPredicateUseRevokeRepairPreserveSdkMcpRowsAndReceiptsAcrossTwoColdCuts)|(Kl015ForeignWritesScansAndIndexesAreDeniedAndAuthorizedReceiptRemainsStable)|(SdkWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects)|(OfficialMcpWriteHeldAcrossPersistedRevocationIsUnauthorizedWithoutEffects)']);
 const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
 const nativeTextPreparedFilter = '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*';
 const localImageGithubIdentity = ['KEYLOAD_IMAGE_RECEIPT', 'GITHUB_SHA', 'GITHUB_ACTIONS'];
@@ -88,6 +91,22 @@ export function nativeSelection(input, inherited = process.env) {
   }
   if (suite === 'rf3' && !values.has('Filter')) values.set('Filter', ordinaryRf3Filter);
   const environment = { ...inherited };
+  if (process.platform === 'darwin') {
+    // Storage roots reject symlink ancestors; MTP pipes need a short existing Unix base.
+    for (const [key, fallback] of [['TMPDIR', '/private/tmp'],
+      ['TESTINGPLATFORM_PIPE_DIRECTORY', '/private/tmp']]) {
+      try {
+        const selected = environment[key] || fallback;
+        if (!path.isAbsolute(selected)) throw new Error('Relative directory.');
+        const physical = realpathSync.native(selected);
+        if (!statSync(physical).isDirectory()) throw new Error('Not a directory.');
+        accessSync(physical, constants.R_OK | constants.W_OK | constants.X_OK);
+        environment[key] = physical;
+      } catch {
+        throw new Error(`Invalid native macOS ${key} directory.`);
+      }
+    }
+  }
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__ScaleProfile', 'KeyLoadTests__VectorProfile',
     'KeyLoadTests__OpenLoopRate', 'KeyLoadTests__LocalRf3Image__Enabled', 'KeyLoadTests__HeavyLoad__Enabled',
     'KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS',

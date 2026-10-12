@@ -67,7 +67,8 @@ internal sealed class RemoteModelNativeReplayExchange(RemoteModelNativeClient cl
         try
         {
             await closed.CancelAsync().ConfigureAwait(false);
-            if (admitted is not null) { await admitted.ConfigureAwait(false); }
+            if (admitted is not null)
+            { await admitted.ConfigureAwait(false); }
         }
         finally
         { closed.Dispose(); }

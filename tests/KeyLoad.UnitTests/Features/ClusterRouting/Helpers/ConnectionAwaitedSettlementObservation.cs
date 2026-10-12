@@ -12,7 +12,8 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     internal ConnectionAwaitedCallback Hold(Guid requestId, Exception? failure = null)
     {
         var callback = new ConnectionAwaitedCallback(failure);
-        if (!callbacks.TryAdd(requestId, callback)) { throw Invalid(); }
+        if (!callbacks.TryAdd(requestId, callback))
+        { throw Invalid(); }
         return callback;
     }
 
@@ -24,7 +25,8 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
             if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
                 || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
                 || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != state.ConnectionId
-                || !identities.TryAdd(identity.RequestId, state)) { throw Invalid(); }
+                || !identities.TryAdd(identity.RequestId, state))
+            { throw Invalid(); }
         }
         return original.ObserveAsync(identity, phase, context, token);
     }
@@ -44,7 +46,8 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     internal GrainRequestContextState Identity(Guid requestId) => identities[requestId];
     internal void ReleaseAll()
     {
-        foreach (var callback in callbacks.Values) { callback.Release.TrySetResult(); }
+        foreach (var callback in callbacks.Values)
+        { callback.Release.TrySetResult(); }
         original.ReleaseAll();
     }
     private static InvalidOperationException Invalid() => new(ConnectionNativeProtocol.IdentityChanged);

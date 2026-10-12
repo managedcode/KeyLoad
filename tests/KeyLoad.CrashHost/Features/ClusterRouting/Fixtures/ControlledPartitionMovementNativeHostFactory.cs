@@ -5,8 +5,13 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal static class ControlledPartitionMovementNativeHostFactory
 {
-    internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
+        => CreateAsync(observerFactory, null, cancellationToken);
+
+    internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
+        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
+        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory, CancellationToken cancellationToken)
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
         var settings = new ControlledPartitionMovementNativeHostSettings(endpoints);
@@ -15,7 +20,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         var failures = new List<Exception>();
         try
         {
-            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory);
+            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory);
             await owner.CreateNodesAsync().ConfigureAwait(false);
             endpoints.Dispose();
             await ControlledPartitionMovementNativeHosts.JoinOriginalAsync(

@@ -12,7 +12,8 @@ internal static class RemoteModelNativeReplayPayload
         var call = envelope.QueueTransfer;
         if (call is null || call.Stage != RemoteQueueTransferPeerStage.Accept)
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
-        if (variation == RemoteModelNativeReplayVariation.Original2) { return original.Payload; }
+        if (variation == RemoteModelNativeReplayVariation.Original2)
+        { return original.Payload; }
         if (variation == RemoteModelNativeReplayVariation.MissingQueueTransfer)
         { return RemoteDocumentWire.Encode(envelope with { QueueTransfer = null }); }
         var changed = variation switch

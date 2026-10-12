@@ -30,7 +30,8 @@ internal static class RemoteTransferPendingDeadlineAssertions
     private static string[] Image(RemoteTransferDatabase fixture) => fixture.Store.Read(view =>
     {
         var page = view.Scan([], fixture.Database.Limits.MaxResults);
-        if (page.HasMore) { throw new InvalidOperationException(IncompleteImage); }
+        if (page.HasMore)
+        { throw new InvalidOperationException(IncompleteImage); }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
             Convert.ToHexString(row.Value.Span)).ToArray();
     });

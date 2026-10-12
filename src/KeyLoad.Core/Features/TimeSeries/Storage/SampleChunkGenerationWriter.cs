@@ -42,7 +42,8 @@ internal static class SampleChunkGenerationWriter
         var tags = ImmutableArray.CreateBuilder<string>();
         foreach (var record in records)
         {
-            if (seen.Add(record.TagsJson)) { tags.Add(record.TagsJson); }
+            if (seen.Add(record.TagsJson))
+            { tags.Add(record.TagsJson); }
         }
         return tags.ToImmutable();
     }

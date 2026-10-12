@@ -58,8 +58,10 @@ internal static class ControlledPartitionMovementNativeProcessOperation
         if (root is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => RequireRootsAsync(root, readiness, clock, cleanup.Token), failures);
-            if (failures.Count == 0) { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
-            foreach (var failure in failures) { failure.Data[RetainedRoot] = root; }
+            if (failures.Count == 0)
+            { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), failures); }
+            foreach (var failure in failures)
+            { failure.Data[RetainedRoot] = root; }
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -69,7 +71,8 @@ internal static class ControlledPartitionMovementNativeProcessOperation
     {
         var replies = await ControlledPartitionMovementNativeProcessSeed.SubmitAsync(owners.Source, cancellationToken);
         await Assert.That(replies.Length).IsEqualTo(OriginalReplyCount);
-        foreach (var reply in replies) { await Assert.That(reply.Error).IsNull(); }
+        foreach (var reply in replies)
+        { await Assert.That(reply.Error).IsNull(); }
         var seed = await ControlledPartitionMovementNativeProcessAssertions.SeedAsync(owners.Source, replies[^1], cancellationToken);
         var blobReplies = await ControlledPartitionMovementNativeProcessBlob.PublishAsync(owners.Source, cancellationToken);
         await Assert.That(blobReplies.Replies.Length).IsEqualTo(OriginalReplyCount);

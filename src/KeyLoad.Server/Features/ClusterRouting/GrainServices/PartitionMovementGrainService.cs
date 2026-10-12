@@ -37,7 +37,8 @@ internal sealed class PartitionMovementGrainService(GrainId id, Silo silo, ILogg
             return new PartitionMovementGrainServiceReply(ReadOnlyMemory<byte>.Empty, string.Empty,
                 ErrorCode.UnsupportedCapability, PartitionMovementProtocol.Unavailable, request?.Nonce ?? Guid.Empty, string.Empty);
         }
-        try { return await active.ExchangeAsync(request, error => LogFailure(diagnostics, error), cancellationToken).ConfigureAwait(true); }
+        try
+        { return await active.ExchangeAsync(request, error => LogFailure(diagnostics, error), cancellationToken).ConfigureAwait(true); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             LogFailure(diagnostics, error);
@@ -78,7 +79,8 @@ internal sealed class PartitionMovementGrainService(GrainId id, Silo silo, ILogg
         }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        try { await base.Stop().ConfigureAwait(true); }
+        try
+        { await base.Stop().ConfigureAwait(true); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         if (failures.Count != NoShutdownFailures)

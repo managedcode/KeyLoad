@@ -41,11 +41,13 @@ internal sealed partial class PartitionMovementPeerAdmission : IDisposable
         this.execution = execution.Value;
         this.clock = clock;
         replay = new(clock, membership);
-        try { nativeReplay = new(clock, membership); }
+        try
+        { nativeReplay = new(clock, membership); }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            try { replay.Dispose(); }
+            try
+            { replay.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
             ServerFailureObserver.ThrowIfAny(failures);

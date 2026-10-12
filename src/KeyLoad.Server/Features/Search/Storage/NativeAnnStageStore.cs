@@ -15,7 +15,8 @@ internal sealed class NativeAnnStageStore(NativeAnnRootLease root, IOptions<Nati
     {
         var key = new NativeAnnOwnedKey(request.Consumer, request.IndexGeneration);
         var entry = root.Receipt.OriginalOperations.SingleOrDefault(item => item.Key == key);
-        if (entry is null) { return null; }
+        if (entry is null)
+        { return null; }
         NativeAnnOriginalResults.Require(entry);
         if (!NativeAnnOriginalResults.SameRequest(entry.InitialRequest, request))
         { throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt); }

@@ -53,6 +53,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     internal void Start(ResourceLoggerService logs)
     {
         ArgumentNullException.ThrowIfNull(logs);
+        _ = app.Services.GetRequiredService<ClusterFixtureStartupEvidence>();
         resourceCapture = CaptureResourcesAsync(logs);
     }
 
@@ -99,6 +100,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         { Directory.CreateDirectory(output); }
         var path = ownedOutput is null ? failureReceipts.Save(output, bounded)
             : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
+        app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save(output);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
     }
 

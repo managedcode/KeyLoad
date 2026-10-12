@@ -107,7 +107,8 @@ internal sealed class RemoteTransferNativeReplayTrial : IAsyncDisposable
                 using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
                 await ServerFailureObserver.ObserveAsync(() => actual.QueryControls.RetireArmAsync(arm, deadline.Token), cleanup);
             }
-            if (failures.Count != 0 || cleanup.Count != 0) { actual.RetainRoots(); }
+            if (failures.Count != 0 || cleanup.Count != 0)
+            { actual.RetainRoots(); }
             await ServerFailureObserver.ObserveAsync(() => actual.DisposeAsync().AsTask(), cleanup);
         }
         failures.AddRange(cleanup);

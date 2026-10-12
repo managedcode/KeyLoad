@@ -14,7 +14,8 @@ internal static class PhysicalOwnerProbeWire
     {
         if (body.Length is < MinimumBodyBytes or > PhysicalOwnerProbeProtocol.MaximumBodyBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, PhysicalOwnerProbeProtocol.InvalidProof); }
-        try { return NativeSerialization.Deserialize<PhysicalOwnerProbeCallV1>(body); }
+        try
+        { return NativeSerialization.Deserialize<PhysicalOwnerProbeCallV1>(body); }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
         { throw Errors.Fail(ErrorCode.Validation, PhysicalOwnerProbeProtocol.InvalidProof); }
     }

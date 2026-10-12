@@ -142,9 +142,10 @@ internal sealed class TestDatabase : IDisposable
             : throw new InvalidOperationException(NativeObservationRequired);
 
     internal KeyLoad.Replication.ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original,
-        Action restoreFaultOwnedRow, List<Exception> failures, CancellationToken cancellationToken)
+        Action restoreFaultOwnedRow, List<Exception> failures, CancellationToken cancellationToken,
+        ErrorCode? expectedApplyError = null)
         => replicaAdmission is { } native
-            ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken)
+            ? native.RecoverFaultOwnedRow(original, restoreFaultOwnedRow, failures, cancellationToken, expectedApplyError)
             : throw new InvalidOperationException(NativeOperationRequired);
 
     private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();

@@ -34,10 +34,10 @@ internal static class NativeBlobWholeStoppedOwner
             var options = IntegrationExecutionOptions.StorageExecution(wave.movementMaxFrameBytes is { } maximum
                 ? new ZoneTreeStorageExecutionOptions { MaxFrameBytes = maximum } : null);
             var openedCanonical = ZoneTreeExistingStore.Open(new(NativeBlobWholePaths.Canonical(nodeRoot))
-                { Incarnation = owner.Incarnation }, originalCanonicalNodeId, options);
+            { Incarnation = owner.Incarnation }, originalCanonicalNodeId, options);
             canonical = openedCanonical;
             var replicaOptions = new ZoneTreeStoreOptions(NativeBlobWholePaths.Replica(nodeRoot))
-                { Incarnation = owner.Incarnation };
+            { Incarnation = owner.Incarnation };
             var resolved = replicaOptions.ResolveExecutionOptions(options);
             var identity = ZoneTreeIdentityFile.Read(NativeBlobWholePaths.Identity(resolved.Directory),
                 resolved.MaximumIdentityFileBytes, resolved.StreamBufferBytes);
@@ -65,8 +65,10 @@ internal static class NativeBlobWholeStoppedOwner
             result = new(owner, originalCanonicalNodeId, actualReplica.NodeId, rows.Position,
                 journalRows.Position, rows.Rows, journalRows.Rows, applied, journal.State, journal.Entries);
         }, failures);
-        if (replica is { } journalOwner) { ServerFailureObserver.Observe(journalOwner.Dispose, failures); }
-        if (canonical is { } databaseOwner) { ServerFailureObserver.Observe(databaseOwner.Dispose, failures); }
+        if (replica is { } journalOwner)
+        { ServerFailureObserver.Observe(journalOwner.Dispose, failures); }
+        if (canonical is { } databaseOwner)
+        { ServerFailureObserver.Observe(databaseOwner.Dispose, failures); }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException("The complete stopped original Blob cut is absent.");
     }

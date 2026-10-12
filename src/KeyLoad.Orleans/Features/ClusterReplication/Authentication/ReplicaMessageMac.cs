@@ -76,14 +76,16 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
 
     internal void RequireOpen()
     {
-        lock (lifecycle) { ObjectDisposedException.ThrowIf(disposed, this); }
+        lock (lifecycle)
+        { ObjectDisposedException.ThrowIf(disposed, this); }
     }
 
     public void Dispose()
     {
         lock (lifecycle)
         {
-            if (disposed) { return; }
+            if (disposed)
+            { return; }
             disposed = true;
             CryptographicOperations.ZeroMemory(secret);
         }

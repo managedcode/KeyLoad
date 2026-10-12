@@ -62,7 +62,8 @@ internal static class SqlCallNoPartialWriteContinuation
 
     private static SqlOperationRequest Request(CommandRequest command)
         => SqlOperationTestData.Call(McpToolNames.DocumentsCommit, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) }) with { Sql = CommentedCall };
+        { [RequestKey] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) }) with
+        { Sql = CommentedCall };
 
     private static CommandRequest Decode(McpDecodedOperation operation)
         => NativeSerialization.Deserialize<CommandRequest>(operation.Payload.Span,

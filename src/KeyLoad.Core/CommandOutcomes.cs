@@ -114,6 +114,8 @@ public sealed partial class DatabaseEngine
         {
             new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
+        if (operation.Kind is OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete)
+        { ReauthorizeRemoteGraphOutcome(view, principal, operation, previous); }
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);
         if (!ValidateRemoteTransferCachedOutcome(view, principal, operation, previous))

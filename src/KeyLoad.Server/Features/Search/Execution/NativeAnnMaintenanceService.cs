@@ -190,6 +190,7 @@ internal sealed class NativeAnnMaintenanceService(string directory, DatabaseEngi
 
     private NativeAnnGenerationOwner? GetDisposingOwner()
     {
-        lock (gate) { return owner; }
+        lock (gate)
+        { return owner; }
     }
 }

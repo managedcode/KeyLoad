@@ -24,7 +24,8 @@ internal static class NativeBlobWireRefusal
             { throw Invalid(); }
             return;
         }
-        if (reply.SafeDetail is not null || reply.Payload.IsEmpty) { throw Invalid(); }
+        if (reply.SafeDetail is not null || reply.Payload.IsEmpty)
+        { throw Invalid(); }
         var changed = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(request.Payload.Span).ControlledBlob
             ?? throw Invalid();
         var inner = NativeSerialization.Deserialize<RemoteDocumentReplyV1>(reply.Payload.Span);

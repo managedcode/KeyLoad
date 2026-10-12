@@ -22,9 +22,12 @@ internal static class C1SubmissionOutcomeInspectionJson
     private static readonly C1SubmissionOutcomeInspectionJsonContext Context = new(new JsonSerializerOptions
     {
         MaxDepth = C1SubmissionOutcomeInspectionProtocol.MaximumJsonDepth,
-        PropertyNameCaseInsensitive = false, IgnoreReadOnlyProperties = true,
+        PropertyNameCaseInsensitive = false,
+        IgnoreReadOnlyProperties = true,
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-        RespectNullableAnnotations = true, RespectRequiredConstructorParameters = true, AllowDuplicateProperties = false
+        RespectNullableAnnotations = true,
+        RespectRequiredConstructorParameters = true,
+        AllowDuplicateProperties = false
     });
 
     internal static C1SubmissionOutcomeInspectionRequest ReadRequest(ReadOnlySpan<byte> bytes)
@@ -65,7 +68,8 @@ internal static class C1SubmissionOutcomeInspectionJson
         if (json.Length + LineFeedBytes > C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes)
         { throw C1SubmissionOutcomeInspectionValidation.Invalid(); }
         var line = new byte[json.Length + LineFeedBytes];
-        json.CopyTo(line, JsonStartOffset); line[^LineFeedBytes] = LineFeed;
+        json.CopyTo(line, JsonStartOffset);
+        line[^LineFeedBytes] = LineFeed;
         return line;
     }
 

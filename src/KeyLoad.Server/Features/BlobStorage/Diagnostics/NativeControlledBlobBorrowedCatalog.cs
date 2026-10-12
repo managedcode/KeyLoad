@@ -34,9 +34,11 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closing is not null, this);
-            if (active || count >= expected) { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            if (active || count >= expected)
+            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
             originalToken.ThrowIfCancellationRequested();
-            if (!catalog.MoveNext()) { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
+            if (!catalog.MoveNext())
+            { throw new InvalidOperationException(RemoteModelNativeProtocol.InvalidProof); }
             var payload = catalog.Current;
             active = true;
             count++;
@@ -62,14 +64,16 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
         NativeControlledBlobFaultPayload payload, int ordinal)
     {
         await start.ConfigureAwait(false);
-        try { return await dispatcher.ExecuteAsync(payload, ordinal).ConfigureAwait(false); }
+        try
+        { return await dispatcher.ExecuteAsync(payload, ordinal).ConfigureAwait(false); }
         catch (Exception error) { lock (gate) { actualFailures.Add(error); } throw; }
         finally { lock (gate) { active = false; } }
     }
 
     public ValueTask DisposeAsync()
     {
-        lock (gate) { return new(closing ??= JoinAsync(running)); }
+        lock (gate)
+        { return new(closing ??= JoinAsync(running)); }
     }
 
     private async Task JoinAsync(Task? admitted)
@@ -78,10 +82,12 @@ internal sealed class NativeControlledBlobBorrowedCatalog : IAsyncDisposable
         if (admitted is not null)
         { await ServerFailureObserver.ObserveAsync(() => admitted, joinFailures).ConfigureAwait(false); }
         List<Exception> failures;
-        lock (gate) { failures = new(actualFailures); }
+        lock (gate)
+        { failures = new(actualFailures); }
         foreach (var error in joinFailures)
         { if (!failures.Any(existing => ReferenceEquals(existing, error))) { failures.Add(error); } }
-        try { catalog.Dispose(); }
+        try
+        { catalog.Dispose(); }
         catch (Exception error) { failures.Add(error); throw; }
         finally { ServerFailureObserver.ThrowIfAny(failures); }
     }

@@ -150,5 +150,19 @@ public enum GrainReadKind
     /// <summary>Privately observes source attempt state or an authenticated actual target capacity failure.</summary>
     QueueTransferCoordination = 72,
     /// <summary>Privately observes one authenticated native ANN root or its exact publication.</summary>
-    AnnProjectionObservation = 73
+    AnnProjectionObservation = 73,
+    /// <summary>Privately prepares one freshly authorized remote graph endpoint.</summary>
+    RemoteGraphTargetPreparation = 74,
+    /// <summary>Privately reads an actual committed remote graph source intent.</summary>
+    RemoteGraphSourceIntent = 75,
+    /// <summary>Privately reads an actual committed remote graph receiver receipt.</summary>
+    RemoteGraphReceiverReceipt = 76,
+    /// <summary>Privately proves current source graph visibility for a remote incoming projection.</summary>
+    RemoteGraphIncoming = 77,
+    /// <summary>Privately captures bounded remote graph receiver candidates at a target cut.</summary>
+    RemoteGraphReceiverCandidates = 78,
+    /// <summary>Privately finalizes a target projection against exact fresh source proofs.</summary>
+    RemoteGraphIncomingFinalize = 79,
+    /// <summary>Composes explicit remote incoming graph reads over distinct authorized owner cuts.</summary>
+    RemoteGraphIncomingParent = 80
 }

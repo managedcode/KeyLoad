@@ -19,17 +19,22 @@ internal static class RequestCqrsAnnEnrollmentFlow
         var definition = new ProjectionConsumerDefinition(original.IndexGeneration, [],
             [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
              MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector,
-             MutationDiscriminatorNames.ApplyVectorProjection]) { AnnMaintenance = original.MaintenanceProfile };
+             MutationDiscriminatorNames.ApplyVectorProjection])
+        { AnnMaintenance = original.MaintenanceProfile };
         var configure = new ConfigureProjectionConsumerRequest(configureId, original.Consumer, definition)
-            { InitialAnnMaintenance = original };
+        { InitialAnnMaintenance = original };
         var configured = await NativeTextMaintenanceCommit.ExecuteAsync<ProjectionConsumerInfo>(fixture.Database,
             OperationKind.ConfigureProjectionConsumer, configure, configureId, token);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         await RequestCqrsAnnAssertions.EqualAsync(new ProjectionConsumerInfo(original.Consumer, definition,
-            InitialCheckpoint, false) { MaintenanceAuthority = new(RequestCqrsAnnTestData.Principal,
+            InitialCheckpoint, false)
+        {
+            MaintenanceAuthority = new(RequestCqrsAnnTestData.Principal,
                 configureId, fixture.Database.Store.Identity.Incarnation, principal.PolicyEpoch),
-                InitialAnnMaintenance = original, InitialAnnMaintenanceSettled = false }, configured);
+            InitialAnnMaintenance = original,
+            InitialAnnMaintenanceSettled = false
+        }, configured);
         await RequestCqrsAnnOriginalReplay.RefuseUnsettledAsync(fixture, original, token);
         await RequestCqrsAnnAssertions.EqualAsync(configured, Current(fixture, original));
     }
@@ -60,7 +65,8 @@ internal static class RequestCqrsAnnEnrollmentFlow
         var child = AnnMaintenanceChildIdentity.Create(original.CommandId, AnnMaintenancePhase.Completed,
             RequestCqrsAnnTestData.OriginalTail);
         await RequestCqrsAnnAssertions.EqualAsync(new CommitProjectionBatchRequest(child,
-            original.Consumer, intent.Token, []) { InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement }, intent);
+            original.Consumer, intent.Token, [])
+        { InitialAnnMaintenanceSettlement = intent.InitialAnnMaintenanceSettlement }, intent);
         await RequestCqrsAnnAssertions.EqualAsync(new AnnProjectionSettlementClaims(
             AnnProjectionSettlementClaims.SettlementPurpose, fixture.Database.Store.Identity.Incarnation,
             RequestCqrsAnnTestData.Principal, authority.PolicyEpoch,

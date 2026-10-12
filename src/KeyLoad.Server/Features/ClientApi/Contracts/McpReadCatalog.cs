@@ -9,6 +9,8 @@ internal static class McpReadCatalog
 {
     internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
     [
+        McpOperationFactory.Read<ReadRemoteIncomingGraphEdgesRequestV1, RemoteIncomingGraphEdgesPageV1>(
+            RemoteGraphPublicProtocol.IncomingTool, RemoteGraphPublicProtocol.IncomingRoute, GrainReadKind.RemoteGraphIncomingParent),
         McpOperationFactory.Read<ReadFollowerDocumentRequestV1, FollowerDocumentReadResultV1>(
             McpToolNames.DocumentsReadFollower, McpToolRoutes.DocumentsReadFollower, GrainReadKind.FollowerDocument),
         McpOperationFactory.Read<GetDocumentRequest, DocumentReadResult>(McpToolNames.DocumentsGet, McpToolRoutes.DocumentsGet, GrainReadKind.Document),

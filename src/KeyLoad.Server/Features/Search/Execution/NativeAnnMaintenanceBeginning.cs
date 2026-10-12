@@ -45,7 +45,8 @@ internal static class NativeAnnMaintenanceBeginning
         }
         catch (Exception primary)
         {
-            try { memory?.Dispose(); }
+            try
+            { memory?.Dispose(); }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }

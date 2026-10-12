@@ -35,13 +35,16 @@ internal sealed class ReplicaNativeDiscoveryAuthentication
     internal ReplicaNativeDiscoveryRequest CreateNativeDiscoveryRequest(string voter, string runtimeAddress)
     {
         mac.RequireOpen();
-        if (!voters.Contains(voter) || !ReplicaEnvelopeValidation.Address(runtimeAddress))
+        if (!voters.Contains(voter) || !NativeDiscoveryAddress(runtimeAddress))
         { throw Errors.Fail(ErrorCode.Validation, ReplicaProtocol.InvalidPeer); }
         var expires = DateTimeOffset.FromUnixTimeMilliseconds(freshness.Now()).Add(configuration.RpcTimeout);
         var request = new ReplicaNativeDiscoveryRequest(ReplicaNativeDiscoveryProtocol.Version, configuration.LocalId,
             local.RuntimeAddress, voter, runtimeAddress, Guid.NewGuid(), expires, string.Empty);
-        return request with { Signature = owner.SignDiscovery(NativeDiscoveryFrame(request with { Signature = string.Empty },
-            ReplicaNativeDiscoveryProtocol.RequestPurpose), request.Nonce) };
+        return request with
+        {
+            Signature = owner.SignDiscovery(NativeDiscoveryFrame(request with { Signature = string.Empty },
+            ReplicaNativeDiscoveryProtocol.RequestPurpose), request.Nonce)
+        };
     }
 
     internal void VerifyNativeDiscoveryRequest(ReplicaNativeDiscoveryRequest request)
@@ -72,8 +75,11 @@ internal sealed class ReplicaNativeDiscoveryAuthentication
         var owned = payload.ToArray();
         var original = error is null ? owner.SignDiscovery(owned, request.Nonce) : string.Empty;
         var reply = new ReplicaNativeDiscoveryReply(owned, original, request.Nonce, error, string.Empty);
-        return reply with { Signature = Convert.ToHexStringLower(mac.Discovery(configuration.Incarnation,
-            configuration.LocalId, request.Nonce, NativeDiscoveryFrame(reply, ReplicaNativeDiscoveryProtocol.ReplyPurpose))) };
+        return reply with
+        {
+            Signature = Convert.ToHexStringLower(mac.Discovery(configuration.Incarnation,
+            configuration.LocalId, request.Nonce, NativeDiscoveryFrame(reply, ReplicaNativeDiscoveryProtocol.ReplyPurpose)))
+        };
     }
 
     internal ReplicaNativeDiscoveryReply VerifyNativeDiscoveryReply(ReplicaNativeDiscoveryRequest request,
@@ -96,8 +102,17 @@ internal sealed class ReplicaNativeDiscoveryAuthentication
 
     private bool NativeDiscoveryIssuance(DateTimeOffset expires)
     {
-        try { return freshness.Includes(expires.Subtract(configuration.RpcTimeout).ToUnixTimeMilliseconds()); }
+        try
+        { return freshness.Includes(expires.Subtract(configuration.RpcTimeout).ToUnixTimeMilliseconds()); }
         catch (ArgumentOutOfRangeException) { return false; }
+    }
+
+    private static bool NativeDiscoveryAddress(string value)
+    {
+        if (!ReplicaEnvelopeValidation.Address(value))
+        { return false; }
+        return SiloAddress.TryParse(value, out var address)
+            && address.ToParsableString() == value;
     }
 
     private static bool NativeDiscoveryIdentity(string? value)

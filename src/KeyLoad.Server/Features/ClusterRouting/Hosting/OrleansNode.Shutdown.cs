@@ -13,6 +13,7 @@ internal sealed partial class OrleansNode
         var failures = new List<Exception>();
         var stopping = Volatile.Read(ref host);
         // Do not resolve services during cleanup: owners were captured by the original startup path.
+        await GraphResources.JoinAsync(failures).ConfigureAwait(false);
         if (Volatile.Read(ref nativeModelReceiver) is { } nativeReceiver)
         { await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false); }
         if (Volatile.Read(ref nativeModelClient) is { } nativeClient)
@@ -25,7 +26,7 @@ internal sealed partial class OrleansNode
         { await ServerFailureObserver.ObserveAsync(() => remote.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(Volatile.Read(ref ownerRegistration),
             physicalOwnerWork, failures).ConfigureAwait(false);
-        if (RemoteDocuments is { IsJoined: false } || Movement is { IsJoined: false })
+        if (RemoteDocuments is { IsJoined: false } || Movement is { IsJoined: false } || !GraphResources.IsJoined)
         {
             ServerFailureObserver.ThrowIfAny(failures);
             throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);

@@ -25,7 +25,8 @@ internal static class NativeBlobWireScope
         if (frame.Original is { } operation)
         {
             var scope = BlobCommandScope.From(operation);
-            if (operation.Id != arm.OriginalCommandId || scope.UploadId != arm.UploadId) { return null; }
+            if (operation.Id != arm.OriginalCommandId || scope.UploadId != arm.UploadId)
+            { return null; }
         }
         else if (NativeBlobWireCodec.Digest(frame.NativeRequest.Span) != arm.NativeRequestDigest)
         { return null; }

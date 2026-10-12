@@ -27,9 +27,12 @@ internal static class C1SubmissionJournalInspectionJson
     private static readonly C1SubmissionJournalInspectionJsonContext Context = new(new JsonSerializerOptions
     {
         MaxDepth = C1SubmissionJournalInspectionProtocol.MaximumJsonDepth,
-        PropertyNameCaseInsensitive = false, IgnoreReadOnlyProperties = true,
+        PropertyNameCaseInsensitive = false,
+        IgnoreReadOnlyProperties = true,
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-        RespectNullableAnnotations = true, RespectRequiredConstructorParameters = true, AllowDuplicateProperties = false
+        RespectNullableAnnotations = true,
+        RespectRequiredConstructorParameters = true,
+        AllowDuplicateProperties = false
     });
     internal static C1SubmissionJournalInspectionRequest ReadRequest(ReadOnlySpan<byte> bytes)
     {
@@ -65,7 +68,8 @@ internal static class C1SubmissionJournalInspectionJson
         if (json.Length + LineFeedBytes > C1SubmissionJournalInspectionProtocol.MaximumReceiptBytes)
         { throw C1SubmissionJournalInspectionValidation.Invalid(); }
         var line = new byte[json.Length + LineFeedBytes];
-        json.CopyTo(line, NoItems); line[^LineFeedBytes] = LineFeed;
+        json.CopyTo(line, NoItems);
+        line[^LineFeedBytes] = LineFeed;
         return line;
     }
     private static int EncodedBytes(int length)
@@ -109,7 +113,8 @@ internal static class C1SubmissionJournalInspectionJson
             { throw C1SubmissionJournalInspectionValidation.Invalid(); }
             return;
         }
-        if (reader.TokenType != JsonTokenType.StartArray) { throw C1SubmissionJournalInspectionValidation.Invalid(); }
+        if (reader.TokenType != JsonTokenType.StartArray)
+        { throw C1SubmissionJournalInspectionValidation.Invalid(); }
         var count = NoItems;
         while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {

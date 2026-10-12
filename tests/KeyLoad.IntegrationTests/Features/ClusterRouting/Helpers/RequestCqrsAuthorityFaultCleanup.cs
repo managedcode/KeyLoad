@@ -8,6 +8,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsAuthorityFaultCleanup
 {
     internal static async Task RunAsync(string root, bool rootCreated, bool waveStartupAttempted,
+        global::KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageTestSession? localImageSession,
+        string localImageDataRoot,
         RequestCqrsProbeFixture? controls, RequestCqrsRf3Wave? wave,
         RequestCqrsRf3Callers? caller, RequestCqrsRf3Callers? administrator,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? operationDeadline,
@@ -44,6 +46,12 @@ internal static class RequestCqrsAuthorityFaultCleanup
             }
             RequestCqrsLifecycleFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup,
                 failureObserver, RequestCqrsLifecycleStage.AuthorityDeadlineDispose);
+            if (localImageSession is not null)
+            {
+                await global::KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixtureLocalImageLifecycle
+                    .JoinAsync(localImageSession, localImageDataRoot, waveStopped, !waveStartupAttempted, cleanup)
+                    .ConfigureAwait(false);
+            }
             if (rootCreated && waveStopped && cleanup.Count == 0)
             {
                 RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,

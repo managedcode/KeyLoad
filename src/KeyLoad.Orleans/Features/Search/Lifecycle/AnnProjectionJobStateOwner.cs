@@ -29,7 +29,8 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
 
     private AnnProjectionJobState? Validate(AnnProjectionJobState? current)
     {
-        if (current is null) { return null; }
+        if (current is null)
+        { return null; }
         if (current.Authority is not { } authority || current.InitialRequest is not { } initial
             || string.IsNullOrWhiteSpace(authority.PrincipalId) || authority.ConfigureCommandId == Guid.Empty
             || authority.PolicyEpoch <= EmptySequence || authority.Incarnation == Guid.Empty
@@ -60,7 +61,8 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
 
     private static void RequireRequest(AnnMaintenanceRequest initial, AnnMaintenanceRequest? request)
     {
-        if (request is null) { return; }
+        if (request is null)
+        { return; }
         if (request.CommandId == Guid.Empty || request.Consumer != initial.Consumer
             || request.IndexGeneration != initial.IndexGeneration || request.NodeId != initial.NodeId
             || request.Placement is not { } placement

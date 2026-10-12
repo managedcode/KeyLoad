@@ -61,7 +61,8 @@ internal static class RemoteTransferNativeHeldOperation
             result = (scope, request, committed);
         }, failures);
         await JoinOriginalAsync(wave, membership, hold, original, operation, observedArm, failures);
-        if (failures.Count != 0) { wave.RetainRoots(); }
+        if (failures.Count != 0)
+        { wave.RetainRoots(); }
         ServerFailureObserver.ThrowIfAny(failures);
         var actual = result ?? throw new InvalidOperationException(RemoteTransferDistinctProtocol.Missing);
         await calls.ReplayAsync(accept, actual.Committed.OriginalReceipt, token);

@@ -44,9 +44,12 @@ internal static class NativeCanonicalModelCutCodec
         return witness with
         {
             Rows = witness.Rows.Select(row => new NativeCanonicalModelCutRow(row.Key.ToArray(), row.Value.ToArray())).ToImmutableArray(),
-            LogicalOutcome = Own(witness.LogicalOutcome), TechnicalOutcome = Own(witness.TechnicalOutcome),
-            TargetReceipt = Own(witness.TargetReceipt), TargetCounter = Own(witness.TargetCounter),
-            SourceIntent = Own(witness.SourceIntent), SourceCounter = Own(witness.SourceCounter)
+            LogicalOutcome = Own(witness.LogicalOutcome),
+            TechnicalOutcome = Own(witness.TechnicalOutcome),
+            TargetReceipt = Own(witness.TargetReceipt),
+            TargetCounter = Own(witness.TargetCounter),
+            SourceIntent = Own(witness.SourceIntent),
+            SourceCounter = Own(witness.SourceCounter)
         };
     }
 

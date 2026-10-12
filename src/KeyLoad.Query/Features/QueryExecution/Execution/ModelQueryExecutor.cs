@@ -20,6 +20,10 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
     {
         var query = request.Query;
         var source = query.ModelSource!;
+        if (source.Kind == ModelQuerySourceKind.Events && query.InnerJoin is not null)
+        {
+            budget.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
+        }
         return database.WithModelQueryView(principalId, request.Partition, query.Collection, source, budget,
             (view, principal, resource) => ExecuteModelView(view, principal, resource, request, budget));
     }
@@ -32,7 +36,9 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var modelResource = ModelQueryPolicies.Rebase(resource);
         if (query.InnerJoin is not null)
         {
-            return QueueEntityRefJoinExecutor.Execute(database, view, principal, resource, request, budget);
+            return source.Kind == ModelQuerySourceKind.Events
+                ? EventEntityRefJoinExecutor.Execute(database, view, principal, resource, request, budget)
+                : QueueEntityRefJoinExecutor.Execute(database, view, principal, resource, request, budget);
         }
         queries.Bind(principal, modelResource, request);
         var accessPath = source.Kind switch

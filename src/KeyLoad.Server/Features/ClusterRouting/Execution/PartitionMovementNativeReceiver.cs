@@ -62,14 +62,14 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
 
     private Task<PartitionMovementGrainServiceReply> DispatchAsync(PartitionMovementGrainServiceRequest request,
         CancellationToken cancellationToken) => request.Channel switch
-    {
-        PartitionMovementGrainServiceChannel.Phase => PartitionMovementNativePhaseOperations.PhaseAsync(this, request, cancellationToken),
-        PartitionMovementGrainServiceChannel.Outcome => PartitionMovementNativePhaseOperations.OutcomeAsync(this, request, cancellationToken),
-        PartitionMovementGrainServiceChannel.ReceiverIssue => PartitionMovementNativeIssuanceOperations.ExecuteAsync(this, request, cancellationToken),
-        PartitionMovementGrainServiceChannel.RetireCancellation => PartitionMovementNativeRetireOperations.ExecuteAsync(this, request, cancellationToken),
-        PartitionMovementGrainServiceChannel.TransferData => PartitionMovementNativeTransferOperations.ExecuteAsync(this, request, cancellationToken),
-        _ => throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof)
-    };
+        {
+            PartitionMovementGrainServiceChannel.Phase => PartitionMovementNativePhaseOperations.PhaseAsync(this, request, cancellationToken),
+            PartitionMovementGrainServiceChannel.Outcome => PartitionMovementNativePhaseOperations.OutcomeAsync(this, request, cancellationToken),
+            PartitionMovementGrainServiceChannel.ReceiverIssue => PartitionMovementNativeIssuanceOperations.ExecuteAsync(this, request, cancellationToken),
+            PartitionMovementGrainServiceChannel.RetireCancellation => PartitionMovementNativeRetireOperations.ExecuteAsync(this, request, cancellationToken),
+            PartitionMovementGrainServiceChannel.TransferData => PartitionMovementNativeTransferOperations.ExecuteAsync(this, request, cancellationToken),
+            _ => throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof)
+        };
 
     private PartitionMovementGrainServiceReply Failure(PartitionMovementGrainServiceRequest? request, bool authenticated, ErrorCode code)
     {

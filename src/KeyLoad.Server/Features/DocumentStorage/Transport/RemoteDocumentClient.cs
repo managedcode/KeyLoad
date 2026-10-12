@@ -23,8 +23,11 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
         IOptions<OrleansMembershipOptions> membership, TimeProvider clock,
         Func<RemoteModelNativeClient> borrowNative, IControlledBlobWireBorrowObserver? wireObserver = null)
     {
-        this.options = options.Value; this.membership = membership;
-        this.clock = clock; this.borrowNative = borrowNative; this.wireObserver = wireObserver;
+        this.options = options.Value;
+        this.membership = membership;
+        this.clock = clock;
+        this.borrowNative = borrowNative;
+        this.wireObserver = wireObserver;
     }
 
     internal Task<RemoteModelAuthenticatedReply> SendNativeAsync(RegisteredPhysicalOwnerV1 destination,
@@ -154,7 +157,8 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
         get
         {
             var existing = Volatile.Read(ref native);
-            if (existing is not null) { return existing; }
+            if (existing is not null)
+            { return existing; }
             var borrowed = borrowNative();
             return Interlocked.CompareExchange(ref native, borrowed, null) ?? borrowed;
         }

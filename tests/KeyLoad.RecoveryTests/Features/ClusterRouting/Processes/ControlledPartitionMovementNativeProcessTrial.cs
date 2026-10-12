@@ -41,13 +41,15 @@ internal static class ControlledPartitionMovementNativeProcessTrial
             else
             {
                 await child.WaitAndJoinAsync(cancellationToken);
-                if (child.ExitCode != SuccessExit) { throw new InvalidOperationException(Failed); }
+                if (child.ExitCode != SuccessExit)
+                { throw new InvalidOperationException(Failed); }
             }
         }, failures);
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
             CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds));
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
-        if (!child.IsSettled) { failures.Add(new IOException(Failed)); }
+        if (!child.IsSettled)
+        { failures.Add(new IOException(Failed)); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

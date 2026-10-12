@@ -24,7 +24,8 @@ internal sealed record NativeSubmissionJournalBudgetCut(long CanonicalPosition, 
     private static byte[] ReadRows(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, StorageReadObserver observe, ref int records)
     {
         var remaining = 256 - records;
-        if (remaining <= 0) { throw new InvalidDataException("The complete both-store row bound was exceeded."); }
+        if (remaining <= 0)
+        { throw new InvalidDataException("The complete both-store row bound was exceeded."); }
         var rows = new List<KeyValueRecord>();
         store.Read(view =>
         {

@@ -83,7 +83,8 @@ internal static class RemoteTransferNativeContinuation
         var id = Guid.NewGuid();
         var seed = original with
         {
-            TransferId = id, Message = message,
+            TransferId = id,
+            Message = message,
             Create = new(Guid.NewGuid(), original.Scenario.SourcePartition,
                 [new CreateQueueTransfer(original.Scenario.SourceQueue, id, original.Scenario.DestinationQueue, message)])
         };

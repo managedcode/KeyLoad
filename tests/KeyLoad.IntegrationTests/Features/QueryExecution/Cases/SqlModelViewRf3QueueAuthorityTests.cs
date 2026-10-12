@@ -43,6 +43,9 @@ internal sealed class SqlModelViewRf3QueueAuthorityTests(ClusterFixture fixture)
         var deniedMcp = await mcp.CallAsync(McpCallerTools.QueryExecute, deniedUse, deadline.Token);
         await SqlModelViewRf3DenialAssertions.McpAsync(deniedMcp, identity.Secret);
 
+        identity = await SqlModelViewRf3AuthorizationAssertions.VerifyQueueReadWithoutUseAsync(
+            administrator, reader, mcp, scenario, identity, deadline.Token);
+
         identity = await SqlModelViewRf3AuthorizationAssertions.GrantSensitiveReadAsync(
             administrator, identity, deadline.Token);
         var visible = await McpCallerAssertions.SdkSuccessAsync(await reader.QueryAsync(

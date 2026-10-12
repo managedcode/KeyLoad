@@ -47,8 +47,10 @@ internal sealed class ControlledPartitionMovementNativePrepareTests
                     if (cold == FirstColdCut)
                     { healthy = await ControlledPartitionMovementNativeHealthy.SubmitAsync(owners.Source, cancellation); }
                     else
-                    { await ControlledPartitionMovementNativeHealthy.ReplayAsync(owners.Source,
-                        healthy ?? throw new InvalidOperationException("The original healthy receipt is missing."), cancellation); }
+                    {
+                        await ControlledPartitionMovementNativeHealthy.ReplayAsync(owners.Source,
+                        healthy ?? throw new InvalidOperationException("The original healthy receipt is missing."), cancellation);
+                    }
                 }
             }, failures);
             if (failures.Count != 0)

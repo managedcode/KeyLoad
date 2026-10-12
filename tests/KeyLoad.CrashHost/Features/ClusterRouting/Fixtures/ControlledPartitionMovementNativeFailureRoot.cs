@@ -32,7 +32,8 @@ internal sealed class ControlledPartitionMovementNativeFailureRoot
             foreach (var child in aggregate.InnerExceptions)
             { if (Find(child) is { } nested) { return nested; } }
         }
-        else if (original.InnerException is { } inner) { return Find(inner); }
+        else if (original.InnerException is { } inner)
+        { return Find(inner); }
         return null;
     }
 }

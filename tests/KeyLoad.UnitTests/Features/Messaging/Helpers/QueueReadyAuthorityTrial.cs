@@ -33,7 +33,7 @@ internal static class QueueReadyAuthorityTrial
                 var first = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Submit(OperationKind.Receive,
                     request, principal: "worker", id: id, time: now.AddSeconds(2)));
                 failures.Add(first);
-                await Assert.That(first.Code).IsEqualTo(expectedError);
+                await Assert.That(first.Code).IsEqualTo(ErrorCode.RecoveryRequired);
                 var retained = fixture.ReadRetainedEntry(id);
                 var original = retained.Operation ?? throw new InvalidOperationException("The failed native entry is absent.");
                 await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
@@ -44,7 +44,7 @@ internal static class QueueReadyAuthorityTrial
                 await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);
                 await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
                 var recovered = fixture.RecoverFaultOwnedRow(original,
-                    () => QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original), failures, token);
+                    () => QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original), failures, token, expectedError);
                 await Assert.That(recovered.Index).IsEqualTo(retained.Index);
                 await Assert.That(recovered.Operation!.Id).IsEqualTo(id);
                 await Assert.That(fixture.ReadJournalCut()).IsEqualTo(cut);

@@ -73,7 +73,8 @@ internal sealed class EventFeedPubSubScratchFailureTests
         var refused = new GrainState<List<string>>([new string('x', routing.Value.MaximumScratchBytes * 16)])
         { ETag = originalTag, RecordExists = true };
         KeyLoadException? failure = null;
-        try { await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, refused, token); }
+        try
+        { await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, refused, token); }
         catch (KeyLoadException actual) { failure = actual; }
         await Assert.That(failure).IsNotNull();
         await RequireCapacity(failure!);
@@ -108,8 +109,10 @@ internal sealed class EventFeedPubSubScratchFailureTests
 
     private static void Request(EventFeedPubSubCountingWriter writer, bool memory, int hint)
     {
-        if (memory) { _ = writer.GetMemory(hint); }
-        else { _ = writer.GetSpan(hint); }
+        if (memory)
+        { _ = writer.GetMemory(hint); }
+        else
+        { _ = writer.GetSpan(hint); }
     }
 
     private static async Task RequireCapacity(KeyLoadException failure)

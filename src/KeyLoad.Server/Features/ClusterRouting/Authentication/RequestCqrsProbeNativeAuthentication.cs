@@ -156,8 +156,10 @@ internal sealed class RequestCqrsProbeNativeAuthentication
             && Text(claim.Voter) && Text(claim.SiloAddress) && Signature(claim.ArmSha256);
     private bool Text(string? value, int? maximum = null)
     {
-        if (string.IsNullOrWhiteSpace(value)) { return false; }
-        try { return Utf8.GetByteCount(value) <= (maximum ?? membership.Value.MaximumAddressBytes); }
+        if (string.IsNullOrWhiteSpace(value))
+        { return false; }
+        try
+        { return Utf8.GetByteCount(value) <= (maximum ?? membership.Value.MaximumAddressBytes); }
         catch (EncoderFallbackException) { return false; }
     }
     private static bool Signature(string? value)
@@ -165,7 +167,8 @@ internal sealed class RequestCqrsProbeNativeAuthentication
     private static byte[] Bound<T>(T value, int maximum)
     {
         var bytes = NativeSerialization.Serialize(value);
-        if (bytes.Length > maximum) { throw Errors.Fail(ErrorCode.ResourceExhausted, RequestCqrsProbeNativeProtocol.Unavailable); }
+        if (bytes.Length > maximum)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, RequestCqrsProbeNativeProtocol.Unavailable); }
         return bytes;
     }
     private static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Unauthenticated, RequestCqrsProbeNativeProtocol.Unavailable);

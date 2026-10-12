@@ -84,8 +84,12 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
     internal void SetDiscovery(ReplicaEnvelopeAuthenticator authentication, ReplicaSiloDiscovery discovery)
     {
         ArgumentNullException.ThrowIfNull(authentication);
-        selected = discovery; unavailable = false; malformed = false;
-        ReleaseAll(); dispatchGate = null; payloadGate = null;
+        selected = discovery;
+        unavailable = false;
+        malformed = false;
+        ReleaseAll();
+        dispatchGate = null;
+        payloadGate = null;
     }
     internal void SetTamperedPayload() => malformed = true;
     internal void SetHeaderGate(RequestCqrsCohortNativeGate gate) => dispatchGate = gate;
@@ -112,7 +116,8 @@ internal sealed class RequestCqrsCohortNativeGate
     internal async Task WaitAsync(CancellationToken token)
     {
         entered.TrySetResult();
-        try { await released.Task.WaitAsync(token); }
+        try
+        { await released.Task.WaitAsync(token); }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { aborted.TrySetResult(); throw; }
     }
     internal void Release() => released.TrySetResult();

@@ -27,9 +27,14 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         RemoteControlledBlobReceiver controlledBlob, IOptions<OrleansMembershipOptions> membership,
         IOptions<GrainRoutingOptions> routing, TimeProvider clock, RemoteTransferPeerReceiver? queueTransfer = null)
     {
-        options = nodeOptions.Value; this.receiver = receiver; this.owner = owner;
-        this.controlled = controlled; this.controlledBlob = controlledBlob;
-        this.queueTransfer = queueTransfer; this.routing = routing.Value; this.clock = clock;
+        options = nodeOptions.Value;
+        this.receiver = receiver;
+        this.owner = owner;
+        this.controlled = controlled;
+        this.controlledBlob = controlledBlob;
+        this.queueTransfer = queueTransfer;
+        this.routing = routing.Value;
+        this.clock = clock;
         replay = new(clock, membership);
     }
 
@@ -56,7 +61,8 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         }
         finally
         {
-            if (operation is not null) { ServerFailureObserver.Observe(operation.Dispose, failures); }
+            if (operation is not null)
+            { ServerFailureObserver.Observe(operation.Dispose, failures); }
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, RemoteDocumentProtocol.InvalidProof);
@@ -104,7 +110,7 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
         { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof); }
     }
 
-    private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteDocumentCallAsync( RemoteDocumentCallV1 call, CancellationToken token)
+    private async Task<(ReadOnlyMemory<byte> Payload, string Signature)> ExecuteDocumentCallAsync(RemoteDocumentCallV1 call, CancellationToken token)
     {
         receiver.Validate(call, token);
         if (!replay.TryUse(call.Nonce))

@@ -23,9 +23,9 @@ internal sealed class PartitionMovementLateNativeNode : IAsyncDisposable
     private Task? partitionDisposal;
 
     internal PartitionMovementLateNativeNode(string[] arguments, IGrainPartitionMovementSealedOperationObserver? observer,
-        IControlledBlobWireBorrowObserver? blobWireObserver = null)
+        IControlledBlobWireBorrowObserver? blobWireObserver = null, NativeLocalhostClusteringOptions? localhostClustering = null)
     {
-        Application = ServerConfiguration.Build(arguments, observer, blobWireObserver);
+        Application = ServerConfiguration.Build(arguments, observer, blobWireObserver, localhostClustering);
         ShutdownTimeout = Application.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value.ShutdownTimeout;
         Clock = Application.Services.GetRequiredService<TimeProvider>();
     }

@@ -19,6 +19,9 @@ public sealed partial class DatabaseEngine
         long position, AtomicPartitionPlacementResolution? placement)
         => operation.Kind switch
         {
+            OperationKind.RemoteGraphSource => ExecuteRemoteGraphSource(transaction, principal, operation, position),
+            OperationKind.RemoteGraphReceive => ExecuteRemoteGraphReceive(transaction, operation, position),
+            OperationKind.RemoteGraphComplete => ExecuteRemoteGraphComplete(transaction, operation, position),
             OperationKind.EventFeedControl => ExecuteEventVectorControl(transaction, principal, operation, position, placement),
             OperationKind.EventFeedSourcePhase => ExecuteEventVectorSource(transaction, principal, operation, position, placement),
             OperationKind.OnlineTextPublicationPhase => ExecuteOnlineTextPublication(transaction, principal, operation),

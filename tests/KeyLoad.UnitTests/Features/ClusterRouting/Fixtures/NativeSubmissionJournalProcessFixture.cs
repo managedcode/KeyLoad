@@ -62,7 +62,8 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
         ServerFailureObserver.Observe(Canonical.CloseStore, failures);
         if (Directory.Exists(ReplicaDirectory))
         {
-            try { RequireLocksReleased(); }
+            try
+            { RequireLocksReleased(); }
             catch (Exception original) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(original) is null)
             {
                 failures.Add(original);
@@ -83,17 +84,20 @@ internal sealed class NativeSubmissionJournalProcessFixture(C1OutcomeInspectionF
     public void Dispose()
     {
         var failures = new List<Exception>();
-        try { log?.Dispose(); }
+        try
+        { log?.Dispose(); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         { failures.Add(error); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
         { failures.Add(error); }
-        try { replica?.Dispose(); }
+        try
+        { replica?.Dispose(); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         { failures.Add(error); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
         { failures.Add(error); }
-        try { retentionLock?.Dispose(); }
+        try
+        { retentionLock?.Dispose(); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         { failures.Add(error); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)

@@ -72,7 +72,8 @@ internal static class ConnectionNativeProducerCleanupFlow
     private static async Task<Exception> DrainFailureAsync(
         IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> stream, CancellationToken token)
     {
-        try { await foreach (var unused in stream.WithCancellation(token)) { } }
+        try
+        { await foreach (var unused in stream.WithCancellation(token)) { } }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { return error; }
         throw new InvalidOperationException("The genuine native primary and cleanup failures must escape.");
     }

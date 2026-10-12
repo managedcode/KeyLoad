@@ -29,9 +29,11 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
 
     internal static async Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhostClustering,
-        IGrainPartitionMovementSealedOperationObserver? sealedObserver = null)
+        IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
+        IDatabaseAuthenticationExecutionObserver? authenticationObserver = null)
     {
-        var application = ServerConfiguration.Build(arguments, sealedObserver: sealedObserver, localhostClustering: localhostClustering);
+        var application = ServerConfiguration.Build(arguments, sealedObserver: sealedObserver, localhostClustering: localhostClustering,
+            authenticationExecutionObserver: authenticationObserver);
         try
         { return new(application); }
         catch (Exception primary)

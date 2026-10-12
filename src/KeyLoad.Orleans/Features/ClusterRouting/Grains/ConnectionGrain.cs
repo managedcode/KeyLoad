@@ -102,7 +102,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             var controlledReply = await TryExecuteControlledAsync(request, writer).ConfigureAwait(true);
             if (controlledReply is not null)
             { return GrainReplyFactory.StreamResult(controlledReply, options); }
-            if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose
+            if (request.Envelope.Purpose is RemoteGraphRequestScope.ParentPurpose or EventVectorRequestScope.ParentPurpose
                 || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition)
             { reply = await ExecuteParentAsync(request, writer, purpose).ConfigureAwait(true); }
             else if (command)
@@ -156,6 +156,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
     private async Task<GrainOperationReply> ExecuteParentAsync(DecodedGrainRequest request,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
     {
+        if (request.Envelope.Purpose == RemoteGraphRequestScope.ParentPurpose)
+        { return await RemoteGraphParentExecution.ExecuteAsync(request, services, clock, codec, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true); }
         if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose)
         { return await EventVectorParentExecution.ExecuteAdmitAsync(request, services, clock, codec, ((IGrainBase)this).GrainContext, writer).ConfigureAwait(true); }
         if (request.Envelope.CommandKind == OperationKind.MovePartition)

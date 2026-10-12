@@ -25,29 +25,29 @@ internal static class NativeDiscoveryCancellationFlow
                 Options.Create(settings), TimeProvider.System, gate);
             try
             {
-            await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () =>
-        {
-            var before = runtime.ReadActiveMembership();
-            var expected = cluster.Receiver.Discovery.Read();
-            var request = fixture.Sign();
-            original = runtime.DiscoverAsync(request, caller.Token);
-            await gate.Entered.WaitAsync(token);
-            await caller.CancelAsync();
-            var refusal = fixture.Sender.VerifyNativeDiscoveryReply(request, await original.WaitAsync(token));
-            await Assert.That(refusal.Nonce).IsEqualTo(request.Nonce);
-            await Assert.That(refusal.Error).IsEqualTo(ErrorCode.OwnershipLost);
-            await Assert.That(refusal.Payload.IsEmpty).IsTrue();
-            await Assert.That(refusal.DiscoverySignature).IsEqualTo(string.Empty);
-            gate.Release();
-            await HealthyAsync(runtime, fixture, expected, token);
-            await Assert.That(runtime.ReadActiveMembership().SequenceEqual(before)).IsTrue();
-            var stop = runtime.StopAsync();
-            await Assert.That(ReferenceEquals(stop, runtime.StopAsync())).IsTrue();
-            await stop;
-            await runtime.DisposeAsync();
-            Assert.ThrowsExactly<ObjectDisposedException>(() => runtime.ReadActiveMembership());
-            await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => runtime.DiscoverAsync(fixture.Sign(), token));
-            await Assert.That((await fixture.ReceiveNativeAsync(fixture.Sign())).Error).IsNull();
+                await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () =>
+            {
+                var before = runtime.ReadActiveMembership();
+                var expected = cluster.Receiver.Discovery.Read();
+                var request = fixture.Sign();
+                original = runtime.DiscoverAsync(request, caller.Token);
+                await gate.Entered.WaitAsync(token);
+                await caller.CancelAsync();
+                var refusal = fixture.Sender.VerifyNativeDiscoveryReply(request, await original.WaitAsync(token));
+                await Assert.That(refusal.Nonce).IsEqualTo(request.Nonce);
+                await Assert.That(refusal.Error).IsEqualTo(ErrorCode.OwnershipLost);
+                await Assert.That(refusal.Payload.IsEmpty).IsTrue();
+                await Assert.That(refusal.DiscoverySignature).IsEqualTo(string.Empty);
+                gate.Release();
+                await HealthyAsync(runtime, fixture, expected, token);
+                await Assert.That(runtime.ReadActiveMembership().SequenceEqual(before)).IsTrue();
+                var stop = runtime.StopAsync();
+                await Assert.That(ReferenceEquals(stop, runtime.StopAsync())).IsTrue();
+                await stop;
+                await runtime.DisposeAsync();
+                Assert.ThrowsExactly<ObjectDisposedException>(() => runtime.ReadActiveMembership());
+                await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => runtime.DiscoverAsync(fixture.Sign(), token));
+                await Assert.That((await fixture.ReceiveNativeAsync(fixture.Sign())).Error).IsNull();
             }, failures);
             }
             finally

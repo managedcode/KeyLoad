@@ -7,6 +7,12 @@ internal static class McpCommandCatalog
 {
     internal static ImmutableArray<McpOperationDescriptor> Entries { get; } =
     [
+        McpOperationFactory.Command<UpsertRemoteGraphEdgeRequestV1, RemoteGraphEdgeResultV1>(RemoteGraphPublicProtocol.UpsertTool,
+            RemoteGraphPublicProtocol.UpsertRoute, OperationKind.UpsertRemoteGraphEdge, static request => request.CommandId),
+        McpOperationFactory.Command<DeleteRemoteGraphEdgeRequestV1, RemoteGraphEdgeResultV1>(RemoteGraphPublicProtocol.DeleteTool,
+            RemoteGraphPublicProtocol.DeleteRoute, OperationKind.DeleteRemoteGraphEdge, static request => request.CommandId),
+        McpOperationFactory.Command<DeliverRemoteGraphEdgeRequestV1, RemoteGraphEdgeResultV1>(RemoteGraphPublicProtocol.DeliverTool,
+            RemoteGraphPublicProtocol.DeliverRoute, OperationKind.DeliverRemoteGraphEdge, static request => request.CommandId),
         McpOperationFactory.Command<CommandRequest, CommitReceipt>(McpToolNames.DocumentsCommit, McpToolRoutes.DocumentsCommit, OperationKind.Batch, static request => request.CommandId),
         McpOperationFactory.Command<AnnMaintenanceRequest, AnnMaintenanceResult>(McpToolNames.SearchAnnMaintain, McpToolRoutes.SearchAnnMaintain, OperationKind.MaintainAnnIndex, static request => request.CommandId),
         McpOperationFactory.Command<TextIndexMaintenanceRequest, TextIndexMaintenanceResult>(McpToolNames.SearchTextMaintain, McpToolRoutes.SearchTextMaintain, OperationKind.MaintainTextIndex, static request => request.CommandId),

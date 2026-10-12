@@ -21,7 +21,8 @@ internal sealed class NativeBlobWireProbeFixture
     {
         Root = Path.Combine(Path.GetFullPath(dataRoot), "native-blob-wire-probes");
         SessionId = sessionId;
-        if (OperatingSystem.IsWindows() || Directory.Exists(Root)) { throw Invalid(); }
+        if (OperatingSystem.IsWindows() || Directory.Exists(Root))
+        { throw Invalid(); }
         Directory.CreateDirectory(Root, RequestCqrsProbeProtocol.PrivateDirectoryMode);
         var limits = Options.Create(new RequestProbeExecutionOptions());
         limits.Value.Validate();
@@ -33,8 +34,14 @@ internal sealed class NativeBlobWireProbeFixture
         try
         {
             using var publication = new FileStream(Path.Combine(Root, NativeBlobWireProbeProtocol.PublicationFile),
-                new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None,
-                    UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode, Options = FileOptions.WriteThrough });
+                new FileStreamOptions
+                {
+                    Mode = FileMode.CreateNew,
+                    Access = FileAccess.Write,
+                    Share = FileShare.None,
+                    UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode,
+                    Options = FileOptions.WriteThrough
+                });
             global::KeyLoad.Server.ServerFailureObserver.Observe(() => publication.Flush(flushToDisk: true), failures);
         }
         catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure))
@@ -54,7 +61,8 @@ internal sealed class NativeBlobWireProbeFixture
         NodeEpochRf3Profile profile, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (stopped) { throw Invalid(); }
+        if (stopped)
+        { throw Invalid(); }
         var resources = parameters.ToArray();
         var physical = await ReadGuidAsync(resources, "membership-physical-b", token).ConfigureAwait(false);
         var incarnation = await ReadGuidAsync(resources, "membership-incarnation-b", token).ConfigureAwait(false);
@@ -65,7 +73,8 @@ internal sealed class NativeBlobWireProbeFixture
         var bytes = Codec.Encode(owner);
         if (ownerBytes is not null)
         {
-            if (!ownerBytes.AsSpan().SequenceEqual(bytes)) { throw Invalid(); }
+            if (!ownerBytes.AsSpan().SequenceEqual(bytes))
+            { throw Invalid(); }
             RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes);
             return;
         }
@@ -100,7 +109,8 @@ internal sealed class NativeBlobWireProbeFixture
 
     internal byte[] Read(string name)
     {
-        if (ownerBytes is null || armsBytes is null || deleted) { throw Invalid(); }
+        if (ownerBytes is null || armsBytes is null || deleted)
+        { throw Invalid(); }
         RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes);
         RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes);
         return files.Read(name);
@@ -111,11 +121,15 @@ internal sealed class NativeBlobWireProbeFixture
     internal void DeleteAfterJoined(TwoRf3MembershipWave wave)
     {
         stopped = true;
-        if (!wave.applicationDisposed || !wave.nodeLocksReleased) { throw Invalid(); }
+        if (!wave.applicationDisposed || !wave.nodeLocksReleased)
+        { throw Invalid(); }
         wave.AssertAllNodeLocksReleased();
-        if (deleted) { return; }
-        if (ownerBytes is not null) { RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes); }
-        if (armsBytes is not null) { RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes); }
+        if (deleted)
+        { return; }
+        if (ownerBytes is not null)
+        { RequireExact(NativeBlobWireProbeProtocol.OwnerFile, ownerBytes); }
+        if (armsBytes is not null)
+        { RequireExact(NativeBlobWireProbeProtocol.ArmsFile, armsBytes); }
         for (var slot = 0; slot < slots; slot++)
         { if (files.Exists(NativeBlobWireNames.Slot(slot))) { throw Invalid(); } }
         files.WithPublication(() => { });

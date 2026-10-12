@@ -709,3 +709,55 @@ Ordered implementation/join: preserve original failure and settlement proof; app
 ## Native Server original lifetime compiler closure (R61)
 
 REQ/AC-SESSIONREAD-002..004 and the existing bounded native model contract retain the original memoized ReplicaDiscoveryLifetime.StopAsync: original stopping cancellation, joined active operations, then idempotently guarded admission/replay/CTS cleanup. Explicit DisposeAsync awaits the same lifetime and exposes direct owned disposal without a second shutdown task. Every cleanup failure remains retained and later owned resources still close. Event-vector disposal preserves replay/callerMac/localMac order and endpoint reset; document runtime preserves receiver/client/work/endpoint shutdown order and complete actual task faults/cancellation. Immediate receiver admission is the existing zero-millisecond admission via native WaitAsync with the original caller token, with unchanged configured limits and original expiry. Native model wire/service visibility is internal; generated aliases, version, request IDs0..11, reply IDs0..5 and channel0/1 are unchanged. Named constants and LoggerMessage preserve original values, Error/default EventId/content-free diagnostic and exact uncertainty bool. Null error Signature remains refused. Existing original MAC mutation/roundtrip and full receiving operation controls remain mandatory. This is source-only compiler repair, not native/runtime/Linux qualification or a change to effects/Unknown classification; external effect-boundary work is a separate coherent union.
+
+
+## TASK-KL098-VECTOR-PURGE-RF3-001 — original native pins and purge
+
+REQ-EVENT-RETENTION-001..003 / AC-EVENT-RETENTION-001..003 and
+REQ-EVENTS-VECTOR-RELEASE-001 / AC-EVENTS-VECTOR-RELEASE-001 require the
+combined public operation. This is an acceptance-code gap, not a new product
+bug: the existing subscription purge and six-owner event-vector cases remain
+unchanged. One actual Aspire-owned two-RF3 wave creates two independent topic
+sources and document/queue siblings through persisted credentials and actual
+.NET/official MCP clients. Original FromBeginning Open owns both native pins.
+Actual per-source purge commands refuse ResourceExhausted; retain each exact
+failed command and protected source/sibling state. Fresh current native owners,
+joined six resources and eighteen released locks precede every stopped read.
+
+Repeat only the SAME refused commands after the first cold. Compare complete
+canonical AND admitted native journal images, permitting only genuine membership
+or exact catalogued Batch receipt/error replay. Every unrelated row remains
+byte-exact; missing/covered/oversize journal evidence refuses. The stopped
+comparison requires one explicit bridge restart before live Release. This is
+three actual restarts for two independently compared cold phases, not an
+invented third qualification result, new timer, retry or altered quota.
+
+Release uses the actual parent with original map/cursor/coverage/revision and
+awaits its SDK/MCP terminal receipts. NEW purge IDs then commit once; failed IDs
+never become successes. Require literal retained event3, HistoryUnavailable for
+the old read, byte-exact full original document and message inspections through BOTH public clients, and a healthy event4. Retain original
+publish/purge/healthy receipts across the second compared cold phase and finish
+with the actual wave stopped, final cleanup joining and deleting its owned roots.
+No direct pin mutation, live file read, expected ACK reconstruction, fallback or
+new product/transport/fixture flag is introduced.
+
+Source map: Integration EventStreams Cases/EventVectorTopicRetentionRf3Tests;
+Helpers/EventVectorTopicRetentionRf3{Seed,Routes,Flow};
+Assertions/EventVectorTopicRetentionRf3{Assertions,ColdAssertions,ReplayProof}.
+Reuse existing NativeRemoteGraphRf3Cuts verified full-owner capture and its
+unmodified native budget, current-owner directory verification and full journal
+authority. These cross-feature helpers are the already-owned diagnostic cut ABI,
+not a graph workload or Blob observer profile. Source preview does not qualify
+KL098: compiler, Linux, current-image SDK/MCP/Aspire RF3 and complete retention,
+backup, restore, horizon/transfer/endurance gates remain OPEN.
+
+```mermaid
+flowchart LR
+  Seed[Persisted six-owner sources] --> Open[Original native vector pins]
+  Open --> Refuse[SDK and MCP purge refusal]
+  Refuse --> Cold1[Full canonical and journal cold comparison]
+  Cold1 --> Bridge[Joined bridge restart]
+  Bridge --> Release[Actual parent Release]
+  Release --> Purge[NEW purge IDs and healthy append]
+  Purge --> Cold2[Original receipt replay and second full cold comparison]
+```

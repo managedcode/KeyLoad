@@ -9,7 +9,8 @@ internal static class RequestCqrsCohortOwners
     private static readonly ConcurrentDictionary<string, RequestCqrsCohortRuntimeFixture> Owners = new();
     internal static void Register(string id, RequestCqrsCohortRuntimeFixture owner)
     {
-        if (!Owners.TryAdd(id, owner)) { throw new InvalidOperationException("Duplicate native cohort owner."); }
+        if (!Owners.TryAdd(id, owner))
+        { throw new InvalidOperationException("Duplicate native cohort owner."); }
     }
     internal static RequestCqrsCohortRuntimeFixture Resolve(IConfiguration configuration)
         => Owners.TryGetValue(configuration[Key] ?? string.Empty, out var owner) ? owner

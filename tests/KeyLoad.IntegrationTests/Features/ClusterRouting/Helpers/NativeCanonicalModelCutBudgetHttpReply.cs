@@ -38,7 +38,8 @@ internal static class NativeCanonicalModelCutBudgetHttpReply
                 .IsEqualTo(NativeCanonicalModelCutCodec.Exhausted().Message);
             token.ThrowIfCancellationRequested();
         }, failures).ConfigureAwait(false);
-        if (client is { } owned) { ServerFailureObserver.Observe(owned.Dispose, failures); }
+        if (client is { } owned)
+        { ServerFailureObserver.Observe(owned.Dispose, failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -53,7 +54,8 @@ internal static class NativeCanonicalModelCutBudgetHttpReply
         while (total < bytes.Length)
         {
             var count = await stream.ReadAsync(bytes.AsMemory(total), token).ConfigureAwait(false);
-            if (count == 0) { break; }
+            if (count == 0)
+            { break; }
             total += count;
         }
         if (total <= 0 || total > maximum || response.Content.Headers.ContentLength is { } expected && expected != total)

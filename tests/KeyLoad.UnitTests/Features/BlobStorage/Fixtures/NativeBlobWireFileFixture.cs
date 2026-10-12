@@ -18,23 +18,33 @@ internal sealed class NativeBlobWireFileFixture : IDisposable
     {
         var limits = Options.Create(new RequestProbeExecutionOptions());
         limits.Value.Validate();
-        if (OperatingSystem.IsWindows()) { throw new PlatformNotSupportedException("Private native owner files require Unix modes."); }
+        if (OperatingSystem.IsWindows())
+        { throw new PlatformNotSupportedException("Private native owner files require Unix modes."); }
         Directory.CreateDirectory(Root, RequestCqrsProbeProtocol.PrivateDirectoryMode);
         try
         {
-            Files = new(Root, limits); Codec = new(limits); Reservations = new(Files, Codec, limits);
+            Files = new(Root, limits);
+            Codec = new(limits);
+            Reservations = new(Files, Codec, limits);
             var tuple = new NativeBlobWireOwnerTuple(Guid.NewGuid(), Guid.NewGuid(), ["a", "b", "c"]);
             Owner = new(NativeBlobWireProbeProtocol.Version, Guid.NewGuid().ToString("N"), "file-unit-owner", tuple, tuple, tuple);
             OwnerDigest = NativeBlobWireCodec.Digest(Codec.Encode(Owner));
             using var publication = new FileStream(Path.Combine(Root, NativeBlobWireProbeProtocol.PublicationFile),
-                new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None,
-                    UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode, Options = FileOptions.WriteThrough });
+                new FileStreamOptions
+                {
+                    Mode = FileMode.CreateNew,
+                    Access = FileAccess.Write,
+                    Share = FileShare.None,
+                    UnixCreateMode = RequestCqrsProbeProtocol.PrivateFileMode,
+                    Options = FileOptions.WriteThrough
+                });
         }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
             ServerFailureObserver.Observe(() => Directory.Delete(Root, recursive: true), failures);
-            ServerFailureObserver.ThrowIfAny(failures); throw;
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
         }
     }
 

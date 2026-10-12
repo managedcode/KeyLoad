@@ -49,7 +49,8 @@ internal sealed class NativeBlobWholeParentOwner(List<Exception> failures) : IAs
         await ServerFailureObserver.ObserveAsync(CloseCallersAsync, cleanup);
         if (wave is { } actual)
         {
-            if (failures.Count != NoFailures || cleanup.Count != NoFailures) { actual.RetainRoots(); }
+            if (failures.Count != NoFailures || cleanup.Count != NoFailures)
+            { actual.RetainRoots(); }
             await ServerFailureObserver.ObserveAsync(() => actual.DisposeAsync().AsTask(), cleanup);
             if (actual.applicationDisposed && actual.nodeLocksReleased)
             {

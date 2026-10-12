@@ -28,7 +28,8 @@ internal sealed class NativeAnnRootLease : IDisposable
     private void RequireStable()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        if (uncertainOriginal) { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
+        if (uncertainOriginal)
+        { throw Errors.Fail(ErrorCode.RecoveryRequired, NativeAnnProtocol.Interrupted); }
     }
 
     internal static NativeAnnRootLease Open(string canonicalRoot, Guid nodeId, Guid incarnation,
@@ -109,29 +110,34 @@ internal sealed class NativeAnnRootLease : IDisposable
 
     internal void StartOriginal(AnnMaintenanceRequest request, NativeAnnExecutionOptions options)
     {
-        lock (receiptGate) { SaveOriginal(NativeAnnOriginalOperations.Start(Receipt, request), options); }
+        lock (receiptGate)
+        { SaveOriginal(NativeAnnOriginalOperations.Start(Receipt, request), options); }
     }
 
     internal void SettleOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
         AnnMaintenanceResult result, KeyLoad.Core.Features.Search.AnnSeed current, NativeAnnExecutionOptions options,
         CommitProjectionBatchRequest? settlementIntent)
     {
-        lock (receiptGate) { SaveOriginal(NativeAnnOriginalOperations.Settle(Receipt, principal, request, result, current, settlementIntent, options), options); }
+        lock (receiptGate)
+        { SaveOriginal(NativeAnnOriginalOperations.Settle(Receipt, principal, request, result, current, settlementIntent, options), options); }
     }
 
     internal void CompleteOriginalRelease(NativeAnnOwnedKey key, NativeAnnExecutionOptions options)
     {
-        lock (receiptGate) { SaveOriginal(NativeAnnOriginalOperations.CompleteRelease(Receipt, key), options); }
+        lock (receiptGate)
+        { SaveOriginal(NativeAnnOriginalOperations.CompleteRelease(Receipt, key), options); }
     }
 
     private void SaveOriginal(NativeAnnRootReceipt next, NativeAnnExecutionOptions options)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        if (ReferenceEquals(Receipt, next)) { return; }
+        if (ReferenceEquals(Receipt, next))
+        { return; }
         NativeAnnRootInventory.Require(Root, next, next.NodeId, next.Incarnation, options);
         if (global::KeyLoad.NativeSerialization.Measure(next) > options.MaximumManifestBytes)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, NativeAnnProtocol.Bound); }
-        try { NativeAnnRootReceipts.Replace(Root, next, options); }
+        try
+        { NativeAnnRootReceipts.Replace(Root, next, options); }
         catch (Exception) { uncertainOriginal = true; throw; }
         Receipt = next;
     }
@@ -140,7 +146,8 @@ internal sealed class NativeAnnRootLease : IDisposable
     {
         lock (receiptGate)
         {
-            if (disposed) { return; }
+            if (disposed)
+            { return; }
             disposed = true;
             ownership.Dispose();
         }

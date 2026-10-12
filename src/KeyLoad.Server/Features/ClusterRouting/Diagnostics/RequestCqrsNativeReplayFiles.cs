@@ -29,13 +29,15 @@ internal sealed class RequestCqrsNativeReplayFiles(string root, string sessionId
         if (RequestCqrsNativeReplayInventory.IsPlanName(name))
         {
             var plan = RequestCqrsNativeReplayInventory.ReadPlan(bytes);
-            if (plan.SessionId != sessionId || name != RequestCqrsNativeReplayInventory.PlanName(plan.ArmId)) { throw Invalid(); }
+            if (plan.SessionId != sessionId || name != RequestCqrsNativeReplayInventory.PlanName(plan.ArmId))
+            { throw Invalid(); }
             plans.Add(plan);
         }
         else
         {
             var value = RequestCqrsNativeReplayInventory.ReadWitness(bytes);
-            if (value.SessionId != sessionId || name != RequestCqrsNativeReplayInventory.WitnessName(value.ArmId, value.RequestId, value.Ordinal)) { throw Invalid(); }
+            if (value.SessionId != sessionId || name != RequestCqrsNativeReplayInventory.WitnessName(value.ArmId, value.RequestId, value.Ordinal))
+            { throw Invalid(); }
             witnesses.Add(value);
         }
         records.RegisterImmutable(name, bytes);
@@ -54,15 +56,18 @@ internal sealed class RequestCqrsNativeReplayFiles(string root, string sessionId
             RequestCqrsNativeReplayInventory.RequireInventory([plan], witnesses, [claim.Arm], [marker], records.RetainedArm);
             var encoded = witnesses.Select(value => (Name: RequestCqrsNativeReplayInventory.WitnessName(value.ArmId, value.RequestId, value.Ordinal),
                 Bytes: RequestCqrsNativeReplayInventory.WriteWitness(value))).ToArray();
-            if (encoded.Any(item => item.Bytes.Length > options.Value.MaximumRecordBytes)) { throw Invalid(); }
+            if (encoded.Any(item => item.Bytes.Length > options.Value.MaximumRecordBytes))
+            { throw Invalid(); }
             var markerBytes = json.WriteMarker(marker);
             if (checked(snapshot.FileCount + encoded.Length + PublishedMarkerCount) > options.Value.MaximumFiles
                 || checked(snapshot.AggregateBytes + encoded.Sum(item => (long)item.Bytes.Length) + markerBytes.Length)
-                    > options.Value.MaximumAggregateBytes) { throw Invalid(); }
+                    > options.Value.MaximumAggregateBytes)
+            { throw Invalid(); }
             var markerName = RequestCqrsProbeFiles.MarkerName(marker);
             var publication = encoded.Append((Name: markerName, Bytes: markerBytes)).ToArray();
             RequestCqrsProbeBatchPublication.Write(root, publication, options, readSnapshot, plan);
-            foreach (var item in publication) { records.RegisterImmutable(item.Name, item.Bytes); }
+            foreach (var item in publication)
+            { records.RegisterImmutable(item.Name, item.Bytes); }
         }
     }
 

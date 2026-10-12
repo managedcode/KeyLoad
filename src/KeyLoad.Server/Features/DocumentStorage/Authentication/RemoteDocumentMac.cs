@@ -59,7 +59,8 @@ internal sealed class RemoteDocumentMac : IDisposable
     {
         RequireOpen();
         ArgumentNullException.ThrowIfNull(request);
-        if (!NativeSignature(request.SenderSignature)) { return false; }
+        if (!NativeSignature(request.SenderSignature))
+        { return false; }
         var expected = NativeDigest(request with { SenderSignature = string.Empty },
             RemoteModelNativeProtocol.NativeRequestPurpose, NativeRequestDomain);
         return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(request.SenderSignature), expected);
@@ -77,7 +78,8 @@ internal sealed class RemoteDocumentMac : IDisposable
     {
         RequireOpen();
         ArgumentNullException.ThrowIfNull(reply);
-        if (!NativeSignature(reply.SenderSignature)) { return false; }
+        if (!NativeSignature(reply.SenderSignature))
+        { return false; }
         var expected = NativeDigest(reply with { SenderSignature = string.Empty },
             RemoteModelNativeProtocol.NativeReplyPurpose, NativeReplyDomain);
         return CryptographicOperations.FixedTimeEquals(Convert.FromHexString(reply.SenderSignature), expected);
@@ -119,14 +121,16 @@ internal sealed class RemoteDocumentMac : IDisposable
 
     private void RequireOpen()
     {
-        lock (lifecycle) { ObjectDisposedException.ThrowIf(disposed != ActiveState, this); }
+        lock (lifecycle)
+        { ObjectDisposedException.ThrowIf(disposed != ActiveState, this); }
     }
 
     public void Dispose()
     {
         lock (lifecycle)
         {
-            if (disposed == DisposedState) { return; }
+            if (disposed == DisposedState)
+            { return; }
             disposed = DisposedState;
             CryptographicOperations.ZeroMemory(key);
         }

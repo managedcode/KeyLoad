@@ -1,4 +1,3 @@
-using System.Buffers.Text;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
@@ -7,8 +6,6 @@ namespace KeyLoad.Orleans;
 /// <summary>Issues and verifies database-signed authority while preserving bounded exact native payload bytes.</summary>
 public sealed partial class GrainRequestCodec
 {
-    private const int SignatureBytes = 32;
-    private const int SeparatorCharacters = 1;
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
@@ -36,9 +33,7 @@ public sealed partial class GrainRequestCodec
         ArgumentNullException.ThrowIfNull(options);
         settings = options.Value;
         executionOptions = options;
-        var envelopeBytes = checked(database.Limits.MaxBatchBytes + GrainRoutingProtocol.EnvelopeMetadataBytes);
-        maximumTokenCharacters = checked(Base64Url.GetEncodedLength(envelopeBytes)
-            + GrainNativeContracts.SignedTokenPrefix.Length + SeparatorCharacters + Base64Url.GetEncodedLength(SignatureBytes));
+        maximumTokenCharacters = GrainRequestTokenBounds.MaximumCharacters(database);
     }
 
     /// <summary>Signs one GUID read request; API-key authentication alone has no principal identifier.</summary>

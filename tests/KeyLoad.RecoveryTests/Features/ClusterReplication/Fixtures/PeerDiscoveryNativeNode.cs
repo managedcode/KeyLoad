@@ -60,13 +60,15 @@ internal sealed class PeerDiscoveryNativeNode : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        lock (lifecycle) { return new(disposal ??= DisposeCoreAsync()); }
+        lock (lifecycle)
+        { return new(disposal ??= DisposeCoreAsync()); }
     }
 
     private async Task DisposeCoreAsync()
     {
         List<Exception> failures = [];
-        if (Runtime is { } runtime) { await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures); }
+        if (Runtime is { } runtime)
+        { await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures); }
         await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => Consensus.DisposeAsync().AsTask(), failures);
         try
         { await materializer.DisposeAsync(); }

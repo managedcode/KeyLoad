@@ -47,8 +47,12 @@ internal sealed class RequestCqrsProbeWireTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = RequestCqrsProbeNativeWireValues.Request(fixture) with
-        { Method = RequestCqrsProbeNativeMethod.Locate, Claim = null, Identity = new(Guid.NewGuid(), Guid.Empty, null, null, null,
-            RequestCqrsProbeNativeWireValues.Now.AddMinutes(1), Guid.NewGuid()) };
+        {
+            Method = RequestCqrsProbeNativeMethod.Locate,
+            Claim = null,
+            Identity = new(Guid.NewGuid(), Guid.Empty, null, null, null,
+            RequestCqrsProbeNativeWireValues.Now.AddMinutes(1), Guid.NewGuid())
+        };
         var reply = RequestCqrsProbeNativeWireValues.Reply(request);
         await RequestCqrsProbeNativeWireValues.AssertExactRoundTrip(request);
         await RequestCqrsProbeNativeWireValues.AssertExactRoundTrip(reply);

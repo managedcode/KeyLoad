@@ -36,7 +36,8 @@ public sealed partial class DatabaseEngine
     private void RequireInitialMaintenanceReservation(global::KeyLoad.Storage.IKeyValueView view,
         ConfigureProjectionConsumerRequest configure, ReplicatedOperation operation)
     {
-        if (configure.InitialAnnMaintenance is not { } original) { return; }
+        if (configure.InitialAnnMaintenance is not { } original)
+        { return; }
         var profile = configure.Definition.AnnMaintenance;
         if (profile is null || original.CommandId == Guid.Empty || original.Mode != AnnMaintenanceMode.Build
             || original.Consumer != configure.Consumer || original.IndexGeneration != configure.Definition.IndexGeneration
@@ -56,7 +57,8 @@ public sealed partial class DatabaseEngine
         if (previous.InitialAnnMaintenance is not null && !previous.InitialAnnMaintenanceSettled
             && configure.CommandId != previous.MaintenanceAuthority?.ConfigureCommandId)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidMaintenanceAuthority); }
-        if (configure.InitialAnnMaintenance is not { } supplied) { return; }
+        if (configure.InitialAnnMaintenance is not { } supplied)
+        { return; }
         if (previous.InitialAnnMaintenance is not { } original
             || !NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(supplied)))
         { throw Errors.Fail(ErrorCode.Conflict, InvalidMaintenanceProfile); }

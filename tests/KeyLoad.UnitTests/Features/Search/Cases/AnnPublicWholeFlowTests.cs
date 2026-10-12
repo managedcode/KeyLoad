@@ -55,6 +55,40 @@ internal sealed class AnnPublicWholeFlowTests
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
         });
 
+    [Test]
+    [Arguments(FullBreadth, AnnPageMode.Approximate)]
+    [Arguments(FallbackBreadth, AnnPageMode.ExactFallback)]
+    public Task ActualProvisionedFilteredSearchDeduplicatesUnknownIdsWithoutReturningNavigationNodesAndRemainsHealthy(int breadth, AnnPageMode mode)
+        => AnnPublicWholeFlow.RunAsync(ApproximateThreshold, breadth, async (database, runtime, pin) =>
+        {
+            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var cut = database.Store.Position;
+            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var original = AnnPublicWholeFlow.Request(database, pin);
+            var request = original with
+            {
+                Search = original.Search with { AllowedIds = ["seed-00000", "missing-ann-id", "seed-00000"] }
+            };
+            var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
+                [new RankedDocument(new DocumentResult(
+                    new EntityRef(database.Partition, AnnSeedTestSupport.Collection, "seed-00000"),
+                    1, "{}", false, []), 1d / 61d)], cut, mode,
+                mode != AnnPageMode.Approximate, pin.IndexGeneration, AnnPageMode.Approximate);
+            var engine = AnnPublicWholeFlow.Engine(database, runtime);
+            var token = TestContext.Current!.Execution.CancellationToken;
+            var actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, token);
+            await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+            await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+            var repeated = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, token);
+            await Assert.That(JsonDefaults.Serialize(repeated).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+            await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+            var healthy = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, original, token);
+            await AnnPublicWholeFlow.PageAsync(healthy, database, cut, mode);
+            await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
+                .IsEquivalentTo(files, CollectionOrdering.Matching);
+        });
+
     private static async Task FailureAsync(Func<Task<AnnSearchPage>> operation, ErrorCode code)
     {
         AnnSearchPage? partial = null;

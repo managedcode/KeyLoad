@@ -40,7 +40,8 @@ internal static class NativeBlobWireEvidenceReader
                     || entry.Variation != result.Variation || entry.RecordDigest != NativeBlobWireCodec.Digest(bytes))
                 { throw Invalid(); }
                 originalBytes ??= result.OriginalNativeRequest;
-                if (!originalBytes.AsSpan().SequenceEqual(result.OriginalNativeRequest)) { throw Invalid(); }
+                if (!originalBytes.AsSpan().SequenceEqual(result.OriginalNativeRequest))
+                { throw Invalid(); }
                 var original = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.OriginalNativeRequest);
                 var request = NativeSerialization.Deserialize<RemoteModelNativeRequest>(result.NativeRequest);
                 var reply = NativeSerialization.Deserialize<RemoteModelNativeReply>(result.NativeReply);

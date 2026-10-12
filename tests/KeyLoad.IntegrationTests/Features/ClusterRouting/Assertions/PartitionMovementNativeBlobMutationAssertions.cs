@@ -13,7 +13,8 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             ? new RemoteDocumentTransportEnvelope(null, null, null)
             : new RemoteDocumentTransportEnvelope(null, null, Change(original,
                 actual.ControlledBlob ?? throw Missing(), fault.Variation));
-        if (!RemoteDocumentWire.Encode(expected).AsSpan().SequenceEqual(fault.Payload.Span)) { throw Missing(); }
+        if (!RemoteDocumentWire.Encode(expected).AsSpan().SequenceEqual(fault.Payload.Span))
+        { throw Missing(); }
     }
 
     private static RemoteControlledBlobCall Change(RemoteControlledBlobCall original, RemoteControlledBlobCall actual,
@@ -28,11 +29,14 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             NativeControlledBlobFaultVariation.SourcePhysicalShard => original with
             { Source = original.Source with { PhysicalShardId = Different(actual.Source.PhysicalShardId, original.Source.PhysicalShardId) } },
             NativeControlledBlobFaultVariation.DestinationIncarnation => original with
-            { Destination = original.Destination with { Owner = original.Destination.Owner with
-                { Incarnation = Different(actual.Destination.Owner.Incarnation, original.Destination.Owner.Incarnation) } } },
-            NativeControlledBlobFaultVariation.PrincipalPolicyEpoch => original with
-            { Request = original.Request with { Frame = frame with
-                { Principal = frame.Principal with { PolicyEpoch = checked(frame.Principal.PolicyEpoch + 1) } } } },
+            {
+                Destination = original.Destination with
+                {
+                    Owner = original.Destination.Owner with
+                    { Incarnation = Different(actual.Destination.Owner.Incarnation, original.Destination.Owner.Incarnation) }
+                }
+            },
+            NativeControlledBlobFaultVariation.PrincipalPolicyEpoch => ChangePrincipalPolicyEpoch(original, frame),
             NativeControlledBlobFaultVariation.QueryId => original with
             { Request = original.Request with { Frame = frame with { QueryId = Different(changed.QueryId, frame.QueryId) } } },
             NativeControlledBlobFaultVariation.Resource => original with
@@ -40,17 +44,50 @@ internal static class PartitionMovementNativeBlobMutationAssertions
             NativeControlledBlobFaultVariation.ExpiresAt => original with
             { Request = original.Request with { Frame = frame with { ExpiresAt = DateTimeOffset.MinValue } } },
             NativeControlledBlobFaultVariation.Purpose => original with
-            { Request = original.Request with { Frame = frame with { Purpose = frame.Purpose == ControlledBlobReadPurpose.Outcome
-                ? ControlledBlobReadPurpose.Metadata : ControlledBlobReadPurpose.Outcome } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        Purpose = frame.Purpose == ControlledBlobReadPurpose.Outcome
+                ? ControlledBlobReadPurpose.Metadata : ControlledBlobReadPurpose.Outcome
+                    }
+                }
+            },
             NativeControlledBlobFaultVariation.NativeRequest => original with
-            { Request = original.Request with { Frame = frame with
-                { NativeRequest = frame.NativeRequest.IsEmpty ? new byte[] { 0x01 } : ReadOnlyMemory<byte>.Empty } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    { NativeRequest = frame.NativeRequest.IsEmpty ? new byte[] { 0x01 } : ReadOnlyMemory<byte>.Empty }
+                }
+            },
             NativeControlledBlobFaultVariation.OriginalOutcome when frame.OriginalOutcome is not null => original with
             { Request = original.Request with { Frame = frame with { OriginalOutcome = null } } },
             NativeControlledBlobFaultVariation.OriginalOperationId when frame.Original is { } operation => original with
-            { Request = original.Request with { Frame = frame with { Original = operation with
-                { Id = Different(changed.Original?.Id ?? throw Missing(), operation.Id) } } } },
+            {
+                Request = original.Request with
+                {
+                    Frame = frame with
+                    {
+                        Original = operation with
+                        { Id = Different(changed.Original?.Id ?? throw Missing(), operation.Id) }
+                    }
+                }
+            },
             _ => throw Missing()
+        };
+    }
+
+    private static RemoteControlledBlobCall ChangePrincipalPolicyEpoch(RemoteControlledBlobCall original, ControlledBlobReadFrame frame)
+    {
+        return original with
+        {
+            Request = original.Request with
+            {
+                Frame = frame with
+                { Principal = frame.Principal with { PolicyEpoch = checked(frame.Principal.PolicyEpoch + 1) } }
+            }
         };
     }
 

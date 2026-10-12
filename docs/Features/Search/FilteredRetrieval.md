@@ -193,3 +193,30 @@ qualification. Private preview is not runtime evidence. Existing recall/F3,
 public SDK/MCP and KL031 lifecycle gates remain mandatory. Rollback restores
 only the method extraction/oracle continuation and additive contracts, keeping
 all original cases and assertions.
+## TASK-FILTER-PUBLIC-SPARSE-001 — native public eligibility continuation
+
+REQ-FILTER-PUBLIC-SPARSE-001 refines REQ-FILTER-001/003/004: the admitted
+public ANN operation must deduplicate an allowlist, ignore unknown IDs and
+exclude every disallowed navigation vertex before native rank fusion. The
+original eligible result capacity is bounded by actual admitted cardinality.
+The page must retain its requested mode, actual execution mode, completeness,
+generation and same authorized cut; filtered reads cannot alter canonical
+records, native files or the store position.
+
+AC-FILTER-PUBLIC-SPARSE-001 maps to
+AnnPublicWholeFlowTests.ActualProvisionedFilteredSearchDeduplicatesUnknownIdsWithoutReturningNavigationNodesAndRemainsHealthy:
+the existing genuine three-row native publication receives the literal
+allowlist seed-00000, missing-ann-id, seed-00000. Both actual full-breadth
+Approximate and insufficient-candidate ExactFallback paths return exactly the
+independently expected seed-00000 reference, revision1, original document body,
+redaction metadata and rank1 contribution1/61. The repeated filtered request
+and subsequent original complete unfiltered page remain healthy; complete
+canonical rows, position and owned file evidence remain unchanged. Existing
+native fixture admission, publication, producer/lease cleanup and failure
+aggregation remain intact.
+
+This is a three-row functional control through SearchEngine.ApproximateSearchAsync,
+not RF3, actual100k/1M, public SDK/MCP interoperability, recall or performance
+qualification. Main owns guarded join, fresh compiler/native test execution and
+Linux evidence. The complete original cases remain selected. No product API,
+schema, quota, index algorithm or source mutation is introduced by this test.

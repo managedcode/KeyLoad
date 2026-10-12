@@ -52,8 +52,11 @@ internal static class NativeAnnSettledRf3Flow
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             NativeAnnMaintenanceRf3Scenario.Collection, Grants, token);
-        var principal = identity.Principal with { ClusterAdministrator = true,
-            PolicyEpoch = checked(identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement) };
+        var principal = identity.Principal with
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = checked(identity.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement)
+        };
         var actual = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async caller => await McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)), token);
@@ -91,8 +94,11 @@ internal static class NativeAnnSettledRf3Flow
             fixture.AdminKey, async healthy =>
             {
                 var before = await NativeAnnSettledRf3Assertions.ReadAsync(healthy.Sdk, original, token);
-                var changed = administrator.Principal with { ClusterAdministrator = false,
-                    PolicyEpoch = checked(administrator.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement) };
+                var changed = administrator.Principal with
+                {
+                    ClusterAdministrator = false,
+                    PolicyEpoch = checked(administrator.Principal.PolicyEpoch + McpCallerProtocol.EpochIncrement)
+                };
                 var actual = await McpCallerAssertions.SdkSuccessAsync(await healthy.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), changed, token));
                 await NativeAnnSettledRf3Assertions.ExactAsync(changed, actual);
                 _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,

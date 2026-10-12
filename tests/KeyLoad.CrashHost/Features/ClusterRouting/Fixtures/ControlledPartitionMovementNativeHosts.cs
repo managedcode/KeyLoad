@@ -18,14 +18,18 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     private IGrainPartitionMovementSealedOperationObserver[]? sealedObservers;
     private Task? shutdown;
     private Exception? creationFailure;
+    private readonly Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory;
+    private IDatabaseAuthenticationExecutionObserver[]? authenticationObservers;
 
     internal ControlledPartitionMovementNativeHosts(ControlledPartitionMovementNativeHostSettings settings,
         NativeLocalhostClusteringOptions localhost,
-        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null)
+        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null,
+        Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory = null)
     {
         this.settings = settings;
         this.localhost = localhost;
         this.observerFactory = observerFactory;
+        this.authenticationObserverFactory = authenticationObserverFactory;
     }
 
     internal ControlledPartitionMovementNativeHost Source => nodes[SourceIndex];
@@ -45,6 +49,13 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         return ControlledPartitionMovementNativeHostFactory.CreateAsync(observerFactory, cancellationToken);
     }
 
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateWithAuthenticationObserverAsync(
+        Func<int, IDatabaseAuthenticationExecutionObserver> observerFactory, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(observerFactory);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, cancellationToken);
+    }
+
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
     internal async Task CreateNodesAsync()
@@ -55,9 +66,17 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
             for (var index = SourceIndex; index < sealedObservers.Length; index++)
             { sealedObservers[index] = observerFactory(index) ?? throw new InvalidOperationException(nameof(observerFactory)); }
         }
+        if (authenticationObserverFactory is not null && authenticationObservers is null)
+        {
+            authenticationObservers = new IDatabaseAuthenticationExecutionObserver[ControlledPartitionMovementNativeHostEndpoints.OwnerCount];
+            for (var index = SourceIndex; index < authenticationObservers.Length; index++)
+            { authenticationObservers[index] = authenticationObserverFactory(index) ?? throw new InvalidOperationException(nameof(authenticationObserverFactory)); }
+        }
         for (var index = SourceIndex; index < ControlledPartitionMovementNativeHostEndpoints.OwnerCount; index++)
-        { nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
-            sealedObservers?[index]).ConfigureAwait(false)); }
+        {
+            nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
+            sealedObservers?[index], authenticationObservers?[index]).ConfigureAwait(false));
+        }
     }
 
     internal static async Task JoinOriginalAsync(Task original)

@@ -7,7 +7,8 @@ internal static class NativeBlobWireWaveLifecycle
     internal static void Prepare(TwoRf3MembershipWave wave, string root, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (!wave.nativeBlobWireProbeSelected) { return; }
+        if (!wave.nativeBlobWireProbeSelected)
+        { return; }
         if (!wave.registerPhysicalOwners || !wave.remoteDocumentReads || !wave.remotePartitionQueries
             || !wave.protectedDocuments || !wave.queryProbe || wave.nativeMembershipDiagnostics
             || wave.nativeDiscoveryOmissionSelected || wave.queryControls is null)
@@ -17,7 +18,8 @@ internal static class NativeBlobWireWaveLifecycle
 
     internal static string[] Arguments(TwoRf3MembershipWave wave, string[] original)
     {
-        if (!wave.nativeBlobWireProbeSelected) { return original; }
+        if (!wave.nativeBlobWireProbeSelected)
+        { return original; }
         var owner = wave.nativeBlobWireControls ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
         return [.. original, "--KeyLoadTests:NativeBlobWireProbe:Root=" + owner.Root,
             "--KeyLoadTests:NativeBlobWireProbe:SessionId=" + owner.SessionId];

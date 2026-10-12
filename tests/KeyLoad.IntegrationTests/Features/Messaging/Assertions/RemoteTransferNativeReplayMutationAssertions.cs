@@ -11,7 +11,8 @@ internal static class RemoteTransferNativeReplayMutationAssertions
     {
         var envelope = NativeSerialization.Deserialize<RemoteDocumentTransportEnvelope>(original.Payload.Span);
         var call = envelope.QueueTransfer ?? throw Missing();
-        if (call.Stage != RemoteQueueTransferPeerStage.Accept || !Enum.IsDefined(mode)) { throw Missing(); }
+        if (call.Stage != RemoteQueueTransferPeerStage.Accept || !Enum.IsDefined(mode))
+        { throw Missing(); }
         var expected = mode switch
         {
             RemoteModelNativeReplayVariation.Original2 => envelope,
@@ -20,8 +21,11 @@ internal static class RemoteTransferNativeReplayMutationAssertions
             RemoteModelNativeReplayVariation.MissingIntentToken => envelope with { QueueTransfer = call with { IntentToken = string.Empty } },
             RemoteModelNativeReplayVariation.EmptyNonce => envelope with { QueueTransfer = call with { Nonce = string.Empty } },
             RemoteModelNativeReplayVariation.EmptyCommandId => envelope with { QueueTransfer = call with { OriginalCommandId = Guid.Empty } },
-            RemoteModelNativeReplayVariation.EmptyDestinationIncarnation => envelope with { QueueTransfer = call with
-                { DestinationOwner = call.DestinationOwner with { Owner = call.DestinationOwner.Owner with { Incarnation = Guid.Empty } } } },
+            RemoteModelNativeReplayVariation.EmptyDestinationIncarnation => envelope with
+            {
+                QueueTransfer = call with
+                { DestinationOwner = call.DestinationOwner with { Owner = call.DestinationOwner.Owner with { Incarnation = Guid.Empty } } }
+            },
             _ => throw Missing()
         };
         var expectedPayload = mode == RemoteModelNativeReplayVariation.Original2

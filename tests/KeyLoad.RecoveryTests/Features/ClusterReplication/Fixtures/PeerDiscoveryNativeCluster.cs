@@ -51,7 +51,8 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
         if (!Voters.Contains(voter, StringComparer.Ordinal))
         { throw new InvalidOperationException("The real silo name is outside the configured recovery cohort."); }
         var node = new PeerDiscoveryNativeNode(new(voter, Voters, Path.GetTempPath(), Incarnation), local, secret);
-        if (nodes.TryAdd(voter, node)) { return node; }
+        if (nodes.TryAdd(voter, node))
+        { return node; }
         node.DisposeAsync().AsTask().GetAwaiter().GetResult();
         throw new InvalidOperationException("Duplicate recovery native silo.");
     }
@@ -63,7 +64,8 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
         {
             await cluster.DeployAsync(deadline.Token);
             var silos = cluster.Silos.OfType<InProcessSiloHandle>().ToArray();
-            if (silos.Length != Voters.Length) { throw new InvalidOperationException("Exactly three real silos are required."); }
+            if (silos.Length != Voters.Length)
+            { throw new InvalidOperationException("Exactly three real silos are required."); }
             SenderServices = FindServices(silos, SenderVoter);
             ReceiverServices = FindServices(silos, ReceiverVoter);
             var entries = SenderServices.GetRequiredService<ReplicaNativeDiscoveryRuntime>().ReadActiveMembership();
@@ -72,7 +74,8 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
         }
         catch (Exception primary)
         {
-            try { await DisposeAsync(); }
+            try
+            { await DisposeAsync(); }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
@@ -83,7 +86,8 @@ internal sealed class PeerDiscoveryNativeCluster : IAsyncInitializer, IAsyncDisp
 
     public ValueTask DisposeAsync()
     {
-        lock (lifecycle) { return new(disposal ??= DisposeCoreAsync()); }
+        lock (lifecycle)
+        { return new(disposal ??= DisposeCoreAsync()); }
     }
 
     private async Task DisposeCoreAsync()

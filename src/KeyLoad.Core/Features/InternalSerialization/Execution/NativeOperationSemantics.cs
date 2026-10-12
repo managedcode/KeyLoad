@@ -24,6 +24,9 @@ public sealed partial class DatabaseEngine
 
     internal static Type? NativeOperationPayloadType(OperationKind kind) => kind switch
     {
+        OperationKind.RemoteGraphSource => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphSourceMutationV1),
+        OperationKind.RemoteGraphReceive => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphReceiverMutationV1),
+        OperationKind.RemoteGraphComplete => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
         OperationKind.PartitionMovementPhase => typeof(PartitionMovePhaseCommand),
         OperationKind.Batch => typeof(CommandRequest),

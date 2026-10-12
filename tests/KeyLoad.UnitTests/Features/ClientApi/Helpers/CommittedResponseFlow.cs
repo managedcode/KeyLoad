@@ -29,7 +29,8 @@ internal static class CommittedResponseFlow
             await using var server = await KeyLoadClientKestrelServer.StartAsync(endpoint.HandleAsync);
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(scenario, server, endpoint, command, expected, callerCancellation, token), failures);
         }, failures);
-        if (endpoint.Failure.Task.IsCompletedSuccessfully) { failures.Add(await endpoint.Failure.Task); }
+        if (endpoint.Failure.Task.IsCompletedSuccessfully)
+        { failures.Add(await endpoint.Failure.Task); }
         await ServerFailureObserver.ObserveAsync(() => scenario.CloseAsync(token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -50,7 +51,10 @@ internal static class CommittedResponseFlow
             await Assert.That(original.IsCompleted).IsFalse();
             await CommittedResponseAssertions.ReceiptAsync(endpoint.Original, expected);
             await CommittedResponseAssertions.StoredAsync(scenario, CommittedResponseProtocol.FirstRevision, CommittedResponseProtocol.OriginalJson);
-            if (callerCancellation) { await caller.CancelAsync(); } else { endpoint.Release.TrySetResult(); }
+            if (callerCancellation)
+            { await caller.CancelAsync(); }
+            else
+            { endpoint.Release.TrySetResult(); }
             var interrupted = await original.WaitAsync(token);
             await Assert.That(interrupted.IsFailed).IsTrue();
             await Assert.That(interrupted.Value).IsNull();
@@ -78,8 +82,11 @@ internal static class CommittedResponseFlow
         await Assert.That(replay.IsSuccess).IsTrue();
         await CommittedResponseAssertions.ReceiptAsync(replay.Value, expected);
         await CommittedResponseAssertions.UnchangedAsync(scenario, bytes, position);
-        var changed = command with { Mutations = [new PutDocument(ConnectionNativeProtocol.Collection,
-            CommittedResponseProtocol.Document, CommittedResponseProtocol.ChangedJson, CommittedResponseProtocol.FirstRevision)] };
+        var changed = command with
+        {
+            Mutations = [new PutDocument(ConnectionNativeProtocol.Collection,
+            CommittedResponseProtocol.Document, CommittedResponseProtocol.ChangedJson, CommittedResponseProtocol.FirstRevision)]
+        };
         var refused = await client.CommitAsync(changed, token);
         await Assert.That(refused.IsFailed).IsTrue();
         await Assert.That(refused.Value).IsNull();

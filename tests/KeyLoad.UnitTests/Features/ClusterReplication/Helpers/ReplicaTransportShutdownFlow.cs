@@ -121,7 +121,8 @@ internal static class ReplicaTransportShutdownFlow
         {
             await RequestCqrsCohortCleanup.CaptureAsync(async () =>
             {
-                try { await endpoint; }
+                try
+                { await endpoint; }
                 catch (OperationCanceledException) when (observed.EndpointCancellationObserved) { }
             }, failures);
         }
@@ -166,7 +167,8 @@ internal static class ReplicaTransportShutdownFlow
     private static Task CaptureExpectedAsync(Func<Task> close, Func<Exception?> expected, List<Exception> failures)
         => RequestCqrsCohortCleanup.CaptureAsync(async () =>
         {
-            try { await close(); }
+            try
+            { await close(); }
             catch (Exception error) when (ReferenceEquals(error, expected())) { }
         }, failures);
 

@@ -28,7 +28,8 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
         Store = original.Store;
         Owner = original.Database;
         opened.Add(Store);
-        try { SampleAggregateTestData.Configure(original); }
+        try
+        { SampleAggregateTestData.Configure(original); }
         catch (Exception initiating)
         {
             var failures = new List<Exception> { initiating };
@@ -76,7 +77,8 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
         { KeyLoad.Server.ServerFailureObserver.Observe(opened[index].Dispose, failures); }
         if (failures.Count == 0)
         {
-            try { original.Dispose(); }
+            try
+            { original.Dispose(); }
             catch (Exception failure) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }

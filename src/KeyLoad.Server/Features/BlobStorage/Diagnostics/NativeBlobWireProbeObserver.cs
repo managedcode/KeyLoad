@@ -11,7 +11,8 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
     public bool Select(RemoteControlledBlobCall original, CancellationToken originalCancellationToken)
     {
         lifetime.Enter();
-        try { return selection.Select(original, originalCancellationToken); }
+        try
+        { return selection.Select(original, originalCancellationToken); }
         finally { lifetime.Leave(); }
     }
 
@@ -45,7 +46,8 @@ internal sealed class NativeBlobWireProbeObserver(NativeBlobWireSelection select
         catch (Exception error) { failures.Add(error); throw; }
         finally
         {
-            if (reservation is not null) { ServerFailureObserver.Observe(() => reservations.Leave(reservation), failures); }
+            if (reservation is not null)
+            { ServerFailureObserver.Observe(() => reservations.Leave(reservation), failures); }
             ServerFailureObserver.Observe(lifetime.Leave, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }

@@ -32,8 +32,13 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
         IOptions<OrleansMembershipOptions> membershipOptions, IOptions<GrainRoutingOptions> routing,
         ISiloStatusOracle oracle, ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<RemoteModelNativeRuntime> logger)
     {
-        this.partition = partition; this.options = options.Value; this.membershipOptions = membershipOptions;
-        this.routing = routing.Value; this.local = local; this.clock = clock; this.logger = logger;
+        this.partition = partition;
+        this.options = options.Value;
+        this.membershipOptions = membershipOptions;
+        this.routing = routing.Value;
+        this.local = local;
+        this.clock = clock;
+        this.logger = logger;
         membershipOptions.Value.Validate();
         membership = new(oracle, membershipOptions);
         replay = new(clock, membershipOptions);
@@ -56,9 +61,11 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
         var admitted = false;
         try
         {
-            caller.ThrowIfCancellationRequested(); operation.ShutdownToken.ThrowIfCancellationRequested();
+            caller.ThrowIfCancellationRequested();
+            operation.ShutdownToken.ThrowIfCancellationRequested();
             admitted = await admission.WaitAsync(ImmediateAdmissionMilliseconds, caller).ConfigureAwait(false);
-            if (!admitted) { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.Unavailable); }
+            if (!admitted)
+            { throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteModelNativeProtocol.Unavailable); }
             RemoteModelNativeIdentity.RequireShape(original, membershipOptions);
             var request = original with { Payload = original.Payload.ToArray() };
             RequireCurrent(request);
@@ -86,7 +93,8 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             if (!replay.TryUse(request.Nonce.ToString(NonceFormat)))
             { throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof); }
             var remaining = request.ExpiresAt - clock.GetUtcNow();
-            if (remaining <= TimeSpan.Zero) { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
+            if (remaining <= TimeSpan.Zero)
+            { throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable); }
             var bound = remaining < routing.ExecutionLifetime ? remaining : routing.ExecutionLifetime;
             using var deadline = new CancellationTokenSource(bound, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(caller, shutdown, deadline.Token);
@@ -98,7 +106,8 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
             var actual = await owner.ExecuteNativeAsync(request, effectBoundary, token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
             RequireCurrent(request);
-            if (request.ExpiresAt <= clock.GetUtcNow()) { throw new OperationCanceledException(token); }
+            if (request.ExpiresAt <= clock.GetUtcNow())
+            { throw new OperationCanceledException(token); }
             if (actual.Payload.IsEmpty || actual.Payload.Length > RemoteDocumentProtocol.MaximumBodyBytes
                 || !RemoteModelNativeIdentity.Signature(actual.Signature))
             { throw Errors.Fail(ErrorCode.Corruption, RemoteModelNativeProtocol.InvalidProof); }

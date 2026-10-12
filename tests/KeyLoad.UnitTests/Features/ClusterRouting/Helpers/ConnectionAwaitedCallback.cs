@@ -15,6 +15,7 @@ internal sealed class ConnectionAwaitedCallback(Exception? failure)
         { throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation); }
         Arrived.SetResult();
         await Release.Task.ConfigureAwait(true);
-        if (failure is not null) { ExceptionDispatchInfo.Capture(failure).Throw(); }
+        if (failure is not null)
+        { ExceptionDispatchInfo.Capture(failure).Throw(); }
     }
 }

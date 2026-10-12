@@ -3,6 +3,7 @@ using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.Client;
 using KeyLoad.Query;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -30,7 +31,7 @@ internal static class ClusterFixtureComposition
         { throw new InvalidOperationException(NamespaceProfileConflict); }
         arguments = ApplySnapshotThreshold(arguments, snapshotThreshold,
             coverage is not null || localImage is not null || isolateReplicaNamespace);
-        var readiness = ClusterFixtureSnapshotReadiness.Create(key, root);
+        var readiness = ClusterFixtureSnapshotReadiness.Create(key, root, isolateReplicaNamespace);
         return (root, readiness?.Apply(arguments) ?? arguments, readiness);
     }
 
@@ -142,6 +143,10 @@ internal static class ClusterFixtureComposition
     internal static void ConfigureLogging(IDistributedApplicationTestingBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+        builder.Configuration[ClusterFixtureStartupProfile.EnabledSetting] = bool.TrueString;
+        builder.Configuration[ClusterFixtureStartupProfile.SessionSetting] = Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat);
+        builder.Services.AddSingleton(static services =>
+            new ClusterFixtureStartupEvidence(services.GetRequiredService<IConfiguration>()));
         builder.Services.AddLogging(logging =>
         {
             logging.ClearProviders();

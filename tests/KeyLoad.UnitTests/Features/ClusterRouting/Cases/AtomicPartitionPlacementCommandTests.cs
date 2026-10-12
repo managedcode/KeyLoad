@@ -115,6 +115,68 @@ internal sealed class AtomicPartitionPlacementCommandTests
         await Assert.That(absentRow.Length).IsEqualTo(0);
     }
 
+    [Test]
+    public async Task AcPmap001OversizedNativeRequestLeavesPlacementUnchangedThenSameIdBindsAndReopens()
+    {
+        var failures = new List<Exception>();
+        PhysicalShardCatalogFixture? fixture = null;
+        try
+        {
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                fixture = new PhysicalShardCatalogFixture();
+                const int MaximumEncodedBytes = KeyLoad.Core.Features.ClusterRouting.Contracts.AtomicPartitionPlacementProtocol.MaximumEncodedBytes;
+                AtomicPartitionPlacementTestSupport.Bootstrap(fixture);
+                var request = Request(0, AtomicPartitionPlacementTestSupport.ShardId);
+                var commandId = Guid.NewGuid();
+                var catalogBefore = fixture.ReadCatalogBytes();
+                var directoryBefore = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
+                    AtomicPartitionPlacementTestSupport.DirectoryKey());
+                var rowBefore = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
+                    AtomicPartitionPlacementTestSupport.RowKey(Partition));
+                var witnessBefore = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
+                    AtomicPartitionPlacementTestSupport.Read(Partition));
+
+                var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+                    fixture.Database.CreateNativeOperation(OperationKind.BindAtomicPartitionPlacement, commandId,
+                        PhysicalShardCatalogFixture.RootPrincipalId, fixture.Database.EvaluationClock.GetUtcNow(),
+                        new byte[checked(MaximumEncodedBytes + 1)]));
+                var directoryAfter = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
+                    AtomicPartitionPlacementTestSupport.DirectoryKey());
+                var rowAfter = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
+                    AtomicPartitionPlacementTestSupport.RowKey(Partition));
+                var witnessAfter = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
+                    AtomicPartitionPlacementTestSupport.Read(Partition));
+
+                await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+                await Assert.That(fixture.ReadCatalogBytes().SequenceEqual(catalogBefore)).IsTrue();
+                await Assert.That(directoryAfter.SequenceEqual(directoryBefore)).IsTrue();
+                await Assert.That(rowAfter.SequenceEqual(rowBefore)).IsTrue();
+                await Assert.That(NativeSerialization.Serialize(witnessAfter)
+                    .SequenceEqual(NativeSerialization.Serialize(witnessBefore))).IsTrue();
+
+                var healthy = Apply(fixture, request, commandId);
+                await Assert.That(healthy.Error).IsNull();
+                var expected = witnessBefore with { DirectoryRevision = 1, Revision = 1, IsFallback = false };
+                var bound = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
+                    AtomicPartitionPlacementTestSupport.Read(Partition));
+                await Assert.That(NativeSerialization.Serialize(bound)
+                    .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+                fixture.Reopen();
+                var reopened = fixture.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
+                    AtomicPartitionPlacementTestSupport.Read(Partition));
+                await Assert.That(NativeSerialization.Serialize(reopened)
+                    .SequenceEqual(NativeSerialization.Serialize(bound))).IsTrue();
+            }, failures);
+        }
+        finally
+        {
+            if (fixture is not null)
+            { KeyLoad.Server.ServerFailureObserver.Observe(fixture.Dispose, failures); }
+        }
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
     private static OperationResult Apply(PhysicalShardCatalogFixture fixture,
         BindAtomicPartitionPlacementRequest request, Guid commandId)
     {

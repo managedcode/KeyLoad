@@ -23,17 +23,73 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         };
 
     internal static async Task<McpPersistedIdentity> GrantSensitiveReadAsync(KeyLoadClient administrator,
-        McpPersistedIdentity identity, CancellationToken cancellationToken)
+        McpPersistedIdentity identity, CancellationToken cancellationToken, bool use = true)
     {
         var updated = identity.Principal with
         {
-            FieldGrants = [SqlModelViewRf3Scenario.SecretGrant, SqlModelViewRf3Scenario.SecretUseGrant],
+            FieldGrants = use
+                ? [SqlModelViewRf3Scenario.SecretGrant, SqlModelViewRf3Scenario.SecretUseGrant]
+                : [SqlModelViewRf3Scenario.SecretGrant],
             PolicyEpoch = identity.Principal.PolicyEpoch + EpochIncrement
         };
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), updated, cancellationToken));
         await Assert.That(persisted.PolicyEpoch).IsEqualTo(updated.PolicyEpoch);
+        await SqlRf3Protocol.EqualAsync(updated, persisted);
         return identity with { Principal = persisted };
+    }
+
+    internal static async Task<McpPersistedIdentity> VerifyQueueReadWithoutUseAsync(
+        KeyLoadClient administrator, KeyLoadClient reader, McpOfficialClient mcp,
+        SqlModelViewRf3Scenario scenario, McpPersistedIdentity identity,
+        CancellationToken cancellationToken)
+    {
+        var before = await SqlModelViewRf3ParityAssertions.InspectBothAsync(
+            administrator, scenario, cancellationToken);
+        var request = scenario.QueueSql();
+        var predicates = new[]
+        {
+            request with { Sql = $"SELECT * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+                + $"WHERE payload.secret = '{SqlModelViewRf3Scenario.QueueCanary}' "
+                + $"ORDER BY id LIMIT {SqlModelViewRf3Scenario.RowLimit}" },
+            request with { Sql = $"SELECT * FROM QUEUE_MESSAGES('{SqlModelViewRf3Scenario.Queue}') "
+                + $"WHERE headers.privateHeader = '{SqlModelViewRf3Scenario.QueueHeaderCanary}' "
+                + $"ORDER BY id LIMIT {SqlModelViewRf3Scenario.RowLimit}" }
+        };
+        for (var transition = 0; transition < 2; transition++)
+        {
+            identity = await GrantSensitiveReadAsync(administrator, identity, cancellationToken, use: false);
+            var visible = await McpCallerAssertions.SdkSuccessAsync(
+                await reader.QueryAsync(request, cancellationToken));
+            var visibleMcp = await McpCallerAssertions.SuccessAsync<QueryPage>(
+                await mcp.CallAsync(McpCallerTools.QueryExecute, request, cancellationToken));
+            await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(before, visible);
+            await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(before, visibleMcp.Value);
+            await SqlRf3Protocol.EqualAsync(visible, visibleMcp.Value);
+            foreach (var predicate in predicates)
+            {
+                await SqlModelViewRf3DenialAssertions.SdkAsync(
+                    await reader.QueryAsync(predicate, cancellationToken), identity.Secret);
+                await SqlModelViewRf3DenialAssertions.McpAsync(
+                    await mcp.CallAsync(McpCallerTools.QueryExecute, predicate, cancellationToken), identity.Secret);
+            }
+            identity = await GrantSensitiveReadAsync(administrator, identity, cancellationToken);
+            foreach (var predicate in predicates)
+            {
+                var sdk = await McpCallerAssertions.SdkSuccessAsync(
+                    await reader.QueryAsync(predicate, cancellationToken));
+                var official = await McpCallerAssertions.SuccessAsync<QueryPage>(
+                    await mcp.CallAsync(McpCallerTools.QueryExecute, predicate, cancellationToken));
+                await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(before, sdk);
+                await SqlModelViewRf3ParityAssertions.AssertQueueRowsAsync(before, official.Value);
+                await SqlRf3Protocol.EqualAsync(sdk, official.Value);
+            }
+            var after = await SqlModelViewRf3ParityAssertions.InspectBothAsync(
+                administrator, scenario, cancellationToken);
+            await SqlModelViewRf3ParityAssertions.AssertQueueUnchangedAsync(before.First, after.First);
+            await SqlModelViewRf3ParityAssertions.AssertQueueUnchangedAsync(before.Second, after.Second);
+        }
+        return identity;
     }
 
     internal static async Task RevokeAsync(KeyLoadClient administrator, McpPersistedIdentity identity,

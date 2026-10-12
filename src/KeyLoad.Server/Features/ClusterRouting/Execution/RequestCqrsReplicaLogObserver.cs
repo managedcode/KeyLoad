@@ -20,7 +20,8 @@ internal sealed class RequestCqrsReplicaLogObserver(RequestCqrsProbeFiles files,
         RequestCqrsProbeLoadedArm? matched = null;
         Exception? primary = null;
         Exception? cleanup = null;
-        try { ObserveCore(entry, arm => matched = arm); }
+        try
+        { ObserveCore(entry, arm => matched = arm); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { primary = error; }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { primary = error; }
         try

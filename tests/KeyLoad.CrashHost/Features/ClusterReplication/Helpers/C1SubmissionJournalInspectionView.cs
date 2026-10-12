@@ -24,7 +24,8 @@ internal sealed class C1SubmissionJournalInspectionView(IKeyValueView original,
         cancellationToken.ThrowIfCancellationRequested();
         return original.VisitRange(prefix, maxRecords, (key, value) =>
         {
-            lifetime.ThrowIfCancellationRequested(); cancellationToken.ThrowIfCancellationRequested();
+            lifetime.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             return visitor(key, value);
         }, afterKey, untilKey, bytes => { budget.Charge(bytes); observer?.Invoke(bytes); }, lifetime);
     }

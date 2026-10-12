@@ -10,7 +10,8 @@ internal sealed class RemoteModelNativeMacFixture : IDisposable
     internal RemoteDocumentMac Mac { get; }
     internal RemoteModelNativeMacFixture()
     {
-        try { Mac = new(Credential); }
+        try
+        { Mac = new(Credential); }
         catch (Exception)
         { CryptographicOperations.ZeroMemory(Credential); throw; }
     }
@@ -49,7 +50,8 @@ internal sealed class RemoteModelNativeMacFixture : IDisposable
 
     public void Dispose()
     {
-        try { Mac.Dispose(); }
+        try
+        { Mac.Dispose(); }
         finally { CryptographicOperations.ZeroMemory(Credential); }
     }
 }

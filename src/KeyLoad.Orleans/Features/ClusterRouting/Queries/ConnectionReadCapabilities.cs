@@ -98,6 +98,10 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
                 principal, request, cancellationToken).ConfigureAwait(true);
         }
+        if (RemoteGraphRequestScope.HandlesRead(kind))
+        {
+            return GrainRemoteGraphReadCapabilities.Execute(localDatabase, services, runtimeClock, principal, request, cancellationToken);
+        }
         if (EventVectorRequestScope.HandlesRead(kind))
         {
             return EventVectorReadCapabilities.Execute(localDatabase, services, principal, request, cancellationToken);
@@ -143,6 +147,12 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
 
+        return await ReadQueryOrAdministrationAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task<object?> ReadQueryOrAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
+        DecodedGrainRequest request, CancellationToken cancellationToken)
+    {
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
         {
             using var observation = codec.HasPhaseObserver

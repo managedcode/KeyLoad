@@ -33,8 +33,10 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
         string voter, string address)
     {
         var claim = lifecycle.FindClaim(identity.RequestId);
-        if (claim is null) { return null; }
-        if (!Matches(claim, identity)) { throw Invalid(); }
+        if (claim is null)
+        { return null; }
+        if (!Matches(claim, identity))
+        { throw Invalid(); }
         return new(claim.Arm.Record.SessionId, claim.Arm.Record.ArmId, identity, owner, voter, address,
             Convert.ToHexStringLower(SHA256.HashData(claim.Arm.ExactBytes)));
     }
@@ -44,7 +46,8 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
         lock (completion)
         {
             var actual = Locate(receipt.Identity, owner, voter, address);
-            if (!RequestCqrsProbeNativeAuthentication.SameClaim(actual, receipt)) { throw Invalid(); }
+            if (!RequestCqrsProbeNativeAuthentication.SameClaim(actual, receipt))
+            { throw Invalid(); }
             var identity = receipt.Identity;
             Complete(new(identity.RequestId, identity.CommandId, identity.PrincipalId, identity.ReadKind, identity.CommandKind)
             { OriginalExpiresAt = identity.OriginalExpiresAt });
@@ -56,11 +59,13 @@ internal sealed class RequestCqrsProbeProducerDisposal(RequestCqrsProbeFiles fil
         lock (completion)
         {
             var claim = lifecycle.FindClaim(identity.RequestId);
-            if (claim is null) { return; }
+            if (claim is null)
+            { return; }
             lifecycle.EnterClaimedCallback();
             try
             {
-                if (claim.Identity != identity) { throw Invalid(); }
+                if (claim.Identity != identity)
+                { throw Invalid(); }
                 var failures = new List<Exception>();
                 ServerFailureObserver.Observe(() => files.WriteClaimedProducerDisposed(
                     marker(claim, RequestCqrsProbePhase.ProducerDisposed, RequestCqrsProbeOutcome.Observed), claim.Arm), failures);

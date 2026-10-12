@@ -311,3 +311,18 @@ ID checks and model/started-container image proof. Root owns these two AppHost
 source joins and reruns the unchanged five actual SDK/MCP connection flows after
 build. The interrupted original startup failures remain retained; no completed
 RF3 pass or performance result is inferred from image preparation.
+
+
+## Explicit current graph, event and lineage local cohort
+
+Owner-authorized local development extends the closed native local-image filter inventory with exactly the four-case selector below; no wildcard suite admission is introduced:
+
+```text
+/*/*/(AuthenticationExecutionTests*)|(EventReferenceSelectRf3Tests*)|(NativeRemoteGraphRf3Tests*)|(ComposedProjectionLineageRf3Tests*)/(RealHttpSdkAndOfficialMcpAuthenticateOncePerRequestThenFreshPolicyRefusalRepairReplayAndTwoColdCuts)|(AcKl095EventReferenceSelectRepairsPersistedUseAndMissingTargetThenReplaysLiteralSdkMcpRowsAcrossTwoColdCuts)|(GenuineSixOwnerCurrentSourceRightsRefusalRestoresOriginalGraphRequestThenFullReceiptsSurviveTwoColdReopens)|(AcKl048ComposedSourceProjectionAndPredicateUseRevokeRepairPreserveSdkMcpRowsAndReceiptsAcrossTwoColdCuts)
+```
+
+The selector binds AuthenticationExecutionTests, EventReferenceSelectRf3Tests, ComposedProjectionLineageRf3Tests and NativeRemoteGraphRf3Tests to their original complete operations. AuthenticationExecutionTests owns six real in-process Orleans/Kestrel/ZoneTree hosts and actual SDK/official MCP calls; it does not acquire Aspire or Docker and does not qualify the Docker RF3 authentication gate. Event and lineage use the original shared keyed ClusterFixture with genuine Aspire-owned Docker RF3. The graph case owns the original TwoRf3MembershipWave with six Docker nodes forming two genuine RF3 owner groups.
+
+The Node selector and LocalRf3ImageSelection admit only the exact bounded filter and existing explicit LocalRf3Image:Enabled=true. Retain rejection of ambient GitHub receipts/revisions/actions, mixed native coverage/comparison/protocol selections and injected image provenance. The existing AppHost image prerequisite builds only the functional server image from the actual current source; source/context hashes, limits, CPU/SIMD policy, typed local-development tag/reference/receipt, image config ID verification before/after startup and all original resource bounds remain unchanged. No stale GitHub image fallback, fabricated digest, consumer-built container, source/build isolation directory or new image producer is introduced.
+
+ClusterFixture already owns its local-image session through application shutdown and lock verification. NativeRemoteGraphRf3Trial additionally follows the original membership case ownership: start LocalRf3ImageTestSession, pass its verified typed Selection to the native wave, retain every operation/startup/cleanup failure, join the wave before disposing the session, and remove the exact owned image only after successful wave cleanup. Preserve real source-policy refusal/repair, original graph receipts and both joined same-root cold restarts. Native process/readers/application/image cleanup and source/image identities require original runtime evidence. Source admission and local passes do not qualify Linux RF3, performance, coverage, endurance or product acceptance; all those gates remain open.

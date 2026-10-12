@@ -33,8 +33,10 @@ internal sealed class NativeCanonicalModelCutAdmissionFixture : IAsyncDisposable
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };
-            if (host is not null) { ServerFailureObserver.Observe(host.Dispose, failures); }
-            if (stopping is not null) { ServerFailureObserver.Observe(stopping.Dispose, failures); }
+            if (host is not null)
+            { ServerFailureObserver.Observe(host.Dispose, failures); }
+            if (stopping is not null)
+            { ServerFailureObserver.Observe(stopping.Dispose, failures); }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
@@ -71,12 +73,14 @@ internal sealed class NativeCanonicalModelCutAdmissionFixture : IAsyncDisposable
         ServerFailureObserver.Observe(stopping.Cancel, failures);
         ServerFailureObserver.Observe(ApplicationLifetime.StopApplication, failures);
         await ServerFailureObserver.ObserveAsync(Lifecycle.StopAdmissionAndJoin, failures);
-                try { host.Dispose(); }
+        try
+        { host.Dispose(); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         { failures.Add(error); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
         { failures.Add(error); }
-        try { stopping.Dispose(); }
+        try
+        { stopping.Dispose(); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         { failures.Add(error); }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)

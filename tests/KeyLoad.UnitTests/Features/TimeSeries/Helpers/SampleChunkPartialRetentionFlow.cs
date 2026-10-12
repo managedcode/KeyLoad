@@ -59,7 +59,8 @@ internal static class SampleChunkPartialRetentionFlow
             SampleChunkCanonicalFixture.Initial, SampleChunkCanonicalFixture.Tags));
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true);
         var changed = SampleChunkCanonicalFixture.Initial[SampleChunkCanonicalFixture.FirstIndex]
-            with { Value = SampleChunkPartialRetentionFixture.FreshValue };
+            with
+        { Value = SampleChunkPartialRetentionFixture.FreshValue };
         var failure = fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, [changed], SampleChunkCanonicalFixture.Tags)));
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.Conflict);

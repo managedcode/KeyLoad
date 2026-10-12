@@ -28,8 +28,11 @@ internal static class NativeCanonicalModelCutBudgetAssertions
         { throw new InvalidDataException(Invalid); }
         var originalArm = NativeCanonicalModelCutOriginalArm.Read(wave.QueryControls, scope.ArmId);
         NativeCanonicalModelCutRetainedArmAssertions.RequireSettledOriginal(wave.QueryControls, scope.ArmId, originalArm);
-        var json = JsonSerializer.Serialize(new { probe = new string(PayloadCharacter,
-            NativeCanonicalModelCutCodec.MaximumRecordBytes + OverflowByte) });
+        var json = JsonSerializer.Serialize(new
+        {
+            probe = new string(PayloadCharacter,
+            NativeCanonicalModelCutCodec.MaximumRecordBytes + OverflowByte)
+        });
         await Assert.That(Encoding.UTF8.GetByteCount(json)).IsGreaterThan(NativeCanonicalModelCutCodec.MaximumRecordBytes);
         var id = DocumentPrefix + Guid.NewGuid().ToString("N");
         var command = new CommandRequest(Guid.NewGuid(), scope.DestinationPartition,

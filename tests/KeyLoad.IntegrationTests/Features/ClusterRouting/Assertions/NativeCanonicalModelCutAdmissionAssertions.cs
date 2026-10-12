@@ -75,14 +75,18 @@ internal static class NativeCanonicalModelCutAdmissionAssertions
         yield return original with { ArmId = Different(original.ArmId) };
         yield return original with { SessionId = Different(Guid.ParseExact(original.SessionId, "N")).ToString("N") };
         yield return original with { AcceptCommandId = Different(original.AcceptCommandId) };
-        yield return original with { LogicalPrincipalId = original.LogicalPrincipalId == WrongPrincipal
-            ? WrongPrincipal + "-other" : WrongPrincipal };
+        yield return original with
+        {
+            LogicalPrincipalId = original.LogicalPrincipalId == WrongPrincipal
+            ? WrongPrincipal + "-other" : WrongPrincipal
+        };
     }
 
     private static Guid Different(Guid original)
     {
         Guid changed;
-        do { changed = Guid.NewGuid(); } while (changed == original || changed == Guid.Empty);
+        do
+        { changed = Guid.NewGuid(); } while (changed == original || changed == Guid.Empty);
         return changed;
     }
 }

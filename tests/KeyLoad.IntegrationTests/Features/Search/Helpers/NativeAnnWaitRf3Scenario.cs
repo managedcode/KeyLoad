@@ -68,9 +68,10 @@ internal static class NativeAnnWaitRf3Scenario
                     var restored = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.MaintainAnnIndexAsync(
                         pin with { CommandId = Guid.NewGuid(), Mode = AnnMaintenanceMode.Restore }, token));
                     await NativeAnnWaitRf3Assertions.AllPathsAsync(reader, changed, restored.Source!.AppliedPosition, token);
+                    var indexedBeforeStop = changed.MinimumToken with { Position = restored.Source.AppliedPosition };
                     await NativeAnnWaitRf3Assertions.LiteralAsync(reader, scenario, pin, true, token);
                     var beforeStop = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
-                    await NativeAnnWaitRf3Cold.RunAsync(fixture, readerSecret, scenario, pin, changed, command, receipt, beforeStop, token);
+                    await NativeAnnWaitRf3Cold.RunAsync(fixture, readerSecret, scenario, pin, changed, command, receipt, indexedBeforeStop, beforeStop, token);
                 }, failures);
             }, failures);
         }, failures);

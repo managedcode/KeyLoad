@@ -71,7 +71,8 @@ internal static class NativeAnnPublicProfileFlow
         var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
         var pin = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
-            placement, AnnMaintenanceMode.Build) { MaintenanceProfile = profile };
+            placement, AnnMaintenanceMode.Build)
+        { MaintenanceProfile = profile };
         return (pin, configured);
     }
 

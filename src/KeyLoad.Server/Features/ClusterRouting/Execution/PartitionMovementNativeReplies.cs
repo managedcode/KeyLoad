@@ -16,7 +16,8 @@ internal static class PartitionMovementNativeReplies
 
     internal static async Task<GrainOperationReply> ExecuteAsync(Func<Task<GrainOperationReply>> operation)
     {
-        try { return Safe(await operation().ConfigureAwait(false)); }
+        try
+        { return Safe(await operation().ConfigureAwait(false)); }
         catch (KeyLoadException error) when (error.Code != ErrorCode.Corruption)
         { return new() { Error = error.Code, SafeDetail = PartitionMovementProtocol.Unavailable }; }
     }

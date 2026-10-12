@@ -34,7 +34,8 @@ internal sealed class NativeBlobWireClaims(IOptions<OrleansMembershipOptions> me
 
     internal static string Digest(RemoteControlledBlobCall call)
     {
-        if (NativeSerialization.Measure(call) > RequestCqrsProbeProtocol.MaximumRecordBytes) { throw Invalid(); }
+        if (NativeSerialization.Measure(call) > RequestCqrsProbeProtocol.MaximumRecordBytes)
+        { throw Invalid(); }
         return NativeBlobWireCodec.Digest(NativeSerialization.Serialize(call));
     }
 

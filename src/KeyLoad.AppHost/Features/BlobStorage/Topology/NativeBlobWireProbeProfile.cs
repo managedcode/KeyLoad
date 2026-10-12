@@ -19,7 +19,8 @@ internal static class NativeBlobWireProbeProfile
     {
         var control = AppHostOptionsRegistration.Get(builder).Control.Value;
         var selected = control.NativeBlobWireProbe;
-        if (selected is null) { return; }
+        if (selected is null)
+        { return; }
         var root = selected.Root;
         var session = selected.SessionId;
         var expected = Path.Combine(Path.GetFullPath(dataRoot), DirectoryName);

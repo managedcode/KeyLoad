@@ -83,7 +83,10 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         var outer = new PartitionMovementMac(fixture.Options.Secret.Span, PhysicalOwnerProbeProtocol.MaximumBodyBytes);
         var request = PhysicalOwnerProbeNativeTestValues.Request(fixture, PhysicalOwnerProbeNativeTestValues.Call(fixture), inner);
         request = request with { SenderSignature = outer.SignNativeRequest(request) };
-        inner.Dispose(); outer.Dispose(); inner.Dispose(); outer.Dispose();
+        inner.Dispose();
+        outer.Dispose();
+        inner.Dispose();
+        outer.Dispose();
         Assert.ThrowsExactly<ObjectDisposedException>(() => inner.Sign(request.Payload.Span, reply: false));
         Assert.ThrowsExactly<ObjectDisposedException>(() => inner.Verify(request.Payload.Span, request.Signature, reply: false));
         Assert.ThrowsExactly<ObjectDisposedException>(() => outer.SignNativeRequest(request));

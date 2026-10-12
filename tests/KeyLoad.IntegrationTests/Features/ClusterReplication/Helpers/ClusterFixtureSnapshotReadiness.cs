@@ -23,8 +23,9 @@ internal sealed class ClusterFixtureSnapshotReadiness(RequestCqrsProbeFixture co
     internal RequestCqrsProbeFixture Controls => controls;
     internal string Secret => secret ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm);
 
-    internal static ClusterFixtureSnapshotReadiness? Create(string? key, string root)
-        => key == FixtureKey ? new(RequestCqrsProbeFixture.Create(root, Guid.NewGuid())) : null;
+    internal static ClusterFixtureSnapshotReadiness? Create(string? key, string root, bool isolateReplicaNamespace = false)
+        => key == FixtureKey || isolateReplicaNamespace
+            ? new(RequestCqrsProbeFixture.Create(root, Guid.NewGuid())) : null;
 
     internal string[] Apply(string[] arguments)
         => [.. arguments, EnabledArgument, RootArgument + controls.Root, SessionArgument + controls.SessionId];

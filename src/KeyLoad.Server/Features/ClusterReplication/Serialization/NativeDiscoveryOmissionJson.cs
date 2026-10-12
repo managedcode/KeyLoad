@@ -76,7 +76,8 @@ internal sealed class NativeDiscoveryOmissionJson
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > ReplicaTransportProtocol.MaximumAddressCharacters)
         { return false; }
-        try { return SiloAddress.FromParsableString(value).ToParsableString() == value; }
+        try
+        { return SiloAddress.FromParsableString(value).ToParsableString() == value; }
         catch (Exception error) when (error is ArgumentException or FormatException) { return false; }
     }
     private static InvalidOperationException Invalid() => new(NativeDiscoveryOmissionProtocol.Invalid);

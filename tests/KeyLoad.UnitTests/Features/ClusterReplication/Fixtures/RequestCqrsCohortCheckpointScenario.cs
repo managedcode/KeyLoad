@@ -38,7 +38,7 @@ internal sealed class RequestCqrsCohortCheckpointScenario(bool failNativeFlush, 
         { throw new InvalidOperationException("The genuine initial checkpoint fingerprint is invalid."); }
         journal.Materializer.Commit(FollowingCut);
         journal.Materializer.WaitForApplyAsync(FollowingCut, linked.Token).GetAwaiter().GetResult();
-        var entries = journal.Log.Read(InitialCut, journal.Configuration.MaxAppendEntries, journal.Configuration.MaxAppendBytes);
+        var entries = journal.Log.Read(FollowingCut, journal.Configuration.MaxAppendEntries, journal.Configuration.MaxAppendBytes);
         if (!prepared.TryAdd(voter, (snapshot, global::KeyLoad.NativeSerialization.Serialize(entries))))
         { throw new InvalidOperationException("The native checkpoint owner was prepared twice."); }
         if (voter == RequestCqrsCohortScenario.LocalVoter)
