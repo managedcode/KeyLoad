@@ -74,6 +74,8 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);
         var body = StoredMessageBody.Read(tx, QueueKey(MessageBodySpace, lane, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
+        if (body.Body.Id != id)
+        { throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody); }
         RequireCurrentQueueDueEntry(lane, metadata, now, leased, item.Key.Span);
         var current = counters ?? Counters(tx, lane);
         tx.Delete(item.Key.ToArray());

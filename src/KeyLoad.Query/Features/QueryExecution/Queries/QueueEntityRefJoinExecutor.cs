@@ -49,12 +49,12 @@ internal static class QueueEntityRefJoinExecutor
     {
         budget.Check();
         using var json = JsonDocument.Parse(left.Json);
+        var reference = QueueEntityRefJoinReference.Read(json.RootElement, request.Partition, target.Name);
         if (request.Query.Filter is not null
             && PredicateEvaluator.Evaluate(request.Query.Filter, left, json.RootElement, request.Parameters) != true)
         {
             return;
         }
-        var reference = QueueEntityRefJoinReference.Read(json.RootElement, request.Partition, target.Name);
         if (reference is null)
         {
             return;

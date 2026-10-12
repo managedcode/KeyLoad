@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using System.Globalization;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 

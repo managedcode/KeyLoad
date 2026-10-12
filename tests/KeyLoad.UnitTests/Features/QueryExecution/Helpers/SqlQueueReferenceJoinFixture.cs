@@ -36,6 +36,21 @@ internal static class SqlQueueReferenceJoinFixture
             InnerJoin: new(Target, "d", "/payload/to", "/entity_ref")),
             new() { [MinimumParameter] = JsonSerializer.SerializeToElement(7) }, AllowFullScan: true, AstVersion: 2);
 
+    internal static QueryRequest FilteredInvalidRequest(PartitionRef partition)
+        => Request(partition, InvalidQueue) with
+        { Parameters = new() { [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100) } };
+
+    internal static AstQueryRequest FilteredInvalidAst(PartitionRef partition)
+    {
+        var request = Ast(partition);
+        return request with
+        {
+            Query = request.Query with
+            { Collection = InvalidQueue, ModelSource = new(ModelQuerySourceKind.QueueMessages, InvalidQueue, 1) },
+            Parameters = new() { [MinimumParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(100) }
+        };
+    }
+
     internal static string Payload(PartitionRef partition, string id, int score)
         => JsonSerializer.Serialize(new { to = new EntityRef(partition, Target, id), score }, JsonDefaults.Options);
 

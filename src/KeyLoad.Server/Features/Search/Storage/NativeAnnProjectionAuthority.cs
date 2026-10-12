@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 

@@ -1,9 +1,9 @@
+using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using ModelContextProtocol.Client;
-using System.Text.Json;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
@@ -21,10 +21,17 @@ internal static class AuthenticationExecutionResourcePolicy
     {
         var partition = state.Document.Partition;
         var definition = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId);
+        var catalog = await McpCallerAssertions.SdkSuccessAsync(await root.ListResourcesAsync(
+            new(partition.TenantId, partition.DatabaseId), token));
+        var current = catalog.Items.Single(item => item.Name == definition.Name);
+        await Assert.That(current.SchemaVersion).IsEqualTo(InitialVersion);
         var protectedDefinition = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition with
-            { FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)] })
-            { ExpectedSchemaVersion = InitialVersion }, token));
+            {
+                SchemaVersion = checked(current.SchemaVersion + 1),
+                FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)]
+            })
+            { ExpectedSchemaVersion = current.SchemaVersion }, token));
         await SqlRf3Protocol.EqualAsync(definition with
         { SchemaVersion = RestrictedVersion, FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)] }, protectedDefinition);
         var before = await AuthenticationExecutionValues.ImageAsync(root, state, token);
@@ -39,7 +46,9 @@ internal static class AuthenticationExecutionResourcePolicy
         await AuthenticationExecutionAssertions.WindowAsync(collector, position, http.Requests - sent, state.Reader.Id);
         await Assert.That(await AuthenticationExecutionValues.ImageAsync(root, state, token)).IsEqualTo(before);
         var repaired = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, definition) { ExpectedSchemaVersion = RestrictedVersion }, token));
+            new(partition.TenantId, partition.DatabaseId, definition with
+            { SchemaVersion = checked(protectedDefinition.SchemaVersion + 1) })
+            { ExpectedSchemaVersion = protectedDefinition.SchemaVersion }, token));
         await SqlRf3Protocol.EqualAsync(definition with { SchemaVersion = RepairedVersion }, repaired);
         await AuthenticationExecutionValues.HealthyAsync(reader, mcp, http, collector, state, state.Expected, token);
     }

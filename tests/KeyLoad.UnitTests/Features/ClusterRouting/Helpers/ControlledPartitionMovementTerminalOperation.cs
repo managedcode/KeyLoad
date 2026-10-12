@@ -6,7 +6,10 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Executes genuine capture/install/finalize/publication/retirement and verifies both cold native owners.</summary>
 internal static class ControlledPartitionMovementTerminalOperation
 {
-    private const long FixedControlEntries = 266;
+    // Fence acceptance, capture, terminal install, advances, publication, retirement completion.
+    private const long FixedControlEntries = 15 + 4 + 2 + 1 + 1 + 2 + 1
+        + PartitionMovementCleanupCountAssertions.CleanupBatchCount
+        * PartitionMovementCleanupCountAssertions.RetireSourceCommits;
     private const long ControlEntriesPerPage = 4;
     private const long FixedTargetEntries = 3;
     private const long TargetEntriesPerPage = 2;

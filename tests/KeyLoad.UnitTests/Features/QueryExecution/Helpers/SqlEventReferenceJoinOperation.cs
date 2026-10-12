@@ -32,6 +32,26 @@ internal static class SqlEventReferenceJoinOperation
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
             () => engine.Execute("root", SqlEventReferenceJoinFixture.Request(database.Partition, SqlEventReferenceJoinFixture.InvalidStreamSet)),
             ErrorCode.Validation);
+        var filteredInvalid = SqlEventReferenceJoinFixture.Request(database.Partition,
+            SqlEventReferenceJoinFixture.InvalidStreamSet) with
+        {
+            Sql = SqlEventReferenceJoinFixture.Sql(SqlEventReferenceJoinFixture.InvalidStreamSet)
+                .Replace("e.payload.score >= @minimum", "e.payload.score > 100", StringComparison.Ordinal),
+            Parameters = null
+        };
+        await SqlEventReferenceJoinAssertions.RejectAsync(database,
+            () => engine.Execute("root", filteredInvalid), ErrorCode.Validation);
+        var invalidAst = SqlEventReferenceJoinFixture.Ast(database.Partition);
+        await SqlEventReferenceJoinAssertions.RejectAsync(database,
+            () => engine.ExecuteAst("root", invalidAst with
+            {
+                Query = invalidAst.Query with
+                {
+                    Collection = SqlEventReferenceJoinFixture.InvalidStreamSet,
+                    Filter = new Comparison(new FieldOperand("/payload/score"), ">", new ValueOperand(System.Text.Json.JsonSerializer.SerializeToElement(100)))
+                },
+                Parameters = null
+            }), ErrorCode.Validation);
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
             () => engine.ExecuteAst("root", SqlEventReferenceJoinFixture.Ast(database.Partition) with
             {

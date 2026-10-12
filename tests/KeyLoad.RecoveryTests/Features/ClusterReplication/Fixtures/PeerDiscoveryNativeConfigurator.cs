@@ -3,8 +3,8 @@ using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
-using Orleans.TestingHost;
 using Orleans.Serialization;
+using Orleans.TestingHost;
 
 namespace KeyLoad.RecoveryTests;
 

@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.Client;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Orleans;
 using KeyLoad.Server;

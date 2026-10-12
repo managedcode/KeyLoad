@@ -19,13 +19,13 @@ internal static class EventReferenceSelectSources
         await SqlRf3Protocol.EqualAsync(state.Repair is null ? null : new DocumentResult(missing, 1,
             EventReferenceSelectProtocol.RepairedJson, false, []), repaired);
         await StreamAsync(admin, state, state.OriginalStream, EventReferenceSelectProtocol.StreamSet, [
-            new("z", "linked", EventReferenceSelectProtocol.Payload(state.Partition, "c1", 7)),
-            new("a", "linked", EventReferenceSelectProtocol.Payload(state.Partition, "m", 7)),
-            new("m", "linked", EventReferenceSelectProtocol.Payload(state.Partition, "c2", 7)),
-            new("b", "linked", EventReferenceSelectProtocol.Payload(state.Partition, "c1", 2)),
+            new("z", "linked", ExpectedPayload(state.Partition, "c1", 7)),
+            new("a", "linked", ExpectedPayload(state.Partition, "m", 7)),
+            new("m", "linked", ExpectedPayload(state.Partition, "c2", 7)),
+            new("b", "linked", ExpectedPayload(state.Partition, "c1", 2)),
             new("n", "unlinked", "{\"score\":7}")], 1, token);
         await StreamAsync(admin, state, state.OriginalInvalid, EventReferenceSelectProtocol.InvalidStreamSet,
-            [new("wrong", "linked", EventReferenceSelectProtocol.Payload(state.Partition with { PartitionKey = "foreign" }, "c1", 7))],
+            [new("wrong", "linked", ExpectedPayload(state.Partition with { PartitionKey = "foreign" }, "c1", 7))],
             6, token);
         await SqlRf3Protocol.EqualAsync(state.Receipt, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Seed, token)));
         if (state.Repair is not null)
@@ -34,6 +34,25 @@ internal static class EventReferenceSelectSources
                 await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Repair, token)));
         }
     }
+
+    private static string ExpectedPayload(PartitionRef partition, string id, int score)
+        => System.Text.Json.JsonSerializer.Serialize(new
+        {
+            score,
+            to = new
+            {
+                collection = EventReferenceSelectProtocol.Target,
+                id,
+                partition = new
+                {
+                    atomicPartitionId = partition.AtomicPartitionId,
+                    databaseId = partition.DatabaseId,
+                    partitionKey = partition.PartitionKey,
+                    tenantId = partition.TenantId,
+                    transactionDomainId = partition.TransactionDomainId
+                }
+            }
+        }, JsonDefaults.Options);
 
     private static async Task StreamAsync(RequestCqrsRf3Callers admin, EventReferenceSelectState state,
         StreamPage original, string streamSet, EventData[] data, long firstSequence, CancellationToken token)

@@ -1,5 +1,5 @@
-using KeyLoad.Server;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

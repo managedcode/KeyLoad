@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using TUnit.Assertions.Enums;
@@ -32,10 +33,14 @@ internal sealed class QueueLostResponseWholeFlowTests
         await Assert.That(delivery.LeaseUntil).IsEqualTo(time.AddSeconds(30));
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
         var leased = QueueWholeFlowStorage.Bytes(fixture.Store);
+        var leasedPosition = fixture.Store.Position;
+        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, leased, leasedPosition, identity);
+        await RefuseChangedContentAsync(database, reopened, OperationKind.Receive, claim with { LeaseSeconds = 31 }, claimId, time);
         var retried = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, claim, claimId, time);
         await NativeReplayResultAssertions.Same<ReceiveResult>(retried, originalResult);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(leased, CollectionOrdering.Matching);
@@ -45,10 +50,13 @@ internal sealed class QueueLostResponseWholeFlowTests
         acknowledged.Get<CommitReceipt>();
         await Assert.That(database.InspectMessage("root", lane, "input")!.Metadata.State).IsEqualTo(MessageState.Acked);
         var acked = QueueWholeFlowStorage.Bytes(reopened);
+        var ackedPosition = reopened.Position;
         reopened.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var restored = QueueWholeFlowStorage.Open(second);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, acked, ackedPosition, identity);
+        await RefuseChangedContentAsync(restored, second, OperationKind.Delivery, ack with { Action = DeliveryAction.Renew }, ackId, time);
         var repeated = QueueWholeFlowStorage.Apply(restored, OperationKind.Delivery, ack, ackId, time);
         await NativeReplayResultAssertions.Same<CommitReceipt>(repeated, acknowledged);
         await Assert.That(QueueWholeFlowStorage.Bytes(second)).IsEquivalentTo(acked, CollectionOrdering.Matching);
@@ -62,5 +70,57 @@ internal sealed class QueueLostResponseWholeFlowTests
         await Assert.That(healthy.PayloadJson).IsEqualTo("{\"work\":2}");
         await Assert.That(healthy.Attempt).IsEqualTo(1);
         await Assert.That(restored.InspectMessage("root", lane, "input")!.Metadata.State).IsEqualTo(MessageState.Acked);
+        await CompleteHealthyColdAsync(restored, second, fixture.Directory, lane, healthy, ack, acknowledged, time, identity);
+    }
+
+    private static async Task RefuseChangedContentAsync<T>(DatabaseEngine database, ZoneTreeStore store,
+        OperationKind kind, T changed, Guid originalId, DateTimeOffset time)
+    {
+        var bytes = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeSerialization.Serialize(store.Identity);
+        var first = QueueWholeFlowStorage.Apply(database, kind, changed, originalId, time);
+        await QueueLeaseExpiryEqualityAssertions.RefusalAsync(first, ErrorCode.Conflict);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        var repeated = QueueWholeFlowStorage.Apply(database, kind, changed, originalId, time);
+        await QueueLeaseExpiryEqualityAssertions.RefusalAsync(repeated, ErrorCode.Conflict);
+        await Assert.That(NativeSerialization.Serialize(repeated)).IsEquivalentTo(
+            NativeSerialization.Serialize(first), CollectionOrdering.Matching);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+    }
+
+    private static async Task CompleteHealthyColdAsync(DatabaseEngine database, ZoneTreeStore store,
+        string directory, QueueLaneRef lane, Delivery healthy, DeliveryCommand originalAck,
+        OperationResult originalReceipt, DateTimeOffset time, byte[] identity)
+    {
+        var ack = new DeliveryCommand(Guid.NewGuid(), lane, healthy.Token, DeliveryAction.Ack);
+        var receipt = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack, ack.CommandId, time);
+        receipt.Get<CommitReceipt>();
+        await TerminalMessagesAsync(database, lane);
+        var bytes = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        store.Dispose();
+        using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
+            UnitExecutionOptions.PointCacheExecution());
+        var restored = QueueWholeFlowStorage.Open(reopened);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, bytes, position, identity);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
+            OperationKind.Delivery, originalAck, originalAck.CommandId, time), originalReceipt);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
+            OperationKind.Delivery, ack, ack.CommandId, time), receipt);
+        await TerminalMessagesAsync(restored, lane);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, bytes, position, identity);
+        var empty = new ReceiveRequest(Guid.NewGuid(), lane);
+        await Assert.That(QueueWholeFlowStorage.Apply(restored, OperationKind.Receive, empty, empty.RequestId,
+            time).Get<ReceiveResult>().Deliveries).IsEmpty();
+        await TerminalMessagesAsync(restored, lane);
+    }
+
+    private static async Task TerminalMessagesAsync(DatabaseEngine database, QueueLaneRef lane)
+    {
+        await Assert.That(database.InspectMessage("root", lane, "input")).IsEqualTo(
+            new MessageInspection(new("input", MessageState.Acked, 1, 3, 1, null, null, LeaseVersion: 1), null, null));
+        await Assert.That(database.InspectMessage("root", lane, "healthy")).IsEqualTo(
+            new MessageInspection(new("healthy", MessageState.Acked, 1, 3, 2, null, null, LeaseVersion: 1), null, null));
     }
 }

@@ -2,12 +2,12 @@
   "STAGE64-PUBLIC-MODELS-001": {
     "record": "docs/implementation/qualification-stage64-public-models.md",
     "originalPlan": {
-      "done": 18,
-      "inProgress": 86,
+      "done": 19,
+      "inProgress": 85,
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "Full normal Release R24 passed0errors/0warnings with9539 source files unchanged. Coherent parallel native R24: Unit179156pass23fail; Recovery1311pass2fail; Integration70pass7fail; all runner/process/output/error/disposal joins completed and source/target images stable. Original failures retained, prepared corrections remain unapplied at this checkpoint. Exact-source Linux, full task acceptance, RF3/fault/endurance and functional coverage gates remain open; no acceptance promotion.",
+    "qualification": "R24 full normal Release passed 0 errors / 0 warnings; its stable local Unit 156/179, Recovery 11/13 and Integration 0/7 failures remain original evidence. R25 source repairs and complete-flow regressions are integrated; R25 native analysis leaves only four known stale metadata diagnostics; actual source diagnostics resolved. Scoped101-file formatter verifies successfully. R25 ordinary compiler and runtime qualification are pending. Original KL-034 acceptance now closed from authenticated exact-source Linux 26/26 normal cases including two genuine Aspire RF3 SDK/MCP/Q1 flows. Remaining exact-source Linux, task-specific, fault/endurance and functional coverage gates stay open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -115,6 +115,51 @@
         "behavior": "Initialize native transport on exact open-loop download context; new owned output/github holds requests/help and ZIP inventories; original authenticated input remains read-only",
         "qualified": false,
         "runtime": "actual_Linux_authenticated_intake_pending"
+      },
+      "r25CompleteFlowRepairs": {
+        "qualified": false,
+        "runtime": "pending exact-source Linux after push",
+        "independentJournalAndColdReplay": {
+          "receipt": "TestResults/stage61-native-join/stage64-r24-independent-journal-counts.native-y.original.json",
+          "sha256": "cda9bb5229eef32b29a04db96dec68234f810a18c3a48e616fe46f9802c0690d"
+        },
+        "queueBodyAuthority": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-due-body-authority.native-y.original.json",
+          "sha256": "1b5c14fefa6ab4fbca0f632a3cce142fe63f9ab8229502bbc1899ab4d8f9ce85"
+        },
+        "queueChangedContentCold": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-kl087-cold-changed-content.native-y.original.json",
+          "sha256": "faedec5789e2911e7bc3269f41572962bae817044ecae24d1e3ab6c031112d1d"
+        },
+        "queueReferenceBeforeFilter": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-queue-filter-reference.native-NY.original.json",
+          "sha256": "4e3fde528efce233122c4215a7a3b42fbf6d126beb2e1628fabf58b0f8091bc0"
+        },
+        "priorDenialAndFreshUnauthenticated": {
+          "receipt": "TestResults/stage61-native-join/refusal-three-r24.actual-y-r1.receipt.json",
+          "sha256": "dd498b29177653873d2a9f90da96e1a3789f35fffef7b44614fa555c94caf175"
+        },
+        "queueCurrentPolicyEpoch": {
+          "receipt": "TestResults/stage61-native-join/kl087-policy-epoch-r2.actual-join.receipt.json",
+          "sha256": "849b0ccc22cb701f049708ff3e195a5129769ffb3767e3dbf1bf5411bfbd0b61"
+        },
+        "eventReferenceBeforeFilter": {
+          "receipt": "TestResults/stage61-native-join/current-stage64-r25-event-reference-before-filter.native-NY-post.original.json",
+          "sha256": "b054846e929f06c197d03923f5e0df94a67cec7f3c834691ab2ddebdbad06f34"
+        },
+        "independentEventUse": {
+          "receipt": "TestResults/stage61-native-join/current-stage64-r25-event-independent-use.source-join.original.json",
+          "sha256": "144ba2b3c6c99e63bf916bd245be7ba569fefb400fae723199bc324369d51f6a"
+        },
+        "receiverAndShutdown": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-peer-observer-diagnostic-repair-Y.original.json",
+          "sha256": "a1391b493af83718884f5669581de4370b52ca19d830cc8ab738f1d42fcd5a08"
+        },
+        "finalSource": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-global-native-final2-source-after.original.json",
+          "sha256": "37d1635cc97aab70ae3ab52a93ae41a769be859495ab356e6bdd0c0d663b085f"
+        },
+        "note": "Individual initial Y receipts remain immutable; later native diagnostic and formatter repairs are bound by the final source inventory."
       }
     },
     "nativeDiagnostics": {
@@ -149,10 +194,43 @@
         "receipt": "TestResults/stage61-native-join/stage64-r24-native-diagnostics.after-repairs.original.json",
         "sha256": "73ea45086f679c0cdac889737e858fee3d7790c23952da90679815f9602965ed",
         "ordinaryCompilerR24": "Full normal SDK compile0errors/0warnings; four native metadata diagnostics remain stale and did not reproduce."
+      },
+      "r25First": {
+        "errors": 42,
+        "warnings": 0,
+        "knownStaleCrashHostMetadata": 4,
+        "actualSourceDiagnostics": 38,
+        "receipt": "TestResults/stage61-native-join/stage64-r25-native-diagnostics.first.original.json",
+        "sha256": "14aeaf5abfaf6257f39499df3bbdf96cd3017c31e3060cc9339485192c3a6ba1"
+      },
+      "r25Intermediate": {
+        "errors": 6,
+        "warnings": 0,
+        "knownStaleCrashHostMetadata": 4,
+        "actualSourceDiagnostics": 2,
+        "receipt": "TestResults/stage61-native-join/stage64-r25-native-diagnostics.after-first-repairs.original.json",
+        "sha256": "57160a39c34023621c706d5e701d48115fdf21232196f2cfd58fa8b98e333d6a",
+        "postguard": "Witness diagnostic repair changed one source after this intermediate observation; not stable runtime qualification"
+      },
+      "r25Final": {
+        "errors": 4,
+        "warnings": 0,
+        "knownStaleCrashHostMetadata": 4,
+        "actualSourceDiagnosticsRemaining": 0,
+        "allRemaining": "Original CrashHost TestingHost stale metadata; normal R24 and exact-source Linux01a9 full compilers passed; R25 ordinary compilation pending",
+        "sourceInputs": 9553,
+        "sourceDrift": 0,
+        "receipt": "TestResults/stage61-native-join/stage64-r25-native-diagnostics.final.original.json",
+        "sha256": "06d9452267fdc861afc83d58f2987132dd3614fec2bddcdb8f6ff061eaf80818",
+        "sourceAfter": {
+          "receipt": "TestResults/stage61-native-join/stage64-r25-global-native-final2-source-after.original.json",
+          "sha256": "37d1635cc97aab70ae3ab52a93ae41a769be859495ab356e6bdd0c0d663b085f"
+        },
+        "currentNormalCompilerPending": true
       }
     },
     "remaining": [
-      "Apply independently reviewed original R24 fixture/journal-oracle corrections; preserve full operations and original failure evidence",
+      "Qualify integrated R25 fixture/journal, original refusal, queue authority and SQL reference repairs on exact delivered Linux source; preserve original failures",
       "Identify original unsigned bad64 issuer through bounded actual receiver observation; do not weaken authentication or reply verification",
       "Deliver exact-source Linux full SDK/MCP RF3, process recovery, fault/endurance and functional coverage gates",
       "Complete genuine Linux selected matrix transport regression and authenticated website producer evidence",
@@ -739,6 +817,95 @@
       "sharedCompiledImage": "All SDK and source writers joined before three parallel native lanes; original full source and actual target DLL/PDB closure guards remained stable.",
       "coverage": "unmeasured; focused native runners do not collect or merge coverage; generic wrapper label does not prove a coverage failure.",
       "LinuxQualification": false
+    },
+    "originalTaskAcceptanceR25": {
+      "KL-034": {
+        "completedAt": "2026-10-12",
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "sourceCommit": "01a9c5eb01016336daab31b8a4ea76ef13f2918d",
+        "runId": 38255628305,
+        "attempt": 1,
+        "jobId": 114832829570,
+        "artifactId": 11750713895,
+        "artifactSha256": "a7d1604656d4674139892777d396848b0d79c6337926f45452b6c603e869af7b",
+        "record": "docs/implementation/kl-034-linux-acceptance-20261012.json",
+        "recordSha256": "faa058cde4638625f72b60e3361eebd1616b1c175ee7121ab9561dd8777e133c",
+        "unitPassed": 24,
+        "rf3Passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "profile": "normal; mandatory SIMD, native50",
+        "requirements": [
+          "REQ-SEARCH-WAIT-001",
+          "REQ-SEARCH-WAIT-002",
+          "REQ-SEARCH-WAIT-003",
+          "REQ-SEARCH-ANN-WAIT-001",
+          "REQ-SEARCH-ANN-WAIT-002"
+        ],
+        "criteria": [
+          "AC-SEARCH-WAIT-001",
+          "AC-SEARCH-WAIT-002",
+          "AC-SEARCH-WAIT-003",
+          "AC-SEARCH-ANN-WAIT-001",
+          "AC-SEARCH-ANN-WAIT-002",
+          "AC-SEARCH-ANN-WAIT-003"
+        ],
+        "exactOriginalCaseIdentitiesIndependentlyMatched": true,
+        "allOriginalProcessJoins": true,
+        "sourceAndImageVerificationPassed": true,
+        "registryRemoved": true
+      }
+    },
+    "formatterR25": {
+      "scopedPaths": 101,
+      "scope": "Completed source packet plus59 original Linux import failures; all mandatory whole-solution CI gates remain required",
+      "apply": {
+        "receipt": "TestResults/stage61-native-join/stage64-r25-format-imports.completion.original.json",
+        "sha256": "c7212219f31823c79acaf027089e3d119a6686aa6d7e18e82deefd28dd772b73"
+      },
+      "verify": {
+        "receipt": "TestResults/stage61-native-join/stage64-r25-format-verify.completion.original.json",
+        "sha256": "16b4750e9be8b70aa75147f2eec46b5c55e6ef7fc6820ed7303c7dfe2aed7a60"
+      },
+      "nativeVerifyExitCode": 0,
+      "sandboxIpcRefusal": {
+        "receipt": "TestResults/stage61-native-join/stage64-r25-format-apply.completion.original.json",
+        "sha256": "4e9ebdc49281eabe003f9d9037057dca45858334a884cff190f3d20b6e587ea7"
+      },
+      "matchedUnrestrictedRetry": {
+        "receipt": "TestResults/stage61-native-join/stage64-r25-format-apply-ipc-retry.completion.original.json",
+        "sha256": "556ebd04f2c250c6527e675ad33612134e1c15bb6bee47da2c63e7073a2572da"
+      }
+    },
+    "deliveredLinuxR24": {
+      "sourceCommit": "01a9c5eb01016336daab31b8a4ea76ef13f2918d",
+      "runId": 38255628305,
+      "mainJobId": 114832899397,
+      "fullReleasePassed": true,
+      "mainFormatter": "failed59imports; repaired in R25, fresh whole-solution verification pending",
+      "unit": {
+        "executed": 1066,
+        "passed": 971,
+        "failed": 95,
+        "skipped": 0
+      },
+      "recovery": {
+        "executed": 351,
+        "passed": 349,
+        "failed": 2,
+        "skipped": 0
+      },
+      "originalArchive": {
+        "receipt": "TestResults/stage61-native-join/stage64-ci-38255628305-unit-recovery.original.zip",
+        "sha256": "2322bacc5eec888abe1190d8f7e73bd31155001ffc7fcd30d51aa9b3aa5d706b"
+      },
+      "originalReports": {
+        "receipt": "TestResults/stage61-native-join/stage64-ci-38255628305-unit-recovery.derived.json",
+        "sha256": "e0ca1c4b2d685cb1b7e49f7d078a3947140bb283daeb9f278796b59086263f93"
+      },
+      "fullRf3": "still running at last observed snapshot; not promoted",
+      "coverage": "unmeasured"
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -56599,7 +56766,7 @@
   },
   "KL-034": {
     "title": "Search freshness contract",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/Search/Queries/DatabaseEngine.VectorReads.cs",
       "src/KeyLoad.Core/Features/Search/Queries/VisibleVectorReads.cs",
@@ -56657,6 +56824,45 @@
       "causeQualified": false,
       "boundsOrReceiptOraclesRelaxed": false,
       "taskQualified": false
+    },
+    "allAcceptanceClosed": true,
+    "acceptanceScope": "Original architecture Search freshness task; current product, coverage, fault/endurance and performance qualification remain open.",
+    "currentOriginalTaskAcceptance": {
+      "completedAt": "2026-10-12",
+      "qualified": true,
+      "allAcceptanceClosed": true,
+      "sourceCommit": "01a9c5eb01016336daab31b8a4ea76ef13f2918d",
+      "runId": 38255628305,
+      "attempt": 1,
+      "jobId": 114832829570,
+      "artifactId": 11750713895,
+      "artifactSha256": "a7d1604656d4674139892777d396848b0d79c6337926f45452b6c603e869af7b",
+      "record": "docs/implementation/kl-034-linux-acceptance-20261012.json",
+      "recordSha256": "faa058cde4638625f72b60e3361eebd1616b1c175ee7121ab9561dd8777e133c",
+      "unitPassed": 24,
+      "rf3Passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "profile": "normal; mandatory SIMD, native50",
+      "requirements": [
+        "REQ-SEARCH-WAIT-001",
+        "REQ-SEARCH-WAIT-002",
+        "REQ-SEARCH-WAIT-003",
+        "REQ-SEARCH-ANN-WAIT-001",
+        "REQ-SEARCH-ANN-WAIT-002"
+      ],
+      "criteria": [
+        "AC-SEARCH-WAIT-001",
+        "AC-SEARCH-WAIT-002",
+        "AC-SEARCH-WAIT-003",
+        "AC-SEARCH-ANN-WAIT-001",
+        "AC-SEARCH-ANN-WAIT-002",
+        "AC-SEARCH-ANN-WAIT-003"
+      ],
+      "exactOriginalCaseIdentitiesIndependentlyMatched": true,
+      "allOriginalProcessJoins": true,
+      "sourceAndImageVerificationPassed": true,
+      "registryRemoved": true
     }
   },
   "KL-035": {

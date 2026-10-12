@@ -1,7 +1,6 @@
+using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-
-using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

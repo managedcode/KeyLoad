@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 

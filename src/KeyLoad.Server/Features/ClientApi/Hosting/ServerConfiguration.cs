@@ -18,7 +18,8 @@ internal static class ServerConfiguration
     internal static WebApplication Build(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
         IControlledBlobWireBorrowObserver? blobWireObserver = null,
         NativeLocalhostClusteringOptions? localhostClustering = null,
-        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null)
+        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
+        IPartitionMovementNativeObserver? partitionMovementNativeObserver = null)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
@@ -42,6 +43,8 @@ internal static class ServerConfiguration
         { builder.Services.AddSingleton(sealedObserver); }
         if (authenticationExecutionObserver is not null)
         { builder.Services.AddSingleton(authenticationExecutionObserver); }
+        if (partitionMovementNativeObserver is not null)
+        { builder.Services.AddSingleton(partitionMovementNativeObserver); }
         DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();

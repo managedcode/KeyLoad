@@ -45,7 +45,7 @@ internal sealed partial class PartitionMovementRuntime : IPartitionMovementDispa
         parent = new(receiver, client, clock, options.GrainRouting,
             options.Core.DatabaseLimits, options.Node.Value.ClusterId);
         NativeReceiver = new(this, admission, receiver, node, options.Node,
-            options.GrainRouting, options.Core.DatabaseLimits, clock);
+            options.GrainRouting, options.Core.DatabaseLimits, clock, node.NativeMovementObservation);
     }
 
     internal Task RunAsync(Func<CancellationToken, Task> operation, CancellationToken caller)

@@ -92,6 +92,63 @@ internal static class SqlModelViewRf3AuthorizationAssertions
         return identity;
     }
 
+    internal static async Task<McpPersistedIdentity> VerifyEventReadWithoutUseAsync(
+        KeyLoadClient administrator, KeyLoadClient reader, McpOfficialClient mcp,
+        SqlModelViewRf3Scenario scenario, McpPersistedIdentity identity,
+        CancellationToken cancellationToken)
+    {
+        for (var transition = 0; transition < 2; transition++)
+        {
+            identity = await GrantSensitiveReadAsync(administrator, identity, cancellationToken, use: false);
+            await VerifyEventQueriesAsync(administrator, reader, mcp, scenario, identity, false, cancellationToken);
+            identity = await GrantSensitiveReadAsync(administrator, identity, cancellationToken);
+            await VerifyEventQueriesAsync(administrator, reader, mcp, scenario, identity, true, cancellationToken);
+        }
+        return identity;
+    }
+
+    private static async Task VerifyEventQueriesAsync(
+        KeyLoadClient administrator, KeyLoadClient reader, McpOfficialClient mcp,
+        SqlModelViewRf3Scenario scenario, McpPersistedIdentity identity, bool use,
+        CancellationToken cancellationToken)
+    {
+        var native = await McpCallerAssertions.SdkSuccessAsync(
+            await administrator.ReadStreamAsync(new(scenario.Stream), cancellationToken));
+        var request = scenario.EventSql();
+        var requests = new[]
+        {
+            request,
+            request with { Sql = $"SELECT * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
+                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE payload.secret = '{SqlModelViewRf3Scenario.EventCanary}' "
+                + $"ORDER BY revision LIMIT {SqlModelViewRf3Scenario.RowLimit}" },
+            request with { Sql = $"SELECT * FROM EVENTS('{SqlModelViewRf3Scenario.StreamSet}',"
+                + $"'{SqlModelViewRf3Scenario.StreamId}') WHERE headers.privateHeader = '{SqlModelViewRf3Scenario.EventHeaderCanary}' "
+                + $"ORDER BY revision LIMIT {SqlModelViewRf3Scenario.RowLimit}" }
+        };
+        foreach (var query in requests)
+        {
+            if (!use && query != request)
+            {
+                await SqlModelViewRf3DenialAssertions.SdkAsync(
+                    await reader.QueryAsync(query, cancellationToken), identity.Secret);
+                await SqlModelViewRf3DenialAssertions.McpAsync(
+                    await mcp.CallAsync(McpCallerTools.QueryExecute, query, cancellationToken), identity.Secret);
+            }
+            else
+            {
+                var sdk = await McpCallerAssertions.SdkSuccessAsync(
+                    await reader.QueryAsync(query, cancellationToken));
+                var official = await McpCallerAssertions.SuccessAsync<QueryPage>(
+                    await mcp.CallAsync(McpCallerTools.QueryExecute, query, cancellationToken));
+                await SqlModelViewRf3ParityAssertions.AssertEventRowsAsync(native.Events, sdk);
+                await SqlModelViewRf3ParityAssertions.AssertEventRowsAsync(native.Events, official.Value);
+                await SqlRf3Protocol.EqualAsync(sdk, official.Value);
+            }
+            await SqlRf3Protocol.EqualAsync(native, await McpCallerAssertions.SdkSuccessAsync(
+                await administrator.ReadStreamAsync(new(scenario.Stream), cancellationToken)));
+        }
+    }
+
     internal static async Task RevokeAsync(KeyLoadClient administrator, McpPersistedIdentity identity,
         CancellationToken cancellationToken)
     {

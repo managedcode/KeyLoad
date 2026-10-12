@@ -1,5 +1,5 @@
-using KeyLoad.Core;
 using System.Text.Json;
+using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 

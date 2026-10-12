@@ -19,6 +19,7 @@ namespace KeyLoad.Server;
 /// <param name="discoveryOmission">Optional fixture observer of actual native discovery replies.</param>
 /// <param name="physicalOwnerProbe">Borrowed probe runtime factory resolved after the outer node exists.</param>
 /// <param name="localhostClustering">Explicit fixture-only native endpoint tuple; production uses Aspire Azure membership.</param>
+/// <param name="partitionMovementNativeObserver">Borrowed fixture-owned peer observation, joined with the actual native call.</param>
 internal sealed partial class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory,
     ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null, PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
@@ -26,9 +27,11 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     IControlledBlobWireBorrowObserver? blobWireObserver = null,
     NativeDiscoveryOmissionOwner? discoveryOmission = null,
     Func<PhysicalOwnerProbeNativeRuntime>? physicalOwnerProbe = null,
-    NativeLocalhostClusteringOptions? localhostClustering = null) : IAsyncDisposable
+    NativeLocalhostClusteringOptions? localhostClustering = null,
+    IPartitionMovementNativeObserver? partitionMovementNativeObserver = null) : IAsyncDisposable
 {
     internal NativeDiscoveryOmissionOwner? DiscoveryOmission => discoveryOmission;
+    internal IPartitionMovementNativeObserver? NativeMovementObservation => partitionMovementNativeObserver;
     private NodeOptions Options => nodeOptions.Value;
     private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
     private readonly Lock lifecycle = new();

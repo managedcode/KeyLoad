@@ -1,9 +1,9 @@
 using System.Globalization;
 using KeyLoad.Orleans;
-using Microsoft.Extensions.Options;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 

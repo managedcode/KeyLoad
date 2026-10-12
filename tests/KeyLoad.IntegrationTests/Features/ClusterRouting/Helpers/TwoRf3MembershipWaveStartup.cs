@@ -69,7 +69,10 @@ internal static class TwoRf3MembershipWaveStartup
         wave.applicationDisposed = false;
         wave.nodeLocksReleased = false;
         if (wave.remoteDocumentReads)
-        { wave.RemoteRuntimeOwner = new ContainerRuntimeControl(wave.application, containerNames, repository); }
+        {
+            wave.RemoteRuntimeOwner = new ContainerRuntimeControl(wave.application, containerNames, repository,
+            wave.localImageSelection);
+        }
         observe?.Invoke("VerifyImageBeforeStart");
         await VerifyBeforeStartAsync(wave, wave.application, repository, githubReference, cancellationToken)
             .ConfigureAwait(false);

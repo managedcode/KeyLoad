@@ -18,10 +18,10 @@ internal static class QueueReferenceSelectSources
         var repaired = await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(missing, token));
         await SqlRf3Protocol.EqualAsync(state.Repair is null ? null : new DocumentResult(missing, 1,
             QueueReferenceSelectProtocol.RepairedJson, false, []), repaired);
-        var payloads = new[] { QueueReferenceSelectProtocol.Payload(state.Partition, "c1", 7),
-            QueueReferenceSelectProtocol.Payload(state.Partition, "m", 7),
-            QueueReferenceSelectProtocol.Payload(state.Partition, "c2", 7),
-            QueueReferenceSelectProtocol.Payload(state.Partition, "c1", 2), "{\"score\":7}" };
+        var payloads = new[] { ExpectedPayload(state.Partition, "c1", 7),
+            ExpectedPayload(state.Partition, "m", 7),
+            ExpectedPayload(state.Partition, "c2", 7),
+            ExpectedPayload(state.Partition, "c1", 2), "{\"score\":7}" };
         var ids = new[] { "a", "b", "c", "d", "e" };
         for (var index = 0; index < ids.Length; index++)
         {
@@ -29,7 +29,7 @@ internal static class QueueReferenceSelectSources
                 payloads[index], index + 1L, token);
         }
         await MessageAsync(admin, state.Partition, QueueReferenceSelectProtocol.InvalidQueue, "wrong",
-            QueueReferenceSelectProtocol.Payload(state.Partition with { PartitionKey = "foreign" }, "c1", 7), 1L, token);
+            ExpectedPayload(state.Partition with { PartitionKey = "foreign" }, "c1", 7), 1L, token);
         await SqlRf3Protocol.EqualAsync(state.Receipt, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Seed, token)));
         if (state.Repair is not null)
         {
@@ -37,6 +37,25 @@ internal static class QueueReferenceSelectSources
                 await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Repair, token)));
         }
     }
+
+    private static string ExpectedPayload(PartitionRef partition, string id, int score)
+        => System.Text.Json.JsonSerializer.Serialize(new
+        {
+            score,
+            to = new
+            {
+                collection = QueueReferenceSelectProtocol.Target,
+                id,
+                partition = new
+                {
+                    atomicPartitionId = partition.AtomicPartitionId,
+                    databaseId = partition.DatabaseId,
+                    partitionKey = partition.PartitionKey,
+                    tenantId = partition.TenantId,
+                    transactionDomainId = partition.TransactionDomainId
+                }
+            }
+        }, JsonDefaults.Options);
 
     private static async Task MessageAsync(RequestCqrsRf3Callers admin, PartitionRef partition,
         string queue, string id, string payload, long sequence, CancellationToken token)

@@ -48,24 +48,31 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
         return found;
     }
 
-    internal async Task RequireCallerAsync(string voter, string address, CancellationToken token)
+    internal async Task RequireCallerAsync(string voter, string address, CancellationToken token,
+        Action<PartitionMovementNativeObservationStage>? observeStage = null)
     {
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerIdentity);
         token.ThrowIfCancellationRequested();
         var control = PhysicalOwnerConfiguredTuples.Control(settings, partition.Configuration);
         if (!control.Owner.VoterIds.Contains(voter, StringComparer.Ordinal)
             || !PhysicalGroupAddress.CanonicalAddress(address, membership))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         var actual = SiloAddress.FromParsableString(address);
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerActive);
         if (!Active().ContainsKey(actual))
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         var nonce = Guid.NewGuid();
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerDiscovery);
         var reply = await discover(actual, nonce, token).ConfigureAwait(false);
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryShape);
         var identity = PartitionMovementNativeDiscoveryIdentity.ReadOwned(reply);
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryVoter);
         if (identity.VoterId != voter)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         PartitionMovementNativeDiscoveryIdentity.Require(settings, partition.Configuration, control,
-            actual, nonce, reply, identity, membership);
+            actual, nonce, reply, identity, membership, observeStage);
         token.ThrowIfCancellationRequested();
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerActiveAfterDiscovery);
         if (oracle.GetApproximateSiloStatus(actual) != SiloStatus.Active)
         { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
     }

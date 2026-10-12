@@ -1,9 +1,9 @@
-using TUnit.Assertions.Enums;
 using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

@@ -1,7 +1,7 @@
+using System.Security.Cryptography;
 using KeyLoad.Orleans;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
 
 namespace KeyLoad.RecoveryTests;
 

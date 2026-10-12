@@ -45,6 +45,14 @@ internal static class SqlQueueReferenceJoinCold
                 var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
                     SqlQueueReferenceJoinFixture.Request(database.Partition, SqlQueueReferenceJoinFixture.InvalidQueue)));
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+                var filtered = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
+                    SqlQueueReferenceJoinFixture.FilteredInvalidRequest(database.Partition)));
+                await Assert.That(filtered.Code).IsEqualTo(ErrorCode.Validation);
+                await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, CollectionOrdering.Matching);
+                await Assert.That(reopened.Position).IsEqualTo(position);
+                var filteredAst = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
+                    SqlQueueReferenceJoinFixture.FilteredInvalidAst(database.Partition)));
+                await Assert.That(filteredAst.Code).IsEqualTo(ErrorCode.Validation);
                 await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, CollectionOrdering.Matching);
                 await Assert.That(reopened.Position).IsEqualTo(position);
             }

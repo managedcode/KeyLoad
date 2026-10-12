@@ -6,8 +6,13 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Preserves the complete source model and original receipts through real abort and both cold native owners.</summary>
 internal static class ControlledPartitionMovementAbortOperation
 {
-    private const long FinalSourceIndex = 185;
-    private const long FinalTargetIndex = 81;
+    // Fence acceptance, capture authorization, begin abort, source marker/terminal, completion.
+    private const long FinalSourceIndex = 15 + 1 + 1 + 3 + 3 + 2
+        + PartitionMovementCleanupCountAssertions.CleanupBatchCount
+        * PartitionMovementCleanupCountAssertions.AbortSourceCommits;
+    private const long FinalTargetIndex = 1
+        + PartitionMovementCleanupCountAssertions.CleanupBatchCount
+        * PartitionMovementCleanupCountAssertions.AbortTargetCommits;
     internal static async Task ExecuteAsync(ControlledPartitionMovementNode source,
         ControlledPartitionMovementNode target, ControlledPartitionMovementLoopbackCorpus corpus,
         ServerRuntimeOptions sourceRuntime, ServerRuntimeOptions targetRuntime,

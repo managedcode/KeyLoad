@@ -77,7 +77,7 @@ That's what we're building: **one place for context, one place for the work that
 
 | Plan tasks | Accepted | In progress |
 |---|---|---|
-| **105** | **18** | **87** |
+| **105** | **19** | **86** |
 
 ```mermaid
 flowchart LR

@@ -22,8 +22,10 @@ internal static class PartitionMovementNativeDiscoveryIdentity
     internal static void Require(NodeOptions options, ReplicaConfiguration configuration,
         RegisteredPhysicalOwnerV1 expected, SiloAddress address, Guid nonce,
         PartitionMovementGrainServiceDiscovery reply, ReplicaSiloDiscovery discovery,
-        IOptions<OrleansMembershipOptions> membership)
+        IOptions<OrleansMembershipOptions> membership,
+        Action<PartitionMovementNativeObservationStage>? observeStage = null)
     {
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryMac);
         var owned = reply.Payload.ToArray();
         var key = Convert.FromBase64String(Secret(options, configuration, expected));
         try
@@ -34,6 +36,7 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             { throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof); }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryContract);
         var actual = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(owned);
         if (actual != discovery || actual is not { TransportReady: true }
             || !expected.Owner.VoterIds.Contains(actual.VoterId, StringComparer.Ordinal)

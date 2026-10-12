@@ -1,5 +1,6 @@
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
@@ -29,13 +30,20 @@ internal static class ControlledPartitionMovementNativeProcessRefusal
         var address = await sender.ResolveAsync(owners.Control, FirstVoter, cancellationToken);
         var signed = sender.CreateRequest(PartitionMovementGrainServiceChannel.Phase, query: false,
             NativeSerialization.Serialize(original), innerSignature, owners.Control.Owner.VoterIds[FirstVoter], address);
-        var failure = await Assert.ThrowsAsync<KeyLoadException>(() => sender.ExchangeAsync(address, signed, cancellationToken))
-            ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
-        if (expectedDetail == PartitionMovementProtocol.Unavailable)
-        { await Assert.That(failure.Data[PartitionMovementGrainServiceClient.InvalidReplyStage]).IsNull(); }
-        await Assert.That(failure.Message).IsEqualTo(expectedDetail);
-        var after = await owners.CaptureAsync(cancellationToken);
-        await ControlledPartitionMovementNativeProcessColdAssertions.ExactAsync(before, after);
+        using var observation = owners.Source.NativeObservation.Arm(signed.Nonce, owners.Control.Owner.VoterIds[FirstVoter]);
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var failure = await Assert.ThrowsAsync<KeyLoadException>(() => sender.ExchangeAsync(address, signed, cancellationToken))
+                ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
+            if (expectedDetail == PartitionMovementProtocol.Unavailable)
+            { await Assert.That(failure.Data[PartitionMovementGrainServiceClient.InvalidReplyStage]).IsNull(); }
+            await Assert.That(failure.Message).IsEqualTo(expectedDetail);
+            var after = await owners.CaptureAsync(cancellationToken);
+            await ControlledPartitionMovementNativeProcessColdAssertions.ExactAsync(before, after);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(observation.RequireAndReport, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

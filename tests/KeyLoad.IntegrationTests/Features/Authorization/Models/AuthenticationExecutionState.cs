@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 

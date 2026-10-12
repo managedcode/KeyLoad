@@ -1,8 +1,7 @@
+using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Server;
-
-using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 

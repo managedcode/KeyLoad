@@ -1,8 +1,8 @@
+using System.Net;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using ModelContextProtocol.Client;
-using System.Net;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 

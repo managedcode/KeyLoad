@@ -7,8 +7,9 @@ internal sealed partial class PartitionMovementPeerAdmission
     /// <summary>Authenticates the current native caller independently of immutable historical signed packets.</summary>
     internal async Task<PartitionMovementGrainServiceRequest> VerifyNativeAsync(PartitionMovementGrainServiceRequest request,
         ReplicaSiloDiscovery local, Func<string, string, CancellationToken, Task> requireCaller,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, Action<PartitionMovementNativeObservationStage>? observeStage = null)
     {
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.AdmissionShape);
         cancellationToken.ThrowIfCancellationRequested();
         var control = PhysicalOwnerConfiguredTuples.Control(options, configuration);
         var now = clock.GetUtcNow();
@@ -27,11 +28,14 @@ internal sealed partial class PartitionMovementPeerAdmission
             || !local.TransportReady)
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
         request = request with { Payload = request.Payload.ToArray() };
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.OuterMac);
         using var mac = CreateControlMac();
         if (!mac.VerifyNativeRequest(request))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerDiscovery);
         await requireCaller(request.CallerVoter, request.CallerSiloAddress, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
+        observeStage?.Invoke(PartitionMovementNativeObservationStage.ExpiryReplay);
         if (request.ExpiresAt <= clock.GetUtcNow() || !nativeReplay.TryUse(request.Nonce.ToString(NonceFormat)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
         return request;

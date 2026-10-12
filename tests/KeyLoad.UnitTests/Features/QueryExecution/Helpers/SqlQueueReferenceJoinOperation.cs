@@ -33,6 +33,10 @@ internal static class SqlQueueReferenceJoinOperation
             () => engine.Execute("root", SqlQueueReferenceJoinFixture.Request(database.Partition, SqlQueueReferenceJoinFixture.InvalidQueue)),
             ErrorCode.Validation);
         await SqlQueueReferenceJoinAssertions.RejectAsync(database,
+            () => engine.Execute("root", SqlQueueReferenceJoinFixture.FilteredInvalidRequest(database.Partition)), ErrorCode.Validation);
+        await SqlQueueReferenceJoinAssertions.RejectAsync(database,
+            () => engine.ExecuteAst("root", SqlQueueReferenceJoinFixture.FilteredInvalidAst(database.Partition)), ErrorCode.Validation);
+        await SqlQueueReferenceJoinAssertions.RejectAsync(database,
             () => engine.ExecuteAst("root", SqlQueueReferenceJoinFixture.Ast(database.Partition) with
             {
                 Query = SqlQueueReferenceJoinFixture.Ast(database.Partition).Query with

@@ -1,6 +1,6 @@
+using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.UnitTests.Features.Messaging;
-using System.Text.Json;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

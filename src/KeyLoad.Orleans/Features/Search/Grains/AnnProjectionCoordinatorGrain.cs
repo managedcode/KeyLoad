@@ -1,10 +1,10 @@
 using KeyLoad.Core;
 using ManagedCode.Communication.CQRS;
+using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
 using Orleans.Serialization;
-using ManagedCode.Orleans.Graph.Extensions;
 
 namespace KeyLoad.Orleans;
 

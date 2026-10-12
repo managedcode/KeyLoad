@@ -7,10 +7,11 @@ internal static class PartitionMovementCleanupCountAssertions
     private const string BlobState = "blob-state-v1";
     private const string BlobHead = "blob-head-v1";
     private const string TargetPage = "partition-move-target-page-v1";
-    private const int CleanupFamilyCount = 83;
-    private const long RetireSourceCommits = 3;
-    private const long AbortSourceCommits = 2;
-    private const long AbortTargetCommits = 1;
+    private const int CleanupFamilyCount = PartitionRecordInventoryTests.ExpectedFamilyCount + 1;
+    internal const int CleanupBatchCount = CleanupFamilyCount + 1;
+    internal const long RetireSourceCommits = 3;
+    internal const long AbortSourceCommits = 2;
+    internal const long AbortTargetCommits = 1;
 
     internal static async Task InventoryAsync()
     {

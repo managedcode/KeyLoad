@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Replication;
 using KeyLoad.Orleans;
+using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;
@@ -18,24 +18,28 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
     private Task? partitionDisposal;
     private bool joined;
 
-    private ControlledPartitionMovementNativeHost(WebApplication application)
+    private ControlledPartitionMovementNativeHost(WebApplication application, ControlledPartitionMovementNativeObservationWitness nativeObservation)
     {
         this.application = application;
+        NativeObservation = nativeObservation;
         Runtime = application.Services.GetRequiredService<ServerRuntimeOptions>();
         Clock = application.Services.GetRequiredService<TimeProvider>();
         Partition = application.Services.GetRequiredService<PartitionHost>();
         Silo = application.Services.GetRequiredService<OrleansNode>();
     }
 
+    internal ControlledPartitionMovementNativeObservationWitness NativeObservation { get; }
+
     internal static async Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhostClustering,
         IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
         IDatabaseAuthenticationExecutionObserver? authenticationObserver = null)
     {
+        var nativeObservation = new ControlledPartitionMovementNativeObservationWitness();
         var application = ServerConfiguration.Build(arguments, sealedObserver: sealedObserver, localhostClustering: localhostClustering,
-            authenticationExecutionObserver: authenticationObserver);
+            authenticationExecutionObserver: authenticationObserver, partitionMovementNativeObserver: nativeObservation);
         try
-        { return new(application); }
+        { return new(application, nativeObservation); }
         catch (Exception primary)
         {
             var failures = new List<Exception> { primary };

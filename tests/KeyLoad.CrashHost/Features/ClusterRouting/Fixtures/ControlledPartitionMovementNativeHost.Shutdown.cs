@@ -23,10 +23,13 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         Task? nodeStop = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            nodeStop = Silo.StopAsync(token);
-            await nodeStop.ConfigureAwait(false);
+            nodeStop = Silo.StopAsync(CancellationToken.None);
+            await nodeStop.WaitAsync(token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        if (nodeStop is not { IsCompletedSuccessfully: true } || !Silo.HasJoinedRequestWork)
+        var nativeHostReleased = false;
+        if (nodeStop is { IsCompleted: true } && Silo.HasJoinedRequestWork)
+        { ServerFailureObserver.Observe(() => nativeHostReleased = Silo.Discovery is null, failures); }
+        if (nodeStop is not { IsCompleted: true } || !Silo.HasJoinedRequestWork || !nativeHostReleased)
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable));
             ServerFailureObserver.ThrowIfAny(failures);
@@ -57,7 +60,11 @@ internal sealed partial class ControlledPartitionMovementNativeHost
             await partitionDisposal.WaitAsync(token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (partitionDisposal is { IsCompletedSuccessfully: true })
-        { Volatile.Write(ref joined, true); }
+        {
+            ServerFailureObserver.Observe(NativeObservation.Dispose, failures);
+            Volatile.Write(ref joined, true);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
+
 }
