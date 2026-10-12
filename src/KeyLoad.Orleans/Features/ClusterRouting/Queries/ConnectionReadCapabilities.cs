@@ -28,8 +28,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         var principal = await ReloadPrincipalAsync(request, requestId, cancellationToken).ConfigureAwait(true);
         if (GrainControlledReadCapabilities.Handles(kind))
         {
-            return GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
-                principal, request, cancellationToken);
+            return kind == GrainReadKind.PartitionMovementParentState && codec.HasPhaseObserver
+                ? await MovementParentStateObservedRead.ExecuteAsync(localDatabase, services, runtimeClock,
+                    principal, request, codec, context, cancellationToken).ConfigureAwait(true)
+                : GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
+                    principal, request, cancellationToken);
         }
         if (kind == GrainReadKind.ClusterBackupOwner)
         {

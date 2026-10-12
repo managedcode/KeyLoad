@@ -30,10 +30,12 @@ internal sealed class QueueLeaseReuseTests
         var bodyBytes = BodyLength(db);
         await Assert.That(Counters(db).InFlightBytes).IsEqualTo(bodyBytes);
 
+        var beforeForeign = QueueLifecycleImage.Capture(db.Store, lane);
         var foreignId = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Delivery,
             new DeliveryCommand(foreignId, lane, first.Token, DeliveryAction.Ack),
             principal: Worker, id: foreignId, time: now).Error).IsEqualTo(ErrorCode.TokenInvalidated);
+        await QueueLifecycleImage.SameAsync(db.Store, lane, beforeForeign);
         var renewId = Guid.NewGuid();
         db.Submit(OperationKind.Delivery,
             new DeliveryCommand(renewId, lane, first.Token, DeliveryAction.Renew, LeaseSeconds: 1),

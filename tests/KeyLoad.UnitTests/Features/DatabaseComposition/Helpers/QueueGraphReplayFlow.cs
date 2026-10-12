@@ -8,6 +8,12 @@ internal static class QueueGraphReplayFlow
         db.Configure(QueueGraphIdentityState.Graph, ResourceKind.Graph);
         db.Configure(QueueGraphIdentityState.Queue, ResourceKind.WorkQueue);
         var source = await QueueGraphIdentityFlow.SeedAsync(db, from);
+        await RunSeededAsync(source, from, component);
+    }
+
+    internal static async Task RunSeededAsync(QueueGraphIdentityState source, bool from, int component)
+    {
+        var db = source.Fixture;
         await QueueGraphIdentityAssertions.HealthyAsync(source, db.Database, db.Store);
         var reverseCommand = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,

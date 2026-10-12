@@ -40,7 +40,9 @@ internal enum RequestCqrsProbePhase
     ReplicaEntryAcknowledged,
     ReplicaEntryObserverDisposed,
     QueryReadCutCaptured,
-    WaitForIndexReadCutCaptured
+    WaitForIndexReadCutCaptured,
+    MovementParentStateExecuting,
+    MovementParentStateReturned
 }
 
 internal enum RequestCqrsProbeAction

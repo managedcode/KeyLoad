@@ -59,6 +59,11 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (operation.Kind == OperationKind.PartitionMovementPhase)
+        {
+            await ReplicaMovementSubmissionAdmission.ValidateAsync(state, operation, cancellationToken)
+                .ConfigureAwait(false);
+        }
         if (state.Materializer.Database.TryReadOrdinaryDocumentSubmission(operation) is { } command)
         {
             await state.LockedAsync(() =>

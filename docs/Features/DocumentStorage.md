@@ -852,7 +852,7 @@ REQ-DSTORE-NATIVE-SCOPE-001 maps to AC-DSTORE-NATIVE-SCOPE-001 under REQ/AC-DSTO
 
 REQ-DSTORE-NATIVE-SCOPE-002 maps to AC-DSTORE-NATIVE-SCOPE-002: native entry observations accept the actual original ReplicatedOperation for explicit scope. The historical Guid-only observation is valid only for one full retained identity; multiple principal/scope identities with that ID refuse InvalidOperationException instead of silently selecting another entry. Repeated entries of the same identity retain the original first-index observation.
 
-Canonical map: UnitTests Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs and existing TestDatabase.cs forwarding; feature acceptance belongs to DocumentStorage. DocumentCommandPrincipalColdReplayTests must prove TWO persisted principals sharing SAME GUID and full partition, independent complete original native entries/results/scoped outcomes, changed-body conflicts, unchanged exact outbox and TWO joined same-owner canonical+replica cold opens, then literal healthy continuation. The complete flow is specified in [NativePrincipalColdReplay](DocumentStorage/NativePrincipalColdReplay.md); compiler/runtime gates remain OPEN; original warm principal and two-partition flows remain unchanged. No production algorithm/schema/provider or direct-Apply replacement is added.
+Canonical map: UnitTests Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs and existing TestDatabase.cs forwarding; feature acceptance belongs to DocumentStorage. DocumentCommandPrincipalColdReplayTests must prove TWO persisted principals sharing SAME GUID and full partition, independent complete original native entries/results/scoped outcomes, changed-body conflicts, unchanged exact outbox and TWO joined same-owner canonical+replica cold opens, then literal healthy continuation. The complete flow is specified in [NativePrincipalColdReplay](DocumentStorage/NativePrincipalColdReplay.md); R31 current-image native execution passed; Linux/RF3 and public-client qualification remain OPEN; original warm principal and two-partition flows remain unchanged. No production algorithm/schema/provider or direct-Apply replacement is added.
 
 ```mermaid
 flowchart TD
@@ -865,4 +865,4 @@ flowchart TD
   Observe --> Cold[Planned two genuine same-owner cold opens]
 ```
 
-Source preview only: no compiler/runtime/Linux/RF3 or public-client qualification. Fixture defect is distinct from canonical product outcome scope.
+Source joined; the R31 exact-image build and native companion group passed 17/17, including this principal cold replay flow. Linux/RF3, endurance, coverage and public-client qualification remain OPEN. Fixture defect is distinct from canonical product outcome scope.

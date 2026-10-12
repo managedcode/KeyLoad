@@ -2243,3 +2243,9 @@ REQ/AC-PMOVE-NATIVE-PREPARE-001 and REQ/AC-PMOVE-NATIVE-RETIRE-LIFETIME-001 reta
 ### Native Prepare original-failure artifact ownership
 
 REQ/AC-PMOVE-NATIVE-PREPARE-001 preserves the first operation/assertion failure and every six-host root until their owner is joined. The existing shared failure ledger is checked before the original await-using host disposal. If the original operation recorded any failure, call the existing fixture RetainRoots method before disposing; no exception is replaced or swallowed, and every original disposal failure remains in the same ledger. Successful complete operations still use original cleanup. No extra observer, product hook, request, clock, deadline or readiness change.
+
+### Retained movement-phase admission before append
+
+REQ/AC-PMOVE-RETAINED-PHASE-ADMISSION-001: an authenticated movement-phase request with an existing scoped outcome and changed command fingerprint must validate fresh persisted principal, administrator permission, policy epoch, storage incarnation and original outcome identity before durable append. Its original Conflict refusal retains the committed receipt and every source/target image, read cut and journal position. Absent or matching outcomes continue the existing submit/apply path, including persisted authorization failures; this admission never returns a previous success.
+
+The original `ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners` case keeps its native UID, malformed/inner-proof controls, exact Conflict assertion, unchanged full images, same-ID replay, two cold owners and healthy continuation. The R31 Conflict-to-UnknownWriteOutcome failure remains immutable evidence; its exact initiating exception is unknown. New compiler/runtime and Linux qualification remain open.

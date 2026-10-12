@@ -52,12 +52,22 @@ internal static class QueueVisibilityBoundaryWholeFlow
         Batch(owner, lane, start, outcomes, new EnqueueMessage(Queue, Message, "{}")).Get<CommitReceipt>();
         var originalBody = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("message-body", lane.Partition, Queue, Message)))
             ?? throw new InvalidOperationException("The genuine producer-persisted boundary body is absent.");
+        await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
+            new(Message, MessageState.Ready, 0, 1, 3, null, null), stored: true, originalBody: originalBody);
         var original = await ReceiveAsync(owner, store, lane, start, outcomes, Message, seconds: 1);
+        await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
+            new(Message, MessageState.Leased, 1, 2, 3, null, null, LeaseOwner: "root",
+                LeaseVersion: 1, LeaseUntil: original.LeaseUntil), stored: true, originalBody: originalBody);
         var before = QueueLifecycleImage.Capture(store, lane);
         await Assert.That(Receive(owner, lane, original.LeaseUntil.AddTicks(-1), outcomes, seconds: 1).Deliveries).IsEmpty();
         await QueueLifecycleImage.SameAsync(store, lane, before);
         Complete(owner, lane, original, original.LeaseUntil.AddTicks(-1), outcomes, DeliveryAction.Renew, 1).Get<CommitReceipt>();
+        await QueueVisibilityBoundaryAssertions.DeliveryReceiptAsync(outcomes[^1], DeliveryAction.Renew, Message, 3);
+        await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
+            new(Message, MessageState.Leased, 1, 3, 3, null, null, LeaseOwner: "root",
+                LeaseVersion: 1, LeaseUntil: original.LeaseUntil.AddSeconds(1).AddTicks(-1)), stored: true, originalBody: originalBody);
         Complete(owner, lane, original, original.LeaseUntil, outcomes, DeliveryAction.Renew, 1).Get<CommitReceipt>();
+        await QueueVisibilityBoundaryAssertions.DeliveryReceiptAsync(outcomes[^1], DeliveryAction.Renew, Message, 4);
         await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
             new(Message, MessageState.Leased, 1, 4, 3, null, null, LeaseOwner: "root",
                 LeaseVersion: 1, LeaseUntil: original.LeaseUntil.AddSeconds(1)), stored: true, originalBody: originalBody);
@@ -80,9 +90,11 @@ internal static class QueueVisibilityBoundaryWholeFlow
         await QueueVisibilityBoundaryAssertions.RefuseAsync(owner, store, lane, original,
             boundary, ErrorCode.StaleLease, "The delivery lease is stale.", outcomes, current.Token);
         Complete(owner, lane, current, boundary, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
+        await QueueVisibilityBoundaryAssertions.DeliveryReceiptAsync(outcomes[^1], DeliveryAction.Ack, Message, 7);
         Batch(owner, lane, boundary, outcomes, new EnqueueMessage(Queue, Healthy, "{}")).Get<CommitReceipt>();
         var healthy = await ReceiveAsync(owner, store, lane, boundary, outcomes, Healthy, seconds: 10);
         Complete(owner, lane, healthy, boundary, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
+        await QueueVisibilityBoundaryAssertions.DeliveryReceiptAsync(outcomes[^1], DeliveryAction.Ack, Healthy, 3);
         await QueueVisibilityBoundaryAssertions.TerminalAsync(owner, store, lane, originalRow);
         await QueueVisibilityBoundaryAssertions.ReplayAsync(owner, store, outcomes);
         await QueueVisibilityBoundaryAssertions.TerminalAsync(owner, store, lane, originalRow);

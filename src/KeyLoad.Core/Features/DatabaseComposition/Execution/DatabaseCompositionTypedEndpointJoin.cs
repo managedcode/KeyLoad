@@ -10,19 +10,20 @@ public partial class DatabaseEngine
     private const string TypedJoinReferenceMismatch = "The queue link does not match its declared endpoint collections.";
     private const string TypedJoinRecordMismatch = "The typed endpoint record has a different canonical identity.";
 
-    private void AuthorizeTypedEndpointJoin(IKeyValueView view, PrincipalRecord principal,
+    private (string FromPrimaryKey, string ToPrimaryKey)? AuthorizeTypedEndpointJoin(IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, QueueToGraph command, BatchResourceAdmission admission)
     {
         if (command.FromCollection is null && command.ToCollection is null)
-        { return; }
+        { return null; }
         if (command.FromCollection is null || command.ToCollection is null
             || StringComparer.Ordinal.Equals(command.FromCollection, command.ToCollection))
         { throw Errors.Fail(ErrorCode.Validation, TypedJoinRequiresRelationalCollections); }
-        AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection, admission);
-        AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection, admission);
+        var fromPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection, admission);
+        var toPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection, admission);
+        return (fromPrimaryKey, toPrimaryKey);
     }
 
-    private void AuthorizeTypedEndpointResource(IKeyValueView view, PrincipalRecord principal,
+    private string AuthorizeTypedEndpointResource(IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, BatchResourceAdmission admission)
     {
         JsonData.Identifier(collection);
@@ -32,22 +33,24 @@ public partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, TypedJoinRequiresRelationalCollections); }
         RelationalRowValidation.ValidateSchema(resource);
         Authorization.RequireFieldUse(principal, resource, JsonData.Path([schema.PrimaryKey]));
+        return schema.PrimaryKey;
     }
 
     private bool SelectTypedEndpointPair(IKeyValueView view, PrincipalRecord principal,
-        QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget)
+        QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget,
+        string fromPrimaryKey, string toPrimaryKey)
     {
         if (!StringComparer.Ordinal.Equals(link.From.Collection, command.FromCollection)
             || !StringComparer.Ordinal.Equals(link.To.Collection, command.ToCollection))
         { throw Errors.Fail(ErrorCode.Validation, TypedJoinReferenceMismatch); }
         // Both genuine probes are charged, including absent and row-denied endpoints.
-        var from = ReadTypedEndpoint(view, principal, link.From, budget);
-        var to = ReadTypedEndpoint(view, principal, link.To, budget);
+        var from = ReadTypedEndpoint(view, principal, link.From, budget, fromPrimaryKey);
+        var to = ReadTypedEndpoint(view, principal, link.To, budget, toPrimaryKey);
         return from is not null && to is not null;
     }
 
     private DocumentRecord? ReadTypedEndpoint(IKeyValueView view, PrincipalRecord principal,
-        EntityRef reference, ReadExecutionBudget budget)
+        EntityRef reference, ReadExecutionBudget budget, string primaryKey)
     {
         var record = budget.ReadRecord<DocumentRecord>(view,
             DocumentKey(reference.Partition, reference.Collection, reference.Id));
@@ -55,7 +58,10 @@ public partial class DatabaseEngine
         { return null; }
         if (record.Reference != reference)
         { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
-        return record.Deleted || !Authorization.CanReadRow(principal, record.Access) ? null : record;
+        if (record.Deleted || !Authorization.CanReadRow(principal, record.Access))
+        { return null; }
+        RequireTypedEndpointPrimaryIdentity(record, primaryKey);
+        return record;
     }
 
     private List<Mutation> ExpandQueueToGraph(IAtomicTransaction transaction, PrincipalRecord principal,
@@ -89,7 +95,9 @@ public partial class DatabaseEngine
             {
                 ValidateCompositionReference(reference, partition);
                 // The budgeted view charges the resource and document once; no second source scan.
-                VisibleVertex(chargedView, principal, reference);
+                var document = VisibleVertex(chargedView, principal, reference);
+                if (document.Reference != reference)
+                { throw Errors.Fail(ErrorCode.Corruption, TypedJoinRecordMismatch); }
             }
         }
         finally

@@ -930,3 +930,9 @@ flowchart LR
 ```
 
 The actual repair is phased: restart the first remote owner and verify the original two-ready majority while the second owner remains genuinely stopped, then restart the second owner before publishing its original incompatible-third-peer control. Both new generations are independently required to differ from their actual stopped owners; no simultaneous restart may erase the original two-ready assertion.
+
+### Movement retained-content refusal before durable submission
+
+REQ/AC-REPL-MOVE-PREAPPEND-001: movement-phase admission checks current ready-leader authority, reads the native scoped retained outcome, and validates fresh persisted authorization and canonical outcome identity only for changed retained content. The leader rechecks readiness before propagating the original Conflict, before `ReplicaSubmissionBoundary.Begin`; no receipt is returned early. New and matching commands retain the ordinary append, RF3 acknowledgement and apply path.
+
+The ordinary-document admission branch and all uncertainty conversion after durable submission starts remain unchanged. The original native Prepare full operation is the regression: invalid proof, retained-content Conflict with no effects, valid same-ID replay, two cold owners and healthy continuation. This source correction does not establish the exact initiating R31 exception or qualify Linux recovery.

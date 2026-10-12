@@ -27,3 +27,25 @@ sequenceDiagram
 ```
 
 Canonical slice map: the existing RecoveryTests ClusterRouting Assertions/ControlledPartitionMovementNativeProcessRefusal owns both negative layers. Existing WarmAsync and the two complete native process/lifetime cases retain all original operations and cleanup. This diagram records protocol control flow, not an executed RF3 receipt.
+
+## Parent-state stage witness (source proposal)
+
+REQ-MOVE-STATE-WITNESS-001 / AC-MOVE-STATE-WITNESS-001: the optional existing native phase observer receives MovementParentStateExecuting after current principal reload and MovementParentStateReturned only after the unchanged controlled read returns and releases Store.Read. Both carry the original request and receiving IGrainContext. No payload, principal, key, reply, admission guard, trusted owner or persisted record changes. Returned proves only completion of that read, never completion or durability of the parent movement.
+
+REQ-MOVE-STATE-WITNESS-002 / AC-MOVE-STATE-WITNESS-002: both append-only closed phases are explicitly unarmable in original production and integration arm validators. The probe enum maps both native names; the normal probe does not publish them as filesystem markers. RegisterSiloOwners borrows the same sealed observer object if it implements the native phase interface and no explicit phase descriptor exists. Explicit registration wins; no new callback owner or disposal is introduced.
+
+REQ-MOVE-STATE-WITNESS-003 / AC-MOVE-STATE-WITNESS-003: original BM25 movement and Retire trials retain at most the first Executing and same-request Returned context per actual registered host. Evidence includes request GUID, read kind, native grain-ID digest and activation ID, with the configured observer owner index labelled as such (not inferred physical placement). Both original whole flows retain every assertion, cancellation, borrow and joined shutdown. Evidence is written only after original cleanup; initiating errors remain first and output failures remain secondary through ServerFailureObserver. No Returned witness is fabricated when the read throws. Source preview, compiler, original runtime and Linux RF3 remain OPEN.
+
+```mermaid
+sequenceDiagram
+    participant Connection
+    participant Observer
+    participant Store
+    Connection->>Connection: current principal reload
+    Connection->>Observer: Executing(original request/context)
+    Connection->>Store: original controlled ParentState read
+    Store-->>Connection: result after read gate released
+    Connection->>Observer: Returned(same request/context)
+```
+
+Canonical roles: Orleans ClusterRouting Queries/Models; Server ClusterRouting Contracts/Validation/Hosting; IntegrationTests ClusterRouting arm validator; UnitTests ClusterRouting Helpers and Search Helpers. Original case declarations and arguments remain unchanged; this bounded witness does not identify an unobserved failed predicate or relax its guard.

@@ -161,6 +161,7 @@ internal sealed class SubscriptionTests
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(1);
         await SubscriptionProcessingAtomicFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
+        await SubscriptionInboxConflictFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task SeekFencesOldTokensAndRequiresExplicitResume()

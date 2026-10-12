@@ -25,7 +25,7 @@ public sealed partial class DatabaseEngine
     {
         const int ExpectedRevisionEmptyCount = 0;
 
-        AuthorizeComposition(authorityView, principal, partition, command);
+        var typedPrimaryKeys = AuthorizeComposition(authorityView, principal, partition, command);
         var lane = new QueueLaneRef(partition, command.Queue);
         var ids = new List<(string Id, byte[] ReadyKey)>();
         var result = budget.VisitRange(tx, QueueKey(ReadyQueueSpace, lane), command.MaxMessages, (key, value) =>
@@ -60,7 +60,8 @@ public sealed partial class DatabaseEngine
             var link = ReadLink(body.PayloadJson, partition);
             if (command.FromCollection is not null)
             {
-                if (!SelectTypedEndpointPair(tx, principal, command, link, budget))
+                if (!SelectTypedEndpointPair(tx, principal, command, link, budget,
+                    typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey))
                 { continue; }
             }
             else

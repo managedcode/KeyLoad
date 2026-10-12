@@ -15,6 +15,7 @@ internal sealed class ControlledPartitionMovementNativeRetireBorrow
         new(TaskCreationOptions.RunContinuationsAsynchronously)
     ];
     private int admitted;
+    private readonly List<NativeMovementParentStateEvidence> evidence = [];
 
     internal Task<ControlledPartitionMovementNativeRetireCaptured> Arm()
     {
@@ -27,7 +28,22 @@ internal sealed class ControlledPartitionMovementNativeRetireBorrow
         }
     }
 
-    internal IGrainPartitionMovementSealedOperationObserver ForOwner(int index) => new Owner(this, index);
+    internal IGrainPartitionMovementSealedOperationObserver ForOwner(int index)
+    {
+        var phases = new NativeMovementParentStateEvidence(index);
+        lock (gate)
+        { evidence.Add(phases); }
+        return new Owner(this, index, phases);
+    }
+
+    internal void WriteEvidence(TextWriter output)
+    {
+        NativeMovementParentStateEvidence[] owned;
+        lock (gate)
+        { owned = evidence.ToArray(); }
+        foreach (var phases in owned)
+        { phases.Write(output); }
+    }
 
     internal Task JoinAsync(int ordinal, CancellationToken cancellationToken)
     {
@@ -70,10 +86,17 @@ internal sealed class ControlledPartitionMovementNativeRetireBorrow
         { joined[ordinal].TrySetResult(); }
     }
 
-    private sealed class Owner(ControlledPartitionMovementNativeRetireBorrow owner, int index)
-        : IGrainPartitionMovementSealedOperationObserver
+    private sealed class Owner(ControlledPartitionMovementNativeRetireBorrow owner, int index, NativeMovementParentStateEvidence phases)
+        : IGrainPartitionMovementSealedOperationObserver, IGrainRequestPhaseObserver
     {
         public ValueTask BorrowAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
             => owner.AcceptAsync(index, operation, cancellationToken);
+
+        public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+            global::Orleans.Runtime.IGrainContext context, CancellationToken cancellationToken)
+            => phases.ObserveAsync(identity, phase, context, cancellationToken);
+
+        public void ProducerDisposed(GrainRequestProbeIdentity identity, global::Orleans.Runtime.IGrainContext context)
+            => phases.ProducerDisposed(identity, context);
     }
 }

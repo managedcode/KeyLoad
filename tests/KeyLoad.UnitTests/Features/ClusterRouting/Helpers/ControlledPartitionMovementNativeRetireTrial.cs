@@ -24,6 +24,8 @@ internal sealed class ControlledPartitionMovementNativeRetireTrial
         if (failures.Count != 0)
         { trial.owners?.RetainRoots(); }
         await trial.CloseAsync(failures);
+        if (failures.Count != 0)
+        { ServerFailureObserver.Observe(() => trial.borrow.WriteEvidence(Console.Error), failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

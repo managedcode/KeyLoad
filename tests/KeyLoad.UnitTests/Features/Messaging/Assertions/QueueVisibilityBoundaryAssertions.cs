@@ -92,11 +92,22 @@ internal static class QueueVisibilityBoundaryAssertions
         { await Assert.That(body).IsNull(); }
     }
 
+    internal static async Task DeliveryReceiptAsync((ReplicatedOperation Operation, OperationResult Result) original,
+        DeliveryAction action, string message, long version)
+    {
+        var command = JsonSerializer.Deserialize<DeliveryCommand>(original.Operation.PayloadJson, JsonDefaults.Options)
+            ?? throw new InvalidOperationException("The original delivery command is absent.");
+        var receipt = original.Result.Get<CommitReceipt>();
+        await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
+        await Assert.That(receipt.Mutations).IsEquivalentTo(
+            new MutationReceipt[] { new(action.ToString(), command.Lane.Queue, message, version) }, CollectionOrdering.Matching);
+    }
+
     internal static async Task TerminalAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, byte[] originalRow)
     {
         var cut = Capture(store);
         await MessageAsync(owner, lane, new(QueueVisibilityBoundaryWholeFlow.Message,
-            MessageState.Acked, 2, 8, 4, null, null, LeaseVersion: 2, SafeFailureCode: "RetryRequested"), stored: false);
+            MessageState.Acked, 2, 7, 4, null, null, LeaseVersion: 2), stored: false);
         await MessageAsync(owner, lane, new(QueueVisibilityBoundaryWholeFlow.Healthy,
             MessageState.Acked, 1, 3, 5, null, null, LeaseVersion: 1), stored: false);
         var preserved = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("message-meta", lane.Partition, lane.Queue, "input")));

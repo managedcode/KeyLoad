@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
             _ => new Mutation[] { mutation }
         };
 
-    private void AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
+    private (string FromPrimaryKey, string ToPrimaryKey)? AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
         BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
     {
         if (mutation is QueueToGraph forward)
@@ -34,7 +34,7 @@ public sealed partial class DatabaseEngine
             var target = BatchResource(view, partition, forward.Graph, admission, ResourceKind.Graph);
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
-            AuthorizeTypedEndpointJoin(view, principal, partition, forward, admission);
+            return AuthorizeTypedEndpointJoin(view, principal, partition, forward, admission);
         }
         else if (mutation is GraphToQueueMutation reverse)
         {
@@ -46,6 +46,7 @@ public sealed partial class DatabaseEngine
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
         }
+        return null;
     }
 
     private void RequireCompositionCapabilities(PrincipalRecord principal, PartitionRef partition, Mutation mutation)

@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R31 final whole-solution formatting, native analyzers and full Release passed zero errors/warnings. Four frozen-source/image native50 local lanes executed207 unique cases:205 passed,2 failed,0 skipped. SQL140/140, Messaging27/28, Cluster21/22, search/blob/document17/17; all process/readers/disposal joined. Actual discovery3758 (3224 functional/534 required controls) and canonical inventory validation passed; discovery is not execution or coverage. Original R30 failures remain immutable; unselected Retire/BM25 OwnershipLost gates stay open. Original plan19/104 done,85 in progress; KL-105 separate, coverage unmeasured, exact-source Linux/RF3/fault/endurance/performance qualification open.",
+    "qualification": "R32 final whole-solution formatter, native analyzers and Release passed zero errors/warnings. Four disjoint frozen-source/image native50 local lanes executed80 unique cases:76 passed,4 failed,0 skipped. SQL35/35, Messaging11/12, Cluster15/16, movement/blob15/17; all native process/readers/disposal joined, original failures retained. Two new typed composition and new blob flows passed; R31 visibility failed UID now passed. Current census3762 (3228 functional/534 required controls) validated; discovery is not execution or coverage. Original plan19/104 done,85 in progress; KL105 separate/open, no reachable process in collector attempts, coverage unmeasured, exact-source Linux/RF3/fault/endurance/performance open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -1165,6 +1165,18 @@
       "executedUniqueCases": 207,
       "passed": 205,
       "failed": 2,
+      "skipped": 0,
+      "duplicates": 0,
+      "nativeMaximumParallelTests": 50,
+      "allOwnersJoined": true,
+      "newTaskAcceptance": false,
+      "coverage": "unmeasured"
+    },
+    "runtimeObservedR32": {
+      "record": "docs/implementation/stage64-r32-development-20261012.json",
+      "executedUniqueCases": 80,
+      "passed": 76,
+      "failed": 4,
       "skipped": 0,
       "duplicates": 0,
       "nativeMaximumParallelTests": 50,

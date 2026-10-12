@@ -25,7 +25,9 @@ internal enum GrainRequestPhase
     OnlineTextCaptured,
     EventVectorFirstDispatchReserved,
     EventVectorFirstCapturesReady,
-    EventVectorFirstAdmitPrepared
+    EventVectorFirstAdmitPrepared,
+    MovementParentStateExecuting,
+    MovementParentStateReturned
 }
 
 /// <summary>Minimal verified request identity for private phase selection.</summary>

@@ -13,7 +13,8 @@ internal static class RequestCqrsProbeArmRecordValidation
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty
             || !ValidPrincipal(value.PrincipalId, executionOptions, strictUtf8)
             || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
-            || value.Phase is RequestCqrsProbePhase.WaitForIndexReadCutCaptured or RequestCqrsProbePhase.QueryReadCutCaptured or RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
+            || value.Phase is RequestCqrsProbePhase.MovementParentStateExecuting or RequestCqrsProbePhase.MovementParentStateReturned
+                or RequestCqrsProbePhase.WaitForIndexReadCutCaptured or RequestCqrsProbePhase.QueryReadCutCaptured or RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
             || value.Phase == RequestCqrsProbePhase.TransferPageReturned
                 && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.PartitionMovementTransferData
                     || value.Action != RequestCqrsProbeAction.Hold)

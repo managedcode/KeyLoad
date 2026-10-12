@@ -43,7 +43,7 @@ internal static class QueueGraphIdentityFlow
         await RunFaultAsync(state, NativeSerialization.Serialize(changed));
     }
 
-    private static async Task RunFaultAsync(QueueGraphIdentityState state, byte[] corrupted)
+    internal static async Task RunFaultAsync(QueueGraphIdentityState state, byte[] corrupted)
     {
         var db = state.Fixture;
         db.Store.Commit((tx, _) => { tx.Put(state.EndpointKey, corrupted); return true; });
