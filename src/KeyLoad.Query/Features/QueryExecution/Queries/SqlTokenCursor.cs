@@ -10,9 +10,11 @@ internal sealed class SqlTokenCursor(List<SqlToken> tokens)
 
     internal SqlToken Current => tokens[offset];
 
-    internal bool Is(string text) => !Current.Quoted && string.Equals(Current.Text, text, StringComparison.OrdinalIgnoreCase);
+    internal bool Is(string text) => Current.Kind is SqlTokenKind.Identifier or SqlTokenKind.Symbol
+        && !Current.Quoted && string.Equals(Current.Text, text, StringComparison.OrdinalIgnoreCase);
 
     internal bool IsNext(string text) => offset + LookaheadOffset < tokens.Count
+        && tokens[offset + LookaheadOffset].Kind is SqlTokenKind.Identifier or SqlTokenKind.Symbol
         && !tokens[offset + LookaheadOffset].Quoted
         && string.Equals(tokens[offset + LookaheadOffset].Text, text, StringComparison.OrdinalIgnoreCase);
 

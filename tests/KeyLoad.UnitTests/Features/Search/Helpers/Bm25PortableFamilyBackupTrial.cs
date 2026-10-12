@@ -7,10 +7,15 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25PortableFamilyBackupTrial
 {
-    internal static Task RunAsync(CancellationToken token) => EventingArtifactFixture.RunAsync(async fixture =>
+    internal static Task RunAsync(CancellationToken token) => RunAsync(keyBodyFault: false, token: token);
+    internal static Task RunKeyBodyAsync(CancellationToken token) => RunAsync(keyBodyFault: true, token: token);
+
+    private static Task RunAsync(bool keyBodyFault, CancellationToken token) => EventingArtifactFixture.RunAsync(async fixture =>
     {
         var seeded = await Bm25PortableFamilyBackupSeed.CreateAsync(fixture, token);
-        var repaired = await RefusalAndRepairAsync(fixture, seeded.Heads[0], seeded.Bytes[0], token);
+        var repaired = keyBodyFault
+            ? await Bm25PortableFamilyKeyBodyRefusal.RunAsync(fixture, seeded.Heads, seeded.Bytes, token)
+            : await RefusalAndRepairAsync(fixture, seeded.Heads[0], seeded.Bytes[0], token);
         Bm25CorpusCurrentV1[] originals = [repaired.Head, seeded.Heads[1]];
         byte[][] originalBytes = [repaired.Bytes, seeded.Bytes[1]];
         var sourceRows = Bm25PortableFamilyBytes.Complete(fixture.Source.Store,

@@ -23,6 +23,13 @@ internal static class PhysicalOwnerRegistrationPolicyReplayAssertions
         await Assert.That(Outcome(fixture, original.Id).SequenceEqual(bytes)).IsTrue();
     }
 
+    internal static async Task AdministrationReplayAsync(PhysicalShardCatalogFixture fixture,
+        ReplicatedOperation original, byte[] bytes)
+    {
+        await AdministrationDeniedAsync(fixture.Database.Apply(original));
+        await Assert.That(Outcome(fixture, original.Id).SequenceEqual(bytes)).IsTrue();
+    }
+
     internal static async Task AdministrationDeniedAsync(OperationResult result)
     {
         await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
@@ -41,12 +48,16 @@ internal static class PhysicalOwnerRegistrationPolicyReplayAssertions
         await Assert.That(NativeSerialization.Serialize(stored.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
     }
 
-    internal static async Task OnlyOutcomeAddedAsync(PhysicalShardCatalogFixture fixture, string[] before, Guid id)
+    internal static async Task OnlyOutcomeAndEvaluatedClockAddedAsync(PhysicalShardCatalogFixture fixture, string[] before, Guid id, DateTimeOffset evaluatedAt)
     {
         var prefix = Convert.ToHexString(KeyLoad.Core.KeySpace.GlobalOutcome(
             PhysicalOwnerRegistrationPolicyReplayFlow.PrincipalId, id)) + ":";
+        var clockPrefix = Convert.ToHexString(KeyLoad.Core.KeySpace.ClockBytes) + ":";
+        await Assert.That(before.Count(row => row.StartsWith(clockPrefix, StringComparison.Ordinal))).IsEqualTo(1);
+        var recordedClock = clockPrefix + Convert.ToHexString(NativeSerialization.Serialize(evaluatedAt));
+        var expected = before.Select(row => row.StartsWith(clockPrefix, StringComparison.Ordinal) ? recordedClock : row);
         var after = PhysicalOwnerDirectoryWholeFlow.Image(fixture);
-        await Assert.That(after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)).SequenceEqual(before)).IsTrue();
+        await Assert.That(after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)).SequenceEqual(expected)).IsTrue();
         await Assert.That(after.Count(row => row.StartsWith(prefix, StringComparison.Ordinal))).IsEqualTo(1);
     }
 

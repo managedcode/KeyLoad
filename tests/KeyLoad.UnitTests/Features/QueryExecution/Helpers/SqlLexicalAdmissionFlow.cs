@@ -1,0 +1,41 @@
+namespace KeyLoad.UnitTests.Features.QueryExecution;
+
+internal static class SqlLexicalAdmissionFlow
+{
+    private const string Invalid = "The SQL statement is invalid for the supported Q1 dialect.";
+    private const string Unsupported = "The SQL statement contains unsupported syntax.";
+
+    internal static async Task RunAsync(global::KeyLoad.Core.DatabaseEngine owner, global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store,
+        global::KeyLoad.PartitionRef partition, global::KeyLoad.CommandRequest command, global::KeyLoad.CommitReceipt receipt)
+    {
+        var engine = new global::KeyLoad.Query.QueryEngine(owner, UnitExecutionOptions.QueryExecution());
+        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
+        var healthy = SqlJoinSourceBindingFixture.Request(partition, SqlLexicalAdmissionFixture.Kind);
+        var ast = SqlJoinSourceBindingFixture.Ast(partition, SqlLexicalAdmissionFixture.Kind);
+        foreach (var fault in SqlLexicalAdmissionFixture.Faults(healthy))
+        {
+            var native = store.GetReadDiagnostics();
+            global::KeyLoad.QueryPage? page = null;
+            var error = Assert.ThrowsExactly<global::KeyLoad.KeyLoadException>(() =>
+                page = engine.Execute(SqlJoinSourceBindingFixture.Root, healthy with { Sql = fault.Sql }));
+            await Assert.That(page).IsNull();
+            await Assert.That(error.Code).IsEqualTo(fault.Code);
+            await Assert.That(error.Message).IsEqualTo(fault.Code == global::KeyLoad.ErrorCode.Validation ? Invalid : Unsupported);
+            await Assert.That(store.GetReadDiagnostics()).IsEqualTo(native);
+            await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, identity);
+            await SqlJoinSourceBindingAssertions.PageAsync(engine.Execute(SqlJoinSourceBindingFixture.Root, healthy), SqlLexicalAdmissionFixture.Kind, position);
+            await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root, ast), SqlLexicalAdmissionFixture.Kind, position);
+            await SqlJoinSourceBindingAssertions.PageAsync(engine.Execute(SqlJoinSourceBindingFixture.Root,
+                SqlLexicalAdmissionFixture.LiteralSql(healthy)), SqlLexicalAdmissionFixture.Kind, position);
+            await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root,
+                SqlLexicalAdmissionFixture.LiteralAst(ast)), SqlLexicalAdmissionFixture.Kind, position);
+            var replay = owner.ApplyEmbedded(new(command.CommandId, global::KeyLoad.OperationKind.Batch, SqlJoinSourceBindingFixture.Root,
+                default, global::System.Text.Json.JsonSerializer.Serialize(command, global::KeyLoad.JsonDefaults.Options)),
+                cancellationToken: default).Get<global::KeyLoad.CommitReceipt>();
+            await Assert.That(global::KeyLoad.JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(receipt))).IsTrue();
+            await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, identity);
+        }
+    }
+}

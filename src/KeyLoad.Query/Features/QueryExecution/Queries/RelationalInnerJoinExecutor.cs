@@ -17,7 +17,6 @@ internal static class RelationalInnerJoinExecutor
     private const int EqualOrder = 0;
     private const string AccessPath = "bounded-primary-key-inner-join";
     private const string InvalidJoin = "The bounded relational join is invalid.";
-    private const string RetainedRowCorrupt = "The retained relational join source is inconsistent.";
     private const string WorkExceeded = "The bounded relational join exceeds the configured work budget.";
 
     private sealed record Candidate(DocumentRecord Left, DocumentRecord Right);
@@ -99,12 +98,13 @@ internal static class RelationalInnerJoinExecutor
                     throw Errors.Fail(ErrorCode.BudgetExceeded, WorkExceeded);
                 }
                 var left = NativeSerialization.Deserialize<DocumentRecord>(payload);
-                ValidateLeftIdentity(request.Partition, leftResource.Name, key, left);
+                RelationalInnerJoinRetainedRows.ValidateLeftIdentity(request.Partition, leftResource.Name, key, left);
                 if (left.Deleted || !database.Authorization.CanReadRow(principal, left.Access))
                 {
                     return true;
                 }
-                using var leftJson = JsonDocument.Parse(left.Json);
+                using var leftJson = RelationalInnerJoinRetainedRows.ParseRetainedJson(left.Json);
+                RelationalInnerJoinRetainedRows.ValidatePrimaryIdentity(leftJson.RootElement, leftResource.RelationalSchema!.PrimaryKey, left.Reference.Id);
                 if (!RelationalInnerJoinLeftPredicate.Matches(request, left, leftJson.RootElement))
                 {
                     return true;
@@ -124,12 +124,14 @@ internal static class RelationalInnerJoinExecutor
                     DocumentStorageKeys.RecordKey(request.Partition, rightResource.Name, leftValue.GetString()!));
                 if (right is not null)
                 {
-                    ValidateRightIdentity(request.Partition, rightResource.Name, leftValue.GetString()!, right);
+                    RelationalInnerJoinRetainedRows.ValidateRightIdentity(request.Partition, rightResource.Name, leftValue.GetString()!, right);
                 }
                 if (right is null || right.Deleted || !database.Authorization.CanReadRow(principal, right.Access))
                 {
                     return true;
                 }
+                using var rightJson = RelationalInnerJoinRetainedRows.ParseRetainedJson(right.Json);
+                RelationalInnerJoinRetainedRows.ValidatePrimaryIdentity(rightJson.RootElement, rightResource.RelationalSchema!.PrimaryKey, right.Reference.Id);
                 Retain(candidates, query.Limit, new(left, right), budget);
                 return true;
             });
@@ -139,27 +141,6 @@ internal static class RelationalInnerJoinExecutor
         }
 
         return new(cut, candidates);
-    }
-
-    private static void ValidateLeftIdentity(PartitionRef partition, string collection,
-        ReadOnlySpan<byte> key, DocumentRecord record)
-    {
-        if (record is null || record.Reference is null || record.Reference.Id is null
-            || record.Reference.Partition != partition || record.Reference.Collection != collection
-            || !key.SequenceEqual(DocumentStorageKeys.RecordKey(partition, collection, record.Reference.Id)))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt);
-        }
-    }
-
-    private static void ValidateRightIdentity(PartitionRef partition, string collection,
-        string id, DocumentRecord record)
-    {
-        if (record.Reference is null || record.Reference.Partition != partition
-            || record.Reference.Collection != collection || record.Reference.Id != id)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt);
-        }
     }
 
     private static QueryPage BuildPage(DatabaseEngine database, PrincipalRecord principal,

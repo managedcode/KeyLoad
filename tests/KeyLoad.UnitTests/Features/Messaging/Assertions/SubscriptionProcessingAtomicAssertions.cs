@@ -1,0 +1,112 @@
+using System.Text.Json;
+using KeyLoad.Core;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+using TUnit.Assertions.Enums;
+
+namespace KeyLoad.UnitTests.Features.Messaging;
+
+internal static class SubscriptionProcessingAtomicAssertions
+{
+    internal static string[] DomainImage(ZoneTreeStore store, SubscriptionRef group, Guid id)
+    {
+        var own = new[] { KeySpace.PartitionOutcome(group.Source.Partition, "root", id),
+            KeySpace.OutcomeLocatorV2(group.Source.Partition, "root", id), KeySpace.ClockBytes }
+            .Select(key => Convert.ToHexString(key) + ":").ToArray();
+        return QueueWholeFlowStorage.Bytes(store).Where(row =>
+            !own.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();
+    }
+
+    internal static byte[] OutcomeBytes(ZoneTreeStore store, SubscriptionRef group, Guid id)
+        => store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(group.Source.Partition, "root", id)))
+            ?? throw new InvalidOperationException("The original processing outcome is absent.");
+
+    internal static async Task RollbackAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
+        ReplicatedOperation operation, OperationResult failure, string[] before, long position)
+    {
+        await FailureAsync(failure);
+        await OwnOutcomeOnlyAsync(store, group, operation, before, position);
+        await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "first"))).IsNull();
+        await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "second"))).IsNull();
+        await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
+        await FailureAsync(NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.Id)).Result);
+    }
+
+    internal static async Task OwnOutcomeOnlyAsync(ZoneTreeStore store, SubscriptionRef group,
+        ReplicatedOperation operation, string[] before, long position)
+    {
+        await Assert.That(DomainImage(store, group, operation.Id)).IsEquivalentTo(before, CollectionOrdering.Matching);
+        await Assert.That(store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(operation.EvaluatedAt);
+        var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.Id);
+        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+            group.Source.Partition, "root", operation.Id)));
+        await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
+    }
+
+    internal static async Task FailureReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
+        ReplicatedOperation operation, OperationResult original, byte[] saved)
+    {
+        var cut = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeSerialization.Serialize(store.Identity);
+        await FailureAsync(original);
+        for (var repeat = 0; repeat < 2; repeat++)
+        {
+            var replay = db.Apply(operation);
+            await FailureAsync(replay);
+            await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
+                .IsEqualTo(JsonSerializer.Serialize(original, JsonDefaults.Options));
+            await Assert.That(OutcomeBytes(store, group, operation.Id).AsSpan().SequenceEqual(saved)).IsTrue();
+            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        }
+    }
+
+    private static async Task FailureAsync(OperationResult result)
+    {
+        await Assert.That(result.Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(result.SafeDetail).IsEqualTo("The expected revision does not match.");
+        await Assert.That(result.Json).IsNull();
+        await Assert.That(result.NativeValue).IsNull();
+    }
+
+    internal static async Task SuccessAsync(DatabaseEngine db, SubscriptionRef group,
+        SubscriptionProcessingRequest request, OperationResult result)
+    {
+        await Assert.That(result.Error).IsNull();
+        var processing = result.Get<SubscriptionProcessingResult>();
+        await Assert.That(processing.AlreadyProcessed).IsFalse();
+        await Assert.That(processing.OriginalEffectsToken).IsEqualTo(processing.Receipt.Token);
+        await Assert.That(processing.Receipt.CommandId).IsEqualTo(request.CommandId);
+        await Assert.That(processing.Receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
+        { new("putDocument", "orders", "first", 1), new("putDocument", "orders", "second", 1),
+          new("Ack", "topic", "1", 1) }, CollectionOrdering.Matching);
+        await DocumentsAsync(db, group);
+        await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 1, 3, 3);
+    }
+
+    internal static async Task DocumentsAsync(DatabaseEngine db, SubscriptionRef group)
+    {
+        foreach (var item in new[] { (Id: "first", Json: "{\"n\":1}"), (Id: "second", Json: "{\"n\":2}") })
+        {
+            var reference = new EntityRef(group.Source.Partition, "orders", item.Id);
+            var expected = new DocumentResult(reference, 1, item.Json, false, []);
+            await Assert.That(JsonSerializer.Serialize(db.GetDocument("root", reference), JsonDefaults.Options))
+                .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
+        }
+    }
+
+    internal static async Task SuccessReplayAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
+        ReplicatedOperation operation, OperationResult original, byte[] saved)
+    {
+        var cut = QueueWholeFlowStorage.Bytes(store);
+        var position = store.Position;
+        var identity = NativeSerialization.Serialize(store.Identity);
+        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(db.Apply(operation), original);
+        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(
+            NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.Id)).Result, original);
+        await Assert.That(OutcomeBytes(store, group, operation.Id).AsSpan().SequenceEqual(saved)).IsTrue();
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+    }
+}
+

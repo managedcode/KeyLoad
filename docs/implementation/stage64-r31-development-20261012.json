@@ -1,0 +1,229 @@
+{
+  "stage": "Stage64 R31 actual local development cohort",
+  "parentCommit": "819d678cb61070cb8c536adc6518a643898c736b",
+  "originalPlan": {
+    "done": 19,
+    "inProgress": 85,
+    "total": 104
+  },
+  "additionalTask": "KL-105",
+  "qualification": "Local macOS development only; two original failed full operations retained; no additional task acceptance or Linux/RF3/fault/endurance/performance qualification claimed",
+  "coverage": "UNMEASURED; no coverage collector or merge ran; generic coverage-worded wrapper failures represent native nonzero test exit; load/comparison cases never contribute",
+  "releaseBuild": {
+    "mode": "build",
+    "startedAt": "2026-10-12T21:43:23.556120+00:00",
+    "completedAt": "2026-10-12T21:46:35.834850+00:00",
+    "elapsedSeconds": 192.27699712500907,
+    "pid": 48593,
+    "exitCode": 0,
+    "processJoined": true,
+    "sourceCount": 9736,
+    "sourceDrift": [],
+    "logSha256": "5233ec2578466e86495821f9a396b8bb64bed1fa4330706e6e460e867531cba5",
+    "errors": 0,
+    "warnings": 0,
+    "completion": {
+      "path": "TestResults/stage61-native-join/stage64-r31-build.original.completion.json",
+      "sha256": "0f5eb9706c0ce88ca97611a65fb6350c4544ada55aa1a8a6c3d51d563ab1f30e"
+    }
+  },
+  "formatterVerification": {
+    "mode": "verify",
+    "startedAt": "2026-10-12T21:37:32.759992+00:00",
+    "completedAt": "2026-10-12T21:43:22.989082+00:00",
+    "elapsedSeconds": 350.22525858401787,
+    "pid": 45813,
+    "exitCode": 0,
+    "processJoined": true,
+    "sourceCount": 9736,
+    "sourceDrift": [],
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scope": "whole solution",
+    "completion": {
+      "path": "TestResults/stage61-native-join/stage64-r31-verify-r3.original.completion.json",
+      "sha256": "c16bfa89378c88dc4c5ed9693d2b12b2a1f396d1202972efb338b0d50241ddeb"
+    }
+  },
+  "nativeDiagnostics": {
+    "errors": 0,
+    "warnings": 0,
+    "original": {
+      "path": "TestResults/stage61-native-join/stage64-r31-native-after-two-final-fixes.original.json",
+      "sha256": "662a6f707806679890184e2a7dade8fefb367791ae98893d5b3cd5e79d40854f"
+    }
+  },
+  "sourceCheckpoints": {
+    "originalBuild": {
+      "path": "TestResults/stage61-native-join/stage64-r31-build.original.source-after.json",
+      "sha256": "da81ae99fcc2025d37cc4ffee35ff5e5c66bfcbd9d6c382d81a525c0fb6daa70"
+    },
+    "actualRuntime": {
+      "path": "TestResults/stage61-native-join/stage64-r31-runtime-source-after-inventory.original.json",
+      "sha256": "791a2652b40153b8db54273c75dd095797fd267d7b550aa0f77a72bc6ad3a6d9"
+    },
+    "buildToRuntimeDelta": [
+      "scripts/Features/CodeQuality/functional-coverage.unit-test-inventory.json"
+    ],
+    "deltaContract": "Canonical non-compiler inventory JSON only; immutable build map retained; all four lanes bound actual source/image/deployment closure"
+  },
+  "nativeCensus": {
+    "discoveredCases": 3758,
+    "functional": 3224,
+    "requiredNonContributor": 534,
+    "dataGenerationErrors": 0,
+    "caseExecutionImplied": false,
+    "original": {
+      "path": "TestResults/stage61-native-join/current-stage64-r31-full-native-census/native-list.original.json",
+      "sha256": "5f659c5f923f442961d6f88881ce90f2e9d2571a87015517978d29d4543109a3"
+    },
+    "actualInventoryJoin": {
+      "path": "TestResults/stage61-native-join/stage64-r31-canonical-inventory.actual-join.original.json",
+      "sha256": "6c24454ba666ad674c5346954543ffd5977099df5110ef569b339e66a00a9043"
+    }
+  },
+  "lanes": {
+    "sqlComposition": {
+      "summary": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-sql-finite-runtime-completion.original-bound.json",
+        "sha256": "badc1af15ccee13bb147dd2816f0be214337a815a81e382d0a58562b39eec131"
+      },
+      "originalTrx": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-sql-finite-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "sha256": "389b0d4dcdfec1fb95c3679ff8d5b50d5d903462e34f48d88f3529c6e78d6bf8"
+      },
+      "executed": 140,
+      "passed": 140,
+      "failed": 0,
+      "skipped": 0,
+      "maximumParallelTests": 50,
+      "actualTrxIntervalPeak": 20,
+      "actualCaseLifetimeWindowSeconds": 10.998011,
+      "allNativeProcessReaderDisposalJoins": true,
+      "sourceImageClosureDrift": false,
+      "failedCases": []
+    },
+    "messaging": {
+      "summary": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-messaging-runtime-completion.original-bound.json",
+        "sha256": "bf0aa3188f4535e623204a0131e2927eed610809902c3d1f4ac2ad24f2f94ddf"
+      },
+      "originalTrx": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-messaging-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "sha256": "89c67b301068c5e8888baf63d85ffdfcc8d37d9f2341f8bb3ef98433ff72c801"
+      },
+      "executed": 28,
+      "passed": 27,
+      "failed": 1,
+      "skipped": 0,
+      "maximumParallelTests": 50,
+      "actualTrxIntervalPeak": 18,
+      "actualCaseLifetimeWindowSeconds": 36.727521,
+      "allNativeProcessReaderDisposalJoins": true,
+      "sourceImageClosureDrift": false,
+      "failedCases": [
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests.1.1.AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing.1.1.0",
+          "outcome": "Failed",
+          "originalError": "<ns0:UnitTestResult xmlns:ns0=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\" executionId=\"2662f038-90a6-414f-ac4c-68dff8c13d30\" testId=\"100f759d-7299-6b19-dff7-d816ab390c41\" testName=\"AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing\" computerName=\"konstantins-macbook-pro\" duration=\"00:00:04.5843650\" startTime=\"2026-10-12T21:50:09.5169370+00:00\" endTime=\"2026-10-12T21:50:14.1013020+00:00\" testType=\"13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B\" outcome=\"Failed\" testListId=\"8C84FA94-04C1-424b-9868-57A2D4851A1D\" relativeResultsDirectory=\"2662f038-90a6-414f-ac4c-68dff8c13d30\">\n      <ns0:Output>\n        <ns0:ErrorInfo>\n          <ns0:Message>AssertionException: Expected to be equal to \"{\"id\":\"visibility-boundary\",\"state\":\"Acked\",\"attempts\":2,\"stateVersion\":8,\"readySequence\":4,\"notBef…\"\nbut received \"{\"id\":\"visibility-boundary\",\"state\":\"Acked\",\"attempts\":2,\"stateVersion\":7,\"readySequence\":4,\"notBef…\" which differs at index 72:\n                            ↓\n   \"empts\":2,\"stateVersion\":7,\"readySequence\":4,\"notBe…\"\n   \"empts\":2,\"stateVersion\":8,\"readySequence\":4,\"notBe…\"\n                            ↑\n\nat Assert.That(JsonSerializer.Serialize(actual.Metadata, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options))</ns0:Message>\n          <ns0:StackTrace>   at KeyLoad.UnitTests.Features.Messaging.QueueVisibilityBoundaryAssertions.MessageAsync(DatabaseEngine owner, QueueLaneRef lane, MessageMetadata expected, Boolean stored, Byte[] originalBody) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Assertions/QueueVisibilityBoundaryAssertions.cs:line 77\n   at KeyLoad.UnitTests.Features.Messaging.QueueVisibilityBoundaryAssertions.TerminalAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, Byte[] originalRow) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Assertions/QueueVisibilityBoundaryAssertions.cs:line 98\n   at KeyLoad.UnitTests.Features.Messaging.QueueVisibilityBoundaryWholeFlow.FinishAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLaneRef lane, Delivery original, DateTimeOffset boundary, List`1 outcomes, Byte[] originalRow, Byte[] originalBody) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueVisibilityBoundaryWholeFlow.cs:line 86\n   at KeyLoad.UnitTests.Features.Messaging.QueueVisibilityBoundaryWholeFlow.RunAsync(TestDatabase fixture, DateTimeOffset start, CancellationToken token) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueVisibilityBoundaryWholeFlow.cs:line 36\n   at KeyLoad.Server.ServerFailureObserver.ThrowIfAny(IReadOnlyList`1 failures) in /Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/ClientApi/Diagnostics/ServerFailureObserver.cs:line 64\n   at KeyLoad.UnitTests.Features.Messaging.QueueVisibilityBoundaryWholeFlow.RunAsync(TestDatabase fixture, DateTimeOffset start, CancellationToken token) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueVisibilityBoundaryWholeFlow.cs:line 44\n   at KeyLoad.UnitTests.Features.Messaging.QueueLeaseReuseTests.AcMp006_RenewForeignExpiredAndStaleTokensPreserveLeaseFencing() in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLeaseReuseTests.cs:line 63\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---</ns0:StackTrace>\n        </ns0:ErrorInfo>\n      </ns0:Output>\n    </ns0:UnitTestResult>\n    "
+        }
+      ]
+    },
+    "clusterRouting": {
+      "summary": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-cluster-runtime-completion.original-bound.json",
+        "sha256": "3e4868439342384895fddd0ea613c39b0eb1c23a8bc3281654dd90343412e771"
+      },
+      "originalTrx": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-cluster-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "sha256": "285276ddafdc65d782d27c3a97e88f3d3a0da830ccbf6e424e83b1709070a5d7"
+      },
+      "executed": 22,
+      "passed": 21,
+      "failed": 1,
+      "skipped": 0,
+      "maximumParallelTests": 50,
+      "actualTrxIntervalPeak": 14,
+      "actualCaseLifetimeWindowSeconds": 39.354963,
+      "allNativeProcessReaderDisposalJoins": true,
+      "sourceImageClosureDrift": false,
+      "failedCases": [
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.1.1.ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners.1.1.0",
+          "outcome": "Failed",
+          "originalError": "<ns0:ErrorInfo xmlns:ns0=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\">\n          <ns0:Message>AssertionException: Expected to be equal to Conflict\nbut received UnknownWriteOutcome\n\nat Assert.That(original.Value.Reply.Error).IsEqualTo(expected)</ns0:Message>\n          <ns0:StackTrace>   at KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativeReplyAssertions.RefusedAsync(PartitionMovementAuthenticatedReply original, ErrorCode expected) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementNativeReplyAssertions.cs:line 43\n   at KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareFlow.ExecuteAsync(ControlledPartitionMovementNativeHosts owners, CancellationToken cancellationToken) in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/ControlledPartitionMovementNativePrepareFlow.cs:line 49\n   at KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.&lt;&gt;c__DisplayClass2_1.&lt;&lt;ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners&gt;b__1&gt;d.MoveNext() in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativePrepareTests.cs:line 31\n--- End of stack trace from previous location ---\n   at KeyLoad.Server.ServerFailureObserver.ThrowIfAny(IReadOnlyList`1 failures) in /Users/ksemenenko/Developer/KeyLoad/src/KeyLoad.Server/Features/ClientApi/Diagnostics/ServerFailureObserver.cs:line 64\n   at KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners() in /Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativePrepareTests.cs:line 59\n   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---</ns0:StackTrace>\n        </ns0:ErrorInfo>\n      "
+        }
+      ]
+    },
+    "searchBlobDocument": {
+      "summary": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-companion-next-four-runtime-completion.original-bound.json",
+        "sha256": "36a2fa33a6a1cdbe111f7e82e2b77eb226b0184fe323ce0cb8e3e1f41eeaf3a3"
+      },
+      "originalTrx": {
+        "path": "TestResults/stage61-native-join/current-stage64-r31-companion-next-four-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "sha256": "a3bbcd80a1fb91e278ae7b07c2a3ab4012449e4948cd8a4e84c22f5b7ca79b62"
+      },
+      "executed": 17,
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "maximumParallelTests": 50,
+      "actualTrxIntervalPeak": 17,
+      "actualCaseLifetimeWindowSeconds": 63.241947,
+      "allNativeProcessReaderDisposalJoins": true,
+      "sourceImageClosureDrift": false,
+      "failedCases": []
+    }
+  },
+  "totals": {
+    "executedUniqueCases": 207,
+    "passed": 205,
+    "failed": 2,
+    "skipped": 0,
+    "duplicates": 0
+  },
+  "originalCaseLifetimeOverlap": {
+    "combinedPeak": 21,
+    "combinedWindowSeconds": 115.509696,
+    "semantics": "Exact original UTC100ns half-open case intervals, end before start on ties, zero intervals omitted; not simultaneous CPU work or process count"
+  },
+  "independentCompanionReconciliation": {
+    "path": "TestResults/stage61-native-join/current-stage64-r31-companion-next-four-b-independent-reconciliation.json",
+    "sha256": "1f8b2b9e46ec35e587797577a883d7717c6e70ccb001a6ac5889233c483749ff"
+  },
+  "profiling": {
+    "original": {
+      "path": "TestResults/stage61-native-join/stage64-r31-kl105-diagnostics-attempt.original-bound.json",
+      "sha256": "45f0b6ca4d3e803a2b91f355778863aab1cbf5ca148c6ba312ccbcda3dfd1af9"
+    },
+    "actualApplicationInfoObserved": true,
+    "cpuAllocationGcContentionThreadPoolCaptureComplete": false,
+    "captureState": "Target exited before collectors; incomplete/unknown-tail original capture retained",
+    "bottleneckOrSpeedClaim": false,
+    "kl105AcceptanceClosed": false
+  },
+  "retainedPreparationFailures": {
+    "formatterEnvironment": {
+      "path": "TestResults/stage61-native-join/stage64-r31-format-r4.original.completion.json",
+      "sha256": "7c17632e5baf216d270a8ffe52ed15b7dec256b7c0bb66c3f517e288d0a042d4"
+    },
+    "actualMatchedFormatterSuccessor": {
+      "path": "TestResults/stage61-native-join/stage64-r31-format-r5.original.completion.json",
+      "sha256": "6fcdb6588745b401e771cc0ca88327c59a2ce92c4c5de5ba1f29fa72be6989d9"
+    },
+    "sqlBinderBeforeRuntime": {
+      "path": "TestResults/stage61-native-join/current-stage64-r31-sql-binder-r7-failure-r8-repair.original.json",
+      "sha256": "1369c2fe0a4c948f1ab1a0e8814a60a9252cad1c87be43f06b82dcfd87545aa3"
+    },
+    "contract": "Original sandbox IPC refusal and binder preparation failure retained; successful successors do not rewrite their original bytes"
+  },
+  "unchangedOpenOriginalFailures": [
+    "R30 Retire OwnershipLost aggregate remains OPEN; unchanged case not selected in R31",
+    "R30 BM25PortableMovement OwnershipLost aggregate remains OPEN; unchanged case not selected in R31"
+  ],
+  "successor": "Separate coherent native source batches for SQL typed replay, Messaging complete visibility/inbox flows and Cluster retained-phase pre-append admission; two original failed UIDs remain failures until actual successor execution",
+  "rootIndependentReconciliation": {
+    "path": "TestResults/stage61-native-join/stage64-r31-root-independent-reconciliation.original.json",
+    "sha256": "918ada11a48317b5eb35642f4a8f90422b59bdf93c8b95d7a3ae63405d539ceb"
+  }
+}

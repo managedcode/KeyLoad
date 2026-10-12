@@ -123,6 +123,7 @@ internal sealed class SubscriptionTests
         await Assert.That(parked.Status.Paused).IsTrue();
         await Assert.That(parked.Status.SafeFailureCode).IsEqualTo("AttemptsExhausted");
         await Assert.That(parked.Status.Checkpoint).IsEqualTo(0);
+        await SubscriptionParkedRecoveryFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task ProcessingEffectsAndAcknowledgementRollBackTogetherAndInboxSurvivesReplay()
@@ -159,6 +160,7 @@ internal sealed class SubscriptionTests
         await Assert.That(processed.OriginalEffectsToken).IsEqualTo(result.OriginalEffectsToken);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(1);
+        await SubscriptionProcessingAtomicFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
     public async Task SeekFencesOldTokensAndRequiresExplicitResume()

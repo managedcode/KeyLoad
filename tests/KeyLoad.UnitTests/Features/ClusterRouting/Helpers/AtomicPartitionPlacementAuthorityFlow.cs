@@ -28,6 +28,8 @@ internal static class AtomicPartitionPlacementAuthorityFlow
         await Assert.That(fixture.Database.Apply(Operation(fixture, first, Guid.NewGuid())).Get<bool>()).IsTrue();
         var row = fixture.Store.Read(view => view.GetRecord<AtomicPartitionPlacementV1>(
             AtomicPartitionPlacementTestSupport.RowKey(partition)))!;
+        await AtomicPartitionPlacementDirectoryAuthorityFlow.RunAsync(fixture, row,
+            Operation(fixture, first with { ExpectedRevision = InitialDirectoryRevision }, Guid.NewGuid()));
         var original = Operation(fixture, first with { ExpectedRevision = InitialDirectoryRevision }, OriginalCommand);
         await RefuseAndRepairAsync(fixture, row with { Version = MalformedVersion, PhysicalShardId = ForeignOwner }, row, original);
         await RefuseAndRepairAsync(fixture, row with

@@ -377,3 +377,27 @@ flowchart LR
 ```
 
 Source joined; current-image execution, compiler, native runtime, Linux and public Aspire SDK/MCP qualification remain OPEN. This additional native store case preserves all existing BlobRangeIntegrity whole cases.
+
+
+## TASK-BLOB-RANGE-POLICY-COLD-001 — current persisted principal across partial reads
+
+REQ-BLOB-RANGE-POLICY-COLD-001 refines REQ-BLOB-002/003/004: every native range, including a zero-length range at the exact published end, resolves the current persisted principal inside its own Store.Read. Original BlobAuthorizationTests warm metadata/row/creator checks remain unchanged. This additional native ZoneTree kernel flow does not qualify public authentication, native replica admission, process kill or RF3.
+
+AC-BLOB-RANGE-POLICY-COLD-001 maps to BlobRangePolicyColdTests.AcBlob003RevokedRangeRemainsDeniedColdThenRestoredPolicyReadsExactVersion: publish the genuine existing two-part object and original receipts, persist a separate authorized BlobRead principal at epoch1, prove literal cross-part/zero ranges and full image invariance, then authorized ConfigurePrincipal epoch2 Revoked. Repeated exact Unauthenticated/safe-detail refusals preserve the complete image and cut AFTER that actual policy commit. Join the store and reopen the same root; repeat exact refusal and complete damaged-policy image/cut equality. A denied read creates no StoredOutcome; it is not a retained issued command failure.
+
+AC-BLOB-RANGE-POLICY-COLD-002 requires a genuine authorized ConfigurePrincipal restore at epoch3 with exact returned principal and actual +1 commit position, literal original range/metadata and no-effect parity, original root publication receipts/result replay, and a second joined same-root cold owner with complete raw image/cut equality and exact healthy byte continuation. All body and owner disposal failures retain their ordered original ledger. No old successful reader command outcome is expected to replay across changed policy epochs; publication belongs to the unchanged original root principal.
+
+```mermaid
+flowchart LR
+  P[Actual multipart publication and persisted reader epoch1] --> H[Exact healthy ranges]
+  H --> R[Actual revoked principal epoch2]
+  R --> D[Repeated read refusal and post-policy unchanged image]
+  D --> C[Joined close and first cold refusal]
+  C --> A[Authorized restore epoch3]
+  A --> B[Exact ranges and original root receipt replay]
+  B --> S[Second joined cold image and healthy parity]
+```
+
+Source joined; compiler, current-image native execution, Linux and Aspire public SDK/MCP gates remain OPEN. Actual owning BlobReads.Cut/DatabaseCredentialValidation.ReadPrincipal reload semantics remain unchanged; no production defect is asserted.
+
+Policy writes use actual CreateNativeOperation with unchanged root, actual EvaluationClock and generated ConfigurePrincipalRequest native bytes, then owning DatabaseEngine.Apply. Caller cancellation is checked before this synchronous operation; this is not async cancellation or a native replica-issued journal claim.

@@ -114,7 +114,8 @@ internal static class SubscriptionLeaseAuthorityFlow
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, second, group.Source, source);
         await SubscriptionLeaseAuthorityAssertions.SettledAsync(db, second, group, claim, original, receipts, reclaimed, reclaimResult);
-        await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(db, second, group, token);
+        await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(db, second, group,
+            QueueWholeFlowStorage.Clock(second).AddSeconds(1), token);
     }
 
     private static async Task AckAsync(DatabaseEngine db, SubscriptionRef group, string leaseToken, DateTimeOffset time,

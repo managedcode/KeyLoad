@@ -141,6 +141,10 @@ internal sealed class TestDatabase : IDisposable
         => replicaAdmission is { } native ? native.ReadRetainedEntry(originalId)
             : throw new InvalidOperationException(NativeObservationRequired);
 
+    internal KeyLoad.Replication.ReplicaEntry ReadRetainedEntry(KeyLoad.ReplicatedOperation original)
+        => replicaAdmission is { } native ? native.ReadRetainedEntry(original)
+            : throw new InvalidOperationException(NativeObservationRequired);
+
     internal KeyLoad.Replication.ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original,
         Action restoreFaultOwnedRow, List<Exception> failures, CancellationToken cancellationToken,
         ErrorCode? expectedApplyError = null)

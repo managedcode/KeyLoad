@@ -87,3 +87,19 @@ flowchart LR
   C --> D[Native signed publication]
   D --> E[Unchanged dependency and generation CAS]
 ```
+
+## Published subject bytes at the wrong canonical key
+
+```mermaid
+flowchart LR
+ P[Two genuine native subject publications] --> F[Second native head bytes at first original key]
+ F --> R[Repeated catalog census refusal: unchanged database state]
+ R --> E[Ordered exact byte repair and retained receipt proof]
+ E --> B[Healthy archive restore and two original target reopens]
+```
+
+REQ-BM25-KEYBODY-001 maps to AC-BM25-CURRENT-006. AC-BM25-KEYBODY-001: the actual second published subject head is placed under the first subject's original canonical key. Both heads are genuine, independently admitted native publications; no synthetic header or foreign policy is generated. Two original catalog captures must refuse with exact Corruption and Bm25CorpusProtocol.Invalid before admitting an archive. Baselines follow the deliberate Unit-owned native transaction and include complete bounded canonical rows, actual identity, position, applied position and native journal index/commit/term. Both original admitted entry and complete result bytes remain unchanged.
+
+Repair restores the original first head bytes even if a refusal/assertion fails, preserving initiating and repair failures in order. Healthy native publication, authenticated pack/unpack/restore, exact subject head bytes and both original target reopens reuse the existing owner and pipeline. The original format-refusal case remains unchanged. Automated mapping: Bm25PortableFamilyKeyBodyTests.ActualPublishedForeignSubjectBytesRefuseCatalogCaptureThenRepairAndSurviveBothNativeReopens (one case, no Arguments).
+
+SOURCE joined; compiler, current-image native execution and exact-source Linux qualification remain OPEN. This bounded Unit flow is not RF3, SDK/MCP, scale or power-loss proof. Journal evidence is the actual cut plus selected original publication entries/results, not complete journal inventory; separately sampled coordinates rely on the isolated joined fixture. Database no-effects does not promise no temporary backup files. Existing fixture failure-ledger and cleanup own those files.

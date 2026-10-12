@@ -37,7 +37,7 @@ internal static class PhysicalOwnerRegistrationIdentityOutcomeFlow
         var refused = Operation(fixture, changed, RefusedId);
         var refusal = fixture.Database.Apply(refused);
         await PhysicalOwnerRegistrationIdentityOutcomeAssertions.RefusedAsync(refusal);
-        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAddedAsync(fixture, before, RefusedId);
+        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, before, RefusedId, refused.EvaluatedAt);
         await PhysicalOwnerRegistrationIdentityOutcomeAssertions.AuthorityAsync(fixture, directory, catalog);
         await FirstColdAsync(fixture, registration, registered, refused, refusal, request);
         await FreshAndSecondColdAsync(fixture, registration, registered, refused, refusal, request, directory, catalog);
@@ -70,7 +70,7 @@ internal static class PhysicalOwnerRegistrationIdentityOutcomeFlow
         var success = fixture.Database.Apply(healthy);
         await Assert.That(success.Error).IsNull();
         await Assert.That(NativeSerialization.Serialize(success).SequenceEqual(NativeSerialization.Serialize(registered))).IsTrue();
-        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAddedAsync(fixture, before, HealthyId);
+        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, before, HealthyId, healthy.EvaluatedAt);
         await PhysicalOwnerRegistrationIdentityOutcomeAssertions.AuthorityAsync(fixture, directory, catalog);
         var image = PhysicalShardCatalogPolicyOutcomeAssertions.Image(fixture);
         var cut = fixture.Store.Position;
@@ -81,10 +81,11 @@ internal static class PhysicalOwnerRegistrationIdentityOutcomeFlow
         await PhysicalOwnerRegistrationIdentityOutcomeAssertions.ReplayAsync(fixture, healthy, success);
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         var continuationBefore = PhysicalOwnerDirectoryWholeFlow.Image(fixture);
-        var continuation = fixture.Database.Apply(Operation(fixture, correct, ContinuationId));
+        var continuationOperation = Operation(fixture, correct, ContinuationId);
+        var continuation = fixture.Database.Apply(continuationOperation);
         await Assert.That(continuation.Error).IsNull();
         await Assert.That(NativeSerialization.Serialize(continuation).SequenceEqual(NativeSerialization.Serialize(success))).IsTrue();
-        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAddedAsync(fixture, continuationBefore, ContinuationId);
+        await PhysicalOwnerRegistrationIdentityOutcomeAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, continuationBefore, ContinuationId, continuationOperation.EvaluatedAt);
         await PhysicalOwnerRegistrationIdentityOutcomeAssertions.AuthorityAsync(fixture, directory, catalog);
     }
 

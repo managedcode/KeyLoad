@@ -844,3 +844,25 @@ cases pass; it does not qualify the separate Linux RF3 or durability gates.
 REQ-SESSIONREAD-NATIVE-TERMINAL-001 maps to AC-SESSIONREAD-NATIVE-TERMINAL-001: the internal nonserialized native terminal exception supports standard Exception constructors without granting terminal provenance. Only its typed original-native constructor records the original KeyLoadException, after the existing awaited native result and fresh authority validation. Controlled document and blob endpoint catch filters require this exact nonnull original before returning its definitive error; a generic message or inner exception cannot grant that classification. Preserve original pre-execution refusal, post-effect uncertainty, signed reply and cause semantics. Existing original controlled operation/refusal/replay and cold flows remain the verification targets; constructor/property-only tests are not acceptance. Current compiler, native execution and Linux RF3 gates remain open.
 
 REQ/AC-SESSIONREAD-002..004 and the existing bounded native model contract retain the original memoized ReplicaDiscoveryLifetime.StopAsync: original stopping cancellation, joined active operations, then idempotently guarded admission/replay/CTS cleanup. Explicit DisposeAsync awaits the same lifetime and exposes direct owned disposal without a second shutdown task. Every cleanup failure remains retained and later owned resources still close. Event-vector disposal preserves replay/callerMac/localMac order and endpoint reset; document runtime preserves receiver/client/work/endpoint shutdown order and complete actual task faults/cancellation. Immediate receiver admission is the existing zero-millisecond admission via native WaitAsync with the original caller token, with unchanged configured limits and original expiry. Native model wire/service visibility is internal; generated aliases, version, request IDs0..11, reply IDs0..5 and channel0/1 are unchanged. Named constants and LoggerMessage preserve original values, Error/default EventId/content-free diagnostic and exact uncertainty bool. Null error Signature remains refused. Existing original MAC mutation/roundtrip and full receiving operation controls remain mandatory. This is source-only compiler repair, not native/runtime/Linux qualification or a change to effects/Unknown classification; external effect-boundary work is a separate coherent union.
+
+
+## Native fixture full command-scope admission
+
+REQ-DSTORE-NATIVE-SCOPE-001 maps to AC-DSTORE-NATIVE-SCOPE-001 under REQ/AC-DSTORE-007/009: the original TestDatabaseReplicaAdmission retained-command shortcut matches exact command ID, ordinal persisted principal ID and CommandOutcomePartitionIdentity.Resolve full scope (Unknown/Global/Partition including full PartitionRef). It does not match fingerprint or kind independently: a changed body occupying the same resolved outcome identity must reach original fresh authorized ResolveOutcome and Conflict rather than append as a new identity. A different persisted principal/full scope may append its own genuine log entry and materialize its own independent outcome. The log/admission lock, commit, apply, cancellation and joined cleanup remain unchanged.
+
+REQ-DSTORE-NATIVE-SCOPE-002 maps to AC-DSTORE-NATIVE-SCOPE-002: native entry observations accept the actual original ReplicatedOperation for explicit scope. The historical Guid-only observation is valid only for one full retained identity; multiple principal/scope identities with that ID refuse InvalidOperationException instead of silently selecting another entry. Repeated entries of the same identity retain the original first-index observation.
+
+Canonical map: UnitTests Features/ClusterReplication/Fixtures/TestDatabaseReplicaAdmission.cs and existing TestDatabase.cs forwarding; feature acceptance belongs to DocumentStorage. DocumentCommandPrincipalColdReplayTests must prove TWO persisted principals sharing SAME GUID and full partition, independent complete original native entries/results/scoped outcomes, changed-body conflicts, unchanged exact outbox and TWO joined same-owner canonical+replica cold opens, then literal healthy continuation. The complete flow is specified in [NativePrincipalColdReplay](DocumentStorage/NativePrincipalColdReplay.md); compiler/runtime gates remain OPEN; original warm principal and two-partition flows remain unchanged. No production algorithm/schema/provider or direct-Apply replacement is added.
+
+```mermaid
+flowchart TD
+  Native[Actual normalized native operation] --> Scope[Existing full scope resolver plus principal and ID]
+  Scope --> Prior[Same identity retained native index]
+  Prior --> Resolve[Original fresh authorization and outcome or conflict]
+  Scope --> New[Different identity native append commit apply]
+  New --> Independent[Independent original scoped outcome]
+  Independent --> Observe[Explicit operation-scoped entry read]
+  Observe --> Cold[Planned two genuine same-owner cold opens]
+```
+
+Source preview only: no compiler/runtime/Linux/RF3 or public-client qualification. Fixture defect is distinct from canonical product outcome scope.

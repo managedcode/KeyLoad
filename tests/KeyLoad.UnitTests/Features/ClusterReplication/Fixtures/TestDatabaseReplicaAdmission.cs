@@ -79,7 +79,7 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
                 caller?.Token ?? contextToken, timeout.Token);
             var actual = database.NormalizeOperation(explicitTime ? operation
                 : operation with { EvaluatedAt = database.EvaluationClock.GetUtcNow() });
-            if (RetainedCommandIndex(actual.Id) is { } originalIndex)
+            if (RetainedCommandIndex(actual) is { } originalIndex)
             {
                 if (originalIndex > log.State.CommittedIndex)
                 { RequireMaterializer().Commit(originalIndex); }
@@ -126,6 +126,17 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
         }
     }
 
+    internal ReplicaEntry ReadRetainedEntry(ReplicatedOperation original)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        lock (admission)
+        {
+            var actual = database.NormalizeOperation(original);
+            var index = RetainedCommandIndex(actual) ?? throw new InvalidOperationException(MissingEntry);
+            return log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
+        }
+    }
+
     internal ReplicaEntry RecoverFaultOwnedRow(ReplicatedOperation original, Action restoreFaultOwnedRow,
         List<Exception> failures, CancellationToken cancellationToken, ErrorCode? expectedApplyError = null)
     {
@@ -145,16 +156,11 @@ internal sealed class TestDatabaseReplicaAdmission : IDisposable
     private ReplicaMaterializer RequireMaterializer()
         => materializer ?? throw new InvalidOperationException(MissingEntry);
 
+    private long? RetainedCommandIndex(ReplicatedOperation operation)
+        => TestDatabaseRetainedCommandScope.Resolve(log, operation);
+
     private long? RetainedCommandIndex(Guid id)
-    {
-        for (var index = IndexStep; index <= log.State.LastIndex; index += IndexStep)
-        {
-            var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
-            if (entry.Operation?.Id == id)
-            { return index; }
-        }
-        return null;
-    }
+        => TestDatabaseRetainedCommandScope.ResolveUnique(log, id);
 
     public void Dispose()
     {

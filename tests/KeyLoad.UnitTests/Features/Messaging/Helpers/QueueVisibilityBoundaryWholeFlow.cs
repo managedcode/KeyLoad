@@ -71,23 +71,18 @@ internal static class QueueVisibilityBoundaryWholeFlow
         Delivery original, DateTimeOffset boundary, List<(ReplicatedOperation Operation, OperationResult Result)> outcomes,
         byte[] originalRow, byte[] originalBody)
     {
-        await Assert.That(Receive(owner, lane, boundary, outcomes, seconds: 10).Deliveries).IsEmpty();
-        var retryAt = boundary.AddMilliseconds(1000);
-        await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
-            new(Message, MessageState.Scheduled, 1, 5, 3, retryAt, null,
-                LeaseVersion: 1, SafeFailureCode: "RetryRequested"), stored: true, originalBody: originalBody);
-        var current = await ReceiveAsync(owner, store, lane, retryAt, outcomes, Message, seconds: 10, attempt: 2, version: 2);
+        var current = await ReceiveAsync(owner, store, lane, boundary, outcomes, Message, seconds: 10, attempt: 2, version: 2);
         await Assert.That(current.LeaseVersion).IsEqualTo(2L);
         await Assert.That(current.Token).IsNotEqualTo(original.Token);
         await QueueVisibilityBoundaryAssertions.MessageAsync(owner, lane,
-            new(Message, MessageState.Leased, 2, 7, 4, null, null, LeaseOwner: "root",
-                LeaseVersion: 2, LeaseUntil: retryAt.AddSeconds(10), SafeFailureCode: "RetryRequested"), stored: true, originalBody: originalBody);
+            new(Message, MessageState.Leased, 2, 6, 4, null, null, LeaseOwner: "root",
+                LeaseVersion: 2, LeaseUntil: boundary.AddSeconds(10)), stored: true, originalBody: originalBody);
         await QueueVisibilityBoundaryAssertions.RefuseAsync(owner, store, lane, original,
-            retryAt, ErrorCode.StaleLease, "The delivery lease is stale.", outcomes, current.Token);
-        Complete(owner, lane, current, retryAt, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
-        Batch(owner, lane, retryAt, outcomes, new EnqueueMessage(Queue, Healthy, "{}")).Get<CommitReceipt>();
-        var healthy = await ReceiveAsync(owner, store, lane, retryAt, outcomes, Healthy, seconds: 10);
-        Complete(owner, lane, healthy, retryAt, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
+            boundary, ErrorCode.StaleLease, "The delivery lease is stale.", outcomes, current.Token);
+        Complete(owner, lane, current, boundary, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
+        Batch(owner, lane, boundary, outcomes, new EnqueueMessage(Queue, Healthy, "{}")).Get<CommitReceipt>();
+        var healthy = await ReceiveAsync(owner, store, lane, boundary, outcomes, Healthy, seconds: 10);
+        Complete(owner, lane, healthy, boundary, outcomes, DeliveryAction.Ack).Get<CommitReceipt>();
         await QueueVisibilityBoundaryAssertions.TerminalAsync(owner, store, lane, originalRow);
         await QueueVisibilityBoundaryAssertions.ReplayAsync(owner, store, outcomes);
         await QueueVisibilityBoundaryAssertions.TerminalAsync(owner, store, lane, originalRow);

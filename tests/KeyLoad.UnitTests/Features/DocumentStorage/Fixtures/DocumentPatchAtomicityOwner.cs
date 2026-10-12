@@ -60,6 +60,10 @@ internal sealed class DocumentPatchAtomicityOwner
         ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(id)
         : Source.ReadRetainedEntry(id);
 
+    internal ReplicaEntry Entry(ReplicatedOperation original) => originalJoined
+        ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadRetainedEntry(original)
+        : Source.ReadRetainedEntry(original);
+
     internal (long LastIndex, long CommittedIndex, long Term) JournalCut() => originalJoined
         ? (coldAdmission ?? throw new InvalidOperationException(MissingOwner)).ReadJournalCut()
         : Source.ReadJournalCut();

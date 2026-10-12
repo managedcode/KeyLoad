@@ -100,7 +100,7 @@ internal static class SqlInnerJoinRetainedIdentityFlow
         return faults.ToArray();
     }
 
-    private static async Task FaultAsync(TestDatabase database, CommandRequest seed,
+    internal static async Task FaultAsync(TestDatabase database, CommandRequest seed,
         CommitReceipt receipt, SqlInnerJoinIdentityFault fault)
     {
         var failures = new List<Exception>();

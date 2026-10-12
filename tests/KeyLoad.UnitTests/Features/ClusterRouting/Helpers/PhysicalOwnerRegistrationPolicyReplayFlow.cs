@@ -47,12 +47,12 @@ internal static class PhysicalOwnerRegistrationPolicyReplayFlow
         await SetAsync(fixture, false, RevokedPolicy);
         var image = PhysicalShardCatalogPolicyOutcomeAssertions.Image(fixture);
         var cut = fixture.Store.Position;
-        await PhysicalOwnerRegistrationPolicyReplayAssertions.PolicyReplayAsync(fixture, original, outcome);
+        await PhysicalOwnerRegistrationPolicyReplayAssertions.AdministrationReplayAsync(fixture, original, outcome);
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         fixture.Reopen();
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         await PersistedAsync(fixture, false, RevokedPolicy);
-        await PhysicalOwnerRegistrationPolicyReplayAssertions.PolicyReplayAsync(fixture, original, outcome);
+        await PhysicalOwnerRegistrationPolicyReplayAssertions.AdministrationReplayAsync(fixture, original, outcome);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.AuthorityAsync(fixture, directory, catalog);
         await PhysicalShardCatalogPolicyOutcomeAssertions.UnchangedAsync(fixture, image, cut);
         var before = PhysicalOwnerDirectoryWholeFlow.Image(fixture);
@@ -61,7 +61,7 @@ internal static class PhysicalOwnerRegistrationPolicyReplayFlow
         await PhysicalOwnerRegistrationPolicyReplayAssertions.AdministrationDeniedAsync(result);
         var bytes = PhysicalOwnerRegistrationPolicyReplayAssertions.Outcome(fixture, DeniedId);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.StoredAsync(fixture, denied, result, bytes, RevokedPolicy);
-        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAddedAsync(fixture, before, DeniedId);
+        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, before, DeniedId, denied.EvaluatedAt);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.AuthorityAsync(fixture, directory, catalog);
         return new(denied, result, bytes);
     }
@@ -81,7 +81,7 @@ internal static class PhysicalOwnerRegistrationPolicyReplayFlow
         var success = fixture.Database.Apply(fresh);
         await Assert.That(success.Error).IsNull();
         await Assert.That(NativeSerialization.Serialize(success).SequenceEqual(NativeSerialization.Serialize(originalResult))).IsTrue();
-        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAddedAsync(fixture, before, FreshId);
+        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, before, FreshId, fresh.EvaluatedAt);
         var freshOutcome = PhysicalOwnerRegistrationPolicyReplayAssertions.Outcome(fixture, FreshId);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.StoredAsync(fixture, fresh, success, freshOutcome, RegrantedPolicy);
         var image = PhysicalShardCatalogPolicyOutcomeAssertions.Image(fixture);
@@ -108,7 +108,7 @@ internal static class PhysicalOwnerRegistrationPolicyReplayFlow
         var result = fixture.Database.Apply(continuation);
         await Assert.That(result.Error).IsNull();
         await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
-        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAddedAsync(fixture, before, ContinuationId);
+        await PhysicalOwnerRegistrationPolicyReplayAssertions.OnlyOutcomeAndEvaluatedClockAddedAsync(fixture, before, ContinuationId, continuation.EvaluatedAt);
         var outcome = PhysicalOwnerRegistrationPolicyReplayAssertions.Outcome(fixture, ContinuationId);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.StoredAsync(fixture, continuation, result, outcome, RegrantedPolicy);
         await PhysicalOwnerRegistrationPolicyReplayAssertions.AuthorityAsync(fixture, directory, catalog);

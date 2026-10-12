@@ -34,6 +34,8 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementForAuthorizedQueryDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
+        if (directory is not null)
+        { AtomicPartitionPlacementValidation.ValidateDirectory(directory); }
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
         if (row is not null)
         { AtomicPartitionPlacementValidation.ValidateRowShape(row, partition); }
