@@ -1,0 +1,5 @@
+# Native movement process refusal
+
+REQ-ROUTE-NATIVE-PROCESS-001 / AC-ROUTE-NATIVE-PROCESS-001 retain the genuine six-host signed outer request with an invalid inner MAC, followed by the unchanged healthy original Prepare. Native peer admission rejects the malformed inner signature before authenticating the request, so its outer failure remains unsigned. The original native sender must reject that unsigned response as `Unauthenticated` with `PartitionMovementProtocol.InvalidProof`. `Unavailable` belongs to a successfully verified signed failure and is not the expected result of this malformed request.
+
+The same native process and canceled-stop cases compare complete six-owner raw images, canonical cuts and journals before and after the refusal. They must retain the original failure if any observation or joined shutdown also fails; no retry, replacement request, relaxed MAC check, accepted unsigned reply or deadline change is permitted. The original R18 refusal assertion and process-entry inspection failures are preserved as failures. This source correction does not qualify their subsequent healthy, kill, cold outcome, exact replay and joined-owner requirements.

@@ -9,10 +9,13 @@ public sealed partial class DatabaseEngine
     private const int QueueDeliveryTransitionVersionOne = 1;
 
     private const int DefaultRenewalSeconds = 30;
+    private const string InvalidQueueDeliveryAction = "Queue delivery action is invalid.";
 
     private CommitReceipt ApplyDeliveryTransition(IAtomicTransaction tx, DeliveryCommand command,
         ResourceDefinition resource, ValidatedQueueLease lease, DateTimeOffset now, long position, ReplicatedOperation? operation = null)
     {
+        if (command.Action is not (DeliveryAction.Ack or DeliveryAction.Nack or DeliveryAction.Renew))
+        { throw Errors.Fail(ErrorCode.Validation, InvalidQueueDeliveryAction); }
         var metadata = lease.Metadata;
         var counters = Counters(tx, command.Lane);
         tx.Delete(QueueKey(LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));

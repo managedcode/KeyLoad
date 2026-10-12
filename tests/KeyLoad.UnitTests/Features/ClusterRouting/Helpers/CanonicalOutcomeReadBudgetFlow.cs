@@ -74,7 +74,7 @@ internal static class CanonicalOutcomeReadBudgetFlow
         {
             using var reopened = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(fixture.DirectoryPath)
             { Incarnation = identity.Incarnation }, identity.NodeId, UnitExecutionOptions.StorageExecution());
-            await Assert.That(reopened.Identity).IsEqualTo(identity);
+            await CanonicalOutcomeReadBudgetAssertions.IdentityAsync(identity, reopened.Identity);
             await CanonicalOutcomeReadBudgetAssertions.ImageAsync(reopened, image);
             await CanonicalOutcomeReadBudgetAssertions.OriginalAsync(original,
                 reopened.Read(view => Select(view, fixture, scope)), fixture);

@@ -25,6 +25,7 @@ internal static class LiveRepairedRf3Continuation
         (administrator, reader) = await LiveSubscriptionRf3Cold.RestartAsync(owner, administrator, reader,
             scenario, token);
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.RepairedRevision, FeedLiveRf3Protocol.FirstJson), FeedLiveRf3Protocol.RepairedSequence,
             () => LiveTailRf3Assertions.DeniedAsync(reader, obsolete, ErrorCode.TokenInvalidated, token), token);
         await LiveRepairedRf3Assertions.DeltaAsync(administrator, reader, scenario, request, receipt, token);
         await ReplayAsync(administrator, scenario, command, receipt, token);

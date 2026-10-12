@@ -64,5 +64,8 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         await Silo.StartAsync(cancellationToken).ConfigureAwait(false);
         await Silo.WaitForPhysicalOwnerRegistrationAsync(cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Silo.DatabaseReady)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
     }
 }

@@ -1245,3 +1245,21 @@ flowchart LR
     Discovery --> Receipts[Original accept and complete receipts]
     Receipts --> Cold[Two same-root cold replays]
 ```
+
+### TASK-MSG-READY-AUTHORITY-NATIVE-ERROR-001
+
+REQ-MSG-READY-AUTHORITY-ERROR-001 (REQ-MSG-001/004/005, ADR-026): native ready-row body or metadata identity mismatch refuses with Corruption; a scheduled state or mismatched ready sequence refuses with RecoveryRequired. An original committed but unapplied operation has no StoredOutcome and ResolveOutcome still returns RecoveryRequired, independently of the initiating apply error. These are existing product contracts, not a change to error normalization.
+
+AC-MSG-READY-AUTHORITY-ERROR-001: preserve every original fault/expiry argument in QueueReadyAuthorityTests.NativeReadyAuthorityFaultPreservesOriginalCommittedEntryThenRecoversClaimOrExpiryAndHealthyProcessing. Independently expect Corruption for BodyIdentity/MetadataIdentity and RecoveryRequired for ScheduledState/ReadySequence on first submission; retained-command replay through the already-failed owner requires RecoveryRequired; require complete unchanged store bytes, identity, position, journal cut, absent outcome/document/inbox, original native payload and index. Join the failed materializer before repairing only its saved fault-owned row. The test-owned recovery helper accepts only the exact initiating typed error code, limited to Corruption or RecoveryRequired, and requires the original first submission and every joined disposal cause to match it while independently requiring RecoveryRequired from the intervening failed-owner replay; the separate failed-owner status and absent-outcome RecoveryRequired checks remain intact. Retain every primary and cleanup error, then complete the original claim or expiry and independent healthy processing without a second journal effect, changed deadline or product exception suppression.
+
+The R18 original four identity cases failed before recovery with Corruption and a matching failed-materializer disposal error. Their original receipts remain failed evidence; this test-only correction requires a newly matched compiled image and full original operations before qualification.
+
+```mermaid
+flowchart LR
+    Row[Original damaged ready authority] --> Error[Exact native initiating code]
+    Error --> NoEffects[Full unchanged image and absent outcome]
+    NoEffects --> Join[Join failed owner with matching original causes]
+    Join --> Repair[Restore exact saved row]
+    Repair --> Replay[Same retained command and index]
+    Replay --> Healthy[Original claim or expiry and healthy processing]
+```

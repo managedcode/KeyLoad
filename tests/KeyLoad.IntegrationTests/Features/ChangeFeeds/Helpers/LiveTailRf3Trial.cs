@@ -48,10 +48,12 @@ internal static class LiveTailRf3Trial
         };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.DeletedRevision, null), FeedLiveRf3Protocol.DeletedSequence,
             () => LiveTailRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);
         var restored = scenario.Identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.DeletedRevision, null), FeedLiveRf3Protocol.DeletedSequence,
             () => LiveTailRf3Assertions.DeniedAsync(reader, original, ErrorCode.TokenInvalidated, token), token);
         var observeCut = await LiveQueryCutRf3Assertions.CreateAsync(administrator, reader, scenario, deletion,
             [], () => LiveTailRf3Assertions.QueryAsync(reader, scenario, token), token);

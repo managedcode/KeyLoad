@@ -1,4 +1,165 @@
 {
+  "STAGE62-COMPOSITION-AND-MODELS-001": {
+    "status": "in_progress",
+    "record": "docs/implementation/qualification-stage62-composition-and-models.md",
+    "originalPlan": {
+      "accepted": 18,
+      "inProgress": 86,
+      "total": 104
+    },
+    "authentication": "standard ASP.NET Core Authentication/Authorization; verified subject, fresh persisted policy; native ManagedCode.Orleans.Identity call context",
+    "sourcePackets": [
+      {
+        "name": "Complete model R2",
+        "paths": 32,
+        "originalPatchSha256": "3e0e7513742fcca95789497a71bb0265095b0c051052452fcf5a5c1ee611d58c",
+        "actualFinalPostReceiptSha256": "edf92c392a8fe8b9da49eed5eb84a54e38697ab8bdcd6c4c837cf9d81d8add02"
+      },
+      {
+        "name": "Complete bounded SQL DML",
+        "paths": 12,
+        "originalPatchSha256": "e80cc810cfabf039da46efe3127346df282614b764f2a64937642eefcfe5f2a4",
+        "actualFinalPostReceiptSha256": "d4f2cf3f991753dcc6bc3df54a4a09b07ecb04d1783fd1fb35c61f0249142489"
+      },
+      {
+        "name": "Complete literal FTS and LiveQuery R3",
+        "paths": 9,
+        "originalPatchSha256": "1a4a32315964317e5d75a092f35fb2fdc9ae79cfa3812d70a2265adfef82b6b1",
+        "actualFinalPostReceiptSha256": "9eaa4b3e1194776dc5c110997e0637d525bddef5ebc845889c972244f1e5f293"
+      }
+    ],
+    "originalR17Failures": {
+      "unitSelected": 149,
+      "unitPassed": 140,
+      "unitFailed": 9,
+      "recoverySelected": 10,
+      "recoveryPassed": 8,
+      "recoveryFailed": 2,
+      "sourceRepaired": true,
+      "repairsRuntimePassed": false
+    },
+    "nativeMaximumParallelTests": 50,
+    "normalSimdRequired": true,
+    "currentSourceCompilerPassed": false,
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
+    "functionalCoverage": "unmeasured; load tests and nonfunctional controls excluded",
+    "remaining": [
+      "Full coherent followup Release and scoped formatter",
+      "Combined current native Unit and Recovery closure for original observed failures",
+      "Current Linux, real Aspire-owned SDK/MCP RF3 and complete original task criteria",
+      "Hosted ANN durable execution and authenticated remote publication owner",
+      "Typed cross-model JOIN/full SQL conformance and native query-owner cut proof",
+      "Complete functional coverage/fault/endurance/matched performance"
+    ],
+    "nativeAnalyzer": {
+      "passed": true,
+      "originalPasses": [
+        {
+          "pass": "original",
+          "receipt": "TestResults/stage61-native-join/stage62-complete-native-diagnostics.original.json",
+          "sha256": "faeb5602c13627721cc2fef2ca044ca857f408442bb24689ecc349e1d8210e2f",
+          "errors": 37,
+          "warnings": 0
+        },
+        {
+          "pass": "after-first-unit-fixes",
+          "receipt": "TestResults/stage61-native-join/stage62-unit-fixes-final-native-diagnostics.original.json",
+          "sha256": "ad9b1d5be11c2cfc8c13fc182f07b049d7371c5ec64258a057363bedd762b03f",
+          "errors": 3,
+          "warnings": 0
+        },
+        {
+          "pass": "after-owner-closures",
+          "receipt": "TestResults/stage61-native-join/stage62-owner-final-native-diagnostics.original.json",
+          "sha256": "c18f77901c57778aa011e90469ee1a7881fa77dd7c46d0526fc976ae1cb2a969",
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "pass": "after-R18-ordered-refusal-test-repair",
+          "receipt": "TestResults/stage61-native-join/stage62-r18-followup-native-diagnostics.original.json",
+          "sha256": "25587e2cd0fb52a4e5d0763fd30d5ac59c2a2710693388f286fe464d5da49653",
+          "errors": 0,
+          "warnings": 0
+        }
+      ],
+      "qualification": "Current followup native compiler/analyzer 0 errors and 0 warnings; genuine R18 full Release passed for its immutable source. Followup full Release/runtime still open."
+    },
+    "standardAspNetSource": {
+      "receipt": "TestResults/stage61-native-join/stage62-standard-aspnet-auth-source.original.json",
+      "sha256": "faf3e379e7ae39c99141294c79ec0a8cb255c0476c116d741d639666a85d0feb",
+      "runtimeQualified": false
+    },
+    "fullReleaseR18": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 0,
+      "sourceInputs": 9226,
+      "sourceDrift": false,
+      "seconds": 343.64257192611694,
+      "originalCompletion": {
+        "path": "TestResults/stage60-native-originals/coherent-full-release-r18-completion.original.json",
+        "sha256": "57a54d56d0f60b057549cc6c9fd9ad6c66fab74af859fc1d5747c4272a7b3f39"
+      },
+      "qualification": "Immutable pre-followup source Release build; later followup code requires its next coherent image."
+    },
+    "currentNativeCompilerAnalyzerPassed": true,
+    "runtimeR18": {
+      "Unit": {
+        "selected": 176,
+        "passed": 172,
+        "failed": 4,
+        "skipped": 0,
+        "seconds": 24.277934,
+        "actualPeakOverlappingTrxIntervals": 45,
+        "original149AllPassed": true,
+        "trxSha256": "469fd559db5e52477f2aa450ba999ab2eeb0a7a27fdef737e5d8ac5f11250214",
+        "sourceImageDrift": false,
+        "allNativeProcessJoins": true
+      },
+      "Recovery": {
+        "selected": 10,
+        "passed": 8,
+        "failed": 2,
+        "skipped": 0,
+        "seconds": 42.733,
+        "trxSha256": "d7cedb5fec79840ff6dcdcf42954386d47a79a9a121b4babfb6012875c6ad238",
+        "sourceDrift": false,
+        "nonRuntimeLogOutputDrift": false,
+        "originalRuntimeLogChanges": 19
+      },
+      "immutableOriginalBoundSummary": {
+        "path": "TestResults/stage61-native-join/stage62-r18-results.derived-original-bound.json",
+        "sha256": "e86919dba04eb3e9c0e410064331e14a3bc46a5af4f629217ab0d42331a06655"
+      },
+      "developmentOnly": true,
+      "LinuxQualified": false
+    },
+    "orderedQueueTestRepair": {
+      "sourceRepaired": true,
+      "runtimePassed": false,
+      "firstIdentityApply": "Corruption",
+      "retainedFailedOwnerReplay": "RecoveryRequired",
+      "joinedDisposal": "original initiating code",
+      "originalR2Manifest": {
+        "path": "TestResults/stage61-native-join/queue-ready-r18-repair-r2-manifest.original.json",
+        "sha256": "f2228c36bade12f79d9d2a5476a0c3d297534a36d8cbe3d9f807ad1ac17e2cd5"
+      }
+    },
+    "currentNativeInventory": {
+      "instances": 3617,
+      "functional": 3115,
+      "mandatoryNonContributors": 502,
+      "compiledUnitSourceFiles": 2130,
+      "fiveOriginalGroupsPreserved": true,
+      "actualRootJoin": {
+        "path": "TestResults/stage61-native-join/coverage-current-r18-ready.actual-root-join.original.json",
+        "sha256": "988e340663e2a33b675fc90d4bd4d186b842ef977e4aa560eb27b40c39db5a47"
+      },
+      "coverageMeasured": false
+    }
+  },
   "STAGE61-COHERENT-SOURCE-JOIN-001": {
     "status": "in_progress",
     "record": "docs/implementation/qualification-stage61-coherent-join.md",
@@ -138,7 +299,64 @@
       "meaningful native Unit operations and same genuine recovery cases",
       "current exact-source Linux unit/recovery and SDK/official MCP Aspire Docker RF3",
       "source-bound functional coverage, fault/endurance and matched performance"
-    ]
+    ],
+    "originalFullReleaseR17": {
+      "sourceRevision": "bb164763063c88046f094ab101732eb98f5d3d68",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 240.97003698349,
+      "sourceInputs": 9191,
+      "sourceDrift": [],
+      "completionSha256": "e69731147261d96fcee303305a50159a73901b80e77afa020ec7f2255bac3d76",
+      "stdoutSha256": "0afa318cba53f53d25f3bb42563f26f531f2b208462264246e6282b5e62d8753",
+      "binlogSha256": "2b379a286038735fd2d8c48e77ed07b6f499ed39bd4898d35c76797ed176f129",
+      "scope": "Full normal local Release; does not qualify subsequent stage62 source or Linux/runtime gates."
+    },
+    "originalCurrentUnitR17": {
+      "nativeDiscoveredCases": 3590,
+      "selected": 149,
+      "passed": 140,
+      "failed": 9,
+      "skipped": 0,
+      "elapsedSeconds": 21.592,
+      "nativeMaximumParallelTests": 50,
+      "trxSha256": "0429abdadbc9978e564f405cb0a6e77c6bebf5743c54efdb25ff8ce85b2a90c5",
+      "beforeAfterImageReceiptSha256": "b04fd26c77ca0098eaae7efffcfa60f7b389dc8e807602df175ad717da2a0859",
+      "nativeExitOutputErrorDisposedJoined": true,
+      "currentSourceAndImagesUnchanged": true,
+      "sourceRepairGroups": [
+        "Cold StoreIdentity compares all fields and independent exact signing bytes, not backing-memory equality.",
+        "Persisted fixture administrator is required for original queue-transfer witness creation.",
+        "ANN serializer fixture must configure and capture its actual pinned canonical source."
+      ],
+      "scope": "Original current-image whole operation development result; all9 failures retained, stage62 repairs unexecuted."
+    },
+    "originalCurrentRecoveryR17": {
+      "selected": 10,
+      "passed": 8,
+      "failed": 2,
+      "skipped": 0,
+      "elapsedSeconds": 41.905,
+      "nativeMaximumParallelTests": 50,
+      "sourceInputs": 9191,
+      "releaseImages": 3293,
+      "sourceDrift": [],
+      "imageDrift": [],
+      "completionSha256": "d996c247ce936b1698647d59ba311f5e4f85f6cd73678778a9afec4887b4060d",
+      "trxSha256": "de37c1cb4ae7960830d0a1640e895ad9f7b7e6f3db09268d29128a92472cf110",
+      "phase": "Both original failures at initial Warm seed: actual physical catalog was not ready for public admission. Stop/kill/cold not reached.",
+      "sourceConfirmedCause": "The six-host fixture omitted required native RemoteDocumentReads for Control/Destination roles. Its production readiness guard correctly refused.",
+      "resourceJoin": "Original process exit/output/error/disposal joined; no child runner observed. Attributable18-lock/cold proof remains open."
+    },
+    "pushedCheckpoint": {
+      "revision": "bb164763063c88046f094ab101732eb98f5d3d68",
+      "branch": "main",
+      "buildAndTestsRun": 38199970086,
+      "benchmarksRun": 38199970113,
+      "websiteRun": 38199970140,
+      "scope": "Authorized main push; workflow completion, coverage and acceptance not implied."
+    }
   },
   "STAGE60-NATIVE-EXECUTION-001": {
     "status": "in_progress",

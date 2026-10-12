@@ -1,4 +1,5 @@
 using global::Orleans.Serialization;
+using global::Orleans.Serialization.Serializers;
 using global::Orleans.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -35,7 +36,13 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
                 state.RecordExists = true;
             }
             else
-            { state.ETag = null; state.RecordExists = false; }
+            {
+                var replacement = CreateState<T>();
+                cancellationToken.ThrowIfCancellationRequested();
+                state.State = replacement;
+                state.ETag = null;
+                state.RecordExists = false;
+            }
         }
         return Task.CompletedTask;
     }
@@ -84,17 +91,24 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
             entries.TryGetValue(grainId, out var before);
             RequireRevision(state.ETag, before);
             if (before is not null)
+            { RequireType<T>(before); }
+            var replacement = CreateState<T>();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (before is not null)
             {
-                RequireType<T>(before);
                 var nextBytes = checked(retainedBytes - before.EncodedBytes);
                 entries.Remove(grainId);
                 retainedBytes = nextBytes;
             }
+            state.State = replacement;
             state.ETag = null;
             state.RecordExists = false;
         }
         return Task.CompletedTask;
     }
+
+    private T CreateState<T>()
+        => originalServices.GetRequiredService<IActivatorProvider>().GetActivator<T>().Create();
 
     private void RequireOpen(CancellationToken cancellationToken)
     {

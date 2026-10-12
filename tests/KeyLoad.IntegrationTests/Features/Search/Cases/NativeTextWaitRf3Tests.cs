@@ -32,6 +32,11 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
         var request = new WaitForIndexRequest(scenario.Partition, NativeTextRf3Scenario.Collection,
             NativeTextRf3Scenario.TextField, scenario.SeedToken);
         var cut = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
+        var history = await NativeTextRf3ReplayHistory.CaptureAsync(administrator, scenario.Partition, token);
+        await NativeTextRf3ReplayHistory.RequireSeedAsync(scenario, history);
+        await NativeTextRf3ReplayHistory.RequireDocumentsAsync(administrator, scenario, token);
+        var outbox = await McpCallerAssertions.SdkSuccessAsync(await administrator.OutboxStatusAsync(scenario.Partition, token));
+        await NativeTextRf3ReplayHistory.RequireSeedOutboxAsync(outbox);
         var failure = await denied.WaitForIndexAsync(request, token);
         await Assert.That(failure.IsSuccess).IsFalse();
         await Assert.That(failure.Value).IsNull();
@@ -49,7 +54,12 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
         await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
             ErrorCode.PermissionDenied, dispatched: true);
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
-        await Assert.That(after.Applied).IsEqualTo(cut.Applied);
+        await NativeTextWaitRf3CutAssertions.OwnerAsync(cut, after);
+        await Assert.That(after.Applied).IsGreaterThanOrEqualTo(cut.Applied);
+        await NativeTextRf3ReplayHistory.RequireAsync(administrator, scenario.Partition, history, token);
+        await NativeTextRf3ReplayHistory.RequireDocumentsAsync(administrator, scenario, token);
+        await SqlRf3Protocol.EqualAsync(outbox, await McpCallerAssertions.SdkSuccessAsync(
+            await administrator.OutboxStatusAsync(scenario.Partition, token)));
         await NativeTextWaitRf3Assertions.WaitAsync(caller, official, administrator, request,
             scenario.Resource.SchemaVersion, identity.Principal.PolicyEpoch, token);
         await NativeTextWaitRf3Assertions.LiteralAsync(scenario, caller, official, false, token);
@@ -61,6 +71,6 @@ internal sealed class NativeTextWaitRf3Tests(ClusterFixture fixture)
         await NativeTextWaitRf3Assertions.LiteralAsync(scenario, caller, official, true, token);
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await administrator.GetAsync(
             new(scenario.Partition, NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId), token));
-        await Assert.That(deleted).IsNull();
+        await Assert.That(deleted.Document).IsNull();
     }
 }

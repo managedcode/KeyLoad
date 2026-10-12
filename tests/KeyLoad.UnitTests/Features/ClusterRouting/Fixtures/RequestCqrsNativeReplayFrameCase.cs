@@ -15,7 +15,8 @@ internal sealed class RequestCqrsNativeReplayFrameCase : IDisposable
     internal RequestCqrsNativeReplayFrameCase()
     {
         Mac = new(security.Options.Secret.Span);
-        database.AddPrincipal(new(Principal, RemoteTransferDatabase.TenantId, [new("*", "*", Capability.All)], ["*"]));
+        database.AddPrincipal(new(Principal, RemoteTransferDatabase.TenantId, [new("*", "*", Capability.All)], ["*"])
+            { ClusterAdministrator = true });
     }
 
     internal RequestCqrsNativeReplayWitness Create(RemoteModelNativeReplayVariation mode = RemoteModelNativeReplayVariation.Original2)

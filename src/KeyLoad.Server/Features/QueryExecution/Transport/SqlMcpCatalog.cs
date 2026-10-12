@@ -7,7 +7,7 @@ namespace KeyLoad.Server;
 /// <summary>Truthful native metadata for the SQL adapter; callable targets remain canonical operations only.</summary>
 internal static class SqlMcpCatalog
 {
-    private const string Description = "Execute one version-one Q1 SELECT or CALL exact_public_operation(@arguments). " +
+    private const string Description = "Execute one version-one Q1 SELECT, bounded model INSERT SELECT, or CALL exact_public_operation(@arguments). " +
         "CALL binds the canonical argument envelope, including caller stable command IDs for mutations. " +
         "Results have the selected operation's actual JSON shape. SQL uses bounded data admission; " +
         "use direct control tools when the data lane is saturated. Joins and full vendor SQL are unsupported.";

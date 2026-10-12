@@ -5,6 +5,20 @@ Canonical slice is Search; the owner selected ZoneTree.FullTextSearch in ADR-071
 KL-029's native candidate generation is distinct from KL-039's broader online
 index-management API and KL-097's event-driven projection lineage.
 
+### TASK-FTS-PUBLIC-ABSENCE-001
+
+REQ/AC-FTS-002/005/006 preserve the original acknowledged-prefix RF3 case and all SDK, official MCP and Q1 authorization, complete history preservation, wait/publication and exact ranked deletion oracles. The existing final successful SDK document read uses the current nonnull DocumentReadResult contract; absence is its nullable Document field. AC-FTS-PUBLIC-ABSENCE-001 requires original authorized DeleteDocument/WaitForIndex and full literal remaining search results to complete, then the successful document response must have Document=null. Never change the public wrapper, weaken success checking or invent a native provider defect to satisfy an outer-null expectation.
+
+Authenticated Linux run38180879404/sourcef4f654fb7c36402bd5dc793700c1592f00cf6a1b/job114592983406 failed only this stale final outer-null assertion after its earlier actual RF3 flow;58 Unit and18 Recovery instances passed, RF3 had8 passed/1 failed/0 skipped. Preserve original log SHA256bd375700b9022e0fdba82917537b21242759ea65135e8b502e0ad767761064e6. Current-source compiler, native whole case and Linux task admission remain open; no cold/recovery gate is inferred from a preview or removed from the existing task.
+
+```mermaid
+flowchart LR
+    Denial[Persisted denial and complete retained history] --> Wait[Authorized SDK MCP Q1 prefix wait]
+    Wait --> Delete[Original authorized delete receipt]
+    Delete --> Publish[Wait and exact remaining ranked documents]
+    Publish --> Absent[Successful DocumentReadResult with Document null]
+```
+
 |Requirement|Acceptance and automated evidence|
 |---|---|
 |REQ-FTS-001: selected actual native provider stays a derived index|AC-FTS-001: published/source-bound1.0.9 and native ZoneTree posting files are used; exact canonical identities/scores/ties and all RRF branch ranks agree on real-store Unicode/digit/short/repeated/missing-field/collision corpus|

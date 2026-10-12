@@ -9,8 +9,20 @@ internal sealed class EventFeedPubSubCountingWriter(int maximum,
     private const int UnspecifiedSizeHint = 0;
     private readonly GrainNativeCountingWriter original = new(maximum, routing, cancellationToken);
     internal long Length => original.Length;
-    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint) => original.GetMemory(sizeHint);
-    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint) => original.GetSpan(sizeHint);
+    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
+    {
+        try
+        { return original.GetMemory(sizeHint); }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity, error); }
+    }
+    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint)
+    {
+        try
+        { return original.GetSpan(sizeHint); }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity, error); }
+    }
     public void Advance(int count)
     {
         try

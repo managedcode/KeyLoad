@@ -46,6 +46,7 @@ public sealed partial class DatabaseEngine
         var bodyKey = QueueKey(MessageBodySpace, request.Lane, id);
         var body = StoredMessageBody.Read(tx, bodyKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyBody);
+        RequireQueueReadyAuthority(request.Lane, id, key, metadata, body.Body);
         state.Counters ??= Counters(tx, request.Lane);
         if (metadata.ExpiresAt <= now)
         {

@@ -11,6 +11,26 @@ internal static class CanonicalOutcomeReadBudgetAssertions
     private const string SeedJson = "{\"seed\":true}";
     private const long SeedRevision = 1;
     private const string PutDocumentKind = "putDocument";
+    private const int SigningKeyBytes = 32;
+
+    internal static async Task IdentityAsync(global::KeyLoad.Storage.StoreIdentity expected,
+        global::KeyLoad.Storage.StoreIdentity actual)
+    {
+        await Assert.That(actual.FormatVersion).IsEqualTo(expected.FormatVersion);
+        await Assert.That(actual.KeyCodecVersion).IsEqualTo(expected.KeyCodecVersion);
+        await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
+        await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
+        await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
+        await Assert.That(actual.DispatchPaused).IsEqualTo(expected.DispatchPaused);
+        await Assert.That(actual.ReadGeneration).IsEqualTo(expected.ReadGeneration);
+        await Assert.That(actual.MinimumReaderContract).IsEqualTo(expected.MinimumReaderContract);
+        await Assert.That(expected.SigningKey.Length).IsEqualTo(SigningKeyBytes);
+        await Assert.That(actual.SigningKey.Length).IsEqualTo(SigningKeyBytes);
+        await Assert.That(actual.SigningKey.Span.SequenceEqual(expected.SigningKey.Span)).IsTrue();
+        var expectedDigest = global::System.Security.Cryptography.SHA256.HashData(expected.SigningKey.Span);
+        var actualDigest = global::System.Security.Cryptography.SHA256.HashData(actual.SigningKey.Span);
+        await Assert.That(Convert.ToHexString(actualDigest)).IsEqualTo(Convert.ToHexString(expectedDigest));
+    }
 
     internal static async Task UnchangedAsync(IAtomicStore store, string[] expected, long position)
     {

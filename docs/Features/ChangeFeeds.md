@@ -260,6 +260,29 @@ AC-FEED-LIVE-FRESH-CUT-002: after the original acknowledged deletion page, commi
 
 Scope is Core0: bounded feature-local integration assertions/control and the existing trial callsites only. No product hooks, cursor/public/storage format changes, deadline/clock/limit/topology/readiness changes or inferred native PASS. Canonical formatter/analyzers, original native discovery, actual fixture-owned Aspire RF3 and exact-source Linux qualification remain pending; source evidence cannot replace runtime proof. Rollback removes this coherent oracle/control change, retaining original failure receipts.
 
+## TASK-KL079-REFUSAL-FRESH-CUT-012
+
+REQ-FEED-REFUSAL-CUT-001: the original refused live/cursor operation preserves the complete authorized logical query output and complete outbox status. Independent uncursored AST queries report fresh cuts; comparing their complete QueryPage objects must not require equal cuts or normalize an expected result using the actual result. Maps to AC-FEED-REFUSAL-CUT-001 and AC-FEED-REFUSAL-AUTHORITY-002.
+
+AC-FEED-REFUSAL-CUT-001: FeedLiveRf3NoEffects.RequireAsync compares complete Rows through SqlRf3Protocol.EqualAsync, Cursor and AccessPath exactly, complete OutboxStatus exactly, and separately requires the later reported CutPosition to be greater than or equal to the earlier reported cut. Actual administrator Status observations require unchanged NodeId, ProcessId and Incarnation, RoutingReady, three voters, QuorumProcessDurable, and nondecreasing Applied and ReadGeneration. These observations describe the selected public endpoint and its reported RF3 readiness; they do not prove the physical owner of either separately routed query. Preserve the genuine persisted revocation/restoration refusals, original SDK and official MCP/Q1 paths, original cursor, concurrent operation, receipt replay, two cold restarts and healthy continuation.
+
+AC-FEED-REFUSAL-AUTHORITY-002 — OPEN: qualification must correlate each returned query cut with its actual activation/node-local database owner, incarnation, read generation and current persisted authorization at that query's native read. QueryPage currently exposes only Rows, Cursor, CutPosition and AccessPath; Status is a separate request and ConnectionGrain uses PreferLocalPlacement rather than guaranteed endpoint-local execution. Existing probe markers do not carry the query cut and native store owner, and this fixture does not enable that probe. The actual read chain reloads persisted authority and validates Query plus DocumentsRead at the native query view, but the public observations cannot independently establish the required owner/cut correlation. No forced placement, synthesized owner evidence or new diagnostic/product hook is admitted by this source correction.
+
+Canonical map: tests/KeyLoad.IntegrationTests/Features/ChangeFeeds/Assertions/FeedLiveRf3NoEffects.cs owns the public refusal oracle; existing ChangeFeeds trial callers retain operation, authorization and resource ownership. KeyLoad.Orleans ConnectionReadExecution/ConnectionReadCapabilities and KeyLoad.Query QueryEngine retain the existing production authority/read-cut path; they are unchanged.
+
+Original Linux run 38180879404/job 114592983420 failed the complete QueryPage equality assertion. Its retained failure does not identify which field differed. Source review confirms the frozen-cut assumption conflicts with uncursored QueryEngine.ResolveCursor; this is a source oracle correction, not a verified historical runtime cause or full native no-effects proof. Exact-source compiler, genuine Aspire RF3 runtime and owner/cut correlation gates remain OPEN.
+
+```mermaid
+flowchart TD
+    S[Actual endpoint Status] --> B[Before query and complete outbox]
+    B --> R[Original refused operation]
+    R --> A[After query and complete outbox]
+    A --> E[Exact Rows Cursor AccessPath and outbox]
+    A --> C[Independent nondecreasing reported cut]
+    S -. separate RPC .-> O[OPEN actual query owner and cut correlation]
+    A -. required qualification evidence .-> O
+```
+
 
 ## TASK-KL079-LIVE-RETENTION-RESYNC-001
 
@@ -279,3 +302,12 @@ REQ/AC-FEED-003 with REQ/AC-FEED-002/005 retains the original ScalarLiveDeltasMa
 Each original Put/Delete returns its actual acknowledged receipt. Before any reads capture complete bounded native bytes and local store position. Require the full independent zero/one change with original receipt token, sequence trial+1, known kind/reference/revision and literal row/null; full replay and actual consumed-cursor empty continuation retain that horizon, HasMore=false and unchanged original local cut/native image. Each issued opaque cursor must be nonempty; distinct issued token bytes are not required equal. Snapshot starts independently empty at logical horizon0. Extract only unchanged Apply/Same/full-round visitation responsibilities into the feature-owned oracle so method/class bounds stay intact; every original mutation/assertion remains. No production/cursor/storage/provider/clock/deadline/limit/authority or scheduling changes, no Test/Args/new UID and no disabled-SIMD profile.
 
 Original8e4 full-page failure is retained without an identified unequal field. Current public fresh-cut brackets, R41 failure-only diagnostics, live retention/resynchronization, persisted revoke/repair, cancellation/native producer joins and real cold operations remain distinct mandatory cases. This new independent permutation oracle is not evidence those public gates passed. Root executes exact current compiler/format/native50 SIMD/compiled discovery and Linux/process/RF3/coverage gates; all remain OPEN until genuine receipts.
+
+
+## TASK-KL079-REFUSAL-LITERAL-013
+
+REQ-FEED-REFUSAL-CUT-001 / AC-FEED-REFUSAL-CUT-001 require both genuine administrator queries to match an independently authored complete phase oracle, in addition to complete before/after parity. Initial budget refusal expects raw a/b revision1 and tail2; reconnect revoke/restoration expects raw a revision2 plus b revision1 and tail3; live tombstone revoke/restoration expects only raw b revision1 and tail4; repaired obsolete-cursor refusal expects raw a revision4 plus b revision1 and tail5. Preserve the full known JSON, EntityId, revision, Redacted=false, empty redaction fields and absent Sources. Each ordinary page has null Cursor and bounded-full-scan AccessPath. Never build these expected rows from a returned page or derive phase from the actual outbox.
+
+Both complete outbox statuses must have the independently known phase Tail, FirstAvailable=1, StoredRecords=Tail and no consumers. StoredBytes must be positive and exactly preserved before/after; server timestamp-dependent serialization is not represented as an independently known byte length. Preserve every original refusal, healthy continuation, exact receipt replay, four caller routes, two cold restarts and joined cleanup. Six existing helper calls explicitly supply their original phase literals; no new test declaration or altered UID is introduced.
+
+Canonical map extends the existing Assertions/FeedLiveRf3NoEffects with Rows/LiteralAsync and the existing Helpers/FeedReconnectRf3Trial, LiveTailRf3Trial and LiveRepairedRf3Continuation pass-throughs. Current persisted-auth and native cut-owner correlation remain separately required; this public result oracle is not a full raw canonical snapshot. Compiler, Linux native discovery and actual Aspire RF3 gates remain OPEN. Rollback removes this additive literal oracle coherently with its callsites; original operation coverage and historical failures remain.

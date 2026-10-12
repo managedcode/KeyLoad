@@ -18,6 +18,8 @@ internal static class SqlOperationCompiler
         if (statement.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
             || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase))
         { return Select(request, maximumPayloadBytes, cancellationToken); }
+        if (statement.Equals(SqlCompositionInsert.Statement, StringComparison.OrdinalIgnoreCase))
+        { return Composition(request, reader, maximumPayloadBytes, cancellationToken); }
         if (!statement.Equals(SqlOperationSyntax.Call, StringComparison.OrdinalIgnoreCase))
         { throw SqlOperationSyntax.UnsupportedInput(); }
         if (request.AllowFullScan || request.Cursor is not null)
@@ -34,6 +36,18 @@ internal static class SqlOperationCompiler
         var arguments = BindArguments(request.Parameters, parameter);
         cancellationToken.ThrowIfCancellationRequested();
         var operation = descriptor.Decode(arguments, maximumPayloadBytes);
+        cancellationToken.ThrowIfCancellationRequested();
+        return operation;
+    }
+
+    private static McpDecodedOperation Composition(SqlOperationRequest request, SqlOperationSyntaxReader reader,
+        int maximumPayloadBytes, CancellationToken cancellationToken)
+    {
+        var command = SqlCompositionInsert.Compile(request, reader);
+        cancellationToken.ThrowIfCancellationRequested();
+        var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+        { [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(command, JsonDefaults.Options) };
+        var operation = Target(McpToolNames.DocumentsCommit).Decode(arguments, maximumPayloadBytes);
         cancellationToken.ThrowIfCancellationRequested();
         return operation;
     }

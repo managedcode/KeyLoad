@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests;
 internal static class TestDatabaseReplicaRecovery
 {
     private const string InvalidRecovery = "The fixture cannot recover this original failed committed entry.";
+    private const int RequiredSubmissionFailures = 2;
+    private const int RetainedReplayFailureIndex = 1;
 
     internal static ReplicaMaterializer Recover(ReplicaMaterializer original, DatabaseEngine database,
         DurableReplicaLog log, IReplicaSnapshotStore snapshots, IOptions<ReplicaExecutionOptions> options,
@@ -21,13 +23,14 @@ internal static class TestDatabaseReplicaRecovery
             || database.ResolveOutcome(operation).Error != ErrorCode.RecoveryRequired)
         { throw new InvalidOperationException(InvalidRecovery); }
         RequireFailed(original);
+        var expectedError = RequireOriginalError(originalFailures);
         var joined = new List<Exception>();
         try
         { original.DisposeAsync().AsTask().GetAwaiter().GetResult(); }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         { joined.Add(error); }
         originalFailures.AddRange(joined);
-        if (joined.Count == 0 || joined.Any(static error => !IsOriginalFailure(error)))
+        if (joined.Count == 0 || joined.Any(error => !IsOriginalFailure(error, expectedError)))
         {
             if (joined.Count != 0)
             { KeyLoad.Server.ServerFailureObserver.ThrowIfAny(joined); }
@@ -48,10 +51,19 @@ internal static class TestDatabaseReplicaRecovery
         throw new InvalidOperationException(InvalidRecovery);
     }
 
-    private static bool IsOriginalFailure(Exception error)
-        => error is KeyLoadException typed ? typed.Code == ErrorCode.RecoveryRequired
+    private static ErrorCode RequireOriginalError(List<Exception> failures)
+    {
+        if (failures.Count != RequiredSubmissionFailures || failures[0] is not KeyLoadException
+                { Code: ErrorCode.Corruption or ErrorCode.RecoveryRequired } first
+            || !IsOriginalFailure(failures[RetainedReplayFailureIndex], ErrorCode.RecoveryRequired))
+        { throw new InvalidOperationException(InvalidRecovery); }
+        return first.Code;
+    }
+
+    private static bool IsOriginalFailure(Exception error, ErrorCode expectedError)
+        => error is KeyLoadException typed ? typed.Code == expectedError
             : error is AggregateException aggregate && aggregate.InnerExceptions.Count != 0
-                && aggregate.InnerExceptions.All(IsOriginalFailure);
+                && aggregate.InnerExceptions.All(inner => IsOriginalFailure(inner, expectedError));
 
     private static bool Same(ReplicatedOperation retained, ReplicatedOperation original)
         => retained.Id == original.Id && retained.Kind == original.Kind

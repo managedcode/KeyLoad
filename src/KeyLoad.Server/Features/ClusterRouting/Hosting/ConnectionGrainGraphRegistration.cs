@@ -18,6 +18,9 @@ internal static class ConnectionGrainGraphRegistration
                     nameof(IAnnProjectionCoordinatorGrain.ScheduleAsync))
                 .AddGrainServiceTransition<RecurringDueGrainService, IRecurringDueCoordinatorGrain>(
                     nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
+                .AddGrainTransition<AnnProjectionCoordinatorGrain, IConnectionGrain>()
+                .MethodByName(nameof(AnnProjectionCoordinatorGrain.ExecuteJobAsync),
+                    nameof(IConnectionGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IRecurringDueCoordinatorGrain, IConnectionGrain>()
                 .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IConnectionGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IConnectionGrain, IConnectionGrain>()

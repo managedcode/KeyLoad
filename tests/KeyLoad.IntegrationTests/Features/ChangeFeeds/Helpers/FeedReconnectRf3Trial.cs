@@ -17,6 +17,7 @@ internal static class FeedReconnectRf3Trial
         string cursor;
         var reader = await owner.ConnectAsync(scenario.Identity.Secret, token);
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.FirstRevision, FeedLiveRf3Protocol.FirstJson), FeedLiveRf3Protocol.HiddenSequence,
             () => FeedLiveRf3Assertions.DeniedAsync(reader,
                 scenario.Feed with { MaxBytes = FeedLiveRf3Protocol.RejectedFirstEntryBytes },
                 ErrorCode.BudgetExceeded, token), token);
@@ -65,10 +66,12 @@ internal static class FeedReconnectRf3Trial
         };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.UpdatedRevision, FeedLiveRf3Protocol.UpdatedJson), FeedLiveRf3Protocol.UpdatedSequence,
             () => FeedLiveRf3Assertions.DeniedAsync(reader, original, ErrorCode.PermissionDenied, token), token);
         var restored = scenario.Identity.Principal with { PolicyEpoch = revoked.PolicyEpoch + FeedLiveRf3Protocol.EpochStep };
         await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token));
         await FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
+            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.UpdatedRevision, FeedLiveRf3Protocol.UpdatedJson), FeedLiveRf3Protocol.UpdatedSequence,
             () => FeedLiveRf3Assertions.DeniedAsync(reader, original, ErrorCode.TokenInvalidated, token), token);
         await FeedLiveRf3Assertions.FeedAsync(reader, scenario, scenario.Feed, scenario.Receipt.Token,
             FeedLiveRf3Protocol.FirstSequence, FeedLiveRf3Protocol.FirstRevision,

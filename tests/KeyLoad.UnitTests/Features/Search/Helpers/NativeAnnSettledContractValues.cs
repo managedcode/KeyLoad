@@ -20,24 +20,25 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
             ? new AnnProjectionMaintenanceProfile(AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field,
                 AnnSeedTestSupport.Space()) : null;
         var configureId = Guid.NewGuid();
-        ImmutableArray<string> resources = profile is null ? [AnnProjectionPinTestSupport.Collection] : [];
-        ImmutableArray<string> kinds = profile is null ? [AnnProjectionPinTestSupport.VectorMutation]
-            : [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
-                MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector,
-                MutationDiscriminatorNames.ApplyVectorProjection];
+        ImmutableArray<string> resources = [];
+        ImmutableArray<string> kinds = [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
+            MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector,
+            MutationDiscriminatorNames.ApplyVectorProjection];
         var definition = new ProjectionConsumerDefinition(Generation, resources, kinds)
             { AnnMaintenance = profile };
         var configure = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, consumer, definition, StartAfter),
             AnnProjectionPinTestSupport.Principal, configureId).Get<ProjectionConsumerInfo>();
-        var captured = AnnProjectionPinTestSupport.Capture(database);
-        var source = NativeAnnCanonicalSource.Source(captured);
         var placement = database.Database.ReadAtomicPartitionPlacement(AnnProjectionPinTestSupport.Principal,
             new(Version, database.Partition));
         var request = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
-            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, source.NodeId,
+            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),
             AnnMaintenanceMode.Build) { MaintenanceProfile = profile };
+        var captured = global::KeyLoad.Core.Features.Search.AnnSeedCollector.CapturePinned(database.Database,
+            AnnProjectionPinTestSupport.Principal, request, UnitAnnSeedOptions.Execution(),
+            new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
+        var source = NativeAnnCanonicalSource.Source(captured);
         var page = AnnProjectionPinTestSupport.Read(database, consumer);
         var intent = NativeAnnMaintenanceTestData.Intent(page);
         var receipt = NativeAnnMaintenanceTestData.Commit(database, intent);

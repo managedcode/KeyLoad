@@ -37,6 +37,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         Set(trust + nameof(PhysicalGroupTrustOptions.Role),
             (control ? PhysicalGroupTrustRole.Control : PhysicalGroupTrustRole.Destination).ToString());
         Set(trust + nameof(PhysicalGroupTrustOptions.RegisterPhysicalOwners), Enabled);
+        Set(trust + nameof(PhysicalGroupTrustOptions.RemoteDocumentReads), Enabled);
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignPhysicalShardId), foreign.PhysicalShardId.ToString(IdentityGuidFormat));
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignIncarnation), foreign.Incarnation.ToString(IdentityGuidFormat));
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignPeerSecret), control ? destinationPeer : controlPeer);

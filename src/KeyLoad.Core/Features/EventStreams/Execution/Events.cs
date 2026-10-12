@@ -23,6 +23,7 @@ public sealed partial class DatabaseEngine
         const string InvalidEventBatchDetail = "The event batch or stream generation is invalid.";
         const string StreamHeadSpace = "stream-head";
         const string StaleStreamGenerationDetail = "The stream generation is stale.";
+        const string InvalidStreamHeadDetail = "The persisted stream head is invalid.";
         const int HeadTailRevisionValidationBoundary = 0;
         const string EventSequenceSpace = "event-sequence";
         const int AppendAbsentCount = 0;
@@ -42,6 +43,13 @@ public sealed partial class DatabaseEngine
         if (head is not null && head.Generation != append.Generation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, StaleStreamGenerationDetail);
+        }
+
+        if (head is not null && (head.TailRevision < HeadTailRevisionValidationBoundary
+            || head.FirstAvailableRevision < FirstAvailableRevisionSingleItemCount
+            || head.TailRevision != long.MaxValue && head.FirstAvailableRevision > head.TailRevision + FirstAvailableRevisionSingleItemCount))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidStreamHeadDetail);
         }
 
         if (append.ExpectedRevision.State == ExpectedStreamState.NoStream && head is not null

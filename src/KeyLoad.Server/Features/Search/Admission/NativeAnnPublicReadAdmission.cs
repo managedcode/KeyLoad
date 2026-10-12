@@ -5,8 +5,9 @@ internal static class NativeAnnPublicReadAdmission
     internal static NativeAnnReadReservation Reserve(List<NativeAnnGenerationSlot> slots,
         NativeAnnExecutionOptions options, NativeAnnReadReservations readers, long desiredBytes, long maintenanceBytes)
     {
-        NativeAnnSlotRetention.RequireResident(slots, options, checked(readers.Bytes + maintenanceBytes));
-        var available = checked(options.MaximumResidentBytes - readers.Bytes - maintenanceBytes
+        var receipt = NativeAnnRootLease.ReceiptReservation(options);
+        NativeAnnSlotRetention.RequireResident(slots, options, checked(receipt + readers.Bytes + maintenanceBytes));
+        var available = checked(options.MaximumResidentBytes - receipt - readers.Bytes - maintenanceBytes
             - slots.Sum(item => item.Index.RetainedBytesUpperBound));
         return readers.Reserve(Math.Min(desiredBytes, available));
     }
