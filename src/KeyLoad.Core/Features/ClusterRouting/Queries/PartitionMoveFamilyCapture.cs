@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Queries;
@@ -31,6 +32,8 @@ internal static class PartitionMoveFamilyCapture
             foreach (var record in page.Records)
             {
                 work.Check();
+                if (family == PartitionRecordFamilies.Bm25CorpusCurrent)
+                { Bm25CorpusShape.RequireRecord(record.Key.Span, record.Value.Span, fence.Partition, limits); }
                 PartitionMoveImageDigest.Append(digest, record.Key.Span);
                 PartitionMoveImageDigest.Append(digest, record.Value.Span);
                 count = checked(count + PartitionMoveProtocol.SequenceStep);

@@ -16,9 +16,15 @@ public sealed partial class DatabaseEngine
     private static void RequireQueueDeadLetterAuthority(IKeyValueView view, QueueLaneRef lane, QueueCounters counters)
     {
         if (counters.StoredMessages < QueueLifecycleProtocol.Initial || counters.StoredBytes < QueueLifecycleProtocol.Initial
+            || counters.InFlightMessages < QueueLifecycleProtocol.Initial || counters.InFlightBytes < QueueLifecycleProtocol.Initial
+            || counters.InFlightMessages > counters.StoredMessages || counters.InFlightBytes > counters.StoredBytes
+            || (counters.InFlightMessages == QueueLifecycleProtocol.Initial) != (counters.InFlightBytes == QueueLifecycleProtocol.Initial)
+            || counters.NextReadySequence < QueueLifecycleProtocol.Initial || counters.NextOrderSequence < QueueLifecycleProtocol.Initial
             || counters.DeadLetterMessages < QueueLifecycleProtocol.Initial || counters.DeadLetterBytes < QueueLifecycleProtocol.Initial
             || counters.NextParkedSequence < QueueLifecycleProtocol.Initial || counters.DeadLetterMessages > counters.StoredMessages
             || counters.DeadLetterBytes > counters.StoredBytes
+            || counters.InFlightMessages > counters.StoredMessages - counters.DeadLetterMessages
+            || counters.InFlightBytes > counters.StoredBytes - counters.DeadLetterBytes
             || (counters.DeadLetterMessages == QueueLifecycleProtocol.Initial) != (counters.DeadLetterBytes == QueueLifecycleProtocol.Initial)
             || counters.DeadLetterMessages > QueueLifecycleProtocol.Initial && counters.NextParkedSequence <= QueueLifecycleProtocol.Initial)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueLifecycleProtocol.InvalidCounter); }

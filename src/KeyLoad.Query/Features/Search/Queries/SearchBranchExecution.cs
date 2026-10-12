@@ -63,7 +63,8 @@ internal static class SearchBranchExecution
         if (original is not null)
         { ranker.AttachProjection(original); }
         database.VisitVisibleDocuments(captured, principal, request.Partition, request.Collection, budget, ranker.Visit);
-        var scores = ranker.Rank();
+        var scores = global::KeyLoad.Query.Features.Search.Bm25CorpusReuse.Rank(
+            database, captured, principal, request, budget, ranker);
         VerifyProjectionCandidates(original, ranker.Terms, scores, budget);
         return scores;
     }

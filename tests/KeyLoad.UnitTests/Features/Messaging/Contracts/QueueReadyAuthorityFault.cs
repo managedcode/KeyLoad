@@ -5,5 +5,17 @@ internal enum QueueReadyAuthorityFault
     ScheduledState,
     ReadySequence,
     MetadataIdentity,
-    BodyIdentity
+    BodyIdentity,
+    NegativeInFlightMessages,
+    NegativeInFlightBytes,
+    ExcessInFlightMessages,
+    ExcessInFlightBytes,
+    NegativeReadySequence,
+    NegativeOrderSequence,
+    InFlightCountWithoutBytes,
+    InFlightBytesWithoutCount,
+    NegativeAttempts,
+    NonPositiveStateVersion,
+    NegativeLeaseVersion,
+    NonPositiveDeliveryGeneration
 }

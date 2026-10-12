@@ -41,6 +41,7 @@ internal static class MixedEventingJournalRecovery
         await Assert.That(journal.Term).IsEqualTo(retained.Term);
         var outcomeKey = KeySpace.PartitionOutcome(state.Partition, operation.PrincipalId, id);
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(outcomeKey))).IsNull();
+        await RetainedRefusalAsync(source, state, operation, originalFailures, corruptRaw, before);
         var repairedCut = before;
         var applied = source.RecoverFaultOwnedRow(operation,
             () =>
@@ -60,6 +61,23 @@ internal static class MixedEventingJournalRecovery
         await MixedEventingFailurePostimage.RequireAsync(source, state, operation, corruptRaw, key, exact,
             outcomeKey, repairedCut, retained.Index);
         await RequireOutcomeAsync(source, state, operation, outcomeKey, retained.Index, retained.Term);
+    }
+
+    private static async Task RetainedRefusalAsync(TestDatabase source, QueueLifecycleTestState state,
+        ReplicatedOperation operation, List<Exception> originalFailures, string[] corruptRaw, long position)
+    {
+        var journal = source.ReadJournalCut();
+        var retained = NativeSerialization.Serialize(source.ReadRetainedEntry(operation.Id));
+        var identity = NativeSerialization.Serialize(source.Store.Identity);
+        var repeated = Assert.ThrowsExactly<KeyLoadException>(() => source.SubmitIssued(operation));
+        originalFailures.Add(repeated);
+        await Assert.That(repeated.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(source.ReadJournalCut()).IsEqualTo(journal);
+        await Assert.That(NativeSerialization.Serialize(source.ReadRetainedEntry(operation.Id)))
+            .IsEquivalentTo(retained, CollectionOrdering.Matching);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(source.Store, corruptRaw, position, identity);
+        await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
+            KeySpace.PartitionOutcome(state.Partition, operation.PrincipalId, operation.Id)))).IsNull();
     }
 
     private static async Task RequireOutcomeAsync(TestDatabase source, QueueLifecycleTestState state,

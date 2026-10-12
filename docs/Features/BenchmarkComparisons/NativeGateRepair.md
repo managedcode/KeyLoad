@@ -135,3 +135,19 @@ REQ-NGR-OPENLOOP-TRANSPORT-001: initialize the bounded native GitHub transport o
 AC-NGR-OPENLOOP-TRANSPORT-001 maps to REQ-NGR-OPENLOOP-TRANSPORT-001: the real Benchmarks `collect-open-loop` entry must retain its bounded authenticated downloads and native ZIP inventory under the owned output, preserve the original metadata bytes, and validate every selected job and terminal against the exact source/run/attempt/profile. Wrong, incomplete, oversized, mismatched or malformed evidence still refuses; no workload retry or historical fallback. Existing genuine native transport/collector TUnit coverage and exact-source Linux intake are required. Source review and a check-only patch do not qualify actual GitHub intake.
 
 The current collector creates a fresh context but never initialized its transport before calling `downloadArtifact`; `requestNative` rejects that missing transport before launching an HTTP request. The original `bab8d9b` run stopped earlier at matrix job admission, so this confirmed source defect is a later prerequisite and is not claimed as its observed failure. Other reviewed collector profile copies use cohort-only validation or initialize their actual network context before requests. Owning map: `scripts/Features/BenchmarkComparisons/open-loop-github-collect.mjs`, existing native transport/ZIP helpers and the real Benchmarks collection step. Archive/capture immutability, bounds, cancellation, cohort and publication guards remain mandatory; exact-source runtime and full qualification remain OPEN.
+
+## Large genuine native stream regression, 2026-10-12
+
+REQ-NGR-LARGE-STREAM-001: the existing bounded native stream API must retain every original binary byte from genuine Node children at 219,259 bytes, 1 MiB and 8 MiB, for natural asynchronous stdout and synchronous fd1 writers. Admit the exact byte limit and independently validate original expected length/hash/full file content; reject one byte over the same limit, join every original child, seal each capture and permit a literal healthy subsequent capture. Retain the existing small-payload, timeout, archive digest/size, symlink, exclusive-path and ZIP inventory cases.
+
+AC-NGR-LARGE-STREAM-001 maps to REQ-NGR-LARGE-STREAM-001 and AC-ISO-007: six native TUnit cases in IsolatedGitHubFileTests.AcIso007LargeNativeStreamRetainsOriginalBytesRefusesOneOverAndJoinsHealthyContinuation invoke the production streamToFile/validateDownloadedArchive through real bounded Node process ownership. Each covers exact-limit acceptance, one-over refusal, original child exit, immutable file mode, original byte/hash equality, healthy continuation and unchanged process signal-listener counts. The outer native owner retains its original deadline/cancellation/joined cleanup. Execute only in the Linux Benchmarks contract lane; no local benchmark execution.
+
+Owning map: existing ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/IsolatedGitHubFileTests.cs and Processes/IsolatedGitHubFileProgram.cs. This additive binary-stream regression does not alter transport code, provide an HTTP provider response or explain the original malformed Website body. Actual authenticated Website capture and Linux runtime are independent required evidence; all new test outcomes remain OPEN.
+
+```mermaid
+flowchart LR
+    Child[Real bounded native stdout child] --> Exact[Exact-limit original byte capture]
+    Exact --> Reject[One-over refusal and joined original child]
+    Reject --> Healthy[Exact healthy continuation and sealed files]
+    Healthy --> Linux[Original Linux TUnit report]
+```

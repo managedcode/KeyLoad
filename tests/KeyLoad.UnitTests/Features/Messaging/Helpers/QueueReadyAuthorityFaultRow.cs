@@ -22,6 +22,10 @@ internal static class QueueReadyAuthorityFaultRow
                     QueueReadyAuthorityFault.ScheduledState => metadata with { State = MessageState.Scheduled },
                     QueueReadyAuthorityFault.ReadySequence => metadata with { ReadySequence = metadata.ReadySequence + 1 },
                     QueueReadyAuthorityFault.MetadataIdentity => metadata with { Id = "foreign" },
+                    QueueReadyAuthorityFault.NegativeAttempts => metadata with { Attempts = -1 },
+                    QueueReadyAuthorityFault.NonPositiveStateVersion => metadata with { StateVersion = 0 },
+                    QueueReadyAuthorityFault.NegativeLeaseVersion => metadata with { LeaseVersion = -1 },
+                    QueueReadyAuthorityFault.NonPositiveDeliveryGeneration => metadata with { DeliveryGeneration = 0 },
                     _ => throw new InvalidOperationException("The native ready authority fault is invalid.")
                 };
                 tx.PutRecord(key, changed);

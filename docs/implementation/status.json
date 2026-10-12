@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R24 full normal Release passed 0 errors / 0 warnings; its stable local Unit 156/179, Recovery 11/13 and Integration 0/7 failures remain original evidence. R25 source repairs and complete-flow regressions are integrated; R25 native analysis leaves only four known stale metadata diagnostics; actual source diagnostics resolved. Scoped101-file formatter verifies successfully. R25 ordinary compiler and runtime qualification are pending. Original KL-034 acceptance now closed from authenticated exact-source Linux 26/26 normal cases including two genuine Aspire RF3 SDK/MCP/Q1 flows. Remaining exact-source Linux, task-specific, fault/endurance and functional coverage gates stay open.",
+    "qualification": "R26 final complete native compiler/analyzer0errors/0warnings,9611source inputs unchanged. Scoped98-path whitespace formatter passed; whole-solution formatting and ordinary full current Release/runtime are pending. R26 full operation packets integrated for persisted BM25, physical whole-partition SDK orchestration, queue/Event integrity, bounded live read work and privacy-preserving recovery diagnostics. R24/local and older Linux failures remain original evidence. Original KL034 accepted from authenticated exact-source Linux26/26; remaining85originaltasks and KL105 require their actual gates. Functional coverage unmeasured.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -160,6 +160,51 @@
           "sha256": "37d1635cc97aab70ae3ab52a93ae41a769be859495ab356e6bdd0c0d663b085f"
         },
         "note": "Individual initial Y receipts remain immutable; later native diagnostic and formatter repairs are bound by the final source inventory."
+      },
+      "r26CompleteOperationPacket": {
+        "qualified": false,
+        "runtime": "pending_current_source_compiler_then_native_census_and_exact_source_Linux",
+        "persistedBm25": {
+          "receipt": "TestResults/stage61-native-join/kl058-persisted-c-actual-join-r1.receipt.json",
+          "sha256": "1f9d86bb6ef04c562d3fade9e0bd80054dad676d153dbe1a0af353fbc6bf0949"
+        },
+        "bm25PortableMovement": {
+          "receipt": "TestResults/stage61-native-join/bm25-portable-movement-actual-join-r2.receipt.json",
+          "sha256": "44600b0a99eb67d508e3b5b32851d4d5585947f530c85a09063a8ad5f9570ba6"
+        },
+        "bm25ConfiguredByteQuota": {
+          "receipt": "TestResults/stage61-native-join/bm25-configured-quota-r1.actual-receipt.json",
+          "sha256": "cd966410800ceda6b579a27430a6ca03d399a153251c262f962144789fffb754"
+        },
+        "wholePartitionSdkOrchestration": {
+          "receipt": "TestResults/stage61-native-join/stage64-kl071-disposal-enumerator-cancellation-Y.original.json",
+          "sha256": "4a0b375f77e3b4062fe31ff5dbcaf1d14f07dc6a487cd814a6a8c7fe91492eba"
+        },
+        "queueColdIntegrity": {
+          "receipt": "TestResults/stage61-native-join/stage64-r26-ready-cold-responsibility.native-y.original.json",
+          "sha256": "5903ee8049723affb63dff78bce88c44b67135145f3fa6033da7107ae9252984"
+        },
+        "eventIntegrity": {
+          "receipt": "TestResults/stage61-native-join/current-stage64-r26-event-integrity-catalog.source-join.original.json",
+          "sha256": "2555f02545a12404185a5bfb95a0ce03de6dd971c5f9e4ccf7223e03805695c4"
+        },
+        "hiddenLiveReadWork": {
+          "receipt": "TestResults/stage61-native-join/current-stage64-r26-kl079-hidden-read-work-and-diagnostic.source-join.original.json",
+          "sha256": "d38d668d83d9085de13453f836d7fc894eef7432fb60be9eefd1f0bc2ad289c9"
+        },
+        "nativeTwoRf3Health": {
+          "receipt": "TestResults/stage61-native-join/stage64-r26-native-membership-health.source-Y.original.json",
+          "sha256": "b21f1cf203be67983141dda66c8a3f986a3c79678dd048b035971dbdcd2b7f00"
+        },
+        "closedProtocolFailureCause": {
+          "receipt": "TestResults/stage61-native-join/current-stage64-r26-kl079-consumption-closed-cause.native-NY-post.original.json",
+          "sha256": "a23d5b1002c465e0907a5c1ded97abccbd87e90575a618d735d208e665b12821"
+        },
+        "linuxLargeChildCapture": {
+          "receipt": "TestResults/stage61-native-join/root-large-stream-r1.actual-y.receipt.json",
+          "sha256": "ca42f9e55ff6d61fd4e3e80c23d857375f5cbb1fbe7c51c3471319968637a7f1"
+        },
+        "note": "Individual native postimages precede later formatting; source guard and actual fresh compiled images bind execution. No isolated existing success or native0 closes new acceptance."
       }
     },
     "nativeDiagnostics": {
@@ -227,10 +272,34 @@
           "sha256": "37d1635cc97aab70ae3ab52a93ae41a769be859495ab356e6bdd0c0d663b085f"
         },
         "currentNormalCompilerPending": true
+      },
+      "r26Final": {
+        "errors": 0,
+        "warnings": 0,
+        "sourceInputs": 9611,
+        "sourceDrift": 0,
+        "currentNormalCompilerPending": true,
+        "receipt": "TestResults/stage61-native-join/stage64-r26-native-diagnostics.final-zero.original.json",
+        "sha256": "ee5e354b9b3e73451586ca4fd448e61a4db246c1bd325acb6d81fdec2401e8a0",
+        "before": {
+          "receipt": "TestResults/stage61-native-join/stage64-r26-coherent-source.final-native-before.original.json",
+          "sha256": "e702a64591b8861585f481e1611d1c65cf17b50e4ad8b99431030c1c9997487d"
+        },
+        "after": {
+          "receipt": "TestResults/stage61-native-join/stage64-r26-coherent-source.final-native-after.original.json",
+          "sha256": "34e200d07d06c60fc35995b5e9dc997494453731cc90a10ab266e01f9a39e6f3"
+        },
+        "formatterFirstWholeGate": {
+          "exitCode": 2,
+          "failures": 3,
+          "diagnostic": "IMPORTS",
+          "repair": "scoped canonical formatter pending",
+          "receipt": "TestResults/stage61-native-join/stage64-r26-format-full-verify.completion.original.json"
+        }
       }
     },
     "remaining": [
-      "Qualify integrated R25 fixture/journal, original refusal, queue authority and SQL reference repairs on exact delivered Linux source; preserve original failures",
+      "Qualify the coherent R26 complete operation packet on its actual fresh image and delivered Linux source; preserve every original runtime failure",
       "Identify original unsigned bad64 issuer through bounded actual receiver observation; do not weaken authentication or reply verification",
       "Deliver exact-source Linux full SDK/MCP RF3, process recovery, fault/endurance and functional coverage gates",
       "Complete genuine Linux selected matrix transport regression and authenticated website producer evidence",
@@ -58374,8 +58443,14 @@
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/SearchTests.cs",
+      "docs/ADR/ADR-127-persisted-bm25-corpus-statistics.md",
+      "docs/Features/Search/Bm25CorpusCurrent.md",
+      "docs/Features/Search/Bm25ConfiguredQuota.md",
+      "docs/Features/Search/Bm25PortableMovement.md"
+    ],
+    "currentSourceStage": "private_persisted_corpus_heads_native_server_Orleans_family83_backup_movement_and_configured_bytes_joined_runtime_pending",
+    "allAcceptanceClosed": false
   },
   "KL-059": {
     "title": "Managed ANN implementation qualification",
@@ -58644,11 +58719,14 @@
       "docs/Features/ClusterRouting/PhysicalShardCatalog.md",
       "src/KeyLoad.Core/Features/ClusterRouting/Contracts/CommandOutcomePartitionScope.cs",
       "src/KeyLoad.Core/Features/ClusterRouting/Identity/CommandOutcomePartitionIdentity.cs",
-      "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs"
+      "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs",
+      "docs/ADR/ADR-128-bounded-physical-shard-partition-orchestration.md",
+      "src/KeyLoad.Client/Features/ClusterRouting/Execution/PhysicalShardPartitionMovement.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Cases/PhysicalShardPartitionMovementRf3Tests.cs"
     ],
     "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
     "decision": "docs/ADR/ADR-106-partition-owner-movement.md",
-    "sourceStage": "native_partition_pages_and_scoped_outcome_inventory_joined_shared_membership_stage1A_contract_accepted_movement_pending",
+    "sourceStage": "bounded_original_whole_partition_sdk_stream_and_genuine_six_owner_disposal_cancellation_resume_merge_flow_joined_Linux_pending",
     "fullTaskComplete": false,
     "runtimeQualified": false,
     "remaining": [
@@ -59144,6 +59222,12 @@
       "causalDiagnosisConfirmed": false,
       "repairAndCurrentLinuxQualification": "OPEN",
       "historicalB1AcceptancePreserved": true
+    },
+    "r26Source": {
+      "hiddenOutboxReadBudget": "existing QueryReadBudget view before decode; full original cursor refusal/repair/literal continuation source flow",
+      "originalLinuxFailure": "660Consumption Protocol failures during ReplicateWhileStoppedAsync before snapshot installation; exact inner cause unobserved",
+      "diagnostic": "closedKeyLoad/Json/Format subtypes retain categoryProtocol and exact original privacy/write outcomes; next original Linux run required",
+      "runtimeQualified": false
     }
   },
   "KL-080": {

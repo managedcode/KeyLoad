@@ -80,10 +80,7 @@ public sealed partial class GrainRequestCodec
         => GrainNativePayload.Copy(payload, database.Limits.MaxBatchBytes);
 
     internal string Issue(GrainRequestEnvelope request)
-    {
-        ValidateScope(request);
-        return database.Sign(GrainRequestPurposeObservation.BeforeSign(PurposeObserver, request));
-    }
+        => GrainRequestIssuance.Issue(this, database, PurposeObserver, request);
 
     internal void ValidateScope(GrainRequestEnvelope request)
         => ValidateScope(request, null);

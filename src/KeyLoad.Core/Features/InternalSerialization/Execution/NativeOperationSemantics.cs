@@ -27,6 +27,7 @@ public sealed partial class DatabaseEngine
         OperationKind.RemoteGraphSource => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphSourceMutationV1),
         OperationKind.RemoteGraphReceive => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphReceiverMutationV1),
         OperationKind.RemoteGraphComplete => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1),
+        OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
         OperationKind.PartitionMovementPhase => typeof(PartitionMovePhaseCommand),
         OperationKind.Batch => typeof(CommandRequest),

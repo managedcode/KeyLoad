@@ -11,6 +11,7 @@ internal static class PartitionRecordFamilies
     internal const string BlobPart = "blob-part-v1";
     internal const string BlobPartMetadata = "blob-partmeta-v1";
     internal const string BlobState = "blob-state-v1";
+    internal const string Bm25CorpusCurrent = global::KeyLoad.Core.Features.Search.Bm25CorpusProtocol.CurrentFamily;
     internal const string DeadLetter = "dead-letter";
     internal const string Document = "document";
     internal const string DocumentEpoch = "document-epoch";
@@ -96,6 +97,7 @@ internal static class PartitionRecordFamilies
         BlobPart,
         BlobPartMetadata,
         BlobState,
+        Bm25CorpusCurrent,
         DeadLetter,
         Document,
         DocumentEpoch,

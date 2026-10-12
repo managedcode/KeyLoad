@@ -42,7 +42,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         var prepared = new PreparedQuery(query.Query, EmptyElementCount, database.Limits.MaxScanRecords);
         budget.Check();
         return database.WithQueryView(principalId, query.Partition, query.Query.Collection,
-            (view, principal, resource) => ReadView(view, principal, resource, query, hash, prepared, request,
+            (view, principal, resource) => ReadView(budget.CreateView(view), principal, resource, query, hash, prepared, request,
                 budget));
     }
 

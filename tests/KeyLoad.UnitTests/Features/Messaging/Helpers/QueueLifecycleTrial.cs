@@ -10,6 +10,7 @@ internal static class QueueLifecycleTrial
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit);
         var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
         await QueueLifecycleInitialPhase.RunAsync(fixture.Database, fixture.Store, state, token);
+        await QueueLifecycleAuthorityRefusal.OverlappingUsageAsync(fixture.Database, fixture.Store, state);
         await QueueLifecycleBackupRestore.RunAsync(fixture.Store, state, token);
         var initial = QueueLifecycleImage.Capture(fixture.Store, state.Lane);
         fixture.Store.Dispose();

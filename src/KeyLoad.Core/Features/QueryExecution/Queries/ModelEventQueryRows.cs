@@ -115,10 +115,15 @@ internal static class ModelEventQueryRows
         ModelQuerySource source, ReadExecutionBudget budget, long revision, ReadOnlySpan<byte> key,
         EventRecord record)
     {
+        const int EventSequenceValidationBoundary = 1;
+        const int SchemaVersionValidationBoundary = 1;
+
         var stream = new StreamRef(partition, resource.Name, source.Item, source.Generation);
         var expectedKey = KeySpace.Partition(EventSpace, partition, resource.Name, source.Item,
             source.Generation, revision);
         if (record is null || record.Data is null || !ModelQueryReadRows.IsIdentifier(record.Data.EventId)
+            || !ModelQueryReadRows.IsIdentifier(record.Data.EventType)
+            || record.Data.SchemaVersion < SchemaVersionValidationBoundary || record.EventSequence < EventSequenceValidationBoundary
             || record.Stream != stream || record.Revision != revision || !key.SequenceEqual(expectedKey))
         {
             throw Errors.Fail(ErrorCode.Corruption, EventCorrupt);

@@ -10,6 +10,8 @@ public sealed partial class DatabaseEngine
         if (metadata.Id != id || body.Id != id)
         { throw Errors.Fail(ErrorCode.Corruption, MissingReadyBody); }
         if (metadata.State != MessageState.Ready || metadata.ReadySequence < QueueReadyClaimsVersionOne
+            || metadata.Attempts < QueueRetryProtocol.Initial || metadata.StateVersion < QueueReadyClaimsVersionOne
+            || metadata.LeaseVersion < QueueRetryProtocol.Initial || metadata.DeliveryGeneration < QueueReadyClaimsVersionOne
             || !actualKey.SequenceEqual(QueueKey(ReadyQueueSpace, lane, metadata.ReadySequence, id)))
         { throw Errors.Fail(ErrorCode.RecoveryRequired, QueueRetryProtocol.StaleDecision); }
     }

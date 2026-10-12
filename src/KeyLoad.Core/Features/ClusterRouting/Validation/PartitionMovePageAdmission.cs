@@ -1,6 +1,7 @@
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
+using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.Core.Features.ClusterRouting.Validation;
 
@@ -25,6 +26,8 @@ internal static class PartitionMovePageAdmission
             if (row.Key.IsEmpty || !row.Key.Span.StartsWith(prefix)
                 || !previous.IsEmpty && row.Key.Span.SequenceCompareTo(previous.Span) <= PartitionMoveProtocol.EmptyCount)
             { throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.InvalidImage); }
+            if (page.Family == PartitionRecordFamilies.Bm25CorpusCurrent)
+            { Bm25CorpusShape.RequireRecord(row.Key.Span, row.Value.Span, page.Partition, limits); }
             previous = row.Key;
         }
         if (page.Digest != PartitionMoveImageDigest.Records(page.Records))

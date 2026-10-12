@@ -24,6 +24,7 @@ public sealed partial class DatabaseEngine
             OperationKind.RemoteGraphComplete => ExecuteRemoteGraphComplete(transaction, operation, position),
             OperationKind.EventFeedControl => ExecuteEventVectorControl(transaction, principal, operation, position, placement),
             OperationKind.EventFeedSourcePhase => ExecuteEventVectorSource(transaction, principal, operation, position, placement),
+            OperationKind.Bm25CorpusPublicationPhase => ExecuteBm25CorpusPublication(transaction, principal, operation, position),
             OperationKind.OnlineTextPublicationPhase => ExecuteOnlineTextPublication(transaction, principal, operation),
             OperationKind.PartitionMovementPhase => ExecutePartitionMovePhase(transaction, principal, operation, position),
             OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),

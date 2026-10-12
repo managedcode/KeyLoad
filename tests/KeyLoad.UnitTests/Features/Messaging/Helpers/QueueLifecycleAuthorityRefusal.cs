@@ -6,6 +6,55 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueLifecycleAuthorityRefusal
 {
+    internal static async Task OverlappingUsageAsync(DatabaseEngine database, ZoneTreeStore store,
+        QueueLifecycleTestState state)
+    {
+        var key = KeySpace.Partition(QueueLifecycleTestProtocol.CounterSpace, state.Partition, state.Lane.Queue);
+        foreach (var bytesOverlap in new[] { false, true })
+        {
+            var original = store.Read(view => view.ReadOwnedValue(key))!;
+            var counters = NativeSerialization.Deserialize<QueueCounters>(original);
+            var exact = QueueWholeFlowStorage.Bytes(store);
+            var queue = QueueLifecycleImage.Capture(store, state.Lane);
+            var corrupted = bytesOverlap ? counters with { InFlightBytes = counters.StoredBytes }
+                : counters with { InFlightMessages = QueueLifecycleTestProtocol.Three };
+            store.Commit((tx, _) => { tx.Put(key, NativeSerialization.Serialize(corrupted)); return true; });
+            var damaged = QueueWholeFlowStorage.Bytes(store);
+            var position = store.Position;
+            var identity = NativeSerialization.Serialize(store.Identity);
+            var id = Guid.NewGuid();
+            var command = new CommandRequest(id, state.Partition,
+                [new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending,
+                    QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One)]);
+            var operation = new ReplicatedOperation(id, OperationKind.Batch, QueueLifecycleTestProtocol.Administrator,
+                state.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
+            for (var repeat = 0; repeat < 2; repeat++)
+            {
+                var refusal = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
+                await Assert.That(refusal.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+                await Assert.That(refusal.Message).IsEqualTo("The queue lifecycle accounting is invalid.");
+                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, damaged, position, identity);
+                await Assert.That(store.Read(view => view.ReadOwnedValue(
+                    KeySpace.PartitionOutcome(state.Partition, operation.PrincipalId, id)))).IsNull();
+            }
+            store.Commit((tx, _) => { tx.Put(key, original); return true; });
+            await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(exact, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            var repaired = database.Apply(operation);
+            await Assert.That(repaired.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(repaired.SafeDetail).IsEqualTo("The queue dead-letter sublimit is exhausted.");
+            await Assert.That(repaired.Json).IsNull();
+            await Assert.That(repaired.NativeValue).IsNull();
+            state.Failures.Add((operation, repaired));
+            var receiptImage = QueueWholeFlowStorage.Bytes(store);
+            var receiptPosition = store.Position;
+            await Assert.That(NativeSerialization.Serialize(database.Apply(operation)))
+                .IsEquivalentTo(NativeSerialization.Serialize(repaired), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, receiptImage, receiptPosition, identity);
+            await QueueLifecycleImage.SameAsync(store, state.Lane, queue);
+            await QueueLifecycleAccountingAssertions.InitialAsync(store, state);
+        }
+    }
+
     internal static async Task MissingOrderedReferenceAsync(DatabaseEngine database, ZoneTreeStore store, QueueLifecycleTestState state)
     {
         var key = KeySpace.Partition(QueueLifecycleTestProtocol.ParkedSpace, state.Partition, state.Lane.Queue,

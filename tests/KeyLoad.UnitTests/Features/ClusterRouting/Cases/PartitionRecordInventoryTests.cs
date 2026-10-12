@@ -6,13 +6,13 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    internal const int ExpectedFamilyCount = 82;
+    internal const int ExpectedFamilyCount = 83;
     private static readonly PartitionRef Partition = new(PartitionRecordNativeFixture.TenantId,
         PartitionRecordNativeFixture.DatabaseId, PartitionRecordNativeFixture.DomainId, PartitionRecordNativeFixture.PartitionKey);
     internal static readonly string[] ExpectedFamilies =
     [
         "adjacency", "aggregate-snapshot-v1", "blob-head-v1", "blob-part-v1", "blob-partmeta-v1",
-        "blob-state-v1", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
+        "blob-state-v1", "bm25-corpus-current", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
         "event-id", "event-sequence", "event-vector-capacity-v1", "event-vector-coverage-proof-v1",
         "event-vector-map-v1", "event-vector-offer-v1", "event-vector-page-v1",
         "event-vector-parent-call-v1", "event-vector-parent-outcome-index-v1", "event-vector-source-capacity-v1",

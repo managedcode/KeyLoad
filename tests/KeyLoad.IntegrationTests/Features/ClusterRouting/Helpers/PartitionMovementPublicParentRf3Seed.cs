@@ -61,6 +61,12 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
     {
         await PhysicalOwnerRegistrationRf3Observation.WaitAsync(wave.Application, cancellationToken).ConfigureAwait(false);
         var credential = await PartitionMovementPublicParentRf3Administrator.PersistAsync(wave, cancellationToken).ConfigureAwait(false);
+        return await CreateAsync(wave, credential, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal static async Task<PartitionMovementPublicParentRf3Seed> CreateAsync(TwoRf3MembershipWave wave,
+        string credential, CancellationToken cancellationToken)
+    {
         var seed = new PartitionMovementPublicParentRf3Seed(wave, credential);
         try
         {

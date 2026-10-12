@@ -6,8 +6,6 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3RemoteReadResources
 {
-    private const string DataReadyHealth = "/health/ready";
-    private const string Http = "http";
     private const string RegistrationLogEnvironment = "Logging__LogLevel__KeyLoad.Server.Features.ClusterRouting.PhysicalOwnerRegistrationWorker";
     private const string RegistrationLogLevel = "Information";
 
@@ -27,8 +25,6 @@ internal static class TwoRf3RemoteReadResources
             {
                 resource.WithEnvironment(TwoRf3ProfileProtocol.RemoteDocumentEnvironment, TwoRf3ProfileProtocol.Enabled);
             }
-            foreach (var resource in resources.Skip(TwoRf3ProfileProtocol.MembersPerGroup))
-            { resource.WithHttpHealthCheck(DataReadyHealth, endpointName: Http); }
         }
         if (control.Value.ProtectedDocumentMovement)
         {

@@ -12,6 +12,7 @@ internal static class GrainPartitionResolver
         OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => GrainEventVectorSourceCommand.Resolve(request),
         OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
+        OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
         OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
             => GrainRemoteTransferCommand.Resolve(request),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),

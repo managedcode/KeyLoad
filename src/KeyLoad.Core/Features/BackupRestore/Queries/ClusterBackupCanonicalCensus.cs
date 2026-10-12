@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.BackupRestore.Validation;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -13,6 +14,7 @@ internal static class ClusterBackupCanonicalCensus
 
     internal sealed record Scope(long Count, string Digest);
     internal sealed record Census(string Digest, IReadOnlyDictionary<PartitionRef, Scope> Partitions);
+    private static readonly byte[] Bm25Prefix = KeyCodec.Encode(Bm25CorpusProtocol.CurrentFamily);
     private const long NoRecords = 0;
     private const long RecordStep = 1;
     private const int GlobalHashCount = 1;
@@ -46,6 +48,8 @@ internal static class ClusterBackupCanonicalCensus
                 { throw Errors.Fail(ErrorCode.Corruption, MissingScope); }
                 if (partition is not null)
                 {
+                    if (key.StartsWith(Bm25Prefix))
+                    { Bm25CorpusShape.RequireRecord(key, value, partition, limits); }
                     Append(scoped[partition], key);
                     Append(scoped[partition], value);
                     counts[partition] = checked(counts[partition] + RecordStep);

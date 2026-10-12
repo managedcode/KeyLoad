@@ -318,7 +318,9 @@ public enum OperationKind
     /// <summary>Coordinates an explicit remote graph edge deletion through separate owner requests.</summary>
     DeleteRemoteGraphEdge = 43,
     /// <summary>Coordinates an explicit remote graph delivery through separate owner receipts.</summary>
-    DeliverRemoteGraphEdge = 44
+    DeliverRemoteGraphEdge = 44,
+    /// <summary>Commits a freshly verified private BM25 corpus publication; excluded from generic public factories.</summary>
+    Bm25CorpusPublicationPhase = 45
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

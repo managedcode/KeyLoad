@@ -1,0 +1,44 @@
+using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.Search;
+using KeyLoad.Query;
+using KeyLoad.Query.Features.Search;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.Server.Features.Search;
+
+internal static class NativeBm25CorpusMaintenance
+{
+    internal static Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
+        string administratorId, string subjectId, SearchRequest query, Guid commandId,
+        Guid? expectedGeneration, DateTimeOffset originalExpiry, ReadExecutionBudget work,
+        CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        work.Check();
+        var operation = Bm25CorpusCapture.Create(partition.Database, administratorId, subjectId,
+            query, commandId, expectedGeneration, originalExpiry, work,
+            node.RuntimeServices.GetRequiredService<IOptions<QueryExecutionOptions>>());
+        return PublishAsync(node, partition, operation, originalExpiry, work, token);
+    }
+
+    internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
+        ReplicatedOperation original, DateTimeOffset envelopeExpiry, ReadExecutionBudget work,
+        CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(original);
+        token.ThrowIfCancellationRequested();
+        work.ConstrainLifetime(envelopeExpiry);
+        var verified = partition.Database.VerifyOperationAuthority(original);
+        if (verified.Kind != OperationKind.Bm25CorpusPublicationPhase)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator); }
+        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(verified);
+        var actual = partition.Database.CreateVerifiedBm25CorpusPublication(verified.PrincipalId, phase, work);
+        var principal = partition.Database.Store.Read(view => partition.Database.Principal(
+            work.CreateView(view), actual.PrincipalId, partition.Database.EvaluationClock.GetUtcNow()));
+        var requestId = Guid.NewGuid();
+        var signed = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
+        return await NativeBm25CorpusCall.ExecuteAsync(node, partition, principal, requestId,
+            actual.Id, signed, work, token).ConfigureAwait(false);
+    }
+}

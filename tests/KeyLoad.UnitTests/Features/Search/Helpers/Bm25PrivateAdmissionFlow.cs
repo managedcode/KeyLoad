@@ -1,0 +1,112 @@
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.Search;
+using KeyLoad.Query.Features.Search;
+
+namespace KeyLoad.UnitTests.Features.Search;
+
+internal static class Bm25PrivateAdmissionFlow
+{
+    private const string Root = "root";
+    private const string Subject = "bm25-subject";
+    private const string Collection = "orders";
+    private const string Document = "healthy";
+    private const string Field = "/text";
+    private const string Term = "needle";
+    private const string OriginalJson = "{\"text\":\"needle\"}";
+    private const string ChangedJson = "{\"text\":\"needle changed\"}";
+
+    internal static async Task RunAsync()
+    {
+        var failures = new List<Exception>();
+        try
+        {
+            using var database = new TestDatabase(nativeReplicaAdmission: true);
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
+        }
+        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { failures.Add(error); }
+        KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task ExecuteAsync(TestDatabase database)
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        database.Configure(Collection, ResourceKind.Collection);
+        database.Commit(new PutDocument(Collection, Document, OriginalJson));
+        var subject = database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(
+            new(Subject, database.Partition.TenantId,
+                [new(database.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], [])))
+            .Get<PrincipalRecord>();
+        var original = Capture(database, Guid.NewGuid(), null, token);
+        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(original);
+        var result = await SubmitAsync(database, original, token);
+        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1);
+        await RequireReplayAsync(database, original, phase, result, token);
+        database.Commit(new PutDocument(Collection, Document, ChangedJson, 1, ExplicitReplacement: true));
+        var changed = Capture(database, original.Id, original.Id, token);
+        var before = ReplicaSubmissionOutcomeState.Read(database);
+        var conflict = await SubmitAsync(database, changed, token);
+        await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(conflict.Json).IsNull();
+        await Assert.That(conflict.NativeValue).IsNull();
+        await Assert.That(conflict.SafeDetail).IsEqualTo("The command ID was already used with different content.");
+        await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(database));
+        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        var healthy = Capture(database, Guid.NewGuid(), original.Id, token);
+        var healthyResult = await SubmitAsync(database, healthy, token);
+        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database,
+            NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(healthy), healthyResult, subject, 2);
+        var document = database.Database.GetDocument(Root, new(database.Partition, Collection, Document));
+        await Assert.That(document!.Json).IsEqualTo(ChangedJson);
+    }
+
+    private static ReplicatedOperation Capture(TestDatabase database, Guid id, Guid? expected, CancellationToken token)
+    {
+        var lifetime = UnitRoutingOptions.Routing().Value.RequestLifetime;
+        return Bm25CorpusCapture.Create(database.Database, Root, Subject,
+            new(database.Partition, Collection, Field, Term), id, expected,
+            database.Database.EvaluationClock.GetUtcNow().Add(TimeSpan.FromTicks(lifetime.Ticks / 2)),
+            database.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
+    }
+
+    private static async Task RequireReplayAsync(TestDatabase database, ReplicatedOperation original,
+        Bm25CorpusPublicationPhaseCommand phase, OperationResult result, CancellationToken token)
+    {
+        var before = ReplicaSubmissionOutcomeState.Read(database);
+        var retained = NativeSerialization.Serialize(database.ReadRetainedEntry(original.Id));
+        var refreshed = database.Database.CreateVerifiedBm25CorpusPublication(Root, phase, database.CreateReadWork(token));
+        var replay = await SubmitAsync(database, refreshed, token);
+        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, replay);
+        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(database));
+        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(retained,
+            NativeSerialization.Serialize(database.ReadRetainedEntry(original.Id)));
+        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase),
+            NativeSerialization.Serialize(NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(
+                database.ReadRetainedEntry(original.Id).Operation!)));
+    }
+
+    private static async Task<OperationResult> SubmitAsync(TestDatabase database, ReplicatedOperation operation,
+        CancellationToken token)
+    {
+        var routing = UnitRoutingOptions.Routing();
+        var codec = new KeyLoad.Orleans.GrainRequestCodec(database.Database, database.Database.EvaluationClock, routing);
+        var expiry = database.Database.EvaluationClock.GetUtcNow().Add(routing.Value.RequestLifetime);
+        var signed = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
+        var decoded = codec.Verify(signed);
+        await Assert.That(decoded.Envelope.CommandId).IsEqualTo(operation.Id);
+        await Assert.That(decoded.Envelope.PrincipalId).IsEqualTo(Root);
+        await Assert.That(decoded.Envelope.Purpose).IsEqualTo(KeyLoad.Orleans.Bm25RequestScope.Purpose);
+        await Assert.That(decoded.Envelope.ExpiresAt).IsEqualTo(expiry);
+        await Assert.That(KeyLoad.Orleans.GrainBm25CorpusPublicationCommand.Resolve(decoded))
+            .IsEqualTo(database.Partition.AtomicPartitionId);
+        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(operation);
+        await Assert.That(decoded.Envelope.ExpiresAt > phase.OriginalExpiry).IsTrue();
+        var principal = database.Store.Read(view =>
+            database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));
+        return await KeyLoad.Orleans.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
+            new KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsNativeCommitCoordinator(database), decoded, principal, token);
+    }
+}

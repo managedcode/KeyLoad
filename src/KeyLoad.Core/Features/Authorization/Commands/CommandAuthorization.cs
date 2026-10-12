@@ -35,6 +35,9 @@ public sealed partial class DatabaseEngine
         }
         switch (operation.Kind)
         {
+            case OperationKind.Bm25CorpusPublicationPhase:
+                AuthorizeBm25CorpusPublication(view, principal, operation);
+                return null;
             case OperationKind.RemoteGraphSource:
             case OperationKind.RemoteGraphReceive:
             case OperationKind.RemoteGraphComplete:
@@ -49,9 +52,7 @@ public sealed partial class DatabaseEngine
                     ? AuthorizeBatch(view, principal, Payload<CommandRequest>(operation))
                     : AuthorizeRemoteTransferNativeProof(view, principal, operation, transferProof);
             case OperationKind.Receive:
-                var receive = Payload<ReceiveRequest>(operation);
-                Authorization.Require(principal, receive.Lane.Partition, receive.Lane.Queue, Capability.QueueConsume);
-                Authorization.RequireWorkerInput(principal, Resource(view, receive.Lane.Partition, receive.Lane.Queue, ResourceKind.WorkQueue));
+                AuthorizeQueueReceiveOperation(view, principal, Payload<ReceiveRequest>(operation));
                 break;
             case OperationKind.Delivery:
                 var delivery = Payload<DeliveryCommand>(operation);
@@ -74,6 +75,12 @@ public sealed partial class DatabaseEngine
                 break;
         }
         return null;
+    }
+
+    private void AuthorizeQueueReceiveOperation(IKeyValueView view, PrincipalRecord principal, ReceiveRequest receive)
+    {
+        Authorization.Require(principal, receive.Lane.Partition, receive.Lane.Queue, Capability.QueueConsume);
+        Authorization.RequireWorkerInput(principal, Resource(view, receive.Lane.Partition, receive.Lane.Queue, ResourceKind.WorkQueue));
     }
 
     private void AuthorizeSubscriptionOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)

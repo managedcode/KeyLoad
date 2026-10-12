@@ -26,5 +26,11 @@ internal enum OrleansRpcFailureKind
     /// <summary>The original failure was observed as Aggregate.</summary>
     Aggregate,
     /// <summary>The original failure was observed as InputOutput.</summary>
-    InputOutput
+    InputOutput,
+    /// <summary>The original failure was a typed KeyLoad exception; no exception text is retained.</summary>
+    KeyLoad,
+    /// <summary>The original failure was a JSON exception; no input or parser text is retained.</summary>
+    Json,
+    /// <summary>The original failure was a format exception; no formatted input is retained.</summary>
+    Format
 }

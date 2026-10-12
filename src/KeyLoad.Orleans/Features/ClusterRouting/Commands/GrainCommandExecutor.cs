@@ -79,6 +79,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 operationToken).ConfigureAwait(true),
             OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
                 database, coordinator, request, principal, onlineText, operationToken).ConfigureAwait(true),
+            OperationKind.Bm25CorpusPublicationPhase => await GrainBm25CorpusPublicationCommand.SubmitAsync(
+                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             _ => await coordinator.SubmitNativeAsync(kind, request.Envelope.CommandId, principal.Id,
                 request.Payload, operationToken).ConfigureAwait(true)
         };

@@ -24,4 +24,25 @@ internal sealed class IsolatedGitHubFileTests
         await Assert.That(result.Output.Trim()).IsEqualTo(corruption == "valid" ? "accepted" : "rejected");
         await Assert.That(result.Error).IsEmpty();
     }
+
+    [Test]
+    [Arguments(219259, "async")]
+    [Arguments(219259, "sync")]
+    [Arguments(1048576, "async")]
+    [Arguments(1048576, "sync")]
+    [Arguments(8388608, "async")]
+    [Arguments(8388608, "sync")]
+    public async Task AcIso007LargeNativeStreamRetainsOriginalBytesRefusesOneOverAndJoinsHealthyContinuation(
+        int length, string writer)
+    {
+        using var directory = new ImageBundleTestDirectory();
+        var result = await IsolatedAggregateNodeProcess.RunAsync(
+            ["--input-type=module", "-e", IsolatedGitHubFileProgram.LargeSource,
+                IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root,
+                length.ToString(System.Globalization.CultureInfo.InvariantCulture), writer],
+            TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(result.ExitCode).IsEqualTo(0);
+        await Assert.That(result.Output.Trim()).IsEqualTo("accepted-large");
+        await Assert.That(result.Error).IsEmpty();
+    }
 }

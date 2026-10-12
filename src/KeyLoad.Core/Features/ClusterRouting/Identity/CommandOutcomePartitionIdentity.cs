@@ -31,6 +31,7 @@ internal static class CommandOutcomePartitionIdentity
             OperationKind.RemoteGraphComplete => ForPayload<global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1>(payload, static request => request.Receipt?.Intent?.Content?.SourcePartition),
             OperationKind.EventFeedControl => ForPayload<EventVectorControlPhase>(payload, static phase => phase.OriginalRequest?.ControlPartition),
             OperationKind.EventFeedSourcePhase => ForPayload<global::KeyLoad.Core.EventVectorSourceMutation>(payload, static request => request.Source?.Partition),
+            OperationKind.Bm25CorpusPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand>(payload, static phase => phase.Current?.Partition),
             OperationKind.OnlineTextPublicationPhase => ForPayload<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload, static request => request.Request.Consumer.Partition),
             OperationKind.PartitionMovementPhase => ForPayload<PartitionMovePhaseCommand>(payload, static request => request.Partition),
             OperationKind.Batch => ForPayload<CommandRequest>(payload, static request => request.Partition),

@@ -5,6 +5,21 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class LiveQueryResultCompositionAssertions
 {
+    internal static async Task UnchangedAsync(TestDatabase db, string[] image, long position, string identity)
+    {
+        await Assert.That(db.Store.Position).IsEqualTo(position);
+        await Assert.That(Bytes(db)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(db.Store.Identity))).IsEqualTo(identity);
+    }
+
+    internal static async Task LiteralAsync(LiveQueryPage actual,
+        System.Collections.Immutable.ImmutableArray<LiveQueryChange> changes, long through, bool more, long cut)
+    {
+        await Assert.That(string.IsNullOrWhiteSpace(actual.Cursor)).IsFalse();
+        var expected = new LiveQueryPage(changes, actual.Cursor, through, more, cut);
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+    }
+
     internal const int Cap = 4096;
     internal static AstQueryRequest Query(TestDatabase db, bool compact)
         => new(db.Partition, new SelectQuery("orders", null,
