@@ -36,13 +36,21 @@ internal sealed class IsolatedGitHubFileTests
         int length, string writer)
     {
         using var directory = new ImageBundleTestDirectory();
-        var result = await IsolatedAggregateNodeProcess.RunAsync(
-            ["--input-type=module", "-e", IsolatedGitHubFileProgram.LargeSource,
-                IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root,
-                length.ToString(System.Globalization.CultureInfo.InvariantCulture), writer],
-            TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(result.ExitCode).IsEqualTo(0);
-        await Assert.That(result.Output.Trim()).IsEqualTo("accepted-large");
-        await Assert.That(result.Error).IsEmpty();
+        try
+        {
+            var result = await IsolatedAggregateNodeProcess.RunAsync(
+                ["--input-type=module", "-e", IsolatedGitHubFileProgram.LargeSource,
+                    IsolatedAggregateNodeProcess.Module("isolated-github-stream.mjs"), directory.Root,
+                    length.ToString(System.Globalization.CultureInfo.InvariantCulture), writer],
+                TestContext.Current!.Execution.CancellationToken);
+            await Assert.That(result.ExitCode).IsEqualTo(0);
+            await Assert.That(result.Output.Trim()).IsEqualTo("accepted-large");
+            await Assert.That(result.Error).IsEmpty();
+        }
+        catch (Exception)
+        {
+            directory.RetainFailureEvidence();
+            throw;
+        }
     }
 }

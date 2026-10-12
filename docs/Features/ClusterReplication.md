@@ -907,3 +907,26 @@ flowchart LR
     D --> E[Join actual original owner]
     E --> F[Original disposed Task refuses before borrowed work]
 ```
+
+
+## Native cold acquisition owner and refusal repair, 2026-10-12
+
+REQ-REP-COLD-ACQUISITION-001: A fresh original native cohort scenario owns a fresh observation interval. The shared actual native endpoint resets its nonce-enrolled request counter with its gates and selected metadata only at the existing scenario boundaries, after the preceding original discovery client has joined disposal. These counters measure enrolled native discovery callbacks, not database or consensus outbound work. Preserve the literal cold zero and acquisition one assertions; do not subtract an observed baseline or rewrite expected counts.
+
+REQ-REP-COLD-ACQUISITION-002: Aggregate unavailable-cohort trials stop both original remote native discovery owners through their existing StopListeningAsync ownership path. They must obtain the original aggregate OwnershipLost/NoLeader refusal and missing-peer observations. A signed individual InvalidDiscovery error remains an individual refusal and must not be normalized to NoLeader. Repair restarts both actual remote silos through the existing RestartVoterAsync lifecycle, joins old owners and native membership stabilization, requires both real generations to change and rebinds fresh signed discovery records from those actual generations. No synthetic generation arithmetic, product catch, retry, deadline increase or authority change is introduced.
+
+AC-REP-COLD-ACQUISITION-001: Preserve RequestCqrsColdStartupAcquisitionTests.ColdFollowerAcquiresItsOwnSignedCurrentCohortWithoutUnrelatedOutboundWork and OriginalUnavailableAndIncompatibleRefusalsAndCallerCancellationPrecedeHealthyAdmission declarations and native UIDs. The same original20s case bound covers actual unavailable refusal, real restart, current signed majority, incompatible third-peer refusal, exact repair, original enumerator/caller cancellation without extra discovery work and fresh healthy admission. Retain every literal error detail, cohort count, request counter and joined cleanup failure. Existing signed invalid identity, tampered bytes, natural cache expiry and stopped-owner transitions remain independent controls.
+
+The coherent R26 additional lane recorded these two original failures with stable source/images and joined processes: the second fresh scenario retained a previous endpoint count1, and the unavailable trial injected a signed InvalidDiscovery receiver error while asserting aggregate NoLeader. The individual product diagnostic remains correct under the frozen aggregate-versus-individual contract. Native source preview and implementation are not runtime or Linux qualification; the original failures stay retained and Root owns compiler, focused native execution and mandatory suites.
+
+```mermaid
+flowchart LR
+  Cold[Fresh joined observation interval] --> Stop[Stop two actual discovery owners]
+  Stop --> Refuse[Original NoLeader and missing peers]
+  Refuse --> Restart[Restart both actual silos and join]
+  Restart --> Generation[Rebind genuine new generations]
+  Generation --> Controls[Original incompatibility and cancellation controls]
+  Controls --> Healthy[Fresh signed healthy cohort]
+```
+
+The actual repair is phased: restart the first remote owner and verify the original two-ready majority while the second owner remains genuinely stopped, then restart the second owner before publishing its original incompatible-third-peer control. Both new generations are independently required to differ from their actual stopped owners; no simultaneous restart may erase the original two-ready assertion.

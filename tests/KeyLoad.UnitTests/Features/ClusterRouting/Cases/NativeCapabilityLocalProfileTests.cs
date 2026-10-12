@@ -47,6 +47,8 @@ internal sealed class NativeCapabilityLocalProfileTests
                 [ProtectedKey] = null
             });
             await NativeCapabilityRegistrationLogging.ProveAsync(unregistered, local, null).ConfigureAwait(false);
+            await Assert.That(TwoRf3QueryProbe.Create(builder, fixture.DataRoot, null, local)!.MemberCount)
+                .IsEqualTo(TwoRf3ProfileProtocol.TotalNodes);
             foreach (var setting in new[] { RemoteQueryKey,
                 ProtectedKey, Omission + "Enabled", Omission })
             {
@@ -69,7 +71,7 @@ internal sealed class NativeCapabilityLocalProfileTests
             await Assert.That(NativeDiscoveryOmissionProfile.Create(Create(fixture), fixture.DataRoot, null,
                 LocalDevelopmentContainerImage.Read(Create(fixture)))).IsNotNull();
             await Assert.That(await EqualAsync(fixture, before, token).ConfigureAwait(false)).IsTrue();
-        }).ConfigureAwait(false);
+        }, includeDestination: true).ConfigureAwait(false);
     }
 
     private static IDistributedApplicationBuilder Create(RequestCqrsProbeAppHostFileFixture fixture,

@@ -103,6 +103,17 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
             runtime.LocalServices.GetRequiredService<ISiloStatusOracle>(), UnitRoutingOptions.Membership(), probe);
     }
 
+    internal async Task RestartUnavailablePeerAsync(string voter, CancellationToken token)
+    {
+        if (voter is not (FirstRemote or SecondRemote) || !Find(voter).Stopped)
+        { throw new InvalidOperationException("The original remote discovery owner must be stopped before restart."); }
+        var index = voter == FirstRemote ? 1 : 2;
+        var original = RuntimeAddress(index);
+        await runtime.RestartVoterAsync(voter, token);
+        if (RuntimeAddress(index) == original)
+        { throw new InvalidOperationException("The genuine native peer restart retained its original generation."); }
+    }
+
     private ReplicaEnvelopeAuthenticator Authenticator(string voter)
         => runtime.Node(voter).Authentication;
 

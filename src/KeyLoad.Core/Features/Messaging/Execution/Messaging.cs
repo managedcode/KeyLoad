@@ -220,6 +220,10 @@ public sealed partial class DatabaseEngine
         { Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead); }
         if (metadata.Id != id)
         { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference); }
+        if (metadata.State is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased
+            or MessageState.Acked or MessageState.DeadLettered or MessageState.Cancelled
+            or MessageState.Expired or MessageState.PendingDeadLetter))
+        { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.InvalidPersistedState); }
         if (retainedDeadLetter)
         {
             _ = RequireQueueLifecycleCounters(view, lane);
@@ -232,7 +236,8 @@ public sealed partial class DatabaseEngine
         var body = view.GetRecord<MessageBody>(QueueKey(MessagingMessageBodyKeySpace, lane, id));
         var retainedBody = metadata.State is MessageState.Ready or MessageState.Scheduled or MessageState.Leased
             or MessageState.DeadLettered or MessageState.PendingDeadLetter;
-        if (retainedBody && (body is null || body.Id != id))
+        var terminalState = metadata.State is MessageState.Acked or MessageState.Cancelled or MessageState.Expired;
+        if (retainedBody && (body is null || body.Id != id) || terminalState && body is not null)
         { throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody); }
         return new MessageInspection(metadata, body is null ? null : Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _),
             body is null ? null : Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));

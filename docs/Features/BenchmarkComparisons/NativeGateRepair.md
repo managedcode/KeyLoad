@@ -151,3 +151,14 @@ flowchart LR
     Reject --> Healthy[Exact healthy continuation and sealed files]
     Healthy --> Linux[Original Linux TUnit report]
 ```
+
+
+## Large-stream failure evidence ownership, 2026-10-12
+
+REQ-NGR-LARGE-CLEANUP-001: retain the initiating native stream, runner, cancellation or assertion failure and its owned partial byte evidence. Directory disposal must not delete that failed fixture evidence or replace its original failure. Successful fixtures retain their normal disposal and visible cleanup-only failures.
+
+AC-NGR-LARGE-CLEANUP-001 maps to REQ-NGR-LARGE-CLEANUP-001 and the six existing AC-ISO-007 cases: retain the existing joined IsolatedAggregateNodeProcess owner and all six original length/writer cases; an initiating body failure marks only its own ImageBundleTestDirectory for retention and rethrows the original exception. A successful body still deletes that original directory normally. This is a test artifact ownership repair; the stream transport and error classifications are unchanged. Original Linux Benchmarks execution remains required and OPEN.
+
+AC-NGR-LARGE-CLEANUP-002 maps to REQ-NGR-LARGE-CLEANUP-001: inject an initiating body failure with a subsequent directory-deletion failure and verify original exception identity plus retained original fixture bytes; separately verify a successful body with deletion failure reports that cleanup failure. Explicit manual verification exception: these adverse disposal flows are not yet automated or executed, remain OPEN, and require retained original Linux fault evidence before qualification. Source/native patch receipts alone do not satisfy either acceptance criterion.
+
+Owning map: existing ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Helpers/ImageBundleTestDirectory.cs and Cases/IsolatedGitHubFileTests.cs, under this feature's existing native runner and artifact ownership. Existing bounded joins and explicit deferred-release failure ledgers remain authoritative; this retention marker does not prove that every exceptional process join has completed. Other fixture users keep their current successful cleanup behavior.

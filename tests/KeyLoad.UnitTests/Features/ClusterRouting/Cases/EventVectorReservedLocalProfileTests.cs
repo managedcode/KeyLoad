@@ -32,6 +32,8 @@ internal sealed class EventVectorReservedLocalProfileTests
             var builder = Create(fixture);
             var local = LocalDevelopmentContainerImage.Read(builder)!;
             await Assert.That(TwoRf3QueryProbe.Create(builder, fixture.DataRoot, null, local)).IsNotNull();
+            await Assert.That(TwoRf3QueryProbe.Create(builder, fixture.DataRoot, null, local)!.MemberCount)
+                .IsEqualTo(TwoRf3ProfileProtocol.TotalNodes);
             foreach (var setting in new[] { ProtectedKey, RegistrationKey, Selection })
             {
                 var denied = Create(fixture, setting, "false");
@@ -51,7 +53,7 @@ internal sealed class EventVectorReservedLocalProfileTests
             await Assert.That(TwoRf3QueryProbe.Create(Create(fixture), fixture.DataRoot, null,
                 LocalDevelopmentContainerImage.Read(Create(fixture)))).IsNotNull();
             await Assert.That(await EqualAsync(fixture, before, token).ConfigureAwait(false)).IsTrue();
-        }).ConfigureAwait(false);
+        }, includeDestination: true).ConfigureAwait(false);
     }
 
     private static IDistributedApplicationBuilder Create(RequestCqrsProbeAppHostFileFixture fixture,

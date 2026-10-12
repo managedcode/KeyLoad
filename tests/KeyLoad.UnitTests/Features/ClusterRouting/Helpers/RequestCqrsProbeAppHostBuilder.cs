@@ -21,7 +21,7 @@ internal static class RequestCqrsProbeAppHostBuilder
         var values = new Dictionary<string, string?>(StringComparer.Ordinal)
         {
             [EnabledKey] = "true",
-            [RootKey] = fixture.Root,
+            [RootKey] = fixture.ProbeRoot,
             [SessionKey] = fixture.SessionId,
             [EphemeralKey] = "true",
             [RuntimeContainerImage.ServerConfiguration] = ValidImage

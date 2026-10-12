@@ -103,7 +103,7 @@ internal sealed class RequestCqrsCohortEndpoint : IReplicaNativeDiscoveryObserve
         token.ThrowIfCancellationRequested();
     }
     internal void ReleaseAll() { dispatchGate?.Release(); payloadGate?.Release(); }
-    internal void Reset() { ReleaseAll(); selected = null; dispatchGate = null; payloadGate = null; unavailable = false; malformed = false; requests.Clear(); }
+    internal void Reset() { ReleaseAll(); selected = null; dispatchGate = null; payloadGate = null; unavailable = false; malformed = false; requests.Clear(); Interlocked.Exchange(ref count, 0); }
 }
 
 internal sealed class RequestCqrsCohortNativeGate

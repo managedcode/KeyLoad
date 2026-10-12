@@ -134,13 +134,14 @@ internal static class RequestCqrsProbeFileStore
     }
 
     internal static void DeleteOwnedTree(string root, IReadOnlyDictionary<string, string> nodePaths,
-        IReadOnlyDictionary<string, byte[]> ownerRecords, bool requireAllOwners)
+        IReadOnlyDictionary<string, byte[]> ownerRecords, bool requireAllOwners, bool includeDestination = false)
     {
         RequestCqrsProbeFileValidation.ValidateDirectory(root);
-        if (nodePaths.Count > RequestCqrsRf3Protocol.NodeCount
-            || (requireAllOwners && nodePaths.Count != RequestCqrsRf3Protocol.NodeCount))
+        var nodes = includeDestination ? TwoRf3MembershipProtocol.Nodes : RequestCqrsProbeFixtureProtocol.Nodes;
+        if (nodePaths.Count > nodes.Count
+            || (requireAllOwners && nodePaths.Count != nodes.Count))
         { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
-        var rootEntries = Directory.EnumerateFileSystemEntries(root).Take(RequestCqrsRf3Protocol.NodeCount + 1).ToArray();
+        var rootEntries = Directory.EnumerateFileSystemEntries(root).Take(nodes.Count + 1).ToArray();
         if (rootEntries.Length != nodePaths.Count
             || rootEntries.Any(path => !nodePaths.Values.Contains(path, StringComparer.Ordinal)))
         { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
@@ -148,7 +149,7 @@ internal static class RequestCqrsProbeFileStore
         {
             var node = pair.Value;
             var expectedPath = Path.GetFullPath(Path.Combine(root, pair.Key));
-            if (pair.Key is not (RequestCqrsRf3Protocol.Node1 or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3)
+            if (!nodes.Contains(pair.Key, StringComparer.Ordinal)
                 || !string.Equals(Path.GetFullPath(node), expectedPath, StringComparison.Ordinal))
             { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
             RequestCqrsProbeFileValidation.ValidateDirectory(node);

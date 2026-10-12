@@ -3,6 +3,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class ImageBundleTestDirectory : IDisposable
 {
     private const string Prefix = "keyload-image-bundle-test-";
+    private bool retainFailureEvidence;
     internal string Root { get; } = Resolve(Directory.CreateTempSubdirectory(Prefix));
 
     private static string Resolve(DirectoryInfo directory)
@@ -15,5 +16,13 @@ internal sealed class ImageBundleTestDirectory : IDisposable
         return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }
 
-    public void Dispose() => Directory.Delete(Root, recursive: true);
+    internal void RetainFailureEvidence() => retainFailureEvidence = true;
+
+    public void Dispose()
+    {
+        if (!retainFailureEvidence)
+        {
+            Directory.Delete(Root, recursive: true);
+        }
+    }
 }

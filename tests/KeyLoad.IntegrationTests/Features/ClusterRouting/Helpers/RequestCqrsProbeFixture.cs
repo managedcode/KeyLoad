@@ -12,13 +12,16 @@ internal sealed class RequestCqrsProbeFixture
     private readonly Dictionary<string, byte[]> ownerRecords = new(StringComparer.Ordinal);
     private readonly Dictionary<Guid, RequestCqrsProbeArmState> arms = [];
     private readonly Dictionary<string, int> activeGates = new(StringComparer.Ordinal);
+    private readonly bool includeDestination;
     private bool admissionStopped;
     private bool cleaned;
     private bool retainEvidence;
 
     internal RequestCqrsProbeFixture(string root, string sessionId,
-        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json)
+        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json,
+        bool includeDestination = false)
     {
+        this.includeDestination = includeDestination;
         Root = root;
         SessionId = sessionId;
         Json = json;
@@ -34,6 +37,9 @@ internal sealed class RequestCqrsProbeFixture
 
     internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId)
         => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId);
+
+    internal static RequestCqrsProbeFixture CreateTwoRf3(string dataRoot, Guid sessionId)
+        => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId, includeDestination: true);
 
     internal Guid WriteArm(string principalId, Guid commandId, GrainReadKind? readKind,
         RequestCqrsProbePhase phase, RequestCqrsProbeAction action, PartitionRef? partition = null, Guid? sourceRequestId = null, string? targetVoter = null, Guid? sourceArmId = null)
@@ -152,14 +158,7 @@ internal sealed class RequestCqrsProbeFixture
             if (cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
                 || (arm.Action == RequestCqrsProbeAction.Hold && arm.RequestId is not null && !arm.Settled && !arm.DisposedGateJoined && !arm.ProcessOwnerJoined))
             { throw new InvalidOperationException(InvalidArm); }
-            foreach (var voter in Nodes)
-            {
-                var directory = nodeDirectories[voter];
-                RequestCqrsProbeFileStore.VerifyOwnerFile(directory, ownerRecords[voter]);
-                RequestCqrsProbeFileStore.VerifyExactFile(directory, RequestCqrsProbeFileNames.Arm(armId), arm.Bytes);
-            }
-            foreach (var voter in Nodes)
-            { RequestCqrsProbeFileStore.DeleteExactFile(nodeDirectories[voter], RequestCqrsProbeFileNames.Arm(armId), arm.Bytes); }
+            RequestCqrsProbeFixtureOperations.RetireArmFiles(armId, arm.Bytes, nodeDirectories, ownerRecords);
             arm.Retired = true;
         }
         return Task.CompletedTask;
@@ -193,11 +192,14 @@ internal sealed class RequestCqrsProbeFixture
             if (cleaned || retainEvidence)
             { return Task.CompletedTask; }
         }
-        RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true);
+        RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true, includeDestination);
         lock (sync)
         { cleaned = true; }
         return Task.CompletedTask;
     }
+
+    internal Task VerifyDestinationOwnerOnlyAsync(CancellationToken token)
+        => RequestCqrsProbeFixtureOperations.VerifyDestinationOwnerOnlyAsync(this, includeDestination, token);
 
     internal (string Directory, byte[] OwnerBytes) NodeFor(string node)
         => (nodeDirectories[node], ownerRecords[node]);

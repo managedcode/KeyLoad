@@ -1,0 +1,318 @@
+{
+  "record": "STAGE64-R27-LOCAL-DEVELOPMENT-20261012",
+  "capturedUtc": "2026-10-12T17:36:38.972654+00:00",
+  "qualification": "Local development only. Original 104 acceptance remains 19 done and 85 in progress; KL-105 is separate. Selected runs do not close full Unit, process recovery, Aspire Docker RF3, endurance, Linux, performance or coverage gates.",
+  "source": {
+    "parentHead": "ebc8150498c241a6635902950bd77ff686fd8aea",
+    "workingTree": "Current reviewed R27 source changes; no clean-parent execution claim",
+    "sourceFiles": 9623,
+    "compiledUnitSources": 2218,
+    "sourceCheckpoint": {
+      "path": "TestResults/stage61-native-join/stage64-r27-full-build-final.original.source-after.json",
+      "sha256": "4e8d555022eea990182d87ab076017956bbb4b498a97ae0099c340224b7240ae"
+    },
+    "nativeImage": {
+      "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+      "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+      "dllSha256": "64e88c6c23be1761e6e0c4a1b1e5f43d6625d6b8644f027ab3850cbe8a64eda0",
+      "pdbSha256": "c3f2a20d13edde1c0afda3ccbc91bdca4581a39a6bc03c9194f4f88baa35de16",
+      "moduleName": "KeyLoad.UnitTests.dll",
+      "compiledIdentityToolSha256": "baf2660772a551118067e33a0a7c62b8477722518561f27d5da2380be9a2d6bb",
+      "originalCompilationRoot": "/Users/ksemenenko/Developer/KeyLoad",
+      "inspectedSourceRoot": "/Users/ksemenenko/Developer/KeyLoad",
+      "mvid": "f549d866-4b72-4820-8873-40297a81af77",
+      "pdbGuid": "8a0bc52d-b3a2-4795-999b-1b936bc1a45e",
+      "pdbStamp": 3694778752,
+      "sourceFilesWithoutPdbDocuments": [],
+      "compiledSourceBindingComplete": true,
+      "qualification": "static native identity inspection only; no test, coverage or build qualification",
+      "compileReceipt": {
+        "version": 1,
+        "sourceCount": 2218,
+        "sourceSetSha256": "091abd05b75e980470a67758831f9488949c0522059120a2d99f2289678e7471",
+        "centralInputCount": 6,
+        "centralInputs": [
+          {
+            "path": "global.json",
+            "sha256": "a5b95fca45a6f4af8bbec957646bba63f7a4384ddc60fa08d99c951413bd0fdf"
+          },
+          {
+            "path": "Directory.Build.props",
+            "sha256": "24b128306eedffc2002e3a9732b33a43bf041b75ce8b22e85b8f71e8f2c6596b"
+          },
+          {
+            "path": "Directory.Build.targets",
+            "sha256": "febf4f715173a01b9975b94bc71b0b0699545001e5ba9f029163524b1691fcf4"
+          },
+          {
+            "path": "Directory.Packages.props",
+            "sha256": "d4e3b070102031bc5ab4167f3e1a143a1dbe4529d8d3736a6107b1428b374d29"
+          },
+          {
+            "path": "KeyLoad.slnx",
+            "sha256": "44c890b5f040b118c55b6b96835f9a98f90ce0283be096e2813f97fabed7c0a3"
+          },
+          {
+            "path": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+            "sha256": "9c5daad55338c5c53fae20aca8a6c268fb81c9a8777313e2dd6924be735c03bc"
+          }
+        ],
+        "producer": {
+          "path": "tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets",
+          "sha256": "fa5084ffd192d206f43dcc2ee482663fb255700c1b15ebe752f8b17e238a4286"
+        },
+        "binding": "same-assembly native metadata; DLL MVID and portable-PDB CodeView identity verified"
+      }
+    }
+  },
+  "nativeDiagnostics": {
+    "errors": 0,
+    "warnings": 0,
+    "original": {
+      "path": "TestResults/stage61-native-join/stage64-r27-native-diagnostics.postformatter.original.json",
+      "sha256": "938ae8d315e9a6f919ac6263105bfadb3a9a3a5e8b7cc85914152d79719a6ce6"
+    }
+  },
+  "formatter": {
+    "argv": [
+      "dotnet",
+      "format",
+      "KeyLoad.slnx",
+      "--verify-no-changes",
+      "--no-restore",
+      "--verbosity",
+      "quiet"
+    ],
+    "pid": 44695,
+    "startedUtc": "2026-10-12T17:09:42.314501+00:00",
+    "finishedUtc": "2026-10-12T17:16:28.376224+00:00",
+    "seconds": 406.05808045796584,
+    "exitCode": 0,
+    "sourceFiles": 9623,
+    "sourceDrift": [],
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalCompletion": {
+      "path": "TestResults/stage61-native-join/stage64-r27-format-final-verify.original.completion.json",
+      "sha256": "c93c0826ab7ab0b24a82cf755e488799269fa3b22ba5e0f484a7786d042cce93"
+    }
+  },
+  "fullRelease": {
+    "argv": [
+      "dotnet",
+      "build",
+      "KeyLoad.slnx",
+      "--no-restore",
+      "--configuration",
+      "Release",
+      "-m:4",
+      "-bl:TestResults/stage61-native-join/stage64-r27-full-build-final.original.binlog"
+    ],
+    "pid": 48922,
+    "startedUtc": "2026-10-12T17:17:14.115301+00:00",
+    "finishedUtc": "2026-10-12T17:19:36.079806+00:00",
+    "seconds": 141.96333504200447,
+    "exitCode": 0,
+    "sourceFiles": 9623,
+    "sourceDrift": [],
+    "stdoutSha256": "4bf5c2eabdc35bba80f1fb56b5b46f0830fb2cb8df2454ff74c756faa084b54c",
+    "warnings": 0,
+    "errors": 0,
+    "originalCompletion": {
+      "path": "TestResults/stage61-native-join/stage64-r27-full-build-final.original.completion.json",
+      "sha256": "3afbd5b73ccafc0f86acd5a7c876e14e694bc5eab0fa6946b1239f3b4fb79434"
+    }
+  },
+  "focusedNativeTUnit": {
+    "entry": "scripts/Features/TestInfrastructure/run-tests.mjs; native TUnit/MTP; fixtures own required Aspire resources",
+    "lanesRunInParallel": true,
+    "executed": 276,
+    "passed": 265,
+    "failed": 11,
+    "skipped": 0,
+    "lanes": [
+      {
+        "lane": "main",
+        "executed": 215,
+        "passed": 215,
+        "failed": 0,
+        "skippedOrOther": 0,
+        "configuredMaximumParallelTests": 50,
+        "actualPeakOverlappingTrxIntervals": 50,
+        "trxWindowSeconds": 349.806243,
+        "nativeJoins": {
+          "exitJoined": true,
+          "outputJoined": true,
+          "errorJoined": true,
+          "disposed": true
+        },
+        "nativeExitCode": 0,
+        "sourceImageDrift": false,
+        "originalTrx": {
+          "path": "TestResults/stage61-native-join/current-stage64-r27-main-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "512f58dee1c3561f577570b0788de382419632588f1a7e6a23d31dae794aed23"
+        }
+      },
+      {
+        "lane": "additional",
+        "executed": 61,
+        "passed": 50,
+        "failed": 11,
+        "skippedOrOther": 0,
+        "configuredMaximumParallelTests": 50,
+        "actualPeakOverlappingTrxIntervals": 22,
+        "trxWindowSeconds": 43.592917,
+        "nativeJoins": {
+          "exitJoined": true,
+          "outputJoined": true,
+          "errorJoined": true,
+          "disposed": true
+        },
+        "nativeExitCode": 2,
+        "sourceImageDrift": false,
+        "originalTrx": {
+          "path": "TestResults/stage61-native-join/current-stage64-r27-additional-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "15444b80a4f878e950e71178e2d9da878292023705ec5c0bbe4a82003c45f8fe"
+        }
+      }
+    ],
+    "mainOriginal": {
+      "path": "TestResults/stage61-native-join/current-stage64-r27-runtime-completion.original-bound.json",
+      "sha256": "b77cf00ce4ee1a92466fed6bd8d02ca08988abc580d1c009aa56fc11108399fa"
+    },
+    "additionalOriginal": {
+      "path": "TestResults/stage61-native-join/current-stage64-r27-additional-runtime-completion.original-bound.json",
+      "sha256": "a3c460de1cf0577608b7305e9cc2f80059ace57fd0d3daaaa30dc9c61820939e"
+    },
+    "failures": [
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).2.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Acked, True)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(System.Int32).1.1.0",
+        "displayName": "AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(-1)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).6.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Expired, True)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).4.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Cancelled, True)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).5.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Expired, False)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).3.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Cancelled, False)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(System.Int32).2.1.0",
+        "displayName": "AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(8)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests.1.1.AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(KeyLoad.MessageState, System.Boolean).1.1.0",
+        "displayName": "AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Acked, False)",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.EventVectorReservedLocalProfileTests.1.1.ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile.1.1.0",
+        "displayName": "ExactEventVectorReservedProfileRefusesForeignEnrollmentWithoutEffectsThenAdmitsSameOwnedProfile",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.NativeCapabilityLocalProfileTests.1.1.ExactLocalCapabilityProfileRejectsMissingEnrollmentWithoutChangingOwnedFilesThenAdmitsRepair.1.1.0",
+        "displayName": "ExactLocalCapabilityProfileRejectsMissingEnrollmentWithoutChangingOwnedFilesThenAdmitsRepair",
+        "outcome": "Failed"
+      },
+      {
+        "nativeUid": "KeyLoad.UnitTests.Features.Search.Bm25PortableMovementTests.1.1.ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects.1.1.0",
+        "displayName": "ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects",
+        "outcome": "Failed"
+      }
+    ]
+  },
+  "remainingObservedFailures": {
+    "terminalReceiveReplay": {
+      "instances": 8,
+      "cause": "New regression replay oracle conflicts with frozen current-lease authorization. Preserve original stored ReceiveResult; compare full replay while lease is current and exact StaleLease/no payload/no effect after terminal settlement. Native Lease validation is unchanged; complete N correction is pending."
+    },
+    "explicitLocalProbeEnrollment": {
+      "instances": 2,
+      "cause": "R27 added an unselected generic local branch bypassing the original missing-profile refusal. Root native N removes only that branch and preserves selected six-owner modes and both original complete cases. Actual next source/run pending."
+    },
+    "bm25PortableMovement": {
+      "instances": 1,
+      "cause": "Original genuine server InvalidScope remains; source cause unproven. Privacy-safe purpose observation N pending; no error normalization or fabricated receipt."
+    }
+  },
+  "coverage": {
+    "status": "UNMEASURED",
+    "reason": "No coverage collector selected. TRX pass counts are not coverage."
+  },
+  "profiling": {
+    "status": "Measured local functional-runner counters; KL-105 acceptance remains open",
+    "original": {
+      "path": "TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.actual.receipt.json",
+      "sha256": "111a29be61e92358ab494cec3e5af791c855ab2691944cea4674b9ac6f0e76fc"
+    },
+    "pid": 50958,
+    "durationSeconds": 15,
+    "counterSeries": 27,
+    "meterSeries": 33,
+    "maximumParallelTests": 50,
+    "sourceCount": 2218,
+    "nativeImageBindingSha256": "d76c6aa2a864f08dd5d39f81477785d3a69054fb74a1ee4c901a371476e7e4dc",
+    "cpuSampling": "Native capability unavailable; no override or CPU capture",
+    "latestAllocationCounter": {
+      "provider": "System.Runtime",
+      "name": "alloc-rate",
+      "displayName": "Allocation Rate",
+      "value": 674579568,
+      "kind": "Sum",
+      "unit": "B",
+      "intervalSec": 1.0015419721603394,
+      "displayRateTimeScale": "00:00:01"
+    },
+    "quality": {
+      "samplingLoss": "UNMEASURED; no original lost-event accounting exposed",
+      "targetOverhead": "UNMEASURED; EventPipe enabled with bounded15s/128series; no paired control",
+      "perOperationAttribution": "UNAVAILABLE;215 concurrent functional cases, maximumParallel50; aggregate period after startup",
+      "cpuStacks": "UNAVAILABLE; native canSampleCpu=false; no override/CPU capture",
+      "runtimeClassifier": "NativeAot label retained as original tool output; separate pinned source review establishes macOS non-exhaustive module classifier flaw. Executed classifier branch/raw sample cause unobserved.",
+      "notesEmptyDoesNotProveComplete": true,
+      "intervalSemantics": "Counters keep raw value/kind/unit/intervalSec/displayRateTimeScale; latest is not whole-window behavior. GC counters are increments over interval, not blindly per-minute counts. Meter lastValue may be process cumulative or last-GC state; rate remains tool-reported, no new inferred timebase.",
+      "limits": [
+        "macOSarm64 development lane, not Linux qualification",
+        "captures only15s window, excludes startup and earlier additional61",
+        "no stack/object/line-level causal attribution",
+        "no equivalent before/after benchmark or independent measurement",
+        "no latency/throughput/speed/endurance/RF3 claim",
+        "functional negative tests explain expected exception candidates; no automatic productionfault inference"
+      ]
+    },
+    "cleanup": {
+      "originalPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.cleanup.original.json",
+      "originalSha256": "4df984a4ed2a1d64277041efb6d9e1cb74304ff7bf34c94f618c098d35195c4d",
+      "helperPtyExitCode": 0,
+      "observedAtUtc": "2026-10-12T17:33:46.614111+00:00",
+      "ownedPids": [
+        51942,
+        51943
+      ],
+      "psExitCode": 1,
+      "remaining": "",
+      "termination": "EOF to owned helper PTY; no app target termination"
+    },
+    "limits": "Aggregate concurrent functional test-runner window; no per-operation stack attribution, measured diagnostics overhead, matched before/after, benchmark or speed qualification."
+  }
+}

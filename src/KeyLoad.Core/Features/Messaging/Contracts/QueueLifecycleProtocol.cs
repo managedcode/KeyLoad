@@ -13,6 +13,7 @@ internal static class QueueLifecycleProtocol
     internal const int Increment = 1;
     internal const string MissingBody = "The queue lifecycle body is unavailable.";
     internal const string MissingMetadata = "The queue lifecycle metadata is unavailable.";
+    internal const string InvalidPersistedState = "The queue lifecycle metadata state is invalid.";
     internal const string InvalidCounter = "The queue lifecycle accounting is invalid.";
     internal const string MissingReference = "The queue lifecycle reference does not match its metadata.";
     internal const string StaleCondition = "The queue lifecycle condition is stale.";

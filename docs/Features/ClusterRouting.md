@@ -870,3 +870,33 @@ AC-MOVE-NATIVE-COMPLETED-FAULT-CLEANUP-001: Preserve the same original six-owner
 ### Native two-RF3 health dependency completion, 2026-10-12
 
 REQ-ROUTE-NATIVE-FIXTURE-001 / AC-ROUTE-NATIVE-FIXTURE-001 require all six native membership-ready annotations without late database-ready admission in the resource startup dependency. The authenticated Linux original run38255628305/source01a9c5eb Unit flow RemoteReadAuthorityDependenciesExcludeLateDataAdmission refused the actual destination ready annotation. Native TwoRf3ClusterResources already emits membership-ready for every resource, but enabling RemoteDocumentReads in TwoRf3RemoteReadResources additionally inserts /health/ready for the three destination resources. Remove that insertion and its exclusive path/endpoint constants; retain all six remote-read environment flags, owner registration, native clustering, protected movement limits and query settings. The existing complete emitted-resource/trust/admission Unit flows retain their strict false-ready/false-retired-authority/true-native-membership oracles. Actual public data admission remains separately verified by the original SDK/MCP RF3 operations and ready endpoint; no membership predicate authorizes data. This source repair is not a passing Linux, RF3, coverage or performance gate.
+
+
+### TASK-MOVE-ABORT-HEALTHY-INDEPENDENT-JOURNAL-001
+
+REQ/AC-MOVE-001/004: the original active-capture abort whole flow MUST independently require the complete healthy CommitReceipt and journal index after every original ordered cleanup operation. The fixed control prefix is accepted fence15, capture authorization1, begin abort1, source marker authorization/apply/ack3, source terminal authorization/apply/ack3 and cancellation/finalization2. The independent literal83 portable families, one target-page cleanup family and one terminal batch produce85 target batches; each commits authorization and acknowledgement on source and one apply on target. The original healthy signed document Batch is one additional source entry, yielding195 after abort and196 for its full receipt. This expected formula MUST use the independent test inventory and named per-phase counts, never an observed receipt/index or production family inventory to set the expected result.
+
+Preserve every original full receipt, native byte replay, complete source/target image and position, original mixed-model/blob/canonical authority, same-root cold open and literal healthy DocumentResult assertion. All six original R26 abort/terminal failures and original run artifacts remain failed evidence. The stale healthy literal186 omitted10 current source entries: the actual82-to83 BM25 family addition accounts for2; the remaining8 were already missing at the82-family cut. This assertion repair is not a product durability change, an accepted failure, a passing test or RF3 qualification. Fresh shared image, original exact native case binding, full runtime flows and Linux acceptance remain OPEN.
+
+
+
+### TASK-CRS-SIX-OWNER-PROBE-COVERAGE-001 — native service coverage in one two-RF3 cohort
+
+REQ-CRS-SIX-OWNER-PROBE-COVERAGE-001: The explicitly selected ephemeral two-RF3 request-probe profile enrolls owner-only private roots on all six actual silos in the single Orleans cluster. Native producer disposal resolves each voter of both configured physical groups through the existing authenticated native Locate call. The pinned Orleans GrainServiceClient SiloAddress overload addresses that exact SystemTarget; it does not remap to a consistent-ring owner. Conditional native service registration must therefore be enabled on every addressed owner. Ordinary three-voter profiles remain exactly three, and no default product observer is enabled.
+
+REQ-CRS-SIX-OWNER-PROBE-COVERAGE-002: Control arms, marker inventory, signed discovery validation, broadcast, record quotas and gate limits remain scoped to the original three Control voters. Destination roots contain exact original owner bytes only, with no arms or markers and no foreign claim authority. Fixture creation validates the fixed six node names and retains partial-creation failures. After original native producer, resource and eighteen owner-lock joins, cleanup validates and deletes all six exact owned roots; every primary and cleanup failure remains retained. Separate native-discovery-omission Control roots keep their original three-voter schema and enrollment.
+
+AC-CRS-SIX-OWNER-PROBE-COVERAGE-001: The unchanged ClusterRestoreRf3Tests original declarations and complete linked-model SDK/official MCP capture, restore, refusal, original receipt and cold continuation flow must reach SixHealthy through actual six-owner native Locate replies. Assert exact Destination owner-only bytes and entries after startup and after the original complete scenario. Preserve Control producer-disposal settlement, original deadlines and joined cleanup. Existing NativeCapabilityLocalProfileTests and EventVectorReservedLocalProfileTests retain their complete refusal, unchanged-file and repair sequence and assert exact six-member producer enrollment while keeping a separate three-member omission root.
+
+The authenticated original Linux KL042 run38255628305, attempt1, source01a9c5eb01016336daab31b8a4ea76ef13f2918d failed its first restore case at SixHealthy with caller and deadline cancellation both false. Original node4 reported unknown IRequestCqrsProbeGrainService SystemTarget at13:36:56.9973772Z, before Control native startup read failures and the earliest fatal node3 at13:36:57.6770022Z. Archive11753879752 SHA2569898311a0c93094172fa63e49c3e799f8bc84a671b80d2378d245ea2ce29f5b1 preserves these originals. This source correction does not admit KL042 acceptance, identify an erased original Orleans subtype, or infer CPU/RAM exhaustion. Fresh compiled full flows and exact-source Linux qualification remain required. ADR-106 owns the private probe and ADR-125 owns producer settlement; no public wire, MAC, role, storage authority or protocol changes.
+
+```mermaid
+flowchart LR
+  Profile[Explicit two RF3 probe profile] --> Owners[Six exact private owner roots]
+  Owners --> Native[Six authenticated native Locate replies]
+  Native --> Control[Original Control arms and settlement]
+  Native --> Destination[Destination owner only no claims]
+  Control --> Join[Original producer resource and lock joins]
+  Destination --> Join
+  Join --> Cleanup[Validate and delete six owned roots]
+```

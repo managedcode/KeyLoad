@@ -44,10 +44,12 @@ internal sealed class ClusterRestoreRf3Tests
             if (!OperatingSystem.IsWindows())
             { File.SetUnixFileMode(ownedRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
             source = await TwoRf3MembershipWave.StartProtectedDocumentsAsync(phase.Startup, caller.Token).ConfigureAwait(false);
+            await source.QueryControls.VerifyDestinationOwnerOnlyAsync(caller.Token).ConfigureAwait(false);
             phase.Set(ClusterRestoreRf3Phase.SeedCreate);
             seed = await PartitionMovementPublicParentRf3Seed.CreateAsync(source, caller.Token).ConfigureAwait(false);
             phase.Set(ClusterRestoreRf3Phase.ScenarioEnter);
             await scenario(source, seed, ownedRoot, caller.Token).ConfigureAwait(false);
+            await source.QueryControls.VerifyDestinationOwnerOnlyAsync(caller.Token).ConfigureAwait(false);
             phase.Set(ClusterRestoreRf3Phase.ScenarioComplete);
         }, failures).ConfigureAwait(false);
         var bodyPhase = phase.Current;

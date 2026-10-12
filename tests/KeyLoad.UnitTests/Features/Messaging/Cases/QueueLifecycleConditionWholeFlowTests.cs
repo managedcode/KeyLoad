@@ -17,4 +17,24 @@ internal sealed class QueueLifecycleConditionWholeFlowTests
     public Task AcMsg088LifecycleInvalidConditionMissingAndTerminalOriginalFailureReplaysAcrossColdBeforeHealthyWork(
         QueueLifecycleConditionRefusal kind)
         => QueueLifecycleConditionTrial.Refusal(kind);
+
+    [Test]
+    [Arguments(MessageState.Acked, false)]
+    [Arguments(MessageState.Acked, true)]
+    [Arguments(MessageState.Cancelled, false)]
+    [Arguments(MessageState.Cancelled, true)]
+    [Arguments(MessageState.Expired, false)]
+    [Arguments(MessageState.Expired, true)]
+    public Task AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(
+        MessageState terminalState, bool foreignBody)
+        => QueueTerminalInspectionWholeFlow.RunAsync(terminalState, foreignBody,
+            TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    [Arguments(-1)]
+    [Arguments(8)]
+    public Task AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(
+        int persistedState)
+        => QueueUnknownStateInspectionWholeFlow.RunAsync(persistedState,
+            TestContext.Current!.Execution.CancellationToken);
 }

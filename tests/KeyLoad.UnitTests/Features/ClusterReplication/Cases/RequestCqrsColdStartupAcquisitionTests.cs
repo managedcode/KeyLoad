@@ -44,19 +44,21 @@ internal sealed class RequestCqrsColdStartupAcquisitionTests(RequestCqrsCohortRu
 
     private static async Task RefusalAndRepairAsync(RequestCqrsCohortScenario scenario, CancellationToken token)
     {
-        var first = scenario.Discovery(RequestCqrsCohortScenario.FirstRemote, 1);
-        var second = scenario.Discovery(RequestCqrsCohortScenario.SecondRemote, 2);
-        scenario.RemoteOne.SetUnavailable();
-        scenario.RemoteTwo.SetUnavailable();
+        await scenario.RemoteOne.StopListeningAsync(token);
+        await scenario.RemoteTwo.StopListeningAsync(token);
         await RequestCqrsCohortObservationAssertions.RefuseAdmissionAsync(scenario, ReplicaProtocol.NoLeader, token);
         var absent = await scenario.Client.AcquireCompatibleCohortAsync(token);
         await Assert.That(absent.Code).IsEqualTo(ReplicaCohortAdmissionCode.InsufficientFreshReady);
         await RequestCqrsCohortObservationAssertions.RequireAsync(scenario,
             ReplicaCohortAdmissionCode.InsufficientFreshReady, 2, 0, 2, 0, 1);
+        await scenario.RestartUnavailablePeerAsync(RequestCqrsCohortScenario.FirstRemote, token);
+        var first = scenario.Discovery(RequestCqrsCohortScenario.FirstRemote, 1);
         scenario.PublishRemoteOneRecord(first);
         var majority = await scenario.Client.AcquireCompatibleCohortAsync(token);
         await Assert.That(majority.Code).IsEqualTo(ReplicaCohortAdmissionCode.Compatible);
         await Assert.That(majority.Ready).IsEqualTo(2);
+        await scenario.RestartUnavailablePeerAsync(RequestCqrsCohortScenario.SecondRemote, token);
+        var second = scenario.Discovery(RequestCqrsCohortScenario.SecondRemote, 2);
         scenario.PublishRemoteTwoRecord(second with { ApplicationRpcVersion = GrainRoutingProtocol.RequestInterfaceVersion - 1 });
         var original = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => scenario.Client.AcquireCompatibleCohortAsync(token));
         var refused = original ?? throw new InvalidOperationException("The original incompatible cohort was admitted.");

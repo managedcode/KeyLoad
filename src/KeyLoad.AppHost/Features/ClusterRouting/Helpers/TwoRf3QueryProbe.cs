@@ -7,9 +7,6 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 internal static class TwoRf3QueryProbe
 {
     private const int FirstProbeIndex = 0;
-    private const string FirstVoter = "node1";
-    private const string SecondVoter = "node2";
-    private const string ThirdVoter = "node3";
 
     internal static RequestCqrsProbeProfile? Create(IDistributedApplicationBuilder builder, string root,
         RuntimeContainerImage? image, LocalDevelopmentContainerImage? local)
@@ -19,29 +16,24 @@ internal static class TwoRf3QueryProbe
         { return null; }
         if (local is not null && image is null && control.NativeDiscoveryOmission is not null)
         {
-            return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
-                benchmarkNodeCount: null, local);
+            return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
         }
         if (local is not null && image is null && control.EventVectorReservedProbe)
         {
-            return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
-                benchmarkNodeCount: null, local);
+            return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
         }
         if (control.TwoRf3 && !control.RemoteDocumentReads && !control.RemotePartitionQueries)
         { return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local); }
         if (control.TwoRf3 && control.RemoteDocumentReads && control.RemotePartitionQueries
             && local is not null && image is null)
         {
-            return RequestCqrsProbeProfile.ReadLocal(builder, root, ephemeral: true,
-                benchmarkNodeCount: null, local);
+            return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
         }
         if (!control.TwoRf3 || local is not null || image is null
             || !control.RemoteDocumentReads
             || !control.RemotePartitionQueries)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
-        return RequestCqrsProbeProfile.Read(builder, root, ephemeral: true, benchmarkNodeCount: null,
-            new Dictionary<string, RuntimeContainerImage>(StringComparer.Ordinal)
-            { [FirstVoter] = image, [SecondVoter] = image, [ThirdVoter] = image });
+        return RequestCqrsProbeProfile.ReadDiagnosticSix(builder, root, image, local);
     }
     internal static void Apply(RequestCqrsProbeProfile? probe,
         IReadOnlyList<IResourceBuilder<ContainerResource>> resources, IReadOnlyList<string> nodes)

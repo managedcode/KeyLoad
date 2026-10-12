@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server.Features.Search;
@@ -27,6 +28,14 @@ internal static class Bm25PortableMovementSeed
         await source.Partition.Coordinator.ReadBarrierAsync(token);
         var entry = ControlledPartitionMovementNativeEntryReader.Read(source, commandId, token);
         await Assert.That(entry.Operation!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
+        var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(entry.Operation!);
+        await Assert.That(receipt.Token.Position).IsEqualTo(entry.Index);
+        await Assert.That(receipt.Token.Incarnation).IsEqualTo(source.Store.Identity.Incarnation);
+        await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(ControlledPartitionMovementCorpus.Partition.AtomicPartitionId);
+        await Assert.That(receipt.Durability).IsEqualTo(source.Database.Durability);
+        var retainedReceipt = source.Database.ResolveSubmissionOutcome(entry.Operation!).Get<CommitReceipt>();
+        await Assert.That(NativeSerialization.Serialize(receipt).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(retainedReceipt))).IsTrue();
         var key = KeySpace.Partition(Bm25CorpusProtocol.CurrentFamily, ControlledPartitionMovementCorpus.Partition,
             ControlledPartitionMovementCorpus.Collection, Field,
             KeyLoad.Query.Features.Search.TextProjectionProtocol.TokenizerVersion, PhysicalShardCatalogFixture.RootPrincipalId);
@@ -34,6 +43,8 @@ internal static class Bm25PortableMovementSeed
             ?? throw new InvalidOperationException("The actual native maintenance publication head is absent.");
         var head = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(bytes);
         Bm25CorpusShape.RequireRecord(key, bytes, ControlledPartitionMovementCorpus.Partition, source.Database.Limits);
+        work.ChargeBytes(NativeSerialization.Measure(phase.Current));
+        await Assert.That(NativeSerialization.Serialize(phase.Current).AsSpan().SequenceEqual(bytes)).IsTrue();
         await Assert.That(head.Generation).IsEqualTo(commandId);
         await Assert.That(head.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(head.Statistics.TotalLength).IsEqualTo(2L);

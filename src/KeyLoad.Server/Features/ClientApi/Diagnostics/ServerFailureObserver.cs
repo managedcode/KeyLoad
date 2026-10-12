@@ -28,7 +28,10 @@ internal static class ServerFailureObserver
         }
         else if (terminal.IsCanceled)
         {
-            failures.Add(new TaskCanceledException(terminal));
+            try
+            { await terminal.ConfigureAwait(false); }
+            catch (OperationCanceledException error)
+            { failures.Add(error); }
         }
     }
 

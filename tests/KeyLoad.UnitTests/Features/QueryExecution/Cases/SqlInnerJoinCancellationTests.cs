@@ -41,6 +41,8 @@ internal sealed class SqlInnerJoinCancellationTests
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
         var position = database.Store.Position;
+        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var identity = Convert.ToHexString(NativeSerialization.Serialize(database.Store.Identity));
         var baseline = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
         var clock = new CancelAfterNativeRangeProgressTimeProvider(database, baseline, cancellation);
@@ -52,8 +54,18 @@ internal sealed class SqlInnerJoinCancellationTests
         var cancellationFailure = failure ?? throw new InvalidOperationException();
         await Assert.That(cancellationFailure.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(database.Store.Position).IsEqualTo(position);
+        await SqlInnerJoinCancellationWholeState.UnchangedAsync(database, before, position, identity);
         var healthy = engine.Execute("root", request);
         await AssertHealthyJoinedRowsAsync(healthy);
+        await SqlInnerJoinCancellationWholeState.LiteralAsync(healthy, ExpectedLeftIds, position);
+        var ast = new AstQueryRequest(database.Partition, new SelectQuery(Left, LeftAlias,
+            [new("/order_id", OrderIdField, LeftAlias), new("/name", NameField, RightAlias)], null,
+            [new("/order_id", false)], ExpectedLeftIds.Length,
+            InnerJoin: new(Right, RightAlias, "/customer_id", "/id")), AllowFullScan: true, AstVersion: Dialect);
+        var astHealthy = engine.ExecuteAst("root", ast);
+        await AssertHealthyJoinedRowsAsync(astHealthy);
+        await SqlInnerJoinCancellationWholeState.LiteralAsync(astHealthy, ExpectedLeftIds, position);
+        await SqlInnerJoinCancellationWholeState.UnchangedAsync(database, before, position, identity);
     }
 
     [Test]

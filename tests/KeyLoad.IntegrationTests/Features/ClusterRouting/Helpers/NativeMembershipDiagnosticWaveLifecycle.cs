@@ -7,7 +7,7 @@ internal static class NativeMembershipDiagnosticWaveLifecycle
     internal static void PrepareControls(TwoRf3MembershipWave wave, string root, CancellationToken token)
     {
         if (wave.queryProbe && wave.queryControls is null)
-        { wave.queryControls = RequestCqrsProbeFixture.Create(root, Guid.NewGuid()); }
+        { wave.queryControls = RequestCqrsProbeFixture.CreateTwoRf3(root, Guid.NewGuid()); }
         if (wave.nativeDiscoveryOmissionSelected && wave.nativeDiscoveryOmission is null)
         { wave.nativeDiscoveryOmission = KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture.Create(root, token); }
         if (wave.nativeMembershipDiagnostics && wave.nativeMembershipControls is null)

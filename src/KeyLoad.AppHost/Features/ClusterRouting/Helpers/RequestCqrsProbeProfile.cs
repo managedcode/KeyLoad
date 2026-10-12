@@ -63,7 +63,7 @@ internal sealed class RequestCqrsProbeProfile
         if (settings is null)
         { return null; }
         var control = AppHostOptionsRegistration.Get(builder).Control.Value;
-        if (!control.TwoRf3 || control.RemoteDocumentReads || control.RemotePartitionQueries
+        if (!control.TwoRf3 || control.RemoteDocumentReads != control.RemotePartitionQueries
             || (image is null) == (local is null)
             || (image is not null && string.IsNullOrWhiteSpace(image.Reference)))
         { throw new InvalidOperationException(InvalidConfiguration); }

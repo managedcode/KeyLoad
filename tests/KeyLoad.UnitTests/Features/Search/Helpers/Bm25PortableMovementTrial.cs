@@ -52,6 +52,7 @@ internal sealed class Bm25PortableMovementTrial
         await Bm25PortableMovementAssertions.HeadAsync(owners.Target, published.Head, published.Bytes, token);
         await ControlledPartitionMovementNativeRetireProducer.CompleteAsync(owners, request, completed, token);
         await ControlledPartitionMovementNativeModels.ReadAsync(owners.Target, seededAt, token);
+        await Bm25PortableMovementAssertions.HistoricalAsync(owners, published.Head, published.Bytes, token);
         await Bm25PortableMovementAssertions.HealthyAsync(owners.Target, token);
     }
 

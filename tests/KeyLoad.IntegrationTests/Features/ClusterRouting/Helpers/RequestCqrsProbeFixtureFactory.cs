@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 /// <summary>Creates the fixture's fresh, exclusively owned voter-control roots.</summary>
 internal static class RequestCqrsProbeFixtureFactory
 {
-    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId)
+    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId, bool includeDestination = false)
     {
         if (sessionId == Guid.Empty)
         { throw new ArgumentException(InvalidArm, nameof(sessionId)); }
@@ -20,15 +20,15 @@ internal static class RequestCqrsProbeFixtureFactory
         RequestCqrsProbeFixture? fixture = null;
         ServerFailureObserver.Observe(() =>
         {
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node1, Node1Origin, directories, owners, json);
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node2, Node2Origin, directories, owners, json);
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node3, Node3Origin, directories, owners, json);
-            fixture = new RequestCqrsProbeFixture(root, session, directories, owners, json);
+            var nodes = includeDestination ? TwoRf3MembershipProtocol.Nodes : Nodes;
+            foreach (var node in nodes)
+            { CreateNode(root, session, node, "http://" + node + ":8080", directories, owners, json); }
+            fixture = new RequestCqrsProbeFixture(root, session, directories, owners, json, includeDestination);
         }, failures);
         if (failures.Count > 0)
         {
             ServerFailureObserver.Observe(() => RequestCqrsProbeFileStore.DeleteOwnedTree(root, directories, owners,
-                requireAllOwners: false), failures);
+                requireAllOwners: false, includeDestination), failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }
         return fixture ?? throw new InvalidOperationException(InvalidControlEntry);

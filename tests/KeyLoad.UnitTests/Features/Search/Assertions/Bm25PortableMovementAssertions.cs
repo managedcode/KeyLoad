@@ -1,9 +1,13 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Orleans;
+using KeyLoad.Query;
 using KeyLoad.UnitTests.Features.ClusterRouting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -32,6 +36,50 @@ internal static class Bm25PortableMovementAssertions
             await Assert.That(NativeSerialization.Serialize(after[index]).AsSpan()
                 .SequenceEqual(NativeSerialization.Serialize(before[index]))).IsTrue();
         }
+    }
+
+    internal static async Task HistoricalAsync(ControlledPartitionMovementNativeHosts owners,
+        Bm25CorpusCurrentV1 original, byte[] originalBytes, CancellationToken token)
+    {
+        var before = await Bm25PortableMovementCapture.SixAsync(owners, token);
+        var target = owners.Target;
+        var work = new ReadExecutionBudget(target.Runtime.Core.DatabaseLimits, target.Clock, token);
+        var observed = target.Database.WithQueryView(original.PrincipalId, original.Partition,
+            original.Collection, (view, principal, resource) =>
+            {
+                var bounded = work.CreateView(view);
+                var catalog = PhysicalShardCatalogRecordSerialization.Read(bounded)
+                    ?? throw new InvalidOperationException("The actual destination catalog is absent.");
+                var statistics = target.Database.ReadBm25CorpusCurrent(bounded, principal, resource,
+                    original.Partition, original.Collection, original.Field, original.TokenizerVersion,
+                    original.Statistics.Terms, work);
+                return (Statistics: statistics, PrincipalId: principal.Id, PolicyEpoch: principal.PolicyEpoch,
+                    SchemaVersion: resource.SchemaVersion, ResourcePolicyDigest: Bm25CorpusDigest.Resource(resource, work),
+                    SourceOutboxTail: target.Database.ReadOutboxHead(bounded, original.Partition).Tail,
+                    Owner: catalog.DefaultShard);
+            });
+        await Assert.That(observed.PrincipalId).IsEqualTo(original.PrincipalId);
+        await Assert.That(observed.PolicyEpoch).IsEqualTo(original.PolicyEpoch);
+        await Assert.That(observed.SchemaVersion).IsEqualTo(original.SchemaVersion);
+        await Assert.That(observed.ResourcePolicyDigest).IsEqualTo(original.ResourcePolicyDigest);
+        await Assert.That(observed.SourceOutboxTail).IsEqualTo(original.SourceOutboxTail);
+        await Assert.That(observed.Owner.Incarnation).IsEqualTo(target.Store.Identity.Incarnation);
+        await Assert.That(observed.Owner.PhysicalShardId == original.SourceOwner.PhysicalShardId).IsFalse();
+        await Assert.That(observed.Owner.Incarnation == original.Incarnation).IsFalse();
+        await Assert.That(observed.Statistics).IsNull();
+        var search = new SearchEngine(target.Database,
+            target.Silo.RuntimeServices.GetRequiredService<IOptions<QueryExecutionOptions>>());
+        var hits = await search.SearchAsync(original.PrincipalId,
+            new(original.Partition, original.Collection, original.Field, "knowledge",
+                TextWeight: 1d, FusionConstant: 60), token);
+        await Assert.That(hits.Length).IsEqualTo(1);
+        var expectedDocument = new DocumentResult(new(original.Partition, original.Collection,
+            ControlledPartitionMovementCorpus.DocumentId), 1L, ControlledPartitionMovementCorpus.OriginalJson, false, []);
+        await Assert.That(NativeSerialization.Serialize(hits[0].Document).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(expectedDocument))).IsTrue();
+        await Assert.That(hits[0].Score).IsEqualTo(1d / 61d);
+        await HeadAsync(target, original, originalBytes, token);
+        await UnchangedAsync(before, owners, token);
     }
 
     internal static async Task<PartitionMoveResult> ResultAsync(GrainOperationReply reply, PartitionMoveRequest request)

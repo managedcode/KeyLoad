@@ -96,6 +96,7 @@ internal static class SqlModelEventRecordIntegrityFlow
         }
         await SqlEventReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt,
             repair.Command, repair.Receipt);
+        await SqlModelEventRecordIntegrityCold.RunAsync(database, key, original, damaged);
     }
 
     private static async Task FaultAsync(TestDatabase database, byte[] key, byte[] original, byte[] damaged)
@@ -113,7 +114,7 @@ internal static class SqlModelEventRecordIntegrityFlow
             database.Store.Commit((transaction, _) => { transaction.Put(key, damaged); return true; });
             await UnchangedAsync(database, expected, checked(position + 1));
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
-            await QueriesAsync(database, expected, checked(position + 1));
+            await QueriesAsync(database.Store, database.Database, database.Partition, expected, checked(position + 1));
         }
         catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
@@ -129,12 +130,13 @@ internal static class SqlModelEventRecordIntegrityFlow
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task QueriesAsync(TestDatabase database, string[] expected, long position)
+    internal static async Task QueriesAsync(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store,
+        Core.DatabaseEngine database, PartitionRef partition, string[] expected, long position)
     {
-        var identity = JsonDefaults.Serialize(database.Store.Identity);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var sql = SqlEventReferenceJoinFixture.Request(database.Partition);
-        var ast = SqlEventReferenceJoinFixture.Ast(database.Partition);
+        var identity = JsonDefaults.Serialize(store.Identity);
+        var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
+        var sql = SqlEventReferenceJoinFixture.Request(partition);
+        var ast = SqlEventReferenceJoinFixture.Ast(partition);
         var falseFilter = new Comparison(new FieldOperand("/payload/score"), ">",
             new ValueOperand(global::System.Text.Json.JsonSerializer.SerializeToElement(100)));
         var operations = new Action[]
@@ -152,8 +154,9 @@ internal static class SqlModelEventRecordIntegrityFlow
             var failure = Assert.ThrowsExactly<KeyLoadException>(operation);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("The retained event source is inconsistent.");
-            await UnchangedAsync(database, expected, position);
-            await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
+            await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(expected, CollectionOrdering.Matching);
+            await Assert.That(store.Position).IsEqualTo(position);
+            await Assert.That(JsonDefaults.Serialize(store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
         }
     }
 

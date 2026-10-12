@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R26 final complete native compiler/analyzer0errors/0warnings,9611source inputs unchanged. Scoped98-path whitespace formatter passed; whole-solution formatting and ordinary full current Release/runtime are pending. R26 full operation packets integrated for persisted BM25, physical whole-partition SDK orchestration, queue/Event integrity, bounded live read work and privacy-preserving recovery diagnostics. R24/local and older Linux failures remain original evidence. Original KL034 accepted from authenticated exact-source Linux26/26; remaining85originaltasks and KL105 require their actual gates. Functional coverage unmeasured.",
+    "qualification": "R27 full native diagnostics: 0 errors and 0 warnings. Whole-solution formatter and full Release passed with 0 errors and 0 warnings; all 9623 source inputs unchanged. Two source/DLL/PDB/native UID-bound focused Unit lanes ran in parallel with maximum 50: 276 executed, 265 passed, 11 failed, no skips. Main 215/215, actual peak 50; additional 50/61, actual peak 22. All processes/readers/disposal joined. Eight new replay oracles conflict with frozen current-lease authorization; two explicit local enrollment refusals expose an introduced bypass; original BM25 InvalidScope remains. Next N repairs are unapplied. Original counts 19 done and 85 in progress, KL-105 separate. Local focused results are not Linux acceptance; functional coverage unmeasured.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -205,6 +205,12 @@
           "sha256": "ca42f9e55ff6d61fd4e3e80c23d857375f5cbb1fbe7c51c3471319968637a7f1"
         },
         "note": "Individual native postimages precede later formatting; source guard and actual fresh compiled images bind execution. No isolated existing success or native0 closes new acceptance."
+      },
+      "r27CompleteFlows": {
+        "qualified": false,
+        "scope": "Queue terminal/undefined-state inspection authority with exact repair, replay and two cold owners; independent196-entry abort journal oracle; Event SQL/AST dirty-cold refusals and actual native Q2 cancellation; first native startup exception identity; six-owner probe registration and per-scenario cold-discovery ownership; issued BM25 phase/count cold recovery and original portable-head assertions; failed large child-capture artifact ownership",
+        "runtime": "Current focused native execution completed with 265/276 passing; full tasks and Linux qualification remain open. See runtimeObservedR27.",
+        "preparedNextScopes": "Strict earlier-head body authority; complete original Receive replay; RF3 Q2 admitted cancellation; first native receiver cause preservation; actual three-partition partial/refusal/resume remain proposals until separately applied and verified"
       }
     },
     "nativeDiagnostics": {
@@ -975,6 +981,161 @@
       },
       "fullRf3": "still running at last observed snapshot; not promoted",
       "coverage": "unmeasured"
+    },
+    "formatterR26": {
+      "wholeSolution": "passed",
+      "exitCode": 0,
+      "elapsedSeconds": 200.262,
+      "originalFirstImportOrderFailureRetained": true,
+      "originalEvidence": "TestResults/stage61-native-join/stage64-r26-format-full-verify-final.completion.original.json"
+    },
+    "fullReleaseR26": {
+      "sourceCommit": "ebc8150498c241a6635902950bd77ff686fd8aea",
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 0,
+      "elapsedSeconds": 160.73,
+      "unchangedSourceInputs": 9611,
+      "originalEvidence": "TestResults/stage61-native-join/stage64-r26-full-build.completion.original.json"
+    },
+    "runtimeObservedR26": {
+      "sourceCommit": "ebc8150498c241a6635902950bd77ff686fd8aea",
+      "unitMain": {
+        "executed": 215,
+        "passed": 209,
+        "failed": 6,
+        "skipped": 0,
+        "actualPeakTrxOverlap": 38
+      },
+      "unitAdditional": {
+        "executed": 30,
+        "passed": 26,
+        "failed": 4,
+        "skipped": 0,
+        "actualPeakTrxOverlap": 16
+      },
+      "nativeMaximumParallelTests": 50,
+      "sourceAndRuntimeClosureUnchanged": true,
+      "allOriginalProcessAndReaderAndDisposalJoins": true,
+      "coverageCollected": false,
+      "recoveryExecuted": false,
+      "integrationExecuted": false,
+      "qualification": "local_development_selected_flows_only_failed_not_full_Linux_or_task_acceptance",
+      "originalEvidence": [
+        "TestResults/stage61-native-join/current-stage64-r26-execution-main/",
+        "TestResults/stage61-native-join/current-stage64-r26-execution-additional/"
+      ]
+    },
+    "buildR27Preparation": {
+      "sourceHead": "ebc8150498c241a6635902950bd77ff686fd8aea",
+      "sourceFiles": 9623,
+      "sourceDrift": false,
+      "firstNative": "Original600s timeout retained; successor Ready27/27 full analyzer observation14errors/0warnings",
+      "firstSdk": "exit1,0warnings/0printederrors; original binlog has failed nestedMSBuild/project-reference tasks and no ErrorRaised; cause unproven",
+      "isolatedSdk": "Complete ordinary fullsolution --disable-build-servers -m:1 exit1 in499.916s:5reportederrors/0warnings; Unit missing type prevented later analyzer execution",
+      "compilerRepair": "Native existing-API/import fixes, token-last/null-cut guard, typed catch and coherent197-line fixture/helper extraction; actual Y originals retained",
+      "runtime": "Completed source-bound focused native run: 276 executed, 265 passed, 11 failed, no skips after final full Release passed. Not a complete suite or Linux qualification. Original preparation failures retained.",
+      "coverage": "UNMEASURED"
+    },
+    "fullReleaseR27": {
+      "original": {
+        "path": "TestResults/stage61-native-join/stage64-r27-full-build-final.original.completion.json",
+        "sha256": "3afbd5b73ccafc0f86acd5a7c876e14e694bc5eab0fa6946b1239f3b4fb79434"
+      },
+      "seconds": 141.96333504200447,
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "sourceFiles": 9623,
+      "sourceDrift": false
+    },
+    "formatterR27": {
+      "original": {
+        "path": "TestResults/stage61-native-join/stage64-r27-format-final-verify.original.completion.json",
+        "sha256": "c93c0826ab7ab0b24a82cf755e488799269fa3b22ba5e0f484a7786d042cce93"
+      },
+      "seconds": 406.05808045796584,
+      "exitCode": 0,
+      "sourceFiles": 9623,
+      "sourceDrift": false
+    },
+    "runtimeObservedR27": {
+      "record": "docs/implementation/stage64-r27-development-20261012.json",
+      "executed": 276,
+      "passed": 265,
+      "failed": 11,
+      "skipped": 0,
+      "mainOriginal": {
+        "path": "TestResults/stage61-native-join/current-stage64-r27-runtime-completion.original-bound.json",
+        "sha256": "b77cf00ce4ee1a92466fed6bd8d02ca08988abc580d1c009aa56fc11108399fa"
+      },
+      "additionalOriginal": {
+        "path": "TestResults/stage61-native-join/current-stage64-r27-additional-runtime-completion.original-bound.json",
+        "sha256": "a3c460de1cf0577608b7305e9cc2f80059ace57fd0d3daaaa30dc9c61820939e"
+      },
+      "configuredMaximumParallelTests": 50,
+      "actualPeakMain": 50,
+      "actualPeakAdditional": 22,
+      "sourceImageDrift": false,
+      "allProcessReaderDisposalJoined": true,
+      "qualification": false,
+      "coverage": "UNMEASURED"
+    },
+    "profilingR27": {
+      "status": "Measured local functional-runner counters; KL-105 acceptance remains open",
+      "original": {
+        "path": "TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.actual.receipt.json",
+        "sha256": "111a29be61e92358ab494cec3e5af791c855ab2691944cea4674b9ac6f0e76fc"
+      },
+      "pid": 50958,
+      "durationSeconds": 15,
+      "counterSeries": 27,
+      "meterSeries": 33,
+      "maximumParallelTests": 50,
+      "sourceCount": 2218,
+      "nativeImageBindingSha256": "d76c6aa2a864f08dd5d39f81477785d3a69054fb74a1ee4c901a371476e7e4dc",
+      "cpuSampling": "Native capability unavailable; no override or CPU capture",
+      "latestAllocationCounter": {
+        "provider": "System.Runtime",
+        "name": "alloc-rate",
+        "displayName": "Allocation Rate",
+        "value": 674579568,
+        "kind": "Sum",
+        "unit": "B",
+        "intervalSec": 1.0015419721603394,
+        "displayRateTimeScale": "00:00:01"
+      },
+      "quality": {
+        "samplingLoss": "UNMEASURED; no original lost-event accounting exposed",
+        "targetOverhead": "UNMEASURED; EventPipe enabled with bounded15s/128series; no paired control",
+        "perOperationAttribution": "UNAVAILABLE;215 concurrent functional cases, maximumParallel50; aggregate period after startup",
+        "cpuStacks": "UNAVAILABLE; native canSampleCpu=false; no override/CPU capture",
+        "runtimeClassifier": "NativeAot label retained as original tool output; separate pinned source review establishes macOS non-exhaustive module classifier flaw. Executed classifier branch/raw sample cause unobserved.",
+        "notesEmptyDoesNotProveComplete": true,
+        "intervalSemantics": "Counters keep raw value/kind/unit/intervalSec/displayRateTimeScale; latest is not whole-window behavior. GC counters are increments over interval, not blindly per-minute counts. Meter lastValue may be process cumulative or last-GC state; rate remains tool-reported, no new inferred timebase.",
+        "limits": [
+          "macOSarm64 development lane, not Linux qualification",
+          "captures only15s window, excludes startup and earlier additional61",
+          "no stack/object/line-level causal attribution",
+          "no equivalent before/after benchmark or independent measurement",
+          "no latency/throughput/speed/endurance/RF3 claim",
+          "functional negative tests explain expected exception candidates; no automatic productionfault inference"
+        ]
+      },
+      "cleanup": {
+        "originalPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.cleanup.original.json",
+        "originalSha256": "4df984a4ed2a1d64277041efb6d9e1cb74304ff7bf34c94f618c098d35195c4d",
+        "helperPtyExitCode": 0,
+        "observedAtUtc": "2026-10-12T17:33:46.614111+00:00",
+        "ownedPids": [
+          51942,
+          51943
+        ],
+        "psExitCode": 1,
+        "remaining": "",
+        "termination": "EOF to owned helper PTY; no app target termination"
+      },
+      "limits": "Aggregate concurrent functional test-runner window; no per-operation stack attribution, measured diagnostics overhead, matched before/after, benchmark or speed qualification."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -61442,7 +61603,7 @@
       "helperFailureRegression": "passed_request_saved_before_invocation_bounded_client_timeout_classified_followup_discovery_13_tools"
     },
     "qualification": {
-      "actualApplicationProfiles": "open_connected_native_process_discovery_timed_out_no_application_capture",
+      "actualApplicationProfiles": "open_R26_actual_native_processes_observed_socket_TMPDIR_visibility_mismatch_preflight_NotADotnetProcess_no_application_capture",
       "confirmedBottleneckRepairs": "open",
       "correctnessRegressions": "open",
       "matchedBeforeAfterProfiles": "open",
@@ -61498,7 +61659,78 @@
         "applicationCapture": false,
         "receipt": "TestResults/stage61-native-join/stage64-r22-kl105-native-process-discovery.original.json",
         "sha256": "07604491f8c5cb65145f55d642ae2681ee9ac55a9f6d46b7f808093847e2f9a8"
+      },
+      "r26ActualProcessObservation": {
+        "sourceCommit": "ebc8150498c241a6635902950bd77ff686fd8aea",
+        "processes": [
+          77933,
+          77941
+        ],
+        "platform": "macOS_arm64_local_development",
+        "mainActualDiagnosticSocket": "/private/tmp/dotnet-diagnostic-77941-1791819270-socket",
+        "nativeToolPreflight": "ProcessNotFound_after_additional_exit_and_NotADotnetProcess_while_main_alive",
+        "applicationCapture": false,
+        "collectorLaunched": false,
+        "processesEnded": true,
+        "bottleneckConfirmed": false,
+        "speedClaim": false
       }
+    },
+    "currentFunctionalRuntimeR27": {
+      "status": "Measured local functional-runner counters; KL-105 acceptance remains open",
+      "original": {
+        "path": "TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.actual.receipt.json",
+        "sha256": "111a29be61e92358ab494cec3e5af791c855ab2691944cea4674b9ac6f0e76fc"
+      },
+      "pid": 50958,
+      "durationSeconds": 15,
+      "counterSeries": 27,
+      "meterSeries": 33,
+      "maximumParallelTests": 50,
+      "sourceCount": 2218,
+      "nativeImageBindingSha256": "d76c6aa2a864f08dd5d39f81477785d3a69054fb74a1ee4c901a371476e7e4dc",
+      "cpuSampling": "Native capability unavailable; no override or CPU capture",
+      "latestAllocationCounter": {
+        "provider": "System.Runtime",
+        "name": "alloc-rate",
+        "displayName": "Allocation Rate",
+        "value": 674579568,
+        "kind": "Sum",
+        "unit": "B",
+        "intervalSec": 1.0015419721603394,
+        "displayRateTimeScale": "00:00:01"
+      },
+      "quality": {
+        "samplingLoss": "UNMEASURED; no original lost-event accounting exposed",
+        "targetOverhead": "UNMEASURED; EventPipe enabled with bounded15s/128series; no paired control",
+        "perOperationAttribution": "UNAVAILABLE;215 concurrent functional cases, maximumParallel50; aggregate period after startup",
+        "cpuStacks": "UNAVAILABLE; native canSampleCpu=false; no override/CPU capture",
+        "runtimeClassifier": "NativeAot label retained as original tool output; separate pinned source review establishes macOS non-exhaustive module classifier flaw. Executed classifier branch/raw sample cause unobserved.",
+        "notesEmptyDoesNotProveComplete": true,
+        "intervalSemantics": "Counters keep raw value/kind/unit/intervalSec/displayRateTimeScale; latest is not whole-window behavior. GC counters are increments over interval, not blindly per-minute counts. Meter lastValue may be process cumulative or last-GC state; rate remains tool-reported, no new inferred timebase.",
+        "limits": [
+          "macOSarm64 development lane, not Linux qualification",
+          "captures only15s window, excludes startup and earlier additional61",
+          "no stack/object/line-level causal attribution",
+          "no equivalent before/after benchmark or independent measurement",
+          "no latency/throughput/speed/endurance/RF3 claim",
+          "functional negative tests explain expected exception candidates; no automatic productionfault inference"
+        ]
+      },
+      "cleanup": {
+        "originalPath": "/Users/ksemenenko/Developer/KeyLoad/TestResults/stage61-native-join/r27-functional-profile/unit-matched-temp/root-r27-functional-profile.cleanup.original.json",
+        "originalSha256": "4df984a4ed2a1d64277041efb6d9e1cb74304ff7bf34c94f618c098d35195c4d",
+        "helperPtyExitCode": 0,
+        "observedAtUtc": "2026-10-12T17:33:46.614111+00:00",
+        "ownedPids": [
+          51942,
+          51943
+        ],
+        "psExitCode": 1,
+        "remaining": "",
+        "termination": "EOF to owned helper PTY; no app target termination"
+      },
+      "limits": "Aggregate concurrent functional test-runner window; no per-operation stack attribution, measured diagnostics overhead, matched before/after, benchmark or speed qualification."
     }
   },
   "AdminDashboard": {

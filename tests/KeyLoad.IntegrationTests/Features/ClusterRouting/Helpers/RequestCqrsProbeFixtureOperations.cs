@@ -23,7 +23,7 @@ internal static class RequestCqrsProbeFixtureOperations
     {
         if (OperatingSystem.IsWindows())
         { throw new PlatformNotSupportedException(RequestCqrsProbeFixtureProtocol.PrivatePermissionsUnsupported); }
-        if (node is not (RequestCqrsRf3Protocol.Node1 or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3))
+        if (!TwoRf3MembershipProtocol.Nodes.Contains(node, StringComparer.Ordinal))
         { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
         var path = Path.Combine(root, node);
         if (Directory.Exists(path) || File.Exists(path))
@@ -38,4 +38,33 @@ internal static class RequestCqrsProbeFixtureOperations
         ServerFailureObserver.ThrowIfAny(failures);
         throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry);
     }
+    internal static void RetireArmFiles(Guid armId, byte[] bytes,
+        IReadOnlyDictionary<string, string> nodeDirectories, IReadOnlyDictionary<string, byte[]> ownerRecords)
+    {
+        foreach (var voter in RequestCqrsProbeFixtureProtocol.Nodes)
+        {
+            var directory = nodeDirectories[voter];
+            RequestCqrsProbeFileStore.VerifyOwnerFile(directory, ownerRecords[voter]);
+            RequestCqrsProbeFileStore.VerifyExactFile(directory, RequestCqrsProbeFileNames.Arm(armId), bytes);
+        }
+        foreach (var voter in RequestCqrsProbeFixtureProtocol.Nodes)
+        { RequestCqrsProbeFileStore.DeleteExactFile(nodeDirectories[voter], RequestCqrsProbeFileNames.Arm(armId), bytes); }
+    }
+
+    internal static async Task VerifyDestinationOwnerOnlyAsync(RequestCqrsProbeFixture fixture,
+        bool includeDestination, CancellationToken token)
+    {
+        if (!includeDestination)
+        { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
+        foreach (var node in TwoRf3MembershipProtocol.Nodes.Skip(TwoRf3MembershipProtocol.MembersPerGroup))
+        {
+            token.ThrowIfCancellationRequested();
+            var owned = fixture.NodeFor(node);
+            RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
+            var entries = Directory.EnumerateFileSystemEntries(owned.Directory).Take(2).ToArray();
+            await Assert.That(entries.SequenceEqual([Path.Combine(owned.Directory, RequestCqrsProbeFixtureProtocol.OwnerFileName)],
+                StringComparer.Ordinal)).IsTrue();
+        }
+    }
+
 }

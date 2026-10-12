@@ -4,7 +4,11 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 /// <summary>Publishes one genuine new original-scope batch after abort, then checks literal receipt, replay and cold visibility.</summary>
 internal static class ControlledPartitionMovementAbortHealthy
 {
-    private const long HealthyReplicaIndex = 186;
+    // Accepted fence, capture authorization, begin abort, source marker/terminal,
+    // cancellation/finalization, two source commits per target cleanup batch, then healthy write.
+    private const long HealthyReplicaIndex = 15 + 1 + 1 + 3 + 3 + 2
+        + PartitionMovementCleanupCountAssertions.CleanupBatchCount
+        * PartitionMovementCleanupCountAssertions.AbortSourceCommits + 1;
     private const long OwnershipEpoch = 1;
     private const long Revision = 1;
     private const string DocumentId = "post-abort-1";
