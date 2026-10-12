@@ -22,8 +22,13 @@ internal sealed class RequestCqrsProbeArmState(string principalId, Guid commandI
     internal bool ProcessOwnerJoined { get; set; }
     internal bool ProducerDisposedSeen { get; set; }
     internal bool CanonicalOwnerDisposedSeen { get; set; }
-    internal bool OwnerDisposedSeen => Phase == RequestCqrsProbePhase.CanonicalJournalFlushed
-        ? CanonicalOwnerDisposedSeen : ProducerDisposedSeen;
+    internal bool ReplicaEntryObserverDisposedSeen { get; set; }
+    internal bool OwnerDisposedSeen => Phase switch
+    {
+        RequestCqrsProbePhase.CanonicalJournalFlushed => CanonicalOwnerDisposedSeen,
+        RequestCqrsProbePhase.ReplicaEntryAcknowledged => ReplicaEntryObserverDisposedSeen,
+        _ => ProducerDisposedSeen
+    };
     internal string? GateVoter { get; set; }
     internal RequestCqrsProbeMarkerRecord?[] MarkerRecords { get; } = new RequestCqrsProbeMarkerRecord?[
         RequestCqrsProbeFixtureProtocol.MaximumMarkerRecordsPerArm];

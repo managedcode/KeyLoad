@@ -43,6 +43,7 @@ internal sealed class SqlOperationRejectionTests
         }
         await SqlOperationTestData.Reject(request with { Cursor = SqlOperationTestData.Cursor }, ErrorCode.Validation);
         await SqlOperationTestData.Reject(request with { AllowFullScan = true }, ErrorCode.Validation);
+        await SqlCallNoPartialWriteContinuation.RunAsync();
     }
 
     [Test]

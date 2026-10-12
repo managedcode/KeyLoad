@@ -138,13 +138,23 @@ internal static class ClusterRestoreRf3Scenario
         PartitionRef partition, CancellationToken cancellationToken)
     {
         var reference = new EntityRef(partition, RelationalSqlRf3Tokens.Documents, PostCaptureId);
-        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, cancellationToken))).IsNull();
+        var expected = new DocumentReadResult(null);
+        var sdkRead = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(reference,
+            cancellationToken).ConfigureAwait(false));
+        await SqlRf3Protocol.EqualAsync(expected, sdkRead);
+        await Assert.That(sdkRead.Document).IsNull();
         var request = new GetDocumentRequest(reference);
-        await Assert.That((await PublicReadAssertions.DocumentAsync(await official.CallAsync(
-            McpCallerTools.DocumentsGet, request, cancellationToken))).Value).IsNull();
+        var mcpRead = (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await official.CallAsync(
+            McpCallerTools.DocumentsGet, request, cancellationToken).ConfigureAwait(false))).Value;
+        await SqlRf3Protocol.EqualAsync(expected, mcpRead);
+        await Assert.That(mcpRead.Document).IsNull();
         var sql = SqlRf3Protocol.Call(partition, McpCallerTools.DocumentsGet, request);
-        await Assert.That(await SqlRf3Protocol.SdkAsync<DocumentResult?>(sdk, sql, cancellationToken)).IsNull();
-        await Assert.That(await SqlRf3Protocol.McpAsync<DocumentResult?>(official, sql, cancellationToken)).IsNull();
+        var sdkSqlRead = await SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, sql, cancellationToken).ConfigureAwait(false);
+        await SqlRf3Protocol.EqualAsync(expected, sdkSqlRead);
+        await Assert.That(sdkSqlRead.Document).IsNull();
+        var mcpSqlRead = await SqlRf3Protocol.McpAsync<DocumentReadResult>(official, sql, cancellationToken).ConfigureAwait(false);
+        await SqlRf3Protocol.EqualAsync(expected, mcpSqlRead);
+        await Assert.That(mcpSqlRead.Document).IsNull();
     }
 
     private static async Task PauseThenResumeAsync(ClusterRestoreRf3Fixture target, KeyLoadClient sdk, McpOfficialClient official,

@@ -36,13 +36,18 @@ internal static class TwoRf3MembershipWaveStartup
         var githubReference = await TwoRf3MembershipImageAdmission.ReadReferenceAsync(wave, repository,
             observe, cancellationToken).ConfigureAwait(false);
         NativeMembershipDiagnosticWaveLifecycle.PrepareControls(wave, root, cancellationToken);
+        await NativeCanonicalModelCutWaveStartup.PrepareAsync(wave, root).ConfigureAwait(false);
+        NativeBlobWireWaveLifecycle.Prepare(wave, root, cancellationToken);
         var args = TwoRf3WaveArguments.Create(root, wave.localImageSelection, wave.registerPhysicalOwners, wave.remoteDocumentReads, wave.remotePartitionQueries, wave.queryControls, wave.protectedDocuments, wave.movementMaxBatchBytes, wave.movementMaxFrameBytes, wave.frameObservation, wave.nativeDiscoveryOmission, wave.EventVectorReservedProbe, wave.nativeMembershipControls);
+        args = NativeBlobWireWaveLifecycle.Arguments(wave, args);
         observe?.Invoke("BuilderCreate");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             (_, settings) => wave.capacity.BindOriginalParameters(settings), cancellationToken).ConfigureAwait(false);
         observe?.Invoke("OriginalParameters");
         await wave.capacity.RequireOriginalParametersAsync(builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
+        await NativeBlobWireWaveLifecycle.PublishOwnerAsync(wave, builder.Resources.OfType<ParameterResource>(), cancellationToken).ConfigureAwait(false);
         wave.capacity.RestoreOriginalEndpoints(builder.Resources.OfType<ContainerResource>());
+        wave.canonicalCutControls?.Configure(builder);
         KeyLoad.IntegrationTests.Features.Messaging.RemoteTransferRf3Enrollment.Configure(builder,
             wave.remoteTransferPrincipalId, cancellationToken);
         if (wave.protectedDocuments)

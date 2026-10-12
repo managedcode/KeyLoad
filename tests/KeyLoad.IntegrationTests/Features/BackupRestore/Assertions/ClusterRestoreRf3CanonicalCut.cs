@@ -56,9 +56,7 @@ internal static class ClusterRestoreRf3CanonicalCut
             ServerFailureObserver.Observe(() =>
             {
                 token.ThrowIfCancellationRequested();
-                store = new(new(Path.Combine(target.DataRoot, ClusterRestoreRf3Protocol.Nodes[index],
-                    ClusterRestoreRf3Protocol.DatabaseDirectory)), IntegrationExecutionOptions.StorageExecution(),
-                    IntegrationExecutionOptions.PointCacheExecution());
+                store = ClusterRestoreRf3ExistingTarget.Open(target, index);
                 results.Add(store.Read(view => Read(view, original, token)));
             }, failures);
             if (store is { } owned)

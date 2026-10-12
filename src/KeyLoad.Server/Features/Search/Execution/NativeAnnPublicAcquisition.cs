@@ -18,11 +18,22 @@ internal static class NativeAnnPublicAcquisition
         { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
     }
 
-    internal static AnnMaintenanceRequest Request(NativeAnnManifest manifest)
+    internal static AnnMaintenanceRequest Request(DatabaseEngine database, IKeyValueView view,
+        NativeAnnManifest manifest, ReadExecutionBudget budget)
     {
+        var metadata = budget.CreateView(view);
+        var principal = database.Principal(metadata, manifest.PrincipalId, database.EvaluationClock.GetUtcNow());
+        var consumer = DatabaseEngine.RequireActiveProjectionConsumer(metadata, principal,
+            manifest.Consumer, manifest.IndexGeneration);
+        var profile = consumer.Definition.AnnMaintenance;
+        if (profile is not null && (profile.Collection != manifest.Collection
+            || profile.Field != manifest.Field || profile.Space != manifest.Space))
+        { throw Errors.Fail(ErrorCode.TokenInvalidated, NativeAnnProtocol.InvalidSource); }
+        budget.Check();
         var id = manifest.CheckpointIntent?.CommandId
             ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Corrupt);
         return new(id, manifest.Consumer, manifest.Collection, manifest.Field, manifest.Space,
-            manifest.IndexGeneration, manifest.Source.NodeId, manifest.Placement, AnnMaintenanceMode.Restore);
+            manifest.IndexGeneration, manifest.Source.NodeId, manifest.Placement, AnnMaintenanceMode.Restore)
+        { MaintenanceProfile = profile };
     }
 }

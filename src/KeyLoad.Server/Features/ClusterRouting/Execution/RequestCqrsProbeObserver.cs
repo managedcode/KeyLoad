@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainRequestProducerDisposedObserver, IAsyncDisposable
+internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
 {
     private readonly Lock disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
@@ -15,9 +15,13 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
     private readonly CancellationTokenSource stopping = new();
     private Task? shutdown;
     private readonly RequestCqrsProbeHeldCallback hold;
+    private readonly NativeCanonicalModelCutAdmission canonicalCuts;
     internal RequestCqrsCanonicalApplyObserver Canonical { get; }
+    internal RequestCqrsReplicaLogObserver ReplicaLog { get; }
     internal RequestCqrsReplicaSnapshotObserver ReplicaSnapshot { get; }
     private readonly RequestCqrsReceiverIssueAdjunct receiverIssueAdjunct;
+    private readonly RequestCqrsNativeModelObservation nativeModel;
+    private readonly RequestCqrsNativeReplayObservation nativeReplay;
     private readonly Lazy<ConnectionProbeCapture> connections;
     internal RequestCqrsProbeProducerDisposal ProducerDisposal { get; }
 
@@ -30,13 +34,36 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         this.files = files;
         hold = new(files, applicationLifetime, executionOptions, clock ?? TimeProvider.System, CreateMarker, stopping.Token);
         lifecycle = new(executionOptions);
+        canonicalCuts = new(files, lifecycle, applicationLifetime, executionOptions, clock ?? TimeProvider.System, stopping.Token);
+        nativeModel = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
+        nativeReplay = new(files, lifecycle, executionOptions, replica.LocalId, siloAddress, CreateMarker, HoldAsync);
         ReplicaSnapshot = new(files, lifecycle, replicaOptions, executionOptions, clock ?? TimeProvider.System,
             CreateMarker, HoldAsync, stopping.Token, applicationLifetime.ApplicationStopping);
         Canonical = new(files, lifecycle, CreateMarker, (claim, phase, token) => HoldAsync(claim, phase, null, token));
+        ReplicaLog = new(files, lifecycle, replica.LocalId, siloAddress, CreateReplicaLogMarker, ThrowOrdinary);
         receiverIssueAdjunct = new(files, lifecycle, CreateMarker, HoldAsync);
         ProducerDisposal = new(files, lifecycle, CreateMarker, receiverIssueAdjunct);
         connections = new(() => new ConnectionProbeCapture(files, executionOptions));
     }
+
+    public ValueTask BeforeDispatchAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
+        CancellationToken cancellationToken)
+        => nativeModel.ObserveAsync(original, null, RequestCqrsProbePhase.NativeModelBeforeDispatch, cancellationToken);
+
+    public ValueTask AfterDispatchAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReply actual, CancellationToken cancellationToken)
+        => nativeModel.ObserveAsync(original, actual, RequestCqrsProbePhase.NativeModelAfterDispatch, cancellationToken);
+
+    public global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReplayVariation? Select(
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original, CancellationToken token)
+        => nativeReplay.Select(original, token);
+
+    public ValueTask ObserveAsync(global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRequest original,
+        global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReplayExchange owner, CancellationToken token)
+        => nativeReplay.ObserveAsync(original, owner, token);
+
+    internal NativeCanonicalModelCutLease OpenCanonicalCut(CancellationToken requestCancellation)
+        => canonicalCuts.Open(requestCancellation);
 
     internal RequestCqrsProbeMigration CreateMigration(ReplicaSiloDiscoveryClient discovery)
         => new(files, lifecycle, replicaOptions, siloAddress, discovery, stopping.Token);
@@ -152,6 +179,12 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         => new(RequestCqrsProbeProtocol.Version, RequestCqrsProbeProtocol.MarkerKind, claim.Arm.Record.SessionId,
             claim.Arm.Record.ArmId, claim.Identity.RequestId, claim.Identity.CommandId, phase, outcome,
             replica.LocalId, siloAddress, claim.EntryIndex, claim.EntryTerm);
+
+    private RequestCqrsProbeMarkerRecord CreateReplicaLogMarker(RequestCqrsProbeArmRecord arm, ReplicaEntry entry, RequestCqrsProbePhase phase)
+        => new(RequestCqrsProbeProtocol.Version, RequestCqrsProbeProtocol.MarkerKind, arm.SessionId,
+            arm.ArmId, arm.SourceRequestId!.Value, arm.CommandId, phase,
+            phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged ? RequestCqrsProbeOutcome.FaultRequested : RequestCqrsProbeOutcome.Observed,
+            replica.LocalId, siloAddress, entry.Index, entry.Term);
 
     private static void ThrowOrdinary()
     {

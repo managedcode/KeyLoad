@@ -96,6 +96,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection, partition.AnnMaintenance));
+        global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeRegistration.Register(services, partition, options);
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
@@ -131,6 +132,10 @@ internal static class OrleansSiloConfiguration
                 provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver>(
+                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
+            services.AddSingleton<global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver>(
+                provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
             services.AddSingleton<IGrainRequestProducerDisposedObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
             services.AddSingleton(provider => new RequestCqrsProbeNativeRelay(provider,
                 provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),

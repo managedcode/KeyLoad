@@ -1,4 +1,113 @@
 {
+  "STAGE61-COHERENT-SOURCE-JOIN-001": {
+    "status": "in_progress",
+    "record": "docs/implementation/qualification-stage61-coherent-join.md",
+    "originalPlan": {
+      "total": 104,
+      "done": 18,
+      "inProgress": 86
+    },
+    "additionalTasks": [
+      "KL-105"
+    ],
+    "authentication": "standard ASP.NET Core Authentication/Authorization; verified subject and fresh persisted operation policy; ManagedCode.Orleans.Identity for native verified grain context",
+    "sourceJoins": [
+      "native_submission_outcome_and_journal",
+      "complete_native_replay_model_cuts",
+      "native_blob_whole_flow_and_two_cold_cuts",
+      "retained_replica_snapshot",
+      "strict_existing_restore_target",
+      "native_graph_connection_stream_edge",
+      "original_sql_numeric_refusal_and_atomic_call_whole_flows",
+      "native_ann_public_optional_profile_read_lease",
+      "original_mcp_cancellation_full_persisted_images"
+    ],
+    "originalFullReleaseR12": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 1,
+      "error": "DurableReplicaLog type204 exceeds unchanged200 limit; later projects not qualified",
+      "sourceInputs": 9110,
+      "sourceDrift": 0,
+      "elapsedSeconds": 71.231
+    },
+    "originalNativeDiagnosticSnapshot": {
+      "errors": 295,
+      "warnings": 0,
+      "authoredOnly": true,
+      "groups": {
+        "crashHostAndPartitionHost": 8,
+        "unit": 31,
+        "serverClusterRouting": 90,
+        "serverBlobDocumentAndAppHostBlob": 90,
+        "integration": 76
+      },
+      "qualification": "pre-repair original source observation; reviewed owner patches require actual coherent full build"
+    },
+    "nativeMaximumParallelism": 50,
+    "originalFullReleaseR13": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 25,
+      "scope": "Server; later test projects not qualified",
+      "sourceInputs": 9197,
+      "sourceDrift": 0,
+      "elapsedSeconds": 127.05010676383972
+    },
+    "postR13FullNativeObservation": {
+      "errors": 33,
+      "warnings": 0,
+      "groups": {
+        "server": 25,
+        "integration": 6,
+        "crashHost": 1,
+        "unit": 1
+      },
+      "scope": "original full authored-source observation before successor repairs"
+    },
+    "originalFullReleaseR14": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 11,
+      "scope": "Server three files; later test projects not qualified",
+      "sourceInputs": 9206,
+      "sourceDrift": 0,
+      "elapsedSeconds": 101.33769607543945,
+      "completionSha256": "527b3d6aa98013f3209bd49a765bc47c31988f654f4658da23e663f4931cc82c",
+      "stdoutSha256": "87ad79b73ba28a66b64c01a098387f376c1db2867ad44bcbd6ad7afb54badc77"
+    },
+    "postR14FullNativeObservation": {
+      "errors": 11,
+      "warnings": 0,
+      "groups": {
+        "server": 7,
+        "integration": 4,
+        "unit": 0,
+        "crashHost": 0
+      },
+      "originalSha256": "8b2b626e1f27c6ed281ec8ded0bb9b92a4ad554de2575ee768a9f901a3c4680c"
+    },
+    "originalFullReleaseR15": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 2,
+      "scope": "Integration native client holder; all acceptance gates remain open",
+      "sourceInputs": 9206,
+      "sourceDrift": 0,
+      "elapsedSeconds": 266.67325711250305
+    },
+    "currentSourceCompilerPassed": false,
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
+    "functionalCoverage": "unmeasured; load cases excluded",
+    "remaining": [
+      "one coherent normal full solution Release build and scoped formatting",
+      "fresh genuine native metadata and complete source/PE/PDB contributor admission",
+      "meaningful native Unit operations and same genuine recovery cases",
+      "current exact-source Linux unit/recovery and SDK/official MCP Aspire Docker RF3",
+      "source-bound functional coverage, fault/endurance and matched performance"
+    ]
+  },
   "STAGE60-NATIVE-EXECUTION-001": {
     "status": "in_progress",
     "record": "docs/implementation/qualification-stage60-native-execution.md",

@@ -68,6 +68,7 @@ internal sealed class ClusterRestoreRf3Fixture : IAsyncDisposable
     internal string DataRoot { get; }
     internal string ExpectedSignerFingerprint => ClusterRestoreRf3SignerIdentity.Fingerprint(profile.SigningKey);
     internal ImmutableArray<ClusterRestoreOwnerMapping> Mappings { get; }
+    internal ImmutableArray<ClusterRestoreRf3OperatorNode> OriginalTargetNodes { get; set; } = [];
     internal DistributedApplication Application => application
         ?? throw new InvalidOperationException(ClusterRestoreRf3Protocol.Invalid);
 

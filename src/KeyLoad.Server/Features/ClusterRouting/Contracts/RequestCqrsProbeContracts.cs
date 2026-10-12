@@ -33,7 +33,12 @@ internal enum RequestCqrsProbePhase
     ReplicaSnapshotReadiness,
     EventVectorFirstDispatchReserved,
     EventVectorFirstCapturesReady,
-    EventVectorFirstAdmitPrepared
+    EventVectorFirstAdmitPrepared,
+    NativeModelBeforeDispatch,
+    NativeModelAfterDispatch,
+    NativeModelReplayBeforeDispatch,
+    ReplicaEntryAcknowledged,
+    ReplicaEntryObserverDisposed
 }
 
 internal enum RequestCqrsProbeAction

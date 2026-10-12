@@ -286,3 +286,12 @@ flowchart LR
     Gate --> Read[Canonical authorized read cut]
     Read --> Public[Real SDK and official MCP results]
 ```
+
+## TASK-SQL-CALL-NO-PARTIAL-WRITE-001
+
+
+REQ-AISQL-003 and AC-AISQL-005/006, REQ-SQLC-003/004/005: preserve original AcAiSql005RejectsMalformedCallQuotedNamesLiteralArgumentsAndTrailingStatements and every prior refusal. Add genuine compiler-to-canonical-native-command-to-ZoneTree operation proof. Before any dispatch, malformed/multi-operation CALL, unknown target and unknown envelope key must reject with exact codes and no partial decoded command, no document, outcome or complete native image/cut change. The following valid commented CALL preserves original command ID and complete literal two-document Unicode/quoted-key payload through native generated deserialization; its real authorized atomic Batch returns both independently expected mutation receipts/full documents. Original same-ID replay retains the full original receipt and complete unchanged bytes. Changed body under the same ID is Conflict, no partial model effects. Genuine joined close and same-volume native reopen preserves identity/cut/bytes, exact replay and full original documents, followed by a fresh acknowledged SQL CALL write and replay. No product defect is claimed: original Complete and closed envelope already enforce these refusals.
+
+This is native compiler/DB Unit operation evidence, not production ASP.NET/MCP authentication, RF3, SQL-client protocol or complete SQL qualification. No new Test/UID, limits, clock, timeout, provider, public DTO or compatibility reader. Compiler/runtime/Linux remain OPEN. Numeric READY5 is an independent predecessor only for shared docs append union; its case/helpers are untouched.
+
+The peer-reviewed R2 original-result oracle retains JSON full-value equality and additionally compares the canonical generated-native full CommitReceipt bytes on each warm/cold same-ID replay. MutationReceipt composition references are native Id4 but excluded from public JSON; JSON alone must not qualify exact native receipt identity. Original decoded command, literal documents/mutations, every no-effect byte/cut assertion and the single genuine cold reopen remain unchanged. A second cold cycle is not claimed by this bounded packet. This is an oracle correction only, with compiler/runtime/Linux gates OPEN.

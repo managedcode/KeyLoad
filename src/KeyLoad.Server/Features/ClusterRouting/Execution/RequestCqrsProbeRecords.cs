@@ -152,7 +152,10 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
                 or RequestCqrsProbePhase.ReplicaSnapshotReadiness
                 or RequestCqrsProbePhase.EventVectorFirstDispatchReserved
                 or RequestCqrsProbePhase.EventVectorFirstCapturesReady
-                or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
+                or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared
+                or RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch
+                or RequestCqrsProbePhase.ReplicaEntryAcknowledged
+                or RequestCqrsProbePhase.ReplicaEntryObserverDisposed)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
         { throw Invalid(); }
         var group = snapshot.Markers
@@ -182,17 +185,25 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         observedControls.Add(name, bytes.ToArray());
     }
 
+    internal RequestCqrsProbeArmRecord? RetainedArm(Guid armId)
+        => knownArms.TryGetValue(armId, out var known) ? known.Record : null;
+
     internal bool IsRetiredArm(Guid armId, byte[] bytes)
         => retiredArms.Contains(armId) && knownArms.TryGetValue(armId, out var known)
             && CryptographicOperations.FixedTimeEquals(known.Bytes, bytes);
 
     private static bool CanonicalAdjunct(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
-        => arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed && arm.Action == RequestCqrsProbeAction.Hold
+        => arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged
+            && marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed
+            && arm.Action == RequestCqrsProbeAction.ThrowOrdinary && marker.Outcome == RequestCqrsProbeOutcome.Observed
+            || arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed && arm.Action == RequestCqrsProbeAction.Hold
             && arm.Partition is not null && marker.Outcome == RequestCqrsProbeOutcome.Observed
             && marker.Phase is RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed;
 
     private static bool ValidOutcome(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
     {
+        if (marker.Phase == RequestCqrsProbePhase.ReplicaEntryObserverDisposed)
+        { return arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged && marker.Outcome == RequestCqrsProbeOutcome.Observed; }
         if (marker.Phase == RequestCqrsProbePhase.ProducerDisposed)
         { return marker.Outcome == RequestCqrsProbeOutcome.Observed; }
         return arm.Action == RequestCqrsProbeAction.Hold

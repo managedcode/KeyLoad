@@ -8,7 +8,6 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal sealed class RequestCqrsProbeFiles
 {
     private const string NameSeparator = "-";
-    private const string TemporaryFileSuffix = ".tmp";
 
     private readonly IOptions<RequestProbeExecutionOptions> executionOptions;
     private readonly RequestCqrsProbeJson json;
@@ -23,6 +22,8 @@ internal sealed class RequestCqrsProbeFiles
     internal readonly RequestCqrsEventVectorExpiryFiles EventVectorExpiry;
     internal readonly RequestCqrsProbeLiveFiles Live;
     internal readonly RequestCqrsProbeMigrationFiles Migration;
+    internal readonly RequestCqrsNativeModelFiles NativeModel;
+    internal readonly RequestCqrsNativeReplayFiles Replay;
 
     private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
         IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
@@ -39,6 +40,8 @@ internal sealed class RequestCqrsProbeFiles
         EventVectorExpiry = new(root, json, records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
         Live = new(root, sessionId, json, records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
         Migration = new(root, sessionId, new(json, executionOptions), records, executionOptions, sync, ReadSnapshotLocked, WriteAtomic);
+        NativeModel = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
+        Replay = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, IOptions<ReplicaConfiguration> replicaOptions, IOptions<RequestProbeExecutionOptions> executionOptions)
@@ -100,6 +103,9 @@ internal sealed class RequestCqrsProbeFiles
         }
     }
 
+    internal void WriteNativeModel(RequestCqrsNativeModelWitness witness, RequestCqrsProbeMarkerRecord marker)
+        => NativeModel.Publish(witness, marker);
+
     internal void WriteActivation(RequestCqrsProbeActivationRecord value)
     {
         lock (sync)
@@ -136,6 +142,9 @@ internal sealed class RequestCqrsProbeFiles
         var migration = new List<RequestCqrsProbeMigrationRecord>();
         var replicaSnapshots = new List<RequestCqrsReplicaSnapshotRecord>();
         var eventVectorExpiries = new List<RequestCqrsEventVectorExpiryRecord>();
+        var nativeModels = new List<RequestCqrsNativeModelWitness>();
+        var replayPlans = new List<RequestCqrsNativeReplayPlan>();
+        var replayWitnesses = new List<RequestCqrsNativeReplayWitness>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
         long aggregateBytes = AggregateBytesInitialValue;
         foreach (var path in entries)
@@ -144,6 +153,10 @@ internal sealed class RequestCqrsProbeFiles
             aggregateBytes = checked(aggregateBytes + ValidateEntry(path, name));
             if (aggregateBytes > executionOptions.Value.MaximumAggregateBytes)
             { throw Invalid(); }
+            if (RequestCqrsNativeReplayInventory.IsPlanName(name) || RequestCqrsNativeReplayInventory.IsWitnessName(name))
+            { Replay.Read(path, name, replayPlans, replayWitnesses, presentControls); continue; }
+            if (RequestCqrsNativeModelInventory.IsName(name))
+            { NativeModel.Read(path, name, nativeModels, presentControls); continue; }
             if (RequestCqrsEventVectorExpiryJson.IsName(name))
             { EventVectorExpiry.Read(path, name, eventVectorExpiries, presentControls); continue; }
             if (RequestCqrsReplicaSnapshotJson.IsName(name))
@@ -158,6 +171,8 @@ internal sealed class RequestCqrsProbeFiles
             { activations.Read(path, name, witnesses, presentControls); continue; }
             records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
+        RequestCqrsNativeModelInventory.RequireMarkers(nativeModels, markers);
+        RequestCqrsNativeReplayInventory.RequireInventory(replayPlans, replayWitnesses, arms, markers, records.RetainedArm);
         RequestCqrsReplicaSnapshotFiles.RequireInventory(replicaSnapshots, arms, markers);
         RequestCqrsEventVectorExpiryFiles.RequireInventory(eventVectorExpiries, arms, markers);
         RequestCqrsProbeActivationInventory.RequireMarkers(witnesses, markers);
@@ -177,7 +192,7 @@ internal sealed class RequestCqrsProbeFiles
         var identity = OfflineRegularFile.Inspect(path);
         RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
         var length = identity.Length;
-        if (length > executionOptions.Value.MaximumRecordBytes || !KnownName(name))
+        if (length > executionOptions.Value.MaximumRecordBytes || !RequestCqrsProbeKnownNames.KnownName(name))
         { throw Invalid(); }
         return length;
     }
@@ -190,28 +205,6 @@ internal sealed class RequestCqrsProbeFiles
 
     internal static byte[] ReadRecord(string path, IOptions<RequestProbeExecutionOptions> executionOptions)
         => RequestCqrsProbeFileReader.Read(path, executionOptions);
-
-    private static bool KnownName(string name) => RequestCqrsEventVectorExpiryJson.IsName(name)
-        || RequestCqrsReplicaSnapshotJson.IsName(name)
-        || ConnectionProbeInventory.IsName(name)
-        || RequestCqrsProbeMigrationValidation.IsName(name)
-        || RequestCqrsProbeLiveValidation.IsName(name)
-        || RequestCqrsProbeActivationValidation.IsName(name)
-        || name == RequestCqrsProbeProtocol.OwnerFile
-        || IsGuidName(name, RequestCqrsProbeProtocol.ArmFilePrefix, RequestCqrsProbeProtocol.JsonFileSuffix) || IsGuidName(name, RequestCqrsProbeProtocol.TemporaryFilePrefix, TemporaryFileSuffix)
-        || name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
-        || name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal);
-
-    private static bool IsGuidName(string name, string prefix, string suffix)
-    {
-        const string CompactIdentityFormat = "N";
-        const int CompactGuidCharacterCount = 32;
-
-        if (!name.StartsWith(prefix, StringComparison.Ordinal) || !name.EndsWith(suffix, StringComparison.Ordinal)
-            || !Guid.TryParseExact(name.AsSpan(prefix.Length, name.Length - prefix.Length - suffix.Length), CompactIdentityFormat, out var value))
-        { return false; }
-        return name.AsSpan(prefix.Length, CompactGuidCharacterCount).SequenceEqual(value.ToString(RequestCqrsProbeProtocol.SessionIdFormat));
-    }
 
     internal static string ArmName(RequestCqrsProbeArmRecord arm) => RequestCqrsProbeProtocol.ArmFilePrefix + arm.ArmId.ToString(RequestCqrsProbeProtocol.SessionIdFormat) + RequestCqrsProbeProtocol.JsonFileSuffix;
     internal static string ReleaseName(RequestCqrsProbeReleaseRecord release)

@@ -47,6 +47,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     private RemoteDocumentRuntime? remoteDocuments;
     private RemoteModelNativeRuntime? nativeModelReceiver;
     private RemoteModelNativeClient? nativeModelClient;
+    private global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeObserver? nativeBlobWireObserver;
     internal RemoteDocumentRuntime? RemoteDocuments => Volatile.Read(ref remoteDocuments);
     private int siloJoined;
 
@@ -119,6 +120,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
         Volatile.Write(ref host, built);
         // Capture the actual singleton owners before native startup; failed startup joins these same instances.
         Volatile.Write(ref nativeModelReceiver, built.Services.GetRequiredService<RemoteModelNativeRuntime>());
+        Volatile.Write(ref nativeBlobWireObserver, built.Services.GetService<global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeObserver>());
         Volatile.Write(ref nativeModelClient, built.Services.GetRequiredService<RemoteModelNativeClient>());
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
@@ -175,12 +177,7 @@ internal sealed partial class OrleansNode(PartitionHost partition, IOptions<Node
     }
 
     internal Task EnsureCatalogAdmissionAsync(CancellationToken cancellationToken)
-    {
-        var catalog = Volatile.Read(ref physicalShardCatalog);
-        if (catalog is null || !catalog.IsReady)
-        { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-        return catalog.EnsureAdmissionAsync(cancellationToken);
-    }
+        => PhysicalShardCatalogFence.EnsureAdmissionAsync(Volatile.Read(ref physicalShardCatalog), cancellationToken);
 
     internal void OpenCatalogAdmission(PhysicalShardCatalogStartup catalog, string principalId,
         CancellationToken cancellationToken)

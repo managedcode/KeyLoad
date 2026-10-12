@@ -6,6 +6,13 @@ internal static class PhysicalShardCatalogFence
     internal const string Mismatch = "The committed physical shard catalog does not match this node's configured identity.";
     internal const string AdministratorRequired = "The configured startup credential is not a persisted cluster administrator.";
 
+    internal static Task EnsureAdmissionAsync(PhysicalShardCatalogStartup? catalog, CancellationToken cancellationToken)
+    {
+        if (catalog is null || !catalog.IsReady)
+        { throw Errors.Fail(ErrorCode.OwnershipLost, NotReady); }
+        return catalog.EnsureAdmissionAsync(cancellationToken);
+    }
+
     internal static bool Matches(PhysicalShardCatalog catalog, Guid physicalShardId,
         Guid incarnation, IReadOnlyList<string> voterIds)
     {

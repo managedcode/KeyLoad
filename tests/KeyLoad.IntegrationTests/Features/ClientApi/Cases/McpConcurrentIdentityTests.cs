@@ -55,5 +55,7 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
         await SqlRf3Protocol.EqualAsync(before,
             await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
                 fixture, first, second, deadline.Token));
+        await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalPolicyContinuation.RunAsync(
+            fixture, firstClient, secondClient, first, second, firstIdentity, secondIdentity, deadline.Token);
     }
 }

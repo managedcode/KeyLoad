@@ -9,6 +9,19 @@ internal static class ReplicaLogValidation
     private const int EmptyEntryCount = 0;
     private const int UnelectedTerm = 0;
     private const int BeforeFirstLogPosition = 0;
+    private const int FirstElectionTerm = 1;
+
+    internal static ReplicaHardState NextVote(ReplicaHardState state, ReplicaConfiguration configuration,
+        long term, string? votedFor)
+    {
+        if (term < state.Term || term < FirstElectionTerm || votedFor is not null && !configuration.VoterIds.Contains(votedFor, StringComparer.Ordinal)
+            || term == state.Term && state.VotedFor is not null && votedFor is not null && state.VotedFor != votedFor)
+        {
+            throw Errors.Fail(ErrorCode.Conflict, ReplicaPersistence.InvalidVote);
+        }
+        var vote = term == state.Term ? state.VotedFor ?? votedFor : votedFor;
+        return state with { Term = term, VotedFor = vote };
+    }
 
     internal static ReplicaHardState Open(IAtomicStore store, ReplicaConfiguration configuration, DatabaseEngine? canonicalDatabase)
     {

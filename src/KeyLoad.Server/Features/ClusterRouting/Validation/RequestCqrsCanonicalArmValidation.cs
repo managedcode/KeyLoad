@@ -4,6 +4,16 @@ internal static class RequestCqrsCanonicalArmValidation
 {
     internal static bool Valid(RequestCqrsProbeArmRecord arm)
     {
+        if (arm.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged)
+        {
+            return arm.Action == RequestCqrsProbeAction.ThrowOrdinary && arm.ReadKind is null
+                && arm.CommandId != Guid.Empty && arm.SourceRequestId is { } logRequest && logRequest != Guid.Empty
+                && arm.SourceArmId is { } logSource && logSource != Guid.Empty && logSource != arm.ArmId
+                && arm.TargetVoter is { } logTarget && RequestCqrsProbeActivationTargetValidation.Valid(logTarget)
+                && arm.Partition is { } logPartition && !string.IsNullOrWhiteSpace(logPartition.TenantId)
+                && !string.IsNullOrWhiteSpace(logPartition.DatabaseId)
+                && !string.IsNullOrWhiteSpace(logPartition.TransactionDomainId) && !string.IsNullOrWhiteSpace(logPartition.PartitionKey);
+        }
         if (arm.Phase is RequestCqrsProbePhase.EventVectorFirstCapturesReady
             or RequestCqrsProbePhase.EventVectorFirstAdmitPrepared)
         { return RequestCqrsEventVectorProbePair.ValidArm(arm); }

@@ -68,6 +68,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken executionToken, CancellationToken callerToken)
     {
+        var stage = OrleansRpcFailureStage.Preparation;
         try
         {
             Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
@@ -75,6 +76,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
             var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
             var purpose = new NativeCqrsStreamPurpose(() => services.GetRequiredService<GrainRequestCodec>()
                 .VerifyRequest(signedRequest, requestId));
+            stage = OrleansRpcFailureStage.Consumption;
             return progress is null
                 ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, executionToken).ConfigureAwait(false)
@@ -83,7 +85,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
-            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, callerToken);
+            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, callerToken);
         }
     }
 }

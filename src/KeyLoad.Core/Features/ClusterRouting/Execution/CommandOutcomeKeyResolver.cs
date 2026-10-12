@@ -17,18 +17,18 @@ internal static class CommandOutcomeKeyResolver
         => new(KeyFor(principalId, commandId, scope), null);
 
     internal static CommandOutcomeSelection Select(IKeyValueView view, string principalId, Guid commandId,
-        CommandOutcomePartitionScope expected)
+        CommandOutcomePartitionScope expected, StorageReadObserver? observer = null)
     {
         var scopedKey = KeyFor(principalId, commandId, expected);
-        var scoped = view.GetRecord<StoredOutcome>(scopedKey);
+        var scoped = view.GetRecord<StoredOutcome>(scopedKey, observer);
 
         if (expected.Kind == CommandOutcomeScopeKind.Partition && expected.Partition is { } partition)
         {
-            ValidateOrphanLocator(view, scoped, partition, principalId, commandId);
+            ValidateOrphanLocator(view, scoped, partition, principalId, commandId, observer);
         }
         if (scoped is not null)
         {
-            ValidateScoped(view, scoped, expected, principalId, commandId);
+            ValidateScoped(view, scoped, expected, principalId, commandId, observer);
         }
         return new(scopedKey, scoped);
     }
@@ -56,10 +56,10 @@ internal static class CommandOutcomeKeyResolver
         };
 
     private static void ValidateOrphanLocator(IKeyValueView view, StoredOutcome? outcome, PartitionRef partition,
-        string principalId, Guid commandId)
+        string principalId, Guid commandId, StorageReadObserver? observer)
     {
         var key = CommandOutcomePartitionLocatorSerialization.ScopedKey(partition, principalId, commandId);
-        if (view.ReadOwnedValue(key) is not null
+        if (CommandOutcomePartitionLocatorSerialization.ReadScopedValue(view, key, observer) is not null
             && (outcome is null || outcome.ScopeKind != CommandOutcomeScopeKind.Partition
                 || outcome.Partition != partition))
         {
@@ -68,14 +68,14 @@ internal static class CommandOutcomeKeyResolver
     }
 
     private static void ValidateScoped(IKeyValueView view, StoredOutcome outcome, CommandOutcomePartitionScope expected,
-        string principalId, Guid commandId)
+        string principalId, Guid commandId, StorageReadObserver? observer = null)
     {
         if (!SameScope(outcome, expected))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidMetadataMessage);
         }
         if (expected.Kind == CommandOutcomeScopeKind.Partition && expected.Partition is not null
-            && !CommandOutcomePartitionLocatorSerialization.MatchesScoped(view, expected.Partition, principalId, commandId))
+            && !CommandOutcomePartitionLocatorSerialization.MatchesScoped(view, expected.Partition, principalId, commandId, observer))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidMetadataMessage);
         }

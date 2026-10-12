@@ -7,6 +7,17 @@ namespace KeyLoad.Server;
 
 internal static class PartitionDatabaseComposition
 {
+    internal static void ValidateHostInputs(NodeOptions options, IAuthorizationPolicy authorization,
+        CommandAdmissionGovernor admission, TimeProvider clock, global::Microsoft.Extensions.Logging.ILogger<ReplicaConsensus> logger)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(authorization);
+        ArgumentNullException.ThrowIfNull(admission);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(logger);
+        options.Validate();
+    }
+
     internal static (DatabaseEngine Database, RowVisibilityCache? Visibility) Open(PartitionStores stores,
         ReplicaConfiguration configuration, ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
         TimeProvider clock, CacheMemoryBudget memory)

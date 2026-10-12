@@ -37,7 +37,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         var options = runtimeOptions.Node.Value;
         var replicaOptions = runtimeOptions.ReplicaConfiguration;
         var executionOptions = runtimeOptions.ReplicaExecution;
-        ValidateConstructorArguments(options, authorization, admission, clock, logger);
+        PartitionDatabaseComposition.ValidateHostInputs(options, authorization, admission, clock, logger);
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
         ApplyProbe = new(Configuration.LocalId);
@@ -58,7 +58,8 @@ internal sealed class PartitionHost : IAsyncDisposable
             Database = openedDatabase.Database;
             rowVisibility = openedDatabase.Visibility;
             TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
-            log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
+            log = openedLog = new(stores.Replica, replicaOptions,
+                faultObserver: options.RequestCqrsProbe.Enabled ? ObserveReplicaLog : null, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
@@ -80,6 +81,12 @@ internal sealed class PartitionHost : IAsyncDisposable
                 openedCoordinator, openedConsensus, applying, openedText, openedLog, openedCacheMemory);
             throw;
         }
+    }
+
+    private void ObserveReplicaLog(ReplicaCrashBoundary boundary)
+    {
+        if (boundary == ReplicaCrashBoundary.EntryAcknowledged && log.ReadEntry(log.State.LastIndex) is { } entry)
+        { ApplyProbe.ObserveReplicaEntry(entry); }
     }
 
     private void CleanupFailedConstruction(Exception error, NativeTextOnlineMaintenanceService? openedOnlineText,
@@ -118,17 +125,6 @@ internal sealed class PartitionHost : IAsyncDisposable
         ServerFailureObserver.Observe(() => { RequireTransferVerifierClosed(); stores.Dispose(); }, failures);
         if (failures.Count > FailuresCountValidationBoundary)
         { throw new AggregateException(failures); }
-    }
-
-    private static void ValidateConstructorArguments(NodeOptions options, IAuthorizationPolicy authorization,
-        CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(authorization);
-        ArgumentNullException.ThrowIfNull(admission);
-        ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(logger);
-        options.Validate();
     }
 
     /// <summary>Private physical node directory; it is not an atomic partition identity.</summary>

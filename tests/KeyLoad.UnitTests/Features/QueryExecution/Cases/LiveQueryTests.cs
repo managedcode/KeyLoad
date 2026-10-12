@@ -8,35 +8,18 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class LiveQueryTests
 {
     private sealed record LiveQueryOrder(decimal Number, string Status);
-    private sealed record LiveQueryExpectation(bool Changed, LiveQueryChangeKind Kind);
+    private sealed record LiveQueryExpectation(bool Changed, LiveQueryChangeKind Kind, CommitReceipt Receipt);
 
     private static AstQueryRequest Query(TestDatabase db) => KeyLoadQuery.From<LiveQueryOrder>(db.Partition, "orders", UnitClientOptions.Translation())
         .Where(order => order.Status == "open").Take(100).ToRequest(true);
-    private static void Apply(Dictionary<string, QueryRow> rows, LiveQueryPage page)
-    {
-        foreach (var change in page.Changes)
-        {
-            if (change.Kind == LiveQueryChangeKind.Remove)
-            {
-                rows.Remove(change.Reference.Id);
-            }
-            else
-            {
-                rows[change.Reference.Id] = change.Row!;
-            }
-        }
-    }
-    private static async Task Same(IEnumerable<QueryRow> expected, IEnumerable<QueryRow> actual)
-        => await Assert.That(JsonDefaults.Serialize(actual.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray())
-            .SequenceEqual(JsonDefaults.Serialize(expected.OrderBy(row => row.EntityId, StringComparer.Ordinal).ToArray()))).IsTrue();
-
     private static LiveQueryExpectation CommitScheduledMutation(TestDatabase db, int index, int trial, int round,
         long[] revisions, bool[] deleted)
     {
         var id = "order-" + index.ToString(CultureInfo.InvariantCulture);
+        CommitReceipt receipt;
         if (round == LiveQueryTestSchedule.DeleteRound)
         {
-            db.Commit(new DeleteDocument("orders", id, revisions[index]));
+            receipt = db.Commit(new DeleteDocument("orders", id, revisions[index]));
             deleted[index] = true;
         }
         else
@@ -45,7 +28,7 @@ internal sealed class LiveQueryTests
                 ? "closed"
                 : "open";
             var json = JsonSerializer.Serialize(new LiveQueryOrder(trial, status), JsonDefaults.Options);
-            db.Commit(new PutDocument("orders", id, json, revisions[index], ExplicitReplacement: true));
+            receipt = db.Commit(new PutDocument("orders", id, json, revisions[index], ExplicitReplacement: true));
             deleted[index] = false;
         }
 
@@ -53,7 +36,7 @@ internal sealed class LiveQueryTests
         return new(round is not LiveQueryTestSchedule.NonmatchingUpdateRound and not LiveQueryTestSchedule.NonmatchingInsertRound,
             round is LiveQueryTestSchedule.LeaveRound or LiveQueryTestSchedule.DeleteRound
                 ? LiveQueryChangeKind.Remove
-                : LiveQueryChangeKind.Upsert);
+                : LiveQueryChangeKind.Upsert, receipt);
     }
 
     [Test]
@@ -64,6 +47,8 @@ internal sealed class LiveQueryTests
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var query = Query(db);
         var snapshot = engine.StartLiveQuery("root", new(query));
+        var literal = new LiveQueryPermutationOracle(db, engine, query);
+        await literal.InitialAsync(snapshot);
         var rows = snapshot.Rows.ToDictionary(row => row.EntityId, StringComparer.Ordinal);
         var cursor = snapshot.Cursor;
         var revisions = new long[LiveQueryTestSchedule.IdentityCount];
@@ -76,14 +61,13 @@ internal sealed class LiveQueryTests
             var index = LiveQueryTestSchedule.IndexForTrial(trial);
             var id = "order-" + index.ToString(CultureInfo.InvariantCulture);
             var round = trial / LiveQueryTestSchedule.IdentityCount;
-            if (round < LiveQueryTestSchedule.FullRounds)
-            {
-                identityVisits[round * LiveQueryTestSchedule.IdentityCount + index]++;
-            }
+            LiveQueryPermutationOracle.Visit(identityVisits, index, round);
             await Assert.That(deleted[index]).IsEqualTo(round is LiveQueryTestSchedule.InsertRound or LiveQueryTestSchedule.NonmatchingInsertRound);
             var expected = CommitScheduledMutation(db, index, trial, round, revisions, deleted);
+            literal.Capture();
             var page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
             var replay = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3));
+            await literal.ObserveAsync(page, replay, expected.Receipt, index, trial, round);
             await Assert.That(JsonDefaults.Serialize(replay.Changes).SequenceEqual(JsonDefaults.Serialize(page.Changes))).IsTrue();
             await Assert.That(page.ThroughSequence).IsEqualTo(previousSequence + 1);
             await Assert.That(page.Changes.Length).IsEqualTo(expected.Changed ? 1 : 0);
@@ -94,13 +78,14 @@ internal sealed class LiveQueryTests
             }
             transitions[round]++;
 
-            Apply(rows, page);
-            Apply(rows, replay);
+            LiveQueryPermutationOracle.Apply(rows, page);
+            LiveQueryPermutationOracle.Apply(rows, replay);
             cursor = page.Cursor;
             while (page.HasMore)
-            { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3)); Apply(rows, page); cursor = page.Cursor; }
+            { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 3)); LiveQueryPermutationOracle.Apply(rows, page); cursor = page.Cursor; }
             previousSequence = page.ThroughSequence;
-            await Same(engine.ExecuteAst("root", query).Rows, rows.Values);
+            await LiveQueryPermutationOracle.SameAsync(engine.ExecuteAst("root", query).Rows, rows.Values);
+            await literal.MaterializedAsync(rows.Values);
         }
 
         await QueryWorkloadCoverageAssertions.AssertLiveMutationCoverage(identityVisits, transitions);
@@ -126,9 +111,9 @@ internal sealed class LiveQueryTests
         var cursor = snapshot.Cursor;
         LiveQueryPage page;
         do
-        { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 4)); Apply(rows, page); cursor = page.Cursor; } while (page.HasMore);
+        { page = engine.ReadLiveQuery("root", new(query, cursor, Limit: 4)); LiveQueryPermutationOracle.Apply(rows, page); cursor = page.Cursor; } while (page.HasMore);
         await Assert.That(rows.Count).IsEqualTo(60);
-        await Same(engine.ExecuteAst("root", query).Rows, rows.Values);
+        await LiveQueryPermutationOracle.SameAsync(engine.ExecuteAst("root", query).Rows, rows.Values);
     }
     [Test]
     public async Task ProtectedPredicateCanUseItsGrantWhileAllReturnedRowsRemainProjected()

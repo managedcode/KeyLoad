@@ -6,7 +6,9 @@ internal static class RequestCqrsCanonicalMarkerValidation
     private const long FirstCanonicalEntryTerm = 1;
     internal static bool Valid(RequestCqrsProbeMarkerRecord marker)
     {
-        var canonical = marker.Phase is RequestCqrsProbePhase.CanonicalJournalFlushed
+        var canonical = marker.Phase is RequestCqrsProbePhase.ReplicaEntryObserverDisposed
+            or RequestCqrsProbePhase.ReplicaEntryAcknowledged
+            or RequestCqrsProbePhase.CanonicalJournalFlushed
             or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted
             or RequestCqrsProbePhase.CanonicalOwnerDisposed;
         return canonical ? marker.EntryIndex is >= FirstCanonicalEntryIndex

@@ -92,7 +92,7 @@ flowchart LR
 
 [KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
 
-KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current qualification record](docs/implementation/qualification-stage60-native-execution.md) separates implemented source, local checks and remaining acceptance gates; earlier evidence remains in the [original qualification record](docs/implementation/qualification-stage57-kl035-kl079.md).
+KL-035 and KL-079 remain open for fresh Linux qualification after regressions. The [current coherent source record](docs/implementation/qualification-stage61-coherent-join.md) tracks the joined operation flows and complete compiler-repair batch; actual current-source qualification remains open. The [earlier native execution record](docs/implementation/qualification-stage60-native-execution.md) retains the original local results and failures.
 
 SIMD is enabled throughout the current execution path. The recorded Linux run at `001bed7` passed all 349 process-recovery tests; its Unit suite passed 3,469 of 3,480 tests, with 11 failures still requiring complete-source qualification. The local native Unit10 successor passed 10/10; Recovery10 passed 8/10 and retains two six-host startup failures. KL-065 passed its complete 78-case task acceptance lane: 45 Unit, 25 process recovery and 8 Aspire RF3 cases. Persisted team row policy, its native authentication decoder, bounded visibility caching and event streaming are implemented. The original full-text replay checks now preserve the complete original checkpoint while validating the actual current source cut; their owning build, scoped formatter and four original native test identities passed locally, with runtime qualification open. Complete Linux/RF3 acceptance and product functional coverage remain open. See the [implementation status](docs/implementation/status.json) for current acceptance gates and original evidence.
 
@@ -107,10 +107,10 @@ SIMD is enabled throughout the current execution path. The recorded Linux run at
 | **SQL & tables** | `SELECT`, `CALL` and bounded INNER JOIN share one language | ◐ In source | [Full SQL, foreign keys and client protocol](docs/Features/QueryExecution.md) |
 | **Queues & events** | Leases, history and queue ↔ graph flows drive agent work | ◐ In source | [Failure, security and recovery checks](docs/Features/Messaging.md) |
 | **SDK & MCP** | SDK, tool discovery, CLI and admin connect callers | ◐ In source | [Gateway and official MCP RF3 checks](docs/Features/ClientApi/ToolDiscovery.md) |
-| **Authorization** | Persisted keys and row/field policies protect context | ◐ In source | [Adversarial and revocation checks](docs/Features/Authorization.md) |
+| **Authorization** | ASP.NET Core authentication and persisted row/field policies protect context | ◐ In source | [Adversarial and revocation checks](docs/Features/Authorization.md) |
 | **RF3 & Orleans** | Three replicas, follower reads and partition movement | ◐ In source | [Fault, restart and runtime checks](docs/Features/ClusterRouting.md) |
 | **RAM & SIMD** | Bounded caches and CPU vectorization target lower memory/latency | ◐ In progress | [Comparable Linux measurements](docs/implementation/memory-performance.md) |
-| **Production** | Qualified database and operator guidance | ○ Gated | Full unit/scalar, recovery, RF3, coverage, performance, endurance and power-loss gates |
+| **Production** | Qualified database and operator guidance | ○ Gated | Full SIMD-enabled unit, recovery, RF3, coverage, performance, endurance and power-loss gates |
 
 Product functional coverage is **unmeasured**. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 

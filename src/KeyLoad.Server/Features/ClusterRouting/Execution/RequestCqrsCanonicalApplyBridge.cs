@@ -25,6 +25,7 @@ internal sealed class RequestCqrsCanonicalApplyBridge(string voter) : IReplicaTr
         { throw new InvalidOperationException(MovementFrameObservationProtocol.Invalid); }
     }
     internal void CloseFrameObservation() => frameObservation?.Close();
+    internal void ObserveReplicaEntry(ReplicaEntry entry) => Volatile.Read(ref observer)?.ReplicaLog.Observe(entry);
     internal IDisposable? Enter(ReplicaEntry entry)
     {
         var operation = entry.Operation!;

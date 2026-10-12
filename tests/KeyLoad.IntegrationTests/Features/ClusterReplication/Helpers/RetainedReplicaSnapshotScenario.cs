@@ -23,6 +23,8 @@ internal static class RetainedReplicaSnapshotScenario
             replica = await StopRetainedReplicaAsync(fixture, state, timeout.Token);
             var final = await ReplicateWhileStoppedAsync(fixture, state, replica.Index, timeout.Token);
             await RestartAndVerifyAsync(fixture, state, replica, final, () => replicaRestarted = true, timeout.Token);
+            await RetainedReplicaSnapshotColdContinuation.RunAsync(fixture, state, replica, final,
+                running => replicaRestarted = running, timeout.Token);
         }
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {

@@ -17,6 +17,8 @@ internal sealed partial class OrleansNode
         { await ServerFailureObserver.ObserveAsync(nativeReceiver.StopAsync, failures).ConfigureAwait(false); }
         if (Volatile.Read(ref nativeModelClient) is { } nativeClient)
         { await ServerFailureObserver.ObserveAsync(nativeClient.StopAsync, failures).ConfigureAwait(false); }
+        if (Volatile.Read(ref nativeBlobWireObserver) is { } blobObserver)
+        { await ServerFailureObserver.ObserveAsync(blobObserver.StopAsync, failures).ConfigureAwait(false); }
         if (Movement is { } moving)
         { await ServerFailureObserver.ObserveAsync(() => moving.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
         if (RemoteDocuments is { } remote)

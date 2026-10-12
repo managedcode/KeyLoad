@@ -23,14 +23,18 @@ internal static class OrleansRpcFailure
     private const string ReadDetail = "The Orleans request could not complete.";
     private const string CommandDetail = "The write outcome is unknown. Retry the same command ID.";
     private const string InvalidFailure = "Fatal runtime failures cannot be converted to request outcomes.";
-    private const string FailureMessage = "Orleans request stream failed: {RequestId} ({Category}) with {ErrorCode}.";
+    private const string FailureMessage = "Orleans request stream failed: {RequestId} ({Category}) with {ErrorCode}; Stage={Stage}; Kind={Kind}.";
     private const int FailureEventId = 1003;
-    private static readonly Action<ILogger, Guid, OrleansRpcFailureCategory, ErrorCode, Exception?> LogFailure =
-        LoggerMessage.Define<Guid, OrleansRpcFailureCategory, ErrorCode>(LogLevel.Warning,
+    private static readonly Action<ILogger, Guid, OrleansRpcFailureCategory, ErrorCode, OrleansRpcFailureStage, OrleansRpcFailureKind, Exception?> LogFailure =
+        LoggerMessage.Define<Guid, OrleansRpcFailureCategory, ErrorCode, OrleansRpcFailureStage, OrleansRpcFailureKind>(LogLevel.Warning,
             new EventId(FailureEventId), FailureMessage);
 
     internal static KeyLoadException Translate(Exception error, bool command, Guid requestId, ILogger logger,
         CancellationToken cancellationToken)
+        => Translate(error, command, requestId, logger, OrleansRpcFailureStage.Unobserved, cancellationToken);
+
+    internal static KeyLoadException Translate(Exception error, bool command, Guid requestId, ILogger logger,
+        OrleansRpcFailureStage stage, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(error);
         ArgumentNullException.ThrowIfNull(logger);
@@ -51,7 +55,23 @@ internal static class OrleansRpcFailure
             _ => OrleansRpcFailureCategory.Unexpected
         };
         var code = command ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost;
-        LogFailure(logger, requestId, category, code, null);
+        LogFailure(logger, requestId, category, code, stage, Kind(error), null);
         return Errors.Fail(code, command ? CommandDetail : ReadDetail);
     }
+
+    private static OrleansRpcFailureKind Kind(Exception error) => error switch
+    {
+        OrleansException => OrleansRpcFailureKind.Orleans,
+        TimeoutException => OrleansRpcFailureKind.Timeout,
+        OperationCanceledException => OrleansRpcFailureKind.Cancellation,
+        KeyLoadException or System.Text.Json.JsonException or FormatException => OrleansRpcFailureKind.Protocol,
+        ObjectDisposedException => OrleansRpcFailureKind.Disposed,
+        InvalidOperationException => OrleansRpcFailureKind.InvalidOperation,
+        NotSupportedException => OrleansRpcFailureKind.NotSupported,
+        ArgumentException => OrleansRpcFailureKind.Argument,
+        System.Runtime.Serialization.SerializationException => OrleansRpcFailureKind.Serialization,
+        AggregateException => OrleansRpcFailureKind.Aggregate,
+        IOException => OrleansRpcFailureKind.InputOutput,
+        _ => OrleansRpcFailureKind.Other
+    };
 }

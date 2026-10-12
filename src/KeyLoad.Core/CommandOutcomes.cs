@@ -24,45 +24,58 @@ public sealed partial class DatabaseEngine
     private OperationResult ResolveOutcomeCore(ReplicatedOperation operation) => Store.Read(view =>
     {
         try
-        {
-            var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
-            var retired = CaptureRetiredOriginalOutcomeReadScope(view, principal, operation);
-            if (retired is null)
-            { AuthorizeOperation(view, principal, operation); }
-            var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-            var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
-            var outcome = selection.Outcome;
-            if (outcome is null)
-            {
-                if (retired is not null)
-                { AuthorizeOperation(view, principal, operation); }
-                throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
-            }
-            if (outcome.PolicyEpoch != principal.PolicyEpoch)
-            { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
-            if (outcome.Incarnation != Store.Identity.Incarnation)
-            {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
-            }
-
-            if (outcome.Fingerprint != CommandFingerprint(operation))
-            {
-                throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
-            }
-
-            CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
-            if (retired is { } retained)
-            {
-                if (outcome.Result.Error is not null)
-                { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
-                RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
-                    retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
-            }
-            ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
-            return outcome.Result;
-        }
+        { return ReadValidatedSubmissionOutcome(view, operation); }
         catch (KeyLoadException exception) { return new OperationResult(null, exception.Code, exception.Message); }
     });
+
+    /// <summary>Returns only the actual validated stored outcome; observation failures retain their cause.</summary>
+    /// <param name="operation">Original native operation with its stable command identity.</param>
+    /// <returns>The canonical stored result after all current authority and identity checks.</returns>
+    internal OperationResult ResolveSubmissionOutcome(ReplicatedOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+        var normalized = NormalizeOperation(operation);
+        return Store.Read(view => ReadValidatedSubmissionOutcome(view, normalized));
+    }
+
+    private OperationResult ReadValidatedSubmissionOutcome(IKeyValueView view, ReplicatedOperation operation)
+    {
+        var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
+        var retired = CaptureRetiredOriginalOutcomeReadScope(view, principal, operation);
+        if (retired is null)
+        { AuthorizeOperation(view, principal, operation); }
+        var scope = CommandOutcomePartitionIdentity.Resolve(operation);
+        var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+        var outcome = selection.Outcome;
+        if (outcome is null)
+        {
+            if (retired is not null)
+            { AuthorizeOperation(view, principal, operation); }
+            throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
+        }
+        if (outcome.PolicyEpoch != principal.PolicyEpoch)
+        { throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage); }
+        if (outcome.Incarnation != Store.Identity.Incarnation)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierOutcomeIncarnationMessage);
+        }
+
+        if (outcome.Fingerprint != CommandFingerprint(operation))
+        {
+            throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
+        }
+
+        CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
+        if (retired is { } retained)
+        {
+            if (outcome.Result.Error is not null)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMoveProtocol.OwnerMismatch); }
+            RequireRetiredOriginalOutcomeIdentity(retained.Command, operation.Id, outcome.Result.Get<CommitReceipt>(),
+                retained.Fence, retained.Control, retained.Placement, retained.ControlOwner, retained.LocalOwner);
+        }
+        ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
+        return outcome.Result;
+    }
     private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)
     {
         if (previous.PolicyEpoch != principal.PolicyEpoch)

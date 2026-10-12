@@ -15,9 +15,11 @@ internal static class RequestCqrsProbeArmValidator
             || !principalId.StartsWith("c1-probe-", StringComparison.Ordinal)
             || StrictUtf8.GetByteCount(principalId) > 256 || !Enum.IsDefined(phase)
             || phase is RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved
-                or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed || !Enum.IsDefined(action)
+                or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed or RequestCqrsProbePhase.ReplicaEntryObserverDisposed || !Enum.IsDefined(action)
             || (readKind is null) == (commandId == Guid.Empty)
-            || (readKind is { } read && !Enum.IsDefined(read)))
+            || (readKind is { } read && !Enum.IsDefined(read))
+            || phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
+                && (readKind is not null || commandId == Guid.Empty || action != RequestCqrsProbeAction.Hold))
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }
     }
 

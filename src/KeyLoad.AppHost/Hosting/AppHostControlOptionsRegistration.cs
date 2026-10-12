@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Features.BlobStorage;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
@@ -24,6 +25,8 @@ internal static class AppHostControlOptionsRegistration
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
+    private const string NativeBlobRootKey = "Root";
+    private const string NativeBlobSessionKey = "SessionId";
     private const int SectionPresenceCount = 1;
 
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution,
@@ -54,10 +57,27 @@ internal static class AppHostControlOptionsRegistration
                 value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
                 value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
                 value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
+                value.NativeBlobWireProbe = ReadNativeBlobWireProbe(configuration, value);
             })], [], []));
         _ = options.Value;
         return options;
     }
+    private static RequestCqrsProbeProfileSettings? ReadNativeBlobWireProbe(IConfiguration configuration,
+        AppHostControlOptions options)
+    {
+        var section = configuration.GetSection(NativeBlobWireProbeProfile.Section);
+        var root = section[NativeBlobRootKey];
+        var session = section[NativeBlobSessionKey];
+        if (root is null && session is null)
+        { return null; }
+        if (!options.Ephemeral || !options.TwoRf3 || options.BenchmarksEnabled || options.ProtocolCohortEnabled
+            || !options.RemoteDocumentReads || !options.RemotePartitionQueries || !options.ProtectedDocumentMovement
+            || options.RequestProbe is null || session != options.RequestProbe.SessionId
+            || string.IsNullOrEmpty(root) || !Path.IsPathFullyQualified(root))
+        { throw new InvalidOperationException(NativeBlobWireProbeProfile.Invalid); }
+        return new RequestCqrsProbeProfileSettings(root, session!);
+    }
+
     private static bool ReadLoggerModelControl(IConfiguration configuration, AppHostControlOptions options)
     {
         var control = configuration.GetSection(LoggerModelControlSetting);

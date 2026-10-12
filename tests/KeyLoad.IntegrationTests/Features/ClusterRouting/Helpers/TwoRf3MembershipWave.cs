@@ -24,6 +24,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal readonly bool queryProbe;
     internal readonly bool nativeMembershipDiagnostics;
     internal NativeMembershipDiagnosticFixture? nativeMembershipControls;
+    internal bool nativeCanonicalCutsSelected;
+    internal NativeCanonicalModelCutFixture? canonicalCutControls;
     internal readonly bool protectedDocuments;
     internal readonly bool activationIsolation;
     internal ReplicaIsolationOwner? IsolationOwner;
@@ -31,6 +33,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal int? movementMaxBatchBytes;
     internal int? movementMaxFrameBytes;
     internal RequestCqrsProbeFixture? queryControls;
+    internal bool nativeBlobWireProbeSelected;
+    internal NativeBlobWireProbeFixture? nativeBlobWireControls;
     internal MovementFrameObservationFixture? frameObservation;
     internal bool nativeDiscoveryOmissionSelected;
     internal bool EventVectorReservedProbe { get; set; }
@@ -139,11 +143,13 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         if (queryControls is { } controls)
         { ServerFailureObserver.Observe(controls.StopAdmission, failures); }
         NativeMembershipDiagnosticWaveLifecycle.StopAdmission(this, failures);
+        NativeBlobWireWaveLifecycle.StopAdmission(this, failures);
         if (IsolationOwner is { } namespaceOwner)
         { await ServerFailureObserver.ObserveAsync(() => namespaceOwner.RestoreAsync(CancellationToken.None), failures); }
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
         if (CanCheckLocks)
         { ServerFailureObserver.Observe(AssertAllNodeLocksReleased, failures); }
+        await NativeCanonicalModelCutWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
         if (applicationDisposed && nodeLocksReleased && queryControls is { } joinedControls)
         { await ServerFailureObserver.ObserveAsync(joinedControls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
         if (IsolationOwner is { } retiredNamespace)
@@ -156,6 +162,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         if (applicationDisposed && nodeLocksReleased && nativeDiscoveryOmission is { } joinedDiscovery)
         { await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false); }
         await NativeMembershipDiagnosticWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
+        NativeBlobWireWaveLifecycle.DeleteJoined(this, failures);
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;
@@ -173,6 +180,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal async Task DisposeApplicationAsync(List<Exception> failures)
     {
+        NativeCanonicalModelCutWaveLifecycle.StopAdmission(this, failures);
         var owned = application;
         if (owned is null)
         { return; }
@@ -196,6 +204,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         retainRoots = true;
         queryControls?.RetainEvidence();
         nativeMembershipControls?.RetainEvidence();
+        canonicalCutControls?.RetainEvidence();
     }
 
     private bool CanDeleteRoot(List<Exception> failures)
@@ -203,16 +212,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
             && (!startAttempted || nodeLocksReleased) && (application is null || applicationDisposed);
 
     internal void AssertAllNodeLocksReleased()
-    {
-        var root = dataRoot ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.InvalidRoot);
-        foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        {
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, "node.owner.lock"));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, "database", "owner.lock"));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, "replica", "owner.lock"));
-        }
-        nodeLocksReleased = true;
-    }
+        => TwoRf3MembershipNodeLockJoin.AssertAll(this);
 
     internal string CreateOwnedRoot()
     {

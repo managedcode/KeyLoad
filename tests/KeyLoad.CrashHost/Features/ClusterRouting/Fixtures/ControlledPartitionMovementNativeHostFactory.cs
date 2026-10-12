@@ -10,6 +10,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
     {
         using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
         var settings = new ControlledPartitionMovementNativeHostSettings(endpoints);
+        var retainedRoot = ControlledPartitionMovementNativeFailureRoot.Capture(settings);
         ControlledPartitionMovementNativeHosts? owner = null;
         var failures = new List<Exception>();
         try
@@ -27,6 +28,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         {
             owner?.RetainCreationFailure(primary);
             failures.Add(primary);
+            ServerFailureObserver.Observe(() => retainedRoot.Attach(primary), failures);
             throw;
         }
         finally

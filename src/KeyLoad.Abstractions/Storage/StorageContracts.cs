@@ -166,13 +166,14 @@ public static class StorageRecords
     /// <typeparam name="T">Owned reference-type record.</typeparam>
     /// <param name="view">View valid only inside its owning store action.</param>
     /// <param name="key">Encoded record key.</param>
+    /// <param name="observer">Optional actual key/value work charge before decoding, including missing lookups.</param>
     /// <returns>The decoded owned record, or null when no value is stored.</returns>
-    public static T? GetRecord<T>(this IKeyValueView view, byte[] key) where T : class
+    public static T? GetRecord<T>(this IKeyValueView view, byte[] key, StorageReadObserver? observer = null) where T : class
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(key);
         T? record = null;
-        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value));
+        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), observer);
         return record;
     }
     /// <summary>Serializes and stages one typed value through the provider-owned write.</summary>

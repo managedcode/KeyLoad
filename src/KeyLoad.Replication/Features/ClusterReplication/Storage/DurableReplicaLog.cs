@@ -11,7 +11,6 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
     private const int ExclusiveProtocolPermit = 1;
     private const int BeforeFirstLogPosition = 0;
     private const int UnelectedTerm = 0;
-    private const int FirstElectionTerm = 1;
     private const int EmptyEntryCount = 0;
     private const int FirstEntryIndex = 0;
 
@@ -122,19 +121,17 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
         lock (gate)
         {
             Check();
-            if (term < state.Term || term < FirstElectionTerm || votedFor is not null && !configuration.VoterIds.Contains(votedFor, StringComparer.Ordinal)
-                || term == state.Term && state.VotedFor is not null && votedFor is not null && state.VotedFor != votedFor)
-            {
-                throw Errors.Fail(ErrorCode.Conflict, ReplicaPersistence.InvalidVote);
-            }
-            var vote = term == state.Term ? state.VotedFor ?? votedFor : votedFor;
-            Save(state with { Term = term, VotedFor = vote });
+            Save(ReplicaLogValidation.NextVote(state, configuration, term, votedFor));
             faultObserver?.Invoke(ReplicaCrashBoundary.TermSaved);
         }
     }
 
     /// <inheritdoc />
     public void Append(IReadOnlyList<ReplicaEntry> entries)
+        => Append(entries, null, CancellationToken.None);
+
+    internal void Append(IReadOnlyList<ReplicaEntry> entries, ReplicaSubmissionBoundary? boundary,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(entries);
         lock (gate)
@@ -144,6 +141,7 @@ public sealed class DurableReplicaLog : IDurableReplicaLog
             { return; }
             var batch = ReplicaAppendCompiler.Validate(entries, state, configuration, Term, CanonicalDatabase);
             var next = ReplicaAppendCompiler.NextState(batch.Entries, state, Load, CanonicalDatabase);
+            boundary?.Begin(cancellationToken);
             store.Commit((tx, _) =>
             {
                 for (var position = FirstEntryIndex; position < batch.Entries.Length; position++)

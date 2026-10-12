@@ -19,6 +19,7 @@ internal static class RequestCqrsProbeClaimSelection
             && (loaded.Record.Phase != RequestCqrsProbePhase.OnlineTextCaptured
                 || identity.CommandKind == OperationKind.MaintainOnlineTextIndex)
             && loaded.Record.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed
+            && loaded.Record.Phase != RequestCqrsProbePhase.ReplicaEntryAcknowledged
             && !(loaded.Record.Phase == RequestCqrsProbePhase.ParentReceiverIssueObserved
                 && loaded.Record.SourceArmId is not null)
             && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();

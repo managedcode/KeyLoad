@@ -1,5 +1,7 @@
 # StorageRecovery
 
+REQ-STORAGE-HOST-COMPOSITION-001 / AC-STORAGE-HOST-COMPOSITION-001: PartitionDatabaseComposition owns validation of the original host constructor inputs. PartitionHost invokes it at the same point before directory/storage acquisition, retaining the exact null checks and NodeOptions.Validate order. Ordered owner construction, rollback, materializer/verifier joins, store-close gate and all original failures remain unchanged. Existing host lifecycle, recovery and Aspire RF3 whole operations plus the unchanged type200/function64 build gates verify this responsibility move; it introduces no new lifetime, operational policy or storage contract.
+
 ## KL-007 v1 key and captured-envelope completion
 
 The accepted [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#2026-10-04-v1-validation-and-ownership-completion)

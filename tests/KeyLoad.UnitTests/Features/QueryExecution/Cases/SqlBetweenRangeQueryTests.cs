@@ -96,6 +96,7 @@ internal sealed class SqlBetweenRangeQueryTests
         await Assert.That(SqlBetweenTestData.Ids(recovered)).IsEqualTo("high,low,middle");
         await Assert.That(recovered.CutPosition).IsEqualTo(position);
         await Assert.That(database.Store.Position).IsEqualTo(position);
+        await SqlNumericRefusalContinuation.RunAsync(database, engine);
     }
 
     [Test]

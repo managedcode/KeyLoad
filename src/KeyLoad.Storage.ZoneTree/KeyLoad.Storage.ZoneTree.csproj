@@ -5,6 +5,7 @@
     <ProjectReference Include="../KeyLoad.Storage.IO/KeyLoad.Storage.IO.csproj" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
     <PackageReference Include="Microsoft.Orleans.Serialization" />

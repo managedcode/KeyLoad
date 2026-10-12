@@ -10,6 +10,7 @@ internal sealed class AppHostControlOptions
     internal TestSuiteSettings? Tests { get; set; }
     internal RequestCqrsProbeProfileSettings? RequestProbe { get; set; }
     internal RequestCqrsProbeProfileSettings? NativeDiscoveryOmission { get; set; }
+    internal RequestCqrsProbeProfileSettings? NativeBlobWireProbe { get; set; }
     internal MovementFrameObservationProfileSettings? MovementFrameObservation { get; set; }
     internal bool EventVectorReservedProbe { get; set; }
     internal bool RemoteDocumentReads { get; set; }

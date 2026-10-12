@@ -45,7 +45,14 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
         this.failures = failures;
         this.executionOptions = executionOptions;
         settings = executionOptions.Value;
-        stdout = new(executionOptions);
+        int? stdoutMaximum = mode switch
+        {
+            C1SubmissionOutcomeInspectionProtocol.Mode => C1SubmissionOutcomeInspectionProtocol.MaximumReceiptBytes,
+            global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.Mode
+                => global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.MaximumReceiptBytes,
+            _ => null
+        };
+        stdout = new(executionOptions, stdoutMaximum);
         stderr = new(executionOptions);
     }
 

@@ -24,6 +24,7 @@ internal static class ControlledPartitionMovementNativeHostLifetimeFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            await ControlledPartitionMovementNativeFailedCreationFlow.RunAsync(readiness, clock, token.Token);
             hosts = await ControlledPartitionMovementNativeHosts.CreateAsync(token.Token);
             var prepared = await ControlledPartitionMovementNativeProcessOperation.WarmAsync(hosts, token.Token);
             hosts.RetainRoots();

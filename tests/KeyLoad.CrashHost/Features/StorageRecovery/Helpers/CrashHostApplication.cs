@@ -34,7 +34,9 @@ internal static class CrashHostApplication
             return;
         }
         if (await NativeInstallFrameInspection.TryRunAsync(args)
-            || await C1OutcomeInspection.TryRunAsync(args) || await ExistingStoreInspector.TryRunAsync(args))
+            || await C1OutcomeInspection.TryRunAsync(args) || await C1SubmissionOutcomeInspection.TryRunAsync(args)
+            || await global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspection.TryRunAsync(args)
+            || await ExistingStoreInspector.TryRunAsync(args))
         {
             return;
         }

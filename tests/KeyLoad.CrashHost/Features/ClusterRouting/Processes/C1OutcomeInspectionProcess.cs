@@ -28,6 +28,21 @@ internal static class C1OutcomeInspectionProcess
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
         => RunOwnedAsync(input, outerOwnerLockPath, NativeInstallFrameInspectionProtocol.Mode, cancellationToken);
 
+    internal static Task<C1OutcomeInspectionProcessResult> RunSubmissionOutcomeAsync(
+        ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
+        => RunOwnedAsync(input, outerOwnerLockPath, C1SubmissionOutcomeInspectionProtocol.Mode, cancellationToken);
+
+    internal static Task<C1OutcomeInspectionProcessResult> RunSubmissionJournalAsync(
+        ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
+    {
+        var request = global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionJson.ReadRequest(input.Span);
+        var owner = global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionPaths.Owner(request);
+        if (!string.Equals(owner, outerOwnerLockPath, StringComparison.Ordinal))
+        { throw global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionValidation.Invalid(); }
+        return RunOwnedAsync(input, outerOwnerLockPath,
+            global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.Mode, cancellationToken);
+    }
+
     private static async Task<C1OutcomeInspectionProcessResult> RunOwnedAsync(
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, string mode, CancellationToken cancellationToken)
     {

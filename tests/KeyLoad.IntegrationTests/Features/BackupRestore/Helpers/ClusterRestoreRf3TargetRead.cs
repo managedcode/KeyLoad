@@ -14,6 +14,7 @@ internal static class ClusterRestoreRf3TargetRead
         ImmutableArray<ClusterBackupOwnerReceipt> originals, bool dispatchPaused)
     {
         await target.StopAsync().ConfigureAwait(false);
+        await ClusterRestoreRf3ExistingTarget.RetainAsync(target, originals).ConfigureAwait(false);
         var failures = new List<Exception>();
         var nodes = ImmutableArray.CreateBuilder<ClusterRestoreRf3OperatorNode>();
         for (var index = FirstNode; index < ClusterRestoreRf3Protocol.Nodes.Length; index++)
@@ -23,9 +24,7 @@ internal static class ClusterRestoreRf3TargetRead
             ZoneTreeStore? store = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                store = new(new(Path.Combine(target.DataRoot, ClusterRestoreRf3Protocol.Nodes[index],
-                    ClusterRestoreRf3Protocol.DatabaseDirectory)), IntegrationExecutionOptions.StorageExecution(),
-                    IntegrationExecutionOptions.PointCacheExecution());
+                store = ClusterRestoreRf3ExistingTarget.Open(target, index);
                 nodes.Add(await ClusterRestoreRf3TargetAuthority.RequireAsync(store, target.Mappings,
                     originals, original, mapping, nodes, index, dispatchPaused, target.OperationId, target.ExpectedSignerFingerprint).ConfigureAwait(false));
             }, failures).ConfigureAwait(false);

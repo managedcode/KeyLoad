@@ -19,6 +19,7 @@ internal static class NativeSiloDiscoveryDiagnosticEndpoints
         if (!options.RequestCqrsProbe.Enabled && !options.NativeDiscoveryOmission.Enabled)
         { return; }
         app.MapGet(NativeSiloDiscoveryDiagnosticProtocol.Path, Read);
+        NativeCanonicalModelCutDiagnosticEndpoints.Map(app);
     }
 
     private static IResult Read(HttpContext context, PartitionHost partition, OrleansNode node, TimeProvider clock)
@@ -69,7 +70,7 @@ internal static class NativeSiloDiscoveryDiagnosticEndpoints
         return nonce;
     }
 
-    private static void RequireCurrent(OrleansNode node, ReplicaSiloDiscovery state)
+    internal static void RequireCurrent(OrleansNode node, ReplicaSiloDiscovery state)
     {
         if (!node.SiloJoined || !state.TransportReady)
         { throw Unavailable(); }

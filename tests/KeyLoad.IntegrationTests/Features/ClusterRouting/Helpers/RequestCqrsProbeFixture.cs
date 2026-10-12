@@ -62,6 +62,22 @@ internal sealed class RequestCqrsProbeFixture
         }
     }
 
+    internal void WriteReplayPlan(Guid armId, KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeReplayVariation mode)
+    {
+        lock (sync)
+        {
+            if (admissionStopped || cleaned || !arms.TryGetValue(armId, out var arm) || arm.Retired
+                || arm.RequestId is not null || arm.Phase != RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
+            { throw new InvalidOperationException(InvalidArm); }
+            var plan = new RequestCqrsNativeReplayPlan(RequestCqrsProbeProtocol.Version,
+                RequestCqrsNativeReplayInventory.PlanKind, SessionId, armId, arm.CommandId, arm.PrincipalId, mode);
+            RequestCqrsNativeReplayInventory.RequireArm(plan, Json.ReadArm(arm.Bytes));
+            var bytes = RequestCqrsNativeReplayInventory.WritePlan(plan);
+            RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
+                RequestCqrsNativeReplayInventory.PlanName(armId), bytes);
+        }
+    }
+
     internal void WriteRelease(Guid armId, Guid requestId)
     {
         lock (sync)

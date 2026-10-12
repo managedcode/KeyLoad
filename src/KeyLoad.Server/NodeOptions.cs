@@ -53,6 +53,7 @@ internal sealed record NodeOptions
     public McpMemoryLimits McpMemory { get; init; } = new();
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
+    public global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeOptions NativeBlobWireProbe { get; init; } = new();
     internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty);
     internal NativeDiscoveryOmissionOptions NativeDiscoveryOmission { get; set; } = NativeDiscoveryOmissionOptions.Disabled;
     internal MovementFrameObservationOptions MovementFrameObservation { get; set; } = MovementFrameObservationOptions.Disabled;

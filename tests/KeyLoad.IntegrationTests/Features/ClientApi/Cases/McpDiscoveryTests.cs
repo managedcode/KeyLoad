@@ -1,5 +1,7 @@
 using System.Net;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Query;
 using ModelContextProtocol.Protocol;
 
@@ -102,14 +104,25 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
     public async Task AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall()
     {
         using var deadline = McpCallerDeadline.Create();
+        var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
+        await scenario.SeedAsync(fixture, deadline.Token);
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
+        var reader = new global::KeyLoad.Client.KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, deadline.Token);
+        var before = await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
+            reader, scenario, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await cancellation.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() => session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: cancellation.Token).AsTask());
+        await SqlRf3Protocol.EqualAsync(before,
+            await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
+                reader, scenario, deadline.Token));
         var next = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         await Assert.That(next.Value.ReadOnly).IsTrue();
+        await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.HealthyAsync(
+            reader, session, scenario, before, deadline.Token);
     }
 }

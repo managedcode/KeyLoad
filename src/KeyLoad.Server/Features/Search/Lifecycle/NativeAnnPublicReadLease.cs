@@ -29,7 +29,7 @@ internal sealed class NativeAnnPublicReadLease : IAnnProjectionLease
             NativeAnnPublicAcquisition.RequireScope(request, manifest);
             memory = owner.ReserveRead(NativeAnnPublicFrameAdmission.Desired(configured, budget));
             callerOptions = NativeAnnPublicFrameAdmission.CaptureOptions(configured, budget, memory.Bytes);
-            var pinned = NativeAnnPublicAcquisition.Request(manifest);
+            var pinned = NativeAnnPublicAcquisition.Request(database, view, manifest, budget);
             scopeWork = new AnnSeedWork(budget, callerOptions.Value.MaxWorkUnits);
             source = AnnSeedCollector.CapturePinnedView(database, view, manifest.PrincipalId,
                 pinned, callerOptions, budget, scopeWork);

@@ -526,3 +526,29 @@ Ordered implementation: existing spec/ADR appendix → original case invokes fea
 
 
 Embedded durability clarification: actual ZoneTreeIdentityFile.Open creates ProcessDurable; DatabaseEngine constructor retains that identity profile and ExecuteBatch writes it into the complete original receipt. The four Unit cases independently require literal ProcessDurable, preserving true synchronous native process durability and never manufacturing RF3 acknowledgement proof. Original R4 normal4 failures from an erroneous QuorumProcessDurable fixture oracle are retained; scalar was not executed on that failed oracle. Full original request/receipt/native bytes/read cut/row/plan/replay/cold invariants remain exact. The native discovery child completed before four runtime results, but the runner was launched before waiting its pending process result; preserve that original orchestration ordering mistake separately and use sequential completed discovery before the corrected run. No durability options/product/timeouts/defaults changed.
+
+## Numeric refusal and healthy cold SQL continuation
+
+
+REQ-SQLC-003/004/006 and AC-SQLC-003P/004/006A: extend only original AcSqlc006AMalformedDelimiterDoesNotAdvanceAndValidRetryUsesSameEngine. Preserve its declaration and all original assertions. Existing invariant-culture int/decimal TryParse already rejects overflowing LIMIT/operands with Validation; no product fix is claimed. Add independently literal complete rows, null cursor, bounded-full-scan access path, native cut and complete bounded key/value image after integer/decimal/exponent refusal, actual original pre-cancellation, and the valid downward result byte ceiling1. Each refusal must return no partial page and be followed by the same engine's healthy exact page. Decimal endpoint literals remain valid and produce the same complete rows. Gracefully close the original owned store, reopen the same volume through existing checksummed ZoneTree owner APIs, preserve identity/incarnation/nondecreasing read generation/full bytes, and repeat original refusal plus full healthy reads. Body and disposal failures remain joined through ServerFailureObserver.
+
+No new case/UID, public type, product/schema/storage change, clock, timeout, default budget, caller authority, provider, numeric arithmetic dialect or compatibility path. Native source/API preview is source proof only; current compiled discovery/normal SIMD native50/Linux execution remain OPEN. SDK/MCP/RF3 and full SQL qualification remain separate mandatory gates.
+
+```mermaid
+flowchart LR
+  Original[Original delimiter refusal and retry] --> Numeric[Overflow and cancellation refusal]
+  Numeric --> Image[Exact unchanged native image]
+  Image --> Healthy[Literal complete healthy page]
+  Healthy --> Budget[One-byte complete result refusal]
+  Budget --> Cold[Joined close and same-volume reopen]
+  Cold --> HealthyCold[Refusal then literal healthy page]
+```
+
+## TASK-SQL-CALL-NO-PARTIAL-WRITE-001
+
+
+REQ-AISQL-003 and AC-AISQL-005/006, REQ-SQLC-003/004/005: preserve original AcAiSql005RejectsMalformedCallQuotedNamesLiteralArgumentsAndTrailingStatements and every prior refusal. Add genuine compiler-to-canonical-native-command-to-ZoneTree operation proof. Before any dispatch, malformed/multi-operation CALL, unknown target and unknown envelope key must reject with exact codes and no partial decoded command, no document, outcome or complete native image/cut change. The following valid commented CALL preserves original command ID and complete literal two-document Unicode/quoted-key payload through native generated deserialization; its real authorized atomic Batch returns both independently expected mutation receipts/full documents. Original same-ID replay retains the full original receipt and complete unchanged bytes. Changed body under the same ID is Conflict, no partial model effects. Genuine joined close and same-volume native reopen preserves identity/cut/bytes, exact replay and full original documents, followed by a fresh acknowledged SQL CALL write and replay. No product defect is claimed: original Complete and closed envelope already enforce these refusals.
+
+This is native compiler/DB Unit operation evidence, not production ASP.NET/MCP authentication, RF3, SQL-client protocol or complete SQL qualification. No new Test/UID, limits, clock, timeout, provider, public DTO or compatibility reader. Compiler/runtime/Linux remain OPEN. Numeric READY5 is an independent predecessor only for shared docs append union; its case/helpers are untouched.
+
+The peer-reviewed R2 original-result oracle retains JSON full-value equality and additionally compares the canonical generated-native full CommitReceipt bytes on each warm/cold same-ID replay. MutationReceipt composition references are native Id4 but excluded from public JSON; JSON alone must not qualify exact native receipt identity. Original decoded command, literal documents/mutations, every no-effect byte/cut assertion and the single genuine cold reopen remain unchanged. A second cold cycle is not claimed by this bounded packet. This is an oracle correction only, with compiler/runtime/Linux gates OPEN.

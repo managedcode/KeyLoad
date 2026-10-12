@@ -64,11 +64,14 @@ internal static class RequestCqrsPhaseFaultCleanup
         if (controls is null || discovery is null || armId == Guid.Empty)
         { return; }
         var state = controls.ArmFor(armId);
-        if (state.RequestId is null || state.ProducerDisposedSeen)
+        var replicaCallback = state.Phase == RequestCqrsProbePhase.ReplicaEntryAcknowledged;
+        if (state.RequestId is null || (replicaCallback
+            ? state.ReplicaEntryObserverDisposedSeen : state.ProducerDisposedSeen))
         { return; }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.ProducerDisposed,
+            await controls.WaitForMarkerAsync(armId, replicaCallback
+                ? RequestCqrsProbePhase.ReplicaEntryObserverDisposed : RequestCqrsProbePhase.ProducerDisposed,
                 RequestCqrsProbeOutcome.Observed, discovery, cancellationToken).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
     }

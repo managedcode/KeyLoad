@@ -38,7 +38,7 @@ internal sealed class RequestCqrsProbeJson
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty
             || !ValidPrincipal(value.PrincipalId)
             || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
-            || value.Phase is RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
+            || value.Phase is RequestCqrsProbePhase.ReplicaEntryObserverDisposed or RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
             || value.Phase == RequestCqrsProbePhase.TransferPageReturned
                 && (value.ReadKind != KeyLoad.Orleans.GrainReadKind.PartitionMovementTransferData
                     || value.Action != RequestCqrsProbeAction.Hold)
@@ -63,6 +63,8 @@ internal sealed class RequestCqrsProbeJson
                 && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold
                     || value.Partition is not null || value.SourceRequestId is not null || value.SourceArmId is not null
                     || value.TargetVoter is not null)
+            || value.Phase is (RequestCqrsProbePhase.NativeModelBeforeDispatch or RequestCqrsProbePhase.NativeModelAfterDispatch or RequestCqrsProbePhase.NativeModelReplayBeforeDispatch)
+                && (value.ReadKind is not null || value.CommandId == Guid.Empty || value.Action != RequestCqrsProbeAction.Hold)
             || !RequestCqrsCanonicalArmValidation.Valid(value)
             || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))

@@ -84,6 +84,7 @@ internal static class TwoRf3ClusterResources
         foreach (var resource in resources)
         { NativeClusteringResources.Apply(resource, tables); }
         TwoRf3QueryProbe.Apply(probe, resources, Nodes);
+        global::KeyLoad.AppHost.Features.BlobStorage.NativeBlobWireProbeProfile.Apply(builder, root, resources);
         frameObservation?.ApplyReceivers(resources, Nodes);
         discoveryOmission?.Apply(resources);
         TwoRf3RemoteReadResources.Configure(AppHostOptionsRegistration.Get(builder).Control, resources, registerOwners);

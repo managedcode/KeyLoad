@@ -1,3 +1,5 @@
+using ManagedCode.Communication.CQRS;
+
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender followers) : IDisposable
@@ -18,49 +20,81 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     internal async Task<OperationResult> SubmitAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
     {
         operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
-        await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var boundary = new ReplicaSubmissionBoundary();
+        OperationResult? terminal = null;
         try
         {
-            var admission = await state.LockedAsync(() => AppendOwned(operation, cancellationToken), cancellationToken).ConfigureAwait(false);
-            if (admission.Outcome is { } originalOutcome)
-            { return originalOutcome; }
-            var entry = admission.Entry ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
-            while (true)
+            await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
+            Exception? primary = null;
+            try
             {
-                await RoundAsync(entry.Term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
-                var committed = await state.LockedAsync(() =>
-                { state.RequireLeader(entry.Term); return state.Log.State.CommittedIndex >= entry.Index; }, cancellationToken).ConfigureAwait(false);
-                if (committed)
-                {
-                    break;
-                }
-                await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
+                terminal = await SubmitOwnedAsync(operation, boundary, cancellationToken).ConfigureAwait(false);
+                return terminal;
             }
-            await state.Materializer.WaitForApplyAsync(entry.Index, cancellationToken).ConfigureAwait(false);
-            var outcome = state.Materializer.Database.ResolveOutcome(entry.Operation!);
-            if (admission.SourcePhaseId != Guid.Empty && outcome.Error is null)
-            {
-                state.Materializer.Database.RequireEventVectorSourceAdmitOutcome(entry.Operation!,
-                    admission.OriginalRequestId, admission.SourcePhaseId, entry.Index, cancellationToken);
-                return outcome with
-                {
-                    NativeValue = EventVectorSourceAdmitAppendResult.FromAppliedEntry(entry,
-                    admission.OriginalRequestId, admission.SourcePhaseId, outcome)
-                };
-            }
-            return admission.OriginalRequestId != Guid.Empty && outcome.Error is null
-                ? outcome with
-                {
-                    NativeValue = EventVectorFirstAdmitAppendResult.FromAppliedEntry(entry,
-                    admission.OriginalRequestId, outcome)
-                }
-                : outcome;
+            catch (Exception error) { primary = error; throw; }
+            finally { ReleaseRound(primary); }
         }
-        finally { rounds.Release(); }
+        catch (Exception error) when ((terminal is not null || boundary.IsStarted) && CqrsRuntimeFailures.FindFatal(error) is null)
+        {
+            if (terminal is not null)
+            { return terminal; }
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ReplicaProtocol.InterruptedWrite, error);
+        }
+    }
+
+    private void ReleaseRound(Exception? primary)
+    {
+        try { rounds.Release(); }
+        catch (Exception cleanup)
+        {
+            state.Poison(cleanup);
+            if (primary is not null)
+            { throw new AggregateException(primary, cleanup); }
+            throw;
+        }
+    }
+
+    private async Task<OperationResult> SubmitOwnedAsync(ReplicatedOperation operation,
+        ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
+    {
+        var admission = await state.LockedAsync(() => AppendOwned(operation, boundary, cancellationToken), cancellationToken).ConfigureAwait(false);
+        if (admission.Outcome is { } originalOutcome)
+        { return originalOutcome; }
+        var entry = admission.Entry ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+        while (true)
+        {
+            await RoundAsync(entry.Term, ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
+            var committed = await state.LockedAsync(() =>
+            { state.RequireLeader(entry.Term); return state.Log.State.CommittedIndex >= entry.Index; }, cancellationToken).ConfigureAwait(false);
+            if (committed)
+            {
+                break;
+            }
+            await Task.Delay(state.Configuration.HeartbeatInterval, state.Clock, cancellationToken).ConfigureAwait(false);
+        }
+        await state.Materializer.WaitForApplyAsync(entry.Index, cancellationToken).ConfigureAwait(false);
+        var outcome = state.Materializer.Database.ResolveSubmissionOutcome(entry.Operation!);
+        if (admission.SourcePhaseId != Guid.Empty && outcome.Error is null)
+        {
+            state.Materializer.Database.RequireEventVectorSourceAdmitOutcome(entry.Operation!,
+                admission.OriginalRequestId, admission.SourcePhaseId, entry.Index, cancellationToken);
+            return outcome with
+            {
+                NativeValue = EventVectorSourceAdmitAppendResult.FromAppliedEntry(entry,
+                admission.OriginalRequestId, admission.SourcePhaseId, outcome)
+            };
+        }
+        return admission.OriginalRequestId != Guid.Empty && outcome.Error is null
+            ? outcome with
+            {
+                NativeValue = EventVectorFirstAdmitAppendResult.FromAppliedEntry(entry,
+                admission.OriginalRequestId, outcome)
+            }
+            : outcome;
     }
 
     private (ReplicaEntry? Entry, OperationResult? Outcome, Guid OriginalRequestId, Guid SourcePhaseId)
-        AppendOwned(ReplicatedOperation operation, CancellationToken cancellationToken)
+        AppendOwned(ReplicatedOperation operation, ReplicaSubmissionBoundary boundary, CancellationToken cancellationToken)
     {
         state.RequireReadyLeader();
         using var firstAdmit = state.Materializer.Database.OpenEventVectorFirstAdmitProbe(operation, cancellationToken);
@@ -73,7 +107,9 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         ReplicaEventVectorSourceAdmit.RequireAbsent(state, sourceAdmit, operation);
         var admitted = state.Materializer.Database.PrepareQueueRetryOperation(operation with { EvaluatedAt = state.Clock.GetUtcNow() });
         var next = new ReplicaEntry(checked(state.Log.State.LastIndex + ContiguousIndexStep), state.Log.State.Term, admitted);
-        state.Log.Append([next]);
+        var nativeLog = state.Log as DurableReplicaLog
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+        nativeLog.Append([next], boundary, cancellationToken);
         return (next, null, firstAdmit?.OriginalParentRequestId ?? sourceAdmit?.OriginalParentRequestId ?? Guid.Empty,
             sourceAdmit?.OriginalSourcePhaseCommandId ?? Guid.Empty);
     }

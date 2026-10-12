@@ -35,6 +35,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
         }
         var owner = new ControlledPartitionMovementNativeHosts(settings,
             new(new IPEndPoint(IPAddress.Loopback, input.PrimarySiloPort)));
+        var retainedRoot = ControlledPartitionMovementNativeFailureRoot.Capture(settings);
         try
         {
             await owner.CreateNodesAsync().ConfigureAwait(false);
@@ -46,6 +47,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
         {
             owner.creationFailure = primary;
             var failures = new List<Exception> { primary };
+            ServerFailureObserver.Observe(() => retainedRoot.Attach(primary), failures);
             await ServerFailureObserver.ObserveAsync(() => owner.CloseRetainingRootAsync().AsTask(), failures)
                 .ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);
