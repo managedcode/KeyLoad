@@ -11,6 +11,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private const string KeySeparator = ":";
     private const string Assignment = "=";
     private const string Enabled = "true";
+    private const int FirstVoter = 0;
 
     internal string[] Arguments(int index)
     {
@@ -39,7 +40,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignPhysicalShardId), foreign.PhysicalShardId.ToString(IdentityGuidFormat));
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignIncarnation), foreign.Incarnation.ToString(IdentityGuidFormat));
         Set(trust + nameof(PhysicalGroupTrustOptions.ForeignPeerSecret), control ? destinationPeer : controlPeer);
-        for (var voter = 0; voter < ControlledPartitionMovementNativeHostEndpoints.GroupSize; voter++)
+        for (var voter = FirstVoter; voter < ControlledPartitionMovementNativeHostEndpoints.GroupSize; voter++)
         {
             var ordinal = voter.ToString(CultureInfo.InvariantCulture);
             Set(nameof(NodeOptions.Peers) + KeySeparator + ordinal, local.VoterIds[voter]);

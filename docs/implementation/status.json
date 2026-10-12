@@ -1,4 +1,79 @@
 {
+  "STAGE60-NATIVE-EXECUTION-001": {
+    "status": "in_progress",
+    "record": "docs/implementation/qualification-stage60-native-execution.md",
+    "originalPlan": {
+      "total": 104,
+      "done": 18,
+      "inProgress": 86
+    },
+    "additionalTasks": [
+      "KL-105"
+    ],
+    "authentication": "standard ASP.NET Core Authentication/Authorization; persisted native operation policy; ManagedCode.Orleans.Identity for verified inter-grain context",
+    "localDevelopment": {
+      "fullReleaseR8": {
+        "passed": true,
+        "sourceInputs": 8943,
+        "sourceDrift": 0,
+        "elapsedSeconds": 359.139,
+        "scope": "before later credential/startup changes"
+      },
+      "unitReleaseR9": {
+        "passed": true,
+        "sourceInputs": 8943,
+        "sourceDrift": 0
+      },
+      "unit10R9": {
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "nativeMaximumParallelism": 50,
+        "completionSha256": "1b53e34080df03088718f1f4b4e1858f52383b8b461c2316dccb4bb6a89cc247"
+      },
+      "recoveryReleaseR11": {
+        "passed": true,
+        "sourceInputs": 8944,
+        "sourceDrift": 0
+      },
+      "recovery10R11": {
+        "passed": 8,
+        "failed": 2,
+        "exitCode": 2,
+        "nativeMaximumParallelism": 50,
+        "sourceInputs": 8944,
+        "releaseImages": 2650,
+        "sourceImageDrift": 0,
+        "runnerExitReadersDisposalJoined": true,
+        "failure": "genuine six-host startup before original cold/kill operation; Authentication/OwnershipLost; R80 prerequisite does not close the complete defect",
+        "failedRoot18LockSettlement": "OPEN; original exception lacks attributable root",
+        "completionSha256": "b728a5a7041824457f34efc11319b08b5f8d51fe3f0029cf4521620d17b431bc"
+      }
+    },
+    "deliveredLinuxHistory": {
+      "source": "001bed73675ff47bf6feb56a4bed1dcdb1555e4c",
+      "run": "https://github.com/managedcode/KeyLoad/actions/runs/38170003679",
+      "attempt": 1,
+      "unit": {
+        "total": 3480,
+        "passed": 3469,
+        "failed": 11
+      },
+      "recovery": {
+        "total": 349,
+        "passed": 349
+      },
+      "qualification": "immutable earlier cohort; not current-source qualification"
+    },
+    "functionalCoverage": "unmeasured; load cases excluded",
+    "remaining": [
+      "current complete solution and formatter",
+      "current exact-source Linux unit and process recovery",
+      "genuine SDK and official MCP Aspire RF3",
+      "successful source-bound functional coverage",
+      "fault/endurance and measured performance"
+    ]
+  },
   "TASK-CLIENT-CONNECTION": {
     "title": "One actual connection grain with parallel independent operations and commands",
     "status": "local_native8_and_actual_sdk_mcp_aspire_rf3_5_passed_qualification_pending",

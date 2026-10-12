@@ -5,6 +5,9 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class NativeClusterStartupEvidenceTests
 {
     private const string Document = "native-startup-following";
+    private const string KindKey = "kind";
+    private const string MissingNativeFilesKey = "missingNativeFiles";
+    private const string EventsKey = "events";
 
     [Test]
     public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
@@ -60,11 +63,11 @@ internal sealed class NativeClusterStartupEvidenceTests
             NativeClusterStartupEvidence.OperationPathFor(clusterId
                 ?? throw new InvalidOperationException("The original operation owner was not created."))));
         var record = evidence.RootElement;
-        await Assert.That(record.GetProperty("kind").GetString()).IsEqualTo(NativeClusterStartupProtocol.OperationKind);
+        await Assert.That(record.GetProperty(KindKey).GetString()).IsEqualTo(NativeClusterStartupProtocol.OperationKind);
         await Assert.That(record.GetProperty(NativeClusterStartupProtocol.CleanupJoined).GetBoolean()).IsTrue();
         await Assert.That(record.GetProperty(NativeClusterStartupProtocol.Files).GetArrayLength()).IsEqualTo(2);
-        await Assert.That(record.GetProperty("missingNativeFiles").GetInt32()).IsEqualTo(0);
-        await Assert.That(record.GetProperty("events").GetArrayLength()).IsGreaterThan(0);
+        await Assert.That(record.GetProperty(MissingNativeFilesKey).GetInt32()).IsEqualTo(0);
+        await Assert.That(record.GetProperty(EventsKey).GetArrayLength()).IsGreaterThan(0);
         await Assert.That(record.GetRawText().Contains(ConnectionNativeProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();
     }
 

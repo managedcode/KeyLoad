@@ -55,7 +55,8 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
             else
             { await JsonSerializer.SerializeAsync(context.Response.Body, receipt, JsonDefaults.Options, context.RequestAborted); }
         }
-        catch (OperationCanceledException) when (first && context.RequestAborted.IsCancellationRequested)
+        catch (OperationCanceledException) when (first && FirstChunk.Task.IsCompletedSuccessfully
+            && context.RequestAborted.IsCancellationRequested)
         { Aborted.TrySetResult(); }
         catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
         { Failure.TrySetResult(error); throw; }

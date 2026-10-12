@@ -54,26 +54,41 @@ internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
                 throw;
             }
         });
-        observation?.Record(KestrelObservationStage.HostStarting);
-        await app.StartAsync();
-        observation?.Record(KestrelObservationStage.HostStarted);
         try
         {
+            observation?.Record(KestrelObservationStage.HostStarting);
+            await app.StartAsync();
+            observation?.Record(KestrelObservationStage.HostStarted);
             var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!;
             return new KeyLoadClientKestrelServer(app, new Uri(addresses.Addresses.Single()), authorizationHeaders, observation);
         }
-        catch (Exception)
+        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            await app.StopAsync();
-            await app.DisposeAsync();
+            await FailStartupAsync(app, error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            await FailStartupAsync(app, error);
             throw;
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        Client.Dispose();
-        await app.StopAsync();
-        await app.DisposeAsync();
+        var failures = new List<Exception>();
+        global::KeyLoad.Server.ServerFailureObserver.Observe(Client.Dispose, failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.StopAsync(), failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
+
+    private static async Task FailStartupAsync(WebApplication app, Exception original)
+    {
+        var failures = new List<Exception> { original };
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.StopAsync(), failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
 }

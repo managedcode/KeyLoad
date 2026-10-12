@@ -61,7 +61,9 @@ internal sealed class DeniedCommandReplayClockTests
         var request = new CommandRequest(id, fixture.Partition, [new PutDocument(Collection, Healthy, Json, 0)]);
         var original = new ReplicatedOperation(id, OperationKind.Batch, Reader,
             fixture.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
-        fixture.Database.Apply(original).Get<CommitReceipt>();
+        var originalPosition = fixture.Store.Position;
+        var originalReceipt = fixture.Database.Apply(original).Get<CommitReceipt>();
+        await DeniedCommandRepairContinuation.OriginalReceiptAsync(fixture, originalReceipt, id, originalPosition);
         fixture.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(writer with { Grants = [], PolicyEpoch = writer.PolicyEpoch + 1 })).Get<PrincipalRecord>();
         var position = fixture.Store.Position;
@@ -80,6 +82,7 @@ internal sealed class DeniedCommandReplayClockTests
         fixture.Commit(new PutDocument(Collection, Healthy, Json, 1));
         await Assert.That(fixture.Database.GetDocument("root", new(fixture.Partition, Collection, Healthy))!.Revision)
             .IsEqualTo(2L);
+        await DeniedCommandRepairContinuation.RunAsync(fixture, writer, original, outcome);
     }
 
     private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, OperationResult expected,

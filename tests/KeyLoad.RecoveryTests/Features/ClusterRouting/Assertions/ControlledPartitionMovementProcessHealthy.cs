@@ -32,7 +32,7 @@ internal static class ControlledPartitionMovementProcessHealthy
             {
                 var acknowledge = ControlledPartitionMovementProcessFenceSettlementRequest.Acknowledge(prepared.Prepared,
                     actualFence, owners, prepared.OriginalCallerAddress, prepared.OriginalExpiry);
-                var ack = await SubmitAsync(source, runtime, admission, acknowledge, cancellationToken);
+                var ack = await SubmitAsync(source, admission, acknowledge, cancellationToken);
                 var grant = prepared.Authorization.Grant
                     ?? throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
                 var expectedAck = new PartitionMovePhaseResult(actualFence.MoveId,
@@ -42,7 +42,7 @@ internal static class ControlledPartitionMovementProcessHealthy
                 await Assert.That(JsonDefaults.Serialize(ack).SequenceEqual(JsonDefaults.Serialize(expectedAck))).IsTrue();
                 var accept = ControlledPartitionMovementProcessFenceSettlementRequest.Accept(prepared.Prepared,
                     actualFence, owners, prepared.OriginalCallerAddress, prepared.OriginalExpiry);
-                var accepted = await SubmitAsync(source, runtime, admission, accept, cancellationToken);
+                var accepted = await SubmitAsync(source, admission, accept, cancellationToken);
                 var expectedFence = ControlledPartitionMovementProcessPhaseAssertions.Fence(owners);
                 var control = expectedFence.Control
                     ?? throw new InvalidOperationException(ControlledPartitionMovementProcessProtocol.Invalid);
@@ -60,10 +60,10 @@ internal static class ControlledPartitionMovementProcessHealthy
     }
 
     private static async Task<PartitionMovePhaseResult> SubmitAsync(ControlledPartitionMovementNativeNode source,
-        ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
+        PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest request, CancellationToken cancellationToken)
     {
-        var operation = await ControlledPartitionMovementProcessIssuer.IssueAsync(source, runtime, admission,
+        var operation = await ControlledPartitionMovementProcessIssuer.IssueAsync(source, admission,
             request, cancellationToken);
         var result = source.Journal.Submit(operation, cancellationToken);
         await Assert.That(result.Error).IsNull();

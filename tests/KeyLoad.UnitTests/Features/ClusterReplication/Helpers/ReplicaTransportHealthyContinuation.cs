@@ -33,7 +33,9 @@ internal static class ReplicaTransportHealthyContinuation
                     endpoint, state, native, gate, task => submitted = task, token), failures);
                 gate.Release();
                 if (submitted is { } original)
+                {
                     await RequestCqrsCohortCleanup.CaptureAsync(() => original, failures);
+                }
             }, failures);
         }, failures);
         RequestCqrsCohortCleanup.ThrowIfAny(failures);
@@ -66,7 +68,7 @@ internal static class ReplicaTransportHealthyContinuation
         await Assert.That(JsonDefaults.Serialize(receipt).SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).SequenceEqual(JsonDefaults.Serialize(
             new MutationReceipt[] { new("putDocument", Collection, Id, InitialRevision) }))).IsTrue();
-        var document = db.Database.GetDocument(Root, new(db.Partition, Collection, Id));
+        var document = db.Database.GetDocument(Root, new(db.Partition, Collection, Id), cancellationToken: token);
         await Assert.That(JsonDefaults.Serialize(document).SequenceEqual(JsonDefaults.Serialize(
             new DocumentResult(new(db.Partition, Collection, Id), InitialRevision, Json, false, [])))).IsTrue();
         await Assert.That(db.Database.GetOutboxStatus(Root, db.Partition).Head.Tail).IsEqualTo(InitialTail);

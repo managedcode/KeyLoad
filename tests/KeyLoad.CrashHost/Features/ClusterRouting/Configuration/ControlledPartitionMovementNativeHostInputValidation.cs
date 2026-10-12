@@ -11,6 +11,8 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
     private const int Version = 1;
     private const int FirstNode = 0;
     private const int SingleArgumentCount = 1;
+    private const int EmptyUriComponentLength = 0;
+    private const string OriginRootPath = "/";
     private const string NodePrefix = "--KeyLoad:";
     private const string UrlPrefix = "--urls=";
     private const string Assignment = "=";
@@ -36,8 +38,9 @@ internal static class ControlledPartitionMovementNativeHostInputValidation
             if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
                 || uri.Scheme != Uri.UriSchemeHttp || !uri.IsLoopback
                 || uri.Host != IPAddress.Loopback.ToString() || uri.Port <= IPEndPoint.MinPort
-                || uri.UserInfo.Length != 0 || uri.Query.Length != 0 || uri.Fragment.Length != 0
-                || uri.AbsolutePath != "/")
+                || uri.UserInfo.Length != EmptyUriComponentLength || uri.Query.Length != EmptyUriComponentLength
+                || uri.Fragment.Length != EmptyUriComponentLength
+                || uri.AbsolutePath != OriginRootPath)
             { throw Invalid(); }
             var address = Read(arguments, nameof(NodeOptions.SiloAddress));
             var port = Read(arguments, nameof(NodeOptions.SiloPort));

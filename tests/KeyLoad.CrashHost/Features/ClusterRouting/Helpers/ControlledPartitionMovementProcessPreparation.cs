@@ -42,13 +42,13 @@ internal static class ControlledPartitionMovementProcessPreparation
                 var caller = ControlledPartitionMovementProcessPrepareRequest.CallerAddress(listeners);
                 var prepare = ControlledPartitionMovementProcessPrepareRequest.Create(source, runtime, owners,
                     placement, caller);
-                var prepared = await SubmitAsync(source, runtime, admission, prepare, cancellationToken);
+                var prepared = await SubmitAsync(source, admission, prepare, cancellationToken);
                 var authorize = ControlledPartitionMovementProcessFenceRequest.Authorize(prepared, owners,
                     caller, prepare.Envelope.ExpiresAt);
-                var authorized = await SubmitAsync(source, runtime, admission, authorize, cancellationToken);
+                var authorized = await SubmitAsync(source, admission, authorize, cancellationToken);
                 var fence = ControlledPartitionMovementProcessFenceRequest.Fence(prepared, authorized, owners,
                     caller, prepare.Envelope.ExpiresAt);
-                var original = await ControlledPartitionMovementProcessIssuer.IssueAsync(source, runtime,
+                var original = await ControlledPartitionMovementProcessIssuer.IssueAsync(source,
                     admission, fence, cancellationToken);
                 captured = new(new(owners.Control.Owner, original, source.Store.Position,
                     source.Journal.Log.State.LastIndex, cut,
@@ -64,10 +64,10 @@ internal static class ControlledPartitionMovementProcessPreparation
     }
 
     private static async Task<PartitionMovePhaseResult> SubmitAsync(ControlledPartitionMovementNativeNode node,
-        ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
+        PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest original, CancellationToken cancellationToken)
     {
-        var operation = await ControlledPartitionMovementProcessIssuer.IssueAsync(node, runtime, admission,
+        var operation = await ControlledPartitionMovementProcessIssuer.IssueAsync(node, admission,
             original, cancellationToken);
         var result = node.Journal.Submit(operation, cancellationToken);
         ControlledPartitionMovementProcessSetup.Require(result);

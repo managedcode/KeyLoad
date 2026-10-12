@@ -10,7 +10,7 @@ internal static class ControlledPartitionMovementProcessIssuer
     private const string Missing = "The original admitted movement process phase is missing.";
 
     internal static async Task<ReplicatedOperation> IssueAsync(ControlledPartitionMovementNativeNode receiver,
-        ServerRuntimeOptions runtime, PartitionMovementPeerAdmission admission,
+        PartitionMovementPeerAdmission admission,
         PartitionMovementTransportRequest original, CancellationToken cancellationToken)
     {
         ReplicatedOperation? operation = null;

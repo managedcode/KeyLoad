@@ -16,13 +16,15 @@ internal static class NativeDiscoveryCancellationFlow
         var gate = new NativeDiscoveryCancellationGate();
         var settings = new OrleansMembershipOptions
         { MaximumAdmissions = OneAdmission, ReplayNonceCapacity = OriginalAndHealthyNonces };
-        var runtime = new ReplicaNativeDiscoveryRuntime(RecoveryExecutionOptions.Configuration(cluster.Receiver.Configuration),
-            cluster.Receiver.Discovery, fixture.Receiver, cluster.ReceiverServices.GetRequiredService<ISiloStatusOracle>(),
-            Options.Create(settings), TimeProvider.System, gate);
         List<Exception> failures = [];
         Task<ReplicaNativeDiscoveryReply>? original = null;
         try
         {
+            await using var runtime = new ReplicaNativeDiscoveryRuntime(RecoveryExecutionOptions.Configuration(cluster.Receiver.Configuration),
+                cluster.Receiver.Discovery, fixture.Receiver, cluster.ReceiverServices.GetRequiredService<ISiloStatusOracle>(),
+                Options.Create(settings), TimeProvider.System, gate);
+            try
+            {
             await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () =>
         {
             var before = runtime.ReadActiveMembership();
@@ -47,19 +49,19 @@ internal static class NativeDiscoveryCancellationFlow
             await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => runtime.DiscoverAsync(fixture.Sign(), token));
             await Assert.That((await fixture.ReceiveNativeAsync(fixture.Sign())).Error).IsNull();
             }, failures);
+            }
+            finally
+            {
+                gate.Release();
+                await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures);
+                if (original is not null)
+                { await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await original; }, failures); }
+            }
         }
-        finally
-        {
-            gate.Release();
-            await ReplicaMaterializerLifecycleErrors.AttemptAsync(runtime.StopAsync, failures);
-            if (original is not null)
-            { await ReplicaMaterializerLifecycleErrors.AttemptAsync(async () => { _ = await original; }, failures); }
-            try { await runtime.DisposeAsync(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
-        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         ReplicaMaterializerLifecycleErrors.Throw(failures);
     }
 

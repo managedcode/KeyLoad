@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -107,15 +108,23 @@ internal static class ReplicaTransportShutdownFlow
     private static async Task JoinAttemptsAsync(Settlement observed, List<Exception> failures)
     {
         if (observed.FrameworkStop is { } stopped)
+        {
             await CaptureExpectedAsync(() => stopped, () => observed.TransportFailure, failures);
+        }
+
         if (observed.NativeAttempt is { } native)
+        {
             await RequestCqrsCohortCleanup.CaptureAsync(() => native, failures);
+        }
+
         if (observed.EndpointAttempt is { } endpoint)
+        {
             await RequestCqrsCohortCleanup.CaptureAsync(async () =>
             {
                 try { await endpoint; }
                 catch (OperationCanceledException) when (observed.EndpointCancellationObserved) { }
             }, failures);
+        }
     }
 
     internal static ReplicaSiloDiscoveryState State(RequestCqrsCohortRuntimeFixture runtime)

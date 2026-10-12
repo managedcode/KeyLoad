@@ -11,6 +11,7 @@ internal static class ControlledPartitionMovementNativeProcessCapture
     private const int FirstRecord = 0;
     private const int PageRecords = 4_096;
     private const int MaximumPages = 16;
+    private const string RowSeparator = ":";
 
     internal static async Task<ControlledPartitionMovementNativeProcessSnapshot> ReadAsync(
         ControlledPartitionMovementNativeHost owner, CancellationToken cancellationToken)
@@ -50,7 +51,7 @@ internal static class ControlledPartitionMovementNativeProcessCapture
             {
                 if (after is not null && row.Key.Span.SequenceCompareTo(after) <= FirstRecord)
                 { throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid); }
-                rows.Add(Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
+                rows.Add(Convert.ToHexString(row.Key.Span) + RowSeparator + Convert.ToHexString(row.Value.Span));
                 after = row.Key.ToArray();
             }
             if (!result.HasMore) { return rows.ToImmutable(); }

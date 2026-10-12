@@ -19,7 +19,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     private Task? shutdown;
     private Exception? creationFailure;
 
-    private ControlledPartitionMovementNativeHosts(ControlledPartitionMovementNativeHostSettings settings,
+    internal ControlledPartitionMovementNativeHosts(ControlledPartitionMovementNativeHostSettings settings,
         NativeLocalhostClusteringOptions localhost,
         Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null)
     {
@@ -36,39 +36,18 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     internal string Root => settings.Root;
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(CancellationToken cancellationToken)
-        => CreateCoreAsync(null, cancellationToken);
+        => ControlledPartitionMovementNativeHostFactory.CreateAsync(null, cancellationToken);
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
         Func<int, IGrainPartitionMovementSealedOperationObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return CreateCoreAsync(observerFactory, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(observerFactory, cancellationToken);
     }
 
-    private static async Task<ControlledPartitionMovementNativeHosts> CreateCoreAsync(
-        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
-    {
-        using var endpoints = new ControlledPartitionMovementNativeHostEndpoints();
-        var settings = new ControlledPartitionMovementNativeHostSettings(endpoints);
-        var owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory);
-        try
-        {
-            await owner.CreateNodesAsync().ConfigureAwait(false);
-            endpoints.Dispose();
-            await JoinOriginalAsync(Task.WhenAll(owner.nodes.Select(node => node.StartAsync(cancellationToken)))).ConfigureAwait(false);
-            return owner;
-        }
-        catch (Exception primary)
-        {
-            owner.creationFailure = primary;
-            var failures = new List<Exception> { primary };
-            await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-    }
+    internal void RetainCreationFailure(Exception original) => creationFailure = original;
 
-    private async Task CreateNodesAsync()
+    internal async Task CreateNodesAsync()
     {
         if (observerFactory is not null && sealedObservers is null)
         {
@@ -81,7 +60,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
             sealedObservers?[index]).ConfigureAwait(false)); }
     }
 
-    private static async Task JoinOriginalAsync(Task original)
+    internal static async Task JoinOriginalAsync(Task original)
     {
         try
         { await original.ConfigureAwait(false); }

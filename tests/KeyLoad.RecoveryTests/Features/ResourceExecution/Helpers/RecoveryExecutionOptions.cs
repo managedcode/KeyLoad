@@ -123,8 +123,6 @@ internal static class RecoveryExecutionOptions
         return Options.Create(settings);
     }
 
-
-
     internal static IOptions<ReplicaConfiguration> Configuration(ReplicaConfiguration configured)
     {
         configured.Validate();

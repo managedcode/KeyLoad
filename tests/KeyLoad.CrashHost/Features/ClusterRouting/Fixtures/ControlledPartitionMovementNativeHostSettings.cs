@@ -33,9 +33,9 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
 
     internal ControlledPartitionMovementNativeHostSettings(ControlledPartitionMovementNativeHostEndpoints endpoints)
     {
-        origins = Enumerable.Range(0, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
+        origins = Enumerable.Range(FirstSource, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
             .Select(endpoints.Origin).ToImmutableArray();
-        silos = Enumerable.Range(0, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
+        silos = Enumerable.Range(FirstSource, ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
             .Select(endpoints.Silo).ToImmutableArray();
         signing = Secret();
         controlPeer = Secret();
@@ -43,7 +43,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         cluster = ClusterPrefix + Guid.NewGuid().ToString(NativeGuidFormat);
         AdministratorKey = RootCredentialPrefix + Secret();
         Root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(NativeGuidFormat));
-        Control = Owner(ControlId, ControlIncarnation, 0);
+        Control = Owner(ControlId, ControlIncarnation, FirstSource);
         Destination = Owner(DestinationId, DestinationIncarnation, FirstDestination);
         Directory.CreateDirectory(Root);
     }

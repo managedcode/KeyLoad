@@ -21,6 +21,8 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
         trace.Stage = PhysicalOwnerProbeStage.NativeStartup;
         await node.WaitForNativeStartupAsync(cancellationToken).ConfigureAwait(false);
+        await NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock,
+            new PhysicalShardCatalogPrerequisiteObservation(), cancellationToken).ConfigureAwait(false);
         Validate(call, cancellationToken);
         trace.Stage = PhysicalOwnerProbeStage.Authentication;
         var administrator = await requests.AuthenticateAsync(cancellationToken).ConfigureAwait(false);

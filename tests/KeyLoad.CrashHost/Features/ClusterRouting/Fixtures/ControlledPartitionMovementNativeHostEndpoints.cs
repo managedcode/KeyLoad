@@ -6,6 +6,7 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal sealed class ControlledPartitionMovementNativeHostEndpoints : IDisposable
 {
+    private const int FirstOwner = 0;
     internal const int GroupSize = 3;
     internal const int OwnerCount = GroupSize + GroupSize;
     private readonly List<Socket> reservations = [];
@@ -16,7 +17,7 @@ internal sealed class ControlledPartitionMovementNativeHostEndpoints : IDisposab
     {
         try
         {
-            for (var index = 0; index < OwnerCount; index++)
+            for (var index = FirstOwner; index < OwnerCount; index++)
             {
                 http[index] = Reserve();
                 silo[index] = Reserve();

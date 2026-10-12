@@ -5,6 +5,7 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal sealed partial class ControlledPartitionMovementNativeHosts
 {
+    private const int NoFailures = 0;
     internal Task RestartAsync(CancellationToken cancellationToken)
     {
         lock (lifecycle)
@@ -76,7 +77,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
         if (nodes.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount
             || nodes.Any(node => !node.IsJoined))
         { failures.Add(Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable)); }
-        if (failures.Count == 0 && creationFailure is null && !retainRoot && !Volatile.Read(ref retainRoots))
+        if (failures.Count == NoFailures && creationFailure is null && !retainRoot && !Volatile.Read(ref retainRoots))
         { ServerFailureObserver.Observe(() => Directory.Delete(settings.Root, recursive: true), failures); }
         ServerFailureObserver.ThrowIfAny(failures);
     }

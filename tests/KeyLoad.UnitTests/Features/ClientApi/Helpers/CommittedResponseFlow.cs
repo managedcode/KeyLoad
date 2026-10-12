@@ -29,6 +29,7 @@ internal static class CommittedResponseFlow
             await using var server = await KeyLoadClientKestrelServer.StartAsync(endpoint.HandleAsync);
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(scenario, server, endpoint, command, expected, callerCancellation, token), failures);
         }, failures);
+        if (endpoint.Failure.Task.IsCompletedSuccessfully) { failures.Add(await endpoint.Failure.Task); }
         await ServerFailureObserver.ObserveAsync(() => scenario.CloseAsync(token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -45,7 +46,7 @@ internal static class CommittedResponseFlow
         {
             var observed = await Task.WhenAny(endpoint.FirstChunk.Task, endpoint.Failure.Task, original).WaitAsync(token);
             if (observed != endpoint.FirstChunk.Task)
-            { throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest, endpoint.Failure.Task.IsCompletedSuccessfully ? endpoint.Failure.Task.Result : null); }
+            { throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest, endpoint.Failure.Task.IsCompletedSuccessfully ? await endpoint.Failure.Task : null); }
             await Assert.That(original.IsCompleted).IsFalse();
             await CommittedResponseAssertions.ReceiptAsync(endpoint.Original, expected);
             await CommittedResponseAssertions.StoredAsync(scenario, CommittedResponseProtocol.FirstRevision, CommittedResponseProtocol.OriginalJson);
@@ -65,7 +66,6 @@ internal static class CommittedResponseFlow
         await ServerFailureObserver.ObserveAsync(caller.CancelAsync, failures);
         await ServerFailureObserver.ObserveAsync(async () => { _ = await original.WaitAsync(token); }, failures);
         await ServerFailureObserver.ObserveAsync(() => endpoint.FirstJoined.Task.WaitAsync(token), failures);
-        if (endpoint.Failure.Task.IsCompletedSuccessfully) { failures.Add(endpoint.Failure.Task.Result); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

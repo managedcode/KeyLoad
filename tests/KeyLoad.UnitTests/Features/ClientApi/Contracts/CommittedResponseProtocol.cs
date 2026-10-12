@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class CommittedResponseProtocol
 {
     internal const string ApiKeyId = "committed-response-key";
-    internal const string ApiKey = "committed-response-test-credential-32-characters";
+    internal const string ApiKey = ApiKeyId + ".committed-response-test-credential-32-characters";
     internal const string Bearer = "Bearer ";
     internal const string Authorization = "Authorization";
     internal const string CommandHeader = "X-KeyLoad-Command-Id";

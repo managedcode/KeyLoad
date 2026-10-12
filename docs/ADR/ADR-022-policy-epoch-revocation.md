@@ -228,3 +228,25 @@ Source ownership: IntegrationTests/Features/Authorization/Helpers/StandardAspNet
 REQ/AC-AUTH-ASPNET-003 and REQ/AC-AUTH-004/005 preserve AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls, its existing arguments/UID/keyed Aspire fixture, four concurrent original calls, unique native identities and every old rejection/canary assertion. Require independently literal FULL DocumentResult (actual reference, revision1, original exact JSON, Deleted=false, empty original metadata) for both successful official SDK results, rather than Reference-only equality. Capture both canonical documents and both complete OutboxStatus DTOs with the existing genuine root SDK before requests and after both foreign PermissionDenied responses. Compare complete native/public serialized content on the SAME original capture owner; do not strip cut or counter fields. Send following healthy owned reads through each SAME original official client, check full literal results and complete image again. No write/capability repair is needed because each original persisted grant remains correct; no extra cold or duplicate case substitutes for the distinct existing revoked/repair/cold owners.
 
 New assertion helper owns only actual root SDK reads/full serialization and independent document literals; no test issuer, fabricated principal, fake outcome/image/cut, provider/migration, new scope, capacity or deadline. Existing native RequestContext signatures remain the authority; four overlapping official operations remain overlapping. Runtime/compiler/native50/SIMD/current-source Linux gates remain OPEN. Source ownership: existing ClientApi/Cases/McpConcurrentIdentityTests.cs and new Authorization/Assertions/ConcurrentPrincipalAuthorityAssertions.cs.
+
+
+## CLIENT005 current-policy receipt replay after actual member repair (2026-10-12)
+
+REQ/AC-CLIENT-005 and REQ/AC-AUTH-007: SAME original AcAuthReplay001RemovedGrantRejectsCachedSuccessWithoutChangingItsReceiptOrClock preserves original grant-removal denial, native outcome bytes/clock/full inventory and original root revision2. Independently validate the original full receipt, then repair SAME member at epoch3 with identical scoped DocumentsWrite grant. Old epoch1 receipt remains PermissionDenied/no protected result/no native effects under ValidateCachedResult; no public success is inferred from retained local outcome bytes. A NEW member revision3 command returns independently literal complete receipt/document and exact same-ID original-result replay/no second effect. Join original resources, reopen actual same-root native ZoneTree/current-format owner, compare exact identity/current bytes/position and nondecreasing ReadGeneration; old denial and fresh replay persist, followed by genuine member revision4/complete replay and literal body. The existing declaration/UID/deadline/native50/normal SIMD remains; no new API/format/clock/limit, compatibility or trusted roles. Native compiler/discovery/runtime/Linux/public/RF3 gates remain OPEN until authentic execution.
+
+```mermaid
+flowchart LR
+ A[Original member receipt] --> B[Grant removal denial]
+ B --> C[Root revision2 / persisted member repair3]
+ C --> D[Old denied / new full member receipt]
+ D --> E[Joined same-root cold]
+ E --> F[Old denied / fresh replay / healthy member revision4]
+```
+
+## TASK-AUTH-ASPNET-MALFORMED-CREDENTIAL-001
+
+REQ/AC-AUTH-ASPNET-001/003 and REQ/AC-AUTH-004 preserve both original AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials arguments and UIDs. Native current DatabaseCredentialResolver accepts only the exact Bearer prefix before dispatch. Existing complete initial-credential flow covers absent/unknown keys, healthy SDK/official MCP, original write receipt replay and same-volume all-three cold, but does not submit a malformed prefix with an actually valid stored key.
+
+Extend its existing refusal owner with two real protected /mcp requests: unsupported Basic scheme carrying that persisted key, and Bearer without its required separator/key. Neither may adopt that otherwise valid principal. Require HTTP401, absent operation request header, the complete independent five-field Unauthenticated Problem with detail `An API key is required.`, existing error-byte bound and absence of key/document canaries. Compare the complete original document and every OutboxStatus field after EACH refusal; then retain the existing healthy SDK/official MCP reads and acknowledged write replay. The same original cold owner repeats these requests and complete healthy/replay checks. Original deadlines, arguments, native50/SIMD, actual Aspire endpoints and disposal remain unchanged. No new case/UID, endpoint, scheme, provider, test issuer, trusted role, quota, format or product behavior change.
+
+Once-per-request credential resolution remains OPEN: neither a cached AuthenticationTicket feature nor a global phase histogram provides a request-bound execution count, and the existing telemetry fixture does not run production authentication. This packet does not claim that criterion or runtime/Linux qualification.

@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
-using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -48,9 +47,6 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
 
     internal void CloseAdmission() => Volatile.Write(ref ready, AdmissionClosed);
 
-    private const long BeforeFirstConsensusTerm = 0;
-    private const long BeforeFirstCommittedEntry = 0;
-
     private async Task AwaitNativeReplicaPrerequisiteAsync(CancellationToken cancellationToken)
     {
         var observation = new PhysicalShardCatalogPrerequisiteObservation();
@@ -62,28 +58,9 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         { observation.Failed(logger, error); throw; }
     }
 
-    private async Task AwaitNativeReplicaPrerequisiteCoreAsync(PhysicalShardCatalogPrerequisiteObservation observation,
+    private Task AwaitNativeReplicaPrerequisiteCoreAsync(PhysicalShardCatalogPrerequisiteObservation observation,
         CancellationToken cancellationToken)
-    {
-        while (true)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
-            observation.Capture(state);
-            if (state.TransportReady && state.LeaderId is not null
-                && partition.Configuration.VoterIds.Contains(state.LeaderId, StringComparer.Ordinal)
-                && state.Term > BeforeFirstConsensusTerm && state.CommittedIndex > BeforeFirstCommittedEntry
-                && state.MaterializedPosition >= state.CommittedIndex
-                && observation.Cohort(await node.AcquireCohortAdmissionAsync(cancellationToken).ConfigureAwait(false))
-                && (state.Role == ReplicaRole.Follower
-                    || state.Role == ReplicaRole.Leader
-                    && observation.Leader(await partition.Consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(false))))
-            {
-                return;
-            }
-            await Task.Delay(partition.Configuration.HeartbeatInterval, clock, cancellationToken).ConfigureAwait(false);
-        }
-    }
+        => NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock, observation, cancellationToken);
 
     private async Task<PrincipalRecord> AuthenticateAdministratorAsync(CancellationToken cancellationToken)
     {

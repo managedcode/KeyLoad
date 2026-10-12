@@ -7,7 +7,6 @@ namespace KeyLoad.RecoveryTests;
 
 /// <summary>Mutations of genuine discovery HTTP requests, without transport doubles.</summary>
 
-
 internal sealed class PeerDiscoveryFixture : IAsyncDisposable
 {
     internal const int SingleCapacity = 1;
