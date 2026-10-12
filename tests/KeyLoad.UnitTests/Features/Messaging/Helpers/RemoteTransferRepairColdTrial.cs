@@ -6,7 +6,8 @@ internal static class RemoteTransferRepairColdTrial
 {
     internal static async Task RunAsync(int ceiling)
     {
-        using var fixture = new RemoteTransferDatabase(new() { MaxQueueTransferRepairAttempts = ceiling });
+        using var fixture = new RemoteTransferDatabase(new() { MaxQueueTransferRepairAttempts = ceiling },
+            timeProvider: new RemoteTransferDiscoveryClock());
         fixture.AddPrincipal(new(RemoteTransferRepairColdProtocol.Subject, RemoteTransferDatabase.TenantId,
             [new(RemoteTransferRepairColdProtocol.Wildcard, RemoteTransferRepairColdProtocol.Wildcard, Capability.All)],
             [RemoteTransferRepairColdProtocol.Wildcard])

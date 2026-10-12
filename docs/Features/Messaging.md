@@ -1202,3 +1202,46 @@ REQ-DUE-UNIT-001: fixed-tail/count algorithm regressions use an explicitly owned
 AC-DUE-UNIT-001: preserve both original AlternatesPrefixesAndBoundsRealZoneTreePages and FixedTailDefersHigherKeysUntilTheFollowingSweep UIDs and complete literal count/order/fixed-tail oracles against real canonical ZoneTree. AC-DUE-UNIT-002: extend the original cancellation whole operation with an elapsed deadline refusal armed only after actual native range bytes were examined, exact BudgetExceeded/owning detail, unchanged complete canonical rows/store position/identity/seed receipt, then a fresh healthy read and same-root reopen with exact original receipt replay and complete row/hint equality. The observed original clock advance remains retained; disarm clears only observation and never rewinds time. Scope is Unit behavior, not RF3 or timing qualification; the unchanged system-clock/Linux production deadline gate stays open.
 
 Source ownership: tests/KeyLoad.UnitTests/Features/Messaging/Helpers/RecurringSagaDatabase.cs supplies the optional borrowed clock to both initial/reopened genuine engine; the two original positive methods opt in. Feature-local DueDiscoveryClock and DueDiscoveryDeadlineFlow own elapsed observation and full refusal/healthy/cold assertions. No product API, policy, persisted format, quota, retry or scheduling changes.
+
+### TASK-DUE-BYTE-UNIT-CLOCK-001
+
+REQ-DUE-BYTE-UNIT-001: the original admitted-value byte-cap and individually oversized-value algorithms explicitly borrow the existing DueDiscoveryClock through RecurringSagaDatabase. Preserve the configured 4,096-byte admission cap, canonical native value serialization, examined-byte accounting, cursor advancement and schedule/saga prefix alternation. Production clocks, discovery deadlines, range byte/record caps and default fixture callers remain unchanged. Linux run38180879404, source f4f654fb7c36402bd5dc793700c1592f00cf6a1b, original lines4499/4515 are genuine elapsed refusals; their scheduling/latency cause is unproven.
+
+AC-DUE-BYTE-UNIT-001: preserve both original ValidValueCrossingAdmittedByteCapIsRevisitedAfterPrefixAlternation and IndividuallyOversizedValueIsRejectedAndItsCanonicalKeyAdvances identities and complete original positive/rejection/healthy-following-page oracles against real ZoneTree. Independently measured serialized value lengths remain the admitted-byte expectations, widened to the actual Int64 contract; the empty admitted-byte expectation is 0L. No page-derived expected value or increased quota is permitted.
+
+AC-DUE-BYTE-UNIT-002: retain AC-DUE-UNIT-002's original cancellation whole operation and DueDiscoveryDeadlineFlow: the unchanged elapsed bound is crossed only after actual native range bytes, with exact refusal, complete unchanged canonical image/identity/position, fresh healthy discovery and same-root original receipt replay. Both source changes and this retained negative flow require Main's real compiler and authenticated Linux execution; logical clocks do not qualify system-clock page latency or RF3.
+
+| Requirement / acceptance | Original automated source |
+|---|---|
+| REQ-DUE-BYTE-UNIT-001 / AC-DUE-BYTE-UNIT-001 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkPageBudgetTests.cs: both original methods |
+| AC-DUE-BYTE-UNIT-002 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueWorkDiscoveryTests.cs: CancellationRejectsTheWholeDiscoveryPage; Assertions/DueDiscoveryDeadlineFlow.cs |
+| Clock ownership | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/DueDiscoveryClock.cs; Helpers/RecurringSagaDatabase.cs |
+
+### TASK-QUEUE-DEADLINE-UNIT-CLOCK-001
+
+REQ-QUEUE-DEADLINE-UNIT-001: the existing QueueDeadlineNativeDiscovery helper explicitly owns the existing DueDiscoveryClock only for its genuine discovery engine. Preserve business due timestamps, the minimum two-record page limit, the maximum twelve discovery pages, original byte caps, cancellation, persisted authority and all original mutation/CAS/cold-owner flows. Linux run38180879404, source f4f654fb7c36402bd5dc793700c1592f00cf6a1b, lines4609/4622 are genuine discovery deadline refusals before the intended CAS assertions; their scheduling/latency cause is unproven. Production and omitted-clock fixture behavior remain unchanged.
+
+AC-QUEUE-DEADLINE-UNIT-001: preserve the original ActualDeadlineCasRefusesNotDueStaleAndRevokedThenAdvancesReplaysAcrossTwoColdOwnersAndHealthyWork identity and all PromoteScheduled, ExpireLease and ExpireMessage argument cases, including not-due, stale, revoked, healthy exact advancement, original replay and both cold-owner continuations. Do not replace original caller operations or weaken the bounds.
+
+AC-QUEUE-DEADLINE-UNIT-002: inside the original bounded discovery loop, wait for its real returned cursor to reach the metadata prefix before testing elapsed refusal. Arm elapsed refusal only after actual native RangeExaminedBytes progress; require exact BudgetExceeded and DueWorkProtocol.DeadlineExceeded, unchanged original native lane-family bytes, whole store identity and position, then disarm without rewinding and execute the original healthy/cancellation discovery assertions. Original bounded native image enumeration fails if incomplete. This proves Unit deadline behavior; system-clock/Linux latency, process and RF3 gates require their actual runs.
+
+| Requirement / acceptance | Original automated source |
+|---|---|
+| REQ-QUEUE-DEADLINE-UNIT-001 / AC-QUEUE-DEADLINE-UNIT-002 | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/QueueDeadlineNativeDiscovery.cs |
+| AC-QUEUE-DEADLINE-UNIT-001 | tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueDeadlineNativeWholeFlowTests.cs; Helpers/QueueDeadlineNativeTrial.cs and original continuation helpers |
+| Clock ownership | tests/KeyLoad.UnitTests/Features/Messaging/Helpers/DueDiscoveryClock.cs |
+
++### TASK-REMOTE-TRANSFER-UNIT-CLOCK-001
+
+REQ-MSG-COLD-CLOCK-001: the four original native transfer pending/attempt/repair cold algorithms explicitly own a logical TimeProvider through the existing DatabaseEngine constructor. RemoteTransferDatabase borrows that same clock for logged operation time and initial/reopened engines; omitted clock retains original system behavior. Production deadlines, cancellation, byte/record caps, authorization and retry policies remain unchanged. Linux run38180879404 original failures were genuine elapsed discovery refusals before the first native scan; scheduling or latency cause is unproven.
+
+AC-MSG-COLD-CLOCK-001: preserve complete canonical accept/complete receipts, denied outcomes, capacity repair, attempt/repair ceilings and both cold-replay oracles in all four original cases. AC-MSG-COLD-CLOCK-002: in the original coordination case advance monotonic time across the original deadline only AFTER actual ZoneTree range bytes have been examined; require exact BudgetExceeded/deadline detail and unchanged complete canonical image, identity and position, then a fresh healthy discovery and original same-command cold receipt continuation. No clock rewind, artificial failure, trusted role, timeout enlargement or system-clock performance claim. Source-only changes remain open for Main compiler and authenticated Linux execution.
+
+```mermaid
+flowchart LR
+    Seed[Original authorized transfer seed] --> Refusal[Elapsed bound after native range bytes]
+    Refusal --> Image[Full canonical image and cut unchanged]
+    Image --> Discovery[Fresh healthy native discovery]
+    Discovery --> Receipts[Original accept and complete receipts]
+    Receipts --> Cold[Two same-root cold replays]
+```

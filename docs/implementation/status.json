@@ -20,7 +20,8 @@
       "native_graph_connection_stream_edge",
       "original_sql_numeric_refusal_and_atomic_call_whole_flows",
       "native_ann_public_optional_profile_read_lease",
-      "original_mcp_cancellation_full_persisted_images"
+      "original_mcp_cancellation_full_persisted_images",
+      "native_transfer_due_page_and_queue_deadline_clock_whole_flows"
     ],
     "originalFullReleaseR12": {
       "passed": false,
@@ -95,6 +96,37 @@
       "sourceInputs": 9206,
       "sourceDrift": 0,
       "elapsedSeconds": 266.67325711250305
+    },
+    "originalFullReleaseR16": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 1,
+      "scope": "Unit unused import; corrected natively after terminal build",
+      "sourceInputs": 9191,
+      "compiledCSharpSourceDrift": 0,
+      "wholeSourceDrift": [
+        "docs/Features/Messaging.md"
+      ],
+      "elapsedSeconds": 306.99445605278015,
+      "wholeFrozenCohortQualified": false
+    },
+    "authenticatedEarlierLinux": {
+      "run": 38180879404,
+      "sourceCommit": "f4f654fb7c36402bd5dc793700c1592f00cf6a1b",
+      "unit": {
+        "passed": 3384,
+        "failed": 96,
+        "total": 3480
+      },
+      "separateOwnershipFailure": "original expected49 versus actual50; current expected50 requires fresh execution",
+      "qualification": "original earlier cohort; not current source acceptance"
+    },
+    "postCompleteMessagingNativeObservation": {
+      "errors": 0,
+      "warnings": 0,
+      "scope": "full native compiler and analyzers after complete joined source batch",
+      "normalSdkFullReleasePassed": false,
+      "runtimeQualified": false
     },
     "currentSourceCompilerPassed": false,
     "runtimeQualified": false,

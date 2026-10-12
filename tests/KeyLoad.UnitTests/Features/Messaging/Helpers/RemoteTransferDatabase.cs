@@ -25,6 +25,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
     private const string GuidFormat = "N";
     private readonly string directory;
     private readonly DatabaseLimits limits;
+    private readonly TimeProvider? timeProvider;
     private ZoneTreeStore store;
     private bool disposed;
 
@@ -38,12 +39,13 @@ internal sealed class RemoteTransferDatabase : IDisposable
     internal RemoteTransferDatabase(DatabaseLimits? databaseLimits = null,
         SensitiveFieldPolicy[]? sourceFields = null, SensitiveFieldPolicy[]? sourceHeaders = null,
         SensitiveFieldPolicy[]? destinationFields = null, SensitiveFieldPolicy[]? destinationHeaders = null,
-        QueuePolicy? destinationPolicy = null)
+        QueuePolicy? destinationPolicy = null, TimeProvider? timeProvider = null)
     {
         limits = databaseLimits ?? new();
+        this.timeProvider = timeProvider;
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: timeProvider);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
@@ -63,7 +65,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
     {
         var commandId = id ?? (payload is CommandRequest command ? command.CommandId : Guid.NewGuid());
         var json = JsonSerializer.Serialize(payload, JsonDefaults.Options);
-        return Database.Apply(new(commandId, kind, principal, time ?? TimeProvider.System.GetUtcNow(), json));
+        return Database.Apply(new(commandId, kind, principal, time ?? (timeProvider ?? TimeProvider.System).GetUtcNow(), json));
     }
 
     internal void AddPrincipal(PrincipalRecord principal)
@@ -107,7 +109,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
     {
         store.Dispose();
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(replacementLimits ?? limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(replacementLimits ?? limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: timeProvider);
         PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 

@@ -8,7 +8,8 @@ internal sealed class DueWorkPageBudgetTests
     [Test]
     public async Task ValidValueCrossingAdmittedByteCapIsRevisitedAfterPrefixAlternation()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit });
+        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit },
+            timeProvider: new DueDiscoveryClock());
         var first = DueWorkTestData.OrderedId(1);
         var second = DueWorkTestData.OrderedId(2);
         var firstBytes = DueWorkTestData.PutSchedule(fixture, first, first,
@@ -20,7 +21,7 @@ internal sealed class DueWorkPageBudgetTests
 
         var firstPage = DueWorkDiscovery.ReadPage(fixture.Database, null, DueWorkTestData.WakeAt);
         await Assert.That(firstPage.Jobs.Select(hint => hint.Id).ToArray()).IsEquivalentTo(new[] { first });
-        await Assert.That(firstPage.AdmittedValueBytes).IsEqualTo(firstBytes);
+        await Assert.That(firstPage.AdmittedValueBytes).IsEqualTo((long)firstBytes);
         await Assert.That(firstPage.ExaminedBytes > firstPage.AdmittedValueBytes).IsTrue();
         await Assert.That(firstPage.Cursor.Schedules.LastKey).IsNotNull();
         await Assert.That(firstPage.Cursor.Sagas.HasUpperBound).IsFalse();
@@ -29,13 +30,14 @@ internal sealed class DueWorkPageBudgetTests
         await Assert.That(secondPage.ScannedPrefix).IsEqualTo(DueWorkKind.Saga);
         var thirdPage = DueWorkDiscovery.ReadPage(fixture.Database, secondPage.Cursor, DueWorkTestData.WakeAt);
         await Assert.That(thirdPage.Jobs.Select(hint => hint.Id).ToArray()).IsEquivalentTo(new[] { second });
-        await Assert.That(thirdPage.AdmittedValueBytes).IsEqualTo(secondBytes);
+        await Assert.That(thirdPage.AdmittedValueBytes).IsEqualTo((long)secondBytes);
     }
 
     [Test]
     public async Task IndividuallyOversizedValueIsRejectedAndItsCanonicalKeyAdvances()
     {
-        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit });
+        using var fixture = new RecurringSagaDatabase(new() { MaxBatchBytes = SmallBatchLimit },
+            timeProvider: new DueDiscoveryClock());
         var oversized = DueWorkTestData.OrderedId(1);
         var following = DueWorkTestData.OrderedId(2);
         var size = DueWorkTestData.PutSchedule(fixture, oversized, oversized,
@@ -47,7 +49,7 @@ internal sealed class DueWorkPageBudgetTests
         await Assert.That(first.Jobs.IsEmpty).IsTrue();
         await Assert.That(first.Rejected.Length).IsEqualTo(1);
         await Assert.That(first.Rejected[0].Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(first.AdmittedValueBytes).IsEqualTo(0);
+        await Assert.That(first.AdmittedValueBytes).IsEqualTo(0L);
         await Assert.That(first.Cursor.Schedules.LastKey).IsNotNull();
         var nextPrefix = DueWorkDiscovery.ReadPage(fixture.Database, first.Cursor, DueWorkTestData.WakeAt);
         var nextSchedule = DueWorkDiscovery.ReadPage(fixture.Database, nextPrefix.Cursor, DueWorkTestData.WakeAt);

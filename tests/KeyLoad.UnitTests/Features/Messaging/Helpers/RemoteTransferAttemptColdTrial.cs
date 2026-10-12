@@ -8,7 +8,8 @@ internal static class RemoteTransferAttemptColdTrial
     internal static async Task RunAsync(int ceiling = RemoteTransferAttemptColdProtocol.Ceiling)
     {
         using var fixture = new RemoteTransferDatabase(new() { MaxQueueTransferAcceptAttempts = ceiling },
-            destinationPolicy: new() { MaxStoredMessages = RemoteTransferAttemptColdProtocol.OneMessage });
+            destinationPolicy: new() { MaxStoredMessages = RemoteTransferAttemptColdProtocol.OneMessage },
+            timeProvider: new RemoteTransferDiscoveryClock());
         fixture.Commit(fixture.DestinationPartition, new EnqueueMessage(fixture.DestinationQueue.Queue,
             RemoteTransferAttemptColdProtocol.FillerMessage, RemoteTransferAttemptColdProtocol.Payload));
         var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,

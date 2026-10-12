@@ -17,11 +17,13 @@ internal sealed class RemoteTransferCoordinationColdTests
     [Test]
     public async Task NativePendingDiscoveryDoesNotMutateAndColdCanonicalAcceptCompleteRetainOriginalReceipts()
     {
-        using var fixture = new RemoteTransferDatabase();
+        var clock = new RemoteTransferDiscoveryClock();
+        using var fixture = new RemoteTransferDatabase(timeProvider: clock);
         var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,
             new(fixture.DestinationQueue.Queue, MessageId, Payload));
         var created = fixture.Commit(fixture.SourcePartition, transfer);
         var original = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal, fixture.SourceQueue, transfer.TransferId)!;
+        await RemoteTransferPendingDeadlineAssertions.RequireAsync(fixture, clock);
         var before = fixture.Store.Position;
         var page = RemoteTransferPendingDiscovery.Read(fixture.Database, RemoteTransferDatabase.RootPrincipal, null, CancellationToken.None);
         await Assert.That(fixture.Store.Position).IsEqualTo(before);
