@@ -51,8 +51,10 @@ internal static class FeedDeleteClassificationFlow
             [new PutDocument(FeedVertexAuthorityFixture.Collection, FeedDeleteClassificationFixture.Id,
                 FeedDeleteClassificationFixture.RestoredJson, 3L, ExplicitReplacement: true)]);
         token.ThrowIfCancellationRequested();
-        var result = owner.Apply(new(command.CommandId, OperationKind.Batch, FeedVertexAuthorityFixture.Root,
-            state.Source.CommittedAt, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)));
+        var result = FeedNativeHealthyAdmission.Submit(owner, cold, database.Directory,
+            new(command.CommandId, OperationKind.Batch, FeedVertexAuthorityFixture.Root,
+                state.Source.CommittedAt, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)),
+            explicitTime: true, token);
         var receipt = result.Get<CommitReceipt>();
         await FeedVertexAuthorityAssertions.ReceiptAsync(command, receipt,
             new MutationReceipt(FeedVertexAuthorityFixture.PutKind, FeedVertexAuthorityFixture.Collection, FeedDeleteClassificationFixture.Id, 4L));

@@ -8,7 +8,8 @@ public sealed partial class DatabaseEngine
 {
     private const int SingleDirectoryRevision = 1;
     private const long EmptyPartitionBytes = 0;
-    private sealed record CapacitySelection(PartitionRef Partition, Guid Owner, long DirectoryRevision, long Bytes);
+    private sealed record CapacitySelection(PartitionRef Partition, Guid Owner, long DirectoryRevision,
+        long RowRevision, long Bytes);
 
     private static ImmutableArray<CapacitySelection> RequirePlacementPlanSelection(IKeyValueView view,
         TenantPlacementPlanRequest request, ImmutableArray<OwnerCapacitySnapshotV1> cohort,
@@ -43,7 +44,7 @@ public sealed partial class DatabaseEngine
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementPolicyProtocol.ScopeMismatch);
             if (bytes.Bytes < EmptyPartitionBytes)
             { throw Errors.Fail(ErrorCode.Corruption, TenantPlacementPolicyProtocol.Malformed); }
-            result.Add(new(part, current.PhysicalShardId, current.DirectoryRevision, bytes.Bytes));
+            result.Add(new(part, current.PhysicalShardId, current.DirectoryRevision, current.Revision, bytes.Bytes));
         }
         if (result.Select(item => item.DirectoryRevision).Distinct().Count() != SingleDirectoryRevision)
         { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }

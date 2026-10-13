@@ -44,6 +44,32 @@ internal static class TwoRf3MembershipFingerprintOracle
         }
     }
 
+    internal static async Task<ReplicaSiloDiscovery[]> ObserveSixAsync(DistributedApplication app,
+        NodeEpochRf3Profile profile, CancellationToken token)
+    {
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var identity = await ReadIdentityAsync(model, profile, token).ConfigureAwait(false);
+        var firstSecret = Convert.FromBase64String(profile.PeerSecret);
+        byte[]? secondSecret = null;
+        try
+        {
+            secondSecret = Convert.FromBase64String(identity.Secret);
+            var observations = await ReadSixAsync(app, profile, identity, firstSecret, secondSecret, token)
+                .ConfigureAwait(false);
+            var fingerprint = TwoRf3MembershipFingerprintAssertions.Fingerprint(
+                observations.Select(value => value.SiloAddress));
+            await TwoRf3MembershipFingerprintAssertions.VerifyHealthAsync(app, fingerprint, token)
+                .ConfigureAwait(false);
+            return observations;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(firstSecret);
+            if (secondSecret is not null)
+            { CryptographicOperations.ZeroMemory(secondSecret); }
+        }
+    }
+
     private static async Task<TwoRf3MembershipIdentity> ReadIdentityAsync(DistributedApplicationModel model,
         NodeEpochRf3Profile profile, CancellationToken token)
     {

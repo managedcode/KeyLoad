@@ -857,6 +857,8 @@ SqlNullDistinctWholeFlowTests and SqlNullDistinctRf3WholeFlowTests independently
 
 Native preview/new-file absence is source evidence only. New-role compilation, actual native identities, original operation/failure/cold joins, Linux RF3 and full client conformance remain OPEN. Existing SELECT DISTINCT remains unsupported.
 
+R37 retained diagnostic correction: REQ/AC-SQLC-006/007 and AC-QUERY-004 preserve the original malformed `score IS DISTINCT FROM` followed by `ORDER BY` Validation expectation. ORDER BY is the next clause, not a right operand. Reject that exact unquoted two-token clause boundary before lowering; a quoted identifier remains an ordinary operand. Preserve the original Unit/RF3 whole-flow declarations, every malformed/type/policy/no-effect/receipt/two-cold oracle and the authentic R37 UnsupportedCapability failure. This scoped source correction does not qualify a new execution or full SQL.
+
 ```mermaid
 flowchart LR
     A[Bounded IS DISTINCT FROM syntax] --> B[Existing canonical predicate lowering]

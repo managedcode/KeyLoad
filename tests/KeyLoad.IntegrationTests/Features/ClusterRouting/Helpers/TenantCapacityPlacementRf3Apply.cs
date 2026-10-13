@@ -13,8 +13,8 @@ internal static class TenantCapacityPlacementRf3Apply
         var request = new ApplyPlacementIntentRequest(seed.Partition.TenantId, seed.Partition.DatabaseId,
             pending.IntentId, pending.Revision, state.Control);
         var id = Guid.NewGuid();
-        var completed = await McpCallerAssertions.SdkSuccessAsync(
-            await seed.Source.ApplyPlacementIntentAsync(id, request, token));
+        var completed = await TenantCapacityPlacementRf3ClaimRace.RunAsync(
+            wave, seed, plan, pending, id, request, token);
         await Assert.That(completed.Status).IsEqualTo(PlacementIntentStatus.Completed);
         await Assert.That(completed.CompletedMoves).IsEqualTo(1);
         await Assert.That(completed.OriginalApplyCommandId).IsEqualTo(id);

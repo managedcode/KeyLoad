@@ -63,7 +63,8 @@ public sealed partial class DatabaseEngine
         foreach (var move in claims.Plan.Moves)
         {
             var current = ResolveRegisteredPlacement(view, move.Partition, catalog.DefaultShard);
-            if (current.DirectoryRevision != claims.Plan.DirectoryRevision)
+            if (current.DirectoryRevision != claims.Plan.DirectoryRevision
+                || current.Revision != move.ExpectedPlacementRevision)
             { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
             _ = ResolveRegisteredPlacementOwner(view, catalog.DefaultShard,
                 move.DestinationPhysicalShardId, ErrorCode.OwnershipLost);

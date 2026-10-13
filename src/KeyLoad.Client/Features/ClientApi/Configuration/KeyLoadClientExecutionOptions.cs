@@ -32,6 +32,23 @@ public sealed class KeyLoadClientExecutionOptions
         && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth
         && SqlBudgetCheckInterval is >= MinimumProblemBodyBytes and <= DefaultSqlBudgetCheckInterval;
 
+    /// <summary>Captures and validates the caller's execution values for one client lifetime.</summary>
+    [ConfigurationBinding]
+    internal static IOptions<KeyLoadClientExecutionOptions> Snapshot(IOptions<KeyLoadClientExecutionOptions> configured)
+    {
+        ArgumentNullException.ThrowIfNull(configured);
+        var value = configured.Value;
+        var copy = new KeyLoadClientExecutionOptions
+        {
+            MaximumProblemBodyBytes = value.MaximumProblemBodyBytes,
+            MaximumSqlInspectionBytes = value.MaximumSqlInspectionBytes,
+            MaximumSqlInspectionDepth = value.MaximumSqlInspectionDepth,
+            SqlBudgetCheckInterval = value.SqlBudgetCheckInterval
+        };
+        copy.Validate();
+        return Options.Create(copy);
+    }
+
     /// <summary>Rejects invalid standalone composition before the client can send a request.</summary>
     public void Validate()
     {

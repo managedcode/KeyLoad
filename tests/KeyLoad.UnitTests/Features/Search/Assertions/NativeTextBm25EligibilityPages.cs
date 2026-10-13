@@ -12,14 +12,15 @@ internal static class NativeTextBm25EligibilityPages
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var result = await ReadAsync(flow, expectedHead);
-        var first = new DocumentResult(new(flow.Owner.Source.Partition, "orders", "first"), mutated ? 2L : 1L,
+        var first = NativeTextBm25ExpectedRows.Document(flow.Owner.Source.Partition, "first", mutated ? 2L : 1L,
             redacted ? "{}" : mutated ? "{\"text\":\"needle needle needle\"}" : "{\"text\":\"needle\"}",
             redacted, redacted ? ["/text"] : []);
-        var second = new DocumentResult(new(flow.Owner.Source.Partition, "orders", "second"), 1L,
+        var second = NativeTextBm25ExpectedRows.Document(flow.Owner.Source.Partition, "second", 1L,
             redacted ? "{}" : "{\"text\":\"needle needle\"}", redacted, redacted ? ["/text"] : []);
         RankedDocument[] expected = mutated
             ? [new(first, 1d / 61d, null), new(second, 1d / 62d, null)]
             : [new(second, 1d / 61d, null), new(first, 1d / 62d, null)];
+        await NativeTextBm25ExpectedRows.RequireOwnershipAsync(expected, result);
         var expectedBytes = NativeSerialization.Serialize(expected);
         var actualBytes = NativeSerialization.Serialize(result);
         await Assert.That(actualBytes.SequenceEqual(expectedBytes)).IsTrue().Because(

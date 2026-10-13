@@ -67,7 +67,7 @@ internal static class TenantCapacityPlacementRf3Cold
         await RequireCanonicalRowsAsync(state, original, stopped, null, move);
     }
 
-    private static async Task RequireFullColdOpenAsync(TwoRf3MembershipWave wave, PartitionMoveRequest move,
+    internal static async Task RequireFullColdOpenAsync(TwoRf3MembershipWave wave, PartitionMoveRequest move,
         PartitionMovementPublicParentRf3NativeCut[] original)
     {
         foreach (var cut in original)
@@ -77,7 +77,7 @@ internal static class TenantCapacityPlacementRf3Cold
         }
     }
 
-    private static async Task RequireCanonicalRowsAsync(TenantCapacityPlacementRf3Provisioning.State state,
+    internal static async Task RequireCanonicalRowsAsync(TenantCapacityPlacementRf3Provisioning.State state,
         PartitionMovementPublicParentRf3NativeCut[] original, PartitionMovementPublicParentRf3NativeCut[] after,
         Guid? intentId, PartitionMoveRequest move)
     {

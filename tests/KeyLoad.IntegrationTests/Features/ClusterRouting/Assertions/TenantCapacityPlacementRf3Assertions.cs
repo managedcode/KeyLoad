@@ -49,7 +49,9 @@ internal static class TenantCapacityPlacementRf3Assertions
         await Assert.That(move.Partition).IsEqualTo(seed.Partition);
         await Assert.That(move.MoveId).IsNotEqualTo(Guid.Empty);
         await Assert.That(move.DestinationPhysicalShardId).IsEqualTo(seed.FirstRequest.DestinationPhysicalShardId);
-        await Assert.That(move.ExpectedPlacementRevision).IsEqualTo(seed.OriginalPlacement.DirectoryRevision);
+        await Assert.That(move.ExpectedPlacementRevision).IsEqualTo(seed.OriginalPlacement.Revision);
+        await Assert.That(result.Plan.DirectoryRevision).IsEqualTo(1);
+        await Assert.That(result.Plan.DirectoryRevision).IsGreaterThan(move.ExpectedPlacementRevision);
         await Assert.That(move.Mode).IsEqualTo(PartitionMoveMode.Transfer);
         await Assert.That(result.Plan.CapacityDigests.Length).IsEqualTo(6);
         await Assert.That(result.Plan.ExpiresAt).IsGreaterThan(result.Plan.SampledAt);

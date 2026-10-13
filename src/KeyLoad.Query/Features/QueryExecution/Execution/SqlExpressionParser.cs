@@ -60,6 +60,10 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
             if (cursor.Eat(SqlSyntax.Distinct))
             {
                 cursor.Need(SqlSyntax.From);
+                if (cursor.Is(SqlSyntax.Order) && cursor.IsNext(SqlSyntax.By))
+                {
+                    throw SqlSyntax.Invalid();
+                }
                 return SqlDistinctPredicate.Lower(value, Operand(), not);
             }
             var missing = cursor.Eat(SqlSyntax.Missing);

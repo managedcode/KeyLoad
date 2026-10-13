@@ -43,7 +43,7 @@ internal static class ProjectionConcurrentCommitFlow
                     state.Second, state.SecondResult, state.Filtered, state.Advanced, token);
                 await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, state.Position);
                 if (healthy)
-                { await ProjectionConcurrentCommitHealthy.RunAsync(owner, cold, state, token); }
+                { await ProjectionConcurrentCommitHealthy.RunAsync(owner, cold, database.Directory, state, token); }
             }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

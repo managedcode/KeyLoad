@@ -13,7 +13,7 @@ internal sealed class KeyLoadClientTransport
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
     private readonly HttpClient http;
     private readonly string apiKey;
-    private readonly KeyLoadClientExecutionOptions execution;
+    private readonly IOptions<KeyLoadClientExecutionOptions> execution;
     private readonly CqrsStreamClientOptions? streaming;
 
     internal KeyLoadClientTransport(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions)
@@ -24,14 +24,13 @@ internal sealed class KeyLoadClientTransport
     {
         ArgumentNullException.ThrowIfNull(http);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        execution = executionOptions.Value;
-        execution.Validate();
+        execution = KeyLoadClientExecutionOptions.Snapshot(executionOptions);
         this.http = http;
         this.apiKey = apiKey;
         streaming = streamingOptions is null ? null : KeyLoadClientStreamPolicy.Snapshot(streamingOptions);
     }
 
-    internal KeyLoadClientExecutionOptions ExecutionOptions => execution;
+    internal KeyLoadClientExecutionOptions ExecutionOptions => execution.Value;
 
     internal IAsyncEnumerable<CqrsStreamChunk<EventFeedTailProgress, EventFeedControlResult>> TailEventFeedAsync(
         EventFeedControlRequest request, CancellationToken cancellationToken)
@@ -80,7 +79,7 @@ internal sealed class KeyLoadClientTransport
             if (!response.IsSuccessStatusCode)
             {
                 var problem = await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
-                    execution.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
+                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
                 return Result.Fail(problem ?? Errors.Problem(ErrorCode.UnknownWriteOutcome,
                     ClientTransportMessages.ServerResponseUnavailable));
             }
@@ -119,7 +118,7 @@ internal sealed class KeyLoadClientTransport
             if (!response.IsSuccessStatusCode)
             {
                 var problem = await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
-                    execution.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
+                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
                 return problem ?? Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,
                     ClientTransportMessages.ServerResponseUnavailable);
             }

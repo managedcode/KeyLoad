@@ -122,11 +122,8 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
 
     internal async Task WaitForSixHealthyAsync(CancellationToken cancellationToken)
     {
-        foreach (var node in TwoRf3MembershipProtocol.Nodes)
-        {
-            await Application.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken)
-                .ConfigureAwait(false);
-        }
+        await global::KeyLoad.AppHost.Features.TestInfrastructure.AspireStartupReadiness.WaitForHealthyAsync(
+            Application, TwoRf3MembershipProtocol.Nodes, cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

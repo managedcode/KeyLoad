@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 internal static class ProjectionPartitionIsolationHealthy
 {
     internal static async Task<ProjectionPartitionIsolationState> RunAsync(DatabaseEngine owner, ZoneTreeStore store,
-        ProjectionPartitionIsolationState original, CancellationToken token)
+        string directory, ProjectionPartitionIsolationState original, CancellationToken token)
     {
         var source = original.Second;
         var outcomes = original.Outcomes.ToList();
@@ -17,7 +17,7 @@ internal static class ProjectionPartitionIsolationHealthy
             new CommandRequest(id, source.Partition, [mutation])) with
         { EvaluatedAt = source.Time };
         token.ThrowIfCancellationRequested();
-        var produced = owner.Apply(operation);
+        var produced = FeedNativeHealthyAdmission.Submit(owner, store, directory, operation, explicitTime: true, token);
         var receipt = produced.Get<CommitReceipt>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(operation, receipt,
             new MutationReceipt(ProjectionPartitionIsolationFixture.PutKind, mutation.Collection, mutation.Id, 1L));
@@ -33,7 +33,7 @@ internal static class ProjectionPartitionIsolationHealthy
             new CommitProjectionBatchRequest(effectId, source.Consumer, batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, ProjectionPartitionIsolationFixture.HealthyEffect,
                     ProjectionPartitionIsolationFixture.HealthyJson, 0L)]));
-        var completed = owner.ApplyEmbedded(effect, token);
+        var completed = FeedNativeHealthyAdmission.Submit(owner, store, directory, effect, explicitTime: false, token);
         var result = completed.Get<ProjectionBatchResult>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(effect, result.Receipt,
             new MutationReceipt(ProjectionPartitionIsolationFixture.PutKind, ProjectionConsumerIdentityFixture.Target,

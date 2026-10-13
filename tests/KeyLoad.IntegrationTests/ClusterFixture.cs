@@ -141,9 +141,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             containerRuntime = new(App, containerNames, repository.FullName, localImageSession?.Selection);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
             (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
             diagnosticIncarnation = ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation;
+            await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
             if (isolationOwner is not null)
             { await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false); }
         }

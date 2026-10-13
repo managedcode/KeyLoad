@@ -9,6 +9,7 @@ internal static class PlacementCapacityEnrollmentFlow
 {
     private const int ControlOwnerIndex = 0;
     private const long EpochStep = 1;
+    private const int DirectoryReadRecords = 1;
     internal static async Task RunAsync()
     {
         var failures = new List<Exception>();
@@ -68,6 +69,7 @@ internal static class PlacementCapacityEnrollmentFlow
     {
         var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(),
             fixture.Database.EvaluationClock, CancellationToken.None);
+        work.ConstrainNativeWork(work.MaximumNativeReadBytes, DirectoryReadRecords);
         fixture.Store.Read(view =>
         {
             PlacementCapacityEnrollment.Require(work.CreateView(view),

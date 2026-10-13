@@ -1522,3 +1522,13 @@ flowchart LR
     C --> D[Create-only complete receipt publication]
     D --> E[Whole-file conservation across next cold wave]
 ```
+
+### R37 failed startup: authenticated evidence and joined native readiness
+
+REQ/AC-TEST-004/010/014/015 preserve genuine Aspire ownership and the original startup failure independently from every cleanup failure. The actual six R37 QueueLeaseFencing/tenant packing/capacity/dedicated/fenced-abort cases failed before their scenario operations; their unchanged original TRX and native identities remain failed. Parent-process settlement does not qualify node, application, local-image or storage-lock cleanup. The observed premature HTTP responses and Running/Unhealthy states do not establish a node crash, ownership fault or timeout defect.
+
+After the original AppHost builder has materialized the actual private profile, ClusterFixture captures its existing administrator, peer credential, physical shard and incarnation before starting the application. This only supplies the same original signed-discovery diagnostic context on startup failure; it exports no credentials and never replaces fresh persisted authorization. The six-owner wave reuses canonical AspireStartupReadiness: all original resource health waits are owned, linked to application stopping, stop on resource unavailability and are joined with primary cancellation and failure retention. Existing configured startup and cleanup deadlines, Docker topology, admission, membership, locks and all complete operation assertions remain unchanged.
+
+The two original QueueLeaseFencing cases and original TenantPackingActivation, TenantCapacityPlacement, TenantDedicatedOwner and PartitionMovementFencedAbort whole flows are the affected required controls. They retain full SDK/official MCP operations, literal receipts, refusal/no-effect checks and cold/healthy continuation. This integrated readiness/evidence correction does not claim to repair the unproved Running/Unhealthy cause or qualify cleanup, RF3, Linux or product acceptance. Required actual source-bound rerun and all resource joins remain OPEN.
+
+R38 extends the closed local RF3 development selector with nine complete functional classes: three BlobStorage, three Search, two TimeSeries and SdkProblemBudgetPublicTests. Their owning specifications define real SDK/official MCP operation results, original receipt replay and two joined cold cycles. Keep all original admitted classes; the new standalone and combined selectors only select existing native TUnit fixtures. Actual native discovery binds identities after the final build. Selector admission and discovered cases are not executed tests, coverage or Linux qualification.

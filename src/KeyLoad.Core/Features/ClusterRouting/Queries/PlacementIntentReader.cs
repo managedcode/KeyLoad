@@ -51,7 +51,8 @@ public sealed partial class DatabaseEngine
             var header = PartitionMoveParentStorage.Header(charged, next.Partition, next.MoveId, Limits.MaxBatchBytes);
             if (header is not null)
             { PartitionMoveParentValidation.RequireReplayScope(header, principalId, next); }
-            if (header is null && current.DirectoryRevision != next.ExpectedPlacementRevision)
+            if (header is null && (current.DirectoryRevision != checked(intent.Plan.DirectoryRevision + intent.CompletedMoves)
+                || current.Revision != next.ExpectedPlacementRevision))
             { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
             var destination = fresh.First(item => item.Owner.PhysicalShardId == next.DestinationPhysicalShardId).Owner;
             if (destination.PhysicalShardId != intent.ControlOwner.PhysicalShardId

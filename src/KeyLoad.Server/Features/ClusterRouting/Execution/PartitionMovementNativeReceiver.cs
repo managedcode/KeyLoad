@@ -58,7 +58,7 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         finally
         {
             CompleteObservation(armed, observation?.Error, observation?.Authenticated ?? false,
-                observation?.Dispatched ?? false, observation?.Failure);
+                observation?.Dispatched ?? false, observation?.Failure, observation?.SecondaryFailure, observation?.FailureStage);
         }
     }
 
@@ -114,16 +114,20 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
     }
 
     private static void CompleteObservation(IPartitionMovementNativeObservation? observation, ErrorCode? error,
-        bool authenticated, bool dispatched, Exception? original)
+        bool authenticated, bool dispatched, Exception? original, Exception? secondary,
+        PartitionMovementNativeObservationStage? failureStage)
     {
         if (observation is null)
         { return; }
         try
-        { observation.Complete(error, authenticated, dispatched); }
+        { observation.Complete(error, authenticated, dispatched, original, secondary, failureStage); }
         catch (Exception observationFailure)
         {
             if (original is not null)
-            { ServerFailureObserver.ThrowIfAny([original, observationFailure]); }
+            {
+                ServerFailureObserver.ThrowIfAny(secondary is null
+                    ? [original, observationFailure] : [original, secondary, observationFailure]);
+            }
             throw;
         }
     }
@@ -166,11 +170,24 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
         internal bool OperationCompleted { get; set; }
         internal ErrorCode? Error { get; private set; }
         internal Exception? Failure { get; private set; }
-        internal void Enter(PartitionMovementNativeObservationStage stage) => observer.Enter(stage);
+        internal Exception? SecondaryFailure { get; private set; }
+        internal PartitionMovementNativeObservationStage? FailureStage { get; private set; }
+        private PartitionMovementNativeObservationStage stage;
+        internal void Enter(PartitionMovementNativeObservationStage value)
+        {
+            stage = value;
+            observer.Enter(value);
+        }
         internal void Fail(Exception original, ErrorCode? code)
         {
-            Error = code;
-            Failure = original;
+            if (Failure is null)
+            {
+                Error = code;
+                Failure = original;
+                FailureStage = stage;
+            }
+            else if (!ReferenceEquals(Failure, original))
+            { SecondaryFailure ??= original; }
         }
     }
 

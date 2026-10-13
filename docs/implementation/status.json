@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "Local macOS arm64 development only. Release and formatter verification passed. Unit executed138:123 passed,15 failed,0 skipped. RF3 was gracefully cancelled after 24 executed failures;53 selected UIDs were not executed and are not native skips. Parent/output/error/disposal joins completed; RF3 fixture cleanup remains unqualified. No new complete task acceptance or exact-source Linux full-suite, recovery, fault, endurance, coverage or performance qualification is claimed. Original plan19/104 done,85 in progress; KL105 remains open. Twenty-one original R36 failures now pass; one original pass regressed.",
-    "coverage": "unmeasured",
+    "qualification": "Local macOS arm64 development only. Full Release0errors0warnings and whole-solution formatter verify pass. Original164 selected cases executed:158pass6fail0skip (functional143/147, controls4/4, recovery11/13); all source/image/runtime closure and process/reader/disposal joins stable. Eleven original R37 failures now pass; no original pass regressed. Original plan19/104 done85in progress; KL105 and complete exact-source Linux/RF3/fault/endurance/power-loss/performance gates remain open.",
+    "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
     "sourceIntegration": {
       "graph": {
         "paths": 144,
@@ -336,11 +336,10 @@
       }
     },
     "remaining": [
-      "Correct the exact38 RF3 selector in both strict consumers, then execute all63 original public operation cases on the next genuine Aspire-owned image.",
-      "Repair the source-proven Feed fixture timeline, remaining wholeflow assertions and genuine movement/replication failure causes without weakening original oracles.",
-      "Integrate independently reviewed SQL, Feed/graph, placement, blob/backup and full-text work while owners continue separate next directions.",
-      "Deliver exact-source Linux full SDK/MCP RF3, process recovery, fault/endurance and functional coverage gates.",
-      "Complete KL105 bounded actual profiling and Linux comparative performance/website provenance; close each original task only on its full acceptance evidence."
+      "Complete bounded causal review/repair of the original two six-owner Prepare full-reply mismatches and two native movement UnknownWriteOutcome failures; retain original diagnostics and deadlines.",
+      "Integrate independent reviewed Graph/Event traversal, Backup identity, credential subject replacement, Queue, Blob, Search, UTC TimeSeries and capacity expiry/authorization/hysteresis packets in the next coherent source cut.",
+      "Finish owning MCPGateway canonical Release/feed verification, then consume its released native result fix and execute the exact retained SDK/official MCP RF3 whole classes.",
+      "Complete full exact-source Linux functional coverage, recovery, RF3, fault/endurance/power-loss and KL105 actual matched profiling/performance gates; close tasks only on complete acceptance."
     ],
     "runtimePreparation": {
       "nativeMaximumParallelTests": 50,
@@ -1353,6 +1352,55 @@
       "releaseBuildErrors": 0,
       "releaseBuildWarnings": 0,
       "coverage": "UNMEASURED",
+      "newCompleteTaskAcceptance": 0
+    },
+    "runtimeObservedR38": {
+      "record": "docs/implementation/stage64-r38-development-20261013.json",
+      "sha256": "d15bd744ec4a9419c72a8782c5b73ff3085b00b0ba556e78f67e230b4394e3de",
+      "localDevelopmentOnly": true,
+      "unit": {
+        "executed": 151,
+        "passed": 147,
+        "failed": 4,
+        "skipped": 0
+      },
+      "unitFunctional": {
+        "executed": 147,
+        "passed": 143,
+        "failed": 4,
+        "actualTrxIntervalPeak": 51
+      },
+      "unitControls": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "actualTrxIntervalPeak": 4
+      },
+      "recovery": {
+        "executed": 13,
+        "passed": 11,
+        "failed": 2,
+        "skipped": 0,
+        "actualTrxIntervalPeak": 6
+      },
+      "configuredNativeTUnitSlots": 50,
+      "coverage": {
+        "status": "FOCUSED_FAILED_RUN_OBSERVATION_NOT_PRODUCT_QUALIFICATION",
+        "linePercent": 25.7299287570356,
+        "branchPercent": 19.627577033917092,
+        "reportedProductionModules": 13,
+        "originalCobertura": {
+          "path": "TestResults/stage61-native-join/current-stage64-r38-unit-functional-results/coverage.cobertura.xml",
+          "sha256": "d363e24082cb47d3d6c4c5e4b77999a6cd410fba0b3959151b96b52d5ad8227f"
+        }
+      },
+      "sourceImageClosureDrift": false,
+      "allOriginalProcessReaderDisposalJoins": true,
+      "fullOriginalCasesPreserved": true,
+      "originalR37FailuresNowPassed": 11,
+      "originalR37PassRegressions": 0,
+      "releaseBuildErrors": 0,
+      "releaseBuildWarnings": 0,
       "newCompleteTaskAcceptance": 0
     }
   },
@@ -3477,19 +3525,19 @@
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match·)",
                 "outcome": "Passed"
               },
               {
@@ -3601,7 +3649,7 @@
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad\u00b7IntegrationTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad·IntegrationTests)",
                 "outcome": "Passed"
               },
               {
@@ -3613,19 +3661,19 @@
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad\u00b7UnitTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad·UnitTests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad\u00b7UnitTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad·UnitTests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad\u00b7Analyzers\u00b7Tests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad·Analyzers·Tests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad\u00b7RecoveryTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad·RecoveryTests)",
                 "outcome": "Passed"
               },
               {
@@ -3715,19 +3763,19 @@
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(same-event, DuplicateEventId, The event ID is already retained in this source generation·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(changed-event, Conflict, The event ID was reused with different content·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(stale-exact, RevisionConflict, The expected stream revision does not match·)",
                 "outcome": "Passed"
               },
               {
-                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match\u00b7)",
+                "name": "AcEvent004And005RejectedAppendRollsBackWholeProducerAndReplaysFailure(no-stream, RevisionConflict, The expected stream revision does not match·)",
                 "outcome": "Passed"
               },
               {
@@ -3839,15 +3887,15 @@
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad\u00b7UnitTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit-scalar, KeyLoad·UnitTests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad\u00b7UnitTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad·UnitTests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad\u00b7IntegrationTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad·IntegrationTests)",
                 "outcome": "Passed"
               },
               {
@@ -3859,11 +3907,11 @@
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad\u00b7RecoveryTests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad·RecoveryTests)",
                 "outcome": "Passed"
               },
               {
-                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad\u00b7Analyzers\u00b7Tests)",
+                "name": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad·Analyzers·Tests)",
                 "outcome": "Passed"
               },
               {
@@ -34164,7 +34212,7 @@
               "proposedSha256": "cab597611ef57b6c96c4dce691d51086048ab89f3b235dfa451e71c347354970"
             }
           ],
-          "rootReview": "Whole native corruption\u2192restoration\u2192healthy indexed continuation and strict native SDK/Q1 no-data failure assertions; exact4base guards and independent patch reconstruction verified. Original deadlines/auth/admission and native storage authority unchanged.",
+          "rootReview": "Whole native corruption→restoration→healthy indexed continuation and strict native SDK/Q1 no-data failure assertions; exact4base guards and independent patch reconstruction verified. Original deadlines/auth/admission and native storage authority unchanged.",
           "qualification": "SOURCE_ONLY; frozen-image native runtime tests pending"
         },
         {
@@ -34213,7 +34261,7 @@
           "receipt": "/private/tmp/keyload-kl015-r760-api-ancestry10-root-source-join-20261008.json",
           "receiptSha256": "f697b035cfc0b1382f5a9e3d161d49004e2c6234eb29386723712527a801f74c",
           "patchSha256": "5cfd29bb05a78bb6854bbbc6529c0ea96c3dab5d0dd954639aed1bdcf5e60fa1",
-          "review": "Pinned native API exposes IncludeTraceState internally; removed invalid consumer configuration only, public processor still clears LogRecord.TraceState and spans. Validated32local-parent work bound before native baggage enumeration; seventh genuine Kestrel persisted-denial\u2192healthy catalog/export operation authored. Original failed R760 retained.",
+          "review": "Pinned native API exposes IncludeTraceState internally; removed invalid consumer configuration only, public processor still clears LogRecord.TraceState and spans. Validated32local-parent work bound before native baggage enumeration; seventh genuine Kestrel persisted-denial→healthy catalog/export operation authored. Original failed R760 retained.",
           "qualification": "Source-only; current exact native gates mandatory."
         },
         {
@@ -35237,7 +35285,7 @@
         "receipt": "/private/tmp/keyload-namespace-retirement-native-focus-r1-20261008-receipt.json",
         "originalTrxSha256": "ffe3c1b0cd210365bb6356ac7c93ee07ef1bef92986e9d6c2fa35504c0dd9c33",
         "passed": "1/1",
-        "qualification": "Nine actual locks\u2192joined owners\u2192cold literal store image development; no Docker RF3 product claim."
+        "qualification": "Nine actual locks→joined owners→cold literal store image development; no Docker RF3 product claim."
       },
       "originalFormatterR757": {
         "commandArgs": [
@@ -37834,7 +37882,7 @@
         {
           "owner": "sol61_security_finish",
           "task": "KL-015",
-          "scope": "Security and telemetry acceptance, including actual exported HTTP/log privacy and native negative\u2192healthy client flows; exclusive ServiceDefaults privacy join.",
+          "scope": "Security and telemetry acceptance, including actual exported HTTP/log privacy and native negative→healthy client flows; exclusive ServiceDefaults privacy join.",
           "state": "Whole KL015: actual source admission/capture-before-start and event/queue authority flows joined;7+7 native Build/logger controls passed. Private exact original discovery/TRX admission implementation active; genuine current C1/RF3 acceptance pending.",
           "previousOwner": "sol_public_bridge_finish"
         },
@@ -49408,7 +49456,7 @@
     }
   },
   "DATABASE-COMPOSITION-001": {
-    "title": "\u041e\u0434\u043d\u0430 \u0431\u0430\u0437\u0430 \u0434\u043b\u044f \u0430\u0433\u0435\u043d\u0442\u0456\u0432: \u043f\u043e\u0432'\u044f\u0437\u0430\u043d\u0456 \u043c\u043e\u0434\u0435\u043b\u0456 \u0442\u0430 SQL composition",
+    "title": "Одна база для агентів: пов'язані моделі та SQL composition",
     "status": "in_progress",
     "decision": "docs/ADR/ADR-067-composable-agent-database.md",
     "feature": "docs/Features/DatabaseComposition.md",
@@ -49473,7 +49521,7 @@
     "fullScalarQualificationPassed": true
   },
   "SQL-CLIENT-001": {
-    "title": "\u041f\u043e\u0432\u043d\u0438\u0439 SQL, \u043a\u043b\u0456\u0454\u043d\u0442\u0441\u044c\u043a\u0438\u0439 \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b \u0442\u0430 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0430 \u0442\u0435\u043a\u0441\u0442\u043e\u0432\u043e\u0433\u043e \u0456\u043d\u0434\u0435\u043a\u0441\u0443",
+    "title": "Повний SQL, клієнтський протокол та перевірка текстового індексу",
     "status": "in_progress",
     "decision": "docs/ADR/ADR-065-full-sql-client-compatibility.md",
     "conformance": "docs/implementation/sql-client-conformance.json",
@@ -49779,7 +49827,7 @@
     }
   },
   "KL-001": {
-    "title": "\u0412\u0435\u0440\u0441\u0456\u0457, \u043b\u0456\u0446\u0435\u043d\u0437\u0456\u0457 \u0442\u0430 platform matrix",
+    "title": "Версії, ліцензії та platform matrix",
     "status": "in_progress",
     "evidence": [
       "Directory.Packages.props",
@@ -49824,7 +49872,7 @@
     }
   },
   "KL-002": {
-    "title": "\u0424\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0456 API \u0442\u0430 consistency contracts",
+    "title": "Формальні API та consistency contracts",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
@@ -49832,7 +49880,7 @@
     ]
   },
   "KL-003": {
-    "title": "ZoneTree durability audit \u0456 crash harness",
+    "title": "ZoneTree durability audit і crash harness",
     "status": "in_progress",
     "atomicWalSerialization": {
       "status": "mandatory_gates_qualified_historical_source; current_resource_performance_evidence_open",
@@ -50589,7 +50637,7 @@
     }
   },
   "KL-006": {
-    "title": "\u041f\u043e\u0440\u0456\u0432\u043d\u044f\u043b\u044c\u043d\u0456 \u0431\u0435\u043d\u0447\u043c\u0430\u0440\u043a\u0438 \u0442\u0430 \u043a\u043b\u0430\u0441\u0442\u0435\u0440\u043d\u0430 \u043c\u0435\u0442\u043e\u0434\u043e\u043b\u043e\u0433\u0456\u044f",
+    "title": "Порівняльні бенчмарки та кластерна методологія",
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Benchmarks/Program.cs",
@@ -50705,7 +50753,7 @@
     }
   },
   "KL-007": {
-    "title": "KeyCodec \u0456 storage envelopes",
+    "title": "KeyCodec і storage envelopes",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
@@ -50958,7 +51006,7 @@
     }
   },
   "KL-008": {
-    "title": "Storage adapter \u0456 lifetime",
+    "title": "Storage adapter і lifetime",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
@@ -51517,7 +51565,7 @@
     "acceptanceScope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open."
   },
   "KL-009": {
-    "title": "Partition writer \u0456 command envelope",
+    "title": "Partition writer і command envelope",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
@@ -51532,7 +51580,7 @@
     }
   },
   "KL-010": {
-    "title": "Document CRUD \u0442\u0430 CAS",
+    "title": "Document CRUD та CAS",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
@@ -51717,7 +51765,7 @@
     "allAcceptanceClosed": true
   },
   "KL-011": {
-    "title": "Strict indexes \u0456 unique scope",
+    "title": "Strict indexes і unique scope",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
@@ -52833,7 +52881,7 @@
     }
   },
   "KL-012": {
-    "title": "Batch \u0456 persisted idempotency",
+    "title": "Batch і persisted idempotency",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
@@ -53008,7 +53056,7 @@
     }
   },
   "KL-013": {
-    "title": "Query AST, planner \u0456 cursors",
+    "title": "Query AST, planner і cursors",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
@@ -53032,7 +53080,7 @@
     }
   },
   "KL-014": {
-    "title": "Standalone server \u0456 C# SDK",
+    "title": "Standalone server і C# SDK",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs",
@@ -53985,7 +54033,7 @@
     "acceptanceScope": "Original architecture task criteria only; complete product/full-suite/coverage/endurance/performance qualification remains open."
   },
   "KL-015": {
-    "title": "Security \u0456 telemetry baseline",
+    "title": "Security і telemetry baseline",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -55278,7 +55326,7 @@
     ]
   },
   "KL-019": {
-    "title": "Orleans membership \u0456 ownership adapter",
+    "title": "Orleans membership і ownership adapter",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
@@ -55375,7 +55423,7 @@
     }
   },
   "KL-020": {
-    "title": "\u0422\u0440\u0438-\u0432\u0443\u0437\u043b\u043e\u0432\u0438\u0439 replicated apply",
+    "title": "Три-вузловий replicated apply",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
@@ -55396,7 +55444,7 @@
     }
   },
   "KL-021": {
-    "title": "Strong read \u0456 session tokens",
+    "title": "Strong read і session tokens",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ClusterCoordinator.cs",
@@ -55653,7 +55701,7 @@
     }
   },
   "KL-025": {
-    "title": "Time-series range \u0456 aggregates",
+    "title": "Time-series range і aggregates",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/TimeSeries/Queries/DatabaseEngine.SampleReads.cs",
@@ -56033,7 +56081,7 @@
     }
   },
   "KL-026": {
-    "title": "Retention, expiry \u0456 rollups",
+    "title": "Retention, expiry і rollups",
     "status": "done",
     "evidence": [
       "docs/ADR/ADR-073-logged-series-retention.md",
@@ -56070,7 +56118,7 @@
     }
   },
   "KL-027": {
-    "title": "Canonical vectors \u0456 exact search",
+    "title": "Canonical vectors і exact search",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/Search/Commands/DatabaseEngine.VectorWrites.cs",
@@ -56733,7 +56781,7 @@
     ]
   },
   "KL-029": {
-    "title": "Text projection \u0456 rebuild",
+    "title": "Text projection і rebuild",
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-078-native-full-text-projection.md",
@@ -57064,7 +57112,7 @@
     }
   },
   "KL-033": {
-    "title": "Hybrid rank \u0456 Explain",
+    "title": "Hybrid rank і Explain",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
@@ -57314,7 +57362,7 @@
     }
   },
   "KL-035": {
-    "title": "Replica snapshot \u0456 installation",
+    "title": "Replica snapshot і installation",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs",
@@ -58387,7 +58435,7 @@
     }
   },
   "KL-041": {
-    "title": "Chaos \u0456 corruption suite",
+    "title": "Chaos і corruption suite",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
@@ -58398,7 +58446,7 @@
     ]
   },
   "KL-042": {
-    "title": "Cluster backup \u0456 restore drills",
+    "title": "Cluster backup і restore drills",
     "status": "in_progress",
     "evidence": [
       "docs/Features/BackupRestore.md",
@@ -58454,7 +58502,7 @@
       "originalNativeBindingManifestSha256": "4b1043ad8a6befbe6b8ab7cd5041cbe8478a61e53090a5ef81ec27982e376dc4",
       "backupFeedSourceJoin20261010": {
         "proof": "/private/tmp/keyload-stage44-backup-feed-native-join-r1-20261010/actual-join-proof.json",
-        "description": "Actual current-source safe lexical destination admission and native symlink leaf/ancestor refusal\u2192same-path repair\u2192healthy/cold operations, plus original modified-WAL archive refusal and joined repair continuation. Runtime unexecuted after join.",
+        "description": "Actual current-source safe lexical destination admission and native symlink leaf/ancestor refusal→same-path repair→healthy/cold operations, plus original modified-WAL archive refusal and joined repair continuation. Runtime unexecuted after join.",
         "runtimeExecuted": false,
         "qualificationClaim": false
       }
@@ -58646,7 +58694,7 @@
     }
   },
   "KL-044": {
-    "title": "Release gate \u0456 operational handbook",
+    "title": "Release gate і operational handbook",
     "status": "in_progress",
     "evidence": [
       "README.md",
@@ -58655,7 +58703,7 @@
     ]
   },
   "KL-045": {
-    "title": "Query capability manifest \u0456 AST version",
+    "title": "Query capability manifest і AST version",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Features/QueryExecution/Contracts/QueryAst.cs",
@@ -58677,7 +58725,7 @@
     ]
   },
   "KL-047": {
-    "title": "SQL parser adapter \u0456 diagnostics",
+    "title": "SQL parser adapter і diagnostics",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
@@ -58687,7 +58735,7 @@
     ]
   },
   "KL-048": {
-    "title": "Binder \u0456 field lineage",
+    "title": "Binder і field lineage",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
@@ -58715,7 +58763,7 @@
     "sourceStage": "complete_composed_projection_lineage_unit_sdk_mcp_scenarios_joined_current_gates_open"
   },
   "KL-050": {
-    "title": "Batch executor \u0456 secure operator boundaries",
+    "title": "Batch executor і secure operator boundaries",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
@@ -58736,7 +58784,7 @@
     ]
   },
   "KL-052": {
-    "title": "\u0420\u0430\u043d\u043d\u0456\u0439 admission control",
+    "title": "Ранній admission control",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
@@ -58751,7 +58799,7 @@
     ]
   },
   "KL-053": {
-    "title": "Session facade \u0442\u0430 independent query contexts",
+    "title": "Session facade та independent query contexts",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQuery.cs",
@@ -58760,7 +58808,7 @@
     ]
   },
   "KL-054": {
-    "title": "SQL differential \u0456 metamorphic suite",
+    "title": "SQL differential і metamorphic suite",
     "status": "in_progress",
     "evidence": [
       "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/QueryAdapterTests.cs",
@@ -58818,7 +58866,7 @@
     }
   },
   "KL-058": {
-    "title": "BM25 corpus \u0456 statistics epochs",
+    "title": "BM25 corpus і statistics epochs",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
@@ -58900,7 +58948,7 @@
     "implementationStage": "F2 computational planner contract accepted; Luna implementation in progress. The current packed executor does not by itself qualify the newly specified adaptive planner, public approximation, RF3 or scale/performance criteria."
   },
   "KL-061": {
-    "title": "Principals, API keys \u0456 RBAC",
+    "title": "Principals, API keys і RBAC",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -58930,7 +58978,7 @@
     ]
   },
   "KL-064": {
-    "title": "\u0404\u0434\u0438\u043d\u0438\u0439 safe projector",
+    "title": "Єдиний safe projector",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -58940,7 +58988,7 @@
     ]
   },
   "KL-065": {
-    "title": "Row ACL planner \u0456 graph enforcement",
+    "title": "Row ACL planner і graph enforcement",
     "status": "done",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -59042,7 +59090,7 @@
     }
   },
   "KL-066": {
-    "title": "Revocation epochs \u0456 cursor reauthorization",
+    "title": "Revocation epochs і cursor reauthorization",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -59052,7 +59100,7 @@
     ]
   },
   "KL-067": {
-    "title": "Classification lineage \u0443 search projections",
+    "title": "Classification lineage у search projections",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Search/Commands/VectorProjectionApply.cs",
@@ -59081,7 +59129,7 @@
     ]
   },
   "KL-070": {
-    "title": "Placement \u0456 tenant packing",
+    "title": "Placement і tenant packing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
@@ -59159,7 +59207,7 @@
     "localDevelopmentGatePassed": true
   },
   "KL-075": {
-    "title": "Scaling benchmark \u0456 fair deployment arms",
+    "title": "Scaling benchmark і fair deployment arms",
     "status": "in_progress",
     "evidence": [
       "docs/Features/BenchmarkComparisons/ScalingQualification.md",
@@ -59222,7 +59270,7 @@
     ]
   },
   "KL-077": {
-    "title": "Hot-path allocation \u0456 SIMD \u043e\u043f\u0442\u0438\u043c\u0456\u0437\u0430\u0446\u0456\u044f",
+    "title": "Hot-path allocation і SIMD оптимізація",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
@@ -59372,7 +59420,7 @@
     }
   },
   "KL-079": {
-    "title": "Resumable change feed \u0456 \u043e\u0431\u043c\u0435\u0436\u0435\u043d\u0456 live queries",
+    "title": "Resumable change feed і обмежені live queries",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/ChangeFeeds/Execution/ChangeFeeds.cs",
@@ -59610,7 +59658,7 @@
     }
   },
   "KL-080": {
-    "title": "Integrated feature \u0456 performance release gate",
+    "title": "Integrated feature і performance release gate",
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-074-aspire-owned-test-entry.md",
@@ -59711,7 +59759,7 @@
     }
   },
   "KL-081": {
-    "title": "Eventing contracts \u0456 shared TransactionDomain",
+    "title": "Eventing contracts і shared TransactionDomain",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Abstractions/Contracts.cs",
@@ -59720,7 +59768,7 @@
     ]
   },
   "KL-082": {
-    "title": "Event/queue keyspace \u0456 state envelopes",
+    "title": "Event/queue keyspace і state envelopes",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
@@ -59730,7 +59778,7 @@
     ]
   },
   "KL-083": {
-    "title": "AppendEvents, expected revision \u0442\u0430 dedup",
+    "title": "AppendEvents, expected revision та dedup",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
@@ -59739,7 +59787,7 @@
     ]
   },
   "KL-084": {
-    "title": "ReadStream, feed cursors \u0456 catch-up",
+    "title": "ReadStream, feed cursors і catch-up",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/EventStreams/Execution/Events.cs",
@@ -59875,7 +59923,7 @@
     }
   },
   "KL-085": {
-    "title": "Aggregate snapshots, schemas \u0442\u0430 replay",
+    "title": "Aggregate snapshots, schemas та replay",
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-075-bounded-aggregate-snapshot-replay.md",
@@ -59893,7 +59941,7 @@
     ]
   },
   "KL-086": {
-    "title": "Durable enqueue \u0456 queue-lane state",
+    "title": "Durable enqueue і queue-lane state",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -59902,7 +59950,7 @@
     ]
   },
   "KL-087": {
-    "title": "Claim, ACK, renew \u0456 delivery fencing",
+    "title": "Claim, ACK, renew і delivery fencing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -59914,7 +59962,7 @@
     ]
   },
   "KL-088": {
-    "title": "Retry, DLQ, cancellation \u0442\u0430 expiry",
+    "title": "Retry, DLQ, cancellation та expiry",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -59923,7 +59971,7 @@
     ]
   },
   "KL-089": {
-    "title": "Durable groups \u0456 contiguous checkpoints",
+    "title": "Durable groups і contiguous checkpoints",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs",
@@ -59933,7 +59981,7 @@
     ]
   },
   "KL-090": {
-    "title": "Inbox \u0456 CommitProcessing",
+    "title": "Inbox і CommitProcessing",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -59953,7 +60001,7 @@
     ]
   },
   "KL-092": {
-    "title": "Persisted scheduler \u0456 clock contract",
+    "title": "Persisted scheduler і clock contract",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -60028,7 +60076,7 @@
     }
   },
   "KL-093": {
-    "title": "Orleans coordinators \u0456 worker SDK",
+    "title": "Orleans coordinators і worker SDK",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipTable.cs",
@@ -60127,7 +60175,7 @@
     }
   },
   "KL-095": {
-    "title": "Event SQL, queue views \u0442\u0430 protocol",
+    "title": "Event SQL, queue views та protocol",
     "status": "in_progress",
     "evidence": [
       "docs/ADR/ADR-072-authorized-sql-model-views.md",
@@ -60142,7 +60190,7 @@
     ]
   },
   "KL-096": {
-    "title": "Event/message RBAC \u0456 sensitive schemas",
+    "title": "Event/message RBAC і sensitive schemas",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Security/Features/Authorization/Execution/AuthorizationPolicy.cs",
@@ -60154,7 +60202,7 @@
     ]
   },
   "KL-097": {
-    "title": "Event-driven projections \u0456 search lineage",
+    "title": "Event-driven projections і search lineage",
     "status": "in_progress",
     "evidence": [
       "docs/Features/Search/EventProjectionLineage.md",
@@ -60180,7 +60228,7 @@
     }
   },
   "KL-098": {
-    "title": "Eventing retention, purge \u0456 backup state",
+    "title": "Eventing retention, purge і backup state",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
@@ -60278,7 +60326,7 @@
     }
   },
   "KL-099": {
-    "title": "Eventing replication \u0456 migration",
+    "title": "Eventing replication і migration",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaMaterializer.cs",
@@ -60289,7 +60337,7 @@
     ]
   },
   "KL-100": {
-    "title": "Delayed jobs, recurring occurrences \u0456 saga state",
+    "title": "Delayed jobs, recurring occurrences і saga state",
     "status": "in_progress",
     "evidence": [
       "docs/Features/Messaging/RecurringSaga.md",
@@ -60337,7 +60385,7 @@
     }
   },
   "KL-101": {
-    "title": "Eventing benchmark kit \u0456 .NET baselines",
+    "title": "Eventing benchmark kit і .NET baselines",
     "status": "in_progress",
     "evidence": [
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadTarget.cs",
@@ -60348,7 +60396,7 @@
     ]
   },
   "KL-102": {
-    "title": "Eventing failure \u0456 state-machine suite",
+    "title": "Eventing failure і state-machine suite",
     "status": "in_progress",
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
@@ -60373,7 +60421,7 @@
     ]
   },
   "KL-104": {
-    "title": "All-in-one release manifest \u0456 runbooks",
+    "title": "All-in-one release manifest і runbooks",
     "status": "in_progress",
     "evidence": [
       "README.md",
@@ -61972,7 +62020,7 @@
     }
   },
   "AdminDashboard": {
-    "title": "Read-only \u0430\u0434\u043c\u0456\u043d\u0456\u0441\u0442\u0440\u0430\u0442\u0438\u0432\u043d\u0430 \u043f\u0430\u043d\u0435\u043b\u044c \u0431\u0430\u0437\u0438 \u0434\u0430\u043d\u0438\u0445",
+    "title": "Read-only адміністративна панель бази даних",
     "status": "in_progress",
     "source": "implemented",
     "route": "/admin",
@@ -62024,7 +62072,7 @@
     }
   },
   "AI-SQL-001": {
-    "title": "\u0404\u0434\u0438\u043d\u0438\u0439 SQL-\u0432\u0445\u0456\u0434 \u0434\u043b\u044f \u043f\u043e\u0432\u2019\u044f\u0437\u0430\u043d\u043e\u0457 AI database",
+    "title": "Єдиний SQL-вхід для пов’язаної AI database",
     "status": "in_progress",
     "sourceStage": "version1_SELECT_CALL_canonical_operation_adapter_typed_rows_native_equality_planning",
     "qualification": "pending_exact_delivered_SHA_GitHub_full_gates",
@@ -62394,7 +62442,7 @@
     }
   },
   "SCALE-PERF-001": {
-    "title": "\u0420\u0435\u0430\u043b\u044c\u043d\u0456 100K/1M/5M \u043d\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0435\u043d\u043d\u044f \u0442\u0430 \u0447\u0435\u0441\u043d\u0456 \u043f\u043e\u0440\u0456\u0432\u043d\u044f\u043d\u043d\u044f",
+    "title": "Реальні 100K/1M/5M навантаження та чесні порівняння",
     "status": "in_progress",
     "decision": "docs/ADR/ADR-069-representative-scaled-workloads.md",
     "feature": "docs/Features/BenchmarkComparisons/ScaledWorkloads.md",
@@ -62469,7 +62517,7 @@
     }
   },
   "BENCHMARK-FAILURE-ISOLATION-001": {
-    "title": "\u041d\u0435\u0437\u0430\u043b\u0435\u0436\u043d\u0456 \u0431\u0435\u043d\u0447\u043c\u0430\u0440\u043a\u0438 \u0442\u0430 \u043f\u0443\u0431\u043b\u0456\u043a\u0430\u0446\u0456\u044f \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0438\u0445 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u0456\u0432",
+    "title": "Незалежні бенчмарки та публікація недоступних результатів",
     "status": "in_progress",
     "feature": "docs/Features/BenchmarkComparisons.md",
     "decision": "docs/ADR/ADR-080-benchmark-failure-isolation.md",

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -11,11 +10,6 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
 {
     private const string MissingState = "The actual public movement seed is incomplete.";
-    private const string CompositionQueue = "parent-composition-jobs";
-    private const string CompositionGraph = "parent-composition-links";
-    private const string CompositionMessage = "parent-original-link";
-    private const string EdgePrefix = "parent-edge-";
-    private const string ReversePrefix = "parent-derived-";
     private readonly HttpClient sourceHttp;
     private readonly HttpClient targetHttp;
     private McpOfficialClient? official;
@@ -50,11 +44,12 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
 
     internal PartitionMovementPublicParentRf3BlobOriginals BlobOriginals { get; private set; } = null!;
     internal static byte[] BlobRange => [0x41, 0x41, 0x42, 0x42];
-    internal static string ForwardMessage => CompositionMessage;
-    internal static string DerivedMessage => ReversePrefix + EdgePrefix + CompositionMessage;
-    internal static string Graph => CompositionGraph;
-    internal static string Queue => CompositionQueue;
-    internal static string ComposedEdge => EdgePrefix + CompositionMessage;
+    internal static string ForwardMessage => PartitionMovementPublicParentRf3Composition.CompositionMessage;
+    internal static string DerivedMessage => PartitionMovementPublicParentRf3Composition.ReversePrefix
+        + PartitionMovementPublicParentRf3Composition.EdgePrefix + ForwardMessage;
+    internal static string Graph => PartitionMovementPublicParentRf3Composition.CompositionGraph;
+    internal static string Queue => PartitionMovementPublicParentRf3Composition.CompositionQueue;
+    internal static string ComposedEdge => PartitionMovementPublicParentRf3Composition.EdgePrefix + ForwardMessage;
 
     internal static async Task<PartitionMovementPublicParentRf3Seed> CreateAsync(TwoRf3MembershipWave wave,
         CancellationToken cancellationToken)
@@ -64,15 +59,25 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         return await CreateAsync(wave, credential, cancellationToken).ConfigureAwait(false);
     }
 
-    internal static async Task<PartitionMovementPublicParentRf3Seed> CreateAsync(TwoRf3MembershipWave wave,
+    internal static Task<PartitionMovementPublicParentRf3Seed> CreateAsync(TwoRf3MembershipWave wave,
         string credential, CancellationToken cancellationToken)
+        => CreateCoreAsync(wave, credential, null, cancellationToken);
+
+    internal static Task<PartitionMovementPublicParentRf3Seed> CreateSiblingAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed original, CancellationToken cancellationToken)
+        => CreateCoreAsync(wave, original.Credential, original.Models with
+        { Partition = original.Partition with { PartitionKey = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat) } },
+            cancellationToken);
+
+    private static async Task<PartitionMovementPublicParentRf3Seed> CreateCoreAsync(TwoRf3MembershipWave wave,
+        string credential, RelationalSqlRf3Scenario? existingModels, CancellationToken cancellationToken)
     {
         var seed = new PartitionMovementPublicParentRf3Seed(wave, credential);
         try
         {
             seed.official = await McpOfficialClient.ConnectAsync(wave.Application, TwoRf3MembershipProtocol.Node1,
                 credential, cancellationToken).ConfigureAwait(false);
-            seed.Models = await RelationalSqlRf3Scenario.CreateAsync(seed.Source, cancellationToken).ConfigureAwait(false);
+            seed.Models = existingModels ?? await RelationalSqlRf3Scenario.CreateAsync(seed.Source, cancellationToken).ConfigureAwait(false);
             seed.Directory = await PhysicalOwnerDirectoryRf3Assertions.ExpectedAsync(wave.Application,
                 wave.Profile, cancellationToken).ConfigureAwait(false);
             seed.OriginalPlacement = await McpCallerAssertions.SdkSuccessAsync(await seed.Source
@@ -82,7 +87,7 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
             seed.FirstRequest = new(Guid.NewGuid(), seed.Partition, destination.PhysicalShardId,
                 seed.OriginalPlacement.Revision, PartitionMoveMode.Transfer);
             await seed.CommitAsync(seed.Models.LinkedModelsCommand(), cancellationToken).ConfigureAwait(false);
-            await seed.CompositionAsync(cancellationToken).ConfigureAwait(false);
+            await seed.CompositionAsync(existingModels is null, cancellationToken).ConfigureAwait(false);
             await seed.BlobAsync(cancellationToken).ConfigureAwait(false);
             seed.OriginalModels = await PartitionMovementPublicParentRf3Cut.CaptureAsync(seed, cancellationToken).ConfigureAwait(false);
             await seed.VerifyAsync(cancellationToken).ConfigureAwait(false);
@@ -97,24 +102,10 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         }
     }
 
-    private async Task CompositionAsync(CancellationToken cancellationToken)
-    {
-        foreach (var (resource, kind) in new[] { (CompositionQueue, ResourceKind.WorkQueue), (CompositionGraph, ResourceKind.Graph) })
-        {
-            _ = await McpCallerAssertions.SdkSuccessAsync(await Source.ConfigureResourceAsync(Guid.NewGuid(),
-                new(Partition.TenantId, Partition.DatabaseId, new(resource, kind, Partition.TransactionDomainId)),
-                cancellationToken).ConfigureAwait(false));
-        }
-        var link = new QueueGraphLink(Models.First, Models.Second, RelationalSqlRf3Tokens.EdgeLabel);
-        var forward = Models.Command(new EnqueueMessage(CompositionQueue, CompositionMessage,
-            JsonSerializer.Serialize(link, JsonDefaults.Options)),
-            new QueueToGraph(CompositionGraph, CompositionQueue, EdgePrefix));
-        await CommitAsync(forward, cancellationToken).ConfigureAwait(false);
-        await CommitAsync(Models.Command(new GraphToQueueMutation(CompositionQueue, CompositionGraph,
-            Models.First, ReversePrefix)), cancellationToken).ConfigureAwait(false);
-    }
+    private Task CompositionAsync(bool configureResources, CancellationToken cancellationToken)
+        => PartitionMovementPublicParentRf3Composition.RunAsync(this, configureResources, cancellationToken);
 
-    private async Task CommitAsync(CommandRequest command, CancellationToken cancellationToken)
+    internal async Task CommitAsync(CommandRequest command, CancellationToken cancellationToken)
     {
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await Source.CommitAsync(command,
             cancellationToken).ConfigureAwait(false));

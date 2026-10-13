@@ -43,7 +43,11 @@ internal static class ControlledPartitionMovementNativeProcessRefusal
             var after = await owners.CaptureAsync(cancellationToken);
             await ControlledPartitionMovementNativeProcessColdAssertions.ExactAsync(before, after);
         }, failures).ConfigureAwait(false);
-        ServerFailureObserver.Observe(observation.RequireAndReport, failures);
+        var authenticated = expectedDetail == PartitionMovementProtocol.Unavailable;
+        var stage = authenticated ? PartitionMovementNativeObservationStage.InnerDispatch
+            : PartitionMovementNativeObservationStage.AdmissionShape;
+        ServerFailureObserver.Observe(() => observation.RequireAndReport(stage, ErrorCode.Unauthenticated,
+            authenticated, authenticated), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

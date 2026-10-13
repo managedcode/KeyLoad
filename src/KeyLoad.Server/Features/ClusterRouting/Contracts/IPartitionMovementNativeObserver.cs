@@ -9,7 +9,8 @@ internal interface IPartitionMovementNativeObserver
 internal interface IPartitionMovementNativeObservation
 {
     void Enter(PartitionMovementNativeObservationStage stage);
-    void Complete(ErrorCode? error, bool authenticated, bool dispatched);
+    void Complete(ErrorCode? error, bool authenticated, bool dispatched, Exception? original,
+        Exception? secondary, PartitionMovementNativeObservationStage? failureStage);
 }
 
 internal enum PartitionMovementNativeObservationStage

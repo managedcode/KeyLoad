@@ -70,7 +70,7 @@ public sealed partial class DatabaseEngine
             token.ThrowIfCancellationRequested();
             if (part.Owner == target)
             { continue; }
-            moves.Add(new(Guid.NewGuid(), part.Partition, target, checked(revision + moves.Count), PartitionMoveMode.Transfer));
+            moves.Add(new(Guid.NewGuid(), part.Partition, target, part.RowRevision, PartitionMoveMode.Transfer));
         }
         return new(TenantPlacementPolicyProtocol.Version, Guid.NewGuid(), request.TenantId, request.DatabaseId,
             policy.Revision, revision, currentCohort, cohort.Min(item => item.Resource.SampledAt),

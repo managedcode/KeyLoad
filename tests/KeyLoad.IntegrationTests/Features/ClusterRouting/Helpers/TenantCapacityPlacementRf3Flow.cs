@@ -9,6 +9,11 @@ internal static class TenantCapacityPlacementRf3Flow
     internal static async Task RunAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
         CancellationToken token)
+        => await RunAsync(wave, seed, state, committedOwnerLoss: false, token).ConfigureAwait(false);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
+        bool committedOwnerLoss, CancellationToken token)
     {
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
@@ -22,6 +27,7 @@ internal static class TenantCapacityPlacementRf3Flow
             state.HealthyPolicy, state.Control);
         _ = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ConfigurePlacementPolicyAsync(
             Guid.NewGuid(), healthy, token));
+        var binding = await RequireRevisionSeparationAsync(seed, state, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, plan, token);
@@ -37,6 +43,47 @@ internal static class TenantCapacityPlacementRf3Flow
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await seed.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
                 new { commandId = persistId, request = persist }, token))).Value);
-        await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, plan, pending, token);
+        if (committedOwnerLoss)
+        { await TenantCapacityPlacementRf3OwnerLoss.RunAsync(wave, seed, state, plan, pending, persistId, persist, token); }
+        else
+        { await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, plan, pending, token); }
+        await RequireBindReplayAsync(seed, binding.Id, binding.Request, token);
+    }
+
+    private static async Task<(Guid Id, BindAtomicPartitionPlacementRequest Request)> RequireRevisionSeparationAsync(PartitionMovementPublicParentRf3Seed seed,
+        TenantCapacityPlacementRf3Provisioning.State state, CancellationToken token)
+    {
+        await Assert.That(seed.OriginalPlacement.IsFallback).IsTrue();
+        await Assert.That(seed.OriginalPlacement.Revision).IsEqualTo(0);
+        await Assert.That(seed.OriginalPlacement.DirectoryRevision).IsEqualTo(0);
+        var id = Guid.NewGuid();
+        var request = new BindAtomicPartitionPlacementRequest(1, 0, state.Control,
+            seed.Directory.ControlOwner.PhysicalShardId);
+        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(
+            await seed.Source.BindAtomicPartitionPlacementAsync(id, request, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
+            await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
+                new { commandId = id, request }, token))).Value).IsTrue();
+        var current = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
+            new(1, seed.Partition), token));
+        await SqlRf3Protocol.EqualAsync(seed.OriginalPlacement with { DirectoryRevision = 1 }, current);
+        var control = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ReadAtomicPartitionPlacementAsync(
+            new(1, state.Control), token));
+        await Assert.That(control.IsFallback).IsFalse();
+        await Assert.That(control.Revision).IsEqualTo(1);
+        await Assert.That(control.DirectoryRevision).IsEqualTo(1);
+        await Assert.That(control.PhysicalShardId).IsEqualTo(seed.Directory.ControlOwner.PhysicalShardId);
+        await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
+        return (id, request);
+    }
+
+    private static async Task RequireBindReplayAsync(PartitionMovementPublicParentRf3Seed seed,
+        Guid id, BindAtomicPartitionPlacementRequest request, CancellationToken token)
+    {
+        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(
+            await seed.Source.BindAtomicPartitionPlacementAsync(id, request, token))).IsTrue();
+        await Assert.That((await McpCallerAssertions.SuccessAsync<bool>(
+            await seed.Official.CallAsync(McpCallerTools.AdminPartitionPlacementBind,
+                new { commandId = id, request }, token))).Value).IsTrue();
     }
 }

@@ -761,3 +761,25 @@ flowchart LR
   Release --> Purge[NEW purge IDs and healthy append]
   Purge --> Cold2[Original receipt replay and second full cold comparison]
 ```
+
+### Persisted append-sequence authority (KL083/KL084)
+
+REQ-EVENT-004/006 and AC-EVENT-004/006 require the partition event sequence read
+by Append to be at least the existing stream tail before publishing any record.
+An absent empty stream retains its valid zero sequence. A seeded tail1 with a
+persisted sequence -1 or 0 is Corruption, before document, queue, event-feed,
+stream-head or command-outcome writes; it must not overwrite the existing feed
+entry or issue a zero global sequence. This is a lower-bound authority guard,
+not an all-stream inventory proof or a new serialized contract.
+
+EventAppendSequenceAuthorityTests exercises both literal corruptions through the
+real ZoneTree atomic producer. Repeat the original GUID twice, require the exact
+Corruption/no-effect full raw image and absent document/message, restore the
+original sequence bytes, and accept that same GUID. Independently require the
+ordered full document/enqueue/append mutation receipts and complete initial,
+repaired and healthy event records. Preserve both original accepted outcomes and
+full raw images across warm replay and two actual same-root cold reopen owners.
+Keep original expected revisions, generation, authenticated principal, event
+schemas, limits and clock. Cold resource disposal retains initiating and cleanup
+failures. This Unit flow is functional source preparation; actual native census,
+current-image execution, Linux, RF3 and fault qualification remain required.

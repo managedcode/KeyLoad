@@ -53,8 +53,9 @@ internal static class NativeTextBm25CapturedClosureTrial
                 execution.MaximumDocumentWords, execution.MaximumWordCharacters);
             result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
                 work, null, FilteredSearchEligibility.Create(null, work));
-            RankedDocument[] expected = [new(new(new(owner.Source.Partition, "orders", "first"),
-                1L, "{\"text\":\"needle\"}", false, []), 1d / 61d, null)];
+            RankedDocument[] expected = [new(NativeTextBm25ExpectedRows.Document(owner.Source.Partition,
+                "first", 1L, "{\"text\":\"needle\"}", false, []), 1d / 61d, null)];
+            await NativeTextBm25ExpectedRows.RequireOwnershipAsync(expected, result);
             var expectedBytes = NativeSerialization.Serialize(expected);
             var actualBytes = NativeSerialization.Serialize(result);
             await Assert.That(actualBytes.SequenceEqual(expectedBytes)).IsTrue().Because(

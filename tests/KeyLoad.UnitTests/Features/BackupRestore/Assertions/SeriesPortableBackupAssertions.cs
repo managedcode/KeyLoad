@@ -36,6 +36,13 @@ internal static class SeriesPortableBackupAssertions
 
     private static async Task RequireRowsAsync(SampleRecord[] expected, SampleRecord[] actual)
     {
+        for (var row = 1; row < expected.Length; row++)
+        {
+            await Assert.That(ReferenceEquals(expected[row].SeriesId, expected[0].SeriesId)).IsFalse();
+            await Assert.That(ReferenceEquals(expected[row].TagsJson, expected[0].TagsJson)).IsFalse();
+            await Assert.That(ReferenceEquals(actual[row].SeriesId, actual[0].SeriesId)).IsFalse();
+            await Assert.That(ReferenceEquals(actual[row].TagsJson, actual[0].TagsJson)).IsFalse();
+        }
         var expectedBytes = NativeSerialization.Serialize(expected);
         var actualBytes = NativeSerialization.Serialize(actual);
         await Assert.That(actualBytes.AsSpan().SequenceEqual(expectedBytes)).IsTrue()
@@ -79,15 +86,16 @@ internal static class SeriesPortableBackupAssertions
             + $"expectedSeriesAliases={expectedSeriesAliases} actualSeriesAliases={actualSeriesAliases} expectedTagsAliases={expectedTagsAliases} actualTagsAliases={actualTagsAliases}.";
     }
 
+    private static SampleRecord ExpectedRow(int id, int seconds, double value, long sequence)
+        => new(new string(SeriesPortableBackupSeed.Series.AsSpan()),
+            SeriesPortableBackupSeed.Data(id, seconds, value), sequence, new string("{}".AsSpan()));
+
     internal static async Task VisibleAsync(DatabaseEngine database, PartitionRef partition, bool complete, CancellationToken token)
     {
         var before = BackupPersistedPolicyAssertions.Capture(database.Store);
         SampleRecord[] expected = complete
-            ? [new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(3, 2, 3), 3L, "{}"),
-                new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(4, 3, 4), 4L, "{}"),
-                new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(5, 4, 5), 5L, "{}")]
-            : [new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(3, 2, 3), 3L, "{}"),
-                new(SeriesPortableBackupSeed.Series, SeriesPortableBackupSeed.Data(4, 3, 4), 4L, "{}")];
+            ? [ExpectedRow(3, 2, 3d, 3L), ExpectedRow(4, 3, 4d, 4L), ExpectedRow(5, 4, 5d, 5L)]
+            : [ExpectedRow(3, 2, 3d, 3L), ExpectedRow(4, 3, 4d, 4L)];
         var actual = database.ReadSamples(SeriesPortableBackupSeed.Root,
             partition, SeriesPortableBackupSeed.Set, SeriesPortableBackupSeed.Series,
             SeriesPortableBackupSeed.Start, SeriesPortableBackupSeed.Start.AddSeconds(5), cancellationToken: token);

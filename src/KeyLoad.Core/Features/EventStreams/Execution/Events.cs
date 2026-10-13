@@ -26,6 +26,7 @@ public sealed partial class DatabaseEngine
         const string InvalidStreamHeadDetail = "The persisted stream head is invalid.";
         const int HeadTailRevisionValidationBoundary = 0;
         const string EventSequenceSpace = "event-sequence";
+        const string InvalidEventSequenceDetail = "The persisted event sequence is invalid.";
         const int AppendAbsentCount = 0;
         const int FirstAvailableRevisionSingleItemCount = 1;
         const string AppendKindText = "appendEvents";
@@ -61,6 +62,10 @@ public sealed partial class DatabaseEngine
         var tail = head?.TailRevision ?? HeadTailRevisionValidationBoundary;
         var sequenceKey = KeySpace.Partition(EventSequenceSpace, partition);
         var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : AppendAbsentCount;
+        if (sequence < tail)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidEventSequenceDetail);
+        }
         foreach (var item in append.Events)
         {
             AppendEvent(tx, principal, partition, append, resource, stream, item, now, ref tail, ref sequence);

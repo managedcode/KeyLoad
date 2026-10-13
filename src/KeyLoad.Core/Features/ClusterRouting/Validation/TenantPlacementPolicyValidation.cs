@@ -46,16 +46,15 @@ internal static class TenantPlacementPolicyValidation
             || value.Moves.Select(move => move.Partition).Distinct().Count() != value.Moves.Length
             || value.Moves.Select(move => move.MoveId).Distinct().Count() != value.Moves.Length)
         { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid); }
-        var expectedRevision = value.DirectoryRevision;
         foreach (var move in value.Moves)
         {
             DatabaseEngine.ValidatePartition(move.Partition);
             if (!value.OriginalPartitions.Contains(move.Partition) || move.Partition.TenantId != value.TenantId || move.Partition.DatabaseId != value.DatabaseId
                 || move.MoveId == Guid.Empty || move.Mode != PartitionMoveMode.Transfer
                 || move.DestinationPhysicalShardId == Guid.Empty
-                || move.ExpectedPlacementRevision != expectedRevision)
+                || move.ExpectedPlacementRevision < MinimumBytes)
             { throw Errors.Fail(error, TenantPlacementPolicyProtocol.Invalid); }
-            expectedRevision = checked(expectedRevision + TenantPlacementPolicyProtocol.RevisionStep);
         }
+        _ = checked(value.DirectoryRevision + value.Moves.Length * TenantPlacementPolicyProtocol.RevisionStep);
     }
 }
