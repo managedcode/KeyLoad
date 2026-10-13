@@ -10,8 +10,8 @@ internal static class DeclarativeReverseQuotaAssertions
     private const string FirstEdge = "bounded-a";
     private const string SecondEdge = "bounded-b";
     private const string EnqueueKind = "enqueue";
-    private const long FirstSequence = 1;
-    private const long SecondSequence = 2;
+    private const long FirstSequence = 2;
+    private const long SecondSequence = 3;
     private const long InitialVersion = 1;
     private const int NoAttempts = 0;
     private const string Headers = "{}";

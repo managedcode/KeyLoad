@@ -20,7 +20,7 @@ internal static class BlobReservationQuotaPublicAssertions
         var official = await callers.Mcp.CallAsync("keyload_blobs_begin_upload", request, token);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.ResourceExhausted, dispatched: true);
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-            .GetProperty(ErrorDetailProperty).GetString()).IsEqualTo("The blob reservation quota is exhausted.");
+            .GetProperty(ErrorDetailProperty).GetString()).IsEqualTo("The operation exceeds the available resource capacity.");
     }
 
     internal static async Task ReservedAsync(RequestCqrsRf3Callers callers,

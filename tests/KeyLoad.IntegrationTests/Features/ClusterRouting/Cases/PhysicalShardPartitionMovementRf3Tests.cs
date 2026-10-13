@@ -35,6 +35,18 @@ internal sealed class PhysicalShardPartitionMovementRf3Tests
     public Task OrderedWholePartitionsResumeAfterObservedCommittedPrepareOwnerKillThenMergeCold()
         => PhysicalShardPartitionMovementRf3FaultScenario.RunAsync(TestContext.Current!.Execution.CancellationToken);
 
+    [Test]
+    public Task OrderedWholePartitionsResumeAfterObservedCommittedFenceAcceptanceOwnerKillThenMergeCold()
+        => PhysicalShardPartitionMovementRf3FaultScenario.RunAsync(
+            global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentPhaseRole.AcceptFence,
+            TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task OrderedWholePartitionsResumeAfterObservedCommittedPublicationOwnerKillThenMergeCold()
+        => PhysicalShardPartitionMovementRf3FaultScenario.RunAsync(
+            global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentPhaseRole.FinalizePublication,
+            TestContext.Current!.Execution.CancellationToken);
+
     private const int ConflictSeedCount = 3;
 
     [Test]

@@ -65,7 +65,7 @@ internal static class RequestCqrsMovementJournalInventory
             { throw Invalid(); }
             return;
         }
-        if (value.MoveId == Guid.Empty || value.Stage != PartitionMovePeerStage.ControlPrepare
+        if (value.MoveId == Guid.Empty || !IsObservedControlStage(value.Stage)
             || value.Journal is not { } journal || journal.CommandId != value.CommandId
             || journal.AppliedPosition <= UnappliedJournalPosition || !Digest(journal.ControlIntentDigest)
             || journal.EffectDigest is { } effect && !Digest(effect)
@@ -130,6 +130,10 @@ internal static class RequestCqrsMovementJournalInventory
             { throw Invalid(); }
         }
     }
+
+    internal static bool IsObservedControlStage(PartitionMovePeerStage? stage)
+        => stage is PartitionMovePeerStage.ControlPrepare or PartitionMovePeerStage.ControlAcceptFence
+            or PartitionMovePeerStage.ControlFinalize;
 
     private static bool Digest(string value) => value is { Length: DigestHexCharacters } && value.All(Uri.IsHexDigit);
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidRecord);

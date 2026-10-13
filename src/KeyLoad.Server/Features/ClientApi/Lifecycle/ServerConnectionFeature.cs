@@ -40,7 +40,7 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, ServerConnectionProtocol.Unavailable))
             .Acquire(cancellationToken);
 
-    private ServerConnectionOperation Acquire(CancellationToken cancellationToken)
+    internal ServerConnectionOperation Acquire(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         lock (gate)

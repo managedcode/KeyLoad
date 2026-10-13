@@ -21,20 +21,10 @@ internal static class CanonicalOperationRequestPreparation
         { payload = FollowerReadCredentialCapability.Wrap(context, payload); }
         if (readKind == GrainReadKind.ClusterBackupOwner)
         { payload = ClusterBackupCredentialCapability.Wrap(context, payload); }
-        var requestId = Guid.NewGuid();
-        var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var signed = global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Handles(readKind, commandKind)
-            ? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Create(codec,
-                context.RequestServices.GetRequiredService<TimeProvider>(), requestId, principal.Id,
-                readKind, commandKind, commandId, payload)
-            : readKind is { } read ? codec.CreateRead(requestId, principal.Id, read, payload)
-                : global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning.Create(
-                    codec, requestId, principal.Id, commandKind!.Value, commandId, payload);
-        var receivingOnly = global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning
-            .IsReceivingOnly(commandKind, payload);
-        var command = commandKind.HasValue && !receivingOnly;
-        OperationResponseHeaders.Publish(context, requestId);
-        RequestFailureDiagnostic.MarkOperationDispatch(context, command);
-        return new Prepared(principal, requestId, signed, command, receivingOnly);
+        var actual = CanonicalOperationSigning.Create(context.RequestServices, principal,
+            readKind, commandKind, commandId, payload, cancellationToken);
+        OperationResponseHeaders.Publish(context, actual.RequestId);
+        RequestFailureDiagnostic.MarkOperationDispatch(context, actual.Command);
+        return actual;
     }
 }

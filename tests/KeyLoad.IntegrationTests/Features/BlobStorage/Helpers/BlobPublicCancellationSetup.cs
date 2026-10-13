@@ -14,14 +14,18 @@ internal static class BlobPublicCancellationSetup
         owner.Root = RequestCqrsPhaseFaultProvisioning.NewPrivateRootPath();
         RequestCqrsPhaseFaultProvisioning.CreatePrivateRoot(owner.Root, () => owner.RootOwned = true);
         var data = Path.Combine(owner.Root, "data");
+        owner.ImageDataRoot = data;
         owner.Lifecycle.SetStage(RequestCqrsLifecycleStage.FaultProfile);
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(data, token)).Profile;
         owner.Lifecycle.SetStage(RequestCqrsLifecycleStage.FaultImages);
-        var images = await RequestCqrsRf3ImageProof.ReadAsync(token);
+        owner.LocalImageSession = await global::KeyLoad.IntegrationTests.Features.ClusterReplication.LocalRf3ImageTestSession
+            .StartIfSelectedAsync(token);
+        var images = await RequestCqrsRf3ImageProof.ReadAsync(token, owner.LocalImageSession?.Selection);
         owner.Controls = RequestCqrsProbeFixture.Create(data, Guid.NewGuid());
         owner.WaveStartupAttempted = true;
         owner.Wave = await RequestCqrsRf3Wave.StartProbedAsync(data,
-            RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), owner.Controls, token, owner.Lifecycle);
+            RequestCqrsPhaseFaultProvisioning.CurrentImages(images.Current), owner.Controls, token, owner.Lifecycle,
+            selection: owner.LocalImageSession?.Selection);
         owner.Lifecycle.SetStage(RequestCqrsLifecycleStage.FaultDiscovery);
         var discovery = new ReplicaSiloDiscovery[RequestCqrsRf3Protocol.NodeCount];
         for (var index = 0; index < discovery.Length; index++)

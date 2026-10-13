@@ -16,7 +16,7 @@ internal static class QueueOrderedRetryPublicOperations
     {
         var delivery = await Assert.That((await ReceiveAsync(callers, state, token)).Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         return delivery;
     }

@@ -6,7 +6,11 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueLifecyclePublicSeed
 {
-    internal static async Task<QueueLifecyclePublicState> RunAsync(RequestCqrsRf3Callers root, int route, CancellationToken token)
+    internal static Task<QueueLifecyclePublicState> RunAsync(RequestCqrsRf3Callers root, int route, CancellationToken token)
+        => RunAsync(root, route, false, token);
+
+    internal static async Task<QueueLifecyclePublicState> RunAsync(RequestCqrsRf3Callers root, int route,
+        bool byteSublimit, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var partition = new PartitionRef("queue-lifecycle-" + suffix, "database", "messaging", suffix);
@@ -16,7 +20,8 @@ internal static class QueueLifecyclePublicSeed
             {
                 MaxAttempts = QueueLifecyclePublicProtocol.One,
                 MaxStoredMessages = QueueLifecyclePublicProtocol.Two,
-                MaxDeadLetterMessages = QueueLifecyclePublicProtocol.One
+                MaxDeadLetterMessages = byteSublimit ? null : QueueLifecyclePublicProtocol.One,
+                MaxDeadLetterBytes = byteSublimit ? QueueLifecyclePublicProtocol.One : null
             },
             FieldPolicies = [new("/knowledge", "private-lifecycle")]
         };

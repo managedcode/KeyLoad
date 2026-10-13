@@ -7,6 +7,8 @@ on:
       - 'tests/KeyLoad.SiteTests/**'
       - 'scripts/Features/BenchmarkComparisons/site-*'
       - 'scripts/Features/BenchmarkComparisons/composite-site-*'
+      - 'scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs'
+      - 'scripts/Features/BenchmarkComparisons/isolated-github-transport.mjs'
       - '.github/workflows/website.yml'
       - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
       - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'

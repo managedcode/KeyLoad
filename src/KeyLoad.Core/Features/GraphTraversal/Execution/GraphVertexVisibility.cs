@@ -12,6 +12,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
     private const int InitialSchemaVersion = 0;
     private readonly record struct CollectionDecision(bool Allowed, long SchemaVersion);
     private const string VertexUnavailable = "The graph vertex is unavailable.";
+    private const string VertexMismatch = "A canonical graph vertex record is inconsistent.";
     private readonly Dictionary<EntityRef, bool> visible = [];
     private readonly Dictionary<(PartitionRef Partition, string Collection), CollectionDecision> collections = [];
 
@@ -96,8 +97,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
                 lease = database.RowVisibility?.AcquireCurrent(database.CaptureCurrentRowVisibility(principal, schema, vertex.Partition, vertex.Collection));
                 if (lease is null || lease.Contains(vertex.Id))
                 {
-                    var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(vertex));
-                    allowed = document is not null && !document.Deleted && database.Authorization.CanReadRow(principal, document.Access);
+                    allowed = ReadVisibleDocument(vertex);
                 }
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
@@ -111,5 +111,15 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
         { RowVisibilityFailureLedger.ThrowJoined(primary, error); throw; }
         return allowed;
+    }
+
+    private bool ReadVisibleDocument(EntityRef vertex)
+    {
+        var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(vertex));
+        if (document is not null && document.Reference != vertex)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);
+        }
+        return document is not null && !document.Deleted && database.Authorization.CanReadRow(principal, document.Access);
     }
 }

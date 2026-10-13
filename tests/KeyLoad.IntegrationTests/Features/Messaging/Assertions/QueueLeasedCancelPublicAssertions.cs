@@ -19,7 +19,7 @@ internal static class QueueLeasedCancelPublicAssertions
             1, 3L, 1L, null, null, LeaseVersion: 2L, DeliveryGeneration: 2L), null, null) : state.Leased;
         await MessageAsync(callers, owner, Target, target, token);
         await MessageAsync(callers, owner, Sibling, new(new(Sibling, MessageState.Ready, 0, 1L, 2L, null, null),
-            QueueLifecyclePublicProtocol.Payload, QueueLifecyclePublicProtocol.Headers), token);
+            QueueLifecyclePublicProtocol.CanonicalPayload, QueueLifecyclePublicProtocol.Headers), token);
         var witness = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(owner.Partition, QueueLifecyclePublicProtocol.Collection, Witness), token));
         await Assert.That(witness!.Json).IsEqualTo(QueueLifecyclePublicProtocol.Payload);

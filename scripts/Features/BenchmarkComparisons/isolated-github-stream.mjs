@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { openExclusive, hashRegularFile } from './isolated-github-files.mjs';
+import { openExclusive, hashRegularFile, writeCapture, writeJson } from './isolated-github-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { responseDecoder } from './isolated-github-headers.mjs';
 
@@ -15,12 +15,49 @@ function monitor(child, state, timeoutMs) {
   state.timeout = setTimeout(() => { state.timedOut = true; stopOwned(child, state); }, timeoutMs);
   child.stderr.on('data', chunk => {
     state.stderrBytes += chunk.length;
+    state.stderrHash.update(chunk);
+    const remaining = GH.stderrBytes - state.stderrCapturedBytes;
+    if (remaining > 0) {
+      const retained = Buffer.from(chunk.subarray(0, remaining));
+      state.stderrChunks.push(retained);
+      state.stderrCapturedBytes += retained.length;
+    }
     if (state.stderrBytes > GH.stderrBytes) { state.exceeded = true; stopOwned(child, state); }
   });
   return new Promise(resolve => {
     child.once('error', () => { state.spawnFailed = true; });
     child.once('close', (code, signal) => resolve({ code, signal }));
   });
+}
+
+function nativeProcessDiagnostic(state, result) {
+  return state.diagnostic ??= { exitCode: result.code, signal: result.signal,
+    timedOut: state.timedOut, exceeded: state.exceeded, spawnFailed: state.spawnFailed,
+    cancelled: state.cancelled === true, stderrBytes: state.stderrBytes,
+    stderrSha256: state.stderrHash.digest('hex') };
+}
+
+function containsCredential(bytes, token, truncated) {
+  const secret = Buffer.from(token);
+  if (bytes.includes(secret)) return true;
+  if (!truncated) return false;
+  for (let count = Math.min(bytes.length, secret.length - 1); count > 0; count -= 1) {
+    if (bytes.subarray(bytes.length - count).equals(secret.subarray(0, count))) return true;
+  }
+  return false;
+}
+
+async function retainNativeFailure(target, state, result, failed, cleanupFailureCount) {
+  if (!failed && result.code === 0 && result.signal === null) return;
+  const original = Buffer.concat(state.stderrChunks, state.stderrCapturedBytes);
+  const tokens = [process.env.GH_TOKEN, process.env.GITHUB_TOKEN].filter(value => typeof value === 'string' && value.length > 0);
+  const truncated = original.length < state.stderrBytes;
+  const credentialExcluded = tokens.some(value => containsCredential(original, value, truncated));
+  const capturedBytes = credentialExcluded ? 0 : original.length;
+  if (capturedBytes > 0) await writeCapture(target + '.stderr', original);
+  await writeJson(target + '.native-process.json', { ...nativeProcessDiagnostic(state, result),
+    stderrCapturedBytes: capturedBytes, stderrTruncated: truncated, cleanupFailureCount,
+    credentialExcluded, stderrFile: capturedBytes > 0 ? target + '.stderr' : null });
 }
 
 async function copyBounded(child, handle, maximumBytes, state, decoder) {
@@ -55,7 +92,9 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     child = spawn(command, argv, { cwd, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, NO_COLOR: '1', CLICOLOR_FORCE: '0', GH_FORCE_TTY: '' } });
   } catch { await handle.close(); throw new Error(GH.failure); }
-  const state = { timedOut: false, exceeded: false, spawnFailed: false, stopping: false, stderrBytes: 0 };
+  const state = { timedOut: false, exceeded: false, spawnFailed: false, stopping: false, stderrBytes: 0,
+    stderrCapturedBytes: 0, stderrChunks: [], stderrHash: createHash('sha256') };
+  let primaryFailure;
   const cancel = () => { state.cancelled = true; stopOwned(child, state); };
   signal?.addEventListener('abort', cancel, { once: true });
   process.on('SIGTERM', cancel);
@@ -68,17 +107,28 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     requireGitHub(result.signal === null && !state.timedOut && !state.exceeded && !state.spawnFailed && !state.cancelled);
     requireGitHub(decoder ? decoder.response !== undefined && [0, 1].includes(result.code) : result.code === 0);
     await handle.sync();
-    return { ...output, ...(decoder ? { response: decoder.response, exitCode: result.code } : {}) };
+    return { ...output, nativeProcess: nativeProcessDiagnostic(state, result),
+      ...(decoder ? { response: decoder.response, exitCode: result.code } : {}) };
+  } catch (error) {
+    primaryFailure = error;
+    throw error;
   } finally {
     if (child.exitCode === null) stopOwned(child, state);
-    await exit;
+    const result = await exit;
     clearTimeout(state.timeout);
     clearTimeout(state.force);
     signal?.removeEventListener('abort', cancel);
     process.off('SIGTERM', cancel);
     process.off('SIGINT', cancel);
-    await handle.chmod(0o400);
-    await handle.close();
+    const cleanupFailures = [];
+    try { await handle.chmod(0o400); } catch (error) { cleanupFailures.push(error); }
+    try { await handle.close(); } catch (error) { cleanupFailures.push(error); }
+    try { await retainNativeFailure(target, state, result,
+      primaryFailure !== undefined || cleanupFailures.length > 0, cleanupFailures.length); }
+    catch (error) { cleanupFailures.push(error); }
+    if (cleanupFailures.length > 0) {
+      throw new AggregateError(primaryFailure === undefined ? cleanupFailures : [primaryFailure, ...cleanupFailures], GH.failure);
+    }
   }
 }
 

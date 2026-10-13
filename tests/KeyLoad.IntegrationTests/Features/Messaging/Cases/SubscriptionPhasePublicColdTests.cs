@@ -1,6 +1,7 @@
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
+[NotInParallel]
 internal sealed class SubscriptionPhasePublicColdTests
 {
     [Test]

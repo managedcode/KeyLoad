@@ -55,18 +55,18 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
     private static Stage Read(GrainRequestProbeIdentity identity, IGrainContext context)
     {
         var services = context.ActivationServices;
-        var partition = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
-            .GetService<global::KeyLoad.Server.PartitionHost>(services);
-        var options = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
-            .GetService<global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.Server.NodeOptions>>(services);
+        var database = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetService<global::KeyLoad.Core.DatabaseEngine>(services);
+        var local = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetService<global::KeyLoad.PhysicalShardRecord>(services);
+        var configuration = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+            .GetService<global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.Replication.ReplicaConfiguration>>(services);
         ConfiguredOwner? configuredOwner = null;
-        if (partition is not null && options is not null)
+        if (database is not null && local is not null && configuration is not null)
         {
-            var local = global::KeyLoad.Server.Features.ClusterRouting.PhysicalOwnerConfiguredTuples
-                .Local(options.Value, partition).Owner;
             configuredOwner = new(local.PhysicalShardId, local.Incarnation, local.PlacementEpoch,
-                string.Join("|", local.VoterIds), partition.Configuration.LocalId,
-                partition.Database.Store.Identity.Incarnation);
+                string.Join("|", local.VoterIds), configuration.Value.LocalId,
+                database.Store.Identity.Incarnation);
         }
         return new(identity.RequestId, identity.ReadKind,
             Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(context.GrainId.ToString()))),

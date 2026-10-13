@@ -19,8 +19,8 @@ internal static class DatabaseCredentialResolver
         { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var token = codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
-            NativeSerialization.Serialize(key[ServerProtocol.BearerPrefix.Length..]));
+        var token = CanonicalCredentialDispatch.Prepare(codec,
+            key[ServerProtocol.BearerPrefix.Length..], requestId);
         RequestFailureDiagnostic.MarkCredentialDispatch(context);
         var started = DatabasePhaseTelemetry.Begin();
         var outcome = DatabasePhaseOutcome.Faulted;
@@ -30,14 +30,14 @@ internal static class DatabaseCredentialResolver
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
             using var connection = ServerConnectionFeature.Acquire(context, context.RequestAborted);
-            using var requestContext = node.OpenRequestContext(null, requestId,
-                Guid.Empty, connection.Token, connection.Id);
-            if (executionObserver is not null)
+            reply = await CanonicalCredentialDispatch.ReadAsync(node, token, connection, requestId, () =>
             {
-                executionObserver.Started(context.TraceIdentifier, requestId);
-                observedExecution = true;
-            }
-            reply = await node.ExecuteAsync(requestId, token, false, connection.Token).ConfigureAwait(false);
+                if (executionObserver is not null)
+                {
+                    executionObserver.Started(context.TraceIdentifier, requestId);
+                    observedExecution = true;
+                }
+            }).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })

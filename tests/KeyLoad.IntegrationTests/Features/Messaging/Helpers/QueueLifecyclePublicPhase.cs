@@ -41,7 +41,7 @@ internal static partial class QueueLifecyclePublicPhase
         await Assert.That(result.RequestId).IsEqualTo(request.RequestId);
         var delivery = await Assert.That(result.Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         await Assert.That(delivery.Token).IsNotEmpty();
         return delivery;

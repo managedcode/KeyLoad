@@ -12,4 +12,16 @@ internal sealed class QueueLifecyclePublicRf3Tests(ClusterFixture fixture)
     [Test, Arguments(false), Arguments(true)]
     public Task CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy(bool mcpFirst)
         => QueueLeasedCancelPublicFlow.RunAsync(fixture, mcpFirst);
+
+    [Test, Arguments(false), Arguments(true)]
+    public Task ByteOnlyDeadLetterSublimitRetainsPendingThroughAtomicRefusalTwoColdRedriveAndSameLaneHealthy(bool mcpFirst)
+        => QueueByteSublimitPublicFlow.RunAsync(fixture, mcpFirst);
+
+    [Test, Arguments(false), Arguments(true)]
+    public Task ScheduledCancellationRollsBackLateFailureThenRejectsOriginalDeadlineCasAcrossBothColdCutsAndHealthyWork(bool mcpFirst)
+        => QueueScheduledCancelPublicFlow.RunAsync(fixture, mcpFirst);
+
+    [Test, Arguments(false), Arguments(true)]
+    public Task HistoricalEmptyReceiveCannotClaimLaterReadyWorkChangedSameIdRefusesAcrossBothColdCutsAndHealthyWork(bool mcpFirst)
+        => QueueEmptyHistoryPublicFlow.RunAsync(fixture, mcpFirst);
 }

@@ -41,9 +41,10 @@ internal static class RequestCqrsMovementJournalCapture
         if (actual.Error is { } error)
         { return Record(claim, voter, siloAddress, partition, Guid.Empty, null, null, error); }
         if (actual.NativeValue is not PartitionMovePhaseResult phase
-            || phase.Stage != PartitionMovePeerStage.ControlPrepare || phase.Control is not { } control
+            || !RequestCqrsMovementJournalInventory.IsObservedControlStage(phase.Stage) || phase.Control is not { } control
             || control.Partition != partition || control.MoveId != phase.MoveId
-            || control.PrincipalId != arm.PrincipalId || phase.Journal.CommandId != arm.CommandId)
+            || control.PrincipalId != arm.PrincipalId || phase.Journal.CommandId != arm.CommandId
+            || !HasCommittedControlShape(phase))
         { throw Invalid(); }
         return Record(claim, voter, siloAddress, partition, phase.MoveId, phase.Stage, phase.Journal, null);
     }
@@ -67,6 +68,24 @@ internal static class RequestCqrsMovementJournalCapture
         else
         { files.WriteMarker(marker); }
     }
+
+    private static bool HasCommittedControlShape(PartitionMovePhaseResult phase)
+        => phase.Stage switch
+        {
+            PartitionMovePeerStage.ControlPrepare => phase.Control!.Phase == PartitionMovePhase.Prepared,
+            PartitionMovePeerStage.ControlAcceptFence => phase.Control!.Phase == PartitionMovePhase.Fenced
+                && phase.Fence is not null && phase.Control.SourceCut == phase.Fence.SourceCut,
+            PartitionMovePeerStage.ControlFinalize => phase.Control!.Phase == PartitionMovePhase.Published
+                && phase.Control.InstalledReceipt is not null && phase.Control.PublishedPlacement is not null
+                && SamePublication(phase.PublishedPlacement, phase.Control.PublishedPlacement),
+            _ => false
+        };
+
+    private static bool SamePublication(AtomicPartitionPlacementV1? actual, AtomicPartitionPlacementV1 expected)
+        => actual is not null && actual.Version == expected.Version && actual.Partition == expected.Partition
+            && actual.PhysicalShardId == expected.PhysicalShardId && actual.Revision == expected.Revision
+            && actual.Incarnation == expected.Incarnation && actual.PlacementEpoch == expected.PlacementEpoch
+            && actual.VoterIds.SequenceEqual(expected.VoterIds, StringComparer.Ordinal);
 
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidRecord);
 }

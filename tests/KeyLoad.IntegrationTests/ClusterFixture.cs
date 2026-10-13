@@ -21,6 +21,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
     private readonly Features.Messaging.QueueDeadlineRf3Selection? queueDeadline;
+    private readonly Features.QueryExecution.PostgresRf3FixtureOwnership nativeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly int? snapshotThreshold;
@@ -51,6 +52,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
 
     internal ClusterFixture(Features.Messaging.QueueDeadlineRf3Selection queueDeadline)
         => this.queueDeadline = queueDeadline;
+
+    internal ClusterFixture(Features.QueryExecution.PostgresRf3Selection selection)
+        => nativeSql = new(selection);
 
     /// <summary>Creates only the explicitly selected Linux native namespace fault cohort.</summary>
     internal ClusterFixture(ReplicaIsolationProfile profile)
@@ -114,7 +118,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
                 isolateReplicaNamespace, snapshotThreshold, Key);
             Root = selection.Root;
             SnapshotReadiness = selection.Readiness;
-            var arguments = selection.Arguments;
+            var arguments = nativeSql.Prepare(Root, selection.Arguments);
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
                 arguments, timeout.Token);
@@ -122,6 +126,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             { isolationBuilder = new(builder); }
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             queueDeadline?.Configure(builder);
+            nativeSql.Configure(builder, Root);
             RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
@@ -239,13 +244,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             localImageSession = null;
         }
         localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
-        if (SnapshotReadiness is not null)
-        {
-            await SnapshotReadiness.JoinAfterStopAsync(appStopped, failures).ConfigureAwait(false);
-            localImageCleanupIncomplete |= failures.Count > 0 || !appStopped;
-        }
-        if (!localImageCleanupIncomplete && !isolationCleanupIncomplete)
-        { await DeleteOwnedRootAsync(coverage, Root, deadline, failures).ConfigureAwait(false); }
+        localImageCleanupIncomplete = await nativeSql.JoinAndReleaseRootAsync(SnapshotReadiness, appStopped,
+            localImageCleanupIncomplete, isolationCleanupIncomplete, failures,
+            () => DeleteOwnedRootAsync(coverage, Root, deadline, failures)).ConfigureAwait(false);
         if (coverage is not null && appStopped && failures.Count == 0 && stoppedNodes is not null)
         {
             await deadline!.CollectAsync(() => coverage.PublishReceiptAsync(stoppedNodes, token), failures)

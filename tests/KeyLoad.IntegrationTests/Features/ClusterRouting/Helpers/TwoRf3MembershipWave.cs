@@ -42,6 +42,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     internal KeyLoad.IntegrationTests.Features.StorageRecovery.NativeCapabilityOmissionRf3Fixture? nativeDiscoveryOmission;
     internal readonly LocalRf3ImageSelection.Selection? localImageSelection;
     internal LocalRf3ImageIdentity.Identity? localImageIdentity;
+    internal LocalRf3ImageTestSession? localImagePreparation;
 
     internal TwoRf3MembershipWave(LocalRf3ImageSelection.Selection? selection, bool register = false, bool remote = false, bool query = false, bool probe = false, bool protectedDocument = false, int? maximumBatchBytes = null, bool isolateActivation = false, bool nativeMembershipDiagnostics = false)
     {
@@ -153,6 +154,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         { await ServerFailureObserver.ObserveAsync(() => joinedDiscovery.DisposeAfterOwnersJoinedAsync(this), failures).ConfigureAwait(false); }
         await NativeMembershipDiagnosticWaveLifecycle.JoinAsync(this, failures).ConfigureAwait(false);
         NativeBlobWireWaveLifecycle.DeleteJoined(this, failures);
+        await TwoRf3MembershipLocalImageLifetime.JoinAsync(this, failures).ConfigureAwait(false);
         if (CanDeleteRoot(failures))
         {
             var root = dataRoot!;

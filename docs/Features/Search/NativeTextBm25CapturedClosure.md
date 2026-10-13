@@ -13,3 +13,9 @@ flowchart LR
   C --> D[Existing eligibility and exact scorer]
   D --> E[Joined read-only complete page]
 ```
+
+## R34 captured resource-authority closure correction
+
+REQ-FTS-BM25-CUT-001 also requires the exact native Resource authority lookup closure before optional head absence can return. Existing Bm25CorpusReuse.Rank calls Resource unconditionally: its unchanged target-stage fence and local catalog/placement/directory checks must read the SAME original captured lease for absent and present heads. Capture the exact partition target-stage, catalog, atomic row/directory, physical directory and published-placement keys before recording optional head absence. Only the outbox eligibility lookup remains conditional on a present head. No fence, placement, policy, budget, decoder, scorer or terminal check is bypassed.
+
+AC-FTS-BM25-CUT-001 retains the complete original no-argument absent/present/full receipt/selected entry/cold regression and independent full RankedDocument page. R34 original UID eb715d1c-993a-6dbc-c4cf-d3536630ebd4 failed on its first absent-head read at PartitionMoveTargetStorage.Read through Resource; the captured target-stage scope was missing. Original failure remains retained; this N-only correction establishes source intent, not a repaired runtime result. The unchanged public warm/two-cold SDK/MCP case remains the public gate.

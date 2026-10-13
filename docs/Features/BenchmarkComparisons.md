@@ -1598,3 +1598,23 @@ Ownership/order: freeze this contract before scripts/Features/BenchmarkCompariso
 ## Native pure/mixed methodology, owner direction 2026-10-09
 
 [Methodology](BenchmarkComparisons/Methodology.md) and [ADR-122](../ADR/ADR-122-native-benchmark-methodology.md) define the current common pure/mixed/ingestion benchmark contract and REQ/AC-METH-001..005. Only native one-node and three-node comparison arms remain active. Earlier two-node cohort counts and original records are historical, not the current execution inventory. Document-family implementation and authentic Linux evidence remain separately tracked; authored methodology is not a passed measurement.
+
+
+## Bounded original native evidence on capture failure
+
+REQ-BC-NATIVE-FAILURE-DIAGNOSTICS-001 and AC-BC-NATIVE-FAILURE-DIAGNOSTICS-001 refine AC-ISO-007 and AC-BC-WEB-002. Actual Website run38326180965/attempt1, source0143bfe0107707f1d876f250b6a43b2cdae53d85, failed before website checkout or tests. Authenticated artifact11780349520 SHA256d85da403807545ebaee36de6880ce55c375d828f30c0af9c6524aca420847624 retains native request15 HTTP200 and a219259-byte truncated JSON body, SHA256420749af6296ff7483c0ad94f71f82f5b237ec1c16a23a6b6f8b7c82a1880154. Current request flow requires both HTTP200 and native exit0; it retained the non-successful body but discarded native stderr and exit code. Provider versus local transport cause remains unproved.
+
+The source-only repair retains original child code/signal, observed stderr byte count/hash, timeout/bound/cancellation facts and a no-follow, exclusive, mode0400 stderr sidecar capped by unchanged GH.stderrBytes. Raw diagnostic text stays in private failure artifacts; the public CLI envelope remains unchanged and contains no native stderr. A captured credential matching actual GH_TOKEN/GITHUB_TOKEN, including its partial prefix crossing the capture cap, is excluded from the raw sidecar, with explicit exclusion metadata; its bytes are never persisted or printed. Oversized stderr retains only its exact bounded prefix and reports observed/captured sizes and truncation truthfully. Native request metadata records actual exit facts and the failure artifact path. Current metadata/archive bounds, deadlines, native retry statuses/counts, selection, hashing, no-fallback, content/metric gates and source closure84 remain unchanged.
+
+Acceptance requires actual TUnit IsolatedGitHubFailureDiagnosticsTests native children for nonzero exit, stderr one-over, full and boundary-prefix credential exclusion, and an existing no-follow diagnostic conflict. Seal, close and diagnostic retention are independently attempted after child exit; any failure preserves the ordered original primary and secondary errors. The real retention-conflict operation proves unchanged original diagnostic bytes, joined native child, both original failure identities and healthy continuation; genuine close/chmod failures remain subject to actual native failure evidence rather than injected API doubles. Each refused process is joined, exact emitted/retained bytes and error-state files are checked, signals/listeners are restored, and a fresh healthy native capture preserves original failure evidence. These are real process/file tests, not HTTP/provider proof. Retain every existing complete large-stream, metadata/archive and site gate. Exact-source Linux Benchmarks contracts and Website original capture/qualification/Pages evidence remain mandatory; no local benchmark execution or unproved speed/durability claim. Current acceptance is OPEN, source N only.
+
+Owning roles: existing isolated-github-stream/transport modules; new UnitContracts/Cases/IsolatedGitHubFailureDiagnosticsTests and Processes/IsolatedGitHubFailureDiagnosticsProgram; Website adds only those two actual input paths to its existing source-push filter. Root integrates docs before code, then native creation/existing-hunk guards, whole common review/build/format and original Linux execution. No product, storage, serialization, dependency, provider, workflow permissions or publication contract changes. Rollback removes diagnostic additions while preserving fail-closed admission and original historical artifacts.
+
+```mermaid
+flowchart LR
+  Child[Original bounded native child] --> Join[Join stdout stderr and native exit]
+  Join --> Failure[Refuse invalid or failed evidence]
+  Failure --> Private[Sealed bounded private diagnostic artifacts]
+  Failure --> Safe[Unchanged safe public envelope]
+  Join --> Healthy[Healthy continuation with original failure preserved]
+```

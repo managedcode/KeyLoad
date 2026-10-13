@@ -11,7 +11,8 @@ internal static class BlobBoundedRetirementPublicAssertions
     {
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString());
+        await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString())
+            .Because(result.Problem?.Detail ?? string.Empty);
     }
 
     internal static async Task RefusedAsync(RequestCqrsRf3Callers callers, ReclaimBlobRequest request,

@@ -7,7 +7,13 @@ internal static class PhysicalShardPartitionMovementRf3FaultScenario
     private const int FirstSeed = 0;
     private const int ExactSeeds = 2;
 
-    internal static async Task RunAsync(CancellationToken token)
+    internal static Task RunAsync(CancellationToken token)
+        => RunAsync(global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentPhaseRole.Prepare, token);
+
+    internal static async Task RunAsync(
+        global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementParentPhaseRole role, CancellationToken token,
+        Func<TwoRf3MembershipWave, PartitionMovementPublicParentRf3Seed[], PartitionMoveRequest[],
+            global::KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalRecord, CancellationToken, Task>? recovery = null)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
@@ -20,7 +26,7 @@ internal static class PhysicalShardPartitionMovementRf3FaultScenario
             seeds.Add(await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, caller.Token));
             while (seeds.Count < ExactSeeds)
             { seeds.Add(await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, seeds[FirstSeed].Credential, caller.Token)); }
-            await PhysicalShardPartitionMovementRf3FaultFlow.RunAsync(wave, seeds.ToArray(), caller.Token);
+            await PhysicalShardPartitionMovementRf3FaultFlow.RunAsync(wave, seeds.ToArray(), role, caller.Token, recovery);
         }, failures);
         if (failures.Count > 0 && wave is { } failedWave)
         { failedWave.QueryControls.RetainEvidence(); }

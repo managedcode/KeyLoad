@@ -39,6 +39,7 @@ internal static class ServerConfiguration
             .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
                 ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
         Register(builder.Services, blobWireObserver, localhostClustering);
+        PostgresNativeComposition.Register(builder.Services, builder.Configuration);
         if (sealedObserver is not null)
         { builder.Services.AddSingleton(sealedObserver); }
         if (authenticationExecutionObserver is not null)

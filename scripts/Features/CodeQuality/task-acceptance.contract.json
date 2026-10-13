@@ -5902,6 +5902,14 @@
               "instanceName": "LiveDeltaCumulativeCeilingRejectsBeforeRetentionAndOriginalPageBoundaryStillResumes",
               "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryResultCompositionTests.cs",
               "parameterTypeFullNames": []
+            },
+            {
+              "className": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryResultCompositionTests",
+              "nativeReportClassName": "KeyLoad.UnitTests.Features.QueryExecution.LiveQueryResultCompositionTests",
+              "methodName": "HiddenOutboxReadWorkRefusesWholePageThenOriginalCursorResumesBoundedLiteralPages",
+              "instanceName": "HiddenOutboxReadWorkRefusesWholePageThenOriginalCursorResumesBoundedLiteralPages",
+              "sourcePath": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/LiveQueryResultCompositionTests.cs",
+              "parameterTypeFullNames": []
             }
           ]
         },

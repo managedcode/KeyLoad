@@ -6,4 +6,8 @@ internal sealed class QueueLeaseFencingRf3Tests
     [Test]
     public Task ActualRenewAndNackReceiptsSurviveColdReclaimStaleTokensThenAcknowledgedHealthyWork()
         => QueueLeaseRf3Trial.RunAsync();
+
+    [Test]
+    public Task OriginalDeadlineCasCannotExpireRenewedLeaseAcrossBothColdCutsThenCurrentTokenAckAndHealthyWork()
+        => QueueRenewedDeadlinePublicTrial.RunAsync();
 }

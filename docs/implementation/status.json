@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R34 Release134.528s, whole-solution formatter verification149.979s and native diagnostics passed0 errors/warnings. Two source/image-bound native50 local Aspire groups executed69 unique cases:42 passed,27 failed,0 skipped (Unit34/38; public Docker RF3 SDK/MCP8/31). Every original process/readers/disposal joined, source/image/deployment closure unchanged. Six readiness/startup failures, seven custom image-owner refusals, six queue payload oracles, two composition and original movement/backup/BM25/blob failures remain open. Actual census3777Unit/450Integration (3243 functionalUnit/534 controls), including24new cases, is neither execution nor coverage. Combined original TRX interval peak27 is distinct from configured50. Actual5s counters/GC capture profiles the owned test driver only, with no hotspot or speed claim. Original plan19/104 done,85 in progress; KL105, coverage and exact-source Linux/full-suite/fault/endurance/performance remain open.",
+    "qualification": "R35 final Release211.919s and whole-solution formatter verification145.581s passed with zero errors/warnings. Two source/image-bound native50 local Aspire groups executed119 unique cases:75 passed,44 failed,0 skipped (Unit60/68; real Docker RF3 SDK/MCP15/51). All process/readers/disposal joins completed with unchanged source/image/deployment closure. Nine six-voter profile refusals, two SQL certificate DI startup failures, five queue wrapper oracles, nineteen expected-domain-error versus UnknownWriteOutcome assertions, one blob safe-detail and eight movement/backup/BM25 unit failures remain open; source-confirmed corrections and hypotheses are distinguished in the original record. Actual census3784Unit/469Integration (3250 functionalUnit/534 required controls) is not execution or coverage. Configured50 and observed combined TRX interval peak30 are distinct. Both lane original coverage-merge failures are retained; coverage remains UNMEASURED. Original plan19/104 done,85 in progress; KL105 and exact-source Linux full-suite/recovery/fault/endurance/performance remain open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -1270,6 +1270,33 @@
       "nativeMaximumParallelTests": 50,
       "actualCombinedTrxIntervalPeak": 27,
       "qualification": "Local macOS development only; every original failure retained. No new complete task acceptance or Linux full-suite, fault, endurance or performance qualification claimed."
+    },
+    "runtimeObservedR35": {
+      "record": "docs/implementation/stage64-r35-development-20261013.json",
+      "executedUniqueCases": 119,
+      "passed": 75,
+      "failed": 44,
+      "skipped": 0,
+      "unit": {
+        "executed": 68,
+        "passed": 60,
+        "failed": 8,
+        "skipped": 0
+      },
+      "rf3": {
+        "executed": 51,
+        "passed": 15,
+        "failed": 36,
+        "skipped": 0
+      },
+      "nativeMaximumParallelTests": 50,
+      "actualCombinedTrxIntervalPeak": 30,
+      "rootIndependentReconciliation": {
+        "path": "TestResults/stage61-native-join/stage64-r35-root-independent-reconciliation.original.json",
+        "sha256": "7fd7e8ba662f681d6a459b7142fad86d936177f350f239848ea39300338da49a"
+      },
+      "qualification": "Local macOS development only. Every original failure retained; no new complete task acceptance or Linux full-suite, process-recovery, fault, endurance or performance qualification claimed.",
+      "coverage": "UNMEASURED; both original native coverage-merge failures retained"
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

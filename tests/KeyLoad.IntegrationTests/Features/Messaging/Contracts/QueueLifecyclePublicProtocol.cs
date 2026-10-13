@@ -8,6 +8,7 @@ internal static class QueueLifecyclePublicProtocol
     internal const string Pending = "pending";
     internal const string Healthy = "healthy";
     internal const string Payload = "{\"knowledge\":\"повний native lifecycle\"}";
+    internal const string CanonicalPayload = "{\"knowledge\":\"\\u043F\\u043E\\u0432\\u043D\\u0438\\u0439 native lifecycle\"}";
     internal const string Headers = "{\"source\":\"four actual public routes\"}";
     internal const string Ordering = "referenced-entity";
     internal const string ColdScenario = "queue-lifecycle-same-owner-cold";

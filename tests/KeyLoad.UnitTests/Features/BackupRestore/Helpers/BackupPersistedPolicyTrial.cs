@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class BackupPersistedPolicyTrial
 {
+    private const string MissingAppliedPosition = "The canonical applied position is invalid.";
     internal static async Task RunAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -99,10 +100,18 @@ internal static class BackupPersistedPolicyTrial
         var cut = BackupPersistedPolicyAssertions.Capture(fixture.TargetStore);
         var authority = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
         await Assert.That(authority.Code).IsEqualTo(ErrorCode.Corruption);
+        var originalToken = result.Get<CommitReceipt>().Token;
+        var owner = database.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, fixture.Partition));
+        await Assert.That(owner.Incarnation).IsEqualTo(originalToken.Incarnation);
+        await Assert.That(owner.PlacementEpoch).IsEqualTo(originalToken.OwnershipEpoch);
+        await Assert.That(originalToken.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
+        await Assert.That(originalToken.Position).IsGreaterThan(0L);
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))).IsNull();
         var reference = new EntityRef(fixture.Partition, BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.GetDocument(BackupPersistedPolicySeed.Reader,
-            reference, result.Get<CommitReceipt>().Token, token));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
+            reference, originalToken, token));
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(error.Message).IsEqualTo(MissingAppliedPosition);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.TargetStore, cut);
     }
 }

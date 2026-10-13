@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
@@ -9,14 +10,21 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
 {
     private const int FirstEntry = 0;
 
-    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+    internal static Task RunAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed[] seeds, CancellationToken token)
+        => RunAsync(wave, seeds, PartitionMovementParentPhaseRole.Prepare, token);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed[] seeds, PartitionMovementParentPhaseRole role, CancellationToken token,
+        Func<TwoRf3MembershipWave, PartitionMovementPublicParentRf3Seed[], PartitionMoveRequest[],
+            RequestCqrsMovementJournalRecord, CancellationToken, Task>? recovery = null)
     {
+        var expectedStage = StageFor(role);
         var requests = seeds.Select(seed => seed.FirstRequest).ToArray();
         var controls = wave.QueryControls;
         var discovery = await PhysicalShardPartitionMovementRf3FaultOwner.DiscoveryAsync(wave, token);
         var phase = PartitionMovementParentPhaseIds.For(requests[FirstEntry],
-            PartitionMovementPublicParentRf3Administrator.PrincipalId, PartitionMovementParentPhaseRole.Prepare);
+            PartitionMovementPublicParentRf3Administrator.PrincipalId, role);
         var arm = controls.WriteArm(PartitionMovementPublicParentRf3Administrator.PrincipalId, phase, null,
             RequestCqrsProbePhase.SubmitReturned, RequestCqrsProbeAction.Hold, seeds[FirstEntry].Partition);
         var originalOwner = wave.Application;
@@ -34,7 +42,7 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
                 marker = await controls.WaitForMarkerAsync(arm, RequestCqrsProbePhase.SubmitReturned,
                     RequestCqrsProbeOutcome.Observed, discovery, token);
                 proof = RequestCqrsMovementJournalReader.Read(controls, marker.Value);
-                await PhysicalShardPartitionMovementRf3JournalAssertions.ProofAsync(proof.Value, seeds[FirstEntry], phase);
+                await PhysicalShardPartitionMovementRf3JournalAssertions.ProofAsync(proof.Value, seeds[FirstEntry], phase, expectedStage);
                 await Assert.That(first.IsCompleted).IsFalse();
                 var node = controls.ArmFor(arm).GateVoter
                     ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
@@ -64,12 +72,33 @@ internal static class PhysicalShardPartitionMovementRf3FaultFlow
         catch (Exception cleanup) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(cleanup) is not null)
         { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
+        await RecoverAsync(wave, seeds, requests, proof, arm, expectedStage, recovery, token);
+    }
+
+    private static async Task RecoverAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed[] seeds, PartitionMoveRequest[] requests,
+        RequestCqrsMovementJournalRecord? proof, Guid arm, PartitionMovePeerStage expectedStage,
+        Func<TwoRf3MembershipWave, PartitionMovementPublicParentRf3Seed[], PartitionMoveRequest[],
+            RequestCqrsMovementJournalRecord, CancellationToken, Task>? recovery, CancellationToken token)
+    {
         var retained = proof ?? throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch);
         await PhysicalShardPartitionMovementRf3JournalAssertions.ColdAsync(wave, seeds, retained,
-            controls.ArmFor(arm).GateVoter!);
-        await PhysicalShardPartitionMovementRf3FaultOwner.ResumeAsync(wave, seeds, requests, token);
-        await controls.RetireArmAsync(arm, token);
+            wave.QueryControls.ArmFor(arm).GateVoter!, expectedStage);
+        if (recovery is null)
+        { await PhysicalShardPartitionMovementRf3FaultOwner.ResumeAsync(wave, seeds, requests, token); }
+        else
+        { await recovery(wave, seeds, requests, retained, token); }
+        await wave.QueryControls.RetireArmAsync(arm, token);
     }
+
+    private static PartitionMovePeerStage StageFor(PartitionMovementParentPhaseRole role)
+        => role switch
+        {
+            PartitionMovementParentPhaseRole.Prepare => PartitionMovePeerStage.ControlPrepare,
+            PartitionMovementParentPhaseRole.AcceptFence => PartitionMovePeerStage.ControlAcceptFence,
+            PartitionMovementParentPhaseRole.FinalizePublication => PartitionMovePeerStage.ControlFinalize,
+            _ => throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch)
+        };
 
     private static async Task CleanupLiveAsync(RequestCqrsProbeFixture controls, Guid arm, Task original,
         CancellationTokenSource originalCancellation, IReadOnlyList<ReplicaSiloDiscovery> discovery,

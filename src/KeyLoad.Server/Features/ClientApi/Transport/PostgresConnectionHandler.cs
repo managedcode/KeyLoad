@@ -1,0 +1,82 @@
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Connections.Features;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.Server;
+
+internal sealed class PostgresConnectionHandler(IServiceProvider services, IOptions<PostgresSessionOptions> configured,
+    PostgresRetainedAdmission admission, PostgresCancellationRegistry cancellations) : ConnectionHandler
+{
+    public override async Task OnConnectedAsync(ConnectionContext context)
+    {
+        var options = configured.Value;
+        if (context.Features.Get<ITlsHandshakeFeature>() is null
+            || context.Features.Get<ServerConnectionFeature>() is null)
+        { throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential); }
+        try
+        {
+            var request = await ReadStartupAsync(context, options).ConfigureAwait(false);
+            if (request is null)
+            { return; }
+            if (request.Cancel is { } cancel)
+            { await cancellations.CancelAsync(cancel.Id, cancel.Secret).ConfigureAwait(false); return; }
+            await new PostgresProtocolSession(services, configured, admission, cancellations)
+                .RunAsync(context, request.Startup ?? throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid))
+                .ConfigureAwait(false);
+        }
+        catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested
+            && (PostgresAdmissionLifetime.Require(context).Completed || !PostgresAdmissionLifetime.Require(context).Token.IsCancellationRequested))
+        {
+            var failures = new List<Exception> { error };
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                using var deadline = new PostgresTransportDeadline(
+                    TimeSpan.FromSeconds(services.GetRequiredService<IOptions<DatabaseLimits>>().Value.QueryDeadlineSeconds),
+                    services.GetRequiredService<TimeProvider>(), context.ConnectionClosed);
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    var writer = new PostgresWireWriter(context.Transport.Output, options.MaximumFrameBytes);
+                    PostgresErrorReply.Write(writer, error);
+                    await writer.FlushAsync(deadline.Token).ConfigureAwait(false);
+                }, failures).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
+    }
+
+    private async Task<StartupRequest?> ReadStartupAsync(ConnectionContext context, PostgresSessionOptions options)
+    {
+        StartupRequest? result = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
+                options.MaximumStartupBytes, admission, PostgresAdmissionLifetime.Require(context).Token).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() =>
+            {
+                if (frame is not null)
+                {
+                    var cancel = Cancellation(frame.Payload);
+                    result = cancel is not null ? new(null, cancel)
+                        : new(PostgresStartupDecoder.Read(frame.Payload, options), null);
+                }
+                return Task.CompletedTask;
+            }, failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return result;
+    }
+
+    private static (int Id, int Secret)? Cancellation(ReadOnlySpan<byte> payload)
+    {
+        var reader = new PostgresPayloadReader(payload);
+        if (reader.Int32() != PostgresProtocol.CancelRequest)
+        { return null; }
+        var id = reader.Int32();
+        var secret = reader.Int32();
+        reader.Complete();
+        return (id, secret);
+    }
+
+    private sealed record StartupRequest(PostgresStartupDecoder.Startup? Startup, (int Id, int Secret)? Cancel);
+}

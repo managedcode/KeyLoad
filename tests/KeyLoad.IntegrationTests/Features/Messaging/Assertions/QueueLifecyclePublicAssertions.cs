@@ -8,7 +8,7 @@ internal static class QueueLifecyclePublicAssertions
     internal static async Task LiteralAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, string id,
         MessageMetadata metadata, bool retained, CancellationToken token)
     {
-        var expected = new MessageInspection(metadata, retained ? QueueLifecyclePublicProtocol.Payload : null,
+        var expected = new MessageInspection(metadata, retained ? QueueLifecyclePublicProtocol.CanonicalPayload : null,
             retained ? QueueLifecyclePublicProtocol.Headers : null);
         var request = new InspectMessageRequest(state.Lane, id);
         foreach (var route in QueueLifecyclePublicProtocol.Routes)

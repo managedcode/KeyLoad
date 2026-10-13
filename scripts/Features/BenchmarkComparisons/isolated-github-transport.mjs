@@ -60,7 +60,9 @@ export async function requestNative(endpoint, target, maximumBytes, timeoutMs, c
     } finally {
       await writeJson(path.join(state.requests, `${name}.json`), { endpoint, repeat, status: result.response.status,
         body: path.relative(state.root, successful ? target : body), headers: path.relative(state.root, headers),
-        bytes: result.bytes, sha256: result.sha256, waitMs: delay, plannedAccumulatedWaitMs: state.waitedMs + delay });
+        bytes: result.bytes, sha256: result.sha256, nativeProcess: result.nativeProcess,
+        nativeFailure: successful ? null : path.relative(state.root, body + '.native-process.json'),
+        waitMs: delay, plannedAccumulatedWaitMs: state.waitedMs + delay });
     }
     if (successful) {
       await link(body, target);

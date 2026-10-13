@@ -1190,7 +1190,7 @@ BackupPersistedPolicyTests.CliRestoredCredentialsAndCurrentFieldPolicySurviveTwo
 source seed uses generated native ConfigureResource/ConfigurePrincipal/ConfigureApiKey
 and Batch commands. Live credential authenticates; a second persisted revoked key
 is rejected. The restored owner is new and dispatch-paused; source-signed mutation refuses Corruption under the new signing key, while the
-old minimum token remains TokenInvalidated, with the full postrestore image unchanged.
+old minimum token refuses Corruption with the exact safe detail `The canonical applied position is invalid.`, with the full postrestore image unchanged. This offline restore retains the archived placement witness; the test independently binds its incarnation/ownership epoch to the original receipt and proves that canonical LastApplied is absent before the refused read. It does not qualify TokenInvalidated after an explicit cluster catalog/roster rebind: that production token-fencing contract remains the separate REQ/AC-BACKUP-CLUSTER-003 and KL042 gate. New target identity, current persisted credentials/policy and fresh target-issued receipts remain independently asserted below.
 
 REQ-BACKUP-PERSISTED-POLICY-002 requires current FieldUse checks from the restored
 persisted principal. AC-BACKUP-PERSISTED-POLICY-002 maps to the same case: epoch2
@@ -1222,3 +1222,100 @@ whole042 credentials/SDK/official MCP/Q1 gates remain independent. No product
 format, auth rule, limits, clock, source identity or serializer changes. This
 unapplied source proposal depends on the accumulated ManifestCut3 doc postimage;
 compiler, actual process flow, Linux and RF3 gates remain OPEN.
+
+
+## Current identity format refusal and exact archive repair through CLI
+
+REQ-BACKUP-IDENTITY-REPAIR-001 / AC-BACKUP-IDENTITY-REPAIR-001 refine REQ/AC-BACKUP-002/003:
+IdentityVersionRepairTests.HashConsistentUnsupportedIdentityRefusesCliThenExactRepairPreservesTwoColdCuts(bool codecVersion)
+uses both actual boolean arguments. Decode the original generated native identity
+envelope; change ONLY the original KeyCodecVersion (true) or FormatVersion (false)
+by checked +1, recompute its native payload SHA, and update the actual outer
+manifest descriptor through MetadataTestFiles. The complete faulted archive is the
+refusal baseline. Native VerifyBackup and actual CLI restore twice require literal
+FormatUnsupported and existing IdentityFormatUnsupported detail, no destination
+publication, unchanged complete source image/cut and every original faulted byte.
+
+REQ-BACKUP-IDENTITY-REPAIR-002 / AC-BACKUP-IDENTITY-REPAIR-002 map to the same case:
+original identity and manifest bytes repair uncancelled under the ordered failure
+ledger; the SAME archive then verifies its original complete identity/cut, restores
+through the actual CLI with its actual receipt, and retains the literal complete
+restored canonical image/new paused authority across two further joined cold opens.
+The source/archive stay exact. The previous NativeMetadataFormatTests already
+cover native identity defects and one restore; this supplements their actual CLI,
+repeated refusal/full-image preservation/two-cold boundary, not a new parser rule.
+
+```mermaid
+flowchart LR
+ A[Original native identity and manifest] --> B[One unsupported version with genuine checksums]
+ B --> C[Native verification and actual CLI refusal twice]
+ C --> D[Exact original identity and manifest repair]
+ D --> E[Same archive CLI restore and literal complete cut]
+ E --> F[Two joined native cold opens]
+```
+
+Original versions, aliases, signing key, limits and production readers remain
+unchanged. No compatibility decoder, data migration, cancellation/OS-specific
+error claim, unobserved staging claim, RF3 or power-loss proof. Unapplied source
+only: compiler/native process/Linux gates remain OPEN. This doc append depends on
+the accumulated persisted-policy proposal; Root owns final current-doc merging.
+
+## Native multipart and active-upload portable backup continuation
+
+REQ-BACKUP-BLOB-PORTABLE-001 / AC-BACKUP-BLOB-PORTABLE-001 refine REQ/AC-BACKUP-002/003 and REQ/AC-BLOB-001/002/004.
+BlobPortableBackupTests.NativeMultipartAndActiveUploadRestoreThroughCliThenFreshPublicationSurvivesTwoColdOwners
+uses genuine native CreateNativeOperation and original ApplyEmbedded kernel execution.
+A published 65,537-byte two-part blob and a creator-owned active upload with its
+first 65,536-byte part have complete native original results/receipts and replay
+cuts. VerifyBackup and actual CLI restore produce a new paused owner. Before
+explicit normalization, the source-signed command refuses Corruption and original
+blob metadata refuses RecoveryRequired; each retains the complete restored cut.
+Complete original StoredOutcome bytes for every source blob command remain
+exact in the restored owner before normalization and after the cold sequence.
+The existing NormalizeRestoredStore rebinds authority and aborts the old active
+upload, releases its unused reservation and preserves its accepted raw part and
+the original published version/integrity chain. No old active upload resumes.
+
+REQ-BACKUP-BLOB-PORTABLE-002 / AC-BACKUP-BLOB-PORTABLE-002 map to the same case:
+literal first/cross-part/last/zero-end reads retain complete metadata and no-effect
+cuts; a genuine fresh target upload publishes the same independently expected
+bytes with native receipt token/incarnation/partition/position/durability checks.
+All fresh original outcomes replay with no effects, before and after two joined
+native cold target opens. Original source image/cut and every archive byte remain
+unchanged. Existing BlobRestoreNormalizationTests keeps its native restore case;
+this supplements actual CLI, original native command/receipt, multipart/full-cut
+and two-cold coverage rather than changing the normalizer or storage format.
+
+```mermaid
+flowchart LR
+ A[Native published and active multipart seed] --> B[Verified archive and actual CLI restore]
+ B --> C[Old signed authority and unnormalized blob refusal]
+ C --> D[Existing normalization aborts old active upload]
+ D --> E[Literal published reads and fresh target publication]
+ E --> F[Original outcome replay across two joined cold opens]
+```
+
+Canonical roles: BackupRestore Cases/BlobPortableBackupTests,
+Helpers/BlobPortableBackupSeed and Trial, Assertions/BlobPortableBackupAssertions;
+existing fixture, process and full-image/receipt owners are reused. This is native
+ZoneTree kernel and real CLI evidence only, not native replica admission, journal,
+public SDK/MCP, cancellation qualification, RF3, power loss or production proof.
+Source N only; compiler/native runtime/Linux gates remain OPEN. Root owns merging
+this append after the latest canonical BackupRestore doc before any future Y.
+
+
+## Portable time-series retention and receipt cold continuation
+
+REQ-BACKUP-SERIES-PORTABLE-001 / AC-BACKUP-SERIES-PORTABLE-001 refine BACKUP-002/003/004 and SERIES-013..016. SeriesPortableBackupTests.NativeSeriesFloorAndIdReceiptsRestoreThroughCliThenBoundedContinuationSurvivesTwoColdOwners uses the original native backup/CLI fixture. Genuine native resource+append+bounded expiry leave one physically retained below-floor sample and exact literal visible records/status. VerifyBackup and actual joined CLI restore preserve original source outcome bytes, sample-family bytes, fresh paused identity and physical restore cut. Original source-issued mutation refuses Corruption without any full image/cut change; this is source-MAC fencing, not a catalog-rebound minimum-token or replica-admission claim.
+
+REQ-BACKUP-SERIES-PORTABLE-002 / AC-BACKUP-SERIES-PORTABLE-002 require a new target-issued mixed append containing a new late sample to refuse HistoryUnavailable without partial sample rows or floor changes. A durable failed outcome may legitimately advance the canonical physical position; the full no-effects replay baseline is taken AFTER that settlement. Same-ID replay preserves the complete original OperationResult and full canonical image/cut. Fresh same-floor expiry finishes the bounded purge and a fresh append must yield independently literal sequence5, visible samples3/4/5 and complete retention floor/count/HasMore. The genuine AggregateSamples half-open read uses the same original full-cut no-effects bracket: before continuation its complete native aggregate is Count2/Sum7/Minimum3/Maximum4/Average3.5; afterward Count3/Sum12/Minimum3/Maximum5/Average4. These independent literals are required after restore, after the late-batch refusal, and after each joined cold reopen, before accepting result replay; no aggregate is reconstructed from returned rows. Two actual joined target close/reopen operations preserve every identity scalar/key bytes, complete canonical image/cut, archived source outcomes and exact original target success/failure result replays. The original source and all archive bytes remain unchanged.
+
+```mermaid
+flowchart LR
+  Seed[Actual native append and paged expiry] --> Backup[Verified archive and joined CLI restore]
+  Backup --> Refuse[Source MAC refusal and fresh late-batch rollback]
+  Refuse --> Healthy[Actual bounded expiry and literal fresh append]
+  Healthy --> Cold[Two joined native cold owners and full-cut replay]
+```
+
+Roles are BackupRestore Cases/SeriesPortableBackupTests, Helpers/SeriesPortableBackupSeed/Trial and Assertions/SeriesPortableBackupAssertions. This append depends on the complete corrective+identity+portable-blob document successor; no predecessor section is replaced. The factory uses actual DatabaseEngine.CreateNativeOperation plus NativeSerialization and current EvaluationClock; ApplyEmbedded is the existing kernel operation, not elected/RF3 admission. Existing bounds/configuration, native error identities, cleanup ledger and source cases remain unchanged. Inherited fixture constructor/nested-disposal limits remain unqualified. Compiler, current-image runtime, public SDK/MCP, process replication, Linux and Docker/Aspire RF3 remain OPEN; no UID, journal/ACK, performance, cancellation or power-loss proof is inferred.

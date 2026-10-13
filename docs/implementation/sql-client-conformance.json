@@ -14,7 +14,39 @@
   "nativeWireTarget": {
     "initial": "3.0",
     "laterNegotiation": "3.2",
-    "implementation": "pending"
+    "implementation": "closed PostgreSQL3.0 TLS/API-key session source; qualification pending",
+    "initialProfile": {
+      "name": "native-sql-v1-jsonb-result",
+      "transport": "native Kestrel TLS ConnectionContext/Pipelines; not HTTP",
+      "authentication": "same persisted API-key verifier, verified subject only, fresh credential/policy every Execute",
+      "result": "one JSONB keyload_result containing entire canonical result",
+      "queryDialects": [
+        1,
+        2
+      ],
+      "callQueryDialect": 1,
+      "preparedProtocol": [
+        "Parse",
+        "Bind",
+        "Describe",
+        "Execute",
+        "Close",
+        "Sync",
+        "Flush",
+        "Terminate"
+      ],
+      "limits": "eight statements/eight portals, current native query/JSON/frame/output and shared retained byte grants",
+      "driver": "Npgsql10.0.3 VerifyFull/root CA; GSS encryption disabled; pooling false; built-in-only type loading; no parameter logging",
+      "qualification": "pending exact-source Linux Aspire RF3 original artifacts",
+      "notDelivered": [
+        "general PostgreSQL catalog/bootstrap and typed column metadata",
+        "SQL PREPARE/EXECUTE/DEALLOCATE syntax",
+        "suspended portals/cursors",
+        "explicit/implicit multistatement transactions",
+        "full PostgreSQL SQL grammar",
+        "protocol3.2 negotiation"
+      ]
+    }
   },
   "inventoryStatus": "183 official command names inventoried; complete semantic contracts and execution fixtures pending",
   "families": [
@@ -168,7 +200,12 @@
       2
     ],
     "q2Profile": "Q2.InnerJoin.v1",
-    "q2Profiles": ["Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1"],
+    "q2Profiles": [
+      "Q2.InnerJoin.v1",
+      "Q2.InnerJoin.LeftPredicate.v1",
+      "Q2.QueueEntityRefJoin.v1",
+      "Q2.EventEntityRefJoin.v1"
+    ],
     "q2Scope": "Explicit source projection; one same-partition typed Text-primary-key INNER JOIN with declared top-level left predicates, or QUEUE_MESSAGES/EVENTS payload.to canonical reference JOIN to one typed target. Left ordinal primary-key/message-id or event revision order, explicit full-scan consent, bounded LIMIT and one authorized native read cut",
     "sourceStage": "Current source contains the four finite Q2 profiles; current-source public RF3/Linux and complete SQL/client qualification remain pending. The preserved normal/scalar606 receipts below are immutable historical development evidence, not current-source qualification",
     "q2Unsupported": [
