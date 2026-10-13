@@ -18,6 +18,7 @@ internal static class SqlBooleanTruthRf3Repair
         var before = await SqlBooleanTruthRf3Image.ReadAsync(root, dirty, token);
         await SqlBooleanTruthRf3Refusals.RejectAsync(fixture, dirty,
             SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
+        await SqlBooleanOperandRf3Controls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresRf3State.Partition,
             [new PutDocument(SqlNullOrderingRf3Protocol.Collection, SqlBooleanTruthRf3State.Low,

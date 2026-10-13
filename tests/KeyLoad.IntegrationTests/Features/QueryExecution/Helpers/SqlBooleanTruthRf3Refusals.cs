@@ -3,7 +3,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlBooleanTruthRf3Refusals
 {
     internal static async Task RejectAsync(ClusterFixture fixture, SqlBooleanTruthRf3State state, string clause,
-        ErrorCode code, CancellationToken token, bool ast = false)
+        ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false,
+        SqlBooleanTruthRf3Case? astCase = null)
     {
         await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
@@ -17,7 +18,7 @@ internal static class SqlBooleanTruthRf3Refusals
             if (ast)
             {
                 var operation = SqlBooleanTruthRf3Cases.Ast(PostgresRf3State.Partition,
-                    SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.AgainstOne]);
+                    astCase ?? SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.AgainstOne]);
                 var typed = await caller.Sdk.QueryAstAsync(operation, token);
                 await global::TUnit.Assertions.Assert.That(typed.IsSuccess).IsFalse();
                 await global::TUnit.Assertions.Assert.That(typed.Value).IsNull();
@@ -33,6 +34,11 @@ internal static class SqlBooleanTruthRf3Refusals
                 {
                     await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
                         code == ErrorCode.Validation ? SqlNullOrderingRf3Protocol.ValidationSqlState : PostgresRf3Protocol.PermissionSqlState, code);
+                    if (healthy)
+                    {
+                        foreach (var item in SqlBooleanTruthRf3Cases.All)
+                        { await SqlBooleanTruthRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token); }
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -44,6 +50,7 @@ internal static class SqlBooleanTruthRf3Refusals
         global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers root, CancellationToken token)
     {
         var before = await SqlBooleanTruthRf3Image.ReadAsync(root, state, token);
+        await SqlBooleanOperandRf3Controls.InvalidAsync(fixture, state, root, token);
         foreach (var clause in new[] { "score IS", "score IS NOT",
             "score IS 'TRUE'", "score IS @absent" })
         { await RejectAsync(fixture, state, clause, ErrorCode.Validation, token); }

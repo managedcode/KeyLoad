@@ -41,7 +41,7 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
-        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1.0", "score = 0o1.0" })
+        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0.0", "score = 0b1.0", "score = 0o1.0" })
         {
             var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix + clause
                 + SqlNullDistinctCases.Tail, AllowFullScan: true);
@@ -71,7 +71,9 @@ internal static class SqlNullDistinctRefusals
 
     internal static async Task TypeRepairAsync(TestDatabase database)
     {
-        var fault = database.Commit(new PutDocument(SqlNullOrderingProtocol.Collection, Low, FaultJson));
+        var faultCommand = new CommandRequest(Guid.NewGuid(), database.Partition,
+            [new PutDocument(SqlNullOrderingProtocol.Collection, Low, FaultJson)]);
+        var fault = database.Submit(OperationKind.Batch, faultCommand, id: faultCommand.CommandId).Get<CommitReceipt>();
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
@@ -84,9 +86,15 @@ internal static class SqlNullDistinctRefusals
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.ContinuationClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.UnicodeClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.UnicodeCustomClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlUnicodeIdentifierCases.Clause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlUnicodeIdentifierCases.WideClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlUnicodeIdentifierCases.CustomClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.DollarClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.BinaryClause),
-            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.OctalClause) })
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.OctalClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.NumericSeparatorClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.NumericRadixSeparatorClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.NumericOctalSeparatorClause) })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 new(database.Partition, SqlNullDistinctCases.Prefix + item.Clause + SqlNullDistinctCases.Tail,
@@ -95,10 +103,17 @@ internal static class SqlNullDistinctRefusals
                 SqlNullDistinctCases.Ast(database.Partition, item))).Code).IsEqualTo(ErrorCode.Validation);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
-        var repaired = database.Commit(new PutDocument(SqlNullOrderingProtocol.Collection, Low, HealthyJson));
+        var repairCommand = new CommandRequest(Guid.NewGuid(), database.Partition,
+            [new PutDocument(SqlNullOrderingProtocol.Collection, Low, HealthyJson)]);
+        var repaired = database.Submit(OperationKind.Batch, repairCommand, id: repairCommand.CommandId).Get<CommitReceipt>();
         await Assert.That(repaired.CommandId).IsNotEqualTo(fault.CommandId);
         await Assert.That(repaired.Mutations).IsEquivalentTo([new MutationReceipt(PutKind,
             SqlNullOrderingProtocol.Collection, Low, RepairedRevision)], global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        var healthy = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
+        var cut = database.Store.Position;
+        await SqlNullOrderingPages.ReplayAsync(database.Database, faultCommand, fault);
+        await SqlNullOrderingPages.ReplayAsync(database.Database, repairCommand, repaired);
+        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, healthy, cut, identity);
     }
 
     private const int First = 0;

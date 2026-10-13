@@ -17,6 +17,8 @@ internal static class SqlNullDistinctPages
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.DollarProfile)).IsTrue();
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.BinaryOctalProfile)).IsTrue();
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.UnicodeProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NumericSeparatorProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);
@@ -31,5 +33,7 @@ internal static class SqlNullDistinctPages
                 SqlNullDistinctCases.Ast(partition, item)));
             await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
         }
+        await SqlNumericSeparatorControls.ParametersAsync(engine, store, partition, lowRevision);
+        await SqlUnicodeIdentifierControls.ParametersAsync(engine, store, partition, lowRevision);
     }
 }

@@ -7,14 +7,13 @@ internal sealed class NativeSixSiloMembershipReadinessTests
     [Test]
     public async Task ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration()
     {
-        var fixture = new NativeSixSiloMembershipReadinessFixture();
         var failures = new List<Exception>();
-        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-            () => fixture.RunAsync(TestContext.Current!.Execution.CancellationToken), failures);
-        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-            fixture.Cluster.StopAllSilosAsync, failures);
-        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
-            async () => await fixture.Cluster.DisposeAsync().ConfigureAwait(false), failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await using var fixture = new NativeSixSiloMembershipReadinessFixture();
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                () => fixture.RunAsync(TestContext.Current!.Execution.CancellationToken), failures);
+        }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

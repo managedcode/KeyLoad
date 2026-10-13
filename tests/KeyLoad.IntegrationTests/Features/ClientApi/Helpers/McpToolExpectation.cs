@@ -11,9 +11,10 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <param name="OuterCommandId">Whether the header-command adapter has a required outer GUID.</param>
 /// <param name="BodyFields">Required canonical constructor fields, excluding optional defaults.</param>
 /// <param name="ResultFields">Canonical result fields asserted when the expected result is an object.</param>
+/// <param name="BodyPropertyFields"></param>
 internal sealed record McpToolExpectation(string Name, bool ReadOnly, bool Idempotent, bool Destructive,
     McpExpectedBody Body, bool OuterCommandId, ImmutableArray<string> BodyFields,
-    ImmutableArray<string> ResultFields = default);
+    ImmutableArray<string> ResultFields = default, ImmutableArray<string> BodyPropertyFields = default);
 
 /// <summary>The public canonical request root, independent of any native schema implementation.</summary>
 internal enum McpExpectedBody

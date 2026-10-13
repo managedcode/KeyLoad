@@ -29,6 +29,8 @@ internal static class PostgresRf3Parity
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                         await SyntaxVariantsAsync(state, wire, token);
                         await LiteralVariantsAsync(state, reader, wire, token);
+                        await SqlUnicodeIdentifierRf3JoinPages.RequireAsync(state, reader, wire, token);
+                        await SqlNumericSeparatorRf3JoinParameters.RequireAsync(state, reader, wire, token);
                         if (state.Dialect == PostgresRf3Protocol.JoinDialect)
                         {
                             var plain = state.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal);
@@ -51,7 +53,8 @@ internal static class PostgresRf3Parity
     private static async Task LiteralVariantsAsync(PostgresRf3State state,
         RequestCqrsRf3Callers reader, PostgresRf3Caller wire, CancellationToken token)
     {
-        foreach (var predicate in new[] { "0x1 = 1", "-0x1 < 0",
+        foreach (var predicate in new[] { "1_0e-1 = 1", "0x_1 = 1 AND 0b_1 = 1 AND 0o_1 = 1",
+            "0x_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF = 79_228_162_514_264_337_593_543_950_335", "0x1 = 1", "-0x1 < 0",
             "0xFFFFFFFFFFFFFFFFFFFFFFFF = 79228162514264337593543950335",
             "U&'\\+01F600' = '😀'", "U&'g!0075ard' UESCAPE '!' = 'guard'",
             "$$guard$$ = 'guard'", "$tag$😀$tag$ = '😀'",

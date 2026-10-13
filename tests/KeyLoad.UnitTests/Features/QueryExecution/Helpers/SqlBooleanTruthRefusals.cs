@@ -10,6 +10,7 @@ internal static class SqlBooleanTruthRefusals
         var before = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
+        await SqlBooleanOperandControls.InvalidAsync(database, engine, before, position, identity);
         foreach (var clause in new[] { "score IS", "score IS NOT", "score IS 'TRUE'",
             "score IS @absent" })
         {
@@ -44,6 +45,7 @@ internal static class SqlBooleanTruthRefusals
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
             SqlBooleanTruthCases.Ast(database.Partition, item))).Code).IsEqualTo(ErrorCode.Validation);
         await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+        await SqlBooleanOperandControls.FaultAsync(database, engine, before, position, identity);
         var repairedCommand = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PutDocument(SqlNullOrderingProtocol.Collection, Low, HealthyJson, InitialRevision + InitialRevision)]);
         var repaired = database.Submit(OperationKind.Batch, repairedCommand, id: repairedCommand.CommandId).Get<CommitReceipt>();

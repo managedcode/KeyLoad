@@ -17,19 +17,23 @@ internal static class SqlBooleanTruthRf3Cancellation
                 {
                     using var cancelled = new CancellationTokenSource();
                     await cancelled.CancelAsync();
-                    var item = SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.First];
-                    var sql = SqlBooleanTruthRf3Cases.Prefix + item.Clause + SqlBooleanTruthRf3Cases.Tail;
-                    var operation = SqlNullOrderingRf3Protocol.Operation(sql);
-                    var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
-                    await SqlBooleanTruthRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                    foreach (var current in SqlBooleanTruthRf3Cases.All.Where(item => item.Clause == SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.First].Clause
+                        || item.Clause == SqlBooleanTruthRf3Cases.BareClause || item.Clause == SqlBooleanTruthRf3Cases.NegatedBareClause))
+                    {
+                        var item = current;
+                        var sql = SqlBooleanTruthRf3Cases.Prefix + item.Clause + SqlBooleanTruthRf3Cases.Tail;
+                        var operation = SqlNullOrderingRf3Protocol.Operation(sql);
+                        var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
+                        var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
+                        var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
+                        await SqlBooleanTruthRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

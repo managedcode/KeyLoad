@@ -21,8 +21,8 @@ internal static class SqlRadixIntegerControls
         }
         foreach (var clause in new[] { "score = 0b1.0",
             "score = 0o1.0",
-            "score = 0b1_0",
-            "score = 0o1_0",
+            "score = 0b1_0.0",
+            "score = 0o1_0.0",
             "score = 0b102",
             "score = 0o128" })
         {

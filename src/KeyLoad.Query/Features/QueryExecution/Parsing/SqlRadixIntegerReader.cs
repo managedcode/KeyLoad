@@ -7,6 +7,7 @@ internal static class SqlRadixIntegerReader
     private const int First = 0;
     private const int Adjacent = 1;
     private const int PrefixWidth = 2;
+    private const char Separator = '_';
     private const char Zero = '0';
     private const char One = '1';
     private const char Seven = '7';
@@ -27,7 +28,7 @@ internal static class SqlRadixIntegerReader
         if (kind is not (Hex or Binary or Octal))
         { return false; }
         index = digits + PrefixWidth;
-        while (index < sql.Length && Digit(sql[index], kind))
+        while (index < sql.Length && (Digit(sql[index], kind) || sql[index] == Separator))
         {
             index++;
             if (index % cadence == First)

@@ -8,7 +8,7 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal enum SqlTokenKind { Identifier, String, Number, Parameter, Symbol, End }
 
 /// <summary>One lexical Q1 token, retaining quoted-identifier provenance.</summary>
-internal sealed record SqlToken(SqlTokenKind Kind, string Text, bool Quoted = false);
+internal sealed record SqlToken(SqlTokenKind Kind, string Text, bool Quoted = false, string? NumericText = null);
 
 /// <summary>Lexes Q1 SQL without evaluating application expressions.</summary>
 internal static class SqlTokenizer
@@ -57,6 +57,7 @@ internal static class SqlTokenizer
             ChargeContinuation(ref sourceTokenCount, maximum);
             result.Add(current switch
             {
+                _ when SqlUnicodeIdentifierReader.Starts(sql, index) => SqlUnicodeIdentifierReader.Read(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum, maximumDepth),
                 _ when SqlUnicodeStringReader.Starts(sql, index) => SqlUnicodeStringReader.Read(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum, maximumDepth),
                 _ when SqlEscapeStringReader.Starts(sql, index) => SqlEscapeStringReader.Read(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum),
                 SqlStringQuote or SqlIdentifierQuote => Quoted(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum),
@@ -145,14 +146,14 @@ internal static class SqlTokenizer
     {
         var start = index++;
         if (SqlRadixIntegerReader.Read(sql, start, ref index, budget, budgetCheckInterval))
-        { return new(SqlTokenKind.Number, sql[start..index]); }
+        { return SqlNumericDigitSeparators.Token(sql[start..index], budget, budgetCheckInterval); }
         while (index < sql.Length && !StartsLineComment(sql, index)
-            && (char.IsDigit(sql[index]) || sql[index] is DecimalPoint or LowerExponentMarker or UpperExponentMarker or PlusCharacter or MinusCharacter))
+            && (char.IsDigit(sql[index]) || sql[index] is IdentifierSeparator or DecimalPoint or LowerExponentMarker or UpperExponentMarker or PlusCharacter or MinusCharacter))
         {
             index++;
             CheckBudget(budget, index, budgetCheckInterval);
         }
-        return new(SqlTokenKind.Number, sql[start..index]);
+        return SqlNumericDigitSeparators.Token(sql[start..index], budget, budgetCheckInterval);
     }
 
     private static bool StartsLineComment(string sql, int index)

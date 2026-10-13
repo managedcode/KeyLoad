@@ -9,6 +9,7 @@ internal static class SqlBooleanTruthPages
     {
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlBooleanTruthCases.Profile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlBooleanTruthCases.OperandProfile)).IsTrue();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);
@@ -23,5 +24,6 @@ internal static class SqlBooleanTruthPages
                 SqlBooleanTruthCases.Ast(partition, item)));
             await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
         }
+        await SqlBooleanOperandControls.ParametersAsync(engine, store, partition, lowRevision);
     }
 }

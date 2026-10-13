@@ -45,6 +45,9 @@ internal static class QueryCapabilityCatalog
     private const string DollarQuotedStringProfile = "SQL.DollarQuotedString.v1";
     private const string BinaryOctalIntegerProfile = "SQL.BinaryOctalIntegerLiteral.v1";
     private const string UnicodeStringProfile = "SQL.UnicodeStringLiteral.v1";
+    private const string UnicodeIdentifierProfile = "SQL.UnicodeIdentifier.v1";
+    private const string NumericDigitSeparatorProfile = "SQL.NumericDigitSeparators.v1";
+    private const string BooleanPredicateProfile = "SQL.BooleanPredicate.v1";
     private const string BooleanTruthProfile = "SQL.BooleanTruth.v1";
     private const string IsTrue = "IS TRUE";
     private const string IsFalse = "IS FALSE";
@@ -70,5 +73,5 @@ internal static class QueryCapabilityCatalog
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
         [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability, DistinctCapability, NotDistinctCapability, IsTrue, IsFalse, IsUnknown, IsNotTrue, IsNotFalse, IsNotUnknown, SymmetricBetweenCapability, NotSymmetricBetweenCapability, AsymmetricBetweenCapability, NotAsymmetricBetweenCapability, SqlSyntax.IsNull, SqlSyntax.NotNull],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability, NullDistinctProfile, BooleanTruthProfile, SymmetricBetweenProfile, SelectAllProfile, ImplicitProjectionAliasProfile, DefaultInnerJoinProfile, AsymmetricBetweenProfile, OrderUsingProfile, NullSynonymProfile, PositiveNumericProfile, LeadingDecimalProfile, HexIntegerProfile, EscapeStringProfile, StringContinuationProfile, DollarQuotedStringProfile, BinaryOctalIntegerProfile, UnicodeStringProfile], SupportedVersions, SupportedDialects);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability, NullDistinctProfile, BooleanTruthProfile, SymmetricBetweenProfile, SelectAllProfile, ImplicitProjectionAliasProfile, DefaultInnerJoinProfile, AsymmetricBetweenProfile, OrderUsingProfile, NullSynonymProfile, PositiveNumericProfile, LeadingDecimalProfile, HexIntegerProfile, EscapeStringProfile, StringContinuationProfile, DollarQuotedStringProfile, BinaryOctalIntegerProfile, UnicodeStringProfile, BooleanPredicateProfile, NumericDigitSeparatorProfile, UnicodeIdentifierProfile], SupportedVersions, SupportedDialects);
 }

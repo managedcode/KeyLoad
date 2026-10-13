@@ -52,7 +52,14 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
 
     private Predicate Condition()
     {
+        var kind = cursor.Current.Kind;
         var value = Operand();
+        return SqlBooleanOperandPredicate.IsBoundary(cursor)
+            ? SqlBooleanOperandPredicate.Lower(value, kind) : Condition(value);
+    }
+
+    private Predicate Condition(Operand value)
+    {
         if (cursor.Is(SqlSyntax.IsNull) || cursor.Is(SqlSyntax.NotNull))
         {
             var not = cursor.Eat(SqlSyntax.NotNull);
@@ -139,7 +146,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
         if (token.Kind == SqlTokenKind.Number)
         {
             cursor.Advance();
-            if (!SqlRadixIntegerReader.Parse(token.Text, out var number))
+            if (!SqlRadixIntegerReader.Parse(token.NumericText ?? token.Text, out var number))
             {
                 throw SqlSyntax.Invalid();
             }

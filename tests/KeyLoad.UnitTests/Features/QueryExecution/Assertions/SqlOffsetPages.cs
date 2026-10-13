@@ -8,7 +8,8 @@ internal static class SqlOffsetPages
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition, string principal)
     {
         foreach (var window in new[] { "LIMIT 1 OFFSET 1", "OFFSET 1 ROW FETCH FIRST ROW ONLY",
-            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 FETCH FIRST 1 ROWS ONLY" })
+            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 FETCH FIRST 1 ROWS ONLY", "LIMIT 0_1 OFFSET 0_1",
+            "OFFSET 0_1 ROWS FETCH NEXT 0_1 ROW ONLY" })
         { await WindowAsync(owner, store, partition, principal, window); }
     }
     private static async Task WindowAsync(global::KeyLoad.Core.DatabaseEngine owner,
@@ -72,7 +73,7 @@ internal static class SqlOffsetPages
             limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
             limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", "graph-search-v1", "graph-path-v1",
                 "Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1",
-                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1", "SQL.BooleanTruth.v1", "SQL.BetweenSymmetric.v1", "SQL.SelectAll.v1", "SQL.ImplicitProjectionAlias.v1", "SQL.DefaultInnerJoin.v1", "SQL.BetweenAsymmetric.v1", "SQL.OrderUsing.v1", "SQL.NullPredicateSynonyms.v1", "SQL.PositiveNumericLiteral.v1", "SQL.LeadingDecimalLiteral.v1", "SQL.HexadecimalIntegerLiteral.v1", "SQL.EscapeStringLiteral.v1", "SQL.StringContinuation.v1", "SQL.DollarQuotedString.v1", "SQL.BinaryOctalIntegerLiteral.v1", "SQL.UnicodeStringLiteral.v1"], [1, 2], [1, 2]);
+                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1", "SQL.BooleanTruth.v1", "SQL.BetweenSymmetric.v1", "SQL.SelectAll.v1", "SQL.ImplicitProjectionAlias.v1", "SQL.DefaultInnerJoin.v1", "SQL.BetweenAsymmetric.v1", "SQL.OrderUsing.v1", "SQL.NullPredicateSynonyms.v1", "SQL.PositiveNumericLiteral.v1", "SQL.LeadingDecimalLiteral.v1", "SQL.HexadecimalIntegerLiteral.v1", "SQL.EscapeStringLiteral.v1", "SQL.StringContinuation.v1", "SQL.DollarQuotedString.v1", "SQL.BinaryOctalIntegerLiteral.v1", "SQL.UnicodeStringLiteral.v1", "SQL.BooleanPredicate.v1", "SQL.NumericDigitSeparators.v1", "SQL.UnicodeIdentifier.v1"], [1, 2], [1, 2]);
         await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)

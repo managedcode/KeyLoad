@@ -7,18 +7,24 @@ using Orleans.TestingHost;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed class NativeSixSiloMembershipReadinessFixture
+internal sealed class NativeSixSiloMembershipReadinessFixture : IAsyncDisposable
 {
+    private const string ClusterNotCreated = "The native cluster has not been created.";
+    private const string NativeMembershipProvider = "Orleans.Runtime.MembershipService.AzureBasedMembershipTable";
     private const short Silos = 6;
     private const int GroupVoters = 3;
     private readonly TimeProvider clock = TimeProvider.System;
     private readonly IOptions<OrleansMembershipOptions> membershipOptions = Options.Create(new OrleansMembershipOptions());
-    internal TestCluster Cluster { get; } = new TestClusterBuilder(Silos).Build();
+    private TestCluster? cluster;
+    private NativeSixMembershipInfrastructure? infrastructure;
+    private Task? disposal;
+    internal TestCluster Cluster => cluster ?? throw new InvalidOperationException(ClusterNotCreated);
 
     internal async Task RunAsync(CancellationToken token)
     {
-        await Cluster.DeployAsync(token).ConfigureAwait(false);
+        await DeployAsync(token).ConfigureAwait(false);
         var handles = Cluster.Silos.ToArray();
+        await RequireNativeMembershipProviderAsync(handles).ConfigureAwait(false);
         var names = handles.Select(silo => silo.Name).ToArray();
         var options = new NodeOptions
         {
@@ -49,6 +55,7 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
         var restarted = await Cluster.RestartSiloAsync(original).ConfigureAwait(false)
             ?? throw new InvalidOperationException("The native restart returned no silo handle.");
         await Cluster.WaitForLivenessToStabilizeAsync(false).ConfigureAwait(false);
+        await RequireNativeMembershipProviderAsync(Cluster.Silos).ConfigureAwait(false);
         await Assert.That(restarted.Name).IsEqualTo(original.Name);
         await Assert.That(restarted.SiloAddress.Equals(oldAddress)).IsFalse();
         await Assert.That(Read(options, oldAddress, bounds, token)).IsNull();
@@ -56,6 +63,20 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
         await Assert.That(Read(options, oldAddress, bounds, token)).IsNull();
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(current, Cluster.Silos.ToArray()).ConfigureAwait(false);
         await Assert.That(current!.ActiveFingerprint).IsNotEqualTo(initial!.ActiveFingerprint);
+    }
+
+    internal async Task DeployAsync(CancellationToken token)
+    {
+        infrastructure = new NativeSixMembershipInfrastructure();
+        using var deadline = new CancellationTokenSource(membershipOptions.Value.StartupTimeout, clock);
+        using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
+        var connection = await infrastructure.StartAsync(startup.Token).ConfigureAwait(false);
+        var builder = new TestClusterBuilder(Silos);
+        builder.Properties[NativeSixAzureMembershipConfigurator.ConnectionKey] = connection;
+        builder.AddSiloBuilderConfigurator<NativeSixAzureMembershipConfigurator>();
+        cluster = builder.Build();
+        await Cluster.DeployAsync(startup.Token).ConfigureAwait(false);
+        await RequireNativeMembershipProviderAsync(Cluster.Silos).ConfigureAwait(false);
     }
 
     internal MembershipReadinessSnapshot? Read(NodeOptions options, SiloAddress localAddress,
@@ -100,5 +121,46 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
         var native = new ReplicaNativeDiscoveryMembership(oracle, membershipOptions);
         foreach (var entry in native.ReadActive())
         { Console.Error.WriteLine($"NativeSixSiloMembership activeName={entry.SiloName} activeAddress={entry.SiloAddress}"); }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return new(disposal ??= DisposeAsyncCore().AsTask());
+    }
+
+    private async ValueTask DisposeAsyncCore()
+    {
+        var failures = new List<Exception>();
+        if (cluster is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(cluster.StopAllSilosAsync, failures).ConfigureAwait(false);
+            try
+            { await cluster.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+        }
+        if (infrastructure is not null)
+        {
+            try
+            { await infrastructure.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+            catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            { failures.Add(error); }
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task RequireNativeMembershipProviderAsync(IEnumerable<SiloHandle> handles)
+    {
+        foreach (var handle in handles)
+        {
+            var provider = Cluster.GetSiloServiceProvider(handle.SiloAddress)
+                .GetRequiredService<global::Orleans.IMembershipTable>();
+            await Assert.That(provider.GetType().FullName).IsEqualTo(NativeMembershipProvider);
+        }
     }
 }

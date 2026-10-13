@@ -6,6 +6,9 @@ internal sealed record SqlBooleanTruthCase(string Clause, Predicate Predicate, s
 internal static class SqlBooleanTruthCases
 {
     internal const string Profile = "SQL.BooleanTruth.v1";
+    internal const string OperandProfile = "SQL.BooleanPredicate.v1";
+    internal const string BareClause = "score";
+    internal const string NegatedBareClause = "NOT score";
     internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";
     internal const string Tail = " ORDER BY label ASC LIMIT 5";
     private static readonly FieldOperand Score = new("/score");
@@ -26,7 +29,18 @@ internal static class SqlBooleanTruthCases
         new("NOT (score IS UNKNOWN)", And(Present, new NullTest(Score, true, false)), ["high", "low"]),
         new("score IS TRUE OR label = 'missing'", Or(True, new Comparison(Label, "=", ValueOperand.Create("missing"))), ["low", "missing"]),
         new("score IS UNKNOWN OR label = 'missing'", Or(Null, new Comparison(Label, "=", ValueOperand.Create("missing"))), ["missing", "null_a", "null_b"]),
-        new("score IS NOT UNKNOWN AND score IS FALSE", And(Present, False), ["high"])
+        new("score IS NOT UNKNOWN AND score IS FALSE", And(Present, False), ["high"]),
+        new("score", True, ["low"]),
+        new("NOT score", new Negation(True), ["high"]),
+        new("(score)", True, ["low"]),
+        new("NOT (score)", new Negation(True), ["high"]),
+        new("TRUE", new Comparison(ValueOperand.Create(true), "=", ValueOperand.Create(true)), ["high", "low", "missing", "null_a", "null_b"]),
+        new("FALSE", new Comparison(ValueOperand.Create(false), "=", ValueOperand.Create(true)), []),
+        new("NULL", new Comparison(ValueOperand.Create(null), "=", ValueOperand.Create(true)), []),
+        new("NOT NULL", new Negation(new Comparison(ValueOperand.Create(null), "=", ValueOperand.Create(true))), []),
+        new("score OR label = 'missing'", Or(True, new Comparison(Label, "=", ValueOperand.Create("missing"))), ["low", "missing"]),
+        new("score AND NOT FALSE", And(True, new Negation(new Comparison(ValueOperand.Create(false), "=", ValueOperand.Create(true)))), ["low"]),
+        new("TRUE AND (score OR NOT score)", And(new Comparison(ValueOperand.Create(true), "=", ValueOperand.Create(true)), Or(True, new Negation(True))), ["high", "low"]),
     ];
     private static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     private static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

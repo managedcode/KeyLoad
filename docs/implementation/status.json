@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R43 full Release build and complete canonical formatter verification passed with0warnings/errors and unchanged source. Focused native50 local macOS arm64 whole-operation execution passed283of289 cases,6failed,0skipped; all285 original R42 selected UIDs retained. Four new backup cases passed; RPC cancellation case repaired; native Prepare regressed at original shutdown joins. Original plan20/104done84in progress; KL-029 original criteria independently accepted at7e94024c. Exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open.",
-    "coverage": "UNMEASURED_FOR_CURRENT_R43. Historical R38 partial functional observation:25.729928757%lines19.627577034%branches across13 reported production modules; controls/load excluded. Full product functional coverage and Linux contributor gates remain unqualified.",
+    "qualification": "R44 coherent full Release, canonical formatter and whole-solution format verification passed with zero errors/warnings and unchanged source. Focused native50 local macOS arm64 whole-operation execution passed283of289 cases,6failed,0skipped; all289 R43 selected UIDs retained. Original six-silo PRIMARY restart now passes; new Boolean predicate refusal classification regressed. Original plan20/104done84in progress; exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open.",
+    "coverage": "UNMEASURED_FOR_CURRENT_R44. Historical R38 partial functional observation:25.729928757%lines19.627577034%branches across13 reported production modules; controls/load excluded. Full product functional coverage and Linux contributor gates remain unqualified.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -1726,6 +1726,168 @@
       "currentRf3Execution": 0,
       "coverage": "UNMEASURED_FOR_R42",
       "completeAcceptanceClosed": 0
+    },
+    "currentStageR44": {
+      "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
+      "sourcePresent": true,
+      "newCSharpFiles": 57,
+      "newFeatureSpecifications": 4,
+      "scope": "Native Aspire AzureTable six-silo membership; dependent-before-primary joined shutdown; SQL Boolean operands, numeric separators and Unicode quoted identifiers; complete public graph rebind, selective event authority, multipart blob policy and time-series atomic retention flows; exact official MCP operation schemas.",
+      "originalTestDeclarationsAndOraclesPreserved": true,
+      "runtimeExecuted": true,
+      "allAcceptanceClosed": false,
+      "originalDevelopmentReport": {
+        "path": "TestResults/stage61-native-join/stage64-r44-development.generated.original.json",
+        "sha256": "b9180657ca503ac04c5c224d8d365e661fec1c402e8936fb22f5cd74c81a4bcf"
+      },
+      "verification": {
+        "build": {
+          "exitCode": 0,
+          "elapsedSeconds": 402.8590606249636,
+          "processJoined": true,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r44-build-coherent-retry1-original.completion.json",
+            "sha256": "b2cf6c70ef1a8deb6c1d47b9b0f513c4f9c61edd2d99aa60e6ac646e5198ea5e"
+          }
+        },
+        "format": {
+          "exitCode": 0,
+          "elapsedSeconds": 107.84036529203877,
+          "processJoined": true,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r44-format-coherent-retry1-original.completion.json",
+            "sha256": "9487b1765b243ad5d857b9e833263fccb1dd4f315e09d8cfb38abc4ef56e3df0"
+          }
+        },
+        "verify": {
+          "exitCode": 0,
+          "elapsedSeconds": 586.1851917080348,
+          "processJoined": true,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r44-verify-coherent-original.completion.json",
+            "sha256": "e2a6a1216138bbf27bf18d0ad233b5710a85b88fef3ee5c62c52667c1e502b26"
+          }
+        }
+      },
+      "nativeDiagnostics": {
+        "currentFinalRequest": "CompleteReady27of27ZeroErrorsZeroWarnings",
+        "includeAnalyzers": true,
+        "cleanClaim": true,
+        "original": {
+          "path": "TestResults/stage61-native-join/stage64-r44-after-release-repair-native.root-r44-final-repaired-complete-native-analyzers.original.json",
+          "sha256": "36dc1a302d96ab771e59623e8c55153795301b62a905665c4a3b6cdcafafccc6"
+        },
+        "originalCompletion": {
+          "path": "TestResults/stage61-native-join/stage64-r44-after-release-repair-native.completion.original.json",
+          "sha256": "d0319f02a73f7ea0b9d9c3b34389fa8da89cc71ade16e1213dd6fc267c54a594"
+        },
+        "retainedInitialTimeout": {
+          "path": "TestResults/stage61-native-join/stage64-r44-native-integration.completion.original.json",
+          "sha256": "7b2a3af613dbb269840c2ecbd0d1a73c9fdc16fcc6dd3470ba3ffcb552fa5639"
+        },
+        "exactCompilerRepair": {
+          "path": "TestResults/stage61-native-join/root-stage64-r44-five-original-compiler-errors-source-actual-join.original.json",
+          "sha256": "06b25d987821b954ef550270efddde2b33f3a1f781292d83f88fd427472463cd"
+        }
+      },
+      "focusedExecution": {
+        "unit": {
+          "expected": 254,
+          "executed": 254,
+          "passed": 250,
+          "failed": 4,
+          "skipped": 0,
+          "maximumParallelTests": 50,
+          "actualTrxIntervalPeak": 51,
+          "binding": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-unit-native-binding.original.json",
+            "sha256": "7ae20e97e199b2f359181ab7071b21d6ca860e15b45be8109f1ed036990a8ed7"
+          },
+          "originalNativeReport": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-unit-results/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "sha256": "a00dfb06b58247d1776e064ba4854a3cfbb7fe271b929ba7bc21dd0de6cf9ad5"
+          },
+          "originalTrx": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-unit-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "43e57b2197291e15d326404ba69f327843901caf89856322905215fa7934d1dd"
+          },
+          "originalProcess": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-unit-execution/native-process.original.json",
+            "sha256": "3408b3a6f3090793bca5bc4cf90bb92cbb8dea476a5c576cbc55558964743edc"
+          },
+          "processJoins": {
+            "exitJoined": true,
+            "outputJoined": true,
+            "errorJoined": true,
+            "disposed": true
+          },
+          "sourceImageClosureDrift": false,
+          "originalTrxElapsedSeconds": 304.86099
+        },
+        "recovery": {
+          "expected": 35,
+          "executed": 35,
+          "passed": 33,
+          "failed": 2,
+          "skipped": 0,
+          "maximumParallelTests": 50,
+          "actualTrxIntervalPeak": 26,
+          "binding": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-recovery-native-binding.original.json",
+            "sha256": "48cbe23eec575f679be1427d8b390ba9368cf7d387a02ddc02620f16694059cd"
+          },
+          "originalNativeReport": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-recovery-results/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+            "sha256": "7a1833451d4da31bd27b03cdc14bcddedc2083c588d99493b5ec3e873d9c7250"
+          },
+          "originalTrx": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-recovery-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+            "sha256": "ee16694d0e4a53f0cc399793415180076a16850c3a059159da0312a95b1cc9cc"
+          },
+          "originalProcess": {
+            "path": "TestResults/stage61-native-join/current-stage64-r44-recovery-execution/native-process.original.json",
+            "sha256": "288a1ba448292f3339e484edf8e6d1d1539d37a6ec9a547adf4a4b69497eb4aa"
+          },
+          "processJoins": {
+            "exitJoined": true,
+            "outputJoined": true,
+            "errorJoined": true,
+            "disposed": true
+          },
+          "sourceImageClosureDrift": false,
+          "originalTrxElapsedSeconds": 304.185241
+        }
+      },
+      "resolvedOriginalUids": [
+        "KeyLoad.UnitTests.Features.ClusterRouting.NativeSixSiloMembershipReadinessTests.1.1.ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration.1.1.0"
+      ],
+      "regressedOriginalUids": [
+        "KeyLoad.UnitTests.Features.QueryExecution.SqlBooleanTruthWholeFlowTests.1.1.BooleanTruthPredicatesRetainMissingUnknownWholeSqlAstRefusalTypeRepairPolicyReplayAndTwoColdCuts.1.1.0"
+      ],
+      "remainingFailedOriginalUids": [
+        "KeyLoad.UnitTests.Features.QueryExecution.SqlBooleanTruthWholeFlowTests.1.1.BooleanTruthPredicatesRetainMissingUnknownWholeSqlAstRefusalTypeRepairPolicyReplayAndTwoColdCuts.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.Bm25PortableMovementTests.1.1.ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects.1.1.0",
+        "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativeRetireTests.1.1.OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners.1.1.0",
+        "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.1.1.ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners.1.1.0",
+        "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeHostLifetimeTests.1.1.CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact.1.1.0",
+        "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeProcessTests.1.1.GenuineSixHostOriginalPrepareSurvivesKilledOwnerAndColdOutcomeObservationWithoutRedispatch.1.1.0"
+      ],
+      "sourceAndRuntime": {
+        "sourceFiles": 11057,
+        "canonicalUnitCases": 3864,
+        "fullRecoveryCensus": 351,
+        "fullIntegrationCensus": 538,
+        "rf3SelectedCases": 120,
+        "rf3Executed": 0,
+        "sourceImageClosureDrift": false,
+        "allOriginalProcessReadersDisposalJoined": true
+      },
+      "coverage": {
+        "current": "UNMEASURED",
+        "collectorExecuted": false,
+        "controlsOrLoadCredit": false
+      },
+      "remaining": "Repair exact original SQL refusal classification and five native host startup/shutdown/ownership flows. Independent fresh Linux full-suite/Aspire RF3, functional coverage, fault/endurance and comparable performance gates remain mandatory; none follows from this focused checkpoint."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -62381,6 +62543,43 @@
       "beforeAfter": "not performed",
       "hotspotOrSpeedClaim": false,
       "acceptance": "KL-105 remains open"
+    },
+    "currentStageR44Diagnostics": {
+      "scope": "Actual native50 Unit test process54372 including in-process database execution; macOS arm64 .NET10.0.12. Not Docker database or Linux benchmark qualification.",
+      "originals": [
+        {
+          "path": "TestResults/stage61-native-join/stage64-r44-kl105-owned-process-census.original.json",
+          "sha256": "28c812bb40d306abb63352368f8a54973acf33f0192c8cf5585c825c32ca6b09"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r44-kl105-unit54372-allocation.original.json",
+          "sha256": "a59acc6b8a809f0c67fd3eb4c7c4aca2c44ee2131332b699e1cb816038f18001"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r44-kl105-unit54372-counters-no-store.original.json",
+          "sha256": "69d43bae0dbb48afc35c748b3d5ad20fefbf3283abcd02892b9dae7f0c1ec7f1"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r44-kl105-unit54372-counters.original.json",
+          "sha256": "7f23819447baac7f0ccb5c5654b41506d9e762d095dcfdf95a13175eb526b067"
+        },
+        {
+          "path": "TestResults/stage61-native-join/stage64-r44-kl105-unit54372-info.original.json",
+          "sha256": "9358e0ef8c275b5ba5745948708d5bcdc4ae15391e48c53236b663bab9cd476a"
+        }
+      ],
+      "nativeCountersCaptured": true,
+      "persistentCapture": "CapacityExceeded store budget; nonpersistent bounded8second EventPipe counters succeeded and original response retained",
+      "allocationCapture": "FormatException Read past end of stream; no allocation hotspot accepted",
+      "currentSourceAndImageBinding": {
+        "path": "TestResults/stage61-native-join/current-stage64-r44-unit-native-binding.original.json",
+        "sha256": "7ae20e97e199b2f359181ab7071b21d6ca860e15b45be8109f1ed036990a8ed7"
+      },
+      "matchedBeforeAfter": false,
+      "overheadMeasured": false,
+      "samplingLossQualified": false,
+      "hotspotOrSpeedClaim": false,
+      "acceptanceClosed": false
     }
   },
   "AdminDashboard": {

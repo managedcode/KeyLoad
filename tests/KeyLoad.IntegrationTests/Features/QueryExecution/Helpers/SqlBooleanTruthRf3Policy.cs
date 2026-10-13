@@ -16,6 +16,7 @@ internal static class SqlBooleanTruthRf3Policy
         var before = await SqlBooleanTruthRf3Image.ReadAsync(root, state, token);
         await SqlBooleanTruthRf3Refusals.RejectAsync(fixture, state,
             SqlBooleanTruthRf3Cases.All[SqlBooleanTruthRf3State.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
+        await SqlBooleanOperandRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(

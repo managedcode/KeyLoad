@@ -23,7 +23,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
     {
         if (originalStop is not null)
         { await JoinOriginalAsync(originalStop).ConfigureAwait(false); }
-        await JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.StopAsync(cancellationToken)))).ConfigureAwait(false);
+        await JoinOriginalAsync(ControlledPartitionMovementNativeGroupShutdown.StopAsync(nodes, cancellationToken)).ConfigureAwait(false);
         if (nodes.Any(node => !node.IsJoined))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
         nodes = [];
@@ -50,7 +50,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
     {
         if (originalRestart is not null)
         { await JoinOriginalAsync(originalRestart).ConfigureAwait(false); }
-        await JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.StopAsync(cancellationToken)))).ConfigureAwait(false);
+        await JoinOriginalAsync(ControlledPartitionMovementNativeGroupShutdown.StopAsync(nodes, cancellationToken)).ConfigureAwait(false);
         if (nodes.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount || nodes.Any(node => !node.IsJoined))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable); }
     }
@@ -75,7 +75,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts
         if (originalStop is not null)
         { await ServerFailureObserver.ObserveAsync(() => originalStop, failures).ConfigureAwait(false); }
         await ServerFailureObserver.ObserveAsync(
-            () => JoinOriginalAsync(Task.WhenAll(nodes.Select(node => node.DisposeAsync().AsTask()))),
+            () => JoinOriginalAsync(ControlledPartitionMovementNativeGroupShutdown.DisposeAsync(nodes)),
             failures).ConfigureAwait(false);
         if (nodes.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount
             || nodes.Any(node => !node.IsJoined))

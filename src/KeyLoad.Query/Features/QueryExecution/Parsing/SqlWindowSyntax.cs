@@ -61,7 +61,7 @@ internal static class SqlWindowSyntax
     private static int Count(SqlTokenCursor cursor)
     {
         if (cursor.Current.Kind != SqlTokenKind.Number
-            || !int.TryParse(cursor.Current.Text, global::System.Globalization.NumberStyles.None,
+            || !int.TryParse(cursor.Current.NumericText ?? cursor.Current.Text, global::System.Globalization.NumberStyles.None,
                 global::System.Globalization.CultureInfo.InvariantCulture, out var value))
         {
             throw SqlSyntax.Invalid();

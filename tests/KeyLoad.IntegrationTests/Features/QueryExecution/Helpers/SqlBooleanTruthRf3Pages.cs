@@ -10,9 +10,11 @@ internal static class SqlBooleanTruthRf3Pages
         {
             var capabilities = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.OperandProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
                 await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthRf3Cases.OperandProfile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -42,5 +44,7 @@ internal static class SqlBooleanTruthRf3Pages
             await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
         await SqlBooleanTruthRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), item, revision);
         await SqlBooleanTruthRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), item, revision);
+        if (item.Clause == SqlBooleanTruthRf3Cases.BareClause)
+        { await SqlBooleanOperandRf3Parameters.RequireAsync(caller, wire, revision, token); }
     }
 }

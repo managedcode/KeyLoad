@@ -5,6 +5,10 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed record SqlNullDistinctRf3Case(string Clause, Predicate Predicate, string[] Ids);
 internal static class SqlNullDistinctRf3Cases
 {
+    internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators.v1";
+    internal const string NumericSeparatorClause = "score = 1_0e-1";
+    internal const string NumericRadixSeparatorClause = "score = 0b_1";
+    internal const string NumericOctalSeparatorClause = "score = 0o_1";
     internal const string Profile = "SQL.NullDistinct.v1";
     internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms.v1";
     internal const string NullClause = "score ISNULL";
@@ -161,6 +165,22 @@ internal static class SqlNullDistinctRf3Cases
             new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
         new("label = U&'\\\\'", new Comparison(Label, "=", ValueOperand.Create("\\")), []),
         new("label = U&'low''other'", new Comparison(Label, "=", ValueOperand.Create("low'other")), []),
+        new("score = 1_0e-1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = .0_1e+0_2", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = 1_0.0_0e-0_1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = +0x_1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = 0b_1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = 0o_1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = -0o_1", new Comparison(Score, "=", ValueOperand.Create(-1)), []),
+        new("score = 0x1_0", new Comparison(Score, "=", ValueOperand.Create(16)), []),
+        new("score = 0b1_0", new Comparison(Score, "=", ValueOperand.Create(2)), ["high"]),
+        new("score = 0o1_0", new Comparison(Score, "=", ValueOperand.Create(8)), []),
+        new("score = 79_228_162_514_264_337_593_543_950_335", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        new("score = -79_228_162_514_264_337_593_543_950_335", new Comparison(Score, "=", ValueOperand.Create(decimal.MinValue)), []),
+        new("score = 0x_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        new("score = 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        new("score = 0o7777_7777_7777_7777_7777_7777_7777_7777", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        .. SqlUnicodeIdentifierCases.All,
     ];
     internal static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     internal static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

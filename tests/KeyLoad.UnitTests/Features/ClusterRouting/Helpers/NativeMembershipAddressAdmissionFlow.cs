@@ -18,18 +18,18 @@ internal static class NativeMembershipAddressAdmissionFlow
     internal static async Task RunAsync(
         Func<NativeSixSiloMembershipReadinessFixture, CancellationToken, Task> operation, CancellationToken cancellationToken)
     {
-        var fixture = new NativeSixSiloMembershipReadinessFixture();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await fixture.Cluster.DeployAsync(cancellationToken).ConfigureAwait(false);
-            using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(AdmissionSeconds), TimeProvider.System);
-            using var admission = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
-            await operation(fixture, admission.Token).ConfigureAwait(false);
+            await using var fixture = new NativeSixSiloMembershipReadinessFixture();
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await fixture.DeployAsync(cancellationToken).ConfigureAwait(false);
+                using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(AdmissionSeconds), TimeProvider.System);
+                using var admission = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
+                await operation(fixture, admission.Token).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(fixture.Cluster.StopAllSilosAsync, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(async () =>
-            await fixture.Cluster.DisposeAsync().ConfigureAwait(false), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

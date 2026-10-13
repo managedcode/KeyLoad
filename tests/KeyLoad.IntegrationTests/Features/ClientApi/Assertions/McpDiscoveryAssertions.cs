@@ -26,7 +26,7 @@ internal static class McpDiscoveryAssertions
         await Assert.That(string.IsNullOrWhiteSpace(tool.Description)).IsFalse();
         await VerifyInputAsync(tool.InputSchema, expected);
         await Assert.That(tool.OutputSchema.HasValue).IsTrue();
-        await VerifyOutputAsync(tool.OutputSchema!.Value);
+        await VerifyOutputAsync(tool.OutputSchema!.Value, expected.ResultFields);
         if (tool.Name is McpCallerProtocol.GraphShortestPath or McpCallerProtocol.QueryGraphPath)
         {
             await McpGraphPathSchemaAssertions.VerifyAsync(tool.Name, tool.InputSchema, tool.OutputSchema!.Value,
@@ -60,10 +60,17 @@ internal static class McpDiscoveryAssertions
             return;
         }
         await RequiredAsync(body, expected.BodyFields);
+        if (!expected.BodyPropertyFields.IsDefault)
+        {
+            var fields = body.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject()
+                .Select(property => property.Name).ToArray();
+            await Assert.That(fields.Length).IsEqualTo(expected.BodyPropertyFields.Length);
+            await Assert.That(fields.ToHashSet(StringComparer.Ordinal).SetEquals(expected.BodyPropertyFields)).IsTrue();
+        }
         await Assert.That(body.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject().Any()).IsTrue();
     }
 
-    private static async Task VerifyOutputAsync(JsonElement schema)
+    private static async Task VerifyOutputAsync(JsonElement schema, ImmutableArray<string> resultFields)
     {
         await Assert.That(schema.GetProperty(McpDiscoveryProtocol.Type).GetString()).IsEqualTo(McpDiscoveryProtocol.Object);
         var variants = schema.GetProperty(McpDiscoveryProtocol.OneOf);
@@ -72,11 +79,24 @@ internal static class McpDiscoveryAssertions
         await RequiredAsync(variants[1], [McpCallerProtocol.Error, McpCallerProtocol.RequestId]);
         await RequiredAsync(schema.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Error),
             McpCallerAssertions.ProblemFields);
+        if (!resultFields.IsDefault)
+        {
+            var result = schema.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Result);
+            var fields = result.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject()
+                .Select(property => property.Name).ToArray();
+            await Assert.That(fields.Length).IsEqualTo(resultFields.Length);
+            await Assert.That(fields.ToHashSet(StringComparer.Ordinal).SetEquals(resultFields)).IsTrue();
+        }
     }
 
     private static async Task RequiredAsync(JsonElement schema, ImmutableArray<string> expected)
     {
-        var actual = schema.GetProperty(McpDiscoveryProtocol.Required).EnumerateArray().Select(field => field.GetString()!).ToArray();
+        if (!schema.TryGetProperty(McpDiscoveryProtocol.Required, out var required))
+        {
+            await Assert.That(expected.IsEmpty).IsTrue();
+            return;
+        }
+        var actual = required.EnumerateArray().Select(field => field.GetString()!).ToArray();
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         await Assert.That(actual.ToHashSet(StringComparer.Ordinal).SetEquals(expected)).IsTrue();
     }

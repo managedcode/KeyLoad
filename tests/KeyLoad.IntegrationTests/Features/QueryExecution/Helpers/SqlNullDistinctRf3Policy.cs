@@ -41,6 +41,8 @@ internal static class SqlNullDistinctRf3Policy
             token, ast: true, astCase: dollar);
         await SqlRadixIntegerRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
         await SqlUnicodeStringRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
+        await SqlUnicodeIdentifierRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
+        await SqlNumericSeparatorRf3Controls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         var hex = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.HexClause);
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, hex.Clause, ErrorCode.PermissionDenied,

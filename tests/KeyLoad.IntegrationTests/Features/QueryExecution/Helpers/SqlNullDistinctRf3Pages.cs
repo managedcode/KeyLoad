@@ -17,6 +17,7 @@ internal static class SqlNullDistinctRf3Pages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.DollarProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.BinaryOctalProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.UnicodeProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NumericSeparatorProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
                 await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.Profile)).IsTrue();
@@ -28,6 +29,9 @@ internal static class SqlNullDistinctRf3Pages
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.DollarProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.BinaryOctalProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.UnicodeProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NumericSeparatorProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -61,6 +65,10 @@ internal static class SqlNullDistinctRf3Pages
         { await SqlEscapeStringRf3Parameters.RequireAsync(wire, item, revision, token); }
         if (item.Clause == SqlNullDistinctRf3Cases.UnicodeClause)
         { await SqlUnicodeStringRf3Parameters.RequireAsync(wire, item, revision, token); }
+        if (item.Clause == SqlNullDistinctRf3Cases.NumericSeparatorClause)
+        { await SqlNumericSeparatorRf3Parameters.RequireAsync(caller, wire, revision, token); }
+        if (item.Clause == SqlUnicodeIdentifierCases.Clause)
+        { await SqlUnicodeIdentifierRf3Parameters.RequireAsync(caller, wire, revision, token); }
         if (item.Clause == SqlNullDistinctRf3Cases.DollarClause)
         { await SqlDollarStringRf3Parameters.RequireAsync(wire, item, revision, token); }
     }
