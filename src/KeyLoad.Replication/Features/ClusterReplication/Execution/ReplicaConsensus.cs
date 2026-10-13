@@ -169,9 +169,10 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         {
             await reads.ExecuteAsync(ReplicaReadRoundPurpose.Control, cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException original) when (!cancellationToken.IsCancellationRequested)
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+            throw ReplicaReadFailureMetadata.Preserve(original,
+                Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader));
         }
     }
 

@@ -51,7 +51,7 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile); }
     }
 
-    private static void RequireInitialMaintenanceReservation(ProjectionConsumerInfo previous,
+    internal static void RequireInitialMaintenanceReservation(ProjectionConsumerInfo previous,
         ConfigureProjectionConsumerRequest configure)
     {
         if (previous.InitialAnnMaintenance is not null && !previous.InitialAnnMaintenanceSettled

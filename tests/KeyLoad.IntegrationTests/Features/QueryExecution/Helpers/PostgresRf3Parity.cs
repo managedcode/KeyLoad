@@ -30,6 +30,8 @@ internal static class PostgresRf3Parity
                         await SyntaxVariantsAsync(state, wire, token);
                         await LiteralVariantsAsync(state, reader, wire, token);
                         await SqlUnicodeIdentifierRf3JoinPages.RequireAsync(state, reader, wire, token);
+                        await SqlTableRf3Pages.RequireAsync(state, reader, wire, token);
+                        await SqlTableRf3Refusals.RequireAsync(state, reader, wire, root.Sdk, token);
                         await SqlNumericSeparatorRf3JoinParameters.RequireAsync(state, reader, wire, token);
                         if (state.Dialect == PostgresRf3Protocol.JoinDialect)
                         {

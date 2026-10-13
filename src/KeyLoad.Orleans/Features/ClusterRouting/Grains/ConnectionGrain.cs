@@ -126,6 +126,10 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
+            if (error is OperationCanceledException cancelled)
+            {
+                operations.ObserveOriginalCancellation(cancelled, requestId, stage, diagnostics, writer.CancellationToken);
+            }
             return GrainReplyFactory.StreamResult(reply: GrainReplyFactory.Failure(error: error, command: command, diagnostics: diagnostics,
                 requestId: requestId, stage: stage, cancellationToken: writer.CancellationToken, options: options), options: options);
         }

@@ -7,8 +7,8 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R44 coherent full Release, canonical formatter and whole-solution format verification passed with zero errors/warnings and unchanged source. Focused native50 local macOS arm64 whole-operation execution passed283of289 cases,6failed,0skipped; all289 R43 selected UIDs retained. Original six-silo PRIMARY restart now passes; new Boolean predicate refusal classification regressed. Original plan20/104done84in progress; exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open.",
-    "coverage": "UNMEASURED_FOR_CURRENT_R44. Historical R38 partial functional observation:25.729928757%lines19.627577034%branches across13 reported production modules; controls/load excluded. Full product functional coverage and Linux contributor gates remain unqualified.",
+    "qualification": "R45 coherent full Release, canonical formatter and whole-solution format verification passed with zero compiler/analyzer errors and warnings. Focused native50 local macOS arm64 execution passed321of332 whole-operation cases:Unit288of297 andRecovery33of35,11failed,0skipped. All289 R44 selected identities retained,43additional current instances observed (40PASS/3FAIL). Current exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open; original plan20of104done84in progress.",
+    "coverage": "UNMEASURED_FOR_CURRENT_R45. Historical R38 partial functional observation remains history; current load/control cases receive no functional coverage credit.",
     "currentStageR43": {
       "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
       "newCSharpFiles": 138,
@@ -1888,6 +1888,137 @@
         "controlsOrLoadCredit": false
       },
       "remaining": "Repair exact original SQL refusal classification and five native host startup/shutdown/ownership flows. Independent fresh Linux full-suite/Aspire RF3, functional coverage, fault/endurance and comparable performance gates remain mandatory; none follows from this focused checkpoint."
+    },
+    "currentStageR45": {
+      "status": "local_development_executed_with_eleven_failures_linux_acceptance_pending",
+      "scope": "Private replica read failure provenance and joined restore drill intervals; ANN original reservation fencing; full blob partial-range cancellation and retained time-series chunk byte budgets; actual PubSub native state; queue/composition original authority/refusal corrections; shared read-budget exact metadata accounting; original SQL refusal/offset/ordinal flows; accepted selected-language T-SQL/ScriptDOM contract with replacement still open.",
+      "originalReport": {
+        "path": "TestResults/stage61-native-join/stage64-r45-development.corrected-qualification.original.json",
+        "sha256": "cffafbceeb42fb1ccc0c44130d67d8d9178507b8944b48cfbefc10c66fcdeb93"
+      },
+      "verification": {
+        "build": {
+          "mode": "build",
+          "startedAt": "2026-10-13T21:42:13.879065+00:00",
+          "completedAt": "2026-10-13T21:46:42.206446+00:00",
+          "elapsedSeconds": 268.3256037499523,
+          "pid": 82572,
+          "exitCode": 0,
+          "processJoined": true,
+          "sourceCount": 11102,
+          "sourceDrift": [],
+          "logSha256": "330d10e84838829c71bdf2a954f718c5371a626949570bea56d00830c28903ea",
+          "originalCompletion": {
+            "path": "TestResults/stage61-native-join/stage64-r45-build-coherent-retry1-original.completion.json",
+            "sha256": "8445b906f883aa8a6846c579065f8422a61a0e2e061091437c24c7878c63a413"
+          }
+        },
+        "format": {
+          "mode": "format",
+          "startedAt": "2026-10-13T21:38:26.037894+00:00",
+          "completedAt": "2026-10-13T21:40:53.191045+00:00",
+          "elapsedSeconds": 147.15174070803914,
+          "pid": 81530,
+          "exitCode": 0,
+          "processJoined": true,
+          "sourceCount": 11102,
+          "sourceDrift": [
+            "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaLeaderRound.cs",
+            "src/KeyLoad.Replication/Features/ClusterReplication/Queries/ReplicaReadRoundExecutor.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Assertions/BlobPartialReadCancellationR45Pages.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Assertions/BlobPartialReadCancellationR45Publication.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Helpers/BlobPartialReadCancellationR45Held.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Helpers/BlobPartialReadCancellationR45Seed.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Helpers/BlobPartialReadCancellationR45Trial.cs",
+            "tests/KeyLoad.IntegrationTests/Features/BlobStorage/Models/BlobPartialReadCancellationR45State.cs",
+            "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Helpers/ReplicaReadFailureEvidence.cs",
+            "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Assertions/SqlOrdinalRf3Pages.cs",
+            "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Helpers/SqlOrdinalRf3Controls.cs",
+            "tests/KeyLoad.UnitTests/Features/QueryExecution/Assertions/SqlOrdinalPages.cs",
+            "tests/KeyLoad.UnitTests/Features/QueryExecution/Assertions/SqlTableControls.cs",
+            "tests/KeyLoad.UnitTests/Features/ResourceExecution/Assertions/SearchReadBudgetAssertions.cs",
+            "tests/KeyLoad.UnitTests/Features/ResourceExecution/Helpers/AnalyticalReadBudgetFailureFlow.cs",
+            "tests/KeyLoad.UnitTests/Features/ResourceExecution/Helpers/SearchReadBudgetCold.cs",
+            "tests/KeyLoad.UnitTests/Features/ResourceExecution/Helpers/SearchReadBudgetCost.cs",
+            "tests/KeyLoad.UnitTests/Features/ResourceExecution/Helpers/SearchReadBudgetOwner.cs",
+            "tests/KeyLoad.UnitTests/Features/Search/Helpers/SharedSearchReadBudgetFlow.cs"
+          ],
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalCompletion": {
+            "path": "TestResults/stage61-native-join/stage64-r45-format-coherent-retry1-original.completion.json",
+            "sha256": "716e47736c1532c8f46e4de5ec9d8658cf504995168bc83941de639018659a4e"
+          }
+        },
+        "verify": {
+          "mode": "verify",
+          "startedAt": "2026-10-13T21:50:03.134792+00:00",
+          "completedAt": "2026-10-13T21:52:58.700920+00:00",
+          "elapsedSeconds": 175.56470641691703,
+          "pid": 84074,
+          "exitCode": 0,
+          "processJoined": true,
+          "sourceCount": 11102,
+          "sourceDrift": [],
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "originalCompletion": {
+            "path": "TestResults/stage61-native-join/stage64-r45-verify-coherent-original.completion.json",
+            "sha256": "3f1a576b9890fc843986a3c5c0b9f0f8e18483950baaf34702e75ff51e9533bf"
+          }
+        }
+      },
+      "outcomes": {
+        "executed": 332,
+        "passed": 321,
+        "failed": 11,
+        "skipped": 0
+      },
+      "wholeUnitClasses": 92,
+      "nativeMaximumParallelTests": 50,
+      "actualTrxCaseLifetimeOverlap": {
+        "unit": 51,
+        "recovery": 27
+      },
+      "originalTrxAndNativeCountsAgree": true,
+      "sourceImageClosureDrift": false,
+      "allOriginalProcessReaderDisposalJoins": true,
+      "originalR44IdentitiesRetained": 289,
+      "newSelectedInstances": 43,
+      "newPassedInstances": 40,
+      "newFailedInstances": 3,
+      "remainingOriginalFailureCount": 11,
+      "nativeDiagnostics": {
+        "currentFinalRequest": "CompleteReady27of27ZeroErrorsZeroWarnings",
+        "includeAnalyzers": true,
+        "cleanClaim": true,
+        "original": {
+          "path": "TestResults/stage61-native-join/stage64-r45-independent-eight-source-native.root-r45-final-existing-native-api-Y-final-complete-analysis-and-status.original.json",
+          "sha256": "c1512bb22b30f67c124c8d8c517a31a359c79a9c50ca05c2ad8c30c043269243"
+        },
+        "originalCompletion": {
+          "path": "TestResults/stage61-native-join/stage64-r45-independent-eight-source-native.completion.original.json",
+          "sha256": "1c2ec2cfae49dffd23aaaa8659905561cbcb8f97a9fa3ade9505a6f45685a031"
+        }
+      },
+      "sqlReplacement": {
+        "selected": "T-SQL via Microsoft ScriptDOM180.140.0",
+        "adoptionAuthorized": true,
+        "sourceIntegrated": false,
+        "runtimeQualified": false,
+        "contract": "docs/ADR/ADR-130-microsoft-scriptdom-tsql.md"
+      },
+      "allAcceptanceClosed": false,
+      "coverage": "UNMEASURED",
+      "rf3": {
+        "actualNativeFullCases": 538,
+        "selectedCases": 120,
+        "executed": 0,
+        "originalBinding": {
+          "path": "TestResults/stage61-native-join/current-stage64-r45-rf3-native-binding.original.json",
+          "sha256": "a077eac7c2dee8c8bca166a017e55dbce08577489643109bcbc666c2bf107b97"
+        },
+        "reason": "Two actual local-image allowlists do not admit the expanded cohort; current exact-source Linux CI remains mandatory."
+      },
+      "remaining": "Fix the actual logger/cold identity oracles and native startup/SQL failures as a coherent batch while independent models continue; integrate selected ScriptDOM replacement and retire replaced grammar. Required exact-source Linux full suites/RF3, meaningful functional coverage, fault/endurance/performance remain mandatory."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -62580,6 +62711,12 @@
       "samplingLossQualified": false,
       "hotspotOrSpeedClaim": false,
       "acceptanceClosed": false
+    },
+    "currentStageR45Diagnostics": {
+      "status": "No actual R45 collector, no new bottleneck or speed claim",
+      "scope": "R45 native source diagnostics are clean; profiling observations from older cohorts do not qualify this source.",
+      "accepted": false,
+      "matchedBeforeAfter": false
     }
   },
   "AdminDashboard": {

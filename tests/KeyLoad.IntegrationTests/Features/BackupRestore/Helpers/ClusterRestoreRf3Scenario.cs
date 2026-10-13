@@ -31,10 +31,13 @@ internal static class ClusterRestoreRf3Scenario
         CancellationToken cancellationToken)
     {
         var started = TimeProvider.System.GetTimestamp();
+        var drill = new ClusterRestoreDrillEvidence(TimeProvider.System);
         var secondary = await ClusterRestoreRf3SecondaryPartition.SeedAsync(source, seed, cancellationToken).ConfigureAwait(false);
         var eventing = await ClusterRestoreRf3EventingSeed.CreateAsync(source, seed, cancellationToken).ConfigureAwait(false);
+        drill.BeginCapture();
         var originals = await ClusterRestoreRf3Capture.CaptureAsync(source, seed.Partition, Guid.NewGuid(),
             cancellationToken).ConfigureAwait(false);
+        drill.EndCapture();
         var postCapture = seed.Models.Command(new PutDocument(RelationalSqlRf3Tokens.Documents,
             PostCaptureId, PostCaptureJson));
         var postCaptureReceipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(postCapture,
@@ -61,7 +64,7 @@ internal static class ClusterRestoreRf3Scenario
                 var repairedArchives = await ClusterRestoreRf3ArchiveMutationTrial.RequireAndRepairAsync(target,
                     originals, archives, ownedRoot, cancellationToken).ConfigureAwait(false);
                 await ClusterRestoreRf3Verification.RunAsync(target, seed, originals, eventing, secondary,
-                    invalidCredentials, repairedArchives, mixed, source.Profile.AdminKey, cancellationToken).ConfigureAwait(false);
+                    invalidCredentials, repairedArchives, mixed, source.Profile.AdminKey, drill, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception original)
             {
@@ -76,6 +79,7 @@ internal static class ClusterRestoreRf3Scenario
             { throw new AggregateException(initiatingFailure, terminal); }
             throw;
         }
+        await drill.WriteAsync(originals).ConfigureAwait(false);
         var elapsed = TimeProvider.System.GetElapsedTime(started);
         await Assert.That(elapsed).IsLessThan(ClusterRestoreRf3Protocol.ParentDeadline);
         await TestContext.Current!.OutputWriter.WriteLineAsync(DurationLabel

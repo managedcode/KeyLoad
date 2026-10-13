@@ -14,6 +14,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private const string ArtifactNamePrefix = "request-cqrs-rf3-mcp-rejections-";
     private const string RpcArtifactNamePrefix = "request-cqrs-rf3-rpc-failures-";
     private const string RpcArtifactDataKey = "KeyLoad.RequestCqrsRf3.RpcFailureArtifact";
+    private const string ConnectionCancellationDataKey = "KeyLoad.RequestCqrsRf3.ConnectionCancellationArtifact";
     private const string ArtifactSuffix = ".json";
     private const string ArtifactDataKey = "KeyLoad.RequestCqrsRf3.McpRejectionArtifact";
     private const string InvalidWaveIdMessage = "The C1 diagnostics wave identifier must be nonempty.";
@@ -32,6 +33,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private Task? disposalTask;
     private string? artifactPath;
     private string? rpcArtifactPath;
+    private string? connectionCancellationArtifactPath;
 
     private RequestCqrsRf3Diagnostics(Guid waveId, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
         ResourceLoggerService logger, ContainerResource[] resources,
@@ -72,7 +74,12 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
         var path = SaveEvidence();
         failure.Data[ArtifactDataKey] = path;
         lock (disposalGate)
-        { failure.Data[RpcArtifactDataKey] = rpcArtifactPath ??= WriteRpcArtifact(); }
+        {
+            failure.Data[RpcArtifactDataKey] = rpcArtifactPath ??= WriteRpcArtifact();
+            failure.Data[ConnectionCancellationDataKey] = connectionCancellationArtifactPath
+                ??= RequestCqrsConnectionCancellationArtifactWriter.Write(waveId,
+                    nodes.Select(node => node.ConnectionCancellationSnapshot()).ToArray());
+        }
     }
 
     internal string SaveEvidence()

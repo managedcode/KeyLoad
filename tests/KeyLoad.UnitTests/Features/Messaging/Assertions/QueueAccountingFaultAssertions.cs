@@ -16,7 +16,7 @@ internal static class QueueAccountingFaultAssertions
     private static readonly CompositeFormat UnexpectedReturnCounterFormat = CompositeFormat.Parse(UnexpectedReturnCounterDetail);
 
     internal static async Task RefusedAsync(DatabaseEngine database, ZoneTreeStore store,
-        QueueAccountingFaultState state, string[] image)
+        QueueAccountingFaultState state, string[] image, ErrorCode expectedError)
     {
         var position = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -27,7 +27,7 @@ internal static class QueueAccountingFaultAssertions
             throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, UnexpectedReturnCounterFormat,
                 code, counters.StoredMessages, counters.StoredBytes, counters.InFlightMessages, counters.InFlightBytes));
         });
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(failure.Code).IsEqualTo(expectedError);
         await Assert.That(failure.Message).IsEqualTo(QueueLifecycleProtocol.InvalidCounter);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);

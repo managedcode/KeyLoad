@@ -73,7 +73,7 @@ internal sealed class EventFeedPubSubStorageTests
         var routing = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         var defaults = Options.Create(new DatabaseLimits());
         var id = Id(FirstKey);
-        var legalBytes = EventFeedPubSubRowEncoding.Create(services, id, Healthy, defaults,
+        var legalBytes = EventFeedPubSubRowEncoding.Create(services, id, new List<string> { Healthy }, defaults,
             routing, CancellationToken.None).EncodedBytes;
         var limits = new DatabaseLimits
         {
@@ -85,38 +85,45 @@ internal sealed class EventFeedPubSubStorageTests
         var options = Options.Create(limits);
         using (var storage = new EventFeedPubSubStorage(services, options, routing))
         {
-            var original = new GrainState<string>(Original);
+            var original = new GrainState<List<string>>([Original]);
             await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, original);
             var originalTag = original.ETag;
-            var refused = new GrainState<string>(new string(OversizeData, checked((int)legalBytes)))
+            var oversized = new string(OversizeData, checked((int)legalBytes));
+            var refused = new GrainState<List<string>>([oversized])
             { ETag = originalTag, RecordExists = true };
             await RequireCode(ErrorCode.ResourceExhausted,
                 () => storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, refused));
-            var read = new GrainState<string>();
+            var read = new GrainState<List<string>>();
             await storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, id, read);
-            await Assert.That(read.State).IsEqualTo(Original);
+            await Assert.That(RequireEncodedState(read).SequenceEqual([Original])).IsTrue();
             await Assert.That(read.ETag).IsEqualTo(originalTag);
             await Assert.That(read.RecordExists).IsTrue();
             await Assert.That(refused.ETag).IsEqualTo(originalTag);
-            var healthy = new GrainState<string>(Healthy) { ETag = originalTag, RecordExists = true };
+            await Assert.That(refused.RecordExists).IsTrue();
+            await Assert.That(RequireEncodedState(refused).SequenceEqual([oversized])).IsTrue();
+            var healthy = new GrainState<List<string>>([Healthy]) { ETag = originalTag, RecordExists = true };
             await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, healthy);
             await storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, id, read);
-            await Assert.That(read.State).IsEqualTo(Healthy);
+            await Assert.That(RequireEncodedState(read).SequenceEqual([Healthy])).IsTrue();
             await Assert.That(read.ETag).IsEqualTo(healthy.ETag);
             await Assert.That(read.RecordExists).IsTrue();
         }
         using var restarted = new EventFeedPubSubStorage(services, options, routing);
-        var absent = new GrainState<string>();
+        var absent = new GrainState<List<string>>();
         await restarted.ReadStateAsync(EventFeedPubSubProtocol.StateName, id, absent);
+        await Assert.That(RequireEncodedState(absent).Count).IsEqualTo(0);
         await Assert.That(absent.ETag).IsNull();
         await Assert.That(absent.RecordExists).IsFalse();
-        var fresh = new GrainState<string>(Healthy);
+        var fresh = new GrainState<List<string>>([Healthy]);
         await restarted.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, fresh);
         await restarted.ReadStateAsync(EventFeedPubSubProtocol.StateName, id, absent);
-        await Assert.That(absent.State).IsEqualTo(Healthy);
+        await Assert.That(RequireEncodedState(absent).SequenceEqual([Healthy])).IsTrue();
         await Assert.That(absent.ETag).IsEqualTo(fresh.ETag);
         await Assert.That(absent.RecordExists).IsTrue();
     }
+
+    private static List<string> RequireEncodedState(GrainState<List<string>> state)
+        => state.State ?? throw new InvalidOperationException("The original native pubsub operation returned no state.");
 
     private static GrainId Id(string key) => GrainId.Create(EventFeedPubSubProtocol.GrainTypeName,
         EventFeedPubSubProtocol.ProviderName + key);

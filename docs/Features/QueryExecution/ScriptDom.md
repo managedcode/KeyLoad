@@ -1,0 +1,44 @@
+# T-SQL parsing and canonical database execution
+
+Owner selection: 2026-10-13. Decision: [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md). Status: accepted replacement contract; package integration, execution and qualification pending. This belongs to QueryExecution and ClientApi under KL-045/KL-047 and existing REQ/AC-SQLC-001–011; it does not complete full SQL by itself.
+
+## Scope and boundaries
+
+Microsoft ScriptDOM180.140.0 owns T-SQL syntax and native AST. KeyLoad translates execution-supported nodes into existing typed queries and canonical model operations; the same authenticated callers, persisted permissions, bounded connection-owned Orleans execution, ZoneTree authority and RF3 receipts remain required. All models remain composable within one database.
+
+Remove replaced handwritten grammar and active PostgreSQL-dialect promises with the replacement. Do not add a fallback parser, SQL normalization shim, legacy mode, persisted-data migration, duplicate authorization or execution dispatcher. Native PostgreSQL framing is an independently described bounded transport, not a promise about SQL grammar or TDS. Frontend: documentation and examples only; no new page flow. Persistence: N/A, public language selection does not change persisted typed records or serializer aliases/IDs.
+
+```mermaid
+flowchart TD
+    Input[Original bounded SQL and verified parameters] --> Syntax[Native ScriptDOM syntax]
+    Syntax --> Decision{Closed supported typed plan}
+    Decision -->|Malformed| Invalid[Fixed Validation and no effects]
+    Decision -->|Valid unsupported| Unsupported[Fixed UnsupportedCapability and no effects]
+    Decision -->|Supported| Execute[Existing authorized Orleans database operation]
+    Execute --> Verify[Full results receipts state and joined resources]
+```
+
+## Acceptance criteria
+
+- **REQ-TSQL-001 / AC-TSQL-001 — native syntax owner:** centrally pin and restore the selected Microsoft package and preserve its MIT notice. All SQL entry points consume the native ScriptDOM AST. Replaced hand parser/lexer paths have no active references or fallback. Independent whole database operations prove equivalent intended results through the selected T-SQL syntax.
+- **REQ-TSQL-002 / AC-TSQL-002 — complete lowering:** bind supported SELECT/projection/predicates/joins/order/TOP/OFFSET-FETCH and canonical EXEC operations to existing typed plans. Every unhandled native clause or family refuses before a view or command is admitted. Verify full literal results, typed-plan caller parity, final state, original GUID replay and no-effects refusal followed by a healthy operation.
+- **REQ-TSQL-003 / AC-TSQL-003 — authority and composition:** SDK, official MCP and the supported native session execute the same plans. Fresh persisted policy/credential revocation refuses the original operation; exact repair and the same caller recover. Documents, typed rows, graphs, vectors, blobs, queues, events and time series retain their existing composition and atomicity contracts. No caller roles or extra authority store.
+- **REQ-TSQL-004 / AC-TSQL-004 — bounded parser lifetime:** original source/token/depth/node/parameter/output and shared execution limits apply before and during native parsing/lowering. Pre-cancelled and admitted cancellation settle and join original work, preserve state and resources, then the same owner executes a healthy operation. Deep, oversized, malformed, multiple-statement and dynamic-SQL inputs retain exact bounded refusal and healthy continuation. A cancellation-aware reader alone is insufficient parsing-phase proof.
+- **REQ-TSQL-005 / AC-TSQL-005 — parameter and effect safety:** verified scalar/JSON parameters bind to native variable nodes without textual value substitution. Literal/comment content is preserved. Prepared/simple calls retain bounded slot ownership and close/repair behavior; failed or cancelled writes retain original unknown-outcome/GUID rules. Classification uses the same compiled plan.
+- **REQ-TSQL-006 / AC-TSQL-006 — delivery and honest conformance:** update dialect, executable-family and native-session inventories and examples together. Full grammar acceptance is distinct from complete execution and interoperability. Require build/analyzers/format, native discovery and whole operation classes, process recovery, genuine Aspire Docker RF3 SDK/MCP/native-driver proof and exact-source Linux originals. Coverage excludes load/performance tests and requires meaningful complete success/failure flows. No local speed, production or power-loss claim.
+
+## Ordered plan and parallel ownership
+
+Root freezes architecture and acceptance, pins/restores the package, resolves actual API identity, integrates shared entry points and removes superseded paths. The SELECT worker drafts admission and query lowering; the operation worker drafts EXEC/model lowering; the transport worker drafts bound parameters and prepared/simple joins. Assign disjoint exact paths before each source packet. Tests are derived from these criteria and preserve original operation/state/fault controls. Model/recovery workers continue independent accepted tasks.
+
+First capture current original failures and native discovery; preserve them when the chosen language changes. Review all replacement source and complete operation fixtures together. Root runs one combined focused test wave after coherent integration, fixes observed failures, then runs mandatory Linux recovery/RF3/resource and module coverage gates. Only original authenticated exact-source passing evidence closes a criterion.
+
+| Criterion | Required complete flow | Level and entry |
+|---|---|---|
+| AC-TSQL-001/002 | Literal T-SQL reads/joins/windows and EXEC writes; complete rows, receipts, replay, malformed/unsupported no-effects then healthy continuation | Genuine ZoneTree TUnit through Aspire-owned Unit/Recovery |
+| AC-TSQL-003 | SDK/MCP/native-driver parity; persisted revoke/repair; model composition and two owned cold continuations | Aspire-owned Docker RF3 on Linux |
+| AC-TSQL-004 | Original-token and admitted cancellation, parser bounds, producer/resource settlement, healthy same-owner retry | TUnit Unit plus public RF3 |
+| AC-TSQL-005 | Typed scalar/JSON binding, preserved literals/comments, prepared capacity refusal/close/repair, original command GUID conflict/replay | Official SDK/MCP and actual native driver |
+| AC-TSQL-006 | Current complete inventories, quality gates, contributor coverage and immutable Linux source/image/process/cleanup evidence | Root integration and CI |
+
+Current uncovered/unexecuted criteria: all six replacement criteria. Existing SQL evidence remains evidence of its actual original language and source; it does not qualify this replacement. Exact native declarations and UIDs are bound after genuine compilation/discovery, never inferred from fixture source text.

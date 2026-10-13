@@ -40,6 +40,7 @@ internal static class BlobPublicCancellationTrial
         await BlobPublicCancellationAssertions.CurrentAsync(callers, fresh.Value, [83], token);
         await BlobPublicCancellationReplay.OriginalAsync(callers, begin, begun, part, written, complete, completed,
             () => BlobPublicCancellationAssertions.CurrentAsync(callers, fresh.Value, [83], token), token);
+        await BlobPartialReadCancellationR45Trial.RunAsync(owner, useMcp, fresh.Value, token);
     }
 
     private static async Task<BlobCommitResult<BlobMetadata>> FreshAsync(RequestCqrsRf3Callers callers,

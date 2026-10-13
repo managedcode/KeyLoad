@@ -22,6 +22,16 @@ internal sealed class NativeConnectionOperationOwner : IAsyncDisposable
 
     internal CancellationToken ShutdownToken => shutdown.Token;
 
+    internal void ObserveOriginalCancellation(OperationCanceledException original, Guid requestId,
+        GrainFailureStage callSiteStage, Microsoft.Extensions.Logging.ILogger logger, CancellationToken writerToken)
+    {
+        var requestActive = active.Contains(requestId);
+        var closed = admissionClosed;
+        var ownerCancelled = shutdown.IsCancellationRequested;
+        NativeConnectionCancellationDiagnostic.Observe(logger, original, requestId, callSiteStage,
+            requestActive, closed, ownerCancelled, original.CancellationToken == writerToken);
+    }
+
     internal NativeConnectionOperationLease Acquire(Guid requestId)
     {
         if (requestId == Guid.Empty)

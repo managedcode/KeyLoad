@@ -16,7 +16,8 @@ internal static class SqlOperationCompiler
         var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, queryOptions, cancellationToken);
         var statement = ReadStatement(reader);
         if (statement.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
-            || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase))
+            || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
+            || statement.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase))
         { return Select(request, maximumPayloadBytes, cancellationToken); }
         if (statement.Equals(SqlCompositionInsert.Statement, StringComparison.OrdinalIgnoreCase))
         { return Composition(request, reader, maximumPayloadBytes, cancellationToken); }

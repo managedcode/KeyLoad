@@ -11,14 +11,15 @@ internal static class QueueAccountingFaultTrial
         token.ThrowIfCancellationRequested();
         using var fixture = new TestDatabase();
         var state = await QueueAccountingFaultSetup.SeedAsync(fixture, kind);
+        var expectedError = RefusalCode(kind, column);
         QueueAccountingFaultSetup.SetCounters(fixture.Store, state.Lane, QueueAccountingFaultSetup.Damage(state, column));
         var damaged = QueueWholeFlowStorage.Bytes(fixture.Store);
-        await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged);
-        await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged);
+        await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged, expectedError);
+        await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged, expectedError);
         fixture.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
-        await QueueAccountingFaultAssertions.RefusedAsync(database, reopened, state, damaged);
+        await QueueAccountingFaultAssertions.RefusedAsync(database, reopened, state, damaged, expectedError);
         QueueAccountingFaultSetup.SetCounters(reopened, state.Lane, state.Counters);
         var result = database.Apply(state.Operation);
         await QueueAccountingFaultAssertions.CompletedAsync(database, reopened, state, result);
@@ -34,6 +35,17 @@ internal static class QueueAccountingFaultTrial
         await QueueAccountingFaultHealthy.ReplayAsync(restored, state, healthy);
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(complete, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
+
+    private static ErrorCode RefusalCode(QueueAccountingOperation kind, QueueAccountingColumn column)
+        => (kind, column) switch
+        {
+            (QueueAccountingOperation.Ack, QueueAccountingColumn.InFlightMessages)
+                or (QueueAccountingOperation.Ack, QueueAccountingColumn.StoredMessages)
+                or (QueueAccountingOperation.Ack, QueueAccountingColumn.StoredBytes)
+                or (QueueAccountingOperation.Processing, QueueAccountingColumn.InFlightMessages)
+                => ErrorCode.RecoveryRequired,
+            _ => ErrorCode.Corruption
+        };
 
     private static Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, OperationResult result)
         => state.Operation.Kind == OperationKind.Receive

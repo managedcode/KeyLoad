@@ -79,6 +79,7 @@ internal static class GrainFailureDiagnostics
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
         var write = category == GrainFailureCategory.Unexpected ? LogUnexpected : LogRejected;
         write(logger, requestId, stage, category, safeCode, global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error), null);
+        ReplicaReadFailureLog.Observe(logger, error, requestId);
     }
 
     private static GrainFailureStage ValidStage(GrainFailureStage stage) => Enum.IsDefined(stage) ? stage : GrainFailureStage.EnvelopeVerification;

@@ -40,9 +40,11 @@ internal static class PostgresRf3Flow
                         {
                             await PostgresRf3Policy.RunAsync(fixture, state, root.Sdk, deadline.Token);
                             await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, deadline.Token);
+                            await PostgresRf3Cancellation.RunAsync(fixture, selection, state, root.Sdk, SqlTableRf3Pages.TableSql, deadline.Token);
                             return true;
                         }, deadline.Token);
                     }
+                    await SqlOrdinalRf3Flow.RunAsync(fixture);
                     for (var cold = PostgresRf3Protocol.FirstColumn; cold < ColdWaves; cold++)
                     {
                         using var deadline = McpCallerDeadline.Create();

@@ -46,6 +46,7 @@ internal static class RequestCqrsAnnOriginalReplay
     {
         var canonical = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
+        var journal = fixture.Database.ReadJournalCut();
         var nativeRoot = Directory.Exists(Path.Combine(fixture.Database.Directory,
             global::KeyLoad.Server.Features.Search.NativeAnnProtocol.RootDirectory));
         var native = nativeRoot ? NativeAnnFixtureFileSnapshot.Capture(fixture.Database.Directory) : [];
@@ -64,6 +65,8 @@ internal static class RequestCqrsAnnOriginalReplay
             new NativeCqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
         await Assert.That(reply.Error).IsEqualTo(expected);
         await Assert.That(reply.Payload.Length).IsEqualTo(EmptyPayload);
+        await Assert.That(fixture.Database.ReadJournalCut().LastIndex).IsEqualTo(journal.LastIndex);
+        await Assert.That(fixture.Database.ReadJournalCut().CommittedIndex).IsEqualTo(journal.CommittedIndex);
         await UnchangedAsync(fixture, canonical, cut, native, nativeRoot);
     }
 

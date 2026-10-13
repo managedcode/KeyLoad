@@ -6,6 +6,8 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class QueueGraphIdentityFlow
 {
+    private const string CanonicalVertexMismatch = "A canonical graph vertex record is inconsistent.";
+
     internal static async Task RunAsync(TestDatabase db, bool from, int component)
     {
         var state = await SeedAsync(db, from);
@@ -21,7 +23,7 @@ internal static class QueueGraphIdentityFlow
         };
         var record = from ? state.First : state.Second;
         var corrupted = NativeSerialization.Serialize(record with { Reference = mismatched });
-        await RunFaultAsync(state, corrupted);
+        await RunFaultAsync(state with { FailureDetail = CanonicalVertexMismatch }, corrupted);
     }
 
     internal static async Task RunReadyAsync(TestDatabase db)

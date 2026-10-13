@@ -188,7 +188,13 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     }
 
     private string[] ReadTail(string name) => nodeLogs.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
-    private string[] ReadFailures(string name) => nodeFailures.TryGetValue(name, out var buffer) ? buffer.ToArray() : [];
+    private string[] ReadFailures(string name)
+    {
+        var tail = ReadTail(name);
+        return nodeFailures.TryGetValue(name, out var buffer)
+            ? buffer.ToArray().Select(line => BoundedDiagnosticLog.ClipUtf8(
+                ReplicaReadFailureEvidence.Attach(line, tail), MaximumCapturedLineBytes)).ToArray() : [];
+    }
 
     private static void CaptureLogLine(ConcurrentQueue<string> buffer, ConcurrentQueue<string> failures, string line)
     {

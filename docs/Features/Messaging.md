@@ -1436,3 +1436,25 @@ Join/dispose all owned caller work before each of two genuine Aspire all-three s
 The six original leased-Cancel and parked/pending lifecycle RF3 failures remain immutable evidence. Existing Enqueue validates queue payload and headers with JsonData.Validate, which canonicalizes using the native canonical writer and the default UTF8 JSON string escaping contract. The original Ukrainian producer input therefore yields the independently literal JSON string {"knowledge":"\u043F\u043E\u0432\u043D\u0438\u0439 native lifecycle"} in retained MessageBody and Delivery.PayloadJson. A separate CanonicalPayload literal is used only for complete delivered/retained-message assertions; the original raw producer input, its command digest/GUID, full outcomes and receipts are unchanged. This is not JSON semantic normalization or a production serialization change.
 
 Plain Document Put uses the distinct ValidateDocument preserve-content contract. The leased-Cancel witness document must continue comparing the original raw Ukrainian text. All complete MessageInspection fields, original delivery/receipt replay, refusal/no-effects, lease/generation fencing, two actual RF3 cold owners and healthy follow-up remain required. Existing case declarations/Args/UIDs remain intact. This correction implements the same frozen KL088 wholeflow criterion; it does not add or qualify acceptance. Current status: native N preview only, original failure retained; fresh-image Linux/RF3 execution remains required.
+
+
+## Native queue accounting authority and release refusal distinction
+
+REQ-MSG-001/002/004 and AC-MSG-001/002/004 retain the original
+QueueAccountingRefusalWholeFlowTests operation and nine arguments. Before ACK
+or Processing releases usage, Counters requires internally consistent persisted
+queue authority. A zero in-flight message count with nonzero in-flight bytes,
+or stored count/bytes below retained in-flight usage, refuses RecoveryRequired
+with the existing QueueLifecycleProtocol.InvalidCounter detail. This is the
+existing authority-validation contract; it does not change product errors.
+
+The original Ack/InFlightMessages, Ack/StoredMessages, Ack/StoredBytes and
+Processing/InFlightMessages fault rows violate that earlier authority. Their
+exact expected refusal is RecoveryRequired. The other original five arguments
+retain exact Corruption for genuine release-underflow after valid authority.
+All original complete image/position, absent StoredOutcome/document, repeated
+refusal, exact original counter repair, same operation/result replay, healthy
+work and two same-root cold-owner checks remain unchanged. The original Case,
+argument declarations, UID identities, quotas, clock, token and ownership are
+unchanged. This correction does not weaken either closed refusal domain or
+claim successful runtime qualification from source review.

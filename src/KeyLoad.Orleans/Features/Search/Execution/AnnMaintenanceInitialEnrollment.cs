@@ -2,6 +2,8 @@ namespace KeyLoad.Orleans;
 
 internal static class AnnMaintenanceInitialEnrollment
 {
+    private const long InitialSequence = 0;
+
     internal static async Task<AnnMaintenanceRequest?> ReadAsync(AnnMaintenanceChildCalls children,
         AnnMaintenanceRequest request, CancellationToken token)
     {
@@ -12,9 +14,14 @@ internal static class AnnMaintenanceInitialEnrollment
         var configured = actual.Consumers.SingleOrDefault(value => value.Consumer == request.Consumer);
         if (configured is null)
         { return request; }
-        if (configured.InitialAnnMaintenance is { } original
-            && NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(request)))
-        { return original; }
-        return null;
+        var initial = configured.InitialAnnMaintenance is { } original
+            && NativeSerialization.Serialize(original).AsSpan().SequenceEqual(NativeSerialization.Serialize(request))
+            ? original : null;
+        var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId,
+            AnnMaintenancePhase.Configure, InitialSequence);
+        global::KeyLoad.Core.DatabaseEngine.RequireInitialMaintenanceReservation(configured,
+            new ConfigureProjectionConsumerRequest(configureId, request.Consumer, configured.Definition)
+            { InitialAnnMaintenance = initial });
+        return initial;
     }
 }

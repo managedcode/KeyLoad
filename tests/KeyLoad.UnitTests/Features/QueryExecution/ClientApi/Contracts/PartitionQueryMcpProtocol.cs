@@ -29,6 +29,7 @@ internal static class PartitionQueryMcpProtocol
     internal const string Filter = "filter";
     internal const string Order = "order";
     internal const string Limit = "limit";
+    internal const string Offset = "offset";
     internal const string Explain = "explain";
     internal const string ModelSource = "modelSource";
     internal const string InnerJoin = "innerJoin";

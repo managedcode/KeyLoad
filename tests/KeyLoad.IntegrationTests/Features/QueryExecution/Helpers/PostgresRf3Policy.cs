@@ -46,6 +46,7 @@ internal static class PostgresRf3Policy
                     await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName,
                         state.Operation, token), ErrorCode.PermissionDenied, dispatched: true);
                     await PostgresDefaultJoinCalls.DeniedAsync(state, reader, wire, token);
+                    await SqlTableRf3Refusals.DeniedAsync(state, reader, wire, token);
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
                     await PersistAsync(root, original with { PolicyEpoch = original.PolicyEpoch + RepairAdvance }, token);
                     await PostgresDefaultJoinCalls.HealthyAsync(state, reader, wire, token);
@@ -56,6 +57,7 @@ internal static class PostgresRf3Policy
                         await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, state.Operation, token));
                     await PostgresRf3Assertions.PageAsync(state,
                         await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, state.Operation, token));
+                    await SqlTableRf3Pages.RequireAsync(state, reader, wire, token);
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
                     await PostgresRf3Credential.RunAsync(root, reader, wire, state, token);
                 }, failures);

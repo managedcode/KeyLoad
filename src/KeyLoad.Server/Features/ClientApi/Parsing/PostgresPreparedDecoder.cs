@@ -27,7 +27,8 @@ internal static class PostgresPreparedDecoder
         var translated = PostgresParameterNames.Translate(sql, count, limits.MaxQueryDepth, queryOptions.Value.SqlBudgetCheckInterval, token);
         var syntax = new SqlOperationSyntaxReader(translated, limits.MaxQueryTokens, limits.MaxQueryDepth, queryOptions, token);
         var kind = syntax.Identifier();
-        var rows = kind.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase);
+        var rows = kind.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
+            || kind.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase);
         if (!rows && !kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
             && !kind.Equals(SqlOperationSyntax.Call, StringComparison.OrdinalIgnoreCase)
             && !kind.Equals(SqlCompositionInsert.Statement, StringComparison.OrdinalIgnoreCase))

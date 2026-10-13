@@ -7,9 +7,6 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
     private const int ExclusiveRoundPermit = 1;
     private const int ContiguousIndexStep = 1;
     private const int UnelectedTerm = 0;
-    private const int LocalAcknowledgementCount = 1;
-    private const int NoPendingFollowers = 0;
-    private const int MajorityArrayIndexAdjustment = 1;
 
     private const int HeartbeatAdmissionWaitMilliseconds = 0;
     private readonly SemaphoreSlim rounds = new(ExclusiveRoundPermit, ExclusiveRoundPermit);
@@ -141,23 +138,37 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
 
     internal async Task<ReadBarrierReceipt> BarrierAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
-        await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
-        long term;
-        long cut;
+        var diagnosticStage = ReplicaReadFailureMetadata.LeaderRound;
         try
         {
-            term = await state.LockedAsync(() => { state.RequireReadyLeader(); return state.Log.State.Term; }, cancellationToken).ConfigureAwait(false);
-            if (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
+            await rounds.WaitAsync(cancellationToken).ConfigureAwait(false);
+            long term;
+            long cut;
+            try
             {
-                throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+                diagnosticStage = ReplicaReadFailureMetadata.LeaderReady;
+                term = await state.LockedAsync(() => { state.RequireReadyLeader(); return state.Log.State.Term; }, cancellationToken).ConfigureAwait(false);
+                diagnosticStage = ReplicaReadFailureMetadata.LeaderQuorum;
+                if (!await RoundAsync(term, purpose, cancellationToken).ConfigureAwait(false))
+                {
+                    throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
+                }
+                diagnosticStage = ReplicaReadFailureMetadata.LeaderTerm;
+                cut = await state.LockedAsync(() =>
+                { state.RequireLeader(term); return state.Log.State.CommittedIndex; }, cancellationToken).ConfigureAwait(false);
             }
-            cut = await state.LockedAsync(() =>
-            { state.RequireLeader(term); return state.Log.State.CommittedIndex; }, cancellationToken).ConfigureAwait(false);
+            finally { rounds.Release(); }
+            diagnosticStage = ReplicaReadFailureMetadata.Apply;
+            await state.Materializer.WaitForApplyAsync(cut, cancellationToken).ConfigureAwait(false);
+            diagnosticStage = ReplicaReadFailureMetadata.LeaderTerm;
+            await state.LockedAsync(() => { state.RequireLeader(term); return true; }, cancellationToken).ConfigureAwait(false);
+            return new(state.Configuration.Incarnation, cut, term);
         }
-        finally { rounds.Release(); }
-        await state.Materializer.WaitForApplyAsync(cut, cancellationToken).ConfigureAwait(false);
-        await state.LockedAsync(() => { state.RequireLeader(term); return true; }, cancellationToken).ConfigureAwait(false);
-        return new(state.Configuration.Incarnation, cut, term);
+        catch (Exception error) when (error is KeyLoadException or OperationCanceledException)
+        {
+            ReplicaReadFailureMetadata.MarkStage(error, diagnosticStage);
+            throw;
+        }
     }
 
     internal async Task HeartbeatAsync(CancellationToken cancellationToken)
@@ -178,31 +189,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
         finally { rounds.Release(); }
     }
 
-    private async Task<bool> RoundAsync(long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
-    {
-        var pending = state.Configuration.VoterIds.Where(voter => voter != state.Configuration.LocalId)
-            .Select(voter => followers.SynchronizeAsync(voter, term, purpose, cancellationToken)).ToList();
-        var acknowledgements = LocalAcknowledgementCount;
-        while (pending.Count > NoPendingFollowers && acknowledgements < state.Configuration.Majority)
-        {
-            var completed = await Task.WhenAny(pending).WaitAsync(cancellationToken).ConfigureAwait(false);
-            pending.Remove(completed);
-            if (await completed.ConfigureAwait(false))
-            {
-                acknowledgements++;
-            }
-        }
-        return await state.LockedAsync(() =>
-        {
-            state.RequireLeader(term);
-            var matches = state.Configuration.VoterIds.Select(voter => voter == state.Configuration.LocalId
-                ? state.Log.State.LastIndex : state.Progress[voter].MatchedIndex).OrderDescending().ToArray();
-            var cut = matches[state.Configuration.Majority - MajorityArrayIndexAdjustment];
-            if (cut > state.Log.State.CommittedIndex && state.Log.TermAt(cut) == term)
-            {
-                state.Materializer.Commit(cut);
-            }
-            return acknowledgements >= state.Configuration.Majority;
-        }, cancellationToken).ConfigureAwait(false);
-    }
+    private Task<bool> RoundAsync(long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
+        => ReplicaLeaderRound.ExecuteAsync(state, followers, term, purpose, cancellationToken);
+
 }

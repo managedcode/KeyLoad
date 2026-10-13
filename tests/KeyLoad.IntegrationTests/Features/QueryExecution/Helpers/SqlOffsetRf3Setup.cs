@@ -5,10 +5,13 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlOffsetRf3Setup
 {
+    internal static Task<SqlOffsetRf3State> RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers,
+        CancellationToken token) => RunAsync(fixture, callers, null, token);
+
     internal static async Task<SqlOffsetRf3State> RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers,
-        CancellationToken token)
+        PartitionRef? nativePartition, CancellationToken token)
     {
-        var partition = new PartitionRef("sql-offset-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
+        var partition = nativePartition ?? new PartitionRef("sql-offset-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
         await ConfigureAsync(callers, partition, new(SqlOffsetRf3Protocol.Left, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(SqlOffsetRf3Protocol.Order, [new(SqlOffsetRf3Protocol.Order, RelationalColumnType.Text),

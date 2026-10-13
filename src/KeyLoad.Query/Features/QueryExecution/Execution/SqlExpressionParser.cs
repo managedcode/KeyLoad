@@ -137,6 +137,10 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
 
     private Operand Operand()
     {
+        if (cursor.Is(SqlSyntax.Order) && cursor.IsNext(SqlSyntax.By))
+        {
+            throw SqlSyntax.Invalid();
+        }
         var token = cursor.Current;
         if (token.Kind == SqlTokenKind.String)
         {

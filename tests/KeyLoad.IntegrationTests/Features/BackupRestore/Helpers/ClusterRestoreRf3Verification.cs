@@ -10,13 +10,22 @@ internal static class ClusterRestoreRf3Verification
     private const string DurationFormat = "c";
     private const int RestoredColdCuts = 2;
 
-    internal static async Task RunAsync(ClusterRestoreRf3Fixture target,
+    internal static Task RunAsync(ClusterRestoreRf3Fixture target,
         PartitionMovementPublicParentRf3Seed seed, ImmutableArray<ClusterBackupOwnerReceipt> originals,
         ClusterRestoreRf3EventingState eventing, ClusterRestoreRf3SecondaryState secondary,
         IReadOnlyList<string>? invalidCredentials, ImmutableArray<string> repairedArchives, ClusterRestoreMixedRetentionRf3State? mixed,
         string rootKey, CancellationToken cancellationToken)
+        => RunAsync(target, seed, originals, eventing, secondary, invalidCredentials, repairedArchives, mixed,
+            rootKey, null, cancellationToken);
+
+    internal static async Task RunAsync(ClusterRestoreRf3Fixture target,
+        PartitionMovementPublicParentRf3Seed seed, ImmutableArray<ClusterBackupOwnerReceipt> originals,
+        ClusterRestoreRf3EventingState eventing, ClusterRestoreRf3SecondaryState secondary,
+        IReadOnlyList<string>? invalidCredentials, ImmutableArray<string> repairedArchives, ClusterRestoreMixedRetentionRf3State? mixed,
+        string rootKey, ClusterRestoreDrillEvidence? drill, CancellationToken cancellationToken)
     {
         var restoreStarted = TimeProvider.System.GetTimestamp();
+        drill?.BeginRestore();
         await target.StartDerivativeArchiveAsync(repairedArchives, rejectModified: false, cancellationToken).ConfigureAwait(false);
         var nativeNodes = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals,
             dispatchPaused: true).ConfigureAwait(false);
@@ -48,6 +57,23 @@ internal static class ClusterRestoreRf3Verification
             await ClusterRestoreUnavailableHistoryFlow.RunAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false);
         }
         _ = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals, dispatchPaused: false).ConfigureAwait(false);
+        drill?.PublicReady();
+        await ColdAsync(target, seed, originals, eventing, secondary, invalidCredentials, mixed, rootKey, fresh,
+            cancellationToken).ConfigureAwait(false);
+        drill?.ColdJoined();
+        var elapsed = TimeProvider.System.GetElapsedTime(restoreStarted);
+        await Assert.That(elapsed).IsLessThan(ClusterRestoreRf3Protocol.ParentDeadline);
+        await TestContext.Current!.OutputWriter.WriteLineAsync(RtoLabel + elapsed.ToString(DurationFormat,
+            CultureInfo.InvariantCulture));
+    }
+
+    private static async Task ColdAsync(ClusterRestoreRf3Fixture target,
+        PartitionMovementPublicParentRf3Seed seed, ImmutableArray<ClusterBackupOwnerReceipt> originals,
+        ClusterRestoreRf3EventingState eventing, ClusterRestoreRf3SecondaryState secondary,
+        IReadOnlyList<string>? invalidCredentials, ClusterRestoreMixedRetentionRf3State? mixed,
+        string rootKey, (CommandRequest Command, CommitReceipt Receipt) fresh,
+        CancellationToken cancellationToken)
+    {
         var finalCut = ClusterRestoreRf3CanonicalCut.Target(target, originals, cancellationToken);
         for (var cut = 0; cut < RestoredColdCuts; cut++)
         {
@@ -69,10 +95,6 @@ internal static class ClusterRestoreRf3Verification
             { ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken); }
             await ClusterRestoreRf3CanonicalCut.RequireColdAsync(target, originals, finalCut, cancellationToken).ConfigureAwait(false);
         }
-        var elapsed = TimeProvider.System.GetElapsedTime(restoreStarted);
-        await Assert.That(elapsed).IsLessThan(ClusterRestoreRf3Protocol.ParentDeadline);
-        await TestContext.Current!.OutputWriter.WriteLineAsync(RtoLabel + elapsed.ToString(DurationFormat,
-            CultureInfo.InvariantCulture));
     }
 
 }

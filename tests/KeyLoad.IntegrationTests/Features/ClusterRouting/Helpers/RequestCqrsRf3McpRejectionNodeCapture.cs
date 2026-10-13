@@ -15,6 +15,8 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     private readonly System.Threading.Lock gate = new();
     private readonly List<RequestCqrsRf3McpRejectionRecord> records = [];
     private readonly List<RequestCqrsRpcFailureRecord> rpcFailures = [];
+    private readonly List<RequestCqrsConnectionCancellationRecord> connectionCancellations = [];
+    private bool connectionCancellationOverflowed;
     private TaskCompletionSource<bool> changed = NewChangeSignal();
     private bool completed;
     private readonly RequestCqrsNativeCaptureEvidence nativeEvidence = new();
@@ -23,6 +25,16 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
 
     internal void TryCapture(string line, Guid waveId)
     {
+        if (RequestCqrsConnectionCancellationParser.TryParse(line, waveId, Name, out var cancellation))
+        {
+            lock (gate)
+            {
+                if (connectionCancellations.Count < MaximumRecords)
+                { connectionCancellations.Add(cancellation); }
+                else
+                { connectionCancellationOverflowed = true; }
+            }
+        }
         if (RequestCqrsRpcFailureParser.TryParse(line, waveId, Name, out var rpc))
         {
             lock (gate)
@@ -98,6 +110,12 @@ internal sealed class RequestCqrsRf3McpRejectionNodeCapture(string name)
     {
         lock (gate)
         { return [.. rpcFailures]; }
+    }
+
+    internal RequestCqrsConnectionCancellationNodeSnapshot ConnectionCancellationSnapshot()
+    {
+        lock (gate)
+        { return new(Name, connectionCancellationOverflowed, [.. connectionCancellations]); }
     }
 
     internal RequestCqrsNativeCaptureSnapshot NativeSnapshot()

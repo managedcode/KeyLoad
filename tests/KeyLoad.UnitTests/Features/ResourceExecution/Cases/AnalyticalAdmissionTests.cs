@@ -104,17 +104,7 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch()
     {
-        using var db = new TestDatabase(new() { MaxConcurrentQueries = 1, MaxQueryReadBytes = 1 });
-        db.Configure(Collection, ResourceKind.Collection);
-        db.Configure("empty", ResourceKind.Collection);
-        db.Commit(new PutDocument(Collection, "hit", "{\"text\":\"needle\"}"));
-        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => search.Search(Principal,
-            new(db.Partition, Collection, SearchField, SearchTerm)));
-        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(await search.SearchAsync(Principal,
-            new(db.Partition, "empty", SearchField, SearchTerm))).IsEmpty();
+        await AnalyticalReadBudgetFailureFlow.RunAsync();
     }
 
     private static async Task AssertSaturatedRequests(TestDatabase db, TestDatabase independent,

@@ -56,6 +56,8 @@ public sealed class SqlParser
     public SelectQuery Parse()
     {
         var explain = cursor.Eat(SqlSyntax.Explain);
+        if (cursor.Eat(SqlSyntax.Table))
+        { return ParseTable(explain); }
         cursor.Need(SqlSyntax.Select);
         cursor.Eat(SqlSyntax.All);
         if (cursor.Is(SqlSyntax.All))
@@ -74,7 +76,7 @@ public sealed class SqlParser
             ? p with { Path = SqlJoinSyntax.BoundPath(p.Path, alias), SourceAlias = null }
             : SqlJoinSyntax.BindProjection(p, alias, join)).ToList();
         var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias, join?.Alias).Parse() : null;
-        var order = ReadOrder(join);
+        var order = ReadOrder(projection, join);
         var (limit, offset) = SqlWindowSyntax.Read(cursor);
         cursor.Eat(SqlSyntax.Semicolon);
         if (cursor.Current.Kind != SqlTokenKind.End)
@@ -87,6 +89,21 @@ public sealed class SqlParser
             throw SqlSyntax.Invalid();
         }
         return new(collection, alias, [.. projection], filter, [.. order], limit, explain, modelSource, join, offset);
+    }
+
+    private SelectQuery ParseTable(bool explain)
+    {
+        var collection = cursor.Identifier();
+        var order = ReadOrder([new(SqlSyntax.Star, SqlSyntax.Star)], null);
+        var (limit, offset) = SqlWindowSyntax.Read(cursor);
+        cursor.Eat(SqlSyntax.Semicolon);
+        if (cursor.Current.Kind != SqlTokenKind.End)
+        { throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail); }
+        if (limit < MinimumPositiveCount || offset < default(int) || (long)limit + offset > limits.MaxResults
+            || order.Count > execution.MaximumOrdering)
+        { throw SqlSyntax.Invalid(); }
+        return new(collection, null, [new(SqlSyntax.Star, SqlSyntax.Star)], null, [.. order], limit, explain,
+            Offset: offset);
     }
 
     private List<Selection> ReadProjection()
@@ -153,7 +170,7 @@ public sealed class SqlParser
         throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
     }
 
-    private List<Ordering> ReadOrder(InnerJoinClause? join)
+    private List<Ordering> ReadOrder(List<Selection> projection, InnerJoinClause? join)
     {
         var order = new List<Ordering>();
         if (cursor.Eat(SqlSyntax.Order))
@@ -161,15 +178,22 @@ public sealed class SqlParser
             cursor.Need(SqlSyntax.By);
             do
             {
-                var raw = cursor.Path();
-                var field = join is null ? SqlJoinSyntax.BoundPath(JsonData.Path(raw.ToArray()), alias)
-                    : SqlJoinSyntax.BoundOrderPath(raw, alias);
+                var field = ReadOrderField(projection, join);
                 var descending = ReadDirection();
                 var nullsFirst = ReadNullPlacement();
                 order.Add(new(field, descending, nullsFirst));
             } while (cursor.Eat(SqlSyntax.Comma));
         }
         return order;
+    }
+
+    private string ReadOrderField(List<Selection> projection, InnerJoinClause? join)
+    {
+        if (cursor.Current.Kind == SqlTokenKind.Number)
+        { return SqlOrderOrdinal.Read(cursor, projection, join is not null, alias); }
+        var raw = cursor.Path();
+        return join is null ? SqlJoinSyntax.BoundPath(JsonData.Path(raw.ToArray()), alias)
+            : SqlJoinSyntax.BoundOrderPath(raw, alias);
     }
 
 }

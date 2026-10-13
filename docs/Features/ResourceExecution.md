@@ -718,3 +718,7 @@ This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new gove
 Owned paths: existing ResourceExecution settled-grant case; new feature-local failure settlement helper; ResourceExecution feature and ADR035 append-only contract. Original existing methods/assertions remain unchanged. Root alone integrates/builds/tests. Normal SIMD/default native50 entry applies when executed.
 
 Exact authored native declaration: `ReadExecutionBudgetSettledGrantTests.AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead`; existing original three settled-grant cases and all cancellation/scoped-grant cases remain mandatory. No syntax-derived native UID or execution result is assigned.
+
+## Original analytical byte-budget continuation
+
+REQ-MP-002 / AC-MP-004/012: the original AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch cannot expect nontrivial text metadata reads to fit one byte. Configure its fixture-only allowance from independent original Resource key/native payload plus absent BM25-head key bytes. Keep the populated original search BudgetExceeded, identical original safe detail, same-owner allowance release and same-term empty-collection healthy continuation, original cancellation identity, complete raw rows/position and same-root cold repetition. Production byte limits, charging, APIs and original UID are unchanged. Native preview/compiler/runtime/Linux gates remain OPEN.

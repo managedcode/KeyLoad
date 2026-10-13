@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
@@ -11,16 +10,11 @@ internal sealed class SearchReadBudgetTests
     private const string TextPath = "/text";
     private const string TestName = "test";
     private const string TestVersion = "1";
-    private const string DocumentKeySpace = "document";
-    private const string VectorKeySpace = "vector";
-    private const string LineageKeySpace = "vector-projection-lineage";
     private const int VectorDimensions = 2;
     private const int VectorVersion = 1;
     private const int PaddingLength = 12_000;
     private const int ReadByteLimit = 4_096;
     private const int MaximumVisibleTextTokens = 5;
-    private const int TwoDocuments = 2;
-    private const int MaximumScanRecords = 100;
     private const int FusionConstant = 61;
     private const double TwelveDecimalPlacesTolerance = 0.0000000000005;
     private static VectorSpace Space { get; } = new(TestName, VectorDimensions, DistanceMetric.Cosine, TestName, TestVersion);
@@ -43,27 +37,7 @@ internal sealed class SearchReadBudgetTests
     [Test]
     public async Task TextAndVectorBranchesShareOneReadByteBudget()
     {
-        using var database = new TestDatabase();
-        database.Configure(Orders, ResourceKind.Collection);
-        database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha alpha\"}"),
-            new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
-        var documentBytes = Bytes(DocumentKeySpace, Orders);
-        var vectorBytes = Bytes(VectorKeySpace, Orders, EmbeddingPath);
-        var lineageBytes = KeySpace.Partition(LineageKeySpace, database.Partition, Orders, EmbeddingPath, "a").LongLength;
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
-        var search = new SearchEngine(bounded, UnitExecutionOptions.QueryExecution());
-        var token = TestContext.Current!.Execution.CancellationToken;
-
-        await Assert.That(await search.SearchAsync("root", new(database.Partition, Orders, TextPath, "alpha"), token)).HasSingleItem();
-        await Assert.That(await search.SearchAsync("root", VectorRequest(database), token)).HasSingleItem();
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            search.SearchAsync("root", new(database.Partition, Orders, TextPath, "alpha", EmbeddingPath, [1, 0], Space), token)))!;
-        await Assert.That(failure.Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-
-        long Bytes(string space, params object?[] suffix) => database.Store.Read(view => view.Scan(
-            KeySpace.Partition(space, database.Partition, suffix), MaximumScanRecords).Records.Sum(record =>
-            (long)record.Key.Length + record.Value.Length));
+        await SharedSearchReadBudgetFlow.RunAsync();
     }
 
     [Test]

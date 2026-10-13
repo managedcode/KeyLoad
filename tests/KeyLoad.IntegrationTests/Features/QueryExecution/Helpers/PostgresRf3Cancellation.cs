@@ -7,8 +7,12 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class PostgresRf3Cancellation
 {
-    internal static async Task RunAsync(ClusterFixture fixture, PostgresRf3Selection selection,
+    internal static Task RunAsync(ClusterFixture fixture, PostgresRf3Selection selection,
         PostgresRf3State state, global::KeyLoad.Client.KeyLoadClient root, CancellationToken token)
+        => RunAsync(fixture, selection, state, root, null, token);
+
+    internal static async Task RunAsync(ClusterFixture fixture, PostgresRf3Selection selection,
+        PostgresRf3State state, global::KeyLoad.Client.KeyLoadClient root, string? sql, CancellationToken token)
     {
         var controls = selection.Controls ?? throw new InvalidOperationException(PostgresRf3Protocol.InvalidResult);
         var discovery = await Task.WhenAll(Nodes.Select(node => fixture.ReadSnapshotDiscoveryAsync(node, token)));
@@ -23,7 +27,7 @@ internal static class PostgresRf3Cancellation
                 var before = await PostgresRf3Assertions.ImageAsync(root, token);
                 var arm = controls.WriteArm(state.Reader.Principal.Id, Guid.Empty, GrainReadKind.Query,
                     RequestCqrsProbePhase.AuthorizationReload, RequestCqrsProbeAction.Hold);
-                var original = wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, originalCancellation.Token);
+                var original = wire.ExecuteAsync<QueryPage>(sql ?? state.Sql, [], prepared: false, originalCancellation.Token);
                 var operationFailures = new List<Exception>();
                 var originalJoined = false;
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -52,6 +56,8 @@ internal static class PostgresRf3Cancellation
                     await global::TUnit.Assertions.Assert.That(await PostgresRf3Assertions.ImageAsync(root, token)).IsEqualTo(before);
                     await PostgresRf3Assertions.PageAsync(state,
                         await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
+                    if (sql is not null)
+                    { await SqlTableRf3Pages.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token)); }
                 }, operationFailures);
                 if (operationFailures.Count != PostgresRf3Protocol.FirstColumn && !controls.ArmFor(arm).Retired)
                 {

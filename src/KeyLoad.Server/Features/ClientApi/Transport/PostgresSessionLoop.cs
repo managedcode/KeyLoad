@@ -107,7 +107,8 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             services.GetRequiredService<IOptions<QueryExecutionOptions>>(), token);
         var kind = reader.Identifier();
         return kind.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
-            || kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase);
+            || kind.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase)
+            || kind.Equals(SqlOperationSyntax.Table, StringComparison.OrdinalIgnoreCase);
     }
 
     private string SimpleSql(ReadOnlySpan<byte> bytes)

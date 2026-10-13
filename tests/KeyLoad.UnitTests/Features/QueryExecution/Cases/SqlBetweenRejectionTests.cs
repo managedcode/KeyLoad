@@ -10,7 +10,7 @@ internal sealed class SqlBetweenRejectionTests
     private const string MissingDelimiter = "SELECT * FROM orders WHERE number BETWEEN 1 9";
     private const string MissingUpper = "SELECT * FROM orders WHERE number BETWEEN 1 AND";
     private const string RepeatedNot = "SELECT * FROM orders WHERE number NOT NOT BETWEEN 1 AND 9";
-    private const string Symmetric = "SELECT * FROM orders WHERE number BETWEEN SYMMETRIC 1 AND 9";
+    private const string MissingSymmetricUpper = "SELECT * FROM orders WHERE number BETWEEN SYMMETRIC 1 AND";
     private const string Arithmetic = "SELECT * FROM orders WHERE number BETWEEN 1 + 2 AND 9";
     private const string SecondStatement = "SELECT * FROM orders WHERE number BETWEEN 1 AND 9; DELETE FROM orders";
 
@@ -28,7 +28,7 @@ internal sealed class SqlBetweenRejectionTests
         await RejectValidation(MissingDelimiter);
         await RejectValidation(MissingUpper);
         await RejectValidation(RepeatedNot);
-        await RejectValidation(Symmetric);
+        await RejectValidation(MissingSymmetricUpper);
         await RejectValidation(Arithmetic);
         var second = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SecondStatement, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         await Assert.That(second.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

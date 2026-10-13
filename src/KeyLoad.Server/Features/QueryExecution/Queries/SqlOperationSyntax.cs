@@ -4,6 +4,7 @@ namespace KeyLoad.Server;
 internal static class SqlOperationSyntax
 {
     internal const string Select = "SELECT";
+    internal const string Table = "TABLE";
     internal const string Explain = "EXPLAIN";
     internal const string Call = "CALL";
     internal const string Invalid = "The unified SQL statement or bound arguments are invalid.";

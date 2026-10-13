@@ -89,3 +89,41 @@ The complete Release build and whole-solution formatter verification passed with
 Native census is 3821 Unit and 481 Integration cases; the canonical Unit join contains 3287 functional cases and 534 required controls. Discovery is neither execution nor coverage. Coverage remains unmeasured; 19 of the original 104 tasks are fully closed and 85 remain in progress, with KL105 separate and open. Linux full-suite, recovery, RF3, fault, endurance, power-loss and comparable performance gates remain open.
 
 The old R35 generic “native coverage merge process failed” wrapper message was incorrectly interpreted as a merge failure. Exact invocation evidence shows both children were the canonical TUnit runner and returned exit2 after failed tests; it does not prove a merge was invoked or failed. Immutable original R35 records are preserved. The [R36 original development record](stage64-r36-development-20261013.json) binds the correction, all selected native identities, original failures, evidence hashes and independent owners.
+
+
+## R45 coherent source and focused runtime checkpoint
+
+R45 completes the joined source batch over the committed R44 baseline. Native
+Roslynk reports Ready27/27, zero errors and zero warnings with analyzers. The
+canonical formatter, full Release solution build and whole-solution formatter
+verification exit0 with joined processes; no source drift occurred during build
+or verification. This is development verification, not full-task acceptance.
+
+The current native discovery observes3870 Unit,351 Recovery and538 integration
+instances. The focused complete-class execution retains all289 R44 selected
+identities and adds43 current instances. Unit passes288/297; Recovery passes33/35:
+321/332 PASS,11FAIL,0skip. The43 additional instances contain40PASS/3FAIL.
+Native scheduling is50; original TRX lifetime overlap peaks51/27, which is not a
+claim that the scheduler admitted51 simultaneous tests. Original Native/TRX
+counts agree; all process/readers/disposal joins and source/image/receipt guards
+are preserved. No failure is removed from the acceptance inventory.
+
+The original report is
+`TestResults/stage61-native-join/stage64-r45-development.corrected-qualification.original.json`,
+SHA256 `cffafbceeb42fb1ccc0c44130d67d8d9178507b8944b48cfbefc10c66fcdeb93`.
+Its retained initial report mislabeled all43 new selected instances as newPassed;
+the successor records the actual40/3 split without changing any native outcome.
+
+The failed cases retain ordinary read-log correlation, two shared cold identity
+oracles, original SQL whole-page parity/read deadlines and native host startup
+refusals. Their initiating causes remain under source/operation review; neither
+larger timeouts nor CPU guesses qualify a repair. The existing local-image
+allowlists do not admit the expanded120-case RF3 cohort. Linux exact-source RF3,
+complete required suites, functional coverage, fault/endurance and performance
+remain open. Current coverage is UNMEASURED; load/control cases receive no credit.
+The original plan remains20/104 accepted and84 in progress, with KL-105 separate.
+
+The owner selected T-SQL through Microsoft ScriptDOM under ADR-130. Its parser,
+transport and meaningful original-flow replacement is being integrated as the
+next coherent batch; this R45 checkpoint does not claim it is implemented or
+runtime-qualified and does not retain a future handwritten grammar fallback.

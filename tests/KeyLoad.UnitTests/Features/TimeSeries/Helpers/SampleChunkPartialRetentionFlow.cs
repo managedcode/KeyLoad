@@ -40,9 +40,11 @@ internal static class SampleChunkPartialRetentionFlow
         await Assert.That(SampleChunkPartialRetentionAssertions.Bytes(fixture, manifestKey).SequenceEqual(manifest)).IsTrue();
         await Assert.That(SampleChunkPartialRetentionAssertions.Bytes(fixture, blockKey).SequenceEqual(block)).IsTrue();
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: false);
+        await SampleChunkRetainedBudgetTrial.RunAsync(fixture, merged: false);
         fixture.Commit(new MergeSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             fixture.WindowId, SampleChunkCanonicalFixture.CorrectedRevision));
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true);
+        await SampleChunkRetainedBudgetTrial.RunAsync(fixture, merged: true);
         await DuplicateAndRefusal(fixture);
         await Cold(fixture, fresh: false);
         fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
@@ -50,6 +52,7 @@ internal static class SampleChunkPartialRetentionFlow
         fixture.Commit(new MergeSampleChunkWindow(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             fixture.WindowId, SampleChunkCanonicalFixture.MergedRevision + SampleChunkCanonicalFixture.FirstRevision));
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true, fresh: true);
+        await SampleChunkRetainedBudgetTrial.RunAsync(fixture, merged: true, fresh: true);
         await Cold(fixture, fresh: true);
     }
 
@@ -81,6 +84,7 @@ internal static class SampleChunkPartialRetentionFlow
         fixture.Reopen();
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true, fresh: fresh);
+        await SampleChunkRetainedBudgetTrial.RunAsync(fixture, merged: true, fresh: fresh);
         await SampleChunkPartialRetentionAssertions.Replay(fixture);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
     }

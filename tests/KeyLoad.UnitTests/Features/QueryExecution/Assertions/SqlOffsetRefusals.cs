@@ -46,6 +46,8 @@ internal static class SqlOffsetRefusals
             ast, cancellationToken: cancelled.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancelled.Token);
         await SqlDefaultJoinControls.CancelledAsync(database, engine, cancelled.Token);
+        await SqlTableCancellation.RequireAsync(database, engine, cancelled.Token);
+        await SqlOrdinalControls.CancelledAsync(database, engine, cancelled.Token);
         await UnchangedAsync(database.Store, before, position, identity);
     }
     internal static async Task DeniedAsync(TestDatabase database)

@@ -50,10 +50,11 @@ internal static class PartitionQueryMcpCatalogAssertions
         await VerifyObjectAsync(query, [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias,
                 PartitionQueryMcpProtocol.Projection, PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order,
                 PartitionQueryMcpProtocol.Limit, PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource,
-                PartitionQueryMcpProtocol.InnerJoin],
+                PartitionQueryMcpProtocol.InnerJoin, PartitionQueryMcpProtocol.Offset],
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit]);
         var queryProperties = query.GetProperty(McpSchemaInspector.Properties);
+        await VerifyPrimitiveAsync(schema, queryProperties.GetProperty(PartitionQueryMcpProtocol.Offset), McpSchemaInspector.Integer);
         await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyProjectionAsync(schema,
             queryProperties.GetProperty(PartitionQueryMcpProtocol.Projection));
         await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyInnerJoinAsync(schema,
