@@ -7,6 +7,10 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class NativeBackupCutTests
 {
+    [Test, Arguments(false), Arguments(true)]
+    public Task UnsafeNativeBackupDestinationRefusesBeforeCopyThenSamePathRepairRestoresAcrossTwoCold(bool ancestorLink)
+        => BackupUnsafeDestinationFlow.RunAsync(ancestorLink, TestContext.Current!.Execution.CancellationToken);
+
     private const ulong UnsupportedJournalSignature = ulong.MaxValue;
 
     [Test, Arguments(false), Arguments(true)]

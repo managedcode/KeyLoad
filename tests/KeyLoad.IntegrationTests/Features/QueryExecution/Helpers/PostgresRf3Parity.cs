@@ -27,6 +27,7 @@ internal static class PostgresRf3Parity
                     {
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, token));
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
+                        await SyntaxVariantsAsync(state, wire, token);
                     }, failures);
                 }, failures);
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -39,4 +40,15 @@ internal static class PostgresRf3Parity
 
     private static Task PageAsync(PostgresRf3State state, QueryPage page)
         => PostgresRf3Assertions.PageAsync(state, page);
+
+    private static async Task SyntaxVariantsAsync(PostgresRf3State state, PostgresRf3Caller wire, CancellationToken token)
+    {
+        var all = state.Sql.Replace("SELECT ", "SELECT ALL ", StringComparison.Ordinal);
+        foreach (var sql in new[] { all, state.Sql.Replace(" AS ", " ", StringComparison.Ordinal),
+            all.Replace(" AS ", " ", StringComparison.Ordinal) })
+        {
+            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token));
+            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token));
+        }
+    }
 }

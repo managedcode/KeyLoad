@@ -22,12 +22,16 @@ internal static class SqlWindowSyntax
         else if (cursor.Eat(SqlSyntax.Offset))
         {
             offset = Offset(cursor);
-            if (cursor.Eat(SqlSyntax.Limit))
-            {
-                limit = Count(cursor);
-            }
+            limit = CountAfterOffset(cursor, limit);
         }
         return (limit, offset);
+    }
+
+    private static int CountAfterOffset(SqlTokenCursor cursor, int defaultLimit)
+    {
+        if (cursor.Eat(SqlSyntax.Limit))
+        { return Count(cursor); }
+        return cursor.Eat(SqlSyntax.Fetch) ? Fetch(cursor) : defaultLimit;
     }
 
     private static int Fetch(SqlTokenCursor cursor)

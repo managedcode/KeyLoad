@@ -57,11 +57,12 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
     {
         var entry = await ControlledPartitionMovementNativeProcessEntry.ReadAsync(owners.Source, original.CommandId, cancellationToken).ConfigureAwait(false);
         var placement = original.Envelope.SourcePlacement;
+        await Assert.That(placement.Partition).IsEqualTo(ControlledPartitionMovementProcessLiteralCorpus.Partition);
         var intent = new PartitionMoveIntent(Version, ControlledPartitionMovementProcessPrepareRequest.MoveId,
-            ControlledPartitionMovementProcessLiteralCorpus.Partition, Principal, FirstRevision, placement, owners.Destination.Owner, entry.Index);
+            placement.Partition, Principal, FirstRevision, placement, owners.Destination.Owner, entry.Index);
         var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(intent)));
         var control = new PartitionMoveControlRecord(Version, ControlledPartitionMovementProcessPrepareRequest.MoveId,
-            ControlledPartitionMovementProcessLiteralCorpus.Partition, Principal, FirstRevision, placement, owners.Destination.Owner,
+            placement.Partition, Principal, FirstRevision, placement, owners.Destination.Owner,
             PartitionMovePhase.Prepared, EmptyCut, entry.Index, null, null, null);
         var expected = new PartitionMovePhaseResult(ControlledPartitionMovementProcessPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlPrepare, new(original.CommandId, owners.Control.Owner, entry.Index, digest),
@@ -120,6 +121,7 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
         await Assert.That(control.Version).IsEqualTo(expectedControl.Version);
         await Assert.That(control.MoveId).IsEqualTo(expectedControl.MoveId);
         await Assert.That(control.Partition).IsEqualTo(expectedControl.Partition);
+        await Assert.That(ReferenceEquals(control.Partition, control.SourcePlacement.Partition)).IsTrue();
         await Assert.That(control.PrincipalId).IsEqualTo(expectedControl.PrincipalId);
         await Assert.That(control.PolicyEpoch).IsEqualTo(expectedControl.PolicyEpoch);
         await Assert.That(control.Phase).IsEqualTo(expectedControl.Phase);

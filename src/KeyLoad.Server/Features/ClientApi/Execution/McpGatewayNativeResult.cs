@@ -9,6 +9,6 @@ internal static class McpGatewayNativeResult
     internal static CallToolResult? GetOriginal(McpGatewayInvokeResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
-        return result.IsSuccess ? result.Output as CallToolResult : null;
+        return result.IsSuccess ? result.McpResult : null;
     }
 }

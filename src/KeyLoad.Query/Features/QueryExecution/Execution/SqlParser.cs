@@ -57,6 +57,9 @@ public sealed class SqlParser
     {
         var explain = cursor.Eat(SqlSyntax.Explain);
         cursor.Need(SqlSyntax.Select);
+        cursor.Eat(SqlSyntax.All);
+        if (cursor.Is(SqlSyntax.All))
+        { throw SqlSyntax.Invalid(); }
         var projection = ReadProjection();
         cursor.Need(SqlSyntax.From);
         var (collection, modelSource) = new ModelSqlSourceParser(cursor).Read();
@@ -98,7 +101,7 @@ public sealed class SqlParser
             do
             {
                 var path = cursor.Path();
-                var output = cursor.Eat(SqlSyntax.As) ? cursor.Identifier() : path.Last();
+                var output = SqlProjectionAliases.Read(cursor, path.Last());
                 projection.Add(new(JsonData.Path(path.ToArray()), output));
             } while (cursor.Eat(SqlSyntax.Comma));
         }

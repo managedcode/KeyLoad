@@ -5,6 +5,7 @@ internal static class SqlSyntax
 {
     internal const string Explain = "EXPLAIN";
     internal const string Select = "SELECT";
+    internal const string All = "ALL";
     internal const string From = "FROM";
     internal const string Inner = "INNER";
     internal const string Join = "JOIN";
@@ -36,10 +37,12 @@ internal static class SqlSyntax
     internal const string Null = "NULL";
     internal const string In = "IN";
     internal const string Between = "BETWEEN";
+    internal const string Symmetric = "SYMMETRIC";
     internal const string And = "AND";
     internal const string Or = "OR";
     internal const string True = "TRUE";
     internal const string False = "FALSE";
+    internal const string Unknown = "UNKNOWN";
     internal const string Star = "*";
     internal const string Comma = ",";
     internal const string Dot = ".";

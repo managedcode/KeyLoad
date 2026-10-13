@@ -23,6 +23,7 @@ internal static class ZoneTreeBackupRestoreFiles
             throw Errors.Fail(ErrorCode.Conflict, BackupDestinationNotEmpty);
         }
 
+        ZoneTreeCatalogBackupPublication.RequirePath(directory);
         ZoneTreeStoreFiles.CreatePrivateDirectory(directory);
         runtime.Journal.Flush(true);
         var files = new ZoneTreeBackupRestoreManifestFile[SourceFiles.Length];

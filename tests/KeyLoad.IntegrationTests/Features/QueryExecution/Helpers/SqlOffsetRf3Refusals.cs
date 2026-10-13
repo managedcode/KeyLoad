@@ -13,7 +13,12 @@ internal static class SqlOffsetRf3Refusals
             ("LIMIT 1 OFFSET -1", ErrorCode.Validation),
             ("LIMIT 1 OFFSET 2147483647", ErrorCode.Validation),
             ("LIMIT 1 OFFSET 1 OFFSET 1", ErrorCode.UnsupportedCapability),
-            ("LIMIT 1 OFFSET @skip", ErrorCode.Validation)
+            ("LIMIT 1 OFFSET @skip", ErrorCode.Validation),
+            ("OFFSET -1 ROWS FETCH FIRST ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 2147483647 ROWS FETCH NEXT ROW ONLY", ErrorCode.Validation),
+            ("OFFSET 1 ROWS FETCH NEXT 0 ROWS ONLY", ErrorCode.Validation),
+            ("OFFSET 1 ROWS FETCH FIRST ROW ONLY FETCH NEXT ROW ONLY", ErrorCode.UnsupportedCapability),
+            ("OFFSET 1 ROWS FETCH NEXT ROW WITH TIES", ErrorCode.UnsupportedCapability)
         })
         {
             var bad = original with { Sql = original.Sql.Replace("LIMIT 1 OFFSET 1", tail, StringComparison.Ordinal) };

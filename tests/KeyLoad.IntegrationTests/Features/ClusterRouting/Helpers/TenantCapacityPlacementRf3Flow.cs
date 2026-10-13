@@ -19,6 +19,11 @@ internal static class TenantCapacityPlacementRf3Flow
     internal static async Task RunAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
         bool committedOwnerLoss, bool originalPlanExpiry, CancellationToken token)
+        => await RunAsync(wave, seed, state, committedOwnerLoss, originalPlanExpiry, pendingIntentRevocation: false, token).ConfigureAwait(false);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
+        bool committedOwnerLoss, bool originalPlanExpiry, bool pendingIntentRevocation, CancellationToken token)
     {
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
@@ -36,7 +41,12 @@ internal static class TenantCapacityPlacementRf3Flow
         var plan = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, plan, token);
-        await TenantCapacityPlacementRf3Authorization.RequireAsync(wave, seed, state, plan, token);
+        await TenantCapacityPlacementRf3Authorization.RequireAsync(wave, seed, state, plan, pendingIntentRevocation, token);
+        if (pendingIntentRevocation)
+        {
+            await RequireBindReplayAsync(seed, binding.Id, binding.Request, token);
+            return;
+        }
         plan = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, plan, token);
         var intentId = Guid.NewGuid();

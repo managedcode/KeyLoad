@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "Local macOS arm64 development only. Full Release0errors0warnings and whole-solution formatter verify pass. Original194 selected cases executed:190pass4fail0skip (functional175/177, controls4/4, recovery11/13); source/image/runtime closure and all process/reader/disposal joins stable. Two original R38 failures now pass; all164 original cases retained with no original pass regression. Original plan19/104 done85in progress; KL105 and complete exact-source Linux/RF3/fault/endurance/power-loss/performance gates remain open.",
+    "qualification": "R40 local development: full Release 0 errors/0 warnings and whole formatter verify pass. Unit232:228passed4failed; recovery13:11passed2failed; no skips. Source/image/closure/receipts and original joins stable. Original plan19/104 done85in progress; no new complete task. Full Linux/RF3/coverage/fault/endurance/performance gates remain open.",
     "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
     "sourceIntegration": {
       "graph": {
@@ -1415,6 +1415,18 @@
       "completeTaskAcceptance": 0,
       "sourceImageClosureDrift": false,
       "profiling": "Actual source-matched target capture retained with CPU unsupported and storage loss/capacity limitations; no hotspot/speed/acceptance credit."
+    },
+    "runtimeObservedR40": {
+      "record": {
+        "path": "docs/implementation/stage64-r40-development-20261013.json",
+        "sha256": "7d8aff86725397e045ddfaed8ba8b203df5a22e4859954d6e3f04dda88e02f7f"
+      },
+      "cases": 245,
+      "passed": 239,
+      "failed": 6,
+      "skipped": 0,
+      "completeTaskAcceptance": 0,
+      "sourceImageClosureDrift": false
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

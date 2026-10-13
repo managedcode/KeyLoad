@@ -23,3 +23,9 @@ sequenceDiagram
     LocalFollower->>LocalFollower: SAME materializer apply join
     Caller->>LocalFollower: bounded native retained entry read
 ```
+
+## Native prepared-intent identity graph
+
+REQ-MOVEMENT-PROCESS-ENTRY-002 / AC-MOVEMENT-PROCESS-ENTRY-002 includes the v1 native serialized identity graph: the expected prepared intent must use the same PartitionRef instance as its SourcePlacement.Partition, after independently checking the complete literal partition value. ResolveRegisteredPlacement and PreparePartitionMove preserve this sharing in the actual control record; the returned control must preserve it too. The fixture must not replace this with a separately allocated equal-value record. Orleans v10.4.0 tracks references for these generated record classes, so different sharing produces different native bytes and SHA256 even when JSON values agree. Product identity construction, aliases, field IDs and digest algorithm remain unchanged.
+
+Original R39 CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact failure first differed at ControlIntentDigest: fixture expected 7916e23e4e867ea0770bfb42d092e616a62709b851145c9d7fc2876cc9323b0c; actual reply contained 5730a6501ca08daf9901193c0b980e6576f8037c7e1ae8ca83a9d4634a43ff60. The fixture used its separately allocated Recovery literal PartitionRef while SourcePlacement used the CrashHost corpus instance. This source-proven fixture mismatch does not establish an Orleans serializer defect. Both original six-owner case IDs, typed identity checks, full reply JSON equality, process kills, replay, cold images, healthy continuation and joined cleanup remain required. The corrected expected digest and complete operation qualification require a genuine new execution; this source correction alone is not a pass.

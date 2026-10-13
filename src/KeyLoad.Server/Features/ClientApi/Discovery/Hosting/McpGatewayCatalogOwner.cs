@@ -2,7 +2,6 @@ using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
-using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
@@ -83,7 +82,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
             new McpGatewayInvokeRequest(ToolId: toolId, Arguments: arguments), cancellationToken)
             .ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!result.IsSuccess || result.Output is not CallToolResult)
+        if (!result.IsSuccess || result.McpResult is null)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, InvocationFailure);
         }

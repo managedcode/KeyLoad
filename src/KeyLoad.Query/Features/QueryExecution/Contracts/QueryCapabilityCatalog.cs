@@ -26,6 +26,18 @@ internal static class QueryCapabilityCatalog
     private const string DistinctCapability = "IS DISTINCT FROM";
     private const string NotDistinctCapability = "IS NOT DISTINCT FROM";
     private const string NullDistinctProfile = "SQL.NullDistinct.v1";
+    private const string SymmetricBetweenCapability = "BETWEEN SYMMETRIC";
+    private const string NotSymmetricBetweenCapability = "NOT BETWEEN SYMMETRIC";
+    private const string SymmetricBetweenProfile = "SQL.BetweenSymmetric.v1";
+    private const string SelectAllProfile = "SQL.SelectAll.v1";
+    private const string ImplicitProjectionAliasProfile = "SQL.ImplicitProjectionAlias.v1";
+    private const string BooleanTruthProfile = "SQL.BooleanTruth.v1";
+    private const string IsTrue = "IS TRUE";
+    private const string IsFalse = "IS FALSE";
+    private const string IsUnknown = "IS UNKNOWN";
+    private const string IsNotTrue = "IS NOT TRUE";
+    private const string IsNotFalse = "IS NOT FALSE";
+    private const string IsNotUnknown = "IS NOT UNKNOWN";
     private const string MissingCapability = "IS MISSING";
     private const string DocumentChangeFeedCapability = "documentChangeFeed";
     private const string ScalarLiveQueryCapability = "scalarLiveQuery";
@@ -42,7 +54,7 @@ internal static class QueryCapabilityCatalog
     private static readonly ImmutableArray<int> SupportedDialects = [Q1DialectVersion, Q2DialectVersion];
 
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
-        [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability, DistinctCapability, NotDistinctCapability],
+        [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability, DistinctCapability, NotDistinctCapability, IsTrue, IsFalse, IsUnknown, IsNotTrue, IsNotFalse, IsNotUnknown, SymmetricBetweenCapability, NotSymmetricBetweenCapability],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability, NullDistinctProfile], SupportedVersions, SupportedDialects);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability, NullDistinctProfile, BooleanTruthProfile, SymmetricBetweenProfile, SelectAllProfile, ImplicitProjectionAliasProfile], SupportedVersions, SupportedDialects);
 }

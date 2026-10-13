@@ -32,7 +32,8 @@ internal sealed class McpGatewayReplyTests
     {
         using var document = JsonDocument.Parse("{\"secret\":\"" + Marker + "\"}");
         var expected = new CallToolResult { IsError = true, StructuredContent = document.RootElement.Clone() };
-        var gatewayResult = new McpGatewayInvokeResult(true, ToolName, "local", ToolName, expected);
+        var gatewayResult = new McpGatewayInvokeResult(true, ToolName, "local", ToolName, expected.StructuredContent)
+        { McpResult = expected, Outcome = global::ManagedCode.MCPGateway.McpGatewayInvocationOutcome.ToolError };
         var actual = McpGatewayNativeResult.GetOriginal(gatewayResult);
         await Assert.That(ReferenceEquals(actual, expected)).IsTrue();
         await Assert.That(actual!.IsError).IsTrue();

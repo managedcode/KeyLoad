@@ -24,12 +24,39 @@ internal static class SqlFetchCountRf3Pages
                 {
                     foreach (var item in SqlFetchCountRf3Protocol.Cases)
                     { await CaseAsync(caller, wire, item.Sql, item.Count, token); }
+                    await WindowAsync(caller, wire, token);
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             return true;
         }, token);
         await global::TUnit.Assertions.Assert.That(await SqlFetchCountRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
+    }
+
+    private const int WindowCount = 2;
+    private const int WindowOffset = 1;
+    private const string CombinedWindow = "SELECT label AS label FROM fetch_count ORDER BY label ASC OFFSET 1 ROWS FETCH NEXT 2 ROWS ONLY";
+    private static async Task WindowAsync(RequestCqrsRf3Callers caller, PostgresRf3Caller wire, CancellationToken token)
+    {
+        var operation = SqlFetchCountRf3Protocol.Operation(CombinedWindow);
+        var ast = SqlFetchCountRf3Protocol.Ast(WindowCount);
+        ast = ast with { Query = ast.Query with { Offset = WindowOffset } };
+        var pages = new[]
+        {
+            await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, operation, token),
+            await SqlRf3Protocol.McpAsync<QueryPage>(caller.Mcp, operation, token),
+            await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)),
+            (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value,
+            await wire.ExecuteAsync<QueryPage>(CombinedWindow, [], prepared: true, token),
+            await wire.ExecuteAsync<QueryPage>(CombinedWindow, [], prepared: false, token)
+        };
+        foreach (var page in pages)
+        {
+            var expected = new QueryPage(
+                [new("b", SqlFetchCountRf3Protocol.SeedRevision, "{\"label\":\"b\"}", RedactedFields: []), new("c", SqlFetchCountRf3Protocol.SeedRevision, "{\"label\":\"c\"}", RedactedFields: [])],
+                null, page.CutPosition, "bounded-full-scan");
+            await SqlRf3Protocol.EqualAsync(expected, page);
+        }
     }
 
     private static async Task ProfileAsync(RequestCqrsRf3Callers caller, CancellationToken token)

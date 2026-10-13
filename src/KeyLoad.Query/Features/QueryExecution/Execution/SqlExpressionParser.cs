@@ -57,6 +57,12 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
         if (cursor.Eat(SqlSyntax.Is))
         {
             var not = cursor.Eat(SqlSyntax.Not);
+            if (cursor.Is(SqlSyntax.True) || cursor.Is(SqlSyntax.False) || cursor.Is(SqlSyntax.Unknown))
+            {
+                var target = cursor.Current.Text.ToUpperInvariant();
+                cursor.Advance();
+                return SqlBooleanTruthPredicate.Lower(value, target, not);
+            }
             if (cursor.Eat(SqlSyntax.Distinct))
             {
                 cursor.Need(SqlSyntax.From);
@@ -80,14 +86,11 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
         }
         if (cursor.Eat(SqlSyntax.Between))
         {
+            var symmetric = cursor.Eat(SqlSyntax.Symmetric);
             var lower = Operand();
             cursor.Need(SqlSyntax.And);
             var upper = Operand();
-            var range = new Logical(
-                new Comparison(value, SqlSyntax.GreaterOrEqual, lower),
-                SqlSyntax.And,
-                new Comparison(value, SqlSyntax.LessOrEqual, upper));
-            return negated ? new Negation(range) : range;
+            return SqlBetweenPredicate.Lower(value, lower, upper, negated, symmetric);
         }
         if (negated || cursor.Current.Kind != SqlTokenKind.Symbol
             || cursor.Current.Text is not (SqlSyntax.Equals or SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals or SqlSyntax.Greater or SqlSyntax.GreaterOrEqual or SqlSyntax.Less or SqlSyntax.LessOrEqual))

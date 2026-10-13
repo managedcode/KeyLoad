@@ -5,6 +5,9 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobRejectedContentPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task InvalidHashChangedDuplicateAndWrongChainRefuseThroughSdkAndOfficialMcpThenOriginalFailuresRemainAfterPublication()
-        => BlobRejectedContentPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+    public async Task InvalidHashChangedDuplicateAndWrongChainRefuseThroughSdkAndOfficialMcpThenOriginalFailuresRemainAfterPublication()
+    {
+        await BlobRejectedContentPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+        await BlobPartIdentityR40Trial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+    }
 }

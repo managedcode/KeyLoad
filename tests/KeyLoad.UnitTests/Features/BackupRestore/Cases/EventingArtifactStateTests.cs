@@ -6,6 +6,24 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class EventingArtifactStateTests
 {
+    [Test]
+    public async Task OldCursorAndLeasesStayFencedAfterAuthorizedResumeTwoColdAndHealthyDelivery()
+        => await RestoreResumedTokenFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(bool existingEmpty)
+        => await CatalogRestoreCancellationFlow.RunAsync(existingEmpty,
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(bool existingEmpty)
+        => await CatalogRestoreCancellationFlow.RunAsync(existingEmpty, afterReconcile: true,
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
     private const int PieceBytes = 1_024;
     private const string Backup = "backup";
     private const string Artifact = "eventing.ctg";

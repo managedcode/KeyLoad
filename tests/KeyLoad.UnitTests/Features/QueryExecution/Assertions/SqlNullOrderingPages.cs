@@ -17,11 +17,17 @@ internal static class SqlNullOrderingPages
             {
                 var expected = Expected(descending, first, position);
                 await EqualAsync(expected, engine.Execute(principal, SqlNullOrderingProtocol.Sql(partition, descending, first)));
+                var all = SqlNullOrderingProtocol.Sql(partition, descending, first);
+                await EqualAsync(expected, engine.Execute(principal, all with { Sql = SqlAllPages.Explicit(all.Sql) }));
                 await EqualAsync(expected, engine.ExecuteAst(principal, SqlNullOrderingProtocol.Ast(partition, descending, first)));
                 await ContinuationAsync(engine, partition, principal, descending, first, position);
                 await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
             }
         }
+        await SqlAllPages.DuplicatesAsync(engine, partition, principal, position);
+        await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
+        await SqlImplicitAliasPages.HealthyAsync(engine, partition, principal, position);
+        await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
     }
 
     internal static QueryPage Expected(bool descending, bool first, long cut)

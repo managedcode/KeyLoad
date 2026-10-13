@@ -14,6 +14,11 @@ internal static class TenantCapacityPlacementRf3Authorization
     internal static async Task RequireAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
         TenantPlacementPlanResultV1 originalPlan, CancellationToken token)
+        => await RequireAsync(wave, seed, state, originalPlan, pendingIntentRevocation: false, token).ConfigureAwait(false);
+
+    internal static async Task RequireAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
+        TenantPlacementPlanResultV1 originalPlan, bool pendingIntentRevocation, CancellationToken token)
     {
         using var sourceHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node1);
         using var targetHttp = McpCallerHttp.Create(wave.Application, TwoRf3MembershipProtocol.Node4);
@@ -56,6 +61,11 @@ internal static class TenantCapacityPlacementRf3Authorization
             await official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
                 new { commandId = healthyId, request = repair }, token))).Value);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
+        if (pendingIntentRevocation)
+        {
+            await TenantCapacityPlacementRf3Revocation.RunAsync(wave, seed, state, sourceRoot, targetRoot,
+            secret, credential, healthy, healthyId, repair, token);
+        }
     }
 
     private static async Task RequireDeniedPlanAsync(KeyLoadClient caller, McpOfficialClient official,
@@ -73,7 +83,7 @@ internal static class TenantCapacityPlacementRf3Authorization
             .IsEqualTo(McpDeniedDetail);
     }
 
-    private static async Task ConfigureAsync(KeyLoadClient source, KeyLoadClient target, string tenant,
+    internal static async Task ConfigureAsync(KeyLoadClient source, KeyLoadClient target, string tenant,
         bool administrator, long epoch, ApiKeyRecord key, CancellationToken token)
     {
         var principal = new PrincipalRecord(PrincipalId, tenant, [], [])

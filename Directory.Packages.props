@@ -16,7 +16,7 @@
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.4" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.5" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
-    <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.23" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.24" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.17" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.10.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />

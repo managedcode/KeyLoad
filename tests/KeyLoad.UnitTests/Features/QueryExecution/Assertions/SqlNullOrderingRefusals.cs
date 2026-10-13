@@ -10,6 +10,8 @@ internal static class SqlNullOrderingRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var good = SqlNullOrderingProtocol.Sql(database.Partition, false, true);
+        await SqlAllPages.InvalidAsync(database, engine);
+        await SqlImplicitAliasPages.InvalidAsync(database, engine);
         foreach (var tail in new[] { "NULLS", "NULLS MIDDLE", "NULLS @placement", "NULLS 'FIRST'" })
         {
             await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Root,
@@ -38,6 +40,10 @@ internal static class SqlNullOrderingRefusals
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
             SqlNullOrderingProtocol.Sql(database.Partition, false, true)), ErrorCode.PermissionDenied);
+        await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
+            new(database.Partition, SqlAllPages.DuplicateSql, AllowFullScan: true)), ErrorCode.PermissionDenied);
+        await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
+            new(database.Partition, SqlImplicitAliasPages.BasicSql, AllowFullScan: true)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
             SqlNullOrderingProtocol.Ast(database.Partition, true, false)), ErrorCode.PermissionDenied);
         await UnchangedAsync(database.Store, image, position, identity);
