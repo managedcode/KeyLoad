@@ -1442,10 +1442,6 @@
       "sourceImageClosureDrift": false
     },
     "runtimeObservedR42": {
-      "record": {
-        "path": "docs/implementation/stage64-r42-development-20261013.json",
-        "sha256": "25db96b4bd5304c8acb67c91ed51b2c8b22dcaba8757259105b8145a8e64389c"
-      },
       "cases": 285,
       "passed": 279,
       "failed": 6,
