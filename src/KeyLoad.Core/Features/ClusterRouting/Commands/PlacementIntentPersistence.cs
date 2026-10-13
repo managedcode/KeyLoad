@@ -20,6 +20,9 @@ public sealed partial class DatabaseEngine
         if (admission.OriginalCohortFingerprint != claims.Plan.CohortFingerprint)
         { throw Errors.Fail(ErrorCode.OwnershipLost, TenantPlacementCapacityProtocol.WrongCohort); }
         PlacementPersistenceCohort.Require(claims, admission.OriginalFreshCapacity, operation.EvaluatedAt);
+        PlacementCapacityEnrollment.Require(transaction, claims.ControlOwner,
+            System.Collections.Immutable.ImmutableArray.CreateRange(
+                admission.OriginalFreshCapacity.Select(item => item.Owner)));
         if (request.ControlPartition != claims.Plan.ControlPartition || claims.Plan.Moves.IsEmpty)
         { throw Errors.Fail(ErrorCode.Validation, TenantPlacementPolicyProtocol.Invalid); }
         var original = PlacementIntentStorage.Read(transaction, claims.Plan.TenantId, claims.Plan.DatabaseId,

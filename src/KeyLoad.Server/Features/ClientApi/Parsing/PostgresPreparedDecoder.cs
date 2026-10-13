@@ -90,8 +90,8 @@ internal static class PostgresPreparedDecoder
 
     private static void RequireOid(int oid)
     {
-        if (oid is not (PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid
-            or PostgresProtocol.TextOid or PostgresProtocol.JsonOid or PostgresProtocol.JsonbOid))
+        if (oid is not (PostgresProtocol.Int16Oid or PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid
+            or PostgresProtocol.TextOid or PostgresProtocol.JsonOid or PostgresProtocol.JsonbOid or PostgresNumericProtocol.Oid))
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported); }
     }
 }

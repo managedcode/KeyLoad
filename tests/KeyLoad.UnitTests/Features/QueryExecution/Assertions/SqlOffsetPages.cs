@@ -52,11 +52,12 @@ internal static class SqlOffsetPages
     private static async Task ManifestAsync(QueryEngine engine, DatabaseLimits limits)
     {
         var expected = new QueryCapabilityManifest(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
-            ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING"],
+            ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING",
+                "IS DISTINCT FROM", "IS NOT DISTINCT FROM"],
             limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
             limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", "graph-search-v1", "graph-path-v1",
                 "Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1",
-                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1"], [1, 2], [1, 2]);
+                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1"], [1, 2], [1, 2]);
         await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)

@@ -11,7 +11,7 @@ internal static class FeedVertexAuthorityFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase();
+            using var database = new TestDatabase(timeProvider: new FeedAuthorityClock());
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database, historicalFault), failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -31,12 +31,12 @@ internal static class FeedVertexAuthorityFlow
                 new MutationReceipt(FeedVertexAuthorityFixture.PutKind, FeedVertexAuthorityFixture.Collection, "b", 2L));
         }
         FeedVertexAuthorityFixture.Damage(database, state, historicalFault);
-        await FeedVertexAuthorityAssertions.RefuseAsync(database.Database, database.Store, state, token);
+        await RefuseAsync(database.Database, database.Store, state, historicalFault, token);
         var corruptImage = FeedVertexAuthorityAssertions.Image(database.Store);
         var corruptPosition = database.Store.Position;
         database.Store.Dispose();
         var continued = await ColdAsync(database,
-            cold => FirstColdAsync(database, cold, state, corruptImage, corruptPosition, token));
+            cold => FirstColdAsync(database, cold, state, corruptImage, corruptPosition, historicalFault, token));
         await ColdAsync(database, async secondCold =>
         {
             var owner = database.CreateConfiguredDatabase(secondCold);
@@ -51,11 +51,11 @@ internal static class FeedVertexAuthorityFlow
     }
 
     private static async Task<FeedVertexAuthorityContinuation> FirstColdAsync(TestDatabase database,
-        ZoneTreeStore cold, FeedVertexAuthorityState state, string[] corruptImage, long corruptPosition, CancellationToken token)
+        ZoneTreeStore cold, FeedVertexAuthorityState state, string[] corruptImage, long corruptPosition, int? historicalFault, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
         await FeedVertexAuthorityAssertions.SameImageAsync(cold, corruptImage, corruptPosition);
-        await FeedVertexAuthorityAssertions.RefuseAsync(owner, cold, state, token);
+        await RefuseAsync(owner, cold, state, historicalFault, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Key, state.Original); return true; });
         var prefix = Convert.ToHexString(state.Key) + ":";
         var repaired = corruptImage.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
@@ -77,6 +77,14 @@ internal static class FeedVertexAuthorityFlow
         return new(command, receipt, FeedVertexAuthorityAssertions.Image(cold), cold.Position);
     }
 
+    private const string RevisionChainCorruption = "The committed document mutation does not match its outbox receipt.";
+
+    private static Task RefuseAsync(global::KeyLoad.Core.DatabaseEngine owner, ZoneTreeStore store, FeedVertexAuthorityState state,
+        int? historicalFault, CancellationToken token)
+        => historicalFault is >= 4
+            ? FeedVertexAuthorityAssertions.RefuseAsync(owner, store, state, RevisionChainCorruption, token)
+            : FeedVertexAuthorityAssertions.RefuseAsync(owner, store, state, token);
+
     private static async Task<FeedVertexAuthorityContinuation> ColdAsync(TestDatabase database,
         Func<ZoneTreeStore, Task<FeedVertexAuthorityContinuation>> action)
     {
@@ -84,7 +92,8 @@ internal static class FeedVertexAuthorityFlow
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
+                UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)

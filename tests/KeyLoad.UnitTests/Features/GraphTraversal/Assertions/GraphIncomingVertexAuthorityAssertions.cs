@@ -37,7 +37,8 @@ internal static class GraphIncomingVertexAuthorityAssertions
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
+        await Assert.That(owner.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
+        await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] expected = [new("putDocument", GraphTraversalIntegrityFixture.Nodes, "incoming-witness", 1L),
             new("upsertEdge", GraphTraversalIntegrityFixture.Graph, edge.Id, 1L)];
         await Assert.That(receipt.Mutations.SequenceEqual(expected)).IsTrue();

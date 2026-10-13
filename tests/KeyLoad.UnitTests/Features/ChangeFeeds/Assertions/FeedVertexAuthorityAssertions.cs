@@ -18,26 +18,30 @@ internal static class FeedVertexAuthorityAssertions
         await Assert.That(store.Position).IsEqualTo(position);
     }
 
-    internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store,
+    internal static Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store,
         FeedVertexAuthorityState state, CancellationToken token)
+        => RefuseAsync(owner, store, state, state.Update is not null ? HistoricalCorruptionDetail : CorruptionDetail, token);
+
+    internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store,
+        FeedVertexAuthorityState state, string expectedDetail, CancellationToken token)
     {
         var image = Image(store);
         var position = store.Position;
         var feed = Assert.ThrowsExactly<KeyLoadException>(() => owner.ReadChangeFeed(
             FeedVertexAuthorityFixture.Root, new(state.Seed.Partition, FeedVertexAuthorityFixture.Collection, state.FeedCursor), token));
-        await ErrorAsync(feed, state.Update is not null);
+        await ErrorAsync(feed, expectedDetail);
         await SameImageAsync(store, image, position);
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
         var live = Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery(
             FeedVertexAuthorityFixture.Root, new(state.Query, state.LiveCursor), cancellationToken: token));
-        await ErrorAsync(live, state.Update is not null);
+        await ErrorAsync(live, expectedDetail);
         await SameImageAsync(store, image, position);
     }
 
-    private static async Task ErrorAsync(KeyLoadException error, bool historical)
+    private static async Task ErrorAsync(KeyLoadException error, string expectedDetail)
     {
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(error.Message).IsEqualTo(historical ? HistoricalCorruptionDetail : CorruptionDetail);
+        await Assert.That(error.Message).IsEqualTo(expectedDetail);
     }
 
     internal static async Task HealthyAsync(DatabaseEngine owner, ZoneTreeStore store,

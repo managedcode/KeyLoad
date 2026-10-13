@@ -7,6 +7,7 @@ internal static class PostgresProtocol
     internal const int CancelRequest = 80877102;
     internal const int Int32Oid = 23;
     internal const int Int64Oid = 20;
+    internal const int Int16Oid = 21;
     internal const int BooleanOid = 16;
     internal const int TextOid = 25;
     internal const int JsonOid = 114;

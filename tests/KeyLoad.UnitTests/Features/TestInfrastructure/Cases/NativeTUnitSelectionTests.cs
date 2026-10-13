@@ -110,6 +110,7 @@ internal sealed class NativeTUnitSelectionTests
             await NativeR33PublicSelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await NativeR34PublicSelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await NativeR34PublicSelectionAssertions.AssertSuccessorAsync(selection.RootElement).ConfigureAwait(false);
+            await NativePublicCohortSelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(GraphIncomingProperty), GraphIncomingFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(GraphIncomingUnsupportedProperty).GetInt32())
                 .IsEqualTo(ExpectedGraphIncomingRejections);

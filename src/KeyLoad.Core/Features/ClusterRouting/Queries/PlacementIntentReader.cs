@@ -43,6 +43,8 @@ public sealed partial class DatabaseEngine
             if (!policy.Enabled || policy.Revision != intent.Plan.PolicyRevision)
             { throw Errors.Fail(ErrorCode.Conflict, TenantPlacementPolicyProtocol.Stale); }
             PlacementCapacityCohort.Require(fresh, cohort, EvaluationClock.GetUtcNow());
+            PlacementCapacityEnrollment.Require(charged, intent.ControlOwner,
+                System.Collections.Immutable.ImmutableArray.CreateRange(fresh.Select(item => item.Owner)));
             PlacementCapacityPartitionSet.Require(intent.Plan, fresh);
             var next = intent.Plan.Moves[intent.CompletedMoves];
             var current = ResolveRegisteredPlacement(charged, next.Partition, intent.ControlOwner);

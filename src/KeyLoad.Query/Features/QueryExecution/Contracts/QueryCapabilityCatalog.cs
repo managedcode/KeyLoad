@@ -23,6 +23,9 @@ internal static class QueryCapabilityCatalog
     private const string BetweenCapability = "BETWEEN";
     private const string NotBetweenCapability = "NOT BETWEEN";
     private const string NullCapability = "IS NULL";
+    private const string DistinctCapability = "IS DISTINCT FROM";
+    private const string NotDistinctCapability = "IS NOT DISTINCT FROM";
+    private const string NullDistinctProfile = "SQL.NullDistinct.v1";
     private const string MissingCapability = "IS MISSING";
     private const string DocumentChangeFeedCapability = "documentChangeFeed";
     private const string ScalarLiveQueryCapability = "scalarLiveQuery";
@@ -39,7 +42,7 @@ internal static class QueryCapabilityCatalog
     private static readonly ImmutableArray<int> SupportedDialects = [Q1DialectVersion, Q2DialectVersion];
 
     internal static QueryCapabilityManifest Create(DatabaseLimits limits) => new(ManifestVersion, ManifestVersion, QueryDialectVersion, AtomicPartitionScope, DecimalScalarType, MissingValueSemantics,
-        [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability],
+        [SqlCallerSurface, JsonCallerSurface, CSharpCallerSurface], [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, BetweenCapability, NotBetweenCapability, NullCapability, MissingCapability, DistinctCapability, NotDistinctCapability],
         limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability], SupportedVersions, SupportedDialects);
+        limits.MaxQueryReadBytes, [QueryDialectVersion, DocumentChangeFeedCapability, ScalarLiveQueryCapability, ModelViewsCapability, SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile, InnerJoinCapability, LeftPredicateJoinCapability, QueueEntityRefJoinCapability, EventEntityRefJoinCapability, Q1OffsetCapability, Q2OffsetCapability, NullOrderingCapability, FetchCountCapability, NullDistinctProfile], SupportedVersions, SupportedDialects);
 }

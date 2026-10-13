@@ -1372,3 +1372,60 @@ Native Close(statement) and unnamed replacement retire portals referencing that 
 Whole Unit flows use actual ZoneTree owners, independently literal rows/source identities, valid signed cursor continuation, malformed/unsupported refusal followed by healthy repair, current policy epochs, original-token pre-cancel controls, full raw image/position/identity conservation, byte-exact original receipt replay and two same-volume cold opens. Whole Aspire RF3 flows use genuine TLS raw frames where protocol controls are required, pinned Npgsql prepared/unprepared commands, SDK and official MCP SQL/AST, complete literal results, current policy denial/repair, minimum-token full document reads, original GUID receipt replay, no partial replies, and two real cold waves after every caller/transport is disposed. Positive Execute reuses the genuine original admitted Npgsql cancellation/ProducerDisposed flow with the default all-rows setting; it does not claim positive-limit-specific admission progress.
 
 QueryPage.CutPosition remains opaque local metadata in RF3 and is never compared to replicated receipt positions. Public document/outbox equality is caller-visible conservation, not physical owner/incarnation or raw-store proof. AC-FEED-REFUSAL-AUTHORITY-002 remains OPEN. A deterministic genuine receiver failure at ErrorResponse publication has not yet been proven; the failure-ledger fix is source-bound and that regression gate remains OPEN. New-role compilation/native UID census, Linux RF3/fault/resource/endurance and full SQL/client conformance remain required; no current runtime result is inferred from these prepared texts. The authentic R35 DI startup failures precede protocol work and stay immutable; their minimal certificate registration correction and the original minimum-token oracle correction are separate retained parent-owned patches.
+
+
+### Native ErrorResponse receiver-failure operation (next guarded source candidate)
+
+REQ/AC-SQLC-007/008 and REQ/AC-CLIENT-CONNECTION-001/002 under ADR-065/125 require the original native operation error to remain first when publishing its safe ErrorResponse fails. This candidate arms only the existing private, authenticated three-voter test profile: actual persisted Query revocation causes PermissionDenied in the genuine native Execute. A bounded closed witness records that the real ErrorResponse was encoded before the original configured control-flush deadline holds delivery. The exact owned TLS receiver is then aborted; actual ConnectionClosed releases the hold and the original FlushAsync observes the original linked cancellation token. No exception, fake producer, fake RequestContext, payload-bearing diagnostic or artificial endpoint is injected.
+
+The same owner retains primary object identity before actual flush failure through backend, catalog, credential, transport connection and connection-grain cleanup. Binary create-only owner/arm/witness records are session/voter bound, byte/count limited and atomically published; successful cleanup is proved before deleting the fixture-owned controls, and failures retain originals. The original control-flush deadline includes the hold; no timeout, session capacity, frame/reply limit or native authorization rule is increased.
+
+The full Q1/Q2 Aspire RF3 cases preserve complete caller-visible document/outbox images, exact persisted denied/restored principals, original command-GUID receipts, genuine minimum-token document reads and independent literal SQL/AST full pages. After fresh policy repair they exercise real Npgsql prepared/unprepared, SDK and official MCP callers, then two original-volume cold continuations after original caller/receiver task disposal. Public query cuts remain opaque and are not compared with replicated receipt positions. This is N-only source evidence; compilation, actual runtime, Linux fault/resource qualification and full SQL/client compatibility remain open.
+
+REQ-SQLC-006 / AC-SQLC-006 (SQLC-READ), REQ/AC-QUERY-004/005/006 and ADR-065: source candidate SQL.NullDistinct.v1 adds IS DISTINCT FROM and IS NOT DISTINCT FROM through the existing canonical Predicate nodes. For two present non-null scalar operands DISTINCT means existing not-equal; two JSON nulls are not distinct and exactly one JSON null is distinct. KeyLoad MISSING remains distinct from JSON null: either missing operand yields unknown for both forms, preserving NOT/AND/OR three-valued behavior. Existing incompatible non-null scalar types still refuse Validation; no implicit coercion is introduced. This is the bounded comparison family, not SELECT DISTINCT, set operators or full SQL.
+
+The parser requires exact identifier-kind IS/[NOT]/DISTINCT/FROM tokens and a real bounded operand; it lowers into existing Comparison, NullTest, Logical and Negation nodes, then the unchanged normalizer charges the entire expansion, query bytes, token/depth limits, field Use, original cancellation and read view. No new serialized predicate node, wire contract, public endpoint, authority store, fallback or budget is introduced.
+
+SqlNullDistinctWholeFlowTests and SqlNullDistinctRf3WholeFlowTests independently author literal outputs and equivalent ASTs for null/non-null/missing/self/NOT/OR cases. The genuine native ZoneTree and Aspire RF3 Npgsql prepared/unprepared/SDK/official MCP flows include malformed grammar refusal, original-token pre-cancel control, persisted Query denial and exact epoch repair, a real acknowledged bool-vs-decimal source mutation causing whole-query Validation with no partial page, exact revision-CAS repair, immutable original seed/fault/repair receipt replay, and healthy continuation through two same-volume/actual-container cold waves. Unit checks full raw image/position/identity; public RF3 checks exact full document images with real minimum tokens plus outbox conservation. RF3 QueryPage cut stays opaque; no physical owner/cut or admitted-cancellation claim is added.
+
+Native preview/new-file absence is source evidence only. New-role compilation, actual native identities, original operation/failure/cold joins, Linux RF3 and full client conformance remain OPEN. Existing SELECT DISTINCT remains unsupported.
+
+```mermaid
+flowchart LR
+    A[Bounded IS DISTINCT FROM syntax] --> B[Existing canonical predicate lowering]
+    B --> C[Fresh policy and charged authorized read]
+    C --> D[Whole literal SQL and independent AST results]
+    D --> E[Type refusal exact repair and two cold continuations]
+```
+
+
+### Exact native decimal parameter binding — guarded source contract
+
+REQ/AC-SQLC-005/007/008, REQ/AC-QUERY-004/006 and ADR-065/125 extend the existing TLS/API-key profile with numeric OID 1700 for exact .NET decimal values. Parse accepts the same bounded parameter slots; Bind decodes text or native base-10000 numeric framing before unchanged canonical JSON parameter dispatch. Finite values must fit the native 96-bit coefficient and scale 0–28 exactly. No rounding, truncation, floating-point conversion, arbitrary-precision allocation, new dispatcher or retained grant is introduced. Malformed numeric framing/sign/digits/exponent syntax is Validation. NaN/infinities, nonrepresentable finite values and binary dscale hiding nonzero precision are UnsupportedCapability. The last refusal deliberately differs from PostgreSQL's permissive hidden-digit truncation; the closed profile does not advertise general PostgreSQL numeric compatibility. Trailing zero coefficient normalization preserves mathematical value, not original numeric display scale.
+
+All existing frame/parameter/session/read/output byte limits, TimeProvider deadlines, native Communication result ownership, one connection grain and separate request grain, persisted API-key verification and fresh per-operation permissions remain. QueryPage results remain one whole canonical JSONB image; local cuts are opaque. PostgresDecimalRf3WholeFlowTests is a prepared whole genuine Aspire RF3 scenario: real Npgsql10.0.3 prepared/unprepared decimal parameters at extrema and fractional precision, SDK/official MCP SQL plus independent AST parity, literal complete pages, malformed/unsupported native Bind then Sync and healthy Bind on the original TLS owner, current Query revoke/exact restore, original-token pre-cancel control, minimum-token full document/outbox conservation, original seed GUID receipt replay and two existing same-volume cold waves after every transport is joined/disposed. It makes no admitted-cancel, physical owner, performance, Linux or full SQL qualification claim. Fresh source integration, compilation, exact native census and original runtime gates remain OPEN.
+
+```mermaid
+flowchart LR
+    Numeric[Bounded native numeric Bind] --> Exact[Exact decimal admission]
+    Exact --> Auth[Fresh persisted authorization]
+    Auth --> CQRS[Original connection owned CQRS]
+    CQRS --> Whole[Whole canonical JSONB result]
+    Numeric --> Refusal[Validation or explicit Unsupported]
+    Refusal --> Sync[Original Sync and healthy Bind]
+```
+
+### Native signed Int16 parameter binding — next guarded source contract
+
+REQ/AC-SQLC-005/007/008 and REQ/AC-QUERY-004/006 under ADR-065/125 add PostgreSQL int2 OID21 to the same closed native TLS/API-key parameter profile. Bind accepts exactly two big-endian bytes for binary Int16, or invariant signed integral text within -32768..32767. The canonical JSON numeric value is exact; it uses the original parameter dictionary, query normalizer, source policy and native CQRS admission. Wrong binary width, malformed integral text and overflow return the existing Validation error; other unsupported OIDs keep their original UnsupportedCapability. Existing frames/slots/retained grants, query read/output budgets and operation/admission/deadlines are unchanged. No new query syntax, lossy conversion, fallback dispatcher, numeric domain expansion or general PostgreSQL compatibility is promised.
+
+PostgresInt16Rf3WholeFlowTests is a prepared genuine Aspire RF3 whole operation: built-in Npgsql Smallint prepared/unprepared execution at signed extrema and ordinary values, SDK and official MCP SQL and independent AST full literal pages; original native Parse then malformed/overflow Bind refusal, Sync and fresh healthy Bind on the same TLS owner; persisted Query revoke/exact whole-principal repair and both public APIs plus Npgsql refusal; original-token pre-cancel control; exact original seed GUID receipt replay; minimum-token full literal documents/outbox conservation; and two real cold waves after original callers and native transports join/dispose. Query cuts stay opaque. Native semantic binding, original runtime, Linux/fault/resource and complete SQL/client qualification remain OPEN.
+
+```mermaid
+flowchart LR
+    Int16[Bounded int2 native Bind] --> Exact[Exact signed Int16 JSON value]
+    Exact --> Auth[Current persisted permission]
+    Auth --> CQRS[Original connection owner CQRS]
+    Int16 --> Refusal[Validation]
+    Refusal --> Sync[Same owner Sync and healthy Bind]
+```

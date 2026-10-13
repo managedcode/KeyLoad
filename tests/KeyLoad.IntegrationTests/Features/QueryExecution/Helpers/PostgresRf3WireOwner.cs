@@ -12,6 +12,18 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
     private NetworkStream? network;
     private SslStream? tls;
     private int disposed;
+    private int receiverAborted;
+    private int socketDisposed;
+    internal bool ReceiverAborted => Volatile.Read(ref receiverAborted) != PostgresRf3Protocol.FirstColumn;
+
+    internal void AbortReceiver()
+    {
+        if (Interlocked.Exchange(ref receiverAborted, PostgresRf3Protocol.OneColumn) != PostgresRf3Protocol.FirstColumn)
+        { return; }
+        socket.LingerState = new LingerOption(true, PostgresRf3Protocol.FirstColumn);
+        if (Interlocked.Exchange(ref socketDisposed, PostgresRf3Protocol.OneColumn) == PostgresRf3Protocol.FirstColumn)
+        { socket.Dispose(); }
+    }
     internal SslStream Stream => tls ?? throw new InvalidOperationException(PostgresRf3Protocol.InvalidResult);
 
     private PostgresRf3WireOwner() { }
@@ -78,7 +90,10 @@ internal sealed class PostgresRf3WireOwner : IAsyncDisposable
             { failures.Add(error); }
         }
         try
-        { socket.Dispose(); }
+        {
+            if (Interlocked.Exchange(ref socketDisposed, PostgresRf3Protocol.OneColumn) == PostgresRf3Protocol.FirstColumn)
+            { socket.Dispose(); }
+        }
         catch (Exception error) when (global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
         { failures.Add(error); }
         catch (Exception error) when (!global::KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))

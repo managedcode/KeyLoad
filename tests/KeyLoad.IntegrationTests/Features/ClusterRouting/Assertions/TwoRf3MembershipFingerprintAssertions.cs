@@ -67,7 +67,7 @@ internal static class TwoRf3MembershipFingerprintAssertions
         await Assert.That(actual).IsEqualTo(expected);
     }
 
-    private static async Task<byte[]> ReadBoundedHealthAsync(HttpResponseMessage response, CancellationToken token)
+    internal static async Task<byte[]> ReadBoundedHealthAsync(HttpResponseMessage response, CancellationToken token)
     {
         if (response.Content.Headers.ContentLength is > MaximumHealthBytes)
         { throw new InvalidDataException(TwoRf3MembershipProtocol.MissingState); }

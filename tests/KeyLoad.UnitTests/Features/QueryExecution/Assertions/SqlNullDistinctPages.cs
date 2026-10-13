@@ -1,0 +1,27 @@
+using KeyLoad.Query;
+
+namespace KeyLoad.UnitTests.Features.QueryExecution;
+
+internal static class SqlNullDistinctPages
+{
+    internal static async Task HealthyAsync(global::KeyLoad.Core.DatabaseEngine owner,
+        global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition, long lowRevision)
+    {
+        var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.Profile)).IsTrue();
+        var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
+        var position = store.Position;
+        var identity = JsonDefaults.Serialize(store.Identity);
+        foreach (var item in SqlNullDistinctCases.All)
+        {
+            var expected = new QueryPage([.. item.Ids.Select(id => new QueryRow(id,
+                id == "low" ? lowRevision : SqlNullDistinctRefusals.InitialRevision,
+                "{\"label\":\"" + id + "\"}", RedactedFields: []))], null, position, "bounded-full-scan");
+            await SqlNullOrderingPages.EqualAsync(expected, engine.Execute(SqlNullOrderingProtocol.Reader,
+                new(partition, SqlNullDistinctCases.Prefix + item.Clause + SqlNullDistinctCases.Tail, AllowFullScan: true)));
+            await SqlNullOrderingPages.EqualAsync(expected, engine.ExecuteAst(SqlNullOrderingProtocol.Reader,
+                SqlNullDistinctCases.Ast(partition, item)));
+            await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
+        }
+    }
+}

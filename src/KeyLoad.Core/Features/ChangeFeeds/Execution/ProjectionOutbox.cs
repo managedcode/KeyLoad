@@ -338,7 +338,10 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, InvalidOutboxPurgePositionDetail);
         }
 
-        var pinned = ProjectionConsumers(tx, request.Partition).Where(consumer => !consumer.Released).Select(consumer => consumer.Checkpoint)
+        var consumers = ProjectionConsumers(tx, request.Partition);
+        foreach (var consumer in consumers)
+        { RequireProjectionRetentionCheckpoint(consumer, head); }
+        var pinned = consumers.Where(consumer => !consumer.Released).Select(consumer => consumer.Checkpoint)
             .DefaultIfEmpty(head.Tail).Min();
         if (request.ThroughSequence > pinned)
         {
@@ -369,6 +372,10 @@ public sealed partial class DatabaseEngine
     {
         RequireProjectionAdministrator(Principal(view, principalId, Clock.GetUtcNow()));
         ValidatePartition(partition);
-        return new(ReadOutboxHead(view, partition), ProjectionConsumers(view, partition));
+        var head = ReadOutboxHead(view, partition);
+        var consumers = ProjectionConsumers(view, partition);
+        foreach (var consumer in consumers)
+        { RequireProjectionRetentionCheckpoint(consumer, head); }
+        return new(head, consumers);
     });
 }

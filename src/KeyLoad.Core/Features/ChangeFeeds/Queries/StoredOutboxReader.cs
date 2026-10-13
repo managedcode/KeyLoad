@@ -17,6 +17,8 @@ internal static class StoredOutboxReader
     private const string PutKind = "putDocument";
     private const string PatchKind = "patchDocument";
     private const string DeleteKind = "deleteDocument";
+    private const long InitialDocumentRevision = 1L;
+    private const long DocumentRevisionStep = 1L;
 
     private static void RequireDocumentMutationReceipt(OutboxEntry entry)
     {
@@ -27,10 +29,31 @@ internal static class StoredOutboxReader
             DeleteDocument delete => (delete.Collection, delete.Id, DeleteKind),
             _ => null
         };
-        if (expected is { } document && (entry.Mutation.Resource != document.Resource
+        if (expected is not { } document)
+        { return; }
+        if (entry.Mutation.Resource != document.Resource
             || entry.Receipt.Resource != document.Resource || entry.Receipt.Id != document.Id
             || entry.Receipt.Kind != document.Kind || entry.After is not { } after
-            || entry.Receipt.Revision != after.Revision))
+            || entry.Receipt.Revision != after.Revision
+            || after.Deleted != (entry.Mutation is DeleteDocument))
+        { throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation); }
+        RequireDocumentRevisionChain(entry);
+    }
+
+    private static void RequireDocumentRevisionChain(OutboxEntry entry)
+    {
+        var after = entry.After ?? throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation);
+        var invalid = after.Revision < InitialDocumentRevision;
+        if (entry.Before is { } before)
+        {
+            invalid |= before.Revision < InitialDocumentRevision || before.Revision == long.MaxValue
+                || after.Revision != before.Revision + DocumentRevisionStep;
+        }
+        else
+        {
+            invalid |= entry.Mutation is not PutDocument || after.Revision != InitialDocumentRevision;
+        }
+        if (invalid)
         { throw Errors.Fail(ErrorCode.Corruption, CorruptDocumentMutation); }
     }
 

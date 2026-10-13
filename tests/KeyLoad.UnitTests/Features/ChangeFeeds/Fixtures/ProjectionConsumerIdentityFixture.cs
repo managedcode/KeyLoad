@@ -30,7 +30,7 @@ internal static class ProjectionConsumerIdentityFixture
         await ProjectionConsumerIdentityAssertions.ExactAsync(configured.Get<ProjectionConsumerInfo>(),
             new ProjectionConsumerInfo(consumer, definition, 0L, false));
         var seedId = Guid.NewGuid();
-        var time = new DateTimeOffset(2026, 10, 13, 0, 0, 0, TimeSpan.Zero);
+        var time = FeedAuthorityClock.Epoch;
         var seed = Operation(OperationKind.Batch, seedId, new CommandRequest(seedId, database.Partition,
             [new PutDocument(Source, "a", "{\"n\":1}", 0L), new PutDocument(Source, "b", "{\"n\":2}", 0L)])) with
         { EvaluatedAt = time };

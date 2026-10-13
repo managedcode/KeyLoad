@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class BlobPortableBackupTrial
 {
+    private const string MissingBeginClock = "The genuine blob Begin committed clock is missing.";
     internal static async Task RunAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -34,6 +35,9 @@ internal static class BlobPortableBackupTrial
         var id = Guid.NewGuid();
         var begin = BlobPortableBackupSeed.Send(source, OperationKind.BeginBlobUpload, id,
             new BeginBlobUploadRequest(id, active, upload, bytes.Length, 0), token);
+        var beginClock = source.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
+            view.ReadOwnedValue(KeySpace.ClockBytes) ?? throw new InvalidOperationException(MissingBeginClock)));
+        await Assert.That(beginClock).IsGreaterThanOrEqualTo(begin.Operation.EvaluatedAt);
         await BlobPortableBackupAssertions.ReceiptAsync(source, active,
             begin.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, id);
         var accepted = bytes.AsMemory(0, BlobLimits.RawPartBytes).ToArray();
@@ -41,8 +45,9 @@ internal static class BlobPortableBackupTrial
         var originalInfo = part.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value;
         var activeHash = BlobIntegrity.InitialHash(source.Store.Identity.Incarnation, active, upload, bytes.Length);
         activeHash = BlobIntegrity.NextHash(activeHash, 0, accepted.Length, BlobIntegrity.PartHash(accepted));
-        await BackupPersistedPolicyAssertions.SameAsync(new BlobUploadInfo(active, upload, bytes.Length,
-            0L, 1, accepted.Length, begin.Operation.EvaluatedAt.AddSeconds(new BlobPolicy().UploadTtlSeconds),
+        await Assert.That(originalInfo.ExpiresAt).IsEqualTo(beginClock.AddSeconds(new BlobPolicy().UploadTtlSeconds));
+        await RequireUploadInfoAsync(new BlobUploadInfo(active, upload, bytes.Length,
+            0L, 1, accepted.Length, beginClock.AddSeconds(new BlobPolicy().UploadTtlSeconds),
             BlobUploadStatus.Active, activeHash), originalInfo);
         var creator = source.Store.Read(view => BlobRecordReader.Get<BlobState>(view, BlobKeys.State(active, upload)));
         await Assert.That(creator!.CreatorPrincipalId).IsEqualTo(BlobPortableBackupSeed.Root);
@@ -69,6 +74,44 @@ internal static class BlobPortableBackupTrial
         await OutcomesAsync(fixture, originals, outcomes);
         await BackupPersistedPolicyAssertions.UnchangedAsync(source.Store, sourceCut);
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
+    }
+
+    private static async Task RequireUploadInfoAsync(BlobUploadInfo expected, BlobUploadInfo actual)
+    {
+        var actualBytes = NativeSerialization.Serialize(actual);
+        var expectedBytes = NativeSerialization.Serialize(expected);
+        await Assert.That(actualBytes.AsSpan().SequenceEqual(expectedBytes)).IsTrue()
+            .Because(DescribeUploadInfo(expected, actual, expectedBytes, actualBytes));
+    }
+
+    private static string DescribeUploadInfo(BlobUploadInfo expected, BlobUploadInfo actual,
+        byte[] expectedBytes, byte[] actualBytes)
+    {
+        string[] left = [expected.Blob.Partition.TenantId, expected.Blob.Partition.DatabaseId,
+            expected.Blob.Partition.TransactionDomainId, expected.Blob.Partition.PartitionKey,
+            expected.Blob.Resource, expected.Blob.Id, expected.IntegrityHash];
+        string[] right = [actual.Blob.Partition.TenantId, actual.Blob.Partition.DatabaseId,
+            actual.Blob.Partition.TransactionDomainId, actual.Blob.Partition.PartitionKey,
+            actual.Blob.Resource, actual.Blob.Id, actual.IntegrityHash];
+        var aliases = true;
+        for (var index = 0; index < left.Length; index++)
+        {
+            for (var other = 0; other < left.Length; other++)
+            { aliases &= ReferenceEquals(left[index], left[other]) == ReferenceEquals(right[index], right[other]); }
+        }
+        var types = expected.GetType() == actual.GetType()
+            && expected.Blob.GetType() == actual.Blob.GetType()
+            && expected.Blob.Partition.GetType() == actual.Blob.Partition.GetType();
+        var offset = 0;
+        while (offset < Math.Min(expectedBytes.Length, actualBytes.Length)
+            && expectedBytes[offset] == actualBytes[offset])
+        { offset++; }
+        return $"BlobUploadInfo blob={expected.Blob == actual.Blob} upload={expected.UploadId == actual.UploadId} "
+            + $"declaredLength={expected.DeclaredLength == actual.DeclaredLength} revision={expected.ExpectedRevision == actual.ExpectedRevision} "
+            + $"ordinal={expected.NextOrdinal == actual.NextOrdinal} storedBytes={expected.StoredBytes == actual.StoredBytes} "
+            + $"expiryExact={expected.ExpiresAt.EqualsExact(actual.ExpiresAt)} status={expected.Status == actual.Status} hash={expected.IntegrityHash == actual.IntegrityHash}; "
+            + $"selectedStringSlots={left.Length} aliasTopology={aliases} runtimeTypes={types}; "
+            + $"bytes expected={expectedBytes.Length} actual={actualBytes.Length} firstDifference={offset}.";
     }
 
     private static async Task OutcomesAsync(BackupIndexedDocumentDedupFixture fixture,

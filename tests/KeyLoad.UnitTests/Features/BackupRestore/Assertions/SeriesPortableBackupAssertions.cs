@@ -34,6 +34,51 @@ internal static class SeriesPortableBackupAssertions
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }
 
+    private static async Task RequireRowsAsync(SampleRecord[] expected, SampleRecord[] actual)
+    {
+        var expectedBytes = NativeSerialization.Serialize(expected);
+        var actualBytes = NativeSerialization.Serialize(actual);
+        await Assert.That(actualBytes.AsSpan().SequenceEqual(expectedBytes)).IsTrue()
+            .Because(DescribeRows(expected, actual, expectedBytes, actualBytes));
+    }
+
+    private static string DescribeRows(SampleRecord[] expected, SampleRecord[] actual,
+        byte[] expectedBytes, byte[] actualBytes)
+    {
+        var series = true;
+        var events = true;
+        var timestamps = true;
+        var values = true;
+        var sequences = true;
+        var tags = true;
+        var expectedSeriesAliases = true;
+        var actualSeriesAliases = true;
+        var expectedTagsAliases = true;
+        var actualTagsAliases = true;
+        for (var row = 0; row < Math.Min(expected.Length, actual.Length); row++)
+        {
+            var left = expected[row];
+            var right = actual[row];
+            series &= left.SeriesId == right.SeriesId;
+            events &= left.Sample.EventId == right.Sample.EventId;
+            timestamps &= left.Sample.Timestamp.EqualsExact(right.Sample.Timestamp);
+            values &= BitConverter.DoubleToInt64Bits(left.Sample.Value) == BitConverter.DoubleToInt64Bits(right.Sample.Value);
+            sequences &= left.Sequence == right.Sequence;
+            tags &= left.TagsJson == right.TagsJson;
+            expectedSeriesAliases &= ReferenceEquals(left.SeriesId, expected[0].SeriesId);
+            actualSeriesAliases &= ReferenceEquals(right.SeriesId, actual[0].SeriesId);
+            expectedTagsAliases &= ReferenceEquals(left.TagsJson, expected[0].TagsJson);
+            actualTagsAliases &= ReferenceEquals(right.TagsJson, actual[0].TagsJson);
+        }
+        var offset = 0;
+        while (offset < Math.Min(expectedBytes.Length, actualBytes.Length)
+            && expectedBytes[offset] == actualBytes[offset])
+        { offset++; }
+        return $"Series count expected={expected.Length} actual={actual.Length}; bytes expected={expectedBytes.Length} actual={actualBytes.Length} firstDifference={offset}; "
+            + $"series={series} event={events} timestampExact={timestamps} valueBits={values} sequence={sequences} tags={tags}; "
+            + $"expectedSeriesAliases={expectedSeriesAliases} actualSeriesAliases={actualSeriesAliases} expectedTagsAliases={expectedTagsAliases} actualTagsAliases={actualTagsAliases}.";
+    }
+
     internal static async Task VisibleAsync(DatabaseEngine database, PartitionRef partition, bool complete, CancellationToken token)
     {
         var before = BackupPersistedPolicyAssertions.Capture(database.Store);
@@ -47,7 +92,7 @@ internal static class SeriesPortableBackupAssertions
             partition, SeriesPortableBackupSeed.Set, SeriesPortableBackupSeed.Series,
             SeriesPortableBackupSeed.Start, SeriesPortableBackupSeed.Start.AddSeconds(5), cancellationToken: token);
         await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
-        await BackupPersistedPolicyAssertions.SameAsync(expected, actual);
+        await RequireRowsAsync(expected, actual);
         var expectedAggregate = complete ? new SampleAggregate(3L, 12d, 3d, 5d, 4d)
             : new SampleAggregate(2L, 7d, 3d, 4d, 3.5d);
         await BackupPersistedPolicyAssertions.SameAsync(expectedAggregate,

@@ -36,7 +36,7 @@ internal static class FeedVertexAuthorityFixture
         await Assert.That(live.CutPosition).IsEqualTo(initialCut);
         var command = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PutDocument(Collection, "a", "{\"n\":1}", 0L), new PutDocument(Collection, "b", "{\"n\":2}", 0L)]);
-        var time = new DateTimeOffset(2026, 10, 13, 0, 0, 0, TimeSpan.Zero);
+        var time = FeedAuthorityClock.Epoch;
         var receipt = database.Submit(OperationKind.Batch, command, id: command.CommandId, time: time).Get<CommitReceipt>();
         CommandRequest? update = null;
         CommitReceipt? updateReceipt = null;
@@ -74,6 +74,10 @@ internal static class FeedVertexAuthorityFixture
                     Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with
                     { Reference = after.Reference with { Id = ForeignId } }
                 },
+                4 => entry with { Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with { Revision = 0L } },
+                5 => entry with { Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with { Revision = 2L } },
+                6 => entry with { Before = (entry.Before ?? throw new InvalidOperationException(MissingRow)) with { Revision = long.MaxValue } },
+                7 => entry with { Before = null },
                 _ => throw new ArgumentOutOfRangeException(nameof(historicalFault))
             };
             database.Store.Commit((transaction, _) => { transaction.PutRecord(state.Key, damaged); return true; });

@@ -508,3 +508,35 @@ REQ/AC-AUTH-ASPNET-003, REQ/AC-AUTH-004/005 and AC-CRS-006 retain the original A
 This test-only extension changes no product API, format, scope, scheduling, clock, quota or timeout and adds no Test/Args/UID. Existing AcCrs058 independently covers real same-HTTP2-connection tenant overlap/cancellation and native producer settlement; existing native scope cases cover previous RequestContext restoration on cancellation/disposal/terminal, without promoting C0 to RF3. Existing AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery remains the independent true all-three same-volume cold/full-receipt/replay gate. Do not cold-restart this shared keyed concurrent fixture or replace those cases. Fresh compiled UID discovery, native50/SIMD execution, Linux and coverage gates remain OPEN until exact-source execution; source preview is not runtime proof.
 
 The private integration successor retains all actual concurrent task faults/cancellations after both operations join, using the existing native ServerFailureObserver on separate per-operation ledgers and ordered aggregation. It does not replace work, modify scheduling/deadlines, use fake tasks or share a mutable failure list across concurrent continuations. This corrects new test-owner error retention only; compiler/runtime qualification remains OPEN.
+
+
+### Exact native decimal parameter binding — guarded source contract
+
+REQ/AC-SQLC-005/007/008, REQ/AC-QUERY-004/006 and ADR-065/125 extend the existing TLS/API-key profile with numeric OID 1700 for exact .NET decimal values. Parse accepts the same bounded parameter slots; Bind decodes text or native base-10000 numeric framing before unchanged canonical JSON parameter dispatch. Finite values must fit the native 96-bit coefficient and scale 0–28 exactly. No rounding, truncation, floating-point conversion, arbitrary-precision allocation, new dispatcher or retained grant is introduced. Malformed numeric framing/sign/digits/exponent syntax is Validation. NaN/infinities, nonrepresentable finite values and binary dscale hiding nonzero precision are UnsupportedCapability. The last refusal deliberately differs from PostgreSQL's permissive hidden-digit truncation; the closed profile does not advertise general PostgreSQL numeric compatibility. Trailing zero coefficient normalization preserves mathematical value, not original numeric display scale.
+
+All existing frame/parameter/session/read/output byte limits, TimeProvider deadlines, native Communication result ownership, one connection grain and separate request grain, persisted API-key verification and fresh per-operation permissions remain. QueryPage results remain one whole canonical JSONB image; local cuts are opaque. PostgresDecimalRf3WholeFlowTests is a prepared whole genuine Aspire RF3 scenario: real Npgsql10.0.3 prepared/unprepared decimal parameters at extrema and fractional precision, SDK/official MCP SQL plus independent AST parity, literal complete pages, malformed/unsupported native Bind then Sync and healthy Bind on the original TLS owner, current Query revoke/exact restore, original-token pre-cancel control, minimum-token full document/outbox conservation, original seed GUID receipt replay and two existing same-volume cold waves after every transport is joined/disposed. It makes no admitted-cancel, physical owner, performance, Linux or full SQL qualification claim. Fresh source integration, compilation, exact native census and original runtime gates remain OPEN.
+
+```mermaid
+flowchart LR
+    Numeric[Bounded native numeric Bind] --> Exact[Exact decimal admission]
+    Exact --> Auth[Fresh persisted authorization]
+    Auth --> CQRS[Original connection owned CQRS]
+    CQRS --> Whole[Whole canonical JSONB result]
+    Numeric --> Refusal[Validation or explicit Unsupported]
+    Refusal --> Sync[Original Sync and healthy Bind]
+```
+
+### Native signed Int16 parameter binding — next guarded source contract
+
+REQ/AC-SQLC-005/007/008 and REQ/AC-QUERY-004/006 under ADR-065/125 add PostgreSQL int2 OID21 to the same closed native TLS/API-key parameter profile. Bind accepts exactly two big-endian bytes for binary Int16, or invariant signed integral text within -32768..32767. The canonical JSON numeric value is exact; it uses the original parameter dictionary, query normalizer, source policy and native CQRS admission. Wrong binary width, malformed integral text and overflow return the existing Validation error; other unsupported OIDs keep their original UnsupportedCapability. Existing frames/slots/retained grants, query read/output budgets and operation/admission/deadlines are unchanged. No new query syntax, lossy conversion, fallback dispatcher, numeric domain expansion or general PostgreSQL compatibility is promised.
+
+PostgresInt16Rf3WholeFlowTests is a prepared genuine Aspire RF3 whole operation: built-in Npgsql Smallint prepared/unprepared execution at signed extrema and ordinary values, SDK and official MCP SQL and independent AST full literal pages; original native Parse then malformed/overflow Bind refusal, Sync and fresh healthy Bind on the same TLS owner; persisted Query revoke/exact whole-principal repair and both public APIs plus Npgsql refusal; original-token pre-cancel control; exact original seed GUID receipt replay; minimum-token full literal documents/outbox conservation; and two real cold waves after original callers and native transports join/dispose. Query cuts stay opaque. Native semantic binding, original runtime, Linux/fault/resource and complete SQL/client qualification remain OPEN.
+
+```mermaid
+flowchart LR
+    Int16[Bounded int2 native Bind] --> Exact[Exact signed Int16 JSON value]
+    Exact --> Auth[Current persisted permission]
+    Auth --> CQRS[Original connection owner CQRS]
+    Int16 --> Refusal[Validation]
+    Refusal --> Sync[Same owner Sync and healthy Bind]
+```

@@ -42,4 +42,14 @@ public sealed partial class DatabaseEngine
         { throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity); }
         return state;
     }
+
+    private static void RequireProjectionRetentionCheckpoint(ProjectionConsumerInfo state, OutboxHead head)
+    {
+        const long InitialCheckpoint = 0L;
+        const long RetainedPredecessorStep = 1L;
+        const string InvalidCheckpointDetail = "The committed projection checkpoint is outside its retained outbox range.";
+        if (state.Checkpoint < InitialCheckpoint || state.Checkpoint > head.Tail
+            || !state.Released && state.Checkpoint < head.FirstAvailable - RetainedPredecessorStep)
+        { throw Errors.Fail(ErrorCode.Corruption, InvalidCheckpointDetail); }
+    }
 }

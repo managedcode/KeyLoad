@@ -11,7 +11,7 @@ internal static class OutboxDocumentMutationFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase();
+            using var database = new TestDatabase(timeProvider: new FeedAuthorityClock());
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database, fault), failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -88,7 +88,8 @@ internal static class OutboxDocumentMutationFlow
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
+                UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }
         catch (Exception error) when (global::ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)

@@ -53,6 +53,20 @@ internal static class TenantCapacityPlacementRf3Cold
         await ReopenAsync(wave, seed, token);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
     }
+    internal static async Task RequireRefusalCutAsync(TenantCapacityPlacementRf3Provisioning.State state,
+        PartitionMovementPublicParentRf3NativeCut[] original, PartitionMovementPublicParentRf3NativeCut[] stopped,
+        PartitionMoveRequest move)
+    {
+        await Assert.That(stopped.Length).IsEqualTo(TwoRf3MembershipProtocol.NodeCount);
+        foreach (var owner in stopped)
+        {
+            await Assert.That(owner.Header).IsNull();
+            await Assert.That(owner.Pending).IsNull();
+            await Assert.That(owner.LastIssued).IsNull();
+        }
+        await RequireCanonicalRowsAsync(state, original, stopped, null, move);
+    }
+
     private static async Task RequireFullColdOpenAsync(TwoRf3MembershipWave wave, PartitionMoveRequest move,
         PartitionMovementPublicParentRf3NativeCut[] original)
     {

@@ -20,7 +20,7 @@ internal static class ReplicaAppliedOutcomeWholeFlow
         await Assert.That(begun.Get<BlobCommitResult<BlobUploadInfo>>().Receipt.CommandId).IsEqualTo(begin.CommandId);
         byte[] bytes = [42];
         var request = new WriteBlobPartRequest(Guid.NewGuid(), blob,
-            scenario == 1 ? Guid.NewGuid() : upload, 0, bytes, Convert.ToHexString(SHA256.HashData(bytes)));
+            scenario == 1 ? Guid.NewGuid() : upload, 0, bytes, Convert.ToHexStringLower(SHA256.HashData(bytes)));
         var operation = Issue(owner, OperationKind.WriteBlobPart, request, request.CommandId, ReplicaSubmissionOutcomeFlow.Writer);
         var original = owner.Submit(operation);
         if (scenario == 2)
@@ -93,7 +93,7 @@ internal static class ReplicaAppliedOutcomeWholeFlow
         var originalBegin = owner.Submit(Issue(owner, OperationKind.BeginBlobUpload, begin, begin.CommandId));
         await Assert.That(originalBegin.Get<BlobCommitResult<BlobUploadInfo>>().Value.Status).IsEqualTo(BlobUploadStatus.Active);
         byte[] bytes = [43];
-        var part = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 0, bytes, Convert.ToHexString(SHA256.HashData(bytes)));
+        var part = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 0, bytes, Convert.ToHexStringLower(SHA256.HashData(bytes)));
         var partOperation = Issue(owner, OperationKind.WriteBlobPart, part, part.CommandId);
         var originalPart = owner.Submit(partOperation);
         var staged = originalPart.Get<BlobCommitResult<BlobUploadInfo>>().Value;

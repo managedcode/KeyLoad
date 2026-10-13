@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 
@@ -25,7 +24,7 @@ internal sealed class PartitionMovementParentNativeFixture(ControlledPartitionMo
     {
         var envelope = new PartitionMovePeerEnvelope(PartitionMoveProtocol.Version, original.MoveId, original.Partition,
             original.ControlOwner, original.SourcePlacement, original.DestinationOwner,
-            state.Control is null ? original.ControlIntentDigest : PartitionMoveIntentIdentity.Digest(state.Control),
+            PartitionMovementParentCheckpointOwner.IntentDigest(state, body, original),
             PartitionMovePeerStage.ControlCheckpoint, PartitionMoveProtocol.EmptyCount,
             source.Database.EvaluationClock.GetUtcNow() + runtime.GrainRouting.Value.RequestLifetime,
             Guid.NewGuid(), NativeSerialization.Serialize(body));

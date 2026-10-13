@@ -31,6 +31,7 @@ internal static class SqlSyntax
     internal const string Last = "LAST";
     internal const string Not = "NOT";
     internal const string Is = "IS";
+    internal const string Distinct = "DISTINCT";
     internal const string Missing = "MISSING";
     internal const string Null = "NULL";
     internal const string In = "IN";

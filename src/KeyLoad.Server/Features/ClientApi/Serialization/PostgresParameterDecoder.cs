@@ -29,6 +29,10 @@ internal static class PostgresParameterDecoder
 
     private static JsonElement Binary(int oid, ReadOnlySpan<byte> bytes, IOptions<McpExecutionOptions> framing)
     {
+        if (oid == PostgresNumericProtocol.Oid)
+        { return Value(PostgresNumericDecimal.Binary(bytes)); }
+        if (oid == PostgresProtocol.Int16Oid && bytes.Length == sizeof(short))
+        { return Value(BinaryPrimitives.ReadInt16BigEndian(bytes)); }
         if (oid == PostgresProtocol.Int32Oid && bytes.Length == sizeof(int))
         { return Value(BinaryPrimitives.ReadInt32BigEndian(bytes)); }
         if (oid == PostgresProtocol.Int64Oid && bytes.Length == sizeof(long))
@@ -39,7 +43,7 @@ internal static class PostgresParameterDecoder
             { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
             return Value(bytes[PostgresProtocol.FirstField] == PostgresProtocol.JsonbVersion);
         }
-        if (oid is PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid)
+        if (oid is PostgresProtocol.Int16Oid or PostgresProtocol.Int32Oid or PostgresProtocol.Int64Oid or PostgresProtocol.BooleanOid)
         { throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid); }
         if (oid == PostgresProtocol.TextOid)
         { return Value(Utf8.GetString(bytes)); }
@@ -55,6 +59,8 @@ internal static class PostgresParameterDecoder
     private static JsonElement Text(int oid, string text, IOptions<McpExecutionOptions> framing)
         => oid switch
         {
+            PostgresNumericProtocol.Oid => Value(PostgresNumericDecimal.Text(text)),
+            PostgresProtocol.Int16Oid => Value(short.Parse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture)),
             PostgresProtocol.Int32Oid => Value(int.Parse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture)),
             PostgresProtocol.Int64Oid => Value(long.Parse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture)),
             PostgresProtocol.BooleanOid => Boolean(text),

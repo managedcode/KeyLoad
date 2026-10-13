@@ -32,13 +32,20 @@ internal static class ProjectionEmptyTailAssertions
         var image = Image(store);
         var position = store.Position;
         var key = OutcomeStoreOracle.PartitionKey(partition, Root, rejected.Id);
+        var locatorKey = KeySpace.OutcomeLocatorV2(partition, Root, rejected.Id);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsNull();
+        await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))).IsNull();
         var result = owner.ApplyEmbedded(rejected, token);
         await ExactAsync(result, new OperationResult(null, ErrorCode.Validation, EmptyDetail));
         var prefix = Convert.ToHexString(key) + ":";
+        var locatorPrefix = Convert.ToHexString(locatorKey) + ":";
         var after = Image(store);
         await Assert.That(after.Count(row => row.StartsWith(prefix, StringComparison.Ordinal))).IsEqualTo(1);
-        await Assert.That(after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)).ToArray())
+        await Assert.That(after.Count(row => row.StartsWith(locatorPrefix, StringComparison.Ordinal))).IsEqualTo(1);
+        var locator = store.Read(view => view.ReadOwnedValue(locatorKey)) ?? throw new InvalidOperationException(MissingEntry);
+        await Assert.That(locator.AsSpan().SequenceEqual(key)).IsTrue();
+        await Assert.That(after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)
+            && !row.StartsWith(locatorPrefix, StringComparison.Ordinal)).ToArray())
             .IsEquivalentTo(image, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position + 1L);
         await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.Id), result);

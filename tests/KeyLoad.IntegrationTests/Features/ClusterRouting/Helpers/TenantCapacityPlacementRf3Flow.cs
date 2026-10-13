@@ -17,6 +17,7 @@ internal static class TenantCapacityPlacementRf3Flow
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
         var dirty = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);
         await TenantCapacityPlacementRf3Cold.RequireDirtyReplayAsync(wave, seed, state, dirty, token);
+        await TenantCapacityPlacementRf3MissingMember.RequireAsync(wave, seed, state, query, dirty, token);
         var healthy = new ConfigurePlacementPolicyRequest(state.OriginalPolicy.Policy.Revision,
             state.HealthyPolicy, state.Control);
         _ = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.ConfigurePlacementPolicyAsync(

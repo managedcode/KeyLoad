@@ -15,8 +15,7 @@ internal sealed class PartitionMovementParentCheckpointOwner(PartitionMovementRe
         PartitionMoveCheckpointBody body, PartitionMovePhaseCommand original, ReadExecutionBudget work,
         CancellationToken cancellationToken)
     {
-        var control = state.Control;
-        var digest = control is null ? original.ControlIntentDigest : PartitionMoveIntentIdentity.Digest(control);
+        var digest = IntentDigest(state, body, original);
         var header = state.Header;
         var envelope = new PartitionMovePeerEnvelope(PartitionMoveProtocol.Version, body.OriginalTransferRequest.MoveId,
             body.OriginalTransferRequest.Partition, header?.ControlOwner ?? original.ControlOwner,
@@ -32,6 +31,30 @@ internal sealed class PartitionMovementParentCheckpointOwner(PartitionMovementRe
             || actual.Journal.AppliedPosition <= PartitionMovementProtocol.NoAppliedPosition || actual.Journal.ControlIntentDigest != digest)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
         return actual;
+    }
+
+    internal static string IntentDigest(PartitionMoveParentState state, PartitionMoveCheckpointBody body,
+        PartitionMovePhaseCommand original)
+    {
+        if (body.Action == PartitionMoveCheckpointAction.Observe
+            && PartitionMoveGrantValidation.IsLocalControl(original.Stage)
+            && body.ObservedOriginalResult is { Error: null } observed)
+        {
+            var actual = observed.Get<PartitionMovePhaseResult>();
+            var control = state.Header?.ControlOwner ?? original.ControlOwner;
+            if (actual.MoveId != original.MoveId || actual.MoveId != body.OriginalTransferRequest.MoveId
+                || actual.Stage != original.Stage || actual.Journal.CommandId != body.OriginalPhaseCommandId
+                || actual.Journal.AppliedPosition <= PartitionMovementProtocol.NoAppliedPosition
+                || !PhysicalOwnerEntryValidation.SameOwner(actual.Journal.PhysicalOwner, control)
+                || !global::KeyLoad.Core.Features.ClusterRouting.Validation.PartitionMoveSourceFenceValidation
+                    .ValidDigest(actual.Journal.ControlIntentDigest)
+                || actual.Control is { } committed
+                    && PartitionMoveIntentIdentity.Digest(committed) != actual.Journal.ControlIntentDigest)
+            { throw Errors.Fail(ErrorCode.RecoveryRequired, PartitionMovementProtocol.InvalidProof); }
+            return actual.Journal.ControlIntentDigest;
+        }
+        return state.Control is { } current
+            ? PartitionMoveIntentIdentity.Digest(current) : original.ControlIntentDigest;
     }
 
     internal static PartitionMovePeerEnvelope OriginalEnvelope(PartitionMoveParentPhase original, bool release,

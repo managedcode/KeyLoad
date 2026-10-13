@@ -12,6 +12,7 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         var owner = context.Features.Get<ServerConnectionFeature>()
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, ServerConnectionProtocol.Unavailable);
         var writer = new PostgresWireWriter(context.Transport.Output, Options.MaximumFrameBytes);
+        var errorProbe = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<PostgresErrorDeliveryProbe>(services);
         PostgresSessionIdentity? identity = null;
         PostgresCancellationRegistry.Registration? backend = null;
         PostgresSessionCatalog? catalog = null;
@@ -43,6 +44,7 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         { ServerFailureObserver.Observe(catalog.Dispose, failures); }
         if (identity is not null)
         { ServerFailureObserver.Observe(identity.Dispose, failures); }
+        ServerFailureObserver.Observe(() => errorProbe?.Session(owner.Id, failures), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private async Task<PostgresSessionIdentity> ReadIdentityAsync(ConnectionContext context, string subject, CancellationToken token)

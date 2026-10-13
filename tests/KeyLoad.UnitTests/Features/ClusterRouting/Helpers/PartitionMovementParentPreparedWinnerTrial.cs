@@ -35,6 +35,7 @@ internal static class PartitionMovementParentPreparedWinnerTrial
         await Assert.That(admitted.Error).IsNull();
         await PartitionMovementParentOmissionTrial.BeforePrepareAsync(source, target, fixture,
             request, phaseId, prepare, expiry);
+        var admittedBeforeEffect = fixture.Read(request, phaseId);
         var executed = await fixture.OriginalAsync(phaseId, prepare, expiry);
         await Assert.That(executed.Error).IsNull();
         await Assert.That(executed.Get<PartitionMovePhaseResult>().Control!.Phase).IsEqualTo(PartitionMovePhase.Prepared);
@@ -44,7 +45,9 @@ internal static class PartitionMovementParentPreparedWinnerTrial
         var observed = new PartitionMoveCheckpointBody(PartitionMoveProtocol.Version,
             PartitionMoveCheckpointAction.Observe, PhysicalShardCatalogFixture.RootPrincipalId, request,
             pending.Header!.Generation, phaseId, null, null, executed, null, null, OriginalExpiresAt: expiry);
-        var result = await fixture.CheckpointAsync(pending, observed, prepare);
+        await Assert.That(admittedBeforeEffect.Control).IsNull();
+        await Assert.That(executed.Get<PartitionMovePhaseResult>().Journal.ControlIntentDigest == prepare.ControlIntentDigest).IsFalse();
+        var result = await fixture.CheckpointAsync(admittedBeforeEffect, observed, prepare);
         await Assert.That(result.Error).IsNull();
         source.Reopen();
         var cold = fixture.Read(request, phaseId);

@@ -38,6 +38,7 @@
       "limits": "eight statements/eight portals, current native query/JSON/frame/output and shared retained byte grants",
       "driver": "Npgsql10.0.3 VerifyFull/root CA; GSS encryption disabled; pooling false; built-in-only type loading; no parameter logging",
       "qualification": "pending exact-source Linux Aspire RF3 original artifacts",
+      "int16ParameterSourceContract": "Guarded next source: exact signedInt16 int2 OID21 text/two-byte binary using original canonical numeric parameters. Wrong width/syntax/overflow Validation, no new grants/SQLgrammar/fallback; genuine Npgsql/SDK/MCP complete operation source and exact Linux qualification pending.",
       "notDelivered": [
         "general PostgreSQL catalog/bootstrap and typed column metadata",
         "SQL PREPARE/EXECUTE/DEALLOCATE syntax",
@@ -45,7 +46,8 @@
         "explicit/implicit multistatement transactions",
         "full PostgreSQL SQL grammar",
         "protocol3.2 negotiation"
-      ]
+      ],
+      "numericParameterSourceContract": "Prepared guarded source only: text/binary OID1700 exact .NET decimal96/scale28 without rounding; malformed Validation, specials/nonrepresentable/hidden-dscale precision UnsupportedCapability. Genuine Npgsql/SDK/MCP whole-flow and exact-source Linux qualification pending; no general PostgreSQL numeric compatibility."
     }
   },
   "inventoryStatus": "183 official command names inventoried; complete semantic contracts and execution fixtures pending",
@@ -63,7 +65,8 @@
       "name": "SELECT expressions, types, casts, nulls, collations, scalar functions",
       "syntax": "Q1 fields and predicates plus bounded BETWEEN/NOT BETWEEN qualified at source7d1196",
       "execution": "Qualified bounded Q1 only; full PostgreSQL18 typed expressions pending",
-      "evidence": "AC-SQLC-006A original21unit cases in each normal/scalar mode and2genuine RF3cases pass; Historical intermediate report removed from repository; no current qualification inferred; complete AC-SQLC-006 remains pending"
+      "evidence": "AC-SQLC-006A original21unit cases in each normal/scalar mode and2genuine RF3cases pass; Historical intermediate report removed from repository; no current qualification inferred; complete AC-SQLC-006 remains pending",
+      "sourceContract": "Bounded SQL.NullDistinct.v1 source candidate: IS [NOT] DISTINCT FROM lowers into existing charged canonical predicate nodes. Two JSON nulls are not distinct, one null is distinct, present non-null values use existing comparison; MISSING remains unknown and incompatible present scalar types refuse Validation. Independent whole ZoneTree and genuine Npgsql/SDK/MCP Aspire RF3 policy/refusal/type-repair/original-receipt/two-cold source flows; compilation/runtime/Linux/physical-owner/fullSQL gates OPEN. SELECT DISTINCT is not included."
     },
     {
       "id": "SQLC-JOIN",

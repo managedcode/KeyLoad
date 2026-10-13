@@ -1,5 +1,15 @@
 # ClusterRouting: bounded partition record pages
 
+### Persisted local phase observation intent
+REQ/AC-PMOVE-NATIVE-OBSERVED-INTENT-001: when a local Control phase has a successful original persisted outcome, its observation checkpoint uses that exact outcome journal's ControlIntentDigest. The pre-effect parent state is not current authority after Prepare or another local Control mutation. Validate the same MoveId, phase stage, original phase CommandId, positive applied position, full Control physical owner and bounded canonical digest; a returned Control record, when present, must carry the same digest. The existing Core checkpoint scope and exact stored original outcome verification remain authoritative.
+
+Failed original outcomes and admission/non-observation requests retain their existing digest and failure paths. Do not re-execute an effect, add a directory lookup, refresh a nonce/expiry, raise a grant, change the wire, weaken MAC validation or convert an original refusal. The same ordered original signed checkpoint still appends, applies and observes its required RF3 receipt.
+
+The original GenuinePreparedWinnerDeniesCancellationBeforeJournalAndRetainsObservedBodyAcrossColdOwner method now deliberately retains its pre-effect admitted state, proves its Control absence and the original successful Prepare journal/body-digest difference, and uses that state for the real observation checkpoint after the first cold cut. Preserve its genuine cancellation refusal/no effects, original result bytes/receipt, second cold state, missing-authority controls and same-ID no-effects replay. Native ControlledPartitionMovementNativeRetireTests and Bm25PortableMovementTests retain their original declarations, security controls, full model/receipt/cold/healthy continuation and all producer/cleanup failures.
+
+Source evidence establishes the stale signing-input defect; the R36 original CapabilityExecution/OwnershipLost/Unobserved reports do not yet identify the exact initiating runtime predicate. The original R36 failures remain immutable. Local and Linux RF3/fault qualification require actual successor execution.
+
+
 Status: first implementation stage for KL-036/071/072; complete movement remains
 unqualified. Decisions: [ADR-016](../../ADR/ADR-016-atomic-physical-placement.md)
 and [ADR-017](../../ADR/ADR-017-ownership-session-tokens.md). Initial serving remains RF3.

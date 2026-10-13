@@ -31,6 +31,8 @@ public sealed partial class DatabaseEngine
             var catalog = PhysicalShardCatalogRecordSerialization.Read(charged)
                 ?? throw Errors.Fail(ErrorCode.NotFound, TenantPlacementPolicyProtocol.Missing);
             PhysicalShardCatalogValidation.ValidateCatalog(catalog);
+            PlacementCapacityEnrollment.Require(charged, catalog.DefaultShard,
+                cohort.Select(item => item.Owner).ToImmutableArray());
             var plan = BuildPlacementPlan(charged, request, policy, cohort, catalog.DefaultShard,
                 currentCohort, originalExpiry, token);
             var claims = new TenantPlacementPlanClaims(TenantPlacementPolicyProtocol.Version,

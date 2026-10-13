@@ -54,12 +54,15 @@ internal static class ContainerRuntimeReceiptStore
         await Assert.That(receipt.KillCompletedAtUtc >= receipt.KillStartedAtUtc).IsTrue();
         await Assert.That(receipt.KillStartedAtUtc > DateTimeOffset.Parse(receipt.BeforeStartedAt, CultureInfo.InvariantCulture)).IsTrue();
         await Assert.That(receipt.KillCompletedAtUtc < DateTimeOffset.Parse(receipt.AfterStartedAt, CultureInfo.InvariantCulture)).IsTrue();
+        var json = JsonSerializer.Serialize(receipt, JsonOptions);
+        if (await ContainerRuntimeOwnedReceipt.TryWriteAsync(receipt, json, cancellationToken))
+        { return; }
         var outputDirectory = Path.Combine(receipt.RepositoryRoot, ContainerRuntimeProtocol.ArtifactsDirectory,
             ContainerRuntimeProtocol.QualificationDirectory);
         Directory.CreateDirectory(outputDirectory);
         var fileName = string.Format(CultureInfo.InvariantCulture, ContainerRuntimeProtocol.ReceiptFileName,
             receipt.Scenario, receipt.ResourceName);
         var outputPath = Path.Combine(outputDirectory, fileName);
-        await File.WriteAllTextAsync(outputPath, JsonSerializer.Serialize(receipt, JsonOptions), cancellationToken);
+        await File.WriteAllTextAsync(outputPath, json, cancellationToken);
     }
 }
