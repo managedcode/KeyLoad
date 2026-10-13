@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 
+using System.Text.Json;
+
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class NativeTextBm25ExpectedRows
@@ -21,17 +23,24 @@ internal static class NativeTextBm25ExpectedRows
         for (var index = 0; index < expected.Length; index++)
         {
             await SeparateAsync(expected[index].Document.Reference);
-            await SeparateAsync(actual[index].Document.Reference);
+            await Assert.That(actual[index].Document.Reference).IsEqualTo(expected[index].Document.Reference);
             if (index > 0)
             {
                 await Assert.That(ReferenceEquals(expected[index - 1].Document.Reference.Partition,
                     expected[index].Document.Reference.Partition)).IsFalse();
-                await Assert.That(ReferenceEquals(actual[index - 1].Document.Reference.Partition,
-                    actual[index].Document.Reference.Partition)).IsFalse();
             }
         }
     }
 
     private static async Task SeparateAsync(EntityRef reference)
         => await Assert.That(ReferenceEquals(reference.Partition.TransactionDomainId, reference.Collection)).IsFalse();
+
+    internal static async Task RequireWholeValuesAsync(RankedDocument[] expected, RankedDocument[] actual)
+    {
+        var independentValues = JsonSerializer.Serialize(expected, JsonDefaults.Options);
+        await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options)).IsEqualTo(independentValues);
+        var bytes = NativeSerialization.Serialize(actual);
+        var reopened = NativeSerialization.Deserialize<RankedDocument[]>(bytes);
+        await Assert.That(JsonSerializer.Serialize(reopened, JsonDefaults.Options)).IsEqualTo(independentValues);
+    }
 }

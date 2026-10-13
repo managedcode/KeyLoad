@@ -1337,3 +1337,37 @@ flowchart LR
 ```
 
 Canonical roles: BackupRestore Cases/SecondGenerationBackupTests, Helpers/SecondGenerationBackupTrial, Assertions/SecondGenerationBackupAssertions. This is a native ZoneTree store and genuine CLI acceptance supplement, not domain-command receipt replay, RF3, roster/token fencing, fault injection, cancellation, Linux or power-loss qualification. Existing current-format aliases/IDs, checksums, verification rules, quotas, clocks and other cases remain unchanged. Source integration and the complete local R36 Release build passed; the original second-generation whole flow passed in the R36 local cohort. Linux recovery and fault qualification remain OPEN. The fixture's inherited constructor/nested cleanup limitations are not qualified by this source review.
+
+## Unsafe native restore destination continuation
+
+REQ-BACKUP-DESTINATION-PATH-001 / AC-BACKUP-DESTINATION-PATH-001 refine the original unsafe-destination clause of REQ/AC-BACKUP-002. MetadataIntegrityTests.UnsafeDestinationLinkRefusesThenExactRepairRestoresWholeImageAndTwoCold covers a genuine direct directory symlink and a symlinked ancestor, separately from the existing canonical source-file link case. Native restore returns the existing Conflict/path diagnostic before source publication; the original link, resolved empty target, complete canonical source image/cut and every archive byte remain unchanged, with no restore staging owner left behind.
+
+The operator removes only the owned faulty link. The SAME logical destination and SAME archive then restore with a new node/incarnation/key and paused dispatch. The complete literal restored canonical image contains the original current value plus paused state; source replica-applied/clock rows are absent under the existing restore contract. A genuine target Commit adds one independently literal healthy value. Two further sequential lexical cold opens retain that full three-row image, exact physical source-cut+2, complete returned identity and source/archive preservation. Initiating failures are captured before owner disposal and all owned cleanup is observed. Existing cases and identifiers remain unchanged.
+
+```mermaid
+flowchart LR
+ A[Verified checkpoint and tail archive] --> B[Direct or ancestor destination link]
+ B --> C[Conflict with unchanged target source and archive]
+ C --> D[Remove owned link and restore same path]
+ D --> E[Literal full image and healthy native commit]
+ E --> F[Two joined cold owners]
+```
+
+This is native operation-path acceptance source, not a race-resistant OS path capability guarantee, CLI/RF3 authority reconciliation, cancellation, Linux runtime, power-loss or resource-measurement qualification. No discovery identity or execution result is inferred from the two literal Args.
+
+## Explicit restore identity overrides
+
+REQ-BACKUP-IDENTITY-OVERRIDE-001 / AC-BACKUP-IDENTITY-OVERRIDE-001 refine AC-BACKUP-002/003 for the existing ordinary native restore API: after verifying the complete source archive and before publishing the target, the resolved new incarnation and signing key must both differ from the verified source identity. Explicit reuse of either value returns the existing Validation identity diagnostic. Destination admission and source verification retain their existing order; absent destinations remain absent, pre-existing empty destinations remain empty, staging ownership is cleaned up, and source records, cut, original command outcome and every archive byte remain unchanged.
+
+The SAME verified archive then restores with independently supplied distinct identity values. The complete authored document result and original stored command-outcome bytes survive; the old command GUID is incarnation-fenced without a write. A fresh command commits its independent literal mutation receipt and document, and matching native replay preserves the complete result, persisted outcome and full target image. Two sequential native cold opens preserve the new identity, paused dispatch, full current records, old command refusal and fresh original replay. Every operation failure is retained before lexical owner disposal; fixture cleanup is observed after the whole operation.
+
+```mermaid
+flowchart LR
+ A[Verified source archive and retained command] --> B[Old incarnation or old key refusal]
+ B --> C[Absent or empty target unchanged]
+ C --> D[Fresh identity restore from same archive]
+ D --> E[Old GUID fenced and fresh write replayed]
+ E --> F[Two joined cold opens and unchanged source archive]
+```
+
+Canonical complete-flow class: BackupRestore RestoreIdentityOverrideWholeFlowTests, literal emptyDestination false/true. This supplements native restore publication and command-receipt fencing; it does not qualify RF3 re-enrollment, cursor/lease reconciliation, CLI dispatch, Linux recovery, fault injection or power-loss durability. New case identities and execution results remain unknown until actual compiled discovery and execution.

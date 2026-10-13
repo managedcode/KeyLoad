@@ -22,7 +22,7 @@ internal sealed class ControlledPartitionMovementNativePrepareTests
                 var cancellation = TestContext.Current!.Execution.CancellationToken;
                 await ControlledPartitionMovementNativeRegistration.VerifyAsync(owners);
                 var seed = await ControlledPartitionMovementNativeSeed.ExecuteAsync(owners.Source, cancellation);
-                var entry = ControlledPartitionMovementNativeEntryReader.Read(owners.Source,
+                var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(owners.Source,
                     ControlledPartitionMovementCorpus.SeedId, cancellation);
                 var operation = entry.Operation ?? throw new InvalidOperationException("The original seed entry has no operation.");
                 var expectedSeed = await ControlledPartitionMovementNativeSeed.ReceiptAsync(owners.Source, seed, entry);

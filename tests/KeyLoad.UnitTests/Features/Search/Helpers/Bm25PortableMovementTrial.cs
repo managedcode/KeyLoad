@@ -33,8 +33,9 @@ internal sealed class Bm25PortableMovementTrial
             return evidence;
         }, token);
         var published = await Bm25PortableMovementSeed.CreateAsync(owners, token);
-        var seededAt = ControlledPartitionMovementNativeEntryReader.Read(owners.Source,
-            ControlledPartitionMovementCorpus.SeedId, token).Operation!.EvaluatedAt;
+        var seededEntry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(owners.Source,
+            ControlledPartitionMovementCorpus.SeedId, token);
+        var seededAt = seededEntry.Operation!.EvaluatedAt;
         var placement = owners.Source.Database.ReadAtomicPartitionPlacement(PhysicalShardCatalogFixture.RootPrincipalId,
             new(1, published.Head.Partition));
         var request = new PartitionMoveRequest(Guid.NewGuid(), published.Head.Partition,

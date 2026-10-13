@@ -24,39 +24,15 @@ internal sealed class TimeSeriesRf3ReadTests(ClusterFixture fixture)
     public async Task AcSeries008LatestUsesTimestampThenSequenceAndReturnsTypedAbsence()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await TimeSeriesRf3Scenario.CreateAsync(fixture, deadline.Token);
         var earlier = TimeSeriesRf3Scenario.Start.AddMinutes(-1);
         var tie = TimeSeriesRf3Scenario.Start;
         var later = TimeSeriesRf3Scenario.Start.AddMinutes(1);
-        await scenario.AppendAsync(fixture, TimeSeriesRf3Scenario.Series,
-            TimeSeriesRf3Scenario.Samples(
-                TimeSeriesRf3Scenario.Data(EarlySampleId, earlier, -3),
-                TimeSeriesRf3Scenario.Data(FirstTieSampleId, tie, 4),
-                TimeSeriesRf3Scenario.Data(LastTieSampleId, tie.ToOffset(TimeSpan.FromHours(2)), 6),
-                TimeSeriesRf3Scenario.Data(LaterSampleId, later, 12)),
-            TimeSeriesRf3Scenario.PrivateTags, deadline.Token);
-        var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
-            TimeSeriesRf3Scenario.Set, Capability.SeriesRead, deadline.Token);
-        var request = scenario.Latest(atOrBefore: tie.ToOffset(TimeSpan.FromHours(-5)));
-        using var http = McpCallerHttp.Create(fixture, TimeSeriesRf3Scenario.Node3);
-        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
-            identity.Secret, deadline.Token);
-        var discovered = await mcp.Client.DiscoverKeyLoadToolAsync(McpCallerTools.SeriesLatest, deadline.Token);
-        await McpDiscoveryAssertions.VerifyAsync(discovered);
-        var latest = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadLatestSampleAsync(request, deadline.Token));
-        var native = await McpCallerAssertions.SuccessAsync<LatestSampleResult>(
-            await mcp.CallAsync(McpCallerTools.SeriesLatest, request, deadline.Token));
-        await Assert.That(latest.Sample?.Sample.EventId).IsEqualTo(LastTieSampleId);
-        await Assert.That(latest.Sample?.Sequence).IsEqualTo(TimeSeriesRf3Scenario.ThirdSequence);
-        await Assert.That(latest.Sample?.TagsJson).IsEqualTo(TimeSeriesRf3Scenario.ProjectedTags);
-        await Assert.That(JsonDefaults.Serialize(latest).AsSpan().SequenceEqual(JsonDefaults.Serialize(native.Value))).IsTrue();
-        var absent = scenario.Latest(TimeSeriesRf3Scenario.EmptySeries);
-        await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadLatestSampleAsync(absent, deadline.Token))).Sample)
-            .IsNull();
-        var absentMcp = await McpCallerAssertions.SuccessAsync<LatestSampleResult>(
-            await mcp.CallAsync(McpCallerTools.SeriesLatest, absent, deadline.Token));
-        await Assert.That(absentMcp.Value.Sample).IsNull();
+        var original = TimeSeriesRf3Scenario.Samples(
+            TimeSeriesRf3Scenario.Data(EarlySampleId, earlier, -3),
+            TimeSeriesRf3Scenario.Data(FirstTieSampleId, tie, 4),
+            TimeSeriesRf3Scenario.Data(LastTieSampleId, tie.ToOffset(TimeSpan.FromHours(2)), 6),
+            TimeSeriesRf3Scenario.Data(LaterSampleId, later, 12));
+        await SeriesUtcTiePublicTrial.RunAsync(fixture, original, deadline.Token);
     }
 
     [Test]

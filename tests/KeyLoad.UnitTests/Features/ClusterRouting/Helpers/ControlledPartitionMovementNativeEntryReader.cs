@@ -10,9 +10,10 @@ internal static class ControlledPartitionMovementNativeEntryReader
     private const long FirstIndex = 1;
     private const int NoExaminedRecords = 0;
 
-    internal static ReplicaEntry Read(ControlledPartitionMovementNativeHost owner, Guid originalCommand,
+    internal static async Task<ReplicaEntry> ReadAsync(ControlledPartitionMovementNativeHost owner, Guid originalCommand,
         CancellationToken cancellationToken)
     {
+        await owner.Partition.Coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(false);
         var state = owner.Log.State;
         var work = new ReadExecutionBudget(owner.Runtime.Core.DatabaseLimits, owner.Clock, cancellationToken);
         ReplicaEntry? found = null;

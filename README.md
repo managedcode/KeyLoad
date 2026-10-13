@@ -113,7 +113,7 @@ Native remote graph operations, ASP.NET authentication, Event JOIN and composed-
 
 Full product functional coverage remains **unqualified**. A focused local run measured **25.73% lines / 19.63% branches** across 13 reported production modules; its 147 functional cases included four failures. Runner controls and load tests contributed no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
-Latest [local development checkpoint](docs/implementation/stage64-r38-development-20261013.json): Release build and formatter verification passed. Unit executed 151 cases: 147 passed and four failed; process recovery executed 13: 11 passed and two failed. Eleven original failures now pass, with no previous pass regressing. RF3 and full Linux qualification remain open.
+Latest [local development checkpoint](docs/implementation/stage64-r39-development-20261013.json): Release build and formatter verification passed. Unit executed 181 cases: 179 passed and two failed; process recovery executed 13: 11 passed and two failed. Two previous failures now pass; all 164 previous cases remain, with no previous pass regressing. RF3 and full Linux qualification remain open.
 
 [Task tracker](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 

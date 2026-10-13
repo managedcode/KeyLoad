@@ -14,6 +14,11 @@ internal static class TenantCapacityPlacementRf3Flow
     internal static async Task RunAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
         bool committedOwnerLoss, CancellationToken token)
+        => await RunAsync(wave, seed, state, committedOwnerLoss, originalPlanExpiry: false, token).ConfigureAwait(false);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed seed, TenantCapacityPlacementRf3Provisioning.State state,
+        bool committedOwnerLoss, bool originalPlanExpiry, CancellationToken token)
     {
         var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
             seed.Partition.DatabaseId, [seed.Partition], state.Control);
@@ -36,6 +41,8 @@ internal static class TenantCapacityPlacementRf3Flow
         await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, plan, token);
         var intentId = Guid.NewGuid();
         var persistId = Guid.NewGuid();
+        if (originalPlanExpiry)
+        { plan = await TenantCapacityPlacementRf3Expiry.RequireAsync(wave, seed, state, persistId, intentId, token); }
         var persist = new PersistPlacementIntentRequest(intentId, 0, plan.SignedPlan, state.Control);
         var pending = await McpCallerAssertions.SdkSuccessAsync(
             await seed.Source.PersistPlacementIntentAsync(persistId, persist, token));
@@ -48,6 +55,8 @@ internal static class TenantCapacityPlacementRf3Flow
         else
         { await TenantCapacityPlacementRf3Apply.RunAsync(wave, seed, state, plan, pending, token); }
         await RequireBindReplayAsync(seed, binding.Id, binding.Request, token);
+        if (originalPlanExpiry)
+        { await TenantCapacityPlacementRf3ExpiryAssertions.PersistReplayAsync(seed, persistId, persist, pending, token); }
     }
 
     private static async Task<(Guid Id, BindAtomicPartitionPlacementRequest Request)> RequireRevisionSeparationAsync(PartitionMovementPublicParentRf3Seed seed,

@@ -21,11 +21,7 @@ internal static class NativeTextBm25EligibilityPages
             ? [new(first, 1d / 61d, null), new(second, 1d / 62d, null)]
             : [new(second, 1d / 61d, null), new(first, 1d / 62d, null)];
         await NativeTextBm25ExpectedRows.RequireOwnershipAsync(expected, result);
-        var expectedBytes = NativeSerialization.Serialize(expected);
-        var actualBytes = NativeSerialization.Serialize(result);
-        await Assert.That(actualBytes.SequenceEqual(expectedBytes)).IsTrue().Because(
-            NativeTextBm25PageEvidence.Describe(expected, result, expectedBytes, actualBytes));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(expectedBytes, actualBytes);
+        await NativeTextBm25ExpectedRows.RequireWholeValuesAsync(expected, result);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
     }
 

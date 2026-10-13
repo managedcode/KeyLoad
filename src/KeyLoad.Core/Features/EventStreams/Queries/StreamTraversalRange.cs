@@ -17,10 +17,15 @@ public sealed partial class DatabaseEngine
         var until = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation, upper);
         var events = new List<EventRecord>();
         var projectedBytes = StreamTraversalProtocol.EmptyRevision;
+        var expectedExclusiveRevision = cursor.NextExclusiveRevision;
         bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
         {
             var record = NativeSerialization.Deserialize<EventRecord>(value);
-            if (record.Stream != stream || record.Revision <= lower || record.Revision >= upper)
+            if (record.Stream != stream || record.Revision <= lower || record.Revision >= upper
+                || record.Revision != expectedExclusiveRevision + (backward
+                    ? -StreamTraversalProtocol.FirstRevision : StreamTraversalProtocol.FirstRevision)
+                || !key.SequenceEqual(KeySpace.Partition(EventSpace, stream.Partition,
+                    stream.StreamSet, stream.StreamId, stream.Generation, record.Revision)))
             {
                 throw Errors.Fail(ErrorCode.Corruption, StreamTraversalProtocol.InvalidRequest);
             }
@@ -32,11 +37,18 @@ public sealed partial class DatabaseEngine
             }
             events.Add(projected);
             projectedBytes += bytes;
+            expectedExclusiveRevision = record.Revision;
             return true;
         }
         var result = backward
             ? bounded.VisitReverseRange(prefix, limit, Visit, after, until)
             : bounded.VisitRange(prefix, limit, Visit, after, until);
+        if (!result.HasMore && (backward
+            ? expectedExclusiveRevision > cursor.CapturedFirstAvailableRevision
+            : expectedExclusiveRevision < cursor.CapturedTailRevision))
+        {
+            throw Errors.Fail(ErrorCode.Corruption, StreamTraversalProtocol.InvalidRequest);
+        }
         return (events.ToImmutableArray(), result.HasMore);
     }
 }

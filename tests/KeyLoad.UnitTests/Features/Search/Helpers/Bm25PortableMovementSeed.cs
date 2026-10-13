@@ -25,8 +25,7 @@ internal static class Bm25PortableMovementSeed
             new(ControlledPartitionMovementCorpus.Partition, ControlledPartitionMovementCorpus.Collection,
                 Field, "knowledge"), commandId, null, expiry, work, token);
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await source.Partition.Coordinator.ReadBarrierAsync(token);
-        var entry = ControlledPartitionMovementNativeEntryReader.Read(source, commandId, token);
+        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, commandId, token);
         await Assert.That(entry.Operation!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         var phase = NativeCommandPayload.Read<Bm25CorpusPublicationPhaseCommand>(entry.Operation!);
         await Assert.That(receipt.Token.Position).IsEqualTo(entry.Index);

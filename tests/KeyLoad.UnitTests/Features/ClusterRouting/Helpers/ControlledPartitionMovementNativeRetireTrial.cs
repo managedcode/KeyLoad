@@ -34,7 +34,7 @@ internal sealed class ControlledPartitionMovementNativeRetireTrial
         owners = await ControlledPartitionMovementNativeHosts.CreateAsync(borrow.ForOwner, cancellationToken);
         await ControlledPartitionMovementNativeRegistration.VerifyAsync(owners);
         var seeded = await ControlledPartitionMovementNativeSeed.ExecuteAsync(owners.Source, cancellationToken);
-        var entry = ControlledPartitionMovementNativeEntryReader.Read(owners.Source,
+        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(owners.Source,
             ControlledPartitionMovementCorpus.SeedId, cancellationToken);
         var seedOperation = entry.Operation ?? throw new InvalidOperationException("The original native seed is absent.");
         var receipt = await ControlledPartitionMovementNativeSeed.ReceiptAsync(owners.Source, seeded, entry);

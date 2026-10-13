@@ -783,3 +783,30 @@ Keep original expected revisions, generation, authenticated principal, event
 schemas, limits and clock. Cold resource disposal retains initiating and cleanup
 failures. This Unit flow is functional source preparation; actual native census,
 current-image execution, Linux, RF3 and fault qualification remain required.
+
+### Complete retained traversal authority (KL084; R39 successor)
+
+REQ-EVENT-006 / AC-EVENT-006 bind the actual native event range key to its stored
+stream/generation/revision and require contiguous revisions within the selected
+captured tail/floor. Reject key-correct skipped first/middle/final rows before a
+page can claim complete history. A bounded page may stop at its existing limit;
+its original signed continuation must then require the next exact revision.
+When native HasMore is false, an unread retained prefix/suffix is Corruption.
+Use the existing traversal Corruption detail. No extra scan, resource grant,
+retry, schema/public format, authorization or clock change is admitted.
+
+The coherent StreamRecordKeyAuthorityTests successor retains its original two
+miskeyed revision inputs and adds literal missing-row inputs1,2,3. Both complete
+directions and original cursor scopes require exact typed failures/full canonical
+no-effects. An original forward cursor already past missing1 legitimately reads
+2,3; an original backward cursor already past missing3 legitimately reads2,1.
+An empty read strictly after tail3 remains valid and empty. Existing real-store
+StreamTraversalNativeTests and StreamReadResourceTests preserve retained floor,
+original cursor invalidation, policy/owner/expiry, raw/result byte bounds,
+pre-cancel and subsequent healthy operations; these controls are not replaced.
+Restore exact original bytes, preserve full retained append outcome during the
+fault and after repair, publish literal healthy4, then require independent full
+four-event pages, original captured three-event cursors and original receipts
+through two actual cold owners with joined primary/cleanup ledgers.
+This combines the immutable row-key predecessor with the related gap authority
+repair. Native source preview is not compiler/runtime/Linux/RF3 qualification.

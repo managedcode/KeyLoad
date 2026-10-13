@@ -35,7 +35,7 @@ internal static class ControlledPartitionMovementNativeBlob
             ControlledPartitionMovementBlobSeed.Blob, ControlledPartitionMovementBlobSeed.UploadId, integrity);
         var reply = await source.SubmitAsync(OperationKind.CompleteBlobUpload, request.CommandId,
             PhysicalShardCatalogFixture.RootPrincipalId, NativeSerialization.Serialize(request), cancellationToken);
-        var entry = ControlledPartitionMovementNativeEntryReader.Read(source, request.CommandId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, request.CommandId, cancellationToken);
         var original = entry.Operation ?? throw new InvalidOperationException("The original blob entry has no operation.");
         var metadata = new BlobMetadata(request.Blob, PublishedRevision, request.UploadId, bytes.Length, PublishedPartCount,
             integrity, new RowAccess(), original.EvaluatedAt, false);

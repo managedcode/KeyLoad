@@ -21,7 +21,7 @@ internal static class ControlledPartitionMovementNativeHealthy
             NativeSerialization.Serialize(Request()), cancellationToken);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        var entry = ControlledPartitionMovementNativeEntryReader.Read(source, CommandId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, CommandId, cancellationToken);
         var expected = new CommitReceipt(CommandId, new(source.Store.Identity.Incarnation,
             ControlledPartitionMovementCorpus.Partition.AtomicPartitionId, entry.Index, InitialRevision),
             [new("putDocument", ControlledPartitionMovementCorpus.Collection, DocumentId, InitialRevision)],

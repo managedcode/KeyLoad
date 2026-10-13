@@ -70,6 +70,8 @@ internal static class TenantCapacityPlacementRf3MultiHold
             await TenantCapacityPlacementRf3MultiHeldAssertions.ReadAsync(seeds[FirstMove], request, token));
         await SqlRf3Protocol.EqualAsync(proof, RequestCqrsMovementJournalReader.Read(controls, marker));
         controls.WriteRelease(marker.ArmId, marker.RequestId);
-        return await McpCallerAssertions.SdkSuccessAsync(await original);
+        var completed = await McpCallerAssertions.SdkSuccessAsync(await original);
+        await SqlRf3Protocol.EqualAsync(applying.Claim, completed.Claim);
+        return completed;
     }
 }

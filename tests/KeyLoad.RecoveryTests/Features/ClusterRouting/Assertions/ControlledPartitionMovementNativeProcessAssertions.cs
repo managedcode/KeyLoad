@@ -66,6 +66,7 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
         var expected = new PartitionMovePhaseResult(ControlledPartitionMovementProcessPrepareRequest.MoveId,
             PartitionMovePeerStage.ControlPrepare, new(original.CommandId, owners.Control.Owner, entry.Index, digest),
             control, null, null, null);
+        await RequirePreparedIdentityAsync(reply.Value.Reply, expected);
         await ReplyAsync(reply.Value.Reply, expected);
         return expected;
     }
@@ -102,6 +103,51 @@ internal static class ControlledPartitionMovementNativeProcessAssertions
             new DocumentResult(reference, FirstRevision, HealthyJson, false, []),
             host.Database.GetDocument(Principal, reference, cancellationToken: cancellationToken));
         return expected;
+    }
+
+    private static async Task RequirePreparedIdentityAsync(GrainOperationReply original, PartitionMovePhaseResult expected)
+    {
+        await Assert.That(original.Error).IsNull();
+        await Assert.That(original.SafeDetail).IsNull();
+        var actual = GrainNativePayload.Read<GrainValue>(original.Payload).Value as PartitionMovePhaseResult;
+        await Assert.That(actual).IsNotNull();
+        var phase = actual ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+        await Assert.That(phase.MoveId).IsEqualTo(expected.MoveId);
+        await Assert.That(phase.Stage).IsEqualTo(expected.Stage);
+        await Assert.That(phase.Control).IsNotNull();
+        var control = phase.Control ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+        var expectedControl = expected.Control ?? throw new InvalidOperationException(ControlledPartitionMovementNativeProcessProtocol.Invalid);
+        await Assert.That(control.Version).IsEqualTo(expectedControl.Version);
+        await Assert.That(control.MoveId).IsEqualTo(expectedControl.MoveId);
+        await Assert.That(control.Partition).IsEqualTo(expectedControl.Partition);
+        await Assert.That(control.PrincipalId).IsEqualTo(expectedControl.PrincipalId);
+        await Assert.That(control.PolicyEpoch).IsEqualTo(expectedControl.PolicyEpoch);
+        await Assert.That(control.Phase).IsEqualTo(expectedControl.Phase);
+        await Assert.That(control.SourceCut).IsEqualTo(expectedControl.SourceCut);
+        await Assert.That(control.ControlPosition).IsEqualTo(expectedControl.ControlPosition);
+        await Assert.That(control.ParentCheckpointRequired).IsEqualTo(expectedControl.ParentCheckpointRequired);
+        await Assert.That(control.SourcePlacement.DirectoryRevision).IsEqualTo(expectedControl.SourcePlacement.DirectoryRevision);
+        await Assert.That(control.SourcePlacement.Revision).IsEqualTo(expectedControl.SourcePlacement.Revision);
+        await Assert.That(control.SourcePlacement.IsFallback).IsEqualTo(expectedControl.SourcePlacement.IsFallback);
+        await ControlledPartitionMovementNativeProcessColdAssertions.EqualAsync(expectedControl.SourcePlacement, control.SourcePlacement);
+        await ControlledPartitionMovementNativeProcessColdAssertions.EqualAsync(expectedControl.DestinationOwner, control.DestinationOwner);
+        await Assert.That(control.ImageDigest).IsNull();
+        await Assert.That(control.InstalledReceipt).IsNull();
+        await Assert.That(control.PublishedPlacement).IsNull();
+        await Assert.That(phase.Journal.CommandId).IsEqualTo(expected.Journal.CommandId);
+        await Assert.That(phase.Journal.AppliedPosition).IsEqualTo(expected.Journal.AppliedPosition);
+        await ControlledPartitionMovementNativeProcessColdAssertions.EqualAsync(expected.Journal.PhysicalOwner, phase.Journal.PhysicalOwner);
+        await Assert.That(phase.Journal.EffectDigest).IsNull();
+        await Assert.That(phase.Journal.ControlIntentDigest).IsEqualTo(expected.Journal.ControlIntentDigest);
+        await Assert.That(phase.Fence).IsNull();
+        await Assert.That(phase.InstalledReceipt).IsNull();
+        await Assert.That(phase.PublishedPlacement).IsNull();
+        await Assert.That(phase.Grant).IsNull();
+        await Assert.That(phase.Cleanup).IsNull();
+        await Assert.That(phase.ControlledCommand).IsNull();
+        await Assert.That(phase.ControlledEffect).IsNull();
+        await Assert.That(phase.ReceiverIssuance).IsNull();
+        await Assert.That(phase.RetireCancellation).IsNull();
     }
 
     internal static async Task ReplyAsync<T>(GrainOperationReply original, T expected)

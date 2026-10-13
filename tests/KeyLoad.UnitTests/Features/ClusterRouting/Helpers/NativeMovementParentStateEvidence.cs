@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class NativeMovementParentStateEvidence(int configuredObserverOwnerIndex) : IGrainRequestPhaseObserver
 {
     private readonly Lock gate = new();
+    private readonly NativeMovementParentCommandEvidence commands = new();
     private Stage? executing;
     private Stage? returned;
     private Stage? lastExecuting;
@@ -15,6 +16,7 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken cancellationToken)
     {
+        commands.Observe(identity, phase, cancellationToken);
         if (identity.ReadKind != GrainReadKind.PartitionMovementParentState
             || phase is not (GrainRequestPhase.MovementParentStateExecuting or GrainRequestPhase.MovementParentStateReturned))
         { return ValueTask.CompletedTask; }
@@ -39,7 +41,8 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
         return ValueTask.CompletedTask;
     }
 
-    public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context) { }
+    public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
+        => commands.ProducerDisposed(identity);
 
     internal void Write(TextWriter output)
     {
@@ -49,6 +52,7 @@ internal sealed class NativeMovementParentStateEvidence(int configuredObserverOw
         Stage? latestAfter;
         lock (gate)
         { before = executing; after = returned; latestBefore = lastExecuting; latestAfter = lastReturned; }
+        commands.Write(output, configuredObserverOwnerIndex);
         output.WriteLine($"Native movement configuredObserverOwnerIndex={configuredObserverOwnerIndex}; Executing={before}; Returned={after}; LastExecuting={latestBefore}; LastReturned={latestAfter}");
     }
 

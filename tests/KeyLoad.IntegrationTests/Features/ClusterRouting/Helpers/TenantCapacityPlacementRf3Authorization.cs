@@ -28,6 +28,10 @@ internal static class TenantCapacityPlacementRf3Authorization
         var caller = new KeyLoadClient(callerHttp, secret, IntegrationClientOptions.Execution());
         await using var official = await McpOfficialClient.ConnectAsync(wave.Application,
             TwoRf3MembershipProtocol.Node1, secret, token);
+        var query = new TenantPlacementPlanRequest(seed.Partition.TenantId,
+            seed.Partition.DatabaseId, [seed.Partition], state.Control);
+        await RequireDeniedPlanAsync(caller, official, query, token);
+        await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
         var deniedId = Guid.NewGuid();
         var original = new PersistPlacementIntentRequest(Guid.NewGuid(), 0,
             originalPlan.SignedPlan, state.Control);
@@ -38,6 +42,9 @@ internal static class TenantCapacityPlacementRf3Authorization
         await ConfigureAsync(sourceRoot, targetRoot, seed.Partition.TenantId, true, 2, credential, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(
             await caller.PersistPlacementIntentAsync(deniedId, original, token), ErrorCode.PermissionDenied);
+        var officialPlan = (await McpCallerAssertions.SuccessAsync<TenantPlacementPlanResultV1>(
+            await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token))).Value;
+        await TenantCapacityPlacementRf3Assertions.RequirePlanAsync(seed, state, officialPlan, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(await caller.PlanTenantPlacementAsync(
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, [seed.Partition], state.Control), token));
         var repair = new PersistPlacementIntentRequest(Guid.NewGuid(), 0, plan.SignedPlan, state.Control);
@@ -49,6 +56,21 @@ internal static class TenantCapacityPlacementRf3Authorization
             await official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
                 new { commandId = healthyId, request = repair }, token))).Value);
         await TenantCapacityPlacementRf3Assertions.RequireOriginalModelsAsync(seed, state, token);
+    }
+
+    private static async Task RequireDeniedPlanAsync(KeyLoadClient caller, McpOfficialClient official,
+        TenantPlacementPlanRequest query, CancellationToken token)
+    {
+        const string McpDeniedDetail = "The authenticated principal is not permitted to perform this operation.";
+        var sdk = await caller.PlanTenantPlacementAsync(query, token);
+        await TenantCapacityPlacementRf3Assertions.RefusalAsync(sdk, ErrorCode.PermissionDenied);
+        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
+            KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired), sdk.Problem!);
+        var mcp = await official.CallAsync(TenantPlacementPublicProtocol.PlanTool, new { request = query }, token);
+        await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
+        await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
+            .GetProperty(McpCallerProtocol.ProblemDetail).GetString())
+            .IsEqualTo(McpDeniedDetail);
     }
 
     private static async Task ConfigureAsync(KeyLoadClient source, KeyLoadClient target, string tenant,

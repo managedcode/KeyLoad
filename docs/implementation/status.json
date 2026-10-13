@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "Local macOS arm64 development only. Full Release0errors0warnings and whole-solution formatter verify pass. Original164 selected cases executed:158pass6fail0skip (functional143/147, controls4/4, recovery11/13); all source/image/runtime closure and process/reader/disposal joins stable. Eleven original R37 failures now pass; no original pass regressed. Original plan19/104 done85in progress; KL105 and complete exact-source Linux/RF3/fault/endurance/power-loss/performance gates remain open.",
+    "qualification": "Local macOS arm64 development only. Full Release0errors0warnings and whole-solution formatter verify pass. Original194 selected cases executed:190pass4fail0skip (functional175/177, controls4/4, recovery11/13); source/image/runtime closure and all process/reader/disposal joins stable. Two original R38 failures now pass; all164 original cases retained with no original pass regression. Original plan19/104 done85in progress; KL105 and complete exact-source Linux/RF3/fault/endurance/power-loss/performance gates remain open.",
     "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
     "sourceIntegration": {
       "graph": {
@@ -1402,6 +1402,19 @@
       "releaseBuildErrors": 0,
       "releaseBuildWarnings": 0,
       "newCompleteTaskAcceptance": 0
+    },
+    "runtimeObservedR39": {
+      "record": {
+        "path": "docs/implementation/stage64-r39-development-20261013.json",
+        "sha256": "e1690514287a94c1866c10b4f752db21c193f4a3736f480ecd165112f28d7280"
+      },
+      "cases": 194,
+      "passed": 190,
+      "failed": 4,
+      "skipped": 0,
+      "completeTaskAcceptance": 0,
+      "sourceImageClosureDrift": false,
+      "profiling": "Actual source-matched target capture retained with CPU unsupported and storage loss/capacity limitations; no hotspot/speed/acceptance credit."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

@@ -34,6 +34,8 @@ internal static class ZoneTreeBackupRestoreRestore
             }
             cancellationToken.ThrowIfCancellationRequested();
             var identity = CreateRestoredIdentity(originalIdentity, newIncarnation, newSigningKey);
+            ZoneTreeCatalogRestoreEntry.RequireFreshIdentity(originalIdentity,
+                identity.Incarnation, identity.SigningKey.ToArray());
             ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
             var restoredIdentity = ApplyRestoreAuthorityState(staging, executionOptions, originalIdentity.Incarnation);
             Publish(staging, destinationPath);

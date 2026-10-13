@@ -12,7 +12,7 @@ internal static class TenantCapacityPlacementRf3MultiReplay
         await Assert.That(original.Receipts.Length).IsEqualTo(CompletedCount);
         await Assert.That(original.OriginalApplyCommandId).IsEqualTo(id);
         await Assert.That(original.OriginalApplyRequest).IsEqualTo(request);
-        await Assert.That(original.Claim).IsNull();
+        await Assert.That(original.Claim).IsNotNull();
         for (var index = 0; index < moves.Length; index++)
         {
             var move = moves[index];

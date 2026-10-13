@@ -29,7 +29,7 @@ internal static class ControlledPartitionMovementNativePrepareFlow
         using var transport = source.BorrowTransport();
         var reply = await ControlledPartitionMovementNativeSend.PhaseAsync(transport, FirstVoter, owners.Control,
             request, local: true, cancellationToken);
-        var entry = ControlledPartitionMovementNativeEntryReader.Read(source, request.CommandId, cancellationToken);
+        var entry = await ControlledPartitionMovementNativeEntryReader.ReadAsync(source, request.CommandId, cancellationToken);
         await Assert.That(entry.Term).IsGreaterThan(InitialRevision);
         await Assert.That(entry.Operation?.PrincipalId).IsEqualTo(PhysicalShardCatalogFixture.RootPrincipalId);
         var expected = await ControlledPartitionMovementNativeReplyAssertions.PreparedAsync(reply, placement,

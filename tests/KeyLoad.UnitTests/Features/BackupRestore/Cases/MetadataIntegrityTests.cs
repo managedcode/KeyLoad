@@ -118,6 +118,12 @@ internal sealed class MetadataIntegrityTests
         await Assert.That(Directory.Exists(destination)).IsFalse();
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public Task UnsafeDestinationLinkRefusesThenExactRepairRestoresWholeImageAndTwoCold(bool ancestorLink)
+        => RestoreUnsafeDestinationFlow.RunAsync(ancestorLink, TestContext.Current!.Execution.CancellationToken);
+
     private static async Task AssertOuterVerificationFailure(MetadataBackupFixture fixture, string suffix)
     {
         var destination = Path.Combine(fixture.BackupDirectory, suffix);
