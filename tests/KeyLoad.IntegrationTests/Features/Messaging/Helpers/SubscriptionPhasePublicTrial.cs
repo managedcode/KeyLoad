@@ -26,12 +26,15 @@ internal static class SubscriptionPhasePublicTrial
         Func<KeyLoadClient, McpOfficialClient, Task> flow, CancellationToken token)
     {
         var failures = new List<Exception>();
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, seed.Manager.Secret, IntegrationClientOptions.Execution());
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, seed.Manager.Secret, token);
-            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => flow(sdk, mcp), failures).ConfigureAwait(false);
+            using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
+            var sdk = new KeyLoadClient(http, seed.Manager.Secret, IntegrationClientOptions.Execution());
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
+            {
+                await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, seed.Manager.Secret, token);
+                await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => flow(sdk, mcp), failures).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

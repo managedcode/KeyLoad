@@ -4,6 +4,7 @@ internal static class RequestCqrsProbeKnownNames
 {
     private const string TemporaryFileSuffix = ".tmp";
     internal static bool KnownName(string name) => RequestCqrsWaitForIndexReadCutInventory.IsName(name)
+        || RequestCqrsMovementJournalInventory.IsName(name)
         || RequestCqrsQueryReadCutInventory.IsName(name)
         || RequestCqrsNativeReplayInventory.IsPlanName(name)
         || RequestCqrsNativeReplayInventory.IsWitnessName(name) || RequestCqrsNativeModelInventory.IsName(name)

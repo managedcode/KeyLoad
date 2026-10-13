@@ -1,0 +1,24 @@
+namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+
+internal static class NativeR34PublicSelectionProgram
+{
+    internal const string Source = """
+        const r34PublicArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/*", localArgs[2]];
+        const r34Public = nativeSelection(r34PublicArgs, {});
+        let r34PublicUnsupportedCount = 0;
+        for (const badFilter of [
+          "/*/*/QueueLifecyclePublicRf3Tests/*",
+          "/*/*/(DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/*",
+          "/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests*|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/*",
+          "/*/*/(DeclarativeCompositionReverseQuotaRf3Tests|TypedEndpointJoinRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/*",
+          "/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|OtherCase)/*",
+          "/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/* "]) {
+          try { nativeSelection([r34PublicArgs[0], "--KeyLoadTests:Filter="+badFilter, r34PublicArgs[2]], {}); }
+          catch (failure) {
+            if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+            r34PublicUnsupportedCount++; continue;
+          }
+          throw new Error('Unsupported R34 public whole-class filter was accepted.');
+        }
+        """;
+}

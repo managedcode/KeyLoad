@@ -15,6 +15,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 [JsonSerializable(typeof(RequestCqrsEventVectorExpiryRecord))]
 [JsonSerializable(typeof(RequestCqrsQueryReadCutWitness))]
 [JsonSerializable(typeof(RequestCqrsWaitForIndexReadCutWitness))]
+[JsonSerializable(typeof(RequestCqrsMovementJournalRecord))]
 internal sealed partial class RequestCqrsProbeJsonContext : JsonSerializerContext
 {
 }

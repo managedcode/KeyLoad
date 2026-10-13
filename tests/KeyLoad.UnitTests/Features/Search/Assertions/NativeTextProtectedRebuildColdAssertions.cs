@@ -67,7 +67,7 @@ internal static class NativeTextProtectedRebuildColdAssertions
         await Assert.That(receipt.CommandId).IsEqualTo(original.Operation.Id);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
-        await Assert.That(NativeSerialization.Serialize(receipt.Mutations).SequenceEqual(
+        await Assert.That(NativeSerialization.Serialize(receipt.Mutations.ToArray()).SequenceEqual(
             NativeSerialization.Serialize(mutations))).IsTrue();
     }
 

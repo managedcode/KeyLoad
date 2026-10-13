@@ -25,6 +25,7 @@ internal sealed class RequestCqrsProbeFiles
     internal readonly RequestCqrsNativeReplayFiles Replay;
     internal readonly RequestCqrsQueryReadCutFiles QueryCuts;
     internal readonly RequestCqrsWaitForIndexReadCutFiles WaitCuts;
+    internal readonly RequestCqrsMovementJournalFiles MovementJournals;
 
     private RequestCqrsProbeFiles(string root, string sessionId, string voter, byte[] ownerBytes,
         IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
@@ -45,6 +46,7 @@ internal sealed class RequestCqrsProbeFiles
         Replay = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         QueryCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
         WaitCuts = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
+        MovementJournals = new(root, sessionId, executionOptions, records, json, sync, ReadSnapshotLocked);
     }
 
     internal static RequestCqrsProbeFiles Open(RequestCqrsProbeOptions options, IOptions<ReplicaConfiguration> replicaOptions, IOptions<RequestProbeExecutionOptions> executionOptions)
@@ -139,6 +141,7 @@ internal sealed class RequestCqrsProbeFiles
         var nativeModels = new List<RequestCqrsNativeModelWitness>();
         var queryCuts = new List<RequestCqrsQueryReadCutWitness>();
         var waitCuts = new List<RequestCqrsWaitForIndexReadCutWitness>();
+        var movementJournals = new List<RequestCqrsMovementJournalRecord>();
         var replayPlans = new List<RequestCqrsNativeReplayPlan>();
         var replayWitnesses = new List<RequestCqrsNativeReplayWitness>();
         var presentControls = new HashSet<string>(StringComparer.Ordinal);
@@ -147,6 +150,8 @@ internal sealed class RequestCqrsProbeFiles
         {
             var name = Path.GetFileName(path);
             aggregateBytes = RequestCqrsProbeSnapshotFiles.ChargeEntry(path, name, aggregateBytes, executionOptions);
+            if (RequestCqrsMovementJournalInventory.IsName(name))
+            { MovementJournals.Read(path, name, movementJournals, presentControls); continue; }
             if (RequestCqrsWaitForIndexReadCutInventory.IsName(name))
             { WaitCuts.Read(path, name, waitCuts, presentControls); continue; }
             if (RequestCqrsQueryReadCutInventory.IsName(name))
@@ -170,6 +175,7 @@ internal sealed class RequestCqrsProbeFiles
             records.ReadControl(path, name, arms, releases, markers, presentControls);
         }
         RequestCqrsWaitForIndexReadCutInventory.RequireInventory(waitCuts, markers);
+        MovementJournals.RequireInventory(movementJournals, markers, arms);
         WaitCuts.RequireArms(waitCuts, arms);
         RequestCqrsQueryReadCutInventory.RequireInventory(queryCuts, markers);
         QueryCuts.RequireArms(queryCuts, arms);
@@ -181,12 +187,19 @@ internal sealed class RequestCqrsProbeFiles
         ConnectionProbeInventory.RequireMarkers(connections, markers);
         RequestCqrsProbeMigrationFiles.RequireInventory(migration, witnesses, markers);
         RequestCqrsProbeLiveFiles.RequireInventory(live, witnesses, markers, root, executionOptions);
+        ValidateRecordInventories(presentControls, markers, arms, releases, migration);
+        return new(arms, releases, markers, entries.Length, aggregateBytes);
+    }
+
+    private void ValidateRecordInventories(HashSet<string> presentControls,
+        List<RequestCqrsProbeMarkerRecord> markers, List<RequestCqrsProbeLoadedArm> arms,
+        List<RequestCqrsProbeReleaseRecord> releases, List<RequestCqrsProbeMigrationRecord> migration)
+    {
         records.ValidatePresence(presentControls);
         records.ValidateInventory(markers);
         records.ValidateCrossRecords(arms, releases, markers);
         records.CommitArmInventory(arms, releases, markers);
         Migration.CommitInventory(migration);
-        return new(arms, releases, markers, entries.Length, aggregateBytes);
     }
 
     private long ValidateEntry(string path, string name)

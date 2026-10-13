@@ -58,8 +58,13 @@ internal static class SubscriptionPhasePublicAssertions
         if (code == ErrorCode.DispatchPaused)
         {
             var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The canonical pause envelope is absent.");
-            await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
-                .IsEqualTo("Subscription delivery is paused.");
+            var problem = envelope.GetProperty(McpCallerProtocol.Error);
+            await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemType).GetString())
+                .IsEqualTo("urn:keyload:error:DispatchPaused");
+            await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemTitle).GetString()).IsEqualTo("DispatchPaused");
+            await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemStatus).GetInt32()).IsEqualTo(400);
+            await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString())
+                .IsEqualTo("The database operation could not be completed.");
         }
         return global::System.Text.Json.JsonSerializer.Serialize(failure.Problem, JsonDefaults.Options);
     }

@@ -141,5 +141,8 @@ internal sealed class RequestCqrsProbeJson
     internal JsonTypeInfo<RequestCqrsQueryReadCutWitness> QueryCutTypeInfo
         => Context.RequestCqrsQueryReadCutWitness;
 
+    internal JsonTypeInfo<RequestCqrsMovementJournalRecord> MovementJournalTypeInfo
+        => Context.RequestCqrsMovementJournalRecord;
+
     private static InvalidOperationException Invalid() => new(InvalidRecord);
 }

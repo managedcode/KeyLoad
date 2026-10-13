@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R33 Release179.936s, whole-solution formatter203.335s and native diagnostics passed0 errors/warnings. Two source/image-bound native50 local Aspire groups executed74 unique cases:65 passed,9 failed,0 skipped (Unit63/66; public RF3 SDK/MCP2/8). Every original process/readers/disposal joined, source/image/deployment closure unchanged. Original native Prepare nonce and paused-drain corrections, remote-transfer arithmetic, four backup/CLI flows and both public blob flows passed. Full FTS, Messaging/SQL public oracles, startup physical ownership and custom movement image admission remain failed until corrected successors execute. Actual census3770Unit/433Integration (3236 functionalUnit/534 controls) is neither execution nor coverage. Original plan19/104 done,85 in progress; KL105 separate/open after inaccessible diagnostic endpoint, coverage unmeasured, exact-source Linux/full-suite/fault/endurance/performance open.",
+    "qualification": "R34 Release134.528s, whole-solution formatter verification149.979s and native diagnostics passed0 errors/warnings. Two source/image-bound native50 local Aspire groups executed69 unique cases:42 passed,27 failed,0 skipped (Unit34/38; public Docker RF3 SDK/MCP8/31). Every original process/readers/disposal joined, source/image/deployment closure unchanged. Six readiness/startup failures, seven custom image-owner refusals, six queue payload oracles, two composition and original movement/backup/BM25/blob failures remain open. Actual census3777Unit/450Integration (3243 functionalUnit/534 controls), including24new cases, is neither execution nor coverage. Combined original TRX interval peak27 is distinct from configured50. Actual5s counters/GC capture profiles the owned test driver only, with no hotspot or speed claim. Original plan19/104 done,85 in progress; KL105, coverage and exact-source Linux/full-suite/fault/endurance/performance remain open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -220,6 +220,28 @@
         },
         "qualified": false,
         "behavior": "Canonical duplicate typed-primary refusal, bounded persisted transfer-generation arithmetic, signed movement nonce refusal, full SDK/MCP composition/subscription/blob/search/cursor and native/CLI backup whole flows; actual individual successes and failures recorded separately."
+      },
+      "r34CompleteBatch": {
+        "record": "docs/implementation/stage64-r34-development-20261013.json",
+        "rootProof": {
+          "path": "TestResults/stage61-native-join/stage64-r34-root-independent-reconciliation.original.json",
+          "sha256": "9b2ca9a2a786e08ffcbdc0d79209c01ba276c650a111c32e8c01b354b458dc30"
+        },
+        "nativeCensus": {
+          "unit": 3777,
+          "integration": 450,
+          "functionalUnit": 3243,
+          "requiredNonContributorUnit": 534,
+          "newUnit": 7,
+          "newIntegration": 17,
+          "executionOrCoverageImplied": false,
+          "actualInventoryJoin": {
+            "path": "TestResults/stage61-native-join/stage64-r34-canonical-inventory.actual-join.original.json",
+            "sha256": "714e5f0ce723e8362d648d5488f95972d746048a38fc6aa9f7b13a36601a1b57"
+          }
+        },
+        "sourceInputs": 9913,
+        "qualification": "Local macOS development only; every original failure retained. No new complete task acceptance or Linux full-suite, fault, endurance or performance qualification claimed."
       }
     },
     "nativeDiagnostics": {
@@ -1226,6 +1248,28 @@
       "allOwnersJoined": true,
       "newTaskAcceptance": false,
       "coverage": "unmeasured"
+    },
+    "runtimeObservedR34": {
+      "record": "docs/implementation/stage64-r34-development-20261013.json",
+      "executedUniqueCases": 69,
+      "passed": 42,
+      "failed": 27,
+      "skipped": 0,
+      "unit": {
+        "executed": 38,
+        "passed": 34,
+        "failed": 4,
+        "skipped": 0
+      },
+      "rf3": {
+        "executed": 31,
+        "passed": 8,
+        "failed": 23,
+        "skipped": 0
+      },
+      "nativeMaximumParallelTests": 50,
+      "actualCombinedTrxIntervalPeak": 27,
+      "qualification": "Local macOS development only; every original failure retained. No new complete task acceptance or Linux full-suite, fault, endurance or performance qualification claimed."
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {
@@ -61693,7 +61737,7 @@
       "helperFailureRegression": "passed_request_saved_before_invocation_bounded_client_timeout_classified_followup_discovery_13_tools"
     },
     "qualification": {
-      "actualApplicationProfiles": "open_R26_actual_native_processes_observed_socket_TMPDIR_visibility_mismatch_preflight_NotADotnetProcess_no_application_capture",
+      "actualApplicationProfiles": "open_R34_actual_owned_test_driver_native_5second_counters_GC_capture_succeeded_database_process_CPU_hotspot_matched_before_after_loss_overhead_and_Linux_qualification_pending",
       "confirmedBottleneckRepairs": "open",
       "correctnessRegressions": "open",
       "matchedBeforeAfterProfiles": "open",
@@ -61821,6 +61865,26 @@
         "termination": "EOF to owned helper PTY; no app target termination"
       },
       "limits": "Aggregate concurrent functional test-runner window; no per-operation stack attribution, measured diagnostics overhead, matched before/after, benchmark or speed qualification."
+    },
+    "r34ActualCapture": {
+      "original": {
+        "path": "TestResults/stage61-native-join/stage64-r34-owned-rf3-native-diagnostics.original.json",
+        "sha256": "d8461aa0ca93f53b3df936684ca34993f9fbf68e4a2637083990c5dc07ee7b13"
+      },
+      "ancestry": {
+        "path": "TestResults/stage61-native-join/stage64-r34-live-runtime-ancestry.original.json",
+        "sha256": "7f1f20d564b486bee7a3ae249c3e03b920bc56974e08294f356045ce86b0ec11"
+      },
+      "actualProfiledPid": 14686,
+      "scope": "Actual owned Integration test driver, not Docker database processes",
+      "capture": "Native five-second counters and GC capture succeeded; zero completed GC and suspension unavailable without observed boundaries",
+      "nativeClassification": "Tool reports NativeAot from absent SampleProfiler events; compilation mode not independently proven",
+      "unsupported": "Native CPU/GCdump and macOS ClrMD live-attach unavailable; no bypass or fake capture",
+      "samplingLoss": "unmeasured",
+      "diagnosticOverhead": "unmeasured",
+      "beforeAfter": "not performed",
+      "hotspotOrSpeedClaim": false,
+      "acceptance": "KL-105 remains open"
     }
   },
   "AdminDashboard": {

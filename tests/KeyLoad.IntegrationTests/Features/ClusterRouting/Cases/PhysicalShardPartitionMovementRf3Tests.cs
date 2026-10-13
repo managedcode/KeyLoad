@@ -31,6 +31,10 @@ internal sealed class PhysicalShardPartitionMovementRf3Tests
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
+    [Test]
+    public Task OrderedWholePartitionsResumeAfterObservedCommittedPrepareOwnerKillThenMergeCold()
+        => PhysicalShardPartitionMovementRf3FaultScenario.RunAsync(TestContext.Current!.Execution.CancellationToken);
+
     private const int ConflictSeedCount = 3;
 
     [Test]

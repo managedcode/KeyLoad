@@ -34,22 +34,42 @@ internal static class RuntimeJournalStartup
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
             services.GetRequiredService<GrainRequestCodec>(), partition.Database, partition.Coordinator,
             services, clock, runtime.GrainRouting);
-        if (!await requests.TryVerifyAsync(token).ConfigureAwait(false))
-        {
-            var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
-            while (!await discovery.HasNativeJournalCohortAsync(token).ConfigureAwait(false))
-            {
-                await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token).ConfigureAwait(false);
-            }
-            await requests.BootstrapAsync(administrator, BootstrapCommandId(options.PhysicalShardId,
-                partition.Configuration.Incarnation), token).ConfigureAwait(false);
-        }
-        else
-        {
-            var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
-            await discovery.EnsureCompatibleCohortAsync(token).ConfigureAwait(false);
-        }
+        var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
+        var commandId = BootstrapCommandId(options.PhysicalShardId, partition.Configuration.Incarnation);
+        await InitializeAuthorityAsync(requests, discovery, administrator, commandId, runtime, clock, token)
+            .ConfigureAwait(false);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);
+    }
+
+    private static async Task InitializeAuthorityAsync(RuntimeJournalStartupRequests requests,
+        ReplicaSiloDiscoveryClient discovery, PrincipalRecord administrator, Guid commandId,
+        ServerRuntimeOptions runtime, TimeProvider clock, CancellationToken token)
+    {
+        while (true)
+        {
+            token.ThrowIfCancellationRequested();
+            try
+            {
+                if (await requests.TryVerifyAsync(token).ConfigureAwait(false))
+                {
+                    await discovery.EnsureCompatibleCohortAsync(token).ConfigureAwait(false);
+                    return;
+                }
+                while (!await discovery.HasNativeJournalCohortAsync(token).ConfigureAwait(false))
+                {
+                    await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
+                        .ConfigureAwait(false);
+                }
+                await requests.BootstrapAsync(administrator, commandId, token).ConfigureAwait(false);
+                return;
+            }
+            catch (KeyLoadException error) when (error.Code == ErrorCode.OwnershipLost
+                && error.Message == global::KeyLoad.Orleans.ReplicaTransportProtocol.TransportUnavailable)
+            {
+                await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
+                    .ConfigureAwait(false);
+            }
+        }
     }
 
     private static Guid BootstrapCommandId(Guid shardId, Guid incarnation)

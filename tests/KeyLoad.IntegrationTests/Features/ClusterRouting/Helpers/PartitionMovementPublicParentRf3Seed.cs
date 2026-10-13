@@ -128,6 +128,17 @@ internal sealed class PartitionMovementPublicParentRf3Seed : IAsyncDisposable
         originals.Add((command, receipt));
     }
 
+    internal async Task ReconnectAsync(TwoRf3MembershipWave wave, CancellationToken cancellationToken)
+    {
+        if (official is { } original)
+        {
+            official = null;
+            await original.DisposeAsync().ConfigureAwait(false);
+        }
+        official = await McpOfficialClient.ConnectAsync(wave.Application, TwoRf3MembershipProtocol.Node1,
+            Credential, cancellationToken).ConfigureAwait(false);
+    }
+
     internal async Task VerifyAsync(CancellationToken cancellationToken)
     {
         await PartitionMovementPublicParentRf3Cut.RequireModelsAsync(this, cancellationToken).ConfigureAwait(false);

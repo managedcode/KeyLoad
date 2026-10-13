@@ -1989,6 +1989,26 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupPersistedPolicyTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupPersistedPolicyTests",
+      "methodName": "CliRestoredCredentialsAndCurrentFieldPolicySurviveTwoColdOpens",
+      "instanceName": "CliRestoredCredentialsAndCurrentFieldPolicySurviveTwoColdOpens",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/BackupPersistedPolicyTests.cs",
+      "sourceSha256": "64fa8f4977b41054838f5bc61beac32232806d7523410ccdcf3bfb1e2d154f8c",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-PERSISTED-POLICY-001",
+        "REQ-BACKUP-PERSISTED-POLICY-002"
+      ],
+      "acceptance": [
+        "AC-BACKUP-PERSISTED-POLICY-001",
+        "AC-BACKUP-PERSISTED-POLICY-002"
+      ]
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
       "methodName": "AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte",
@@ -2069,6 +2089,24 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.CheckpointFooterRepairTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CheckpointFooterRepairTests",
+      "methodName": "HashConsistentCheckpointFooterRefusalRepairsOriginalArchiveAndPreservesTwoColdCuts",
+      "instanceName": "HashConsistentCheckpointFooterRefusalRepairsOriginalArchiveAndPreservesTwoColdCuts",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CheckpointFooterRepairTests.cs",
+      "sourceSha256": "0e843bb61e04dac99beccfc9d5d8f9cc51bc49291869a1661618bb1ebf4b3dc1",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-CHECKPOINT-REPAIR-001"
+      ],
+      "acceptance": [
+        "AC-BACKUP-CHECKPOINT-REPAIR-001"
+      ]
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupExecutionPolicyTests",
       "methodName": "ConfiguredArchivePiecesRoundTripAndInvalidPolicyCreatesNoArchive",
@@ -2124,6 +2162,26 @@
       "acceptance": [
         "AC-BACKUP-CLI-JOURNAL-001",
         "AC-BACKUP-CLI-JOURNAL-002"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupOwnerExclusionTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupOwnerExclusionTests",
+      "methodName": "ActualCliBackupRefusesOpenNativeOwnerThenRestoresAfterJoinedCloseAndTwoColdReopens",
+      "instanceName": "ActualCliBackupRefusesOpenNativeOwnerThenRestoresAfterJoinedCloseAndTwoColdReopens",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupOwnerExclusionTests.cs",
+      "sourceSha256": "706ed046aa4e0cc1711cdec8d21faae5dcc50cf65a97fdf43336d81e6954e86b",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-CLI-OWNER-001",
+        "REQ-BACKUP-CLI-OWNER-002"
+      ],
+      "acceptance": [
+        "AC-BACKUP-CLI-OWNER-001",
+        "AC-BACKUP-CLI-OWNER-002"
       ]
     },
     {
@@ -2328,6 +2386,42 @@
       ],
       "acceptance": [
         "AC-BACKUP-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests",
+      "methodName": "InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts",
+      "instanceName": "InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts(False)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ManifestCutRepairTests.cs",
+      "sourceSha256": "9a9ba7bdc60faf0a9ca5ad85923d437a6badf4c995fa4ff7e6668ad146b3bf22",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-MANIFEST-CUT-REPAIR-001"
+      ],
+      "acceptance": [
+        "AC-BACKUP-MANIFEST-CUT-REPAIR-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests",
+      "methodName": "InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts",
+      "instanceName": "InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts(True)",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ManifestCutRepairTests.cs",
+      "sourceSha256": "9a9ba7bdc60faf0a9ca5ad85923d437a6badf4c995fa4ff7e6668ad146b3bf22",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-MANIFEST-CUT-REPAIR-001"
+      ],
+      "acceptance": [
+        "AC-BACKUP-MANIFEST-CUT-REPAIR-001"
       ]
     },
     {
@@ -32070,10 +32164,32 @@
     {
       "className": "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests",
       "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests",
+      "methodName": "ExpiredRetainedDeadLetterAndPendingRefuseRedrivePromotionRollbackThenTwoColdExplicitCancelAndHealthy",
+      "instanceName": "ExpiredRetainedDeadLetterAndPendingRefuseRedrivePromotionRollbackThenTwoColdExplicitCancelAndHealthy",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLifecyclePhaseOneTests.cs",
+      "sourceSha256": "2a38b57f3ba74de67518ff160d81dbe3264c1c9f456981077929ff2a7e22b85a",
+      "lineNumber": 11,
+      "endLineNumber": 13,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-MSG-001",
+        "REQ-MSG-004",
+        "REQ-MSG-005"
+      ],
+      "acceptance": [
+        "AC-MSG-088-PARK",
+        "AC-MSG-088-REDRIVE",
+        "AC-MSG-088-CANCEL"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests",
       "methodName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold",
       "instanceName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLifecyclePhaseOneTests.cs",
-      "sourceSha256": "f4a173873c81fbec0257145b61f11eade007a3931ddc49cdfb92e35b686d014c",
+      "sourceSha256": "2a38b57f3ba74de67518ff160d81dbe3264c1c9f456981077929ff2a7e22b85a",
       "lineNumber": 5,
       "endLineNumber": 9,
       "classification": "functional",
@@ -32099,7 +32215,7 @@
       "methodName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold",
       "instanceName": "FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/QueueLifecyclePhaseOneTests.cs",
-      "sourceSha256": "f4a173873c81fbec0257145b61f11eade007a3931ddc49cdfb92e35b686d014c",
+      "sourceSha256": "2a38b57f3ba74de67518ff160d81dbe3264c1c9f456981077929ff2a7e22b85a",
       "lineNumber": 5,
       "endLineNumber": 9,
       "classification": "functional",
@@ -51015,6 +51131,26 @@
       "sourceSha256": "af3a901f43480d4b7f77a7eb375badfd2af48ee1ad8e0e47fe49692149826525",
       "lineNumber": 14,
       "endLineNumber": 62
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.Search.NativeTextBm25CapturedClosureTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.Search.NativeTextBm25CapturedClosureTests",
+      "methodName": "AbsentAndPublishedCorpusHeadsPreserveCompleteCapturedPagesAndOriginalReceipt",
+      "instanceName": "AbsentAndPublishedCorpusHeadsPreserveCompleteCapturedPagesAndOriginalReceipt",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/NativeTextBm25CapturedClosureTests.cs",
+      "sourceSha256": "f161d1c52b45fb01eea8817dab72635d1a3b639aa37e3b17075e5f7e5a0dbdf4",
+      "lineNumber": 5,
+      "endLineNumber": 7,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-FTS-BM25-CUT-001"
+      ],
+      "acceptance": [
+        "AC-FTS-BM25-CUT-001",
+        "AC-BM25-CURRENT-004",
+        "AC-FTS-002"
+      ]
     },
     {
       "className": "KeyLoad.UnitTests.Features.Search.NativeTextCapturedPublicOperationTests",
@@ -74573,9 +74709,9 @@
       "methodName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections",
       "instanceName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(analyzers, KeyLoad·Analyzers·Tests)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/NativeTUnitSelectionTests.cs",
-      "sourceSha256": "f179df6ae770656d7e58ec988d5248cacd8f7408338c6ca5ea8e16ca02a0054b",
+      "sourceSha256": "2e9e993ffcf7cd6a707f694d1c5ee576a57ef71ff74c33642cc638a2045cc0af",
       "lineNumber": 72,
-      "endLineNumber": 126,
+      "endLineNumber": 127,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -74593,9 +74729,9 @@
       "methodName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections",
       "instanceName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(recovery, KeyLoad·RecoveryTests)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/NativeTUnitSelectionTests.cs",
-      "sourceSha256": "f179df6ae770656d7e58ec988d5248cacd8f7408338c6ca5ea8e16ca02a0054b",
+      "sourceSha256": "2e9e993ffcf7cd6a707f694d1c5ee576a57ef71ff74c33642cc638a2045cc0af",
       "lineNumber": 72,
-      "endLineNumber": 126,
+      "endLineNumber": 127,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -74613,9 +74749,9 @@
       "methodName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections",
       "instanceName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(rf3, KeyLoad·IntegrationTests)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/NativeTUnitSelectionTests.cs",
-      "sourceSha256": "f179df6ae770656d7e58ec988d5248cacd8f7408338c6ca5ea8e16ca02a0054b",
+      "sourceSha256": "2e9e993ffcf7cd6a707f694d1c5ee576a57ef71ff74c33642cc638a2045cc0af",
       "lineNumber": 72,
-      "endLineNumber": 126,
+      "endLineNumber": 127,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -74633,9 +74769,9 @@
       "methodName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections",
       "instanceName": "NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(unit, KeyLoad·UnitTests)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/NativeTUnitSelectionTests.cs",
-      "sourceSha256": "f179df6ae770656d7e58ec988d5248cacd8f7408338c6ca5ea8e16ca02a0054b",
+      "sourceSha256": "2e9e993ffcf7cd6a707f694d1c5ee576a57ef71ff74c33642cc638a2045cc0af",
       "lineNumber": 72,
-      "endLineNumber": 126,
+      "endLineNumber": 127,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -74945,13 +75081,14 @@
   "coverageGroups": [
     {
       "groupId": "unit-functional-01",
-      "selector": "/*/*/(AggregateReplayS*)|(AnnSeedC*)|(AnnSeedF*)|(AtomicPartitionRosterB*)|(BlobAu*)|(BlobCu*)|(BlobE*)|(BlobL*)|(BlobSu*)|(Bm25ConfiguredQ*)|(Bm25OriginalP*)|(Bm25R*)|(C1OutcomeInspectionI*)|(CacheControlWireA*)|(CacheControlWireT*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(ClusterPrincipalA*)|(Conf*)|(ConnectionF*)|(ControlledD*)|(ControlledPartitionMovementA*)|(ControlledPartitionMovementC*)|(ControlledPartitionMovementG*)|(ControlledPartitionMovementNativeP*)|(ControlledPartitionMovementP*)|(ControlledPartitionMovementR*)|(ControlledPartitionMovementS*)|(ControlledPartitionMovementT*)|(CurrentW*)|(DatabaseCompositionF*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DueF*)|(DueWorkN*)|(EventAppendC*)|(EventProjectionI*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphSearchI*)|(GraphShortestPathC*)|(HybridE*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(Li*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpNativeAuthenticationE*)|(McpNativeP*)|(McpPo*)|(McpRes*)|(MetadataB*)|(MultiLaneC*)|(NativeAnnPublicR*)|(NativeAnnWaitA*)|(NativeCon*)|(NativeCqrsT*)|(NativeD*)|(NativeEventFeedPubSubA*)|(NativeOperationF*)|(NativePublicN*)|(NativeReadCutCa*)|(NativeSagaTimeoutR*)|(NativeSix*)|(NativeSt*)|(NativeSubmissionJournalBudgetCas*)|(NativeSubmissionOutcomeP*)|(NativeTextB*)|(NativeTextOnlineW*)|(NativeTextProjectionA*)|(NativeTextProjectionO*)|(NativeTextProjectionRem*)|(NativeTextWaitF*)|(NativeTextWaitObserve*)|(NativeUnknownWellKnownHeaderR*)|(NativeV*)|(NativeWireSupportedScalarT*)|(Op*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(Proj*)|(QueueA*)|(QueueE*)|(QueueLif*)|(QueueO*)|(ReadB*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RemoteTransferAc*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(ReplicaAd*)|(ReplicaAppl*)|(ReplicaInspectionResolutionR*)|(ReplicaNativeI*)|(ReplicaReplayD*)|(RequestCqrsCohortT*)|(RequestCqrsF*)|(ResourcePolicyUpdateV*)|(RuntimeJournalB*)|(RuntimeJournalL*)|(Sag*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRan*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(Sec*)|(SqlBetweenB*)|(SqlClientO*)|(SqlGraphPathD*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(TargetInboxA*)|(Ti*)|(TopicSqlNativeR*)|(TransactionP*)|(U*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!InvalidPolicyRejectsBeforeAnyStoreDirectory*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafNativePayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
+      "selector": "/*/*/(AggregateReplayS*)|(AnnSeedC*)|(AnnSeedF*)|(AtomicPartitionRosterB*)|(BlobAu*)|(BlobCu*)|(BlobE*)|(BlobL*)|(BlobSu*)|(Bm25ConfiguredQ*)|(Bm25OriginalP*)|(Bm25R*)|(C1OutcomeInspectionI*)|(CacheControlWireA*)|(CacheControlWireT*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(ClusterPrincipalA*)|(Conf*)|(ConnectionF*)|(ControlledD*)|(ControlledPartitionMovementA*)|(ControlledPartitionMovementC*)|(ControlledPartitionMovementG*)|(ControlledPartitionMovementNativeP*)|(ControlledPartitionMovementP*)|(ControlledPartitionMovementR*)|(ControlledPartitionMovementS*)|(ControlledPartitionMovementT*)|(CurrentW*)|(DatabaseCompositionF*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DueF*)|(DueWorkN*)|(EventAppendC*)|(EventProjectionI*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphSearchI*)|(GraphShortestPathC*)|(HybridE*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(Li*)|(Ma*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpNativeAuthenticationE*)|(McpNativeP*)|(McpPo*)|(McpRes*)|(MetadataB*)|(MultiLaneC*)|(NativeAnnPublicR*)|(NativeAnnWaitA*)|(NativeCon*)|(NativeCqrsT*)|(NativeD*)|(NativeEventFeedPubSubA*)|(NativeOperationF*)|(NativePublicN*)|(NativeReadCutCa*)|(NativeSagaTimeoutR*)|(NativeSix*)|(NativeSt*)|(NativeSubmissionJournalBudgetCas*)|(NativeSubmissionOutcomeP*)|(NativeTextBi*)|(NativeTextOnlineW*)|(NativeTextProjectionA*)|(NativeTextProjectionO*)|(NativeTextProjectionRem*)|(NativeTextWaitF*)|(NativeTextWaitObserve*)|(NativeUnknownWellKnownHeaderR*)|(NativeV*)|(NativeWireSupportedScalarT*)|(Op*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(Proj*)|(QueueA*)|(QueueE*)|(QueueLif*)|(QueueO*)|(ReadB*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RemoteTransferAc*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(ReplicaAd*)|(ReplicaAppl*)|(ReplicaInspectionResolutionR*)|(ReplicaNativeI*)|(ReplicaReplayD*)|(RequestCqrsCohortT*)|(RequestCqrsF*)|(ResourcePolicyUpdateV*)|(RuntimeJournalB*)|(RuntimeJournalL*)|(Sag*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRan*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(Sec*)|(SqlBetweenB*)|(SqlClientO*)|(SqlGraphPathD*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(TargetInboxA*)|(Ti*)|(TopicSqlNativeR*)|(TransactionP*)|(U*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!InvalidPolicyRejectsBeforeAnyStoreDirectory*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafNativePayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
       "classNames": [
         "KeyLoad.UnitTests.Features.Authorization.ClusterPrincipalAuthorizationTests",
         "KeyLoad.UnitTests.Features.Authorization.ResourcePolicyUpdateVisibilityTests",
         "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterBudgetTests",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupJournalRepairTests",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests",
+        "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataBoundaryTests",
         "KeyLoad.UnitTests.Features.BlobStorage.BlobAuthorizationTests",
         "KeyLoad.UnitTests.Features.BlobStorage.BlobCurrentFormatWholeFlowTests",
@@ -75143,6 +75280,8 @@
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupJournalRepairTests|ActualCliRejectsNativeFrameChecksumThenRepairsOriginalAndPreservesTwoColdCuts|ActualCliRejectsNativeFrameChecksumThenRepairsOriginalAndPreservesTwoColdCuts(False)",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupJournalRepairTests|ActualCliRejectsNativeFrameChecksumThenRepairsOriginalAndPreservesTwoColdCuts|ActualCliRejectsNativeFrameChecksumThenRepairsOriginalAndPreservesTwoColdCuts(True)",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreLengthMismatchTests|AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup|AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup",
+        "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests|InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts|InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts(False)",
+        "KeyLoad.UnitTests.Features.BackupRestore.ManifestCutRepairTests|InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts|InvalidManifestPositionRefusesNativeAndCliRestoreThenExactRepairPreservesTwoColdCuts(True)",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataBoundaryTests|IdentityTrailingBytesAtInclusiveLimitRejectAndOneOverFailsBeforeDestination|IdentityTrailingBytesAtInclusiveLimitRejectAndOneOverFailsBeforeDestination",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataBoundaryTests|ManifestTrailingBytesAtInclusiveLimitRejectAndOneOverFailsBeforeDestination|ManifestTrailingBytesAtInclusiveLimitRejectAndOneOverFailsBeforeDestination",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataBoundaryTests|StartupIdentityBoundaryFailuresReleaseLockAndOriginalBytesReopen|StartupIdentityBoundaryFailuresReleaseLockAndOriginalBytesReopen",
@@ -75430,6 +75569,7 @@
         "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests|AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck|AcMsg088TerminalInspectionRefusesRetainedBodyThenExactRepairTwoColdOwnersAndHealthyAck(Expired, True)",
         "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests|AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck|AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(-1)",
         "KeyLoad.UnitTests.Features.Messaging.QueueLifecycleConditionWholeFlowTests|AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck|AcMsg088UndefinedPersistedStateRefusesInspectionThenExactRepairTwoColdOwnersAndHealthyAck(8)",
+        "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests|ExpiredRetainedDeadLetterAndPendingRefuseRedrivePromotionRollbackThenTwoColdExplicitCancelAndHealthy|ExpiredRetainedDeadLetterAndPendingRefuseRedrivePromotionRollbackThenTwoColdExplicitCancelAndHealthy",
         "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests|FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold|FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(False)",
         "KeyLoad.UnitTests.Features.Messaging.QueueLifecyclePhaseOneTests|FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold|FullDeadLetterPendingAtomicRefusalRedriveCancellationAndSameRootCold(True)",
         "KeyLoad.UnitTests.Features.Messaging.QueueOrderedRetryWholeTests|AcMsg089ForeignEarlierStrictHeadBodyRefusesFollowerReceiveThenExactRepairNativeAckTwoColdAndHealthy|AcMsg089ForeignEarlierStrictHeadBodyRefusesFollowerReceiveThenExactRepairNativeAckTwoColdAndHealthy(Leased)",
@@ -75783,7 +75923,7 @@
     },
     {
       "groupId": "unit-functional-02",
-      "selector": "/*/*/(AdminQ*)|(Admis*)|(AggregateReplayWorkerP*)|(Ana*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AtomicPartitionPlacementA*)|(AtomicPartitionPlacementC*)|(AtomicPartitionRosterF*)|(AtomicPartitionRosterRes*)|(Ba*)|(BlobO*)|(BlobPublishedL*)|(BlobRangeP*)|(BlobRo*)|(Bm25CorpusO*)|(Bm25PortableFamilyB*)|(Bu*)|(C1OutcomeInspectionP*)|(CacheControlWireP*)|(CacheControlWireS*)|(CacheReadPermitT*)|(Cha*)|(Che*)|(CliBackupRestoreI*)|(ConnectionNativeO*)|(CoreM*)|(DatabaseCompositionB*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWa*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventFeedPubSubSt*)|(EventProjectionR*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(Grai*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalR*)|(GraphTraversalT*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpA*)|(McpGatewayG*)|(McpMemoryB*)|(McpTransportG*)|(McpV*)|(Mes*)|(Mix*)|(NativeAnnWaitG*)|(NativeAnnWaitO*)|(NativeBa*)|(NativeBo*)|(NativeCh*)|(NativeCqrsL*)|(NativeEventFeedPubSubF*)|(NativeI*)|(NativeOperationO*)|(NativePublicE*)|(NativeReadCutB*)|(NativeReadCutCo*)|(NativeSagaTimeoutJ*)|(NativeSig*)|(NativeTextC*)|(NativeTextF*)|(NativeTextProjectionD*)|(NativeTextProjectionRes*)|(NativeTextProjectionS*)|(NativeTextWaitObserva*)|(NativeWireC*)|(OrleansWalS*)|(PartitionH*)|(PartitionMovementE*)|(PartitionOwnershipEpochT*)|(PartitionQueryPublicA*)|(PhysicalOwnerDirectoryW*)|(PhysicalShardCatalogB*)|(PhysicalShardCatalogP*)|(QueryAdapterV*)|(QueueB*)|(QueueDeadl*)|(QueueRetr*)|(ReadExecutionBudgetGrantP*)|(ReadExecutionBudgetGrantR*)|(RelationalA*)|(RemoteTransferRepairC*)|(ReplicaAppe*)|(ReplicaE*)|(ReplicaInspectionResolutionA*)|(ReplicaNativeP*)|(ReplicaReplayL*)|(RequestCqrsB*)|(RequestCqrsCohortS*)|(RequestCqrsCol*)|(RequestCqrsPu*)|(RuntimeJournalG*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleM*)|(SampleRetentionM*)|(SearchS*)|(SqlClientC*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SubscriptionC*)|(TopicSqlNativeT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)|(ZoneTreeCoordinatedPointCacheL*)|(ZoneTreeCoordinatedPointCacheP*)|(ZoneTreeCoordinatedPointCacheR*)|(ZoneTreePointCacheA*)|(ZoneTreePointCacheOwnerC*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!InvalidDeadlineIsRejectedBeforeMaterializerRecovery*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!NativeAliasesAndFieldIdsRemainExact*)&(!ReplayConfigurationRejectsNonpositiveAndUnboundedMemoryBudgets*)",
+      "selector": "/*/*/(AdminQ*)|(Admis*)|(AggregateReplayWorkerP*)|(Ana*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AtomicPartitionPlacementA*)|(AtomicPartitionPlacementC*)|(AtomicPartitionRosterF*)|(AtomicPartitionRosterRes*)|(BackupI*)|(BackupR*)|(BlobO*)|(BlobPublishedL*)|(BlobRangeP*)|(BlobRo*)|(Bm25CorpusO*)|(Bm25PortableFamilyB*)|(Bu*)|(C1OutcomeInspectionP*)|(CacheControlWireP*)|(CacheControlWireS*)|(CacheReadPermitT*)|(Cha*)|(Che*)|(CliBackupRestoreI*)|(ConnectionNativeO*)|(CoreM*)|(DatabaseCompositionB*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWa*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventFeedPubSubSt*)|(EventProjectionR*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(Grai*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalR*)|(GraphTraversalT*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpA*)|(McpGatewayG*)|(McpMemoryB*)|(McpTransportG*)|(McpV*)|(Mes*)|(Mix*)|(NativeAnnWaitG*)|(NativeAnnWaitO*)|(NativeBa*)|(NativeBo*)|(NativeCh*)|(NativeCqrsL*)|(NativeEventFeedPubSubF*)|(NativeI*)|(NativeOperationO*)|(NativePublicE*)|(NativeReadCutB*)|(NativeReadCutCo*)|(NativeSagaTimeoutJ*)|(NativeSig*)|(NativeTextBm*)|(NativeTextC*)|(NativeTextF*)|(NativeTextProjectionD*)|(NativeTextProjectionRes*)|(NativeTextProjectionS*)|(NativeTextWaitObserva*)|(NativeWireC*)|(OrleansWalS*)|(PartitionH*)|(PartitionMovementE*)|(PartitionOwnershipEpochT*)|(PartitionQueryPublicA*)|(PhysicalOwnerDirectoryW*)|(PhysicalShardCatalogB*)|(PhysicalShardCatalogP*)|(QueryAdapterV*)|(QueueB*)|(QueueDeadl*)|(QueueRetr*)|(ReadExecutionBudgetGrantP*)|(ReadExecutionBudgetGrantR*)|(RelationalA*)|(RemoteTransferRepairC*)|(ReplicaAppe*)|(ReplicaE*)|(ReplicaInspectionResolutionA*)|(ReplicaNativeP*)|(ReplicaReplayL*)|(RequestCqrsB*)|(RequestCqrsCohortS*)|(RequestCqrsCol*)|(RequestCqrsPu*)|(RuntimeJournalG*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleM*)|(SampleRetentionM*)|(SearchS*)|(SqlClientC*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SubscriptionC*)|(TopicSqlNativeT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)|(ZoneTreeCoordinatedPointCacheL*)|(ZoneTreeCoordinatedPointCacheP*)|(ZoneTreeCoordinatedPointCacheR*)|(ZoneTreePointCacheA*)|(ZoneTreePointCacheOwnerC*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!InvalidDeadlineIsRejectedBeforeMaterializerRecovery*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!NativeAliasesAndFieldIdsRemainExact*)&(!ReplayConfigurationRejectsNonpositiveAndUnboundedMemoryBudgets*)",
       "classNames": [
         "KeyLoad.UnitTests.CheckpointTests",
         "KeyLoad.UnitTests.DueWaitControlledClockTests",
@@ -75792,6 +75932,7 @@
         "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterRestoreTests",
         "KeyLoad.UnitTests.Features.BackupRestore.BackupIndexedDocumentDedupCases",
         "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests",
+        "KeyLoad.UnitTests.Features.BackupRestore.CheckpointFooterRepairTests",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests",
         "KeyLoad.UnitTests.Features.BackupRestore.MixedEventingRetentionBackupTests",
         "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests",
@@ -75918,6 +76059,7 @@
         "KeyLoad.UnitTests.Features.Search.GraphSearchExpansionTests",
         "KeyLoad.UnitTests.Features.Search.NativeAnnWaitGenerationTests",
         "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests",
+        "KeyLoad.UnitTests.Features.Search.NativeTextBm25CapturedClosureTests",
         "KeyLoad.UnitTests.Features.Search.NativeTextCapturedPublicOperationTests",
         "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests",
         "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests",
@@ -75977,6 +76119,7 @@
         "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests|AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte|AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(True)",
         "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests|AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte|AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(False)",
         "KeyLoad.UnitTests.Features.BackupRestore.BackupRestoreStagingJoinTests|AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte|AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(True)",
+        "KeyLoad.UnitTests.Features.BackupRestore.CheckpointFooterRepairTests|HashConsistentCheckpointFooterRefusalRepairsOriginalArchiveAndPreservesTwoColdCuts|HashConsistentCheckpointFooterRefusalRepairsOriginalArchiveAndPreservesTwoColdCuts",
         "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreInvalidCatalogTests|AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal|AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal",
         "KeyLoad.UnitTests.Features.BackupRestore.MixedEventingRetentionBackupTests|RetainedEventsQueueLifecycleAndTargetInboxSharePausedBackupCutThenAuthorizedColdContinuation|RetainedEventsQueueLifecycleAndTargetInboxSharePausedBackupCutThenAuthorizedColdContinuation",
         "KeyLoad.UnitTests.Features.BackupRestore.NativeBackupCutTests|AcIs004CompleteJournalRequiresExactManifestCut|AcIs004CompleteJournalRequiresExactManifestCut(-1)",
@@ -76487,6 +76630,7 @@
         "KeyLoad.UnitTests.Features.Search.NativeAnnWaitGenerationTests|ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow|ActualUpdateDeleteRejectsStaleWaitThenExplicitRestoreAndColdOwnerReturnIndexedPrefixWithoutDeletedRow",
         "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests|ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy|ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy(False)",
         "KeyLoad.UnitTests.Features.Search.NativeAnnWaitObservedWorkTests|ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy|ActualNativeAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy(True)",
+        "KeyLoad.UnitTests.Features.Search.NativeTextBm25CapturedClosureTests|AbsentAndPublishedCorpusHeadsPreserveCompleteCapturedPagesAndOriginalReceipt|AbsentAndPublishedCorpusHeadsPreserveCompleteCapturedPagesAndOriginalReceipt",
         "KeyLoad.UnitTests.Features.Search.NativeTextCapturedPublicOperationTests|GenuineBoundedCapturedAdmissionRefusalJoinsActualOwnerBeforeFullPublicHealthyReceiptReplayAndCold|GenuineBoundedCapturedAdmissionRefusalJoinsActualOwnerBeforeFullPublicHealthyReceiptReplayAndCold",
         "KeyLoad.UnitTests.Features.Search.NativeTextCapturedPublicOperationTests|GenuineSameOwnerSnapshotReplacementWhileOriginalPublicFtsReaderRemainsHeldRefusesOldCutThenFreshRebindCompletesFullReplayAndCold|GenuineSameOwnerSnapshotReplacementWhileOriginalPublicFtsReaderRemainsHeldRefusesOldCutThenFreshRebindCompletesFullReplayAndCold",
         "KeyLoad.UnitTests.Features.Search.NativeTextCapturedPublicOperationTests|OriginalPublicNativeReaderOverlapsCompletedUpdateDeleteSwapThenJoinsAndCompletesHealthyReplayAndCold|OriginalPublicNativeReaderOverlapsCompletedUpdateDeleteSwapThenJoinsAndCompletesHealthyReplayAndCold(False)",
@@ -77477,13 +77621,15 @@
     },
     {
       "groupId": "unit-functional-04",
-      "selector": "/*/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnnProjectionPinB*)|(AnnSeedM*)|(Ar*)|(AtomicPartitionPlacementQ*)|(AtomicPartitionRosterP*)|(BlobAgentD*)|(BlobCo*)|(BlobG*)|(BlobPublishedR*)|(BlobQ*)|(BlobRangeI*)|(BlobRaw*)|(BlobStorageL*)|(Bm25ConfiguredC*)|(Bm25I*)|(Bm25PortableFamilyK*)|(Bm25Pu*)|(C1S*)|(CacheControlWireC*)|(CacheControlWireD*)|(CacheControlWireG*)|(CacheControlWireR*)|(CacheM*)|(CacheReadPermitA*)|(CanonicalO*)|(ChunkG*)|(ChunkSelectedB*)|(ClusterPrincipalP*)|(CommandA*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionNativeC*)|(ConnectionNativeS*)|(ControlledPartitionMovementNativeR*)|(CoreN*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(DocumentF*)|(DocumentI*)|(DocumentPa*)|(Ep*)|(EventAppendW*)|(EventFeedPubSubSc*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionM*)|(GraphCrossPartitionRep*)|(GraphSearchA*)|(GraphShortestPathA*)|(Ht*)|(HybridQualityR*)|(JsonP*)|(JsonTextP*)|(KeyCodecT*)|(McpGatewayC*)|(McpI*)|(McpNativeAuthenticationM*)|(MetadataI*)|(NativeAnnWaitPi*)|(NativeAnnWaitR*)|(NativeCqrsG*)|(NativeG*)|(NativeMa*)|(NativeOperationC*)|(NativeOperationS*)|(NativePublicC*)|(NativeQ*)|(NativeReadCutCl*)|(NativeReade*)|(NativeReq*)|(NativeSagaTimeoutF*)|(NativeSubmissionJournalBudgetCan*)|(NativeSubmissionJournalP*)|(NativeSubmissionJournalR*)|(NativeTextIncrementalE*)|(NativeTextOnlineF*)|(NativeTextProjectionF*)|(NativeTextProt*)|(NativeUnknownWellKnownHeaderT*)|(OrleansWalC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionOwnershipEpochW*)|(PartitionP*)|(PartitionRecordP*)|(PhysicalOwnerRegistrationI*)|(PhysicalShardCatalogA*)|(PhysicalShardCatalogV*)|(QueryAdapterT*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadExecutionBudgetSc*)|(RecurringO*)|(RelationalS*)|(RemotePartitionD*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(ReplicaCon*)|(ReplicaG*)|(ReplicaMa*)|(ReplicaNativeA*)|(ReplicaNativeC*)|(ReplicaReplayC*)|(ReplicaT*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsCohortC*)|(RequestCqrsT*)|(Rev*)|(RuntimeJournalN*)|(RuntimeJournalR*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkM*)|(SampleChunkSn*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRaw*)|(SampleRollupR*)|(Seri*)|(SqlBetweenRa*)|(SqlInnerJoinB*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlTriviaE*)|(StreamC*)|(SubscriptionF*)|(SubscriptionL*)|(SubscriptionP*)|(TargetInboxP*)|(TopicRetentionBa*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeCoordinatedPointCacheF*)|(ZoneTreeM*)|(ZoneTreePointCacheC*)|(ZoneTreePointCacheD*)|(ZoneTreePointCacheF*)|(ZoneTreePointCacheOwnerI*)/(*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!ActualScratchRefusalPreservesCauseAndFollowingWriterCancellationAndDisposal*)&(!AppendedMethodsPreserveExistingWireOrdinals*)&(!GrammarAtomsRetainPositiveBoundedProgressAndOriginalOffsets*)&(!InvalidNativeClientCadenceFailsStartupBeforeInspection*)&(!NativeConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload*)&(!NativeFunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes*)&(!OmittedNativeSettingsRetainTheIndependentOriginalDefault*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
+      "selector": "/*/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnnProjectionPinB*)|(AnnSeedM*)|(Ar*)|(AtomicPartitionPlacementQ*)|(AtomicPartitionRosterP*)|(BackupP*)|(BlobAgentD*)|(BlobCo*)|(BlobG*)|(BlobPublishedR*)|(BlobQ*)|(BlobRangeI*)|(BlobRaw*)|(BlobStorageL*)|(Bm25ConfiguredC*)|(Bm25I*)|(Bm25PortableFamilyK*)|(Bm25Pu*)|(C1S*)|(CacheControlWireC*)|(CacheControlWireD*)|(CacheControlWireG*)|(CacheControlWireR*)|(CacheM*)|(CacheReadPermitA*)|(CanonicalO*)|(ChunkG*)|(ChunkSelectedB*)|(CliBackupO*)|(ClusterPrincipalP*)|(CommandA*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionNativeC*)|(ConnectionNativeS*)|(ControlledPartitionMovementNativeR*)|(CoreN*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(DocumentF*)|(DocumentI*)|(DocumentPa*)|(Ep*)|(EventAppendW*)|(EventFeedPubSubSc*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionM*)|(GraphCrossPartitionRep*)|(GraphSearchA*)|(GraphShortestPathA*)|(Ht*)|(HybridQualityR*)|(JsonP*)|(JsonTextP*)|(KeyCodecT*)|(McpGatewayC*)|(McpI*)|(McpNativeAuthenticationM*)|(MetadataI*)|(NativeAnnWaitPi*)|(NativeAnnWaitR*)|(NativeCqrsG*)|(NativeG*)|(NativeMa*)|(NativeOperationC*)|(NativeOperationS*)|(NativePublicC*)|(NativeQ*)|(NativeReadCutCl*)|(NativeReade*)|(NativeReq*)|(NativeSagaTimeoutF*)|(NativeSubmissionJournalBudgetCan*)|(NativeSubmissionJournalP*)|(NativeSubmissionJournalR*)|(NativeTextIncrementalE*)|(NativeTextOnlineF*)|(NativeTextProjectionF*)|(NativeTextProt*)|(NativeUnknownWellKnownHeaderT*)|(OrleansWalC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionOwnershipEpochW*)|(PartitionP*)|(PartitionRecordP*)|(PhysicalOwnerRegistrationI*)|(PhysicalShardCatalogA*)|(PhysicalShardCatalogV*)|(QueryAdapterT*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadExecutionBudgetSc*)|(RecurringO*)|(RelationalS*)|(RemotePartitionD*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(ReplicaCon*)|(ReplicaG*)|(ReplicaMa*)|(ReplicaNativeA*)|(ReplicaNativeC*)|(ReplicaReplayC*)|(ReplicaT*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsCohortC*)|(RequestCqrsT*)|(Rev*)|(RuntimeJournalN*)|(RuntimeJournalR*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkM*)|(SampleChunkSn*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRaw*)|(SampleRollupR*)|(Seri*)|(SqlBetweenRa*)|(SqlInnerJoinB*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlTriviaE*)|(StreamC*)|(SubscriptionF*)|(SubscriptionL*)|(SubscriptionP*)|(TargetInboxP*)|(TopicRetentionBa*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeCoordinatedPointCacheF*)|(ZoneTreeM*)|(ZoneTreePointCacheC*)|(ZoneTreePointCacheD*)|(ZoneTreePointCacheF*)|(ZoneTreePointCacheOwnerI*)/(*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!ActualScratchRefusalPreservesCauseAndFollowingWriterCancellationAndDisposal*)&(!AppendedMethodsPreserveExistingWireOrdinals*)&(!GrammarAtomsRetainPositiveBoundedProgressAndOriginalOffsets*)&(!InvalidNativeClientCadenceFailsStartupBeforeInspection*)&(!NativeConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload*)&(!NativeFunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!NativePayloadMappingCoversEverySupportedOperationKindWithoutInventedDtoTypes*)&(!OmittedNativeSettingsRetainTheIndependentOriginalDefault*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
       "classNames": [
         "KeyLoad.UnitTests.Features.AdminDashboard.AdminCatalogTests",
         "KeyLoad.UnitTests.Features.Authorization.ClusterPrincipalPolicyTests",
         "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests",
         "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests",
         "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterPlacementTests",
+        "KeyLoad.UnitTests.Features.BackupRestore.BackupPersistedPolicyTests",
+        "KeyLoad.UnitTests.Features.BackupRestore.CliBackupOwnerExclusionTests",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests",
         "KeyLoad.UnitTests.Features.BlobStorage.BlobAgentDecodeTests",
         "KeyLoad.UnitTests.Features.BlobStorage.BlobConfigurationCounterTests",
@@ -77695,6 +77841,8 @@
         "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTests|ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt|ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt",
         "KeyLoad.UnitTests.Features.BackupRestore.ArtifactTransferRejectedInputFlowTests|AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds|AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds",
         "KeyLoad.UnitTests.Features.BackupRestore.AtomicPartitionRosterPlacementTests|AcBackup004EmptyPlacementAndCrossPartitionDestinationWritesRemainRegisteredAfterDelete|AcBackup004EmptyPlacementAndCrossPartitionDestinationWritesRemainRegisteredAfterDelete",
+        "KeyLoad.UnitTests.Features.BackupRestore.BackupPersistedPolicyTests|CliRestoredCredentialsAndCurrentFieldPolicySurviveTwoColdOpens|CliRestoredCredentialsAndCurrentFieldPolicySurviveTwoColdOpens",
+        "KeyLoad.UnitTests.Features.BackupRestore.CliBackupOwnerExclusionTests|ActualCliBackupRefusesOpenNativeOwnerThenRestoresAfterJoinedCloseAndTwoColdReopens|ActualCliBackupRefusesOpenNativeOwnerThenRestoresAfterJoinedCloseAndTwoColdReopens",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests|CorruptWalVerificationPrecedesUnsupportedIdentityParsing|CorruptWalVerificationPrecedesUnsupportedIdentityParsing",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests|IdentityInnerChecksumMismatchFailsBeforeDestinationCreation|IdentityInnerChecksumMismatchFailsBeforeDestinationCreation",
         "KeyLoad.UnitTests.Features.BackupRestore.MetadataIntegrityTests|IdentityLengthMismatchFailsBeforeDestinationCreation|IdentityLengthMismatchFailsBeforeDestinationCreation",

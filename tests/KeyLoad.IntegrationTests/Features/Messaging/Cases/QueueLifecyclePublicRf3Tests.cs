@@ -8,4 +8,8 @@ internal sealed class QueueLifecyclePublicRf3Tests(ClusterFixture fixture)
     [Test, Arguments(0), Arguments(1), Arguments(2), Arguments(3)]
     public Task ParkedPendingAtomicRefusalCancelRedriveFreshLeaseFourRoutesAndSameOwnerCold(int route)
         => QueueLifecyclePublicTrial.RunAsync(fixture, route);
+
+    [Test, Arguments(false), Arguments(true)]
+    public Task CurrentLeasedCancellationRollsBackLateFailureThenFencesOldTokensTwoColdAndSameLaneHealthy(bool mcpFirst)
+        => QueueLeasedCancelPublicFlow.RunAsync(fixture, mcpFirst);
 }

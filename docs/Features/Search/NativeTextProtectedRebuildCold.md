@@ -21,3 +21,5 @@ flowchart LR
 ```
 
 Canonical slice map: Unit Search Cases/NativeTextProtectedRebuildColdTests; Helpers/Owner,Seed,Trial; Assertions/NativeTextProtectedRebuildColdAssertions. Product implementation unchanged. Server/SDK/MCP/frontend N/A to this supplementary native kernel regression; original RF3/process/whole product gates remain mandatory. Regression source is implemented; compiler/runtime/current-image/Linux gates remain OPEN pending recorded execution.
+
+Receipt oracle container contract: the actual `CommitReceipt.Mutations` is `ImmutableArray<MutationReceipt>` and independent literal expected mutations are an array. Compare native serialization of the actual collection converted to an array against the original expected array, preserving every ordered mutation record and native field. Serializing unequal container types is not a valid record equality oracle. R33 failed at the first warm seed receipt predicate before the subsequent search/cold flow; this repair is source-only until the complete original case is rerun with the current bound image.

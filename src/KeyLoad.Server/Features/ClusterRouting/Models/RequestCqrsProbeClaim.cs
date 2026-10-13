@@ -9,4 +9,5 @@ internal sealed record RequestCqrsProbeClaim(RequestCqrsProbeLoadedArm Arm, Grai
     internal RequestCqrsProbeClaim? ReceiverIssueAdjunct { get; set; }
     internal long? EntryIndex { get; init; }
     internal long? EntryTerm { get; init; }
+    internal RequestCqrsMovementJournalRecord? MovementJournal { get; set; }
 }

@@ -33,6 +33,15 @@ internal static class RequestCqrsCanonicalArmValidation
                 && arm.SourceArmId is { } sourceArm && sourceArm != Guid.Empty && sourceArm != arm.ArmId
                 && arm.Partition is null && arm.TargetVoter is null;
         }
+        if (arm.Phase == RequestCqrsProbePhase.SubmitReturned && arm.Partition is { } movementPartition)
+        {
+            return arm.Action == RequestCqrsProbeAction.Hold && arm.ReadKind is null && arm.CommandId != Guid.Empty
+                && arm.TargetVoter is null && arm.SourceRequestId is null && arm.SourceArmId is null
+                && !string.IsNullOrWhiteSpace(movementPartition.TenantId)
+                && !string.IsNullOrWhiteSpace(movementPartition.DatabaseId)
+                && !string.IsNullOrWhiteSpace(movementPartition.TransactionDomainId)
+                && !string.IsNullOrWhiteSpace(movementPartition.PartitionKey);
+        }
         if (arm.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed)
         {
             return arm.Partition is null && arm.SourceRequestId is null && arm.SourceArmId is null

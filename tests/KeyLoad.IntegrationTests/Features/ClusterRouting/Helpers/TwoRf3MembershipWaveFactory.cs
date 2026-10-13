@@ -21,7 +21,7 @@ internal static class TwoRf3MembershipWaveFactory
         => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true), cancellationToken);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(CancellationToken token)
-        => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
+        => TwoRf3MembershipWave.StartOwnedAsync(new TwoRf3MembershipWave(LocalRf3ImageSelection.Read(), register: true, remote: true, query: true, probe: true, protectedDocument: true), token);
 
     internal static Task<TwoRf3MembershipWave> StartProtectedDocumentsAsync(Action<string> observe, CancellationToken token)
         => TwoRf3MembershipWaveStartup.StartOwnedAsync(new TwoRf3MembershipWave(null, register: true, remote: true,

@@ -1,0 +1,67 @@
+using KeyLoad.Query.Features.Search;
+using KeyLoad.Server;
+using KeyLoad.Server.Features.Search;
+
+namespace KeyLoad.UnitTests.Features.Search;
+
+internal static class NativeTextBm25CapturedClosureTrial
+{
+    internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow)
+    {
+        var owner = flow.Owner;
+        var absent = await ReadAsync(flow);
+        var original = flow.Capture(null);
+        var receipt = flow.Publish(original);
+        await flow.RequireHealthyAsync(original, receipt);
+        var entry = NativeSerialization.Serialize(owner.Entry(original.Id));
+        var present = await ReadAsync(flow);
+        await Assert.That(NativeSerialization.Serialize(present).SequenceEqual(
+            NativeSerialization.Serialize(absent))).IsTrue();
+        var baseline = Bm25OriginalPhaseRecoveryState.Read(owner);
+        await Assert.That(NativeSerialization.Serialize(flow.Publish(flow.Reissue(original))).SequenceEqual(
+            NativeSerialization.Serialize(receipt))).IsTrue();
+        await baseline.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, original, entry);
+        owner.Reopen();
+        var cold = await ReadAsync(flow);
+        await Assert.That(NativeSerialization.Serialize(cold).SequenceEqual(
+            NativeSerialization.Serialize(absent))).IsTrue();
+        await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, original, entry);
+    }
+
+    private static async Task<RankedDocument[]> ReadAsync(Bm25OriginalPhaseRecoveryFlow flow)
+    {
+        var owner = flow.Owner;
+        var before = Bm25OriginalPhaseRecoveryState.Read(owner);
+        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var execution = UnitExecutionOptions.QueryExecution().Value;
+        var request = new SearchRequest(owner.Source.Partition, "orders", "/text", "needle");
+        NativeTextProjection? projection = null;
+        ICapturedTextRead? captured = null;
+        RankedDocument[]? result = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            projection = new(Path.Combine(owner.Source.Directory, "bm25-captured-text"),
+                UnitExecutionOptions.DatabaseLimits(owner.Database.Limits), owner.Store.Identity.NodeId,
+                UnitNativeTextOptions.Execution());
+            captured = owner.Database.WithQueryView(Bm25OriginalPhaseRecoveryFlow.Subject,
+                request.Partition, request.Collection, (view, principal, resource) =>
+                    NativeTextCapturedReadFactory.Capture(owner.Database, projection, view,
+                        principal, resource, request, work));
+            var ranker = new TextRanker(request.Text!, request.TextField!, work, execution.TextBudgetCheckInterval,
+                execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
+                work, null, FilteredSearchEligibility.Create(null, work));
+            RankedDocument[] expected = [new(new(new(owner.Source.Partition, "orders", "first"),
+                1L, "{\"text\":\"needle\"}", false, []), 1d / 61d, null)];
+            await Assert.That(NativeSerialization.Serialize(result).SequenceEqual(
+                NativeSerialization.Serialize(expected))).IsTrue();
+        }, failures);
+        ServerFailureObserver.Observe(() => captured?.Dispose(), failures);
+        ServerFailureObserver.Observe(() => projection?.Dispose(), failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        return result!;
+    }
+}

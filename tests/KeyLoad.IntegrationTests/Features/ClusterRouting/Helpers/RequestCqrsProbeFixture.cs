@@ -168,10 +168,11 @@ internal sealed class RequestCqrsProbeFixture
     { lock (sync) { RequestCqrsProbeDisposedGateCleanup.Join(ArmFor(armId), activeGates, originalProducer); } }
 
     internal void JoinKilledOwnerGates(TwoRf3MembershipWave wave, Aspire.Hosting.DistributedApplication originalOwner,
-        IReadOnlyList<Guid> originalArms)
+        IReadOnlyList<Guid> originalArms, KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalRecord? movementJournal = null,
+        RequestCqrsProbeMarkerRecord? originalMarker = null, Task? originalProducer = null)
     {
         lock (sync)
-        { RequestCqrsProbeKilledOwnerCleanup.Join(wave, originalOwner, originalArms, arms, activeGates, Json); }
+        { RequestCqrsProbeKilledOwnerCleanup.Join(wave, originalOwner, originalArms, arms, activeGates, Json, movementJournal, originalMarker, originalProducer); }
     }
 
     internal void RetainEvidence()

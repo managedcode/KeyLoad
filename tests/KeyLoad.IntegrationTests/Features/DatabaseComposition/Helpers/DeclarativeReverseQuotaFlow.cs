@@ -88,7 +88,7 @@ internal static class DeclarativeReverseQuotaFlow
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);
         var actual = await callers.Sdk.ExecuteSqlAsync(sql, token);
         await Assert.That(actual.IsFailed).IsTrue();
-        await Assert.That(actual.Value).IsNull();
+        await Assert.That(actual.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.ResourceExhausted));
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
             ErrorCode.ResourceExhausted, dispatched: true);

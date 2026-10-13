@@ -17,8 +17,7 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         trace.Stage = PhysicalOwnerProbeStage.CallValidation;
         Validate(call, cancellationToken);
         trace.Stage = PhysicalOwnerProbeStage.InitialMembership;
-        var initial = await node.MembershipReadyAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+        var initial = await AwaitInitialMembershipAsync(call, cancellationToken).ConfigureAwait(false);
         trace.Stage = PhysicalOwnerProbeStage.NativeStartup;
         await node.WaitForNativeStartupAsync(cancellationToken).ConfigureAwait(false);
         await NativeReplicaStartupPrerequisite.WaitAsync(node, partition, clock,
@@ -62,6 +61,18 @@ internal sealed class PhysicalOwnerProbeReceiver(OrleansNode node, PartitionHost
         return new(PhysicalOwnerProbeProtocol.Version, call.RequestId, call.Nonce,
             PhysicalOwnerConfiguredTuples.Local(nodeOptions.Value, partition), discovery,
             local.MaterializedPosition, final.ActiveFingerprint);
+    }
+
+    private async Task<MembershipReadinessSnapshot> AwaitInitialMembershipAsync(PhysicalOwnerProbeCallV1 call,
+        CancellationToken token)
+    {
+        while (true)
+        {
+            Validate(call, token);
+            if (await node.MembershipReadyAsync(token).ConfigureAwait(false) is { } ready)
+            { return ready; }
+            await Task.Delay(partition.Configuration.HeartbeatInterval, clock, token).ConfigureAwait(false);
+        }
     }
 
     internal void Validate(PhysicalOwnerProbeCallV1 call, CancellationToken cancellationToken)

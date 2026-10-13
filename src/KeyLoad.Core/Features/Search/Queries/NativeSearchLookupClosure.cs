@@ -6,10 +6,12 @@ namespace KeyLoad.Core.Features.Search;
 internal static class NativeSearchLookupClosure
 {
     internal static void Capture(DatabaseEngine database, IScopedReadCapture source, PrincipalRecord principal,
-        PartitionRef partition, string collection, string? vectorField, ReadExecutionBudget budget)
+        PartitionRef partition, string collection, string? vectorField, string? textField, string tokenizer, ReadExecutionBudget budget)
     {
         source.CapturePrefix(DocumentStorageKeys.Prefix(partition, collection));
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
+        if (textField is not null)
+        { DatabaseEngine.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer); }
         if (vectorField is null)
         { return; }
         var prefix = KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, collection, vectorField);

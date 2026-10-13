@@ -13,7 +13,7 @@ internal sealed partial class NativeTextCapturedRead
         { throw new InvalidOperationException(AlreadySettled); }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => NativeSearchLookupClosure.Capture(database, builder, Principal,
-            request.Partition, request.Collection, request.VectorField, budget), failures);
+            request.Partition, request.Collection, request.VectorField, request.TextField, TextProjectionProtocol.TokenizerVersion, budget), failures);
         if (failures.Count == NoFailures)
         { ServerFailureObserver.Observe(JoinNative, failures); }
         if (failures.Count == NoFailures)

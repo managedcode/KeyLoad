@@ -36,8 +36,12 @@ internal static class SubscriptionInboxPublicAssertions
         var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Conflict, true);
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The canonical conflict envelope is absent.");
-        await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
-            .IsEqualTo("The subscription input was completed with different effects.");
+        var problem = envelope.GetProperty(McpCallerProtocol.Error);
+        await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemType).GetString()).IsEqualTo("urn:keyload:error:Conflict");
+        await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemTitle).GetString()).IsEqualTo("Conflict");
+        await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemStatus).GetInt32()).IsEqualTo(409);
+        await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString())
+            .IsEqualTo("The database operation could not be completed.");
         await SubscriptionFilterRf3Assertions.EqualAsync(
             await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(request.Subscription, token)), before);
         await DocumentsAsync(sdk, request.Subscription, token);

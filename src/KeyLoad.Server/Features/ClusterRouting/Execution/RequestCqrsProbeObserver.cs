@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
+internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGrainPartitionMovementJournalObserver, IGrainRequestProducerDisposedObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeFaultObserver, global::KeyLoad.Server.Features.DocumentStorage.IRemoteModelNativeReplayObserver, IAsyncDisposable
 {
     private readonly Lock disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
@@ -78,6 +78,10 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         return new ValueTask(ObserveCoreAsync(identity, phase, context, cancellationToken));
     }
 
+    public void CaptureReturned(GrainRequestProbeIdentity identity, OperationResult actual, IGrainContext context)
+        => RequestCqrsMovementJournalCapture.CaptureReturned(lifecycle, files, identity, actual,
+            context, replica.LocalId, siloAddress);
+
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -134,7 +138,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
             var marker = CreateMarker(claim, selectedPhase, outcome);
             if (selectedPhase == RequestCqrsProbePhase.EventVectorFirstDispatchReserved)
             { files.EventVectorExpiry.Publish(claim); }
-            files.WriteMarker(marker);
+            RequestCqrsMovementJournalCapture.PublishReturned(files, claim, marker);
             RequestCqrsProbeActivationCapture.Observe(files, marker, context);
             if (gate && selectedPhase == RequestCqrsProbePhase.RequestStarted)
             { await connections.Value.ObserveAsync(marker, context, requestCancellation).ConfigureAwait(true); }
@@ -152,25 +156,8 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
 
     private RequestCqrsProbeClaim? Claim(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         RequestCqrsProbeSnapshot snapshot)
-    {
-        if (!TryGetPhase(phase, out _))
-        { throw Invalid(); }
-        if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState context
-            || context.RequestId != identity.RequestId || context.CommandId != identity.CommandId || context.ConnectionId == Guid.Empty)
-        { throw Invalid(); }
-        var existing = lifecycle.FindClaim(identity.RequestId);
-        if (existing is not null)
-        {
-            if (existing.Identity != identity || existing.ConnectionId != context.ConnectionId)
-            { throw Invalid(); }
-            return existing;
-        }
-        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot, replica.LocalId, phase);
-        if (selected is null)
-        { return null; }
-        // Retain the first validated request identity so the later disposal callback can join across voters.
-        return lifecycle.AddClaim(identity, selected, context.ConnectionId);
-    }
+        => RequestCqrsProbeClaimSelection.Bind(identity, phase, snapshot, replica.LocalId, lifecycle,
+            TryGetPhase(phase, out _));
 
     private static bool TryGetPhase(GrainRequestPhase phase, out RequestCqrsProbePhase selectedPhase)
         => Enum.TryParse(phase.ToString(), ignoreCase: false, out selectedPhase);
@@ -224,5 +211,4 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IGr
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);
 }

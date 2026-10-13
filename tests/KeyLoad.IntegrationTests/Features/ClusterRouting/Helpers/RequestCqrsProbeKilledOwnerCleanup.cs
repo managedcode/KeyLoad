@@ -10,8 +10,17 @@ internal static class RequestCqrsProbeKilledOwnerCleanup
 
     internal static void Join(TwoRf3MembershipWave wave, DistributedApplication originalOwner,
         IReadOnlyList<Guid> originalArms, IReadOnlyDictionary<Guid, RequestCqrsProbeArmState> arms,
-        IDictionary<string, int> gates, RequestCqrsProbeJson json)
+        IDictionary<string, int> gates, RequestCqrsProbeJson json,
+        KeyLoad.Server.Features.ClusterRouting.RequestCqrsMovementJournalRecord? movementJournal = null,
+        KeyLoad.Server.Features.ClusterRouting.RequestCqrsProbeMarkerRecord? originalMarker = null,
+        Task? originalProducer = null)
     {
+        if (movementJournal is not null || originalMarker is not null || originalProducer is not null)
+        {
+            RequestCqrsMovementJournalOwnerJoin.JoinSelected(wave, originalOwner, originalArms, arms, gates,
+                json, movementJournal, originalMarker, originalProducer);
+            return;
+        }
         if (!wave.applicationDisposed || !wave.nodeLocksReleased || wave.application is not null
             || originalArms.Count != ExactPair || originalArms.Distinct().Count() != originalArms.Count)
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.UnsettledGates); }
