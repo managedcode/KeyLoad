@@ -23,6 +23,8 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
     private const string ForeignCustomer = """{"id":"foreign","name":"8"}""";
     private const string MissingCustomer = """{"name":"8"}""";
     private const string NonTextCustomer = """{"id":7,"name":"8"}""";
+    private const string DuplicateOrder = """{"order_id":"foreign","order_id":"z","customer_id":"c2","total":8}""";
+    private const string DuplicateCustomer = """{"id":"foreign","id":"c2","name":"8"}""";
     private const string MissingOriginal = "The original retained primary identity row is absent.";
     private const string MalformedRow = "{";
     private const string NonObjectRow = "[]";
@@ -56,8 +58,8 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
                 left ? Left : Right, left ? LastLeft : LastRight);
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingOriginal);
             var row = global::KeyLoad.NativeSerialization.Deserialize<global::KeyLoad.DocumentRecord>(bytes);
-            foreach (var json in left ? new[] { ForeignOrder, MissingOrder, NonTextOrder, MalformedRow, NonObjectRow }
-                : new[] { ForeignCustomer, MissingCustomer, NonTextCustomer, MalformedRow, NonObjectRow })
+            foreach (var json in left ? new[] { ForeignOrder, MissingOrder, NonTextOrder, MalformedRow, NonObjectRow, DuplicateOrder }
+                : new[] { ForeignCustomer, MissingCustomer, NonTextCustomer, MalformedRow, NonObjectRow, DuplicateCustomer })
             { faults.Add(new(key, bytes, global::KeyLoad.NativeSerialization.Serialize(row with { Json = json }), left)); }
         }
         return [.. faults];

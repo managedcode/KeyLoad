@@ -18,13 +18,26 @@ internal static class RelationalInnerJoinRetainedRows
 
     internal static void ValidatePrimaryIdentity(global::System.Text.Json.JsonElement json, string primaryKey, string id)
     {
-        if (json.ValueKind != global::System.Text.Json.JsonValueKind.Object || !json.TryGetProperty(primaryKey, out var value)
-            || value.ValueKind != global::System.Text.Json.JsonValueKind.String || value.GetString() != id)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt);
-        }
+        if (json.ValueKind != global::System.Text.Json.JsonValueKind.Object)
+        { throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt); }
+        var value = FindUniquePrimaryValue(json, primaryKey);
+        if (value is not { ValueKind: global::System.Text.Json.JsonValueKind.String } primary || primary.GetString() != id)
+        { throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt); }
     }
 
+    private static global::System.Text.Json.JsonElement? FindUniquePrimaryValue(global::System.Text.Json.JsonElement row, string primaryKey)
+    {
+        global::System.Text.Json.JsonElement? primary = null;
+        foreach (var property in row.EnumerateObject())
+        {
+            if (!property.NameEquals(primaryKey))
+            { continue; }
+            if (primary is not null)
+            { throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt); }
+            primary = property.Value;
+        }
+        return primary;
+    }
     internal static void ValidateLeftIdentity(PartitionRef partition, string collection,
         ReadOnlySpan<byte> key, DocumentRecord record)
     {

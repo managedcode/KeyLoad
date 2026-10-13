@@ -77,10 +77,18 @@ internal sealed class ControlledPartitionMovementNativeObservationWitness : IPar
         }
 
         internal void RequireAndReport()
+            => RequireAndReport(null);
+
+        internal void RequireAndReport(PartitionMovementNativeObservationStage expectedStage, ErrorCode expectedError,
+            bool authenticated, bool dispatched)
+            => RequireAndReport(new(expectedStage, expectedError, authenticated, dispatched));
+
+        private void RequireAndReport(Terminal? expected)
         {
             lock (owner.gate)
             {
-                if (terminal is not { } value || completions != ExpectedCompletions)
+                if (terminal is not { } value || completions != ExpectedCompletions
+                    || expected is not null && value != expected)
                 { throw new InvalidOperationException(Unjoined); }
                 Console.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, ReportFormat, nonce,
                     value.Stage, value.Error, value.Authenticated, value.Dispatched));

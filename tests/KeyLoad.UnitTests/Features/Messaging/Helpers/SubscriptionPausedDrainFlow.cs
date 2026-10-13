@@ -71,14 +71,15 @@ internal static class SubscriptionPausedDrainFlow
             QueueWholeFlowStorage.Clock(cold).AddSeconds(1)), history).Get<SubscriptionInfo>();
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 3, 3, false);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
-        await HealthyAsync(db, cold, group, 4, history, token);
+        var fourth = await HealthyAsync(db, cold, group, 4, history, token);
         var after = SubscriptionCheckpointAuthorityAssertions.SourceImage(cold, group.Source.Partition);
-        await SecondColdAsync(cold, fixture.Directory, group, request, original, claimSaved, history, after, token);
+        await SecondColdAsync(cold, fixture.Directory, group, request, original, claimSaved, history, after, fourth, token);
     }
 
     private static async Task SecondColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group,
         ReceiveSubscriptionRequest request, OperationResult original, byte[] claimSaved,
-        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, string[] source, CancellationToken token)
+        List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, string[] source,
+        SourceEventRecord fourth, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -88,17 +89,20 @@ internal static class SubscriptionPausedDrainFlow
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
-        await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, cold, group.Source, source);
+        var retained = original.Get<ReceiveSubscriptionResult>().Deliveries.Select(delivery => delivery.Event).Append(fourth).ToArray();
+        await SubscriptionPausedDrainAssertions.SourceAsync(db, cold, group.Source, source, retained);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
         await SubscriptionPausedDrainAssertions.OriginalClaimAsync(db, cold, request, original, claimSaved, token);
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 4, 4, false);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
-        await HealthyAsync(db, cold, group, 5, history, token);
+        var fifth = await HealthyAsync(db, cold, group, 5, history, token);
+        var after = SubscriptionCheckpointAuthorityAssertions.SourceImage(cold, group.Source.Partition);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
+        await SubscriptionPausedDrainAssertions.SourceAsync(db, cold, group.Source, after, [.. retained, fifth]);
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 5, 5, false);
     }
 
-    private static async Task HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, long number,
+    private static async Task<SourceEventRecord> HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, long number,
         List<(ReplicatedOperation Operation, OperationResult Result, byte[] Saved)> history, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -120,6 +124,7 @@ internal static class SubscriptionPausedDrainFlow
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, original, token);
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, number, number, false);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(store, group);
+        return expected.Event;
     }
 
     private static async Task AckAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, SubscriptionDelivery delivery,

@@ -13,7 +13,8 @@ internal static class RemoteTransferRepairStateValidation
         var first = RemoteTransferRepairProtocol.InitialGeneration;
         if (state.Ceiling < first || state.AcceptPolicyGeneration < first || state.CompleteGeneration < first
             || state.History.IsDefault || state.History.Length >= state.Ceiling
-            || state.History.Length != checked(state.AcceptPolicyGeneration - first + state.CompleteGeneration - first))
+            || state.AcceptPolicyGeneration - first > state.History.Length
+            || state.CompleteGeneration - first != state.History.Length - (state.AcceptPolicyGeneration - first))
         { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
         var policy = first;
         var complete = first;
@@ -29,5 +30,7 @@ internal static class RemoteTransferRepairStateValidation
             else
             { complete = checked(complete + first); }
         }
+        if (policy != state.AcceptPolicyGeneration || complete != state.CompleteGeneration)
+        { throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid); }
     }
 }

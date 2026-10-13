@@ -948,3 +948,98 @@ Docs-first diagnostic refinement of REQ/AC-BACKUP-RESTORE-RESUME-001..003 and BA
 The BackupRestore test emits one bounded typed phase record after original owner cleanup settles: original last body phase, latest cleanup phase, failure count, caller/deadline cancellation flags and elapsed time. Startup strings map only to a closed enum; arbitrary text is never output. Failed body phase is captured before cleanup so shutdown does not overwrite it. Output failures enter the same ordered failure ledger after original failures. No exception wrapping, detached work, additional timer/request, trace/principal/key/payload/endpoint content, retry, admission or bound change. Last awaited phase is evidence only; exact cause remains Unknown.
 
 Automated acceptance remains the same original three restore and seven process-cut whole flows, with real Aspire RF3 SDK/official MCP callers and cleanup. Canonical compiler/formatter, fresh native census/report/image binding and original Linux qualification are pending. Closure015 full fault/repair images remain independently preserved; neither source packet claims to repair the original8e4 failure.
+
+
+### Native journal repair continuation
+
+REQ-BACKUP-JOURNAL-REPAIR-001: a native backup whose outer manifest matches the
+stored WAL bytes must still reject a corrupted committed frame checksum without
+publishing a destination. Repair restores the exact original WAL and manifest;
+the original archive then restores canonical data under new authority with
+dispatch paused. No checksum, identity, durability or cut check is relaxed.
+
+AC-BACKUP-JOURNAL-REPAIR-001 maps to
+`NativeBackupJournalRepairTests.HashConsistentJournalRefusalRepairsExactArchiveAndSurvivesTwoColdReopens`
+with checkpoint=false and checkpoint=true. The genuine existing
+NativeBackupCutFixture creates each archive. A one-byte checksum fault in the
+last original WAL frame is followed by the existing native manifest update.
+The real Restore must report Corruption with the original journal-checksum
+detail; destination publication and staging leftovers are refused, the entire
+faulted archive stays byte-identical, and the original source identity, complete
+rows and position remain unchanged.
+
+AC-BACKUP-JOURNAL-REPAIR-002 maps to the same two cases. Both original journal
+and manifest bytes are restored under an ordered failure ledger. VerifyBackup
+must again return the original identity and cut. Restore must create distinct
+node/incarnation/signing authority, preserve durability, pause dispatch and
+advance only its actual authority transaction. Literal metadata value and pause
+row constitute the complete restored fixture image. Two separately disposed
+and reopened native owners must preserve that complete image, position and
+full native identity. The original source and complete repaired archive remain
+unchanged. Cancellation is checked before new work; repair and disposal still
+join and preserve primary plus cleanup failures.
+
+Canonical source map: UnitTests/Features/BackupRestore/Cases/
+NativeBackupJournalRepairTests, Helpers/NativeBackupJournalRepairTrial,
+Assertions/NativeBackupJournalRepairAssertions. This acceptance contribution
+uses genuine ZoneTree native Restore/VerifyBackup and original fixture ownership;
+it is not a public SDK/MCP, Orleans replica admission, process-kill or Aspire RF3
+qualification. Compiler, runtime and Linux qualification remain OPEN.
+
+```mermaid
+flowchart LR
+    A[Original native backup and complete source cut] --> B[Original last-frame checksum fault]
+    B --> C[Matching outer manifest and native restore refusal]
+    C --> D[Exact original WAL and manifest repair]
+    D --> E[Verified original cut and new paused restore authority]
+    E --> F[Cold reopen one with complete image parity]
+    F --> G[Cold reopen two and unchanged original source/archive]
+```
+
+The two new checkpoint arguments use the modern per-test native TUnit
+TestContext.Current.Execution.CancellationToken. No case UID is inferred from
+source and no broader session cancellation is substituted.
+
+
+## TASK-BACKUP-CLI-JOURNAL-REPAIR-001 — actual CLI native-frame refusal and cold repair
+
+REQ-BACKUP-CLI-JOURNAL-001 / AC-BACKUP-CLI-JOURNAL-001 refine REQ/AC-BACKUP-002:
+the original NativeBackupCutFixture with checkpoint false/true creates a genuine
+native archive and closed source. Change only the original last WAL frame's
+checksum byte and update its existing manifest hash. Actual Release CLI restore
+must twice report exit1, Corruption and the existing JournalChecksumInvalid detail,
+with empty stdout, joined original child/stdout/stderr/disposal, no destination,
+unchanged complete damaged archive and complete source cut. This does not weaken
+native frame verification merely because the archive file hash matches.
+
+REQ-BACKUP-CLI-JOURNAL-002 / AC-BACKUP-CLI-JOURNAL-002 refine REQ/AC-BACKUP-002/003:
+after all original child joins, independently repair the exact original journal
+and manifest under the ordered failure ledger. A fresh real CLI restore must
+return NodeId/Incarnation/DispatchPaused bound to the actual reopened target,
+new authority and the independently literal complete restored rows and original
+backup cut plus the native single authority-reset commit. Two further joined
+close/reopens retain every identity field, complete canonical image and physical
+cut; the original source and repaired archive remain exact. No failed branch
+continues to healthy restore. The original process execution and settlement
+limits, caller cancellation, fixture and CLI implementation remain unchanged.
+
+Ownership is BackupRestore Cases/CliBackupJournalRepairTests,
+Helpers/CliBackupJournalRepairTrial and Assertions/CliBackupJournalRepairAssertions.
+This additive packet requires the reviewed Backup R2 NativeBackupJournalRepairAssertions;
+its bounded complete archive/row reader and independent literal restored-state
+oracle are reused, not replaced. The two original bool Arguments select existing
+checkpoint modes; no runtime UID or discovery count is inferred. This is actual
+CLI child and native node-local cold proof supporting KL-043/KL-042, not process-kill,
+RF3, SDK/MCP or power-loss qualification. Compiler/current runtime/Linux remain
+OPEN. Product/public formats, serializer IDs, topology, limits, clock, policy and
+shared configuration are unchanged. Rollback removes only the new roles and this
+append, preserving all original cases and failed receipts.
+
+```mermaid
+flowchart LR
+  A[Original closed native archive] --> B[One frame checksum fault and matching file hash]
+  B --> C[Two actual CLI refusals and full unchanged cuts]
+  C --> D[Joined child and exact original archive repair]
+  D --> E[Actual CLI restore and literal new authority cut]
+  E --> F[Two joined cold reopens and exact original source/archive]
+```

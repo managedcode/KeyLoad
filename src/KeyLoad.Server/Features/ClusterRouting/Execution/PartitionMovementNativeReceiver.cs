@@ -80,6 +80,7 @@ internal sealed class PartitionMovementNativeReceiver(PartitionMovementRuntime r
                         voter, address, observeStage, caller), bounded, observeStage).ConfigureAwait(false);
                 authenticated = true;
                 observation?.Authenticated = true;
+                admission.RequireNativeExpiryReplay(request, observeStage, bounded);
                 return await PartitionMovementNativeLifetime.WithinExpiryAsync(this, request.ExpiresAt, inner =>
                 {
                     inner.ThrowIfCancellationRequested();

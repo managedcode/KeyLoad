@@ -23,23 +23,36 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         await Assert.That(original.OwnershipEpoch).IsEqualTo(seed.OriginalPlacement.PlacementEpoch);
         var expected = new DocumentResult(seed.Models.First, DocumentRevision, RelationalSqlRf3Tokens.FirstRow, false, []);
         await RequireReadAsync(seed, seed.Models.First, original, expected, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.RefuseRepeatedPartitionAsync(seed, token);
+        var cursorOriginal = await MovementCursorRf3Corpus.SeedAsync(seed, token);
+        var controls = await CurrentOwnershipTokenAfterMovementRf3ReadControls.CaptureAsync(seed, original, token);
         var moved = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.MovePartitionAsync(
             seed.FirstRequest, token).ConfigureAwait(false));
         var publication = checked(seed.OriginalPlacement.DirectoryRevision + RevisionIncrement);
         await PhysicalShardPartitionMovementRf3Placement.RequireAsync(seed, seed.FirstRequest, seed.OriginalPlacement,
             seed.Directory.ControlOwner, moved, publication, publication, token);
         await RequireInvalidAsync(seed, original, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.InvalidAsync(seed, original, controls.Cursor, token);
+        await MovementCursorRf3Query.RefuseAsync(seed, cursorOriginal.Pages, token);
+        await MovementCursorRf3Live.RefuseAsync(seed, cursorOriginal.Lives, token);
+        await MovementCursorRf3Stream.RefuseAsync(seed, cursorOriginal.Streams, token);
+        await MovementCursorRf3Corpus.ReplayAsync(seed, cursorOriginal, token);
         await seed.VerifyAsync(token);
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);
         await PartitionMovementPublicParentRf3Cut.RequireCompactedAsync(before);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         await RequireInvalidAsync(seed, original, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.InvalidAsync(seed, original, controls.Cursor, token);
+        await MovementCursorRf3Query.RefuseAsync(seed, cursorOriginal.Pages, token);
+        await MovementCursorRf3Live.RefuseAsync(seed, cursorOriginal.Lives, token);
+        await MovementCursorRf3Stream.RefuseAsync(seed, cursorOriginal.Streams, token);
+        await MovementCursorRf3Corpus.ReplayAsync(seed, cursorOriginal, token);
         await PartitionMovementPublicCallerReplay.RequireAsync(seed.Source, seed.Official, seed.FirstRequest, moved, token);
         await seed.VerifyAsync(token);
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);
         await SqlRf3Protocol.EqualAsync(before, after);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
-        await RequireHealthyAsync(wave, seed, moved, original, token);
+        await RequireHealthyAsync(wave, seed, moved, original, controls.Cursor, controls.PolicyEpoch, cursorOriginal, token);
     }
 
     private static async Task RequireInvalidAsync(PartitionMovementPublicParentRf3Seed seed, CommitToken original,
@@ -71,8 +84,13 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
     }
 
     private static async Task RequireHealthyAsync(TwoRf3MembershipWave wave, PartitionMovementPublicParentRf3Seed seed,
-        PartitionMoveResult moved, CommitToken original, CancellationToken token)
+        PartitionMoveResult moved, CommitToken original, string originalCursor, long originalPolicyEpoch,
+        MovementCursorRf3Original cursorOriginal, CancellationToken token)
     {
+        var currentPages = await MovementCursorRf3Query.CaptureAsync(seed, token);
+        var currentLives = await MovementCursorRf3Live.CaptureAsync(seed, token);
+        var currentStreams = await MovementCursorRf3Stream.CaptureAsync(seed, token);
+        var currentCursor = await CurrentOwnershipTokenAfterMovementRf3ReadControls.CaptureCursorAsync(seed, token);
         var command = seed.Models.Command(new PutDocument(RelationalSqlRf3Tokens.Documents,
             CurrentDocumentId, CurrentDocumentJson));
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await seed.Source.CommitAsync(command, token));
@@ -85,11 +103,28 @@ internal static class CurrentOwnershipTokenAfterMovementRf3Flow
         var expected = new DocumentResult(new(seed.Partition, RelationalSqlRf3Tokens.Documents, CurrentDocumentId),
             DocumentRevision, CurrentDocumentJson, false, []);
         await RequireReadAsync(seed, expected.Reference, receipt.Token, expected, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.HealthyAsync(seed, receipt.Token,
+            originalPolicyEpoch, currentCursor, expected, token);
+        await MovementCursorRf3Query.ContinueAsync(seed, currentPages, token);
+        await MovementCursorRf3Live.ContinueAsync(seed, currentLives, token);
+        await MovementCursorRf3Stream.ContinueAsync(seed, currentStreams, token);
         await RequireReceiptAsync(seed, command, receipt, token);
         var before = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);
         await PartitionMovementPublicParentRf3Cut.RestartAsync(wave, token);
         await RequireInvalidAsync(seed, original, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.InvalidAsync(seed, original, originalCursor, token);
+        await MovementCursorRf3Query.RefuseAsync(seed, cursorOriginal.Pages, token);
+        await MovementCursorRf3Live.RefuseAsync(seed, cursorOriginal.Lives, token);
+        await MovementCursorRf3Stream.RefuseAsync(seed, cursorOriginal.Streams, token);
+        await MovementCursorRf3Query.RefuseAsync(seed, currentPages, token);
+        await MovementCursorRf3Live.ContinueAsync(seed, currentLives, token);
+        await MovementCursorRf3Stream.ContinueAsync(seed, currentStreams, token);
+        await MovementCursorRf3Query.CaptureAsync(seed, token);
+        await MovementCursorRf3Live.CaptureAsync(seed, token);
+        await MovementCursorRf3Corpus.ReplayAsync(seed, cursorOriginal, token);
         await RequireReadAsync(seed, expected.Reference, receipt.Token, expected, token);
+        await CurrentOwnershipTokenAfterMovementRf3ReadControls.HealthyAsync(seed, receipt.Token,
+            originalPolicyEpoch, currentCursor, expected, token);
         await RequireReceiptAsync(seed, command, receipt, token);
         await seed.VerifyAsync(token);
         var after = await PartitionMovementPublicParentRf3Cut.StopAndReadAsync(wave, seed.FirstRequest, token);

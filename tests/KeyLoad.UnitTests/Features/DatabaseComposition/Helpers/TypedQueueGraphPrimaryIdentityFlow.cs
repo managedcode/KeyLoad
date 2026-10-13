@@ -9,8 +9,12 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
     private const string MalformedPrimaryJson = "{";
     private const string NonObjectPrimaryJson = "[]";
 
+    private const string DuplicateFirstPrimaryJson = """{"id":"foreign","id":"first","name":"first"}""";
+    private const string DuplicateSecondPrimaryJson = """{"id":"foreign","id":"second","name":"second"}""";
+
     internal static IEnumerable<string> Faults =>
-        [ForeignPrimaryJson, MissingPrimaryJson, NonTextPrimaryJson, MalformedPrimaryJson, NonObjectPrimaryJson];
+        [ForeignPrimaryJson, MissingPrimaryJson, NonTextPrimaryJson, MalformedPrimaryJson, NonObjectPrimaryJson,
+         DuplicateFirstPrimaryJson, DuplicateSecondPrimaryJson];
 
     internal static async Task RunAsync(TestDatabase db, bool from, string json)
     {

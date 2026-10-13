@@ -8,6 +8,16 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class SubscriptionPausedDrainAssertions
 {
+    internal static async Task SourceAsync(DatabaseEngine db, ZoneTreeStore store, EventSourceRef source,
+        string[] original, SourceEventRecord[] expected)
+    {
+        await Assert.That(SubscriptionCheckpointAuthorityAssertions.SourceImage(store, source.Partition))
+            .IsEquivalentTo(original, CollectionOrdering.Matching);
+        var events = db.ReadEventSource("root", new(source)).Events;
+        await Assert.That(JsonSerializer.Serialize(events, JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
+    }
+
     internal static Task StatusAsync(DatabaseEngine db, SubscriptionRef group, long checkpoint, long tail, bool paused)
         => SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new() { MaxWindow = 3 },
             1, checkpoint, tail, tail, paused, null);

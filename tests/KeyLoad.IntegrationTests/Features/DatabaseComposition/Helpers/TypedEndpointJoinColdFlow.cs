@@ -11,24 +11,25 @@ internal static class TypedEndpointJoinColdFlow
 
     internal static async Task RunAsync(ClusterFixture fixture, TypedEndpointJoinState original, CancellationToken token)
     {
+        original = await TypedEndpointJoinReverseFlow.WarmAsync(fixture, original, token);
         await ModelSqlRf3Cold.RunAsync(fixture, token);
         var continued = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
             await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, original.Seed.Identity.Secret,
-                async callers => await ContinueAsync(admin, callers, original, token), token), token);
+                async callers => await ContinueAsync(fixture, admin, callers, original, token), token), token);
         await ModelSqlRf3Cold.RunAsync(fixture, token);
         await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey, async admin =>
             await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, continued.Seed.Identity.Secret, async callers =>
         {
-            await AssertOriginalAsync(admin, callers, continued, token);
+            await AssertOriginalAsync(fixture, admin, callers, continued, token);
             await TypedEndpointJoinAssertions.LiteralAsync(continued.Models, continued.Seed.Partition, continued: true, joined: true);
             return true;
         }, token), token);
     }
 
-    private static async Task<TypedEndpointJoinState> ContinueAsync(RequestCqrsRf3Callers admin,
+    private static async Task<TypedEndpointJoinState> ContinueAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
         RequestCqrsRf3Callers callers, TypedEndpointJoinState state, CancellationToken token)
     {
-        await AssertOriginalAsync(admin, callers, state, token);
+        await AssertOriginalAsync(fixture, admin, callers, state, token);
         var revoked = await TypedEndpointJoinAuthority.PolicyAsync(admin, state.Seed.Partition, state.Seed.ToDefinition,
             TypedEndpointJoinProtocol.BlockedUseGrant, token);
         await TypedEndpointJoinAuthority.DeniedAsync(callers, state.Healthy, token);
@@ -59,13 +60,15 @@ internal static class TypedEndpointJoinColdFlow
         return state with { Models = models, Continuation = continuation, ContinuationReceipt = receipt };
     }
 
-    private static async Task AssertOriginalAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers callers,
+    private static async Task AssertOriginalAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin, RequestCqrsRf3Callers callers,
         TypedEndpointJoinState state, CancellationToken token)
     {
         await SqlRf3Protocol.EqualAsync(state.Models, await TypedEndpointJoinAssertions.CaptureAsync(admin, state.Seed.Partition, token));
         await SqlRf3Protocol.EqualAsync(state.OriginalProblem,
             await TypedEndpointJoinAuthority.DeniedAsync(callers, state.OriginalDenied, token));
         await TypedEndpointJoinAssertions.ReplayAsync(callers, state.Healthy, state.Receipt, token);
+        if (state.Reverse is not null)
+        { await TypedEndpointJoinReverseAssertions.OriginalAsync(fixture, admin, state, token); }
         if (state.Malformed is { } malformed && state.MalformedProblem is { } problem)
         { await SqlRf3Protocol.EqualAsync(problem, await RefusedMalformedAsync(callers, malformed, token)); }
         if (state.Continuation is { } continuation && state.ContinuationReceipt is { } receipt)

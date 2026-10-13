@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R32 final whole-solution formatter, native analyzers and Release passed zero errors/warnings. Four disjoint frozen-source/image native50 local lanes executed80 unique cases:76 passed,4 failed,0 skipped. SQL35/35, Messaging11/12, Cluster15/16, movement/blob15/17; all native process/readers/disposal joined, original failures retained. Two new typed composition and new blob flows passed; R31 visibility failed UID now passed. Current census3762 (3228 functional/534 required controls) validated; discovery is not execution or coverage. Original plan19/104 done,85 in progress; KL105 separate/open, no reachable process in collector attempts, coverage unmeasured, exact-source Linux/RF3/fault/endurance/performance open.",
+    "qualification": "R33 Release179.936s, whole-solution formatter203.335s and native diagnostics passed0 errors/warnings. Two source/image-bound native50 local Aspire groups executed74 unique cases:65 passed,9 failed,0 skipped (Unit63/66; public RF3 SDK/MCP2/8). Every original process/readers/disposal joined, source/image/deployment closure unchanged. Original native Prepare nonce and paused-drain corrections, remote-transfer arithmetic, four backup/CLI flows and both public blob flows passed. Full FTS, Messaging/SQL public oracles, startup physical ownership and custom movement image admission remain failed until corrected successors execute. Actual census3770Unit/433Integration (3236 functionalUnit/534 controls) is neither execution nor coverage. Original plan19/104 done,85 in progress; KL105 separate/open after inaccessible diagnostic endpoint, coverage unmeasured, exact-source Linux/full-suite/fault/endurance/performance open.",
     "coverage": "unmeasured",
     "sourceIntegration": {
       "graph": {
@@ -211,6 +211,15 @@
         "scope": "Queue terminal/undefined-state inspection authority with exact repair, replay and two cold owners; independent196-entry abort journal oracle; Event SQL/AST dirty-cold refusals and actual native Q2 cancellation; first native startup exception identity; six-owner probe registration and per-scenario cold-discovery ownership; issued BM25 phase/count cold recovery and original portable-head assertions; failed large child-capture artifact ownership",
         "runtime": "Current focused native execution completed with 265/276 passing; full tasks and Linux qualification remain open. See runtimeObservedR27.",
         "preparedNextScopes": "Strict earlier-head body authority; complete original Receive replay; RF3 Q2 admitted cancellation; first native receiver cause preservation; actual three-partition partial/refusal/resume remain proposals until separately applied and verified"
+      },
+      "r33CompleteBatch": {
+        "record": "docs/implementation/stage64-r33-development-20261013.json",
+        "rootProof": {
+          "path": "TestResults/stage61-native-join/stage64-r33-root-independent-reconciliation.original.json",
+          "sha256": "d10fb4507236de687d7151c1dba519717144cacb3f707d652076c7596c6d907e"
+        },
+        "qualified": false,
+        "behavior": "Canonical duplicate typed-primary refusal, bounded persisted transfer-generation arithmetic, signed movement nonce refusal, full SDK/MCP composition/subscription/blob/search/cursor and native/CLI backup whole flows; actual individual successes and failures recorded separately."
       }
     },
     "nativeDiagnostics": {
@@ -1173,13 +1182,47 @@
       "coverage": "unmeasured"
     },
     "runtimeObservedR32": {
-      "record": "docs/implementation/stage64-r32-development-20261012.json",
+      "record": "docs/implementation/stage64-r32-development-corrected-20261012.json",
       "executedUniqueCases": 80,
       "passed": 76,
       "failed": 4,
       "skipped": 0,
       "duplicates": 0,
       "nativeMaximumParallelTests": 50,
+      "allOwnersJoined": true,
+      "newTaskAcceptance": false,
+      "coverage": "unmeasured",
+      "sourceOrderCorrection": {
+        "originalRecordPreserved": {
+          "path": "docs/implementation/stage64-r32-development-20261012.json",
+          "sha256": "92dc45da73eeea7cae7c20ddc8b310a76b254fbd3734fc92ad156e5c5a10423e"
+        },
+        "nativeSourceOrderProof": {
+          "path": "TestResults/stage61-native-join/stage64-r32-prepare-order-correction.native-source.original.json",
+          "sha256": "88d79d0f9b1f4e02e2cf81f0d32d30938e0690696479fa7485c6f192f11959aa"
+        },
+        "actualNativeUidTrxOutcomesChanged": false,
+        "taskAcceptanceChanged": false
+      }
+    },
+    "runtimeObservedR33": {
+      "record": "docs/implementation/stage64-r33-development-20261013.json",
+      "executedUniqueCases": 74,
+      "passed": 65,
+      "failed": 9,
+      "skipped": 0,
+      "unit": {
+        "executed": 66,
+        "passed": 63,
+        "failed": 3
+      },
+      "rf3": {
+        "executed": 8,
+        "passed": 2,
+        "failed": 6
+      },
+      "nativeMaximumParallelTests": 50,
+      "actualTrxIntervalPeak": 21,
       "allOwnersJoined": true,
       "newTaskAcceptance": false,
       "coverage": "unmeasured"
@@ -58314,7 +58357,7 @@
       "Complete current-format write, reopen, WAL replay, compaction, checkpoint, backup and restore operations with exact state and authority assertions.",
       "Complete strict absent, zero, unknown and corrupt identity/capability rejection flows without file or state mutation.",
       "Retain real process recovery and current RF3 SDK/MCP operations, including incompatible signed-purpose/capability rejection and unchanged state.",
-      "Run complete current-source build, formatter, analyzers, normal/scalar/recovery/RF3 and exact-source Linux qualification; no current acceptance is closed by this proposal."
+      "Run complete current-source build, formatter, analyzers, mandatory-SIMD/recovery/RF3 and exact-source Linux qualification; no current acceptance is closed by source implementation alone."
     ],
     "verificationStage": "R290 full Release and R294 format pass; current InternalSerialization/query/typed-row/scan owning normal/scalar606/606 and real indexed/idempotency process recovery2/2 pass. This is a subset, not the complete current-format recovery/RF3 or original Linux gate; no migration or legacy format path is added.",
     "coverage": "unmeasured",

@@ -1,3 +1,13 @@
+## Public model operation selection
+
+REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006 admit this exact additional local development selector under ADR-117/118/119:
+
+    /*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests)/*
+
+The native selector and fixture argument reader must agree on this literal seven-class union. It selects every actual native method and Arguments in those classes: typed SQL composition and queue quota refusal/repair, subscription phases, blob supersession and partial reads, protected text search, and partition movement. Fresh discovery determines actual identities and counts; this contract does not invent UIDs or execution results.
+
+Preserve the original native50 default, all existing selector controls, bounded image/source verification, Aspire-owned genuine RF3 membership, discovered SDK and official MCP endpoints, current persisted authorization, original deadlines, cancellation and joined cleanup. The existing native entry operation flow verifies exact argv/environment propagation and refuses near-miss selectors plus inherited, mixed and GitHub identities. Default and Linux image admission remain unchanged. Local evidence cannot close Linux, full-suite, fault, endurance, coverage or benchmark qualification.
+
 # TestInfrastructure
 
 ## Native Aspire startup stage evidence, 2026-10-12
@@ -1450,3 +1460,5 @@ REQ-UNIT-OWNED-FAILURE-SETTLEMENT-001: Genuine SampleChunkPartialRetention, Remo
 AC-UNIT-OWNED-FAILURE-SETTLEMENT-001: All original retention/merge/refusal/replay/two-cold, native MAC sign/verify/privacy and read-consumer failure→retained charge→settlement→healthy→cold assertions and declarations remain unchanged. No invented failure/provider, no cap/deadline/default/protocol changes. Native fix-first exact rows returned NotFound; source-only preview/reconstruction does not establish analyzer or runtime PASS. Canonical Unit50 SIMD and exact source/image/current UID discovery remain mandatory OPEN gates.
 
 Source map: TimeSeries/Fixtures/SampleChunkPartialRetentionFixture.cs and Helpers/SampleChunkPartialRetentionFlow.cs; DocumentStorage/Fixtures/RemoteModelNativeMacFixture.cs; ResourceExecution/Helpers/ReadGrantFailureSettlementFlow.cs.
+
+- **AC-TI-R33-PUBLIC-WHOLECLASS-SELECTION-001:** Admit only the exact literal local RF3 whole-class selector `/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests)/*` through the matching Node and Integration closed admissions. The existing genuine Node selection subprocess and original four-suite TUnit workflow must preserve all previous positive selectors, default native50 and all16 ambient/GitHub/inherited/coverage/mixed-suite refusal controls; the new selector joins that same refusal loop and independently rejects six literal single-class/omitted-class/prefix/reordered/foreign-class/trailing-space near misses. Compare actual native argv, exact three-element preparation environment, absent forged image/child/GitHub identity, complete process/output/error-reader/disposal settlement and unchanged original test identities. This required tooling control prepares genuine scoped SDK/official MCP/Aspire RF3 wholeflows; selection/source acceptance does not qualify the selected database cases, measured coverage, RF3 fault gates or Linux delivery.

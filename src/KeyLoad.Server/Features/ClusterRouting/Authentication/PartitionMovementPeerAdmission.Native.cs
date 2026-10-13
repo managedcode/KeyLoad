@@ -35,9 +35,15 @@ internal sealed partial class PartitionMovementPeerAdmission
         observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerDiscovery);
         await requireCaller(request.CallerVoter, request.CallerSiloAddress, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
+        return request;
+    }
+
+    internal void RequireNativeExpiryReplay(PartitionMovementGrainServiceRequest request,
+        Action<PartitionMovementNativeObservationStage>? observeStage, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         observeStage?.Invoke(PartitionMovementNativeObservationStage.ExpiryReplay);
         if (request.ExpiresAt <= clock.GetUtcNow() || !nativeReplay.TryUse(request.Nonce.ToString(NonceFormat)))
         { throw Errors.Fail(ErrorCode.Unauthenticated, InvalidProof); }
-        return request;
     }
 }
