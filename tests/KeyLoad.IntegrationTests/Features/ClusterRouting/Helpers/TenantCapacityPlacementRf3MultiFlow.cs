@@ -8,9 +8,14 @@ internal static class TenantCapacityPlacementRf3MultiFlow
 {
     private const int FirstSeed = 0;
     private const long NewIntentRevision = 0;
-    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+    internal static Task RunAsync(TwoRf3MembershipWave wave,
         PartitionMovementPublicParentRf3Seed[] seeds, TenantCapacityPlacementRf3Provisioning.State state,
         CancellationToken token)
+        => RunAsync(wave, seeds, state, committedSecondOwnerLoss: false, token);
+
+    internal static async Task RunAsync(TwoRf3MembershipWave wave,
+        PartitionMovementPublicParentRf3Seed[] seeds, TenantCapacityPlacementRf3Provisioning.State state,
+        bool committedSecondOwnerLoss, CancellationToken token)
     {
         var first = seeds[FirstSeed];
         var query = new TenantPlacementPlanRequest(first.Partition.TenantId,
@@ -38,8 +43,11 @@ internal static class TenantCapacityPlacementRf3MultiFlow
         var id = Guid.NewGuid();
         var request = new ApplyPlacementIntentRequest(first.Partition.TenantId,
             first.Partition.DatabaseId, intentId, pending.Revision, state.Control);
-        var completed = await TenantCapacityPlacementRf3MultiHold.RunAsync(wave, seeds,
-            state, moves, pending, id, request, token);
+        var completed = committedSecondOwnerLoss
+            ? await TenantCapacityPlacementRf3SecondOwnerLoss.RunAsync(wave, seeds,
+                state, moves, pending, id, request, token)
+            : await TenantCapacityPlacementRf3MultiHold.RunAsync(wave, seeds,
+                state, moves, pending, id, request, token);
         await TenantCapacityPlacementRf3MultiReplay.RequireAsync(seeds, state, moves,
             id, request, completed, token);
         await TenantCapacityPlacementRf3Assertions.RefusalAsync(

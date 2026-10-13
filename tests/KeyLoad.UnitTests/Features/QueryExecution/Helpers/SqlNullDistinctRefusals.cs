@@ -10,11 +10,16 @@ internal static class SqlNullDistinctRefusals
         var before = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
+        await SqlStringContinuationControls.InvalidAsync(database, engine);
         foreach (var clause in new[] { "score IS DISTINCT NULL", "score IS DISTINCT FROM", "score IS 'DISTINCT' FROM NULL",
             "score IS NOT DISTINCT FROM @absent", "score IS ISNULL", "score IS NOT NOTNULL",
             "score 'ISNULL'", "score NOT ISNULL", "score = ++1", "score = +",
             "score = +true", "score = +@absent", "score = + 1", "score = +79228162514264337593543950336",
-            "score = .e1", "score = ..5", "score = .5e+", "score = .5.0", "score = +.x", "score = -.x" })
+            "score = .e1", "score = ..5", "score = .5e+", "score = .5.0", "score = +.x", "score = -.x",
+            "score = 0x", "score = 0xG", "score = 0x1000000000000000000000000", "score = -0x1000000000000000000000000",
+            "label = E'\\u123'", "label = E'\\U00110000'", "label = E'\\uD800'",
+            "label = E'\\uDC00'", "label = E'\\000'", "label = E'\\x00'", "label = E'\\xff'",
+            "label = E'\\xc3'", "label = E'unterminated", "label = E'\\'" })
         {
             var actual = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 new(database.Partition, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail, AllowFullScan: true)));
@@ -24,7 +29,8 @@ internal static class SqlNullDistinctRefusals
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
         foreach (var window in new[] { "LIMIT +1", "OFFSET +1 LIMIT 1", "FETCH FIRST +1 ROW ONLY",
-            "LIMIT .5", "OFFSET .5 LIMIT 1", "FETCH FIRST .5 ROW ONLY" })
+            "LIMIT .5", "OFFSET .5 LIMIT 1", "FETCH FIRST .5 ROW ONLY",
+            "LIMIT 0x1", "OFFSET 0x1 LIMIT 1", "FETCH FIRST 0x1 ROW ONLY" })
         {
             var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix
                 + SqlNullDistinctCases.PositiveClause + " ORDER BY label ASC " + window, AllowFullScan: true);
@@ -34,10 +40,22 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
+        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1", "score = 0o1" })
+        {
+            var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix + clause
+                + SqlNullDistinctCases.Tail, AllowFullScan: true);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
+                request)).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+            await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
+            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
+        }
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         foreach (var clause in new[] { SqlNullDistinctCases.All[First].Clause, SqlNullDistinctCases.NullClause,
-            SqlNullDistinctCases.NotNullClause, SqlNullDistinctCases.PositiveClause, SqlNullDistinctCases.LeadingClause })
+            SqlNullDistinctCases.NotNullClause, SqlNullDistinctCases.PositiveClause, SqlNullDistinctCases.LeadingClause,
+            SqlNullDistinctCases.HexClause,
+            SqlNullDistinctCases.EscapeClause, SqlNullDistinctCases.ContinuationClause })
         {
             var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix + clause
                 + SqlNullDistinctCases.Tail, AllowFullScan: true);
@@ -59,7 +77,10 @@ internal static class SqlNullDistinctRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         foreach (var item in new[] { SqlNullDistinctCases.All[AgainstOne],
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.PositiveClause),
-            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.LeadingClause) })
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.LeadingClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.HexClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.EscapeClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.ContinuationClause) })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 new(database.Partition, SqlNullDistinctCases.Prefix + item.Clause + SqlNullDistinctCases.Tail,

@@ -27,6 +27,18 @@ internal static class SqlNullDistinctRf3Repair
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, leading.Clause, ErrorCode.Validation,
             token, ast: true, astCase: leading);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var hex = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.HexClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, hex.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: hex);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var escaped = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.EscapeClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, escaped.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: escaped);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var continuation = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.ContinuationClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, continuation.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: continuation);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresRf3State.Partition,
             [new PutDocument(SqlNullOrderingRf3Protocol.Collection, SqlNullDistinctRf3State.Low,
                 SqlNullDistinctRf3State.HealthyJson, SqlNullDistinctRf3State.FaultRevision)]);

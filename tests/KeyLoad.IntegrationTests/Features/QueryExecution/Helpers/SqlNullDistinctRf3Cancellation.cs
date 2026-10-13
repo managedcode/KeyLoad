@@ -22,7 +22,10 @@ internal static class SqlNullDistinctRf3Cancellation
                         || item.Clause == SqlNullDistinctRf3Cases.NullClause
                         || item.Clause == SqlNullDistinctRf3Cases.NotNullClause
                         || item.Clause == SqlNullDistinctRf3Cases.PositiveClause
-                        || item.Clause == SqlNullDistinctRf3Cases.LeadingClause))
+                        || item.Clause == SqlNullDistinctRf3Cases.LeadingClause
+                        || item.Clause == SqlNullDistinctRf3Cases.HexClause
+                        || item.Clause == SqlNullDistinctRf3Cases.EscapeClause
+                            || item.Clause == SqlNullDistinctRf3Cases.ContinuationClause))
                     {
                         var sql = SqlNullDistinctRf3Cases.Prefix + item.Clause + SqlNullDistinctRf3Cases.Tail;
                         var operation = SqlNullOrderingRf3Protocol.Operation(sql);

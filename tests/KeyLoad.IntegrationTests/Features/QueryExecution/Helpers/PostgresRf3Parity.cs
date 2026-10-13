@@ -28,6 +28,7 @@ internal static class PostgresRf3Parity
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, token));
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                         await SyntaxVariantsAsync(state, wire, token);
+                        await HexVariantsAsync(state, reader, wire, token);
                         if (state.Dialect == PostgresRf3Protocol.JoinDialect)
                         {
                             var plain = state.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal);
@@ -46,6 +47,22 @@ internal static class PostgresRf3Parity
 
     private static Task PageAsync(PostgresRf3State state, QueryPage page)
         => PostgresRf3Assertions.PageAsync(state, page);
+
+    private static async Task HexVariantsAsync(PostgresRf3State state,
+        RequestCqrsRf3Callers reader, PostgresRf3Caller wire, CancellationToken token)
+    {
+        foreach (var predicate in new[] { "0x1 = 1", "-0x1 < 0",
+            "0xFFFFFFFFFFFFFFFFFFFFFFFF = 79228162514264337593543950335" })
+        {
+            var sql = state.Sql.Replace(" ORDER BY ", " WHERE " + predicate + " ORDER BY ", StringComparison.Ordinal);
+            await global::TUnit.Assertions.Assert.That(sql).IsNotEqualTo(state.Sql);
+            var operation = state.Operation with { Sql = sql };
+            await PageAsync(state, await SqlRf3Protocol.SdkAsync<QueryPage>(reader.Sdk, operation, token));
+            await PageAsync(state, await SqlRf3Protocol.McpAsync<QueryPage>(reader.Mcp, operation, token));
+            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token));
+            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token));
+        }
+    }
 
     private static async Task SyntaxVariantsAsync(PostgresRf3State state, PostgresRf3Caller wire, CancellationToken token)
     {

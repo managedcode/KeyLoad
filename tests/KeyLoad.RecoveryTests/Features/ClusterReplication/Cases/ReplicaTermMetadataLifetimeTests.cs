@@ -8,8 +8,6 @@ internal sealed class ReplicaTermMetadataLifetimeTests
     private const long EntryTerm = 1;
     private const long LogTerm = 2;
     private const long ReplicaIndex = 1;
-    private const string BackupDirectoryName = "term-backup";
-    private const string RestoredDirectoryName = "term-restored";
 
     [Test]
     public async Task LogDisposalRejectsAFormerlyWarmTermAndReopenStartsCold()
@@ -19,22 +17,7 @@ internal sealed class ReplicaTermMetadataLifetimeTests
             ReplicaTermMetadataFixture.PrepareLog(fixture.Log, EntryTerm, LogTerm);
             await Assert.That(fixture.Log.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);
             var originalIdentity = fixture.Store.Identity;
-            var backup = Path.Combine(fixture.DirectoryPath, BackupDirectoryName);
-            var restoredDirectory = Path.Combine(fixture.DirectoryPath, RestoredDirectoryName);
-            await Assert.That(fixture.Store.CreateBackup(backup)).IsEqualTo(fixture.Store.Position);
-            var restoredIdentity = ZoneTreeStore.Restore(backup, restoredDirectory, RecoveryExecutionOptions.StorageExecution(), originalIdentity.Incarnation);
-            await Assert.That(restoredIdentity.NodeId == originalIdentity.NodeId).IsFalse();
-            await Assert.That(restoredIdentity.Incarnation).IsEqualTo(originalIdentity.Incarnation);
-            var reopenedStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(restoredDirectory)
-            {
-                Incarnation = originalIdentity.Incarnation
-            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
-            var reopenedLog = fixture.Own(new DurableReplicaLog(reopenedStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = restoredDirectory })));
-            var reopenedBefore = reopenedStore.GetReadDiagnostics();
-            await Assert.That(reopenedLog.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);
-            var reopenedAfter = reopenedStore.GetReadDiagnostics();
-            await Assert.That(reopenedAfter.BorrowedPointLookups - reopenedBefore.BorrowedPointLookups).IsEqualTo(1);
-
+            var originalPosition = fixture.Store.Position;
             var beforeProviderClose = fixture.Store.GetReadDiagnostics();
             fixture.CloseStore();
             await Assert.That(Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Log.TermAt(ReplicaIndex)))
@@ -42,9 +25,23 @@ internal sealed class ReplicaTermMetadataLifetimeTests
             var afterProviderClose = fixture.Store.GetReadDiagnostics();
             await Assert.That(afterProviderClose.BorrowedPointLookups).IsEqualTo(beforeProviderClose.BorrowedPointLookups);
             fixture.CloseLog();
-
             await Assert.That(Assert.ThrowsExactly<ObjectDisposedException>(() => fixture.Log.TermAt(ReplicaIndex)))
                 .IsNotNull();
+
+            var reopenedStore = fixture.Own(new ZoneTreeStore(new ZoneTreeStoreOptions(fixture.Configuration.Directory)
+            {
+                Incarnation = originalIdentity.Incarnation
+            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
+            await Assert.That(reopenedStore.Identity.NodeId).IsEqualTo(originalIdentity.NodeId);
+            await Assert.That(reopenedStore.Identity.Incarnation).IsEqualTo(originalIdentity.Incarnation);
+            await Assert.That(reopenedStore.Identity.SigningKey.Span.SequenceEqual(originalIdentity.SigningKey.Span)).IsTrue();
+            await Assert.That(reopenedStore.Position).IsEqualTo(originalPosition);
+            var reopenedLog = fixture.Own(new DurableReplicaLog(reopenedStore,
+                RecoveryExecutionOptions.Configuration(fixture.Configuration)));
+            var reopenedBefore = reopenedStore.GetReadDiagnostics();
+            await Assert.That(reopenedLog.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);
+            var reopenedAfter = reopenedStore.GetReadDiagnostics();
+            await Assert.That(reopenedAfter.BorrowedPointLookups - reopenedBefore.BorrowedPointLookups).IsEqualTo(1);
         });
     }
 }

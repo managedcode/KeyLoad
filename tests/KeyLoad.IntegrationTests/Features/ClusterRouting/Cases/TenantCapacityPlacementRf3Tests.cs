@@ -4,6 +4,16 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class TenantCapacityPlacementRf3Tests
 {
     [Test]
+    public async Task OriginalTwoMoveApplyResumesSameGuidAfterSecondCommittedPrepareOwnerLossAndColdReceiptReplay()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3MultiScenario.RunAsync(committedSecondOwnerLoss: true, linked.Token)
+            .ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task OriginalSignedPlanPolicyCasRefusalRetainsFailedGuidThenFreshIntentMovesAndSurvivesDirtyAndHealthyColdCuts()
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);

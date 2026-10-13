@@ -4,7 +4,10 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class TenantCapacityPlacementRf3MultiScenario
 {
-    internal static async Task RunAsync(CancellationToken token)
+    internal static Task RunAsync(CancellationToken token)
+        => RunAsync(committedSecondOwnerLoss: false, token);
+
+    internal static async Task RunAsync(bool committedSecondOwnerLoss, CancellationToken token)
     {
         TwoRf3MembershipWave? wave = null;
         PartitionMovementPublicParentRf3Seed? first = null;
@@ -16,7 +19,8 @@ internal static class TenantCapacityPlacementRf3MultiScenario
             first = await PartitionMovementPublicParentRf3Seed.CreateAsync(wave, token);
             second = await PartitionMovementPublicParentRf3Seed.CreateSiblingAsync(wave, first, token);
             var state = await TenantCapacityPlacementRf3Provisioning.CreateAsync(first, token);
-            await TenantCapacityPlacementRf3MultiFlow.RunAsync(wave, [first, second], state, token);
+            await TenantCapacityPlacementRf3MultiFlow.RunAsync(wave, [first, second], state,
+                committedSecondOwnerLoss, token);
         }, failures);
         if (second is not null)
         { await ServerFailureObserver.ObserveAsync(() => second.DisposeAsync().AsTask(), failures); }

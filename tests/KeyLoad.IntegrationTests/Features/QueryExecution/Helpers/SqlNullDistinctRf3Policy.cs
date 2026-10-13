@@ -28,6 +28,18 @@ internal static class SqlNullDistinctRf3Policy
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, leading.Clause, ErrorCode.PermissionDenied,
             token, ast: true, astCase: leading);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
+        var escaped = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.EscapeClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, escaped.Clause, ErrorCode.PermissionDenied,
+            token, ast: true, astCase: escaped);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
+        var continuation = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.ContinuationClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, continuation.Clause, ErrorCode.PermissionDenied,
+            token, ast: true, astCase: continuation);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
+        var hex = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.HexClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, hex.Clause, ErrorCode.PermissionDenied,
+            token, ast: true, astCase: hex);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));

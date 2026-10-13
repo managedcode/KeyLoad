@@ -2,12 +2,12 @@
   "STAGE64-PUBLIC-MODELS-001": {
     "record": "docs/implementation/qualification-stage64-public-models.md",
     "originalPlan": {
-      "done": 19,
-      "inProgress": 85,
+      "done": 20,
+      "inProgress": 84,
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R41 local development: full Release 0 errors/0 warnings and whole formatter pass. Unit240:234passed6failed; recovery13:11passed2failed; no skips. Original source/image/closure/receipts and process joins stable. Original plan20/104 done84in progress; KL-029 original criteria independently qualified on Linux at 7e94024c. Fresh complete Linux/RF3/coverage/fault/endurance/performance gates remain open.",
+    "qualification": "R42 local development: full Release 0 errors/0 warnings and whole formatter pass. Unit250:246passed4failed; recovery35:33passed2failed; no skips, no prior-pass regressions, three prior failures now passed. Original source/image/closure/receipts and all process/reader/disposal joins stable. Original plan20/104 done84in progress; KL-029 original criteria independently qualified on Linux at 7e94024c. Fresh complete Linux/RF3/coverage/fault/endurance/performance gates remain open.",
     "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
     "sourceIntegration": {
       "graph": {
@@ -336,10 +336,10 @@
       }
     },
     "remaining": [
-      "Complete bounded causal review/repair of the original two six-owner Prepare full-reply mismatches and two native movement UnknownWriteOutcome failures; retain original diagnostics and deadlines.",
-      "Integrate independent reviewed Graph/Event traversal, Backup identity, credential subject replacement, Queue, Blob, Search, UTC TimeSeries and capacity expiry/authorization/hysteresis packets in the next coherent source cut.",
-      "Finish owning MCPGateway canonical Release/feed verification, then consume its released native result fix and execute the exact retained SDK/official MCP RF3 whole classes.",
-      "Complete full exact-source Linux functional coverage, recovery, RF3, fault/endurance/power-loss and KL105 actual matched profiling/performance gates; close tasks only on complete acceptance."
+      "Repair the six retained R42 failures using their original native diagnostics; preserve cancellation, authoritative raw state, original GUIDs and resource cleanup.",
+      "Integrate independent reviewed SQL literal, capacity, backup, Graph, ChangeFeeds/EventStreams, Blob and TimeSeries complete operation flows in one coherent next source cut.",
+      "Gateway published 0.4.24 is consumed; no further dependency repair/release is selected for this batch. Its current official SDK interoperability still requires full Linux RF3 qualification.",
+      "Complete full delivered-source Linux functional coverage, recovery, RF3, fault/endurance/power-loss and KL105 actual matched profiling/performance gates; close tasks only on complete acceptance."
     ],
     "runtimePreparation": {
       "nativeMaximumParallelTests": 50,
@@ -1440,6 +1440,25 @@
       "completeTaskAcceptanceFromPartialRuntime": 0,
       "separateOriginalLinuxTaskAcceptance": "KL-029",
       "sourceImageClosureDrift": false
+    },
+    "runtimeObservedR42": {
+      "record": {
+        "path": "docs/implementation/stage64-r42-development-20261013.json",
+        "sha256": "25db96b4bd5304c8acb67c91ed51b2c8b22dcaba8757259105b8145a8e64389c"
+      },
+      "cases": 285,
+      "passed": 279,
+      "failed": 6,
+      "skipped": 0,
+      "allOriginal253Retained": true,
+      "originalPassRegressions": 0,
+      "originalFailuresNowPassed": 3,
+      "configuredNativeParallelism": 50,
+      "allProcessesReadersAndDisposalJoined": true,
+      "sourceImageClosureDrift": false,
+      "currentRf3Execution": 0,
+      "coverage": "UNMEASURED_FOR_R42",
+      "completeAcceptanceClosed": 0
     }
   },
   "STAGE63-NATIVE-COMPOSITION-001": {

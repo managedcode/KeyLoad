@@ -60,7 +60,10 @@
       "syntax": "Q1 subset plus line and nested block comments",
       "execution": "Q1 subset",
       "evidence": "Original full CI baseline7d9852 and existing lexical/RF3 cases; Historical intermediate report removed from repository; no current qualification inferred; full PostgreSQL lexical conformance pending",
-      "sourceContract": "Bounded token-kind admission: SQL String/Parameter tokens cannot replace grammar keywords, separators or comparison symbols; literal data and quoted identifiers retain their roles. SqlLexicalAdmissionTests whole typed Q2 refusal/repair/GUID replay/two-cold source packet; current execution pending."
+      "sourceContract": "Bounded token-kind admission: SQL String/Parameter tokens cannot replace grammar keywords, separators or comparison symbols; literal data and quoted identifiers retain their roles. SqlLexicalAdmissionTests whole typed Q2 refusal/repair/GUID replay/two-cold source packet; current execution pending.",
+      "nextEscapeStringCandidate": "REQ-SQLC-006 / AC-SQLC-006 SQLC-LEX and REQ/AC-QUERY-004/005/006, ADR-065: NEXT guarded SQL.EscapeStringLiteral.v1 accepts adjacent E/e single-quoted string literals using C-style escapes, octal/hex UTF-8 byte escapes and validated Unicode scalar/surrogate-pair escapes (u/U widths may be mixed; a backslash-x without hex digits is the literal x), lowered to the same original String ValueOperand. Invalid UTF-8, malformed Unicode, NUL, incomplete escape/quote refuse the existing fixed Validation diagnostic; ordinary strings, quoted identifiers, parameters and original unsupported operations remain unchanged. Native PostgreSQL positional-parameter rewriting must preserve escaped quotes and literal $n content and map only actual external parameters to original source positions. Native .NET Rune/UTF8Encoding/ArrayBufferWriter are used with original source/token/read/depth/output bounds and original cancellation; no package, AST/version/serializer, authorization, connection owner, admission quota or deadline changes. Independent complete scalar SQL/AST literal pages, real SDK/official MCP/Npgsql simple/prepared parity and a genuine bound positional argument outside an escaped literal, malformed refusal followed by healthy operation on the original connection, current persisted query-policy denial and exact epoch restoration, real retained scalar-type fault and revision3 repair, original-token pre-cancellation, seed/fault/repair receipt replay, complete Unit raw image/position/identity and RF3 public document/outbox image, warm and two original owned cold waves are required. Public query cuts remain opaque. Physical-owner correlation, admitted row-progress cancellation, native binding/compilation/runtime/Linux RF3/resource/recovery and full SQL/client compatibility remain separate OPEN; this is a prepared source contract, not delivered capability.",
+      "nextHexadecimalIntegerCandidate": "NEXT closed 0x/0X and adjacent-sign hexadecimal integer literal to existing decimal AST using first-party Char/UInt128; decimal domain bound, raw source spelling/positions and unsigned resource counts unchanged. Binary/octal/separators/fractional radix/general arithmetic stay unsupported. Complete original native and SDK/MCP/Npgsql RF3 refusal/repair/policy/cancel/full rows/receipts/two-cold source; no current runtime/fullSQL qualification.",
+      "nextHexQ2CallerCoverage": "NEXT hex operation coverage also reuses the original PostgresNativeSessionRf3Tests scalar/join instances and existing PostgresRf3Parity caller/wire scopes: three independently true exact decimal-domain hexadecimal predicates precede the original ORDER BY and preserve each full original seeded page through actual SDK/MCP and Npgsql simple/prepared execution. This does not add seed fields, AST capabilities, request declarations, deadlines, or physical-owner/cut correlation. Original whole owner/no-effect/receipt/policy/cancellation/cold lifecycle remains; dedicated Q2 numeric-field type-repair and new-hex independent AST lowering beyond the scalar full-flow stay separate OPEN, not inferred from parity."
     },
     {
       "id": "SQLC-READ",
@@ -252,5 +255,19 @@
     "ownership": "native node-local full-text index over canonical ZoneTree records; not an SQL parser or replacement canonical database",
     "integration": "existing native selected provider; its scoped tests and qualification remain in Search/FullTextNative",
     "performanceQualification": "open; SQL conformance does not qualify comparative search performance"
+  },
+  "preparedStringContinuation": {
+    "profile": "SQL.StringContinuation.v1",
+    "criteria": [
+      "AC-SQLC-006",
+      "AC-QUERY-004",
+      "AC-QUERY-005",
+      "AC-QUERY-006"
+    ],
+    "sourceOnly": true,
+    "qualified": false,
+    "sameLineAndBlockOnly": "unsupported",
+    "fragmentBudget": "each original quoted fragment counts unchanged MaxQueryTokens",
+    "utf8": "validate entire E byte stream after final fragment"
   }
 }

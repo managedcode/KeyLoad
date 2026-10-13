@@ -115,7 +115,7 @@ KL‑029 now satisfies its original projection rebuild, checkpoint recovery and 
 
 Full product functional coverage remains **unqualified**. A focused local run measured **25.73% lines / 19.63% branches** across 13 reported production modules; its 147 functional cases included four failures. Runner controls and load tests contributed no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
-The latest [development checkpoint](docs/implementation/stage64-r41-development-20261013.json) has clean build and formatting checks: unit **234/240**, process recovery **11/13**, no skips. Eight failures, fresh RF3 and complete Linux qualification remain open.
+The latest [development checkpoint](docs/implementation/stage64-r42-development-20261013.json) has clean build and formatting checks: unit **246/250**, process recovery **33/35**, no skips or prior-pass regressions. Three prior failures now pass; six failures, fresh RF3 and complete Linux qualification remain open.
 
 [Task tracker](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 

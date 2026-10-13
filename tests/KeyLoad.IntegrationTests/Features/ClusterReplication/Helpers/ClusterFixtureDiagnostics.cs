@@ -30,6 +30,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeFailures = new(StringComparer.Ordinal);
     private const string RequestFailureMarker = "Database request failed";
     private const string RpcFailureMarker = "Orleans request stream failed";
+    private const string RpcOriginalCauseMarker = "Orleans original stream cause";
     private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
     private const int FailureLinesPerNode = 3;
     private const int MaximumCapturedLineBytes = 1_024;
@@ -195,6 +196,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         AppendLogLine(buffer, content, ClusterFixtureProtocol.CapturedLogLinesPerNode);
         if (content.Contains(RequestFailureMarker, StringComparison.Ordinal)
             || content.Contains(RpcFailureMarker, StringComparison.Ordinal)
+            || content.Contains(RpcOriginalCauseMarker, StringComparison.Ordinal)
             || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal))
         {
             AppendLogLine(failures, content, FailureLinesPerNode);

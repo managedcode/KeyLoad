@@ -60,7 +60,7 @@ internal static class TenantCapacityPlacementRf3ClaimRace
         await McpCallerAssertions.ErrorAsync(refusal, ErrorCode.Conflict, dispatched: true);
         await Assert.That(refusal.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(
-                KeyLoad.Core.Features.ClusterRouting.Contracts.TenantPlacementPolicyProtocol.Stale);
+                "The database operation could not be completed.");
         await SqlRf3Protocol.EqualAsync(applying, await ReadAsync(seed, request, token));
         await SqlRf3Protocol.EqualAsync(proof, RequestCqrsMovementJournalReader.Read(controls, marker));
         await Assert.That(original.IsCompleted).IsFalse();

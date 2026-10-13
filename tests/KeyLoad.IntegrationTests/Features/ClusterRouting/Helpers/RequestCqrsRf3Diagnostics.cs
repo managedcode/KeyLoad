@@ -22,6 +22,8 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private const string IncompleteSubscriptionMessage = "C1 diagnostics cannot be saved before every original subscription joins.";
     private const int MaximumArtifactBytes = 16 * 1_024;
     private const int ArtifactVersion = 1;
+    private const int RpcArtifactVersion = 2;
+    private const string RpcReadbackMessage = "The owned RPC diagnostic export did not retain the complete original records.";
 
     private readonly Guid waveId;
     private readonly RequestCqrsRf3McpRejectionNodeCapture[] nodes;
@@ -138,18 +140,35 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
 
     private string WriteRpcArtifact()
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(new RequestCqrsRpcFailureArtifact(ArtifactVersion,
-            waveId, nodes.SelectMany(node => node.RpcSnapshot()).ToArray()));
+        var records = nodes.SelectMany(node => node.RpcSnapshot()).ToArray();
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new RequestCqrsRpcFailureArtifact(RpcArtifactVersion,
+            waveId, records));
         if (bytes.Length > MaximumArtifactBytes)
         { throw new InvalidOperationException(OversizedArtifactMessage); }
         var directory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
             ArtifactRootDirectory, ArtifactDirectory);
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, RpcArtifactNamePrefix + waveId.ToString("N") + ArtifactSuffix);
-        using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        stream.Write(bytes);
-        stream.Flush(flushToDisk: true);
+        using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            stream.Write(bytes);
+            stream.Flush(flushToDisk: true);
+        }
+        VerifyRpcExport(path, bytes, records);
         return path;
+    }
+
+    private void VerifyRpcExport(string path, byte[] original, RequestCqrsRpcFailureRecord[] records)
+    {
+        var saved = new byte[original.Length];
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        stream.ReadExactly(saved);
+        if (stream.ReadByte() != -1 || !saved.AsSpan().SequenceEqual(original))
+        { throw new InvalidOperationException(RpcReadbackMessage); }
+        var result = JsonSerializer.Deserialize<RequestCqrsRpcFailureArtifact>(saved);
+        if (result is null || result.Version != RpcArtifactVersion || result.WaveId != waveId
+            || result.Failures is null || !result.Failures.SequenceEqual(records))
+        { throw new InvalidOperationException(RpcReadbackMessage); }
     }
 
     private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1

@@ -34,6 +34,7 @@ internal sealed class OrleansRpcFailureTests
             await Assert.That(failure.InnerException).IsNull();
             await Assert.That(output).Contains(requestId.ToString());
             await Assert.That(output).Contains(category);
+            await Assert.That(output).Contains($"CommandId={Guid.Empty}; ReadKind=Unobserved; CommandKind=Unobserved; OriginalErrorCode=Unobserved");
             await Assert.That(output).Contains(expectedCode.ToString());
             await Assert.That(output).DoesNotContain(PrivateCanary);
             await Assert.That(output).DoesNotContain(error.GetType().FullName!);
@@ -44,25 +45,33 @@ internal sealed class OrleansRpcFailureTests
     [Test]
     public async Task AcCrs005UnvalidatedStreamFailuresDoNotExposeArbitraryExceptionDetails()
     {
-        Exception[] failures =
+        (Exception Error, string OriginalCode)[] failures =
         [
-            Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary),
-            Errors.Fail(ErrorCode.PermissionDenied, PrivateCanary),
-            new JsonException(PrivateCanary),
-            new ArgumentException(PrivateCanary), new InvalidOperationException(PrivateCanary),
-            new IOException(PrivateCanary)
+            (Errors.Fail(ErrorCode.RecoveryRequired, PrivateCanary), nameof(ErrorCode.RecoveryRequired)),
+            (Errors.Fail(ErrorCode.PermissionDenied, PrivateCanary), nameof(ErrorCode.PermissionDenied)),
+            (new JsonException(PrivateCanary), "Unobserved"),
+            (new ArgumentException(PrivateCanary), "Unobserved"),
+            (new InvalidOperationException(PrivateCanary), "Unobserved"),
+            (new IOException(PrivateCanary), "Unobserved")
         ];
-        foreach (var error in failures)
+        var originalCommandId = Guid.NewGuid();
+        var operation = new OrleansRpcFailureOperation(originalCommandId, null, OperationKind.Batch);
+        foreach (var (error, originalCode) in failures)
         {
-            var (failure, output) = TranslateAndCapture(error, true, Guid.NewGuid());
+            var requestId = Guid.NewGuid();
+            var (failure, output) = TranslateAndCapture(error, true, requestId, operation);
+            await Assert.That(output).Contains($"Orleans original stream cause: {requestId}");
+            await Assert.That(output).Contains($"CommandId={originalCommandId}");
+            await Assert.That(output).Contains("ReadKind=Unobserved; CommandKind=Batch");
+            await Assert.That(output).Contains($"OriginalErrorCode={originalCode}");
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
             await Assert.That(failure.Message).IsEqualTo(CommandDetail);
             await Assert.That(failure.InnerException).IsNull();
             await Assert.That(output).DoesNotContain(PrivateCanary);
             await Assert.That(output).DoesNotContain(error.GetType().FullName!);
         }
-        await Assert.That(((KeyLoadException)failures[0]).Code).IsEqualTo(ErrorCode.RecoveryRequired);
-        await Assert.That(failures[0].Message).IsEqualTo(PrivateCanary);
+        await Assert.That(((KeyLoadException)failures[0].Error).Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(failures[0].Error.Message).IsEqualTo(PrivateCanary);
     }
 
     [Test]
@@ -145,14 +154,16 @@ internal sealed class OrleansRpcFailureTests
         yield return (new TaskCanceledException(PrivateCanary), CancellationCategory);
     }
 
-    private static (KeyLoadException Failure, string Output) TranslateAndCapture(Exception error, bool command, Guid requestId)
+    private static (KeyLoadException Failure, string Output) TranslateAndCapture(Exception error, bool command, Guid requestId,
+        OrleansRpcFailureOperation? operation = null)
     {
         using var capture = new EventSourceLogCapture();
         KeyLoadException failure;
         using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
         {
             var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
-            failure = OrleansRpcFailure.Translate(error, command, requestId, logger, CancellationToken.None);
+            failure = OrleansRpcFailure.Translate(error, command, requestId, logger,
+                OrleansRpcFailureStage.Unobserved, operation, CancellationToken.None);
         }
         return (failure, capture.Text);
     }

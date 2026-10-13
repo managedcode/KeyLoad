@@ -7,6 +7,8 @@ internal static class RequestCqrsRpcFailureParser
     private const string Prefix = "Orleans request stream failed: ";
     private const string CategoryStart = " (";
     private const string ErrorStart = ") with ";
+    private const string StageStart = "; Stage=";
+    private const string KindStart = "; Kind=";
     private const string GuidFormat = "D";
     private const char Terminator = '.';
     internal static bool TryParse(string line, Guid waveId, string node, out RequestCqrsRpcFailureRecord record)
@@ -24,14 +26,33 @@ internal static class RequestCqrsRpcFailureParser
             || !Guid.TryParseExact(text[..category], GuidFormat, out var requestId) || requestId == Guid.Empty)
         { return false; }
         var categoryText = text[(category + CategoryStart.Length)..error];
-        var errorText = text[(error + ErrorStart.Length)..^1];
+        var tail = text[(error + ErrorStart.Length)..^1];
+        var stageMarker = tail.IndexOf(StageStart, StringComparison.Ordinal);
+        var kindMarker = tail.IndexOf(KindStart, StringComparison.Ordinal);
+        if (stageMarker <= 0 || kindMarker <= stageMarker + StageStart.Length
+            || !TryReadOrigin(tail, stageMarker, kindMarker, out var stage, out var failureKind))
+        { return false; }
+        var errorText = tail[..stageMarker];
         if (!Enum.TryParse<OrleansRpcFailureCategory>(categoryText, false, out var kind) || !Enum.IsDefined(kind)
             || !categoryText.SequenceEqual(kind.ToString())
             || !Enum.TryParse<ErrorCode>(errorText, false, out var code)
             || code is not (ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome)
             || !errorText.SequenceEqual(code.ToString()))
         { return false; }
-        record = new(waveId, node, requestId, kind, code);
+        record = new(waveId, node, requestId, kind, code, stage, failureKind);
         return true;
+    }
+
+    private static bool TryReadOrigin(ReadOnlySpan<char> tail, int stageMarker, int kindMarker,
+        out OrleansRpcFailureStage stage, out OrleansRpcFailureKind kind)
+    {
+        var stageText = tail[(stageMarker + StageStart.Length)..kindMarker];
+        var kindText = tail[(kindMarker + KindStart.Length)..];
+        stage = default;
+        kind = default;
+        return Enum.TryParse(stageText, false, out stage) && Enum.IsDefined(stage)
+            && stageText.SequenceEqual(stage.ToString())
+            && Enum.TryParse(kindText, false, out kind) && Enum.IsDefined(kind)
+            && kindText.SequenceEqual(kind.ToString());
     }
 }

@@ -7,6 +7,7 @@ internal static class RestoreResumedTokenHealthy
 {
     private const string HealthyId = "resumed-token-healthy";
     private const long NextPosition = 5;
+    private const long HealthyReadySequence = 3;
 
     internal static async Task RunAsync(EventingArtifactFixture fixture)
     {
@@ -51,6 +52,6 @@ internal static class RestoreResumedTokenHealthy
         var actual = fixture.Database.InspectMessage(EventingArtifactFixture.Principal, fixture.Lane, HealthyId);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options)).IsEqualTo(
             JsonSerializer.Serialize(new MessageInspection(new(HealthyId, MessageState.Acked,
-                1, 3, 2, null, null, LeaseVersion: 1), null, null), JsonDefaults.Options));
+                1, 3, HealthyReadySequence, null, null, LeaseVersion: 1), null, null), JsonDefaults.Options));
     }
 }

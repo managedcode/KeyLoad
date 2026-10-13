@@ -50,6 +50,8 @@ internal static class TenantCapacityPlacementRf3RevocationApply
             completed, id, request, oldIntent, oldPersistId, oldRow, token);
         await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller,
             new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), state.HealthyPolicy, completed, token);
+        await TenantCapacityPlacementRf3CompletedPolicyReplay.RunAsync(wave, seed, state, caller,
+            new(pending, persistId, persist, completed, id, request, oldIntent, oldPersistId, oldRow), token);
         await TenantCapacityPlacementRf3RevocationReplay.RequireAsync(seed, state, caller, completed,
             id, request, pending, persistId, persist, oldIntent, oldId, oldRequest, oldPersistId, oldPersist, token);
         await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token);

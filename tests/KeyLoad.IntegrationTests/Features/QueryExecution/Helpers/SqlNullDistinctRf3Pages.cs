@@ -12,12 +12,16 @@ internal static class SqlNullDistinctRf3Pages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NullSynonymProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.PositiveProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.LeadingProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.HexProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.EscapeProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
                 await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NullSynonymProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.PositiveProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.LeadingProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.HexProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.EscapeProfile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -47,5 +51,7 @@ internal static class SqlNullDistinctRf3Pages
             await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
         await SqlNullDistinctRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), item, revision);
         await SqlNullDistinctRf3Image.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), item, revision);
+        if (item.Clause == SqlNullDistinctRf3Cases.EscapeClause)
+        { await SqlEscapeStringRf3Parameters.RequireAsync(wire, item, revision, token); }
     }
 }

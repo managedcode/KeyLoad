@@ -63,8 +63,10 @@ internal static class RuntimeJournalStartup
                 await requests.BootstrapAsync(administrator, commandId, token).ConfigureAwait(false);
                 return;
             }
-            catch (KeyLoadException error) when (error.Code == ErrorCode.OwnershipLost
-                && error.Message == global::KeyLoad.Orleans.ReplicaTransportProtocol.TransportUnavailable)
+            catch (KeyLoadException error) when (error.Code == ErrorCode.UnknownWriteOutcome
+                || error.Code == ErrorCode.OwnershipLost
+                && (error.Message == global::KeyLoad.Orleans.ReplicaTransportProtocol.TransportUnavailable
+                    || error.Message == global::KeyLoad.Replication.ReplicaProtocol.NoLeader))
             {
                 await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
                     .ConfigureAwait(false);

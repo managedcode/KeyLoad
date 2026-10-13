@@ -11,6 +11,8 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
 {
     private const short Silos = 6;
     private const int GroupVoters = 3;
+    private readonly TimeProvider clock = TimeProvider.System;
+    private readonly IOptions<OrleansMembershipOptions> membershipOptions = Options.Create(new OrleansMembershipOptions());
     internal TestCluster Cluster { get; } = new TestClusterBuilder(Silos).Build();
 
     internal async Task RunAsync(CancellationToken token)
@@ -30,7 +32,8 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
             }
         };
         var original = Cluster.Primary ?? throw new InvalidOperationException("The deployed native cluster has no primary silo.");
-        var bounds = new OrleansMembershipOptions();
+        var bounds = membershipOptions.Value;
+        bounds.Validate();
         var initial = Read(options, original.SiloAddress, bounds, token);
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(initial, handles).ConfigureAwait(false);
         var wrong = options with
@@ -49,7 +52,8 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
         await Assert.That(restarted.Name).IsEqualTo(original.Name);
         await Assert.That(restarted.SiloAddress.Equals(oldAddress)).IsFalse();
         await Assert.That(Read(options, oldAddress, bounds, token)).IsNull();
-        var current = Read(options, restarted.SiloAddress, bounds, token);
+        var current = await WaitForCurrentAsync(options, restarted.SiloAddress, bounds, token).ConfigureAwait(false);
+        await Assert.That(Read(options, oldAddress, bounds, token)).IsNull();
         await NativeSixSiloMembershipReadinessAssertions.CompleteAsync(current, Cluster.Silos.ToArray()).ConfigureAwait(false);
         await Assert.That(current!.ActiveFingerprint).IsNotEqualTo(initial!.ActiveFingerprint);
     }
@@ -62,5 +66,18 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
         var oracle = Cluster.GetSiloServiceProvider(primary.SiloAddress).GetRequiredService<ISiloStatusOracle>();
         var membership = new ReplicaNativeDiscoveryMembership(oracle, Options.Create(new OrleansMembershipOptions()));
         return ReplicaMembershipReadiness.ReadView(membership.ReadActive(), options, localAddress, bounds, token);
+    }
+
+    private async Task<MembershipReadinessSnapshot> WaitForCurrentAsync(NodeOptions options,
+        SiloAddress address, OrleansMembershipOptions bounds, CancellationToken token)
+    {
+        using var deadline = new CancellationTokenSource(bounds.StartupTimeout, clock);
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
+        while (true)
+        {
+            if (Read(options, address, bounds, execution.Token) is { } current)
+            { return current; }
+            await Task.Delay(bounds.StartupRetryDelay, clock, execution.Token).ConfigureAwait(false);
+        }
     }
 }

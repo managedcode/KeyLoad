@@ -44,7 +44,10 @@ internal static class SqlDefaultJoinControls
             plain, cancellationToken: originalToken));
         await Assert.That(failure.CancellationToken).IsEqualTo(originalToken);
         await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
-        await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain, cancellationToken: originalToken), SqlOffsetPages.JoinPage(position));
+        using var healthy = new CancellationTokenSource();
+        var healthyToken = healthy.Token;
+        await Assert.That(healthyToken.IsCancellationRequested).IsFalse();
+        await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain, cancellationToken: healthyToken), SqlOffsetPages.JoinPage(position));
         await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
     }
 
