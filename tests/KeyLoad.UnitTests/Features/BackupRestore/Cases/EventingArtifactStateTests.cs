@@ -7,6 +7,23 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal sealed class EventingArtifactStateTests
 {
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task OriginalCatalogReusedOwnerIdentityRefusesThenSameTupleRepairAndTwoColdOwners(bool reuseIncarnation)
+        => await CatalogRestoreOwnerIdentityFlow.RunAsync(reuseIncarnation,
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
+    public async Task OriginalCatalogWrongOperatorCredentialRefusesThenSameTupleRepairAndTwoColdOwners()
+        => await CatalogRestoreCredentialFlow.RunAsync(
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
+    public async Task OriginalCatalogCanonicalDigestRefusesThenExactArchiveRepairAndTwoColdOwners()
+        => await CatalogRestoreCanonicalCutFlow.RunAsync(
+            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
     public async Task RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners()
         => await CatalogArchiveRetryFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 

@@ -32,6 +32,8 @@ internal static class PostgresParameterNames
             if (char.IsWhiteSpace(character) || Pair(sql, offset, LineComment, LineComment)
                 || Pair(sql, offset, BlockCommentOpen, BlockCommentMarker))
             { Trivia(sql, ref offset, output, maximumDepth, cadence, token); continue; }
+            if (global::KeyLoad.Features.QueryExecution.SqlDollarQuoteReader.CanStart(sql.AsSpan(), offset))
+            { PostgresDollarQuote.Copy(sql, ref offset, output, cadence, token); continue; }
             if (character == PositionalParameter)
             { Parameter(sql, ref offset, output, parameterCount); continue; }
             if (character == NamedParameter)

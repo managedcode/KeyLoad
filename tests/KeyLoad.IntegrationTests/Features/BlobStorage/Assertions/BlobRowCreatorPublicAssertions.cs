@@ -55,11 +55,12 @@ internal static class BlobRowCreatorPublicAssertions
         }
     }
 
-    internal static async Task ReadDeniedAsync(RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,
+    internal static async Task ReadDeniedAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,
         string credential, string privateValue, BlobSupersessionPublicTrial.Version publication, CancellationToken token)
     {
         var metadata = publication.Completed.Value;
-        Func<Task> healthy = () => CurrentAsync(creator, publication, token);
+        var outbox = await BlobPublishedRowReadFenceAssertions.BaselineAsync(administrator, creator, publication, token);
+        Func<Task> healthy = () => BlobPublishedRowReadFenceAssertions.ObserveAsync(administrator, creator, publication, outbox, token);
         await RefusedAsync(() => other.Sdk.GetBlobMetadataAsync(new(metadata.Blob), token),
             () => other.Mcp.CallAsync("keyload_blobs_metadata", new BlobMetadataRequest(metadata.Blob), token),
             credential, privateValue, healthy);
@@ -69,6 +70,7 @@ internal static class BlobRowCreatorPublicAssertions
             await RefusedAsync(() => other.Sdk.ReadBlobRangeAsync(request, token),
                 () => other.Mcp.CallAsync("keyload_blobs_read_range", request, token), credential, privateValue, healthy);
         }
+        await BlobPublishedRowReadFenceAssertions.RunAsync(administrator, other, creator, credential, privateValue, publication, outbox, token);
     }
 
     internal static async Task CreatorDeniedAsync(RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,

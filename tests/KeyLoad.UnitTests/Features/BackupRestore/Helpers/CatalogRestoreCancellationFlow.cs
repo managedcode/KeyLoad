@@ -57,7 +57,7 @@ internal static class CatalogRestoreCancellationFlow
         await SourceAsync(fixture, capture.Position, source, backup, archive);
     }
 
-    private static async Task SourceAsync(EventingArtifactFixture fixture, long position,
+    internal static async Task SourceAsync(EventingArtifactFixture fixture, long position,
         string[] source, string backup, IReadOnlyDictionary<string, byte[]> archive)
     {
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(position);
@@ -75,7 +75,7 @@ internal static class CatalogRestoreCancellationFlow
         await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(backup, archive);
     }
 
-    private static async Task<Dictionary<string, byte[]>> ArchiveAsync(string backup, CancellationToken token)
+    internal static async Task<Dictionary<string, byte[]>> ArchiveAsync(string backup, CancellationToken token)
     {
         var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(backup, "*", SearchOption.AllDirectories))

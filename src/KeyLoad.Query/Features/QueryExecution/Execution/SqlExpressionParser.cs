@@ -1,4 +1,3 @@
-using System.Globalization;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
@@ -13,11 +12,6 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
     private const int NotPrecedence = 3;
     private const int SinglePathSegment = 1;
     private const int FirstPathSegment = 0;
-    private const int AdjacentCharacterOffset = 1;
-    private const int HexPrefixLength = 2;
-    private const string HexPrefix = "0x";
-    private const char MinusSign = '-';
-    private const char PlusSign = '+';
 
     private readonly DatabaseLimits limits = limitsOptions.Value;
     private int depth;
@@ -145,7 +139,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
         if (token.Kind == SqlTokenKind.Number)
         {
             cursor.Advance();
-            if (!TryNumber(token.Text, out var number))
+            if (!SqlRadixIntegerReader.Parse(token.Text, out var number))
             {
                 throw SqlSyntax.Invalid();
             }
@@ -169,23 +163,6 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
             return ValueOperand.Create(false);
         }
         return Field();
-    }
-
-    private static bool TryNumber(string text, out decimal number)
-    {
-        var value = text.AsSpan();
-        var negative = value[FirstPathSegment] == MinusSign;
-        if (value[FirstPathSegment] is MinusSign or PlusSign)
-        { value = value[AdjacentCharacterOffset..]; }
-        if (!value.StartsWith(HexPrefix, StringComparison.OrdinalIgnoreCase))
-        { return decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out number); }
-        if (!global::System.UInt128.TryParse(value[HexPrefixLength..], NumberStyles.AllowHexSpecifier,
-            CultureInfo.InvariantCulture, out var integer) || integer > (global::System.UInt128)decimal.MaxValue)
-        { number = default; return false; }
-        number = (decimal)integer;
-        if (negative)
-        { number = -number; }
-        return true;
     }
 
     private FieldOperand Field()

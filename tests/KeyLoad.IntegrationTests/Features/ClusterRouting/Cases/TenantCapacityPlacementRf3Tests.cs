@@ -4,6 +4,33 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class TenantCapacityPlacementRf3Tests
 {
     [Test]
+    public async Task OriginalPendingPolicyCasRecordsClaimButRefusesOldPlanThenFreshIntentMovesAndSurvivesTwoColdReplays()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3PendingPolicyScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task OriginalInvalidOwnerWeightsRetainValidationOutcomesAcrossPolicyRepairNativeMoveAndColdReplay()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3PolicyWeightsScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task OriginalDistinctHostCandidateRefusalPreservesPersistedIntentThenSameOwnersRepairMoveReplayAndSurviveColdCuts()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3FailureDomainsScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task OriginalTwoMoveApplyResumesSameGuidAfterSecondCommittedPrepareOwnerLossAndColdReceiptReplay()
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);

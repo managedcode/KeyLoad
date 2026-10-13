@@ -30,6 +30,7 @@ internal static class BlobReadPolicyPublicTrial
                         return true;
                     }, token);
             }, token);
+        await BlobSelectiveReadR43Trial.RunAsync(fixture, token);
     }
 
     private static async Task PersistAsync(RequestCqrsRf3Callers administrator,

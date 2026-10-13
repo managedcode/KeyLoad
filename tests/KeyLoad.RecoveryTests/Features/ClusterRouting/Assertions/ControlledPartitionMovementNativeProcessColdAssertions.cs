@@ -22,6 +22,13 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
         for (var index = FirstOwner; index < Owners; index++)
         {
             await EqualAsync(before[index].Identity, after[index].Identity);
+            await Assert.That(after[index].State.Version).IsEqualTo(before[index].State.Version);
+            await Assert.That(after[index].State.Incarnation).IsEqualTo(before[index].State.Incarnation);
+            await Assert.That(after[index].State.Term).IsEqualTo(before[index].State.Term);
+            await Assert.That(after[index].State.VotedFor).IsEqualTo(before[index].State.VotedFor);
+            await Assert.That(after[index].State.LastIndex).IsEqualTo(before[index].State.LastIndex);
+            await Assert.That(after[index].State.CommittedIndex).IsEqualTo(before[index].State.CommittedIndex);
+            await EqualAsync(before[index].State.Snapshot, after[index].State.Snapshot);
             await EqualAsync(before[index].State, after[index].State);
             await Assert.That(after[index].Position).IsEqualTo(before[index].Position);
             await Assert.That(after[index].Rows.SequenceEqual(before[index].Rows)).IsTrue();

@@ -49,7 +49,12 @@ internal static class SqlNullDistinctRf3Refusals
                             || item.Clause == SqlNullDistinctRf3Cases.LeadingClause
                             || item.Clause == SqlNullDistinctRf3Cases.HexClause
                             || item.Clause == SqlNullDistinctRf3Cases.EscapeClause
-                            || item.Clause == SqlNullDistinctRf3Cases.ContinuationClause))
+                            || item.Clause == SqlNullDistinctRf3Cases.ContinuationClause
+                            || item.Clause == SqlNullDistinctRf3Cases.UnicodeClause
+                            || item.Clause == SqlNullDistinctRf3Cases.UnicodeCustomClause
+                            || item.Clause == SqlNullDistinctRf3Cases.DollarClause
+                            || item.Clause == SqlNullDistinctRf3Cases.BinaryClause
+                            || item.Clause == SqlNullDistinctRf3Cases.OctalClause))
                         { await SqlNullDistinctRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token); }
                     }
                 }, failures);
@@ -64,6 +69,9 @@ internal static class SqlNullDistinctRf3Refusals
     {
         var before = await SqlNullDistinctRf3Image.ReadAsync(root, state, token);
         await SqlStringContinuationRf3Controls.InvalidAsync(fixture, state, root, token);
+        await SqlDollarStringRf3Controls.InvalidAsync(fixture, state, root, token);
+        await SqlRadixIntegerRf3Controls.InvalidAsync(fixture, state, root, token);
+        await SqlUnicodeStringRf3Controls.InvalidAsync(fixture, state, root, token);
         foreach (var clause in new[] { "score IS DISTINCT NULL", "score IS DISTINCT FROM",
             "score IS 'DISTINCT' FROM NULL", "score IS NOT DISTINCT FROM @absent", "score IS ISNULL",
             "score IS NOT NOTNULL", "score 'ISNULL'", "score NOT ISNULL", "score = ++1", "score = +",
@@ -88,7 +96,7 @@ internal static class SqlNullDistinctRf3Refusals
                 healthy: true, sqlOverride: sql);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         }
-        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1", "score = 0o1" })
+        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1.0", "score = 0o1.0" })
         {
             await RejectAsync(fixture, state, clause, ErrorCode.UnsupportedCapability, token, healthy: true);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);

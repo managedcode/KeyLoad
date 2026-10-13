@@ -73,11 +73,32 @@ internal sealed class NativeSixSiloMembershipReadinessFixture
     {
         using var deadline = new CancellationTokenSource(bounds.StartupTimeout, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
-        while (true)
+        try
         {
-            if (Read(options, address, bounds, execution.Token) is { } current)
-            { return current; }
-            await Task.Delay(bounds.StartupRetryDelay, clock, execution.Token).ConfigureAwait(false);
+            while (true)
+            {
+                if (Read(options, address, bounds, execution.Token) is { } current)
+                { return current; }
+                await Task.Delay(bounds.StartupRetryDelay, clock, execution.Token).ConfigureAwait(false);
+            }
         }
+        catch (OperationCanceledException original) when (execution.IsCancellationRequested)
+        {
+            var failures = new List<Exception> { original };
+            ServerFailureObserver.Observe(() => WriteCurrentUnavailable(options, address), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    private void WriteCurrentUnavailable(NodeOptions options, SiloAddress expectedLocal)
+    {
+        var primary = Cluster.Primary ?? throw new InvalidOperationException("The deployed native cluster has no primary silo.");
+        var oracle = Cluster.GetSiloServiceProvider(primary.SiloAddress).GetRequiredService<ISiloStatusOracle>();
+        Console.Error.WriteLine($"NativeSixSiloMembership phase=RestartUnavailable primary={primary.SiloAddress.ToParsableString()} expectedLocal={expectedLocal.ToParsableString()} approximateActiveCount={oracle.GetApproximateSiloStatuses(onlyActive: true).Count}");
+        Console.Error.WriteLine($"NativeSixSiloMembership expectedNames={string.Join(",", options.Peers.Concat(options.PhysicalGroupTrust.ForeignVoterIds))}");
+        var native = new ReplicaNativeDiscoveryMembership(oracle, membershipOptions);
+        foreach (var entry in native.ReadActive())
+        { Console.Error.WriteLine($"NativeSixSiloMembership activeName={entry.SiloName} activeAddress={entry.SiloAddress}"); }
     }
 }

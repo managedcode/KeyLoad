@@ -9,6 +9,7 @@ internal sealed class CatalogRestoreCancellationAuthority : IDisposable
 {
     private const long NoAppliedIndex = 0;
     private const int RestoreCommits = 2;
+    private const string WrongOperatorCredential = "root.backup-operator-invalid-verifier-32-characters";
     private static readonly global::System.Collections.Immutable.ImmutableArray<string> Endpoints =
         ["http://127.0.0.1:18001/", "http://127.0.0.1:18002/", "http://127.0.0.1:18003/"];
     private readonly ClusterBackupOwnerCut original;
@@ -37,6 +38,28 @@ internal sealed class CatalogRestoreCancellationAuthority : IDisposable
                 fixture.Source.ReconcileCatalogRestore(transaction, identity, position, metadata,
                     [original], [mapping], work);
                 CancelAfterReconcile(cancelAfterReconcile);
+            }, incarnation, signingKey, token);
+
+    internal StoreIdentity RestoreRefusingReusedOwner(EventingArtifactFixture fixture, string backup, string target,
+        bool reuseIncarnation, ReadExecutionBudget work, CancellationToken token)
+    {
+        var rejectedTarget = reuseIncarnation
+            ? mapping.Target with { Incarnation = original.Owner.Incarnation }
+            : mapping.Target with { PhysicalShardId = original.Owner.PhysicalShardId };
+        var rejected = mapping with { Target = rejectedTarget };
+        return ZoneTreeStore.RestoreCatalogBackup(backup, target, fixture.Source.StorageExecution,
+            (transaction, identity, position, metadata) =>
+                fixture.Source.ReconcileCatalogRestore(transaction, identity, position, metadata,
+                    [original], [rejected], work), incarnation, signingKey, token);
+    }
+
+    internal StoreIdentity RestoreRefusingWrongCredential(EventingArtifactFixture fixture,
+        string backup, string target, ReadExecutionBudget work, CancellationToken token)
+        => ZoneTreeStore.RestoreCatalogBackup(backup, target, fixture.Source.StorageExecution,
+            (transaction, identity, position, metadata) =>
+            {
+                fixture.Source.ReconcileCatalogRestore(transaction, identity, position, metadata,
+                    [original], [mapping], work, WrongOperatorCredential);
             }, incarnation, signingKey, token);
 
     internal async Task RequireIdentityAsync(StoreIdentity identity, StoreIdentity source)

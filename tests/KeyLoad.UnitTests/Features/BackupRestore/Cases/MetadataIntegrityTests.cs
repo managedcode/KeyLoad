@@ -21,13 +21,7 @@ internal sealed class MetadataIntegrityTests
     [Test]
     public async Task IdentityOuterChecksumMismatchFailsBeforeDestinationCreation()
     {
-        using var fixture = new MetadataBackupFixture();
-        var path = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName);
-        var identity = await File.ReadAllBytesAsync(path);
-        identity[0] ^= 1;
-        await File.WriteAllBytesAsync(path, identity);
-
-        await AssertOuterVerificationFailure(fixture, MetadataTestContract.IdentityChecksumRestorePath);
+        await MetadataOuterChecksumRepairFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }
 
     [Test]

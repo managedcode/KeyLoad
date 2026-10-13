@@ -24,10 +24,6 @@ internal static class SqlTokenizer
     private const char LowerExponentMarker = 'e';
     private const char UpperExponentMarker = 'E';
     private const char PlusCharacter = '+';
-    private const char ZeroCharacter = '0';
-    private const char LowerHexMarker = 'x';
-    private const char UpperHexMarker = 'X';
-    private const int HexPrefixLength = 2;
     private const char GreaterCharacter = '>';
     private const char LessCharacter = '<';
     private const char NotCharacter = '!';
@@ -61,10 +57,12 @@ internal static class SqlTokenizer
             ChargeContinuation(ref sourceTokenCount, maximum);
             result.Add(current switch
             {
+                _ when SqlUnicodeStringReader.Starts(sql, index) => SqlUnicodeStringReader.Read(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum, maximumDepth),
                 _ when SqlEscapeStringReader.Starts(sql, index) => SqlEscapeStringReader.Read(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum),
                 SqlStringQuote or SqlIdentifierQuote => Quoted(sql, ref index, budget, budgetCheckInterval, ref sourceTokenCount, maximum),
+                global::KeyLoad.Features.QueryExecution.SqlDollarQuoteReader.Delimiter => SqlDollarStringReader.Read(sql, ref index, budget, budgetCheckInterval),
                 _ when char.IsLetter(current) || current is IdentifierSeparator or ParameterPrefix => Identifier(sql, ref index, budget, budgetCheckInterval),
-                _ when StartsNumber(sql, index)
+                _ when SqlNumericLiteralStart.Read(sql, index)
                     => Number(sql, ref index, budget, budgetCheckInterval),
                 _ => Symbol(sql, ref index)
             });
@@ -78,17 +76,6 @@ internal static class SqlTokenizer
         if (count >= maximum)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.TokenBudgetDetail); }
         count++;
-    }
-
-    private static bool StartsNumber(string sql, int index)
-    {
-        if (sql[index] is MinusCharacter or PlusCharacter)
-        { index++; }
-        if (index >= sql.Length)
-        { return false; }
-        return char.IsDigit(sql[index]) || sql[index] == DecimalPoint
-            && index + AdjacentElementOffset < sql.Length
-            && char.IsDigit(sql[index + AdjacentElementOffset]);
     }
 
     private static SqlTriviaStatus ReadTrivia(string sql, ref int index, ref SqlTriviaState state,
@@ -157,7 +144,7 @@ internal static class SqlTokenizer
     private static SqlToken Number(string sql, ref int index, ReadExecutionBudget? budget, int budgetCheckInterval)
     {
         var start = index++;
-        if (ReadHexNumber(sql, start, ref index, budget, budgetCheckInterval))
+        if (SqlRadixIntegerReader.Read(sql, start, ref index, budget, budgetCheckInterval))
         { return new(SqlTokenKind.Number, sql[start..index]); }
         while (index < sql.Length && !StartsLineComment(sql, index)
             && (char.IsDigit(sql[index]) || sql[index] is DecimalPoint or LowerExponentMarker or UpperExponentMarker or PlusCharacter or MinusCharacter))
@@ -166,22 +153,6 @@ internal static class SqlTokenizer
             CheckBudget(budget, index, budgetCheckInterval);
         }
         return new(SqlTokenKind.Number, sql[start..index]);
-    }
-
-    private static bool ReadHexNumber(string sql, int start, ref int index,
-        ReadExecutionBudget? budget, int budgetCheckInterval)
-    {
-        var digits = sql[start] is MinusCharacter or PlusCharacter ? start + AdjacentElementOffset : start;
-        if (digits + AdjacentElementOffset >= sql.Length || sql[digits] != ZeroCharacter
-            || sql[digits + AdjacentElementOffset] is not (LowerHexMarker or UpperHexMarker))
-        { return false; }
-        index = digits + HexPrefixLength;
-        while (index < sql.Length && char.IsAsciiHexDigit(sql[index]))
-        {
-            index++;
-            CheckBudget(budget, index, budgetCheckInterval);
-        }
-        return true;
     }
 
     private static bool StartsLineComment(string sql, int index)

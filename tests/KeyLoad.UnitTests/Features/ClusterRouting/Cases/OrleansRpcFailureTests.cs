@@ -81,23 +81,24 @@ internal sealed class OrleansRpcFailureTests
     {
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        using var capture = new EventSourceLogCapture();
-        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
-        var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
         foreach (var (error, _) in NativeFailures())
         {
-            var cancelled = OrleansRpcFailure.Translate(error, command, Guid.NewGuid(), logger, cancellation.Token);
+            var requestId = Guid.NewGuid();
+            var (cancelled, output) = TranslateAndCapture(error, command, requestId,
+                cancellationToken: cancellation.Token);
             await Assert.That(cancelled.Code).IsEqualTo(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Cancelled);
+            await Assert.That(cancelled.Message).IsEqualTo(command ? CommandDetail : ReadDetail);
             await Assert.That(cancelled.InnerException).IsNull();
-        }
-        if (command)
-        {
-            await Assert.That(capture.Text).Contains(ErrorCode.UnknownWriteOutcome.ToString());
-            await Assert.That(capture.Text).DoesNotContain(PrivateCanary);
-        }
-        else
-        {
-            await Assert.That(capture.Text).IsEqualTo(string.Empty);
+            await Assert.That(output).DoesNotContain(PrivateCanary);
+            if (command)
+            {
+                await Assert.That(output).Contains(requestId.ToString());
+                await Assert.That(output).Contains(ErrorCode.UnknownWriteOutcome.ToString());
+            }
+            else
+            {
+                await Assert.That(output).IsEqualTo(string.Empty);
+            }
         }
     }
 
@@ -155,7 +156,7 @@ internal sealed class OrleansRpcFailureTests
     }
 
     private static (KeyLoadException Failure, string Output) TranslateAndCapture(Exception error, bool command, Guid requestId,
-        OrleansRpcFailureOperation? operation = null)
+        OrleansRpcFailureOperation? operation = null, CancellationToken cancellationToken = default)
     {
         using var capture = new EventSourceLogCapture();
         KeyLoadException failure;
@@ -163,7 +164,7 @@ internal sealed class OrleansRpcFailureTests
         {
             var logger = factory.CreateLogger(nameof(GrainFailureDiagnosticsTests));
             failure = OrleansRpcFailure.Translate(error, command, requestId, logger,
-                OrleansRpcFailureStage.Unobserved, operation, CancellationToken.None);
+                OrleansRpcFailureStage.Unobserved, operation, cancellationToken);
         }
         return (failure, capture.Text);
     }

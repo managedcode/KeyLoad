@@ -24,7 +24,7 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             nodeStop = Silo.StopAsync(CancellationToken.None);
-            await nodeStop.WaitAsync(token).ConfigureAwait(false);
+            await JoinObservedAsync(nodeStop, failures, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         var nativeHostReleased = false;
         if (nodeStop is { IsCompleted: true } && Silo.HasJoinedRequestWork)
@@ -45,7 +45,7 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             applicationDisposal ??= application.DisposeAsync().AsTask();
-            await applicationDisposal.WaitAsync(token).ConfigureAwait(false);
+            await JoinObservedAsync(applicationDisposal, failures, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (httpStop is not { IsCompletedSuccessfully: true }
             && applicationDisposal is not { IsCompletedSuccessfully: true })
@@ -57,7 +57,7 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             partitionDisposal ??= Partition.DisposeAsync().AsTask();
-            await partitionDisposal.WaitAsync(token).ConfigureAwait(false);
+            await JoinObservedAsync(partitionDisposal, failures, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (partitionDisposal is { IsCompletedSuccessfully: true })
         {
@@ -65,6 +65,23 @@ internal sealed partial class ControlledPartitionMovementNativeHost
             Volatile.Write(ref joined, true);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task JoinObservedAsync(Task original, List<Exception> failures,
+        CancellationToken token)
+    {
+        var observation = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(token), observation).ConfigureAwait(false);
+        failures.AddRange(observation);
+        if (observation.Count == NoCommandFailures)
+        { return; }
+        var completion = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => original, completion).ConfigureAwait(false);
+        foreach (var error in completion)
+        {
+            if (!observation.Any(observed => ReferenceEquals(observed, error)))
+            { failures.Add(error); }
+        }
     }
 
 }

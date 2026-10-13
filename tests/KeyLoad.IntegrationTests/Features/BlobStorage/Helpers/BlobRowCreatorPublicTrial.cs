@@ -33,7 +33,7 @@ internal static class BlobRowCreatorPublicTrial
         BlobRef blob, CancellationToken token)
     {
         var published = await BlobRowCreatorPublicPublication.RunAsync(creator, other, creatorIdentity, otherIdentity, blob, token);
-        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
+        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(administrator, other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
         var repaired = await BlobRowCreatorPublicPolicy.PersistAsync(administrator, otherIdentity.Principal with
         { OwnerId = creatorIdentity.Principal.OwnerId, PolicyEpoch = 3L }, token);
         await BlobRowCreatorPublicAssertions.CurrentAsync(other, published, token);
@@ -42,9 +42,9 @@ internal static class BlobRowCreatorPublicTrial
         await BlobRowCreatorPublicAssertions.CurrentAsync(other, published, token);
         _ = await BlobRowCreatorPublicPolicy.PersistAsync(administrator, repaired with
         { OwnerId = otherIdentity.Principal.OwnerId, PolicyEpoch = 4L }, token);
-        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
+        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(administrator, other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
         await BlobRowCreatorPublicReplay.RunAsync(creator, published, token);
-        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
+        await BlobRowCreatorPublicAssertions.ReadDeniedAsync(administrator, other, creator, otherIdentity.Secret, creatorIdentity.Secret, published, token);
         return true;
     }
 }

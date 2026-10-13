@@ -39,6 +39,12 @@ internal static class SqlNullDistinctRf3Repair
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, continuation.Clause, ErrorCode.Validation,
             token, ast: true, astCase: continuation);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var dollar = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.DollarClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, dollar.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: dollar);
+        await SqlRadixIntegerRf3Controls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
+        await SqlUnicodeStringRf3Controls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresRf3State.Partition,
             [new PutDocument(SqlNullOrderingRf3Protocol.Collection, SqlNullDistinctRf3State.Low,
                 SqlNullDistinctRf3State.HealthyJson, SqlNullDistinctRf3State.FaultRevision)]);

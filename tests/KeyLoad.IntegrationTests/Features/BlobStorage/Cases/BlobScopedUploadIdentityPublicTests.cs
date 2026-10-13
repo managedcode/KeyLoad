@@ -5,6 +5,10 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobScopedUploadIdentityPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task SameUploadIdRemainsScopedAcrossPartitionResourceAndNameWhileSingleLifetimeCleanupPreservesOtherReceipts()
-        => BlobScopedUploadIdentityPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
+    public async Task SameUploadIdRemainsScopedAcrossPartitionResourceAndNameWhileSingleLifetimeCleanupPreservesOtherReceipts()
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await BlobScopedUploadIdentityPublicTrial.RunAsync(fixture, token);
+        await BlobScopedBytesR42Trial.RunAsync(fixture, token);
+    }
 }

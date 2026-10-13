@@ -13,20 +13,23 @@ internal sealed class GraphPathRf3AuthorizationTests(ClusterFixture fixture)
     public async Task AcGraph007HiddenVerticesAndFieldUseGrantAreConsistentAcrossSdkAndOfficialMcp()
     {
         using var deadline = McpCallerDeadline.Create();
-        var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
-        var sdk = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            seed.Reader.Secret, deadline.Token);
-        await VerifySourceAndTargetHidingAsync(seed, sdk, mcp, deadline.Token);
-        var labeled = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
-        await AssertDeniedAsync(sdk, mcp, labeled, ErrorCode.PermissionDenied, deadline.Token);
-        var sqlDenied = GraphPathRf3Scenario.SqlRequest(seed, label: GraphPathRf3Scenario.Label);
-        await GraphPathRf3Assertions.AssertSdkErrorAsync(await sdk.ShortestPathSqlAsync(sqlDenied, deadline.Token),
-            ErrorCode.PermissionDenied);
-        await GraphPathRf3Assertions.AssertMcpErrorAsync(await mcp.CallAsync(
-            GraphPathRf3Scenario.SqlTool, sqlDenied, deadline.Token), ErrorCode.PermissionDenied);
-        await GrantAndVerifyLabelPathAsync(fixture, seed, sdk, mcp, deadline.Token);
+        {
+            var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
+            using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
+            var sdk = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
+            await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+                seed.Reader.Secret, deadline.Token);
+            await VerifySourceAndTargetHidingAsync(seed, sdk, mcp, deadline.Token);
+            var labeled = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
+            await AssertDeniedAsync(sdk, mcp, labeled, ErrorCode.PermissionDenied, deadline.Token);
+            var sqlDenied = GraphPathRf3Scenario.SqlRequest(seed, label: GraphPathRf3Scenario.Label);
+            await GraphPathRf3Assertions.AssertSdkErrorAsync(await sdk.ShortestPathSqlAsync(sqlDenied, deadline.Token),
+                ErrorCode.PermissionDenied);
+            await GraphPathRf3Assertions.AssertMcpErrorAsync(await mcp.CallAsync(
+                GraphPathRf3Scenario.SqlTool, sqlDenied, deadline.Token), ErrorCode.PermissionDenied);
+            await GrantAndVerifyLabelPathAsync(fixture, seed, sdk, mcp, deadline.Token);
+        }
+        await GraphPathFieldUseR43Trial.RunAsync(fixture, deadline.Token);
     }
 
     [Test]

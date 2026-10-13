@@ -20,6 +20,7 @@ internal static class BlobTombstoneListingPublicTrial
             _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
                 async callers => { await BlobTombstoneListingPublicReplay.FinalAsync(callers, state, token); return true; }, token);
         }
+        await BlobLiveListR43Trial.RunAsync(fixture, token);
     }
 
     private static async Task<BlobTombstoneListingPublicState> SetupAsync(RequestCqrsRf3Callers callers, CancellationToken token)

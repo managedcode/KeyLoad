@@ -123,9 +123,10 @@ internal sealed class TestDatabase : IDisposable
 
     internal void ReconcileCatalogRestore(IAtomicTransaction transaction, StoreIdentity identity,
         long position, ReadOnlyMemory<byte> metadata, ImmutableArray<ClusterBackupOwnerCut> cuts,
-        ImmutableArray<ClusterRestoreOwnerMapping> mappings, ReadExecutionBudget work)
+        ImmutableArray<ClusterRestoreOwnerMapping> mappings, ReadExecutionBudget work,
+        string credential = RootCredential)
         => ClusterRestoreCatalogReconciliation.Reconcile(transaction, identity, position, metadata,
-            RootCredential, cuts, mappings, limits, Database.EvaluationClock, work);
+            credential, cuts, mappings, limits, Database.EvaluationClock, work);
 
     internal TestDatabaseReplicaAdmission CreateTargetAdmission(DatabaseEngine targetDatabase, ZoneTreeStore target,
         string directory, string replicaDirectory, Guid? originalNodeId) => new(targetDatabase, target, directory,

@@ -28,7 +28,7 @@ internal static class PostgresRf3Parity
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, token));
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                         await SyntaxVariantsAsync(state, wire, token);
-                        await HexVariantsAsync(state, reader, wire, token);
+                        await LiteralVariantsAsync(state, reader, wire, token);
                         if (state.Dialect == PostgresRf3Protocol.JoinDialect)
                         {
                             var plain = state.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal);
@@ -48,11 +48,18 @@ internal static class PostgresRf3Parity
     private static Task PageAsync(PostgresRf3State state, QueryPage page)
         => PostgresRf3Assertions.PageAsync(state, page);
 
-    private static async Task HexVariantsAsync(PostgresRf3State state,
+    private static async Task LiteralVariantsAsync(PostgresRf3State state,
         RequestCqrsRf3Callers reader, PostgresRf3Caller wire, CancellationToken token)
     {
         foreach (var predicate in new[] { "0x1 = 1", "-0x1 < 0",
-            "0xFFFFFFFFFFFFFFFFFFFFFFFF = 79228162514264337593543950335" })
+            "0xFFFFFFFFFFFFFFFFFFFFFFFF = 79228162514264337593543950335",
+            "U&'\\+01F600' = '😀'", "U&'g!0075ard' UESCAPE '!' = 'guard'",
+            "$$guard$$ = 'guard'", "$tag$😀$tag$ = '😀'",
+            "0b1 = 1 AND 0o1 = 1",
+            "0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = 79228162514264337593543950335",
+            "0o77777777777777777777777777777777 = 79228162514264337593543950335",
+            "-0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = -79228162514264337593543950335",
+            "-0o77777777777777777777777777777777 = -79228162514264337593543950335" })
         {
             var sql = state.Sql.Replace(" ORDER BY ", " WHERE " + predicate + " ORDER BY ", StringComparison.Ordinal);
             await global::TUnit.Assertions.Assert.That(sql).IsNotEqualTo(state.Sql);

@@ -14,29 +14,32 @@ internal sealed class GraphPathRf3ParityTests(ClusterFixture fixture)
     public async Task AcGraph009DirectAndSqlSdkMcpReturnExactTiedPathAndProjectedEdges()
     {
         using var deadline = McpCallerDeadline.Create();
-        var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
-        var identity = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, deadline.Token);
-        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
-        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
-        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
-            identity.Secret, deadline.Token);
-        var direct = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
-        var sql = GraphPathRf3Scenario.SqlRequest(seed, label: GraphPathRf3Scenario.Label);
+        {
+            var seed = await GraphPathRf3Scenario.CreateAsync(fixture, deadline.Token);
+            var identity = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, deadline.Token);
+            using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+            var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
+            await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+                identity.Secret, deadline.Token);
+            var direct = GraphPathRf3Scenario.Request(seed, labels: ImmutableArray.Create(GraphPathRf3Scenario.Label));
+            var sql = GraphPathRf3Scenario.SqlRequest(seed, label: GraphPathRf3Scenario.Label);
 
-        var sdkDirect = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathAsync(direct, deadline.Token));
-        var mcpDirect = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
-            GraphPathRf3Scenario.DirectTool, direct, deadline.Token));
-        var sdkSql = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathSqlAsync(sql, deadline.Token));
-        var mcpSql = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
-            GraphPathRf3Scenario.SqlTool, sql, deadline.Token));
-        var vertices = new[] { seed.Source, seed.FirstBranch, seed.Target };
-        var edges = new[] { "a-branch-a", "a-end-a" };
+            var sdkDirect = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathAsync(direct, deadline.Token));
+            var mcpDirect = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
+                GraphPathRf3Scenario.DirectTool, direct, deadline.Token));
+            var sdkSql = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathSqlAsync(sql, deadline.Token));
+            var mcpSql = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
+                GraphPathRf3Scenario.SqlTool, sql, deadline.Token));
+            var vertices = new[] { seed.Source, seed.FirstBranch, seed.Target };
+            var edges = new[] { "a-branch-a", "a-end-a" };
 
-        await GraphPathRf3Assertions.AssertPathAsync(sdkDirect, vertices, edges, GraphPathRf3Scenario.Label);
-        await GraphPathRf3Assertions.AssertProjectedAsync(sdkDirect);
-        await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, mcpDirect.Value);
-        await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, sdkSql);
-        await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, mcpSql.Value);
+            await GraphPathRf3Assertions.AssertPathAsync(sdkDirect, vertices, edges, GraphPathRf3Scenario.Label);
+            await GraphPathRf3Assertions.AssertProjectedAsync(sdkDirect);
+            await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, mcpDirect.Value);
+            await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, sdkSql);
+            await GraphPathRf3Assertions.AssertEquivalentAsync(sdkDirect, mcpSql.Value);
+        }
+        await GraphPathRawReadR43Trial.RunAsync(fixture, deadline.Token);
     }
 
     [Test]

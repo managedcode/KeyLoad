@@ -14,6 +14,9 @@ internal static class SqlNullDistinctPages
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.LeadingProfile)).IsTrue();
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.HexProfile)).IsTrue();
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.EscapeProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.DollarProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.BinaryOctalProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.UnicodeProfile)).IsTrue();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);

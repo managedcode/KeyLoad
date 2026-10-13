@@ -7,8 +7,279 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R42 local development: full Release 0 errors/0 warnings and whole formatter pass. Unit250:246passed4failed; recovery35:33passed2failed; no skips, no prior-pass regressions, three prior failures now passed. Original source/image/closure/receipts and all process/reader/disposal joins stable. Original plan20/104 done84in progress; KL-029 original criteria independently qualified on Linux at 7e94024c. Fresh complete Linux/RF3/coverage/fault/endurance/performance gates remain open.",
-    "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
+    "qualification": "R43 full Release build and complete canonical formatter verification passed with0warnings/errors and unchanged source. Focused native50 local macOS arm64 whole-operation execution passed283of289 cases,6failed,0skipped; all285 original R42 selected UIDs retained. Four new backup cases passed; RPC cancellation case repaired; native Prepare regressed at original shutdown joins. Original plan20/104done84in progress; KL-029 original criteria independently accepted at7e94024c. Exact-source Linux full suites/RF3/functional coverage/fault/endurance/performance remain open.",
+    "coverage": "UNMEASURED_FOR_CURRENT_R43. Historical R38 partial functional observation:25.729928757%lines19.627577034%branches across13 reported production modules; controls/load excluded. Full product functional coverage and Linux contributor gates remain unqualified.",
+    "currentStageR43": {
+      "status": "local_development_executed_with_six_failures_linux_acceptance_pending",
+      "newCSharpFiles": 138,
+      "newFeatureSpecifications": 14,
+      "scope": "SQL dollar quotes, binary/octal integers and Unicode U& strings; pending placement policy, weights and physical-domain whole flows; four native backup admission/repair flows; Graph cycles/label frontiers/persisted field grants, EventStreams current authority/byte bounds/schema cursors, Blob multipart/partial reads/list continuation and TimeSeries overflow/scoped identity; joined native fixture shutdown and precise original failure observation.",
+      "originalTestDeclarationsAndOraclesPreserved": true,
+      "runtimeExecuted": true,
+      "allAcceptanceClosed": false,
+      "sourceAdmissionIsNotQualification": true,
+      "sourceProvenNextRepair": "Default native TestCluster membership is primary-owned and volatile; the original PRIMARY restart requires the existing production external AzureStorage clustering provider through fixture-owned Aspire. This next repair is drafted, not integrated or runtime-qualified.",
+      "remaining": "Fix six retained original lifecycle/ownership failures including the native Prepare shutdown regression; integrate concrete external-membership provider repair and the independently prepared next workstreams. Exact-source Linux full functional/recovery/Aspire RF3, full coverage and required fault/endurance/performance gates remain open.",
+      "nativeDiagnostics": {
+        "solution": "Ready27/27",
+        "errors": 0,
+        "warnings": 0,
+        "includeAnalyzers": true,
+        "original": "TestResults/stage61-native-join/stage64-r43-native-integration.root-r43-zero-errors-complete-analyzers-check.original.json",
+        "sha256": "a13d054cccca8fffbd8e828f21696d4f42caade7b16197f911c4012057a9b0ee",
+        "ordinarySdkBuildAndRuntime": "Complete Release0errors0warnings, whole formatter passed; focused native runtime283/289passed,6failures, no skips.",
+        "scope": "Actual native analyzers before the40 canonical formatter deltas; current full SDK build is the authoritative compiler gate."
+      },
+      "sourceAndRuntime": {
+        "sourceFiles": 10996,
+        "newFunctionalUnitCases": 4,
+        "canonicalUnitCases": 3864,
+        "functionalUnitCases": 3330,
+        "requiredNonContributorCases": 534,
+        "fullRecoveryCensus": 351,
+        "fullIntegrationCensus": 536,
+        "rf3SelectedCases": 118,
+        "rf3Executed": 0,
+        "sourceImageClosureDrift": false,
+        "allOriginalNativeProcessReadersExitJoinedDisposed": true
+      },
+      "verification": {
+        "build": {
+          "exitCode": 0,
+          "processJoined": true,
+          "elapsedSeconds": 231.62585091707297,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r43-build-coherent-original.completion.json",
+            "sha256": "3a2341d2e4c9c53e17587735683624992e7f0d714c5a8b36ae366af4fbf90b5b"
+          }
+        },
+        "format": {
+          "exitCode": 0,
+          "processJoined": true,
+          "elapsedSeconds": 218.2991717910627,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r43-format-coherent-original.completion.json",
+            "sha256": "8fe6a160d1609d8208863218706c93886122011b0cd1916bc7a966d5a462ffcf"
+          }
+        },
+        "verify": {
+          "exitCode": 0,
+          "processJoined": true,
+          "elapsedSeconds": 170.60872254194692,
+          "original": {
+            "path": "TestResults/stage61-native-join/stage64-r43-verify-coherent-original.completion.json",
+            "sha256": "43cdea695012535bd8e4c58639d867aae3d616202a09e60042685b18da7d29e6"
+          }
+        }
+      },
+      "focusedExecution": {
+        "unit": {
+          "binding": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-native-binding.original.json",
+            "sha256": "db7cf093a19302481154b84b9abf3eaa34f1ae6fdef19c4031f77a586ca930f2"
+          },
+          "originalNativeReport": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-results/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+            "sha256": "0503824d3e19ccd49b7a870623e599611c4a8a26cfb8c13918c9fd9509bc98fe"
+          },
+          "originalTrx": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-results/KeyLoad.UnitTests_net10.0_arm64.trx",
+            "sha256": "0a6cbfa2e0d1b1321b695618e200d278796f1f09122caa366f38a16ca1e0ed6b"
+          },
+          "originalProcess": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-execution/native-process.original.json",
+            "sha256": "cc93a2f691e443a380c61911dca39e4423471b91517f5a309c49e399fda0d149"
+          },
+          "originalStdout": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-execution/runner.stdout.original.txt",
+            "sha256": "151697308b5fdf0b4e0971141308087a53709bfa970cf79ef8527ff7ae8dd45d"
+          },
+          "originalStderr": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-execution/runner.stderr.original.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "postCaptureErrors": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-unit-execution/post-capture-errors.original.json",
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "expected": 254,
+          "executed": 254,
+          "passed": 250,
+          "failed": 4,
+          "skipped": 0,
+          "maximumParallelTests": 50,
+          "actualTrxIntervalPeak": 51,
+          "parallelismNote": "Original TRX case lifetime overlap, distinct from native configured scheduler capacity.",
+          "processJoins": {
+            "exitJoined": true,
+            "outputJoined": true,
+            "errorJoined": true,
+            "disposed": true
+          },
+          "sourceImageClosureDrift": false,
+          "originalTrxTimes": {
+            "creation": "2026-10-13T18:38:54.829608Z",
+            "queuing": "2026-10-13T18:38:54.829608Z",
+            "start": "2026-10-13T18:38:54.829608Z",
+            "finish": "2026-10-13T18:41:38.330852Z"
+          },
+          "originalTrxElapsedSeconds": 163.501244
+        },
+        "recovery": {
+          "binding": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-native-binding.original.json",
+            "sha256": "0b87f85666fd610b5831ad86dc0799b32b43bcafd35b84399ae71a9d371cedd9"
+          },
+          "originalNativeReport": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-results/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
+            "sha256": "ae430f3986c473f76d27bae96ba24568c0b65d35e2f43ff2a217f0db671d3d17"
+          },
+          "originalTrx": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-results/KeyLoad.RecoveryTests_net10.0_arm64.trx",
+            "sha256": "cd72eac83c7bea3ada5a3f52d7aaed35c867e4432f786151f1b5e715d9d49a0c"
+          },
+          "originalProcess": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-execution/native-process.original.json",
+            "sha256": "21c1c675b2d543dc79da83af3f7841e02993b391a4fb4c2990458bdde394f80a"
+          },
+          "originalStdout": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-execution/runner.stdout.original.txt",
+            "sha256": "3c2b40a75e0729516badf2abef5ee7b889d3af0240723fa16f68d98e7a009905"
+          },
+          "originalStderr": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-execution/runner.stderr.original.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "postCaptureErrors": {
+            "path": "TestResults/stage61-native-join/current-stage64-r43-recovery-execution/post-capture-errors.original.json",
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "expected": 35,
+          "executed": 35,
+          "passed": 33,
+          "failed": 2,
+          "skipped": 0,
+          "maximumParallelTests": 50,
+          "actualTrxIntervalPeak": 15,
+          "parallelismNote": "Original TRX case lifetime overlap, distinct from native configured scheduler capacity.",
+          "processJoins": {
+            "exitJoined": true,
+            "outputJoined": true,
+            "errorJoined": true,
+            "disposed": true
+          },
+          "sourceImageClosureDrift": false,
+          "originalTrxTimes": {
+            "creation": "2026-10-13T18:38:54.747649Z",
+            "queuing": "2026-10-13T18:38:54.747649Z",
+            "start": "2026-10-13T18:38:54.747649Z",
+            "finish": "2026-10-13T18:40:53.676476Z"
+          },
+          "originalTrxElapsedSeconds": 118.928827
+        }
+      },
+      "comparisonWithR42": {
+        "retainedNativeUids": 285,
+        "newNativeCasesPassed": 4,
+        "resolved": [
+          "KeyLoad.UnitTests.Features.ClusterRouting.OrleansRpcFailureTests.1.1.AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation(System.Boolean).2.1.0"
+        ],
+        "regressions": [
+          "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.1.1.ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners.1.1.0"
+        ]
+      },
+      "observedFailures": [
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.Search.Bm25PortableMovementTests.1.1.ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects.1.1.0",
+          "className": "KeyLoad.UnitTests.Features.Search.Bm25PortableMovementTests",
+          "methodName": "ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects",
+          "displayName": "ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects",
+          "sourcePath": "tests/KeyLoad.UnitTests/Features/Search/Cases/Bm25PortableMovementTests.cs",
+          "sourceSha256": "79d5dd8f7279205f9abb232b88a7c8ba9202abc33f02678a7a496cc283b7a352",
+          "originalError": "AggregateException: One or more errors occurred. (The write outcome is unknown. Retry the same command ID.) (The write outcome is unknown. Retry the same command ID.)\n ---> KeyLoad.KeyLoadException: The write outcome is unknown. Retry the same command ID.\n ---> KeyLoad.KeyLoadException: The write outcome is unknown. Retry the same command ID."
+        },
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativeRetireTests.1.1.OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners.1.1.0",
+          "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativeRetireTests",
+          "methodName": "OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
+          "displayName": "OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners",
+          "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativeRetireTests.cs",
+          "sourceSha256": "a9987e7ae7b35c16d44fb1c369cf8053aff4fa94217201d468955822ea5a704b",
+          "originalError": "AggregateException: One or more errors occurred. (The write outcome is unknown. Retry the same command ID.) (The write outcome is unknown. Retry the same command ID.)\n ---> KeyLoad.KeyLoadException: The write outcome is unknown. Retry the same command ID.\n ---> KeyLoad.KeyLoadException: The write outcome is unknown. Retry the same command ID."
+        },
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests.1.1.ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners.1.1.0",
+          "className": "KeyLoad.UnitTests.Features.ClusterRouting.ControlledPartitionMovementNativePrepareTests",
+          "methodName": "ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners",
+          "displayName": "ActualNativePrepareRefusesInvalidProofThenRetainsMixedReceiptConflictAndTwoColdOwners",
+          "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativePrepareTests.cs",
+          "sourceSha256": "586d081563bfb4e73775363e5d59d02a5514966b8b2702dbc2c3b299ae7c07a5",
+          "originalError": "AggregateException: One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (A task was canceled.) (A task was canceled.))) (One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (A task was canceled.) (A task was canceled.))) (One or more errors occurred. (One or more errors occurred. (A task was canceled.) (A task was canceled.))))\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled."
+        },
+        {
+          "nativeUid": "KeyLoad.UnitTests.Features.ClusterRouting.NativeSixSiloMembershipReadinessTests.1.1.ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration.1.1.0",
+          "className": "KeyLoad.UnitTests.Features.ClusterRouting.NativeSixSiloMembershipReadinessTests",
+          "methodName": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration",
+          "displayName": "ActualSixNativeSilosRefuseWrongNamesAndCancellationThenRepairAndFenceRestartedGeneration",
+          "sourcePath": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/NativeSixSiloMembershipReadinessTests.cs",
+          "sourceSha256": "6f6670958af5b4f50d28acc9f6a56b9bc0aaff114ac3d54567cb90c4b3b35e4e",
+          "originalError": "TaskCanceledException: A task was canceled."
+        },
+        {
+          "nativeUid": "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeHostLifetimeTests.1.1.CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact.1.1.0",
+          "className": "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeHostLifetimeTests",
+          "methodName": "CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact",
+          "displayName": "CanceledOriginalStopJoinsAllSixOwnersThenOriginalColdOutcomeAndHealthyReplayRemainExact",
+          "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativeHostLifetimeTests.cs",
+          "sourceSha256": "ce8df1e7e9fedd1c9e01fee0d8cfda44896d7995efb57f886ccd18ae40825aac",
+          "originalError": "AssertionException: Expected to be 26\nbut found 28\n\nat Assert.That(after[index].State.LastIndex).IsEqualTo(before[index].State.LastIndex)"
+        },
+        {
+          "nativeUid": "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeProcessTests.1.1.GenuineSixHostOriginalPrepareSurvivesKilledOwnerAndColdOutcomeObservationWithoutRedispatch.1.1.0",
+          "className": "KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeProcessTests",
+          "methodName": "GenuineSixHostOriginalPrepareSurvivesKilledOwnerAndColdOutcomeObservationWithoutRedispatch",
+          "displayName": "GenuineSixHostOriginalPrepareSurvivesKilledOwnerAndColdOutcomeObservationWithoutRedispatch",
+          "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterRouting/Cases/ControlledPartitionMovementNativeProcessTests.cs",
+          "sourceSha256": "9f7dcf74d214d9188e76791c194b12fad0a28cde333c607eca5beea4480ff1cd",
+          "originalError": "AggregateException: One or more errors occurred. (One or more errors occurred. (One or more errors occurred. (A task was canceled.) (A task was canceled.))) (One or more errors occurred. (One or more errors occurred. (A task was canceled.) (A task was canceled.)))\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled.\n ---> System.Threading.Tasks.TaskCanceledException: A task was canceled."
+        }
+      ],
+      "localRf3Admission": "Fresh native118selected cases only; two actual local-image allowlists do not admit this enlarged cohort. Current exact-source Linux CI execution required.",
+      "profilingKL105": {
+        "scope": "Bounded attempt to identify actual R43 application for KL-105; metadata only, no capture.",
+        "targetProcessId": 21635,
+        "role": "TUnit actual managed test child, separate from controller21633 and SDK launcher21631",
+        "originals": [
+          {
+            "path": "TestResults/stage61-native-join/stage64-r43-kl105-process-list.original.json",
+            "sha256": "bca4dfc3d046662f72b59f5008c2226aeb2e5419319ed46d44fe87b93ccfaecf"
+          },
+          {
+            "path": "TestResults/stage61-native-join/stage64-r43-kl105-info.original.json",
+            "sha256": "7bd77844c1ad0479525f1c5a0531d19f3eee442585dd72674d2b072831c33a8d"
+          },
+          {
+            "path": "TestResults/stage61-native-join/stage64-r43-kl105-preflight.original.json",
+            "sha256": "704f47a3e9bb097ee928cd1cb79eb0f3a9b0448788be9c7931ddda5a7737ab5b"
+          },
+          {
+            "path": "TestResults/stage61-native-join/stage64-r43-kl105-capabilities.original.json",
+            "sha256": "f5d4bada02fdc356e3a132487bfe24b38008aa02cae3ff1dcdf88ff46c359b27"
+          }
+        ],
+        "nativeFollowupResult": "ProcessNotFound after the actual native run had ended. macOS ClrMD live-attach blocker pertains to those specific tools; no all-collector unsupported conclusion.",
+        "collectorsStarted": false,
+        "matchedBeforeAfter": false,
+        "overhead": "unmeasured",
+        "hotspotOrSpeedClaim": false,
+        "acceptanceClosed": false
+      },
+      "originalLocalDerivation": {
+        "path": "TestResults/stage61-native-join/stage64-r43-development.generated.original.json",
+        "sha256": "c75dbb1f72ac981f8863db679a12c54ef4336f646264ab19845aab17a3f60a63",
+        "purpose": "Original joined local results; generated ignored artifact, no whole-task acceptance or coverage claim."
+      }
+    },
     "sourceIntegration": {
       "graph": {
         "paths": 144,

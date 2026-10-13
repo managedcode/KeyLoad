@@ -15,7 +15,15 @@ internal static class SqlNullDistinctRf3Cases
     internal const string LeadingClause = "score > .5";
     internal const string HexProfile = "SQL.HexadecimalIntegerLiteral.v1";
     internal const string HexClause = "score = 0x1";
+    internal const string UnicodeProfile = "SQL.UnicodeStringLiteral.v1";
+    internal const string UnicodeClause = "score = 1 AND label = U&'l\\006fw'";
+    internal const string UnicodeCustomClause = "score = 1 AND label = U&'l#006fw' UESCAPE '#'";
+    internal const string BinaryOctalProfile = "SQL.BinaryOctalIntegerLiteral.v1";
+    internal const string BinaryClause = "score = 0b1";
+    internal const string OctalClause = "score = 0o1";
     internal const string EscapeProfile = "SQL.EscapeStringLiteral.v1";
+    internal const string DollarProfile = "SQL.DollarQuotedString.v1";
+    internal const string DollarClause = "score = 1 AND label = $tag$low$tag$";
     internal const string EscapeClause = "score = 1 AND label = E'low'";
     internal const string ContinuationClause = "score = 1 AND label = 'lo'\n'w'";
     private const decimal Half = 0.5m;
@@ -106,6 +114,53 @@ internal static class SqlNullDistinctRf3Cases
             new Comparison(ValueOperand.Create("é"), "=", ValueOperand.Create("é"))), ["low"]),
         new("score = 1 AND E'\\xf0\\x9f'\n'\\x98\\x80' = '😀'", And(new Comparison(Score, "=", ValueOperand.Create(1)),
             new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
+        new(DollarClause, And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(Label, "=", ValueOperand.Create("low"))), ["low"]),
+        new("label = $$low$$", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = $κ_1$low$κ_1$", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = $X$low$X$", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = $$$$", new Comparison(Label, "=", ValueOperand.Create("")), []),
+        new("label = $$l\\ow$$", new Comparison(Label, "=", ValueOperand.Create("l\\ow")), []),
+        new("label = $$' OR score = 1 --$$", new Comparison(Label, "=", ValueOperand.Create("' OR score = 1 --")), []),
+        new("label = $outer$$inner$low$inner$$outer$", new Comparison(Label, "=", ValueOperand.Create("$inner$low$inner$")), []),
+        new("score = 1 AND $$😀$$ = '😀'", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
+        new("score = 0b1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = +0B1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = -0b1", new Comparison(Score, "=", ValueOperand.Create(-1)), []),
+        new("score > 0b1", new Comparison(Score, ">", ValueOperand.Create(1)), ["high"]),
+        new("score = 0o1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = +0O1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = -0o1", new Comparison(Score, "=", ValueOperand.Create(-1)), []),
+        new("score > 0o1", new Comparison(Score, ">", ValueOperand.Create(1)), ["high"]),
+        new("score = 0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        new("score = 0o77777777777777777777777777777777", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
+        new("score BETWEEN 0b1 AND 0o2", And(new Comparison(Score, ">=", ValueOperand.Create(1)),
+            new Comparison(Score, "<=", ValueOperand.Create(2))), ["high", "low"]),
+        new("score IN (0b1,0o2)", new InPredicate(Score, [ValueOperand.Create(1), ValueOperand.Create(2)], false), ["high", "low"]),
+        new("score IS NOT DISTINCT FROM 0b1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = 1 AND 0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = 79228162514264337593543950335", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create(decimal.MaxValue), "=", ValueOperand.Create(decimal.MaxValue))), ["low"]),
+        new("score = 1 AND 0o77777777777777777777777777777777 = 79228162514264337593543950335", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create(decimal.MaxValue), "=", ValueOperand.Create(decimal.MaxValue))), ["low"]),
+        new("score = 1 AND -0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111 = -79228162514264337593543950335", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create(decimal.MinValue), "=", ValueOperand.Create(decimal.MinValue))), ["low"]),
+        new("score = 1 AND -0o77777777777777777777777777777777 = -79228162514264337593543950335", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create(decimal.MinValue), "=", ValueOperand.Create(decimal.MinValue))), ["low"]),
+        new("score = 1 AND label = U&'l\\006fw'", And(new Comparison(Score, "=", ValueOperand.Create(1)), new Comparison(Label, "=", ValueOperand.Create("low"))), ["low"]),
+        new("score = 1 AND label = U&'l#006fw' UESCAPE '#'", And(new Comparison(Score, "=", ValueOperand.Create(1)), new Comparison(Label, "=", ValueOperand.Create("low"))), ["low"]),
+        new("label = u&'l\\+00006fw'", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = U&'lo'\n'w'", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = U&'l!006fw' UESCAPE E'\\x21'", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("label = U&'l!006fw' UESCAPE $$!$$", new Comparison(Label, "=", ValueOperand.Create("low")), ["low"]),
+        new("score = 1 AND U&'\\+01F600' = '😀'", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
+        new("score = 1 AND U&'\\D83D\\+00DE00' = '😀'", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
+        new("score = 1 AND U&'\\+00D83D\\DE00' = '😀'", And(new Comparison(Score, "=", ValueOperand.Create(1)),
+            new Comparison(ValueOperand.Create("😀"), "=", ValueOperand.Create("😀"))), ["low"]),
+        new("label = U&'\\\\'", new Comparison(Label, "=", ValueOperand.Create("\\")), []),
+        new("label = U&'low''other'", new Comparison(Label, "=", ValueOperand.Create("low'other")), []),
     ];
     internal static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     internal static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

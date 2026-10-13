@@ -11,6 +11,7 @@ internal static class SqlNullDistinctRefusals
         var position = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         await SqlStringContinuationControls.InvalidAsync(database, engine);
+        await SqlLiteralFormsControls.InvalidAsync(database, engine);
         foreach (var clause in new[] { "score IS DISTINCT NULL", "score IS DISTINCT FROM", "score IS 'DISTINCT' FROM NULL",
             "score IS NOT DISTINCT FROM @absent", "score IS ISNULL", "score IS NOT NOTNULL",
             "score 'ISNULL'", "score NOT ISNULL", "score = ++1", "score = +",
@@ -40,7 +41,7 @@ internal static class SqlNullDistinctRefusals
             await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition, InitialRevision);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, before, position, identity);
         }
-        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1", "score = 0o1" })
+        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0", "score = 0b1.0", "score = 0o1.0" })
         {
             var request = new QueryRequest(database.Partition, SqlNullDistinctCases.Prefix + clause
                 + SqlNullDistinctCases.Tail, AllowFullScan: true);
@@ -80,7 +81,12 @@ internal static class SqlNullDistinctRefusals
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.LeadingClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.HexClause),
             SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.EscapeClause),
-            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.ContinuationClause) })
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.ContinuationClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.UnicodeClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.UnicodeCustomClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.DollarClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.BinaryClause),
+            SqlNullDistinctCases.All.Single(value => value.Clause == SqlNullDistinctCases.OctalClause) })
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlNullOrderingProtocol.Reader,
                 new(database.Partition, SqlNullDistinctCases.Prefix + item.Clause + SqlNullDistinctCases.Tail,
