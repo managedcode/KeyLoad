@@ -19,6 +19,14 @@ internal static class SqlNullDistinctRf3Repair
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty,
             SqlNullDistinctRf3Cases.All[SqlNullDistinctRf3State.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var positive = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.PositiveClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, positive.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: positive);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
+        var leading = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.LeadingClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, dirty, leading.Clause, ErrorCode.Validation,
+            token, ast: true, astCase: leading);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresRf3State.Partition,
             [new PutDocument(SqlNullOrderingRf3Protocol.Collection, SqlNullDistinctRf3State.Low,
                 SqlNullDistinctRf3State.HealthyJson, SqlNullDistinctRf3State.FaultRevision)]);

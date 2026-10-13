@@ -41,7 +41,9 @@ internal static class SqlOffsetRf3Refusals
     }
     internal static async Task DeniedAsync(RequestCqrsRf3Callers callers, SqlOffsetRf3State state, CancellationToken token)
     {
-        foreach (var query in new[] { SqlOffsetRf3Protocol.ScalarRequest(state.Partition), SqlOffsetRf3Protocol.JoinRequest(state.Partition) })
+        var plain = SqlOffsetRf3Protocol.JoinRequest(state.Partition);
+        foreach (var query in new[] { SqlOffsetRf3Protocol.ScalarRequest(state.Partition), plain,
+            plain with { Sql = plain.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal) } })
         {
             var failure = await callers.Sdk.QueryAsync(query, token);
             await Assert.That(failure.IsSuccess).IsFalse();

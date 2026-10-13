@@ -19,6 +19,8 @@ internal static class SqlNullOrderingRf3Refusals
         var image = await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token);
         await RejectAsync(fixture, state, SqlNullOrderingRf3Protocol.AscFirst,
             ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
+        await RejectAsync(fixture, state, SqlNullOrderingRf3Protocol.Using(false, true),
+            ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
         await RejectAsync(fixture, state, SqlAllRf3Pages.DuplicateSql,
             ErrorCode.PermissionDenied, PostgresRf3Protocol.PermissionSqlState, token);
         await RejectAsync(fixture, state, SqlImplicitAliasRf3Pages.BasicSql,
@@ -34,6 +36,7 @@ internal static class SqlNullOrderingRf3Refusals
         var image = await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token);
         await RejectAsync(fixture, state, SqlNullOrderingRf3Protocol.BadSql,
             ErrorCode.Validation, SqlNullOrderingRf3Protocol.ValidationSqlState, token);
+        await UsingInvalidAsync(fixture, state, root, token);
         await RejectAsync(fixture, state, "SELECT ALL ALL label FROM null_ordering LIMIT 5",
             ErrorCode.Validation, SqlNullOrderingRf3Protocol.ValidationSqlState, token);
         await RejectAsync(fixture, state, "SELECT score copied,label copied FROM null_ordering LIMIT 5",
@@ -61,18 +64,45 @@ internal static class SqlNullOrderingRf3Refusals
                     state.Reader.Principal.Id, state.Reader.Secret, PostgresRf3Certificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), sqlState, code);
-                    if (code == ErrorCode.Validation)
+                    global::Npgsql.NpgsqlParameter[] arguments = sql.Contains(SqlNullOrderingRf3Protocol.DirectionOperand, StringComparison.Ordinal)
+                        ? [new() { ParameterName = SqlNullOrderingRf3Protocol.DirectionName,
+                            NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Text, Value = SqlNullOrderingRf3Protocol.DirectionValue }]
+                        : [];
+                    await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, arguments, prepared: true, token), sqlState, code);
+                    if (code is ErrorCode.Validation or ErrorCode.UnsupportedCapability)
                     {
                         await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlNullOrderingRf3Protocol.AscFirst, [], prepared: false, token), false, true);
                         await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlAllRf3Pages.Explicit(SqlNullOrderingRf3Protocol.AscFirst), [], prepared: false, token), false, true);
                         await SqlImplicitAliasRf3Pages.HealthyAsync(caller, wire, token);
+                        var repaired = SqlNullOrderingRf3Protocol.Operation(SqlNullOrderingRf3Protocol.Using(false, true));
+                        await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, repaired, token), false, true);
+                        await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.McpAsync<QueryPage>(caller.Mcp, repaired, token), false, true);
+                        await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(repaired.Sql, [], prepared: false, token), false, true);
                     }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             return true;
         }, token);
+    }
+
+    private static async Task UsingInvalidAsync(ClusterFixture fixture, SqlNullOrderingRf3State state,
+        KeyLoadClient root, CancellationToken token)
+    {
+        var image = await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token);
+        foreach (var (direction, code) in new[]
+        {
+            (" USING ", ErrorCode.Validation), (" USING '>' ", ErrorCode.Validation),
+            (" USING @direction ", ErrorCode.Validation), (" USING = ", ErrorCode.UnsupportedCapability),
+            (" USING <= ", ErrorCode.UnsupportedCapability), (" ASC USING < ", ErrorCode.UnsupportedCapability),
+            (" USING < DESC ", ErrorCode.UnsupportedCapability)
+        })
+        {
+            var sql = SqlNullOrderingRf3Protocol.AscFirst.Replace(SqlNullOrderingRf3Protocol.Ascending, direction, StringComparison.Ordinal);
+            await RejectAsync(fixture, state, sql, code,
+                code == ErrorCode.Validation ? SqlNullOrderingRf3Protocol.ValidationSqlState : PostgresRf3Protocol.UnsupportedSqlState, token);
+            await global::TUnit.Assertions.Assert.That(await SqlNullOrderingRf3Assertions.ImageAsync(root, state, token)).IsEqualTo(image);
+        }
     }
 
     private static async Task PersistAsync(KeyLoadClient root, PrincipalRecord expected, CancellationToken token)

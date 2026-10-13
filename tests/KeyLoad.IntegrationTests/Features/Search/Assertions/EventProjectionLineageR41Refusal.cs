@@ -1,0 +1,26 @@
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
+
+namespace KeyLoad.IntegrationTests.Features.Search;
+
+internal static class EventProjectionLineageR41Refusal
+{
+    internal static async Task BothAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers worker,
+     RequestCqrsRf3Callers reader, EventProjectionLineageR41State state, CancellationToken token)
+    {
+        foreach (var command in new[] { state.Projection, state.FreshProjection })
+        {
+            var result = await worker.Sdk.CommitAsync(command, token);
+            await Assert.That(result.IsFailed).IsTrue();
+            await Assert.That(result.Value).IsNull();
+            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.NotFound, EventProjectionLineageR41Protocol.Unavailable), result.Problem);
+            await EventProjectionLineageR41Canonical.CurrentAsync(admin, reader, state, token);
+            var response = await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
+            await McpCallerAssertions.ErrorAsync(response, ErrorCode.NotFound, dispatched: true);
+            await Assert.That(response.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
+             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(EventProjectionLineageR41Protocol.McpUnavailable);
+            await EventProjectionLineageR41Canonical.CurrentAsync(admin, reader, state, token);
+        }
+    }
+}

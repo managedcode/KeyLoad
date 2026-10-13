@@ -17,19 +17,22 @@ internal static class SqlBetweenSymmetricRf3Cancellation
                 {
                     using var cancelled = new CancellationTokenSource();
                     await cancelled.CancelAsync();
-                    var item = SqlBetweenSymmetricRf3Cases.All[SqlBetweenSymmetricRf3State.First];
-                    var sql = SqlBetweenSymmetricRf3Cases.Prefix + item.Clause + SqlBetweenSymmetricRf3Cases.Tail;
-                    var operation = SqlNullOrderingRf3Protocol.Operation(sql);
-                    var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
-                    await SqlBetweenSymmetricRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                    foreach (var item in new[] { SqlBetweenSymmetricRf3Cases.All[SqlBetweenSymmetricRf3State.First],
+                        SqlBetweenSymmetricRf3Cases.All.Single(value => value.Clause == SqlBetweenSymmetricRf3Cases.AsymmetricHealthy) })
+                    {
+                        var sql = SqlBetweenSymmetricRf3Cases.Prefix + item.Clause + SqlBetweenSymmetricRf3Cases.Tail;
+                        var operation = SqlNullOrderingRf3Protocol.Operation(sql);
+                        var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
+                        var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
+                        var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
+                            () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
+                        await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
+                        await SqlBetweenSymmetricRf3Pages.CaseAsync(caller, wire, item, state.LowRevision, token);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

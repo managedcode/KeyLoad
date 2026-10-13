@@ -6,6 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, OrleansNode node,
     PhysicalOwnerRegistrationController controller, IOptions<GrainRoutingOptions> routingOptions,
+    IOptions<global::KeyLoad.Orleans.OrleansMembershipOptions> membershipOptions,
     TimeProvider clock, ILogger logger) : ISiloStatusListener, IAsyncDisposable
 {
     private const int SignalCapacity = 1;
@@ -46,7 +47,7 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
         try
         {
             while (await node.MembershipReadyAsync(execution.Token).ConfigureAwait(false) is null)
-            { await signals.Reader.ReadAsync(execution.Token).ConfigureAwait(false); }
+            { await WaitForSignalAsync(execution.Token).ConfigureAwait(false); }
             await controller.RegisterAsync(expiresAt, execution.Token).ConfigureAwait(false);
             PhysicalOwnerRegistrationLog.Succeeded(logger);
         }
@@ -67,6 +68,16 @@ internal sealed class PhysicalOwnerRegistrationWorker(ISiloStatusOracle oracle, 
     {
         lock (gate)
         { shutdown ??= StopAsync(worker); return new ValueTask(shutdown); }
+    }
+
+    private async Task WaitForSignalAsync(CancellationToken cancellationToken)
+    {
+        using var retry = new CancellationTokenSource(membershipOptions.Value.StartupRetryDelay, clock);
+        using var observed = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, retry.Token);
+        try
+        { await signals.Reader.ReadAsync(observed.Token).ConfigureAwait(false); }
+        catch (OperationCanceledException) when (retry.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        { }
     }
 
     private async Task StopAsync(Task? original)

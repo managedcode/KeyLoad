@@ -12,6 +12,7 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
     private const long FirstNewEntry = 1;
     private const long InitialTerm = 0;
     private const string Separator = ":";
+    private const string UnexpectedStartupReplay = "A cold native owner appended an operation absent from its original bootstrap authority.";
 
     internal static async Task ExactAsync(ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> before,
         ImmutableArray<ControlledPartitionMovementNativeProcessSnapshot> after)
@@ -54,7 +55,7 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
         foreach (var entry in after.Entries.Skip(before.Entries.Length))
         {
             await Assert.That(entry.Index).IsEqualTo(next++);
-            await Assert.That(entry.Operation).IsNull();
+            await StartupReplayAsync(before, after, checked((int)(entry.Index - FirstNewEntry)));
             await Assert.That(entry.Term).IsGreaterThan(InitialTerm);
         }
         var added = after.State.CommittedIndex - before.State.CommittedIndex;
@@ -70,4 +71,19 @@ internal static class ControlledPartitionMovementNativeProcessColdAssertions
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(expected).AsSpan().SequenceEqual(JsonDefaults.Serialize(actual))).IsTrue();
+
+    private static async Task StartupReplayAsync(ControlledPartitionMovementNativeProcessSnapshot before,
+        ControlledPartitionMovementNativeProcessSnapshot after, int entryOffset)
+    {
+        if (after.Entries[entryOffset].Operation is not { } replay)
+        { return; }
+        await Assert.That(replay.Kind).IsEqualTo(OperationKind.BootstrapPhysicalShardCatalog);
+        var original = before.Entries.Select(entry => entry.Operation)
+            .FirstOrDefault(operation => operation is not null && operation.Id == replay.Id)
+            ?? throw new InvalidOperationException(UnexpectedStartupReplay);
+        await Assert.That(original.Kind).IsEqualTo(OperationKind.BootstrapPhysicalShardCatalog);
+        await Assert.That(replay.EvaluatedAt >= original.EvaluatedAt).IsTrue();
+        await Assert.That(replay.NativePayload.Span.SequenceEqual(original.NativePayload.Span)).IsTrue();
+        await EqualAsync(original, replay with { EvaluatedAt = original.EvaluatedAt });
+    }
 }

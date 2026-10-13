@@ -2396,9 +2396,9 @@
       "methodName": "AcBackup004LocalEventingArtifactRetainsGroupInboxQueueCutAndRequiresExplicitResume",
       "instanceName": "AcBackup004LocalEventingArtifactRetainsGroupInboxQueueCutAndRequiresExplicitResume",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 33,
-      "endLineNumber": 82,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 37,
+      "endLineNumber": 86,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2414,9 +2414,9 @@
       "methodName": "OldCursorAndLeasesStayFencedAfterAuthorizedResumeTwoColdAndHealthyDelivery",
       "instanceName": "OldCursorAndLeasesStayFencedAfterAuthorizedResumeTwoColdAndHealthyDelivery",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 9,
-      "endLineNumber": 11,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 13,
+      "endLineNumber": 15,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2432,9 +2432,9 @@
       "methodName": "OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners",
       "instanceName": "OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 13,
-      "endLineNumber": 18,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 17,
+      "endLineNumber": 22,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2452,9 +2452,9 @@
       "methodName": "OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners",
       "instanceName": "OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 13,
-      "endLineNumber": 18,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 17,
+      "endLineNumber": 22,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2472,9 +2472,9 @@
       "methodName": "OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners",
       "instanceName": "OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 20,
-      "endLineNumber": 25,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 24,
+      "endLineNumber": 29,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2492,9 +2492,9 @@
       "methodName": "OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners",
       "instanceName": "OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
-      "sourceSha256": "42a9c5b39939b39ca8cbae5a150ada9c91e541c84c41983c77dc5d0b58333916",
-      "lineNumber": 20,
-      "endLineNumber": 25,
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 24,
+      "endLineNumber": 29,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -2503,6 +2503,26 @@
       ],
       "acceptance": [
         "AC-BACKUP-002",
+        "AC-BACKUP-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests",
+      "nativeReportClassName": "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests",
+      "methodName": "RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners",
+      "instanceName": "RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners",
+      "sourcePath": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
+      "sourceSha256": "cffa42c0d8c23a5297097e1209400a21cb8eaeba28d1b6fb7f411b031c3cc763",
+      "lineNumber": 9,
+      "endLineNumber": 11,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BACKUP-003",
+        "REQ-BACKUP-004"
+      ],
+      "acceptance": [
+        "AC-BACKUP-003",
         "AC-BACKUP-004"
       ]
     },
@@ -78712,6 +78732,7 @@
         "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests|OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners|OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(True)",
         "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests|OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners|OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(False)",
         "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests|OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners|OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(True)",
+        "KeyLoad.UnitTests.Features.BackupRestore.EventingArtifactStateTests|RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners|RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners",
         "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests|AcBackup002EmptyBackupDirectoryRejectsBeforePublication|AcBackup002EmptyBackupDirectoryRejectsBeforePublication",
         "KeyLoad.UnitTests.Features.BackupRestore.MissingBackupManifestTests|AcBackup002MissingBackupDirectoryRejectsBeforePublication|AcBackup002MissingBackupDirectoryRejectsBeforePublication",
         "KeyLoad.UnitTests.Features.BackupRestore.NativeMetadataFormatTests|AcIs002NativeCheckpointDefectsRejectBeforeLiveStateAndOriginalInstalls|AcIs002NativeCheckpointDefectsRejectBeforeLiveStateAndOriginalInstalls(EmptyIncarnation)",

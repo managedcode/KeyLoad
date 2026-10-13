@@ -28,4 +28,15 @@ internal static class SqlNullOrderingRf3Protocol
     internal static AstQueryRequest Ast(bool descending, bool first)
         => new(PostgresRf3State.Partition, new(Collection, null, [new(LabelPath, Label)], null,
             [new(ScorePath, descending, first)], RowCount), AllowFullScan: true);
+    internal const string UsingProfile = "SQL.OrderUsing.v1";
+    internal const string DirectionName = "direction";
+    internal const string DirectionOperand = "@direction";
+    internal const string DirectionValue = ">";
+    internal const string Ascending = " ASC ";
+    internal const string Descending = " DESC ";
+    internal const string UsingAscending = " USING < ";
+    internal const string UsingDescending = " USING > ";
+    internal static string Using(bool descending, bool first)
+        => Sql(descending, first).Replace(descending ? Descending : Ascending,
+            descending ? UsingDescending : UsingAscending, StringComparison.Ordinal);
 }

@@ -379,3 +379,73 @@ REQ-SQLC-006 / AC-SQLC-006 SQLC-READ and REQ/AC-QUERY-004/005/006, ADR-065: NEXT
 REQ-SQLC-006 / AC-SQLC-006 SQLC-READ and REQ/AC-QUERY-004/005/006, ADR-065: NEXT bounded SQL.ImplicitProjectionAlias.v1 accepts ordinary identifier or quoted output label without AS through the existing Selection and canonical identifier/source binding rules. Explicit AS/default path label remain unchanged. Bare currently parsed structural keywords are not consumed as labels; quoting permits ORDER/FROM labels. This is not a complete PostgreSQL keyword-table or full-grammar compatibility promise; those conformance gates stay OPEN. Existing duplicate output aliases refuse Validation before execution. Existing native .NET FrozenSet holds the closed current structural word set once; no library/package/AST/version/serializer/admission/store change. Complete independently literal projected_score/ORDER/FROM JSON rows, original SQL AS and independent AST equality, canonical Q2 joined source lineage with implicit projection/table labels, SDK/official MCP and Q1/Q2 Npgsql simple/prepared outputs, malformed/duplicate-label refusal then same-wire healthy continuation, persisted policy denial/restore, original-token pre-cancel, full Unit raw image/cut/identity and caller-visible RF3 document/outbox parity, exact original seed receipt replay and two cold continuations are required. All original wholecase declarations/Args/lifetimes remain; public query cuts stay opaque and physical-owner/admitted-cancel gates remain separate OPEN.
 
 The two profiles share one current parser/catalog/manifest patch. All original BooleanTruth/BetweenSymmetric profiles and wholeflow declarations remain unchanged. Native preview and fresh new-file admission are OPEN until actual service Ready; no source or runtime qualification follows from this prepared union.
+
+### Natural ordering-operator source candidate
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-SET and REQ/AC-QUERY-004/005/006, ADR-065: next guarded SQL.OrderUsing.v1 accepts ORDER BY a currently supported field USING < or USING >, with the original optional NULLS FIRST/LAST, by lowering to the existing natural ascending/descending Ordering. Default placement, KeyLoad MISSING ordering, full-reference tie break, source validation, supported-model restrictions, per-operation persisted permissions, native read cut, read/output/depth limits and signed canonical cursor stay unchanged. This closed natural-operator profile does not implement arbitrary PostgreSQL operator families, user-defined type/collation/default-null semantics, expressions or full SQL. Missing/literal/parameter direction refuses Validation; other valid symbolic or qualified operators and mixed/duplicate direction refuse UnsupportedCapability before result publication. No custom comparator/delegate, library, AST/version/serializer/store/protocol/deadline change. Preserve original NullOrdering and SqlOffset wholeclass declarations, Args, UIDs and all ALL/alias/order controls. Independent complete ascending/descending/null-first/null-last SQL/AST rows, native SQL-to-AST-to-SQL cursor continuation, seven malformed/unsupported operator refusal-to-healthy flows on the same original SDK/MCP/Npgsql owner, current persisted policy deny-to-exact epoch repair, original-token pre-cancel-to-healthy, complete Unit raw image/cut/identity and RF3 document/outbox image, original seed receipt replay and two actual fixture-owned cold waves are required. Public cuts remain opaque; admitted cancellation, physical-owner correlation, integrated compiler/runtime/Linux RF3/resource/recovery and full SQL/client compatibility remain separate OPEN.
+
+### Explicit ordered range source candidate
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-READ and REQ/AC-QUERY-004/005/006, ADR-065: next guarded SQL.BetweenAsymmetric.v1 accepts explicit BETWEEN ASYMMETRIC / NOT BETWEEN ASYMMETRIC as the existing ordered inclusive comparisons and optional Negation. It never swaps endpoints; reversed endpoints produce false, NOT reverses that result, JSON null and KeyLoad MISSING retain existing unknown semantics. SYMMETRIC, implicit ordered BETWEEN, quoted identifiers and all original unsupported operations remain unchanged. Same canonical nodes are charged by the original normalizer, limits, authorization, cut, depth, cancellation and output accounting; no library, AST/version/serializer/transport/deadline change. Preserve original range wholeclass declarations, Args, UIDs and all controls. Six independent literal SQL/AST pages, malformed rejection then healthy same original SDK/MCP/Npgsql connection, true retained scalar-type fault then exact revision3 repair, persisted policy epoch1->2->3 refusal/healthy continuation, original-token pre-cancel, complete Unit raw image/cut/identity and public document/outbox image, exact seed/fault/repair receipt replay and two original owned cold waves are required. Public cut is opaque; physical owner correlation, admitted row-progress cancellation, integrated compiler/runtime/Linux RF3/resource/recovery and full SQL/native protocol qualification remain separate OPEN.
+
+### NEXT default INNER JOIN spelling
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-JOIN, REQ-QUERY-007 / AC-QUERY-007-JOIN-001/002 and existing AC-REL-004-JOIN criteria under ADR-118/065: NEXT guarded SQL.DefaultInnerJoin.v1 recognizes unquoted JOIN as the standard optional-INNER spelling of the existing closed Q2 InnerJoinClause. Both source aliases, same atomic partition, Text primary-key equijoin, model-reference/row integrity, current field/resource permissions, one admitted read cut, full retained-source validation and all native cumulative record/byte/depth/output limits remain unchanged. Q1 still refuses joins with UnsupportedCapability; quoted JOIN stays an ordinary identifier. This adds no OUTER/CROSS/NATURAL/USING/multi-join or AST/version/library/serializer/transport capability. Real ZoneTree full joined rows/source lineage, malformed missing-ON refusal then original healthy repair, Q1 refusal, fresh persisted query-policy denial/restore, original-token pre-cancel, complete raw image/cut/identity, SDK/official MCP and Npgsql simple/prepared same-connection pages, original seed receipts and two cold continuations are required. Query cuts remain opaque publicly; admitted row-progress cancellation, physical-owner authority and exact-source Linux/fault/resource/fullSQL gates remain separate OPEN. Current source draft is not source Y or qualification.
+
+```mermaid
+flowchart LR
+  Join[JOIN or INNER JOIN] --> AST[Existing bounded Q2 InnerJoinClause]
+  AST --> Auth[Fresh permissions and declared sources]
+  Auth --> Page[Complete literal rows and lineage]
+  Page --> Repair[Refusal repair and two cold continuation]
+```
+
+### Closed PostgreSQL null-predicate synonyms source candidate
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-READ and REQ/AC-QUERY-004/005/006, ADR-065: guarded SQL.NullPredicateSynonyms.v1 accepts PostgreSQL18 nonstandard ISNULL and NOTNULL for currently supported scalar operands. Both lower to the original NullTest(value, negated, missing:false) used by IS NULL and IS NOT NULL, preserving exact existing JSON-null versus KeyLoad MISSING behavior; this is not row-valued PostgreSQL null-test compatibility or a standard-SQL/full-SQL claim. Existing token-kind/quoted identifier/source alias validation, charged canonical predicate depth/read/output limits, scoped cut, fresh persisted authority and connection-owned Orleans dispatch remain unchanged. No library, AST/version/serializer, provider, settings, deadline or architecture change. Original NullDistinct wholecase declarations/Args/UIDs and source type-fault/repair/seed/fault/repair receipt replay stay intact. Independent full SQL/AST literal null/MISSING/present rows, malformed refusal followed by healthy results on the same original SDK/MCP/Npgsql owner, current query-policy epoch denial and exact restoration, original-token pre-cancellation, complete Unit raw image/position/identity and RF3 caller-visible document/outbox parity, warm and two original owned cold continuations are required. Public query cuts remain opaque; physical-owner correlation, admitted row-progress cancellation, coherent compiler/runtime/Linux RF3/resource/recovery and full SQL/client interoperability qualification stay separate OPEN.
+
+```mermaid
+flowchart LR
+    A[SQL ISNULL / NOTNULL] --> B[Existing unquoted token and source admission]
+    B --> C[Canonical NullTest / fresh authority / bounded view]
+    C --> D[Full independent SQL and AST literal pages]
+    C --> E[Malformed / policy / original-token refusal]
+    E --> F[Complete no-effects and same-connection healthy continuation]
+    D --> G[Original receipts and two owned cold continuations]
+```
+
+Native PredicateEvaluator confirms NullTest(missing:false) compares null directly: JSON nulls select null_a/null_b; NOTNULL and NOT ISNULL select high/low/missing because the existing MissingValue sentinel is distinct from null. NOT NOTNULL selects null_a/null_b. These independently literal results preserve current IS [NOT] NULL semantics; they do not change MISSING into PostgreSQL SQL NULL.
+
+### Closed positive numeric literal spelling
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-LEX/READ and REQ/AC-QUERY-004/005/006, ADR-065: guarded SQL.PositiveNumericLiteral.v1 accepts an adjacent leading + before a decimal digit through the existing bounded numeric token and invariant native .NET decimal parser, exactly as the current adjacent minus literal path. Existing exponent signs and negative literals remain unchanged. PostgreSQL treats signs as operators; this is a closed literal-folding profile, not general unary expression/arithmetic, whitespace-separated sign, parameter/field unary operators or full PostgreSQL numeric grammar compatibility. No AST/version, library, serialization, schema, provider, grant, deadline or storage change. LIMIT/OFFSET/FETCH remain unsigned counts through existing NumberStyles.None and existing checked limits; +count refuses Validation. Exact decimal overflow, repeated/bare/non-numeric signs and unsupported separated sign refuse the original safe Validation without a partial result.
+
+Preserve original SqlNullDistinctWholeFlowTests and SqlNullDistinctRf3WholeFlowTests declarations/Args/UIDs and original warm/cold, type-fault and receipt controls. Eight independent complete SQL/AST literal pages include equality, comparison, ordered BETWEEN, IN, distinctness, signed exponent, original negative control and decimal.MaxValue. Genuine malformed/count refusals then healthy continuation on the same original SDK/MCP/Npgsql owner, persisted query-policy denial/exact restoration, original-token pre-cancel/healthy, actual retained Boolean type fault with original and new numeric SQL/AST refusals then exact revision3 repair/original fault+repair receipts, full Unit raw image/position/identity and caller-visible RF3 document/outbox parity, original seed receipt replay and two actual fixture-owned cold continuations are required. Query cuts remain opaque publicly; physical owner correlation, admitted row-progress cancellation, coherent native compiler/runtime/Linux/resource/recovery/full SQL and native-driver qualification remain separate OPEN.
+
+```mermaid
+flowchart LR
+  Sign[Adjacent + decimal literal] --> Token[Existing bounded Number token]
+  Token --> Decimal[Existing invariant .NET decimal]
+  Decimal --> AST[Original ValueOperand / fresh permissions / bounded cut]
+  AST --> Page[Independent complete SQL and AST pages]
+  AST --> Refusal[Malformed / count / policy / type refusal]
+  Refusal --> Repair[No effects / exact repair / same owner healthy]
+  Repair --> Cold[Original receipts and two cold continuations]
+```
+
+### Closed leading-decimal-point literal spelling
+
+REQ-SQLC-006 / AC-SQLC-006 SQLC-LEX/READ and REQ/AC-QUERY-004/005/006, ADR-065: guarded SQL.LeadingDecimalLiteral.v1 accepts a decimal point followed by a digit, optionally with the current adjacent literal sign, through the existing Number token and invariant native .NET decimal ValueOperand path. Existing digit-first/trailing-point/exponent literal behavior remains; ordinary field/source dots followed by identifiers or quoted names stay separators. Bare/repeated points, absent exponent digits and non-numeric signs retain safe Validation. This is a closed decimal literal spelling within the existing decimal domain, not general unary operators/arithmetic, whitespace-sign forms or full PostgreSQL literal grammar/type compatibility. Existing token/depth/SQL/read/output bounds, cancellation and source positions remain; LIMIT/OFFSET/FETCH keep NumberStyles.None and refuse fractional counts. No AST/version/library/serializer, policy, schema, grants, deadline or topology change.
+
+Original SqlNullDistinctWholeFlowTests and SqlNullDistinctRf3WholeFlowTests declarations/Args/UIDs stay unchanged. Independent complete SQL/AST .5/-.5/+.5/exponent/IN/ordered-range/distinctness pages, malformed/fractional-count refusal followed by same original SDK/MCP/Npgsql healthy continuation, actual Boolean retained-type fault then original and leading-literal SQL/AST refusals before exact revision3 repair/receipt replay, current persisted query-policy denial/restoration, original-token pre-cancel/healthy, full Unit raw image/cut/identity plus public RF3 document/outbox parity, seed/fault/repair original GUID receipts and two actual owned cold continuations are required. Public query cuts remain opaque. Compiler/census/runtime/Linux/resource/recovery, admitted row-progress cancellation, physical-owner correlation and full SQL/native-client qualification remain separate OPEN.
+
+```mermaid
+flowchart LR
+  Decimal[.5 / -.5 / +.5] --> Start[Bounded existing lexer Number admission]
+  Start --> AST[Existing decimal ValueOperand]
+  AST --> Auth[Fresh policy / original cut and limits]
+  Auth --> Page[Complete independent SQL and AST pages]
+  Auth --> Refusal[Malformed / fractional count / type / policy refusal]
+  Refusal --> Repair[No effects / exact repair / original healthy owner]
+  Repair --> Cold[Original receipts and two cold continuations]
+```

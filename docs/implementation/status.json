@@ -7,7 +7,7 @@
       "total": 104
     },
     "additionalTask": "KL-105",
-    "qualification": "R40 local development: full Release 0 errors/0 warnings and whole formatter verify pass. Unit232:228passed4failed; recovery13:11passed2failed; no skips. Source/image/closure/receipts and original joins stable. Original plan19/104 done85in progress; no new complete task. Full Linux/RF3/coverage/fault/endurance/performance gates remain open.",
+    "qualification": "R41 local development: full Release 0 errors/0 warnings and whole formatter pass. Unit240:234passed6failed; recovery13:11passed2failed; no skips. Original source/image/closure/receipts and process joins stable. Original plan20/104 done84in progress; KL-029 original criteria independently qualified on Linux at 7e94024c. Fresh complete Linux/RF3/coverage/fault/endurance/performance gates remain open.",
     "coverage": "FOCUSED_LOCAL_OBSERVATION:147 functional cases,143pass4fail;25.729928757%lines19.627577034%branches,13 reported production modules;4 controls/load excluded. Full product functional coverage and Linux contributor gates unqualified.",
     "sourceIntegration": {
       "graph": {
@@ -1426,6 +1426,19 @@
       "failed": 6,
       "skipped": 0,
       "completeTaskAcceptance": 0,
+      "sourceImageClosureDrift": false
+    },
+    "runtimeObservedR41": {
+      "record": {
+        "path": "docs/implementation/stage64-r41-development-20261013.json",
+        "sha256": "43d23ed057f04ec29711e215ac280e380dd457b740ab6b2ee4b869d94a2039c2"
+      },
+      "cases": 253,
+      "passed": 245,
+      "failed": 8,
+      "skipped": 0,
+      "completeTaskAcceptanceFromPartialRuntime": 0,
+      "separateOriginalLinuxTaskAcceptance": "KL-029",
       "sourceImageClosureDrift": false
     }
   },
@@ -56807,15 +56820,16 @@
   },
   "KL-029": {
     "title": "Text projection і rebuild",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "docs/ADR/ADR-078-native-full-text-projection.md",
       "docs/Features/Search/NativeFullTextProjection.md",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "docs/implementation/kl-029-linux-acceptance-20261013.json"
     ],
     "qualification": {
-      "source": "native_provider_generation_join_reviewed_and_development_verified",
+      "source": "original_architecture_task_accepted_at_7e94024c",
       "runtimeQualified": false,
       "localDevelopment": {
         "nativeUnit": "26/26",
@@ -56824,7 +56838,7 @@
         "fullFormatter": "passed",
         "governance": "passed"
       },
-      "remaining": "exact-source Linux full-suite, package and Docker RF3 SDK/MCP gates; incremental replay/freshness and measured resource gates; no acceleration claim",
+      "remaining": "Current whole-product Linux suites, full functional coverage, broader provider/Search and matched resource/performance/endurance/power-loss gates remain open.",
       "awaitedExecutionDevelopment": {
         "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "normalUnit": 2866,
@@ -56836,6 +56850,43 @@
         "unchangedSourceAndRuntime": true,
         "actualPublicRf3": "pending",
         "exactDeliveredSourceLinux": "pending"
+      },
+      "currentOriginalTaskAcceptance": {
+        "completedAt": "2026-10-13",
+        "sourceCommit": "7e94024c4b891011fa7095c37b05bd775d17ff4f",
+        "runId": 38409507544,
+        "attempt": 1,
+        "jobId": 115337802386,
+        "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38409507544/job/115337802386",
+        "qualified": true,
+        "allAcceptanceClosed": true,
+        "scope": "Original architecture KL-029 task criteria; no full-product/full-suite/coverage/performance/endurance/power-loss promotion.",
+        "canonicalEvidencePath": "docs/implementation/kl-029-linux-acceptance-20261013.json",
+        "canonicalEvidenceSha256": "bb399b7c6fb6c76e223f010d90d5a267d525e5aae2b87c56d648082ed172b382",
+        "artifactId": 11824475195,
+        "artifactSha256": "974c69bfc7d16529acba459f1f54945e1118985f3f595eb1a42b027d4eae8f38",
+        "nativeUnitCases": 58,
+        "nativeProcessRecoveryCases": 18,
+        "nativeRf3Cases": 9,
+        "passed": 85,
+        "failed": 0,
+        "skipped": 0,
+        "nativeMaximumParallelTests": 50,
+        "originalArchitectureCriteria": [
+          "Projection deletion and canonical replay return expected literal results",
+          "A crash at checkpoint cannot conceal missing updates",
+          "Stale revisions cannot resurrect"
+        ],
+        "nativeUidTrxUnionAndSourcePdbBindingVerified": true,
+        "preparedBeforeAfterImagesEqual": true,
+        "nativeProcessReadersExitJoinedDisposed": true,
+        "gitSourceAndBuildInputCount": 8411,
+        "laterSourceBoundary": "These successful Linux originals qualify 7e94024c only. Current R41 shared routing/SQL/model edits require their own current coherent build and suites.",
+        "remainingMandatoryGates": [
+          "Complete current-source solution build and full native TUnit/recovery/Aspire RF3 suites",
+          "Current full functional coverage",
+          "Broader provider and Search acceptance, matched resources/performance/endurance and power-loss qualification"
+        ]
       }
     },
     "stageXVIISourceDevelopment": {
@@ -56968,7 +57019,9 @@
       "actualRf3RuntimePassed": false,
       "deliveredSourceLinuxQualified": false,
       "wholeTaskAccepted": false
-    }
+    },
+    "allAcceptanceClosed": true,
+    "acceptanceScope": "Original architecture KL-029 task criteria; no full-product/full-suite/coverage/performance/endurance/power-loss promotion."
   },
   "KL-030": {
     "title": "ANN provider qualification",

@@ -38,6 +38,8 @@ internal static class SqlOffsetPages
         { Sql = SqlOffsetProtocol.JoinSql.Replace("LIMIT 1 OFFSET 1", window, StringComparison.Ordinal) };
         await ExactAsync(engine.Execute(principal, joined), expected);
         await ExactAsync(engine.Execute(principal, joined with
+        { Sql = joined.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal) }), expected);
+        await ExactAsync(engine.Execute(principal, joined with
         { Sql = joined.Sql.Replace(" AS ", " ", StringComparison.Ordinal) }), expected);
         await ExactAsync(engine.ExecuteAst(principal, SqlOffsetProtocol.Join(partition)), expected);
         var alternate = SqlOffsetProtocol.JoinRequest(partition) with
@@ -66,11 +68,11 @@ internal static class SqlOffsetPages
         var expected = new QueryCapabilityManifest(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
             ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING",
                 "IS DISTINCT FROM", "IS NOT DISTINCT FROM", "IS TRUE", "IS FALSE", "IS UNKNOWN",
-                "IS NOT TRUE", "IS NOT FALSE", "IS NOT UNKNOWN", "BETWEEN SYMMETRIC", "NOT BETWEEN SYMMETRIC"],
+                "IS NOT TRUE", "IS NOT FALSE", "IS NOT UNKNOWN", "BETWEEN SYMMETRIC", "NOT BETWEEN SYMMETRIC", "BETWEEN ASYMMETRIC", "NOT BETWEEN ASYMMETRIC", "ISNULL", "NOTNULL"],
             limits.MaxResults, limits.MaxScanRecords, limits.MaxQueryBytes, limits.MaxQueryDepth, true, true,
             limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", "graph-search-v1", "graph-path-v1",
                 "Q2.InnerJoin.v1", "Q2.InnerJoin.LeftPredicate.v1", "Q2.QueueEntityRefJoin.v1", "Q2.EventEntityRefJoin.v1",
-                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1", "SQL.BooleanTruth.v1", "SQL.BetweenSymmetric.v1", "SQL.SelectAll.v1", "SQL.ImplicitProjectionAlias.v1"], [1, 2], [1, 2]);
+                "Q1.Offset.v1", "Q2.InnerJoin.Offset.v1", "Q1.NullOrdering.v1", "SQL.FetchCount.v1", "SQL.NullDistinct.v1", "SQL.BooleanTruth.v1", "SQL.BetweenSymmetric.v1", "SQL.SelectAll.v1", "SQL.ImplicitProjectionAlias.v1", "SQL.DefaultInnerJoin.v1", "SQL.BetweenAsymmetric.v1", "SQL.OrderUsing.v1", "SQL.NullPredicateSynonyms.v1", "SQL.PositiveNumericLiteral.v1", "SQL.LeadingDecimalLiteral.v1"], [1, 2], [1, 2]);
         await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)

@@ -18,7 +18,7 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
 
     internal InnerJoinClause? ReadJoin(string? leftAlias, ModelQuerySource? leftSource)
     {
-        if (!cursor.Eat(SqlSyntax.Inner))
+        if (!cursor.Is(SqlSyntax.Inner) && !cursor.Is(SqlSyntax.Join))
         {
             return null;
         }
@@ -26,6 +26,7 @@ internal sealed class SqlJoinSyntax(SqlTokenCursor cursor, int dialectVersion)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedJoinDetail);
         }
+        cursor.Eat(SqlSyntax.Inner);
         cursor.Need(SqlSyntax.Join);
         var collection = cursor.Identifier();
         cursor.Eat(SqlSyntax.As);

@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlBetweenSymmetricRf3Refusals
 {
     internal static async Task RejectAsync(ClusterFixture fixture, SqlBetweenSymmetricRf3State state, string clause,
-        ErrorCode code, CancellationToken token, bool ast = false)
+        ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false)
     {
         await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
@@ -33,6 +33,12 @@ internal static class SqlBetweenSymmetricRf3Refusals
                 {
                     await PostgresRf3Assertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
                         code == ErrorCode.Validation ? SqlNullOrderingRf3Protocol.ValidationSqlState : PostgresRf3Protocol.PermissionSqlState, code);
+                    if (healthy)
+                    {
+                        await SqlBetweenSymmetricRf3Pages.CaseAsync(caller, wire,
+                            SqlBetweenSymmetricRf3Cases.All.Single(value => value.Clause == SqlBetweenSymmetricRf3Cases.AsymmetricHealthy),
+                            state.LowRevision, token);
+                    }
                 }, failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -45,8 +51,11 @@ internal static class SqlBetweenSymmetricRf3Refusals
     {
         var before = await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, token);
         foreach (var clause in new[] { "score BETWEEN SYMMETRIC 2 1", "score BETWEEN SYMMETRIC 2 OR 1",
-            "score BETWEEN SYMMETRIC (2) AND 1", "score NOT BETWEEN SYMMETRIC 2 1" })
-        { await RejectAsync(fixture, state, clause, ErrorCode.Validation, token); }
+            "score BETWEEN SYMMETRIC (2) AND 1", "score NOT BETWEEN SYMMETRIC 2 1",
+            "score BETWEEN ASYMMETRIC 2 1", "score NOT BETWEEN ASYMMETRIC 2 OR 1",
+            "score BETWEEN ASYMMETRIC ASYMMETRIC 1 AND 2",
+            "score BETWEEN SYMMETRIC ASYMMETRIC 1 AND 2" })
+        { await RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true); }
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         await SqlBetweenSymmetricRf3Pages.HealthyAsync(fixture, state, token);
     }

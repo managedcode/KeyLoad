@@ -22,6 +22,7 @@ internal static class TenantCapacityPlacementRf3MultiFlow
         _ = await McpCallerAssertions.SdkSuccessAsync(await first.Source.ConfigurePlacementPolicyAsync(
             Guid.NewGuid(), new(state.OriginalPolicy.Policy.Revision, state.HealthyPolicy, state.Control), token));
         var binding = await TenantCapacityPlacementRf3MultiAssertions.BindControlAsync(first, state, token);
+        await TenantCapacityPlacementRf3CompleteRosterAssertions.RequireAsync(wave, seeds, state, token);
         var plan = await McpCallerAssertions.SdkSuccessAsync(await first.Source.PlanTenantPlacementAsync(query, token));
         await TenantCapacityPlacementRf3MultiAssertions.PlanAsync(seeds, state, plan);
         var moves = plan.Plan.Moves.ToArray();

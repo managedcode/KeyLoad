@@ -31,6 +31,11 @@ internal static class SqlOffsetRf3Pages
             await JoinAsync(page);
             var envelope = new SqlOperationRequest(state.Partition, sql.Sql,
                 AllowFullScan: true, QueryDialectVersion: SqlOffsetRf3Protocol.Q2);
+            var plainEnvelope = new SqlOperationRequest(state.Partition,
+                sql.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal),
+                AllowFullScan: true, QueryDialectVersion: SqlOffsetRf3Protocol.Q2);
+            await JoinAsync(official ? await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp, plainEnvelope, token)
+                : await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk, plainEnvelope, token));
             var implicitEnvelope = new SqlOperationRequest(state.Partition,
                 sql.Sql.Replace(" AS ", " ", StringComparison.Ordinal),
                 AllowFullScan: true, QueryDialectVersion: SqlOffsetRf3Protocol.Q2);

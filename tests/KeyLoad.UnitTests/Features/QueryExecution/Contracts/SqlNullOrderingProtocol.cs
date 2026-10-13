@@ -23,4 +23,18 @@ internal static class SqlNullOrderingProtocol
     internal static AstQueryRequest Ast(PartitionRef partition, bool descending, bool first, int limit = ResultCount)
         => new(partition, new(Collection, null, [new(Label, LabelName)], null,
             [new(Score, descending, first)], limit), AllowFullScan: true);
+    internal const string UsingProfile = "SQL.OrderUsing.v1";
+    internal const string Ascending = " ASC ";
+    internal const string Descending = " DESC ";
+    internal const string UsingAscending = " USING < ";
+    internal const string UsingDescending = " USING > ";
+    internal static QueryRequest Using(PartitionRef partition, bool descending, bool first, int limit = ResultCount)
+    {
+        var original = Sql(partition, descending, first, limit);
+        return original with
+        {
+            Sql = original.Sql.Replace(descending ? Descending : Ascending,
+            descending ? UsingDescending : UsingAscending, StringComparison.Ordinal)
+        };
+    }
 }

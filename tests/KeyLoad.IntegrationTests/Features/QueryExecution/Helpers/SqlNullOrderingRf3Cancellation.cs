@@ -22,7 +22,8 @@ internal static class SqlNullOrderingRf3Cancellation
                     using var cancelled = new CancellationTokenSource();
                     await cancelled.CancelAsync();
                     foreach (var sql in new[] { SqlNullOrderingRf3Protocol.AscFirst,
-                        SqlAllRf3Pages.Explicit(SqlNullOrderingRf3Protocol.AscFirst), SqlImplicitAliasRf3Pages.BasicSql })
+                        SqlAllRf3Pages.Explicit(SqlNullOrderingRf3Protocol.AscFirst), SqlImplicitAliasRf3Pages.BasicSql,
+                        SqlNullOrderingRf3Protocol.Using(false, true) })
                     {
                         var operation = SqlNullOrderingRf3Protocol.Operation(sql);
                         var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(

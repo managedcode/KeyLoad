@@ -6,6 +6,14 @@ internal sealed record SqlNullDistinctCase(string Clause, Predicate Predicate, s
 internal static class SqlNullDistinctCases
 {
     internal const string Profile = "SQL.NullDistinct.v1";
+    internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms.v1";
+    internal const string NullClause = "score ISNULL";
+    internal const string NotNullClause = "score NOTNULL";
+    internal const string PositiveProfile = "SQL.PositiveNumericLiteral.v1";
+    internal const string PositiveClause = "score = +1";
+    internal const string LeadingProfile = "SQL.LeadingDecimalLiteral.v1";
+    internal const string LeadingClause = "score > .5";
+    private const decimal Half = 0.5m;
     internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";
     internal const string Tail = " ORDER BY label ASC LIMIT 5";
     internal static readonly FieldOperand Score = new("/score");
@@ -21,7 +29,34 @@ internal static class SqlNullDistinctCases
         new("NOT (score IS DISTINCT FROM NULL)", new NullTest(Score, false, false), ["null_a", "null_b"]),
         new("score IS DISTINCT FROM 1 OR label = 'missing'", Or(Or(new NullTest(Score, false, false),
             new Comparison(Score, "<>", ValueOperand.Create(1))), new Comparison(Label, "=", ValueOperand.Create("missing"))),
-            ["high", "missing", "null_a", "null_b"])
+            ["high", "missing", "null_a", "null_b"]),
+        new("score IS NULL", new NullTest(Score, false, false), ["null_a", "null_b"]),
+        new(NullClause, new NullTest(Score, false, false), ["null_a", "null_b"]),
+        new("score IS NOT NULL", new NullTest(Score, true, false), ["high", "low", "missing"]),
+        new(NotNullClause, new NullTest(Score, true, false), ["high", "low", "missing"]),
+        new("NOT (score ISNULL)", new Negation(new NullTest(Score, false, false)), ["high", "low", "missing"]),
+        new("NOT (score NOTNULL)", new Negation(new NullTest(Score, true, false)), ["null_a", "null_b"]),
+        new("score ISNULL OR label = 'missing'", Or(new NullTest(Score, false, false),
+            new Comparison(Label, "=", ValueOperand.Create("missing"))), ["missing", "null_a", "null_b"]),
+        new(PositiveClause, new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score > +1", new Comparison(Score, ">", ValueOperand.Create(1)), ["high"]),
+        new("score BETWEEN +1 AND +2", And(new Comparison(Score, ">=", ValueOperand.Create(1)),
+            new Comparison(Score, "<=", ValueOperand.Create(2))), ["high", "low"]),
+        new("score IN (+1,+2)", new InPredicate(Score, [ValueOperand.Create(1), ValueOperand.Create(2)], false), ["high", "low"]),
+        new("score IS NOT DISTINCT FROM +1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = +1e+0", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score = -1", new Comparison(Score, "=", ValueOperand.Create(-1)), []),
+        new("score = +79228162514264337593543950335", new Comparison(Score, "=",
+            ValueOperand.Create(decimal.MaxValue)), []),
+        new(LeadingClause, new Comparison(Score, ">", ValueOperand.Create(Half)), ["high", "low"]),
+        new("score = .1e1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
+        new("score > -.5", new Comparison(Score, ">", ValueOperand.Create(-Half)), ["high", "low"]),
+        new("score > +.5", new Comparison(Score, ">", ValueOperand.Create(Half)), ["high", "low"]),
+        new("score BETWEEN .5 AND 1.", And(new Comparison(Score, ">=", ValueOperand.Create(Half)),
+            new Comparison(Score, "<=", ValueOperand.Create(1))), ["low"]),
+        new("score IN (.5,1.)", new InPredicate(Score, [ValueOperand.Create(Half), ValueOperand.Create(1)], false), ["low"]),
+        new("score = .5", new Comparison(Score, "=", ValueOperand.Create(Half)), []),
+        new("score IS NOT DISTINCT FROM .1e1", new Comparison(Score, "=", ValueOperand.Create(1)), ["low"]),
     ];
     internal static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     internal static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

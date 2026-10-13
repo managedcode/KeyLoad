@@ -18,6 +18,7 @@ internal static class SqlSyntax
     internal const string Order = "ORDER";
     internal const string By = "BY";
     internal const string Desc = "DESC";
+    internal const string Using = "USING";
     internal const string Asc = "ASC";
     internal const string Limit = "LIMIT";
     internal const string Offset = "OFFSET";
@@ -32,12 +33,15 @@ internal static class SqlSyntax
     internal const string Last = "LAST";
     internal const string Not = "NOT";
     internal const string Is = "IS";
+    internal const string IsNull = "ISNULL";
+    internal const string NotNull = "NOTNULL";
     internal const string Distinct = "DISTINCT";
     internal const string Missing = "MISSING";
     internal const string Null = "NULL";
     internal const string In = "IN";
     internal const string Between = "BETWEEN";
     internal const string Symmetric = "SYMMETRIC";
+    internal const string Asymmetric = "ASYMMETRIC";
     internal const string And = "AND";
     internal const string Or = "OR";
     internal const string True = "TRUE";

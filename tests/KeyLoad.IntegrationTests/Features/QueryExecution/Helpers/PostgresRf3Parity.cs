@@ -28,6 +28,12 @@ internal static class PostgresRf3Parity
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: false, token));
                         await PageAsync(state, await wire.ExecuteAsync<QueryPage>(state.Sql, [], prepared: true, token));
                         await SyntaxVariantsAsync(state, wire, token);
+                        if (state.Dialect == PostgresRf3Protocol.JoinDialect)
+                        {
+                            var plain = state.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal);
+                            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(plain, [], prepared: false, token));
+                            await PageAsync(state, await wire.ExecuteAsync<QueryPage>(plain, [], prepared: true, token));
+                        }
                     }, failures);
                 }, failures);
                 global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

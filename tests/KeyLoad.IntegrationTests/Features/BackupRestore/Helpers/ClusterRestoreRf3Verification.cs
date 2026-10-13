@@ -37,10 +37,16 @@ internal static class ClusterRestoreRf3Verification
         }
         await ClusterRestoreRf3SecondaryPartition.RequireTargetAsync(target, seed.Credential, secondary, originals, cancellationToken).ConfigureAwait(false);
         if (mixed is not null)
-        { await ClusterRestoreMixedRetentionRf3Restore.PausedAsync(target, mixed, cancellationToken).ConfigureAwait(false); }
+        {
+            await ClusterRestoreMixedRetentionRf3Restore.PausedAsync(target, mixed, cancellationToken).ConfigureAwait(false);
+            await ClusterRestoreUnavailableHistoryFlow.RunAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false);
+        }
         var fresh = await ClusterRestoreRf3Scenario.CallersAsync(target, seed, originals, eventing, null, cancellationToken).ConfigureAwait(false);
         if (mixed is not null)
-        { await ClusterRestoreMixedRetentionRf3Restore.ContinueAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false); }
+        {
+            await ClusterRestoreMixedRetentionRf3Restore.ContinueAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false);
+            await ClusterRestoreUnavailableHistoryFlow.RunAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false);
+        }
         _ = await ClusterRestoreRf3TargetRead.RequireAsync(target, originals, dispatchPaused: false).ConfigureAwait(false);
         var finalCut = ClusterRestoreRf3CanonicalCut.Target(target, originals, cancellationToken);
         for (var cut = 0; cut < RestoredColdCuts; cut++)
@@ -54,7 +60,10 @@ internal static class ClusterRestoreRf3Verification
             await ClusterRestoreRf3SecondaryPartition.RequireTargetAsync(target, seed.Credential, secondary, originals, cancellationToken).ConfigureAwait(false);
             _ = await ClusterRestoreRf3Scenario.CallersAsync(target, seed, originals, eventing, fresh, cancellationToken).ConfigureAwait(false);
             if (mixed is not null)
-            { await ClusterRestoreMixedRetentionRf3Cold.RequireAsync(target, mixed, cancellationToken).ConfigureAwait(false); }
+            {
+                await ClusterRestoreMixedRetentionRf3Cold.RequireAsync(target, mixed, cancellationToken).ConfigureAwait(false);
+                await ClusterRestoreUnavailableHistoryFlow.RunAsync(target, mixed, rootKey, cancellationToken).ConfigureAwait(false);
+            }
             await target.StopAsync().ConfigureAwait(false);
             if (mixed is not null)
             { ClusterRestoreMixedRetentionRf3NativeCut.RequireRetained(target, mixed, cancellationToken); }

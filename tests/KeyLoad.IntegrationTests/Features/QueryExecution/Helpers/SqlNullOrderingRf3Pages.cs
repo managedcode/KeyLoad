@@ -43,6 +43,8 @@ internal static class SqlNullOrderingRf3Pages
             await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new { }, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.Profile)).IsTrue();
+        await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.UsingProfile)).IsTrue();
+        await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingRf3Protocol.UsingProfile)).IsTrue();
     }
 
     internal static async Task CaseAsync(RequestCqrsRf3Callers caller, PostgresRf3Caller wire,
@@ -50,6 +52,7 @@ internal static class SqlNullOrderingRf3Pages
     {
         var sql = SqlNullOrderingRf3Protocol.Sql(descending, first);
         await AllAsync(caller, wire, descending, first, token);
+        await UsingAsync(caller, wire, descending, first, token);
         var operation = SqlNullOrderingRf3Protocol.Operation(sql);
         await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), descending, first);
         await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.McpAsync<QueryPage>(caller.Mcp, operation, token), descending, first);
@@ -58,6 +61,17 @@ internal static class SqlNullOrderingRf3Pages
             await caller.Sdk.QueryAstAsync(ast, token)), descending, first);
         await SqlNullOrderingRf3Assertions.PageAsync((await McpCallerAssertions.SuccessAsync<QueryPage>(
             await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value, descending, first);
+        await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), descending, first);
+        await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), descending, first);
+    }
+
+    private static async Task UsingAsync(RequestCqrsRf3Callers caller, PostgresRf3Caller wire,
+        bool descending, bool first, CancellationToken token)
+    {
+        var sql = SqlNullOrderingRf3Protocol.Using(descending, first);
+        var operation = SqlNullOrderingRf3Protocol.Operation(sql);
+        await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), descending, first);
+        await SqlNullOrderingRf3Assertions.PageAsync(await SqlRf3Protocol.McpAsync<QueryPage>(caller.Mcp, operation, token), descending, first);
         await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), descending, first);
         await SqlNullOrderingRf3Assertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), descending, first);
     }

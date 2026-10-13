@@ -35,6 +35,8 @@ internal static class TenantCapacityPlacementRf3RevocationApply
         await SqlRf3Protocol.EqualAsync(pending, (await McpCallerAssertions.SuccessAsync<PlacementIntentV1>(
             await caller.Official.CallAsync(TenantPlacementPublicProtocol.PersistTool,
                 new { commandId = persistId, request = persist }, token))).Value);
+        await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller,
+            new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), state.HealthyPolicy, pending, token);
         var id = Guid.NewGuid();
         var request = new ApplyPlacementIntentRequest(seed.Partition.TenantId, seed.Partition.DatabaseId,
             pending.IntentId, pending.Revision, state.Control);
@@ -46,6 +48,8 @@ internal static class TenantCapacityPlacementRf3RevocationApply
             id, request, pending, persistId, persist, oldIntent, oldId, oldRequest, oldPersistId, oldPersist, token);
         await TenantCapacityPlacementRf3RevocationHealthyCold.RequireAsync(wave, seed, state, caller,
             completed, id, request, oldIntent, oldPersistId, oldRow, token);
+        await TenantCapacityPlacementRf3ReadAuthorityAssertions.CurrentAsync(caller,
+            new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), state.HealthyPolicy, completed, token);
         await TenantCapacityPlacementRf3RevocationReplay.RequireAsync(seed, state, caller, completed,
             id, request, pending, persistId, persist, oldIntent, oldId, oldRequest, oldPersistId, oldPersist, token);
         await TenantCapacityPlacementRf3MultiContinuation.RequireAsync(seed, token);

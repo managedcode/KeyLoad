@@ -9,9 +9,15 @@ internal static class SqlNullDistinctRf3Pages
         {
             var capabilities = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NullSynonymProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.PositiveProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctRf3Cases.LeadingProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
                 await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new { }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.NullSynonymProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.PositiveProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctRf3Cases.LeadingProfile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {

@@ -16,6 +16,8 @@ internal static class SqlBetweenSymmetricRf3Policy
         var before = await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, token);
         await SqlBetweenSymmetricRf3Refusals.RejectAsync(fixture, state,
             SqlBetweenSymmetricRf3Cases.All[SqlBetweenSymmetricRf3State.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
+        await SqlBetweenSymmetricRf3Refusals.RejectAsync(fixture, state,
+            SqlBetweenSymmetricRf3Cases.AsymmetricHealthy, ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(

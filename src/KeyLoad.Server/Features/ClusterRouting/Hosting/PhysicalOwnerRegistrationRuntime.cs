@@ -19,7 +19,7 @@ internal sealed class PhysicalOwnerRegistrationRuntime : IAsyncDisposable
         {
             var requests = new PhysicalOwnerStartupRequests(node, options.Node, options.McpExecution);
             controller = new(node, partition, probes, requests, options.Node);
-            worker = new(oracle, node, controller, options.GrainRouting, clock, logger);
+            worker = new(oracle, node, controller, options.GrainRouting, options.Membership, clock, logger);
         }
         catch (Exception exception) when (NativeCqrsBoundaryErrors.IsNonFatal(exception))
         {

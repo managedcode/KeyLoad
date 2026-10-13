@@ -61,13 +61,24 @@ internal static class SqlTokenizer
             {
                 SqlStringQuote or SqlIdentifierQuote => Quoted(sql, ref index, budget, budgetCheckInterval),
                 _ when char.IsLetter(current) || current is IdentifierSeparator or ParameterPrefix => Identifier(sql, ref index, budget, budgetCheckInterval),
-                _ when char.IsDigit(current) || current == MinusCharacter && index + AdjacentElementOffset < sql.Length && char.IsDigit(sql[index + AdjacentElementOffset])
+                _ when StartsNumber(sql, index)
                     => Number(sql, ref index, budget, budgetCheckInterval),
                 _ => Symbol(sql, ref index)
             });
         }
         result.Add(new(SqlTokenKind.End, string.Empty));
         return result;
+    }
+
+    private static bool StartsNumber(string sql, int index)
+    {
+        if (sql[index] is MinusCharacter or PlusCharacter)
+        { index++; }
+        if (index >= sql.Length)
+        { return false; }
+        return char.IsDigit(sql[index]) || sql[index] == DecimalPoint
+            && index + AdjacentElementOffset < sql.Length
+            && char.IsDigit(sql[index + AdjacentElementOffset]);
     }
 
     private static SqlTriviaStatus ReadTrivia(string sql, ref int index, ref SqlTriviaState state,

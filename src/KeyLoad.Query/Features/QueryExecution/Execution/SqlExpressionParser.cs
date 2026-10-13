@@ -54,6 +54,13 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
     private Predicate Condition()
     {
         var value = Operand();
+        if (cursor.Is(SqlSyntax.IsNull) || cursor.Is(SqlSyntax.NotNull))
+        {
+            var not = cursor.Eat(SqlSyntax.NotNull);
+            if (!not)
+            { cursor.Need(SqlSyntax.IsNull); }
+            return new NullTest(value, not, false);
+        }
         if (cursor.Eat(SqlSyntax.Is))
         {
             var not = cursor.Eat(SqlSyntax.Not);
@@ -87,6 +94,10 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
         if (cursor.Eat(SqlSyntax.Between))
         {
             var symmetric = cursor.Eat(SqlSyntax.Symmetric);
+            if (!symmetric)
+            {
+                cursor.Eat(SqlSyntax.Asymmetric);
+            }
             var lower = Operand();
             cursor.Need(SqlSyntax.And);
             var upper = Operand();

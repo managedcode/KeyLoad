@@ -16,6 +16,17 @@ internal static class SqlNullDistinctRf3Policy
         var before = await SqlNullDistinctRf3Image.ReadAsync(root, state, token);
         await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state,
             SqlNullDistinctRf3Cases.All[SqlNullDistinctRf3State.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state,
+            SqlNullDistinctRf3Cases.NullClause, ErrorCode.PermissionDenied, token);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state,
+            SqlNullDistinctRf3Cases.NotNullClause, ErrorCode.PermissionDenied, token);
+        var positive = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.PositiveClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, positive.Clause, ErrorCode.PermissionDenied,
+            token, ast: true, astCase: positive);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
+        var leading = SqlNullDistinctRf3Cases.All.Single(value => value.Clause == SqlNullDistinctRf3Cases.LeadingClause);
+        await SqlNullDistinctRf3Refusals.RejectAsync(fixture, state, leading.Clause, ErrorCode.PermissionDenied,
+            token, ast: true, astCase: leading);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctRf3Image.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with { PolicyEpoch = original.PolicyEpoch + SqlNullOrderingRf3Protocol.RepairAdvance };
         await SqlRf3Protocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(

@@ -12,6 +12,8 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
     private const string KeySeparator = ":";
     private const string Assignment = "=";
     private const string Enabled = "true";
+    private const string ConsoleErrorArgument = "--Logging:Console:LogToStandardErrorThreshold=Trace";
+    private const string ConsoleLevelArgument = "--Logging:LogLevel:Default=Warning";
     private const int FirstVoter = 0;
 
     internal string[] Arguments(int index)
@@ -19,7 +21,7 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         var control = index < FirstDestination;
         var local = control ? Control.Owner : Destination.Owner;
         var foreign = control ? Destination.Owner : Control.Owner;
-        var arguments = new List<string> { UrlArgumentPrefix + origins[index] };
+        var arguments = new List<string> { UrlArgumentPrefix + origins[index], ConsoleErrorArgument, ConsoleLevelArgument };
         void Set(string key, string value) => arguments.Add(NodeArgumentPrefix + key + Assignment + value);
         Set(nameof(NodeOptions.DataDirectory), DirectoryPath(index));
         Set(nameof(NodeOptions.PublicEndpoint), origins[index]);

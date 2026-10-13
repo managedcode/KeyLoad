@@ -11,6 +11,7 @@ internal static class SqlOffsetRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = SqlOffsetProtocol.JoinRequest(database.Partition);
+        await SqlDefaultJoinControls.InvalidAsync(database, engine);
         foreach (var (tail, code) in new[]
         {
             ("LIMIT 1 OFFSET -1", ErrorCode.Validation),
@@ -44,6 +45,7 @@ internal static class SqlOffsetRefusals
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => engine.ExecuteAst(SqlOffsetProtocol.Root,
             ast, cancellationToken: cancelled.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancelled.Token);
+        await SqlDefaultJoinControls.CancelledAsync(database, engine, cancelled.Token);
         await UnchangedAsync(database.Store, before, position, identity);
     }
     internal static async Task DeniedAsync(TestDatabase database)
@@ -53,6 +55,9 @@ internal static class SqlOffsetRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, SqlOffsetProtocol.JoinRequest(database.Partition)), ErrorCode.PermissionDenied);
+        var plain = SqlOffsetProtocol.JoinRequest(database.Partition);
+        await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, plain with
+        { Sql = plain.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal) }), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Reader, SqlOffsetProtocol.Join(database.Partition)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Reader, SqlOffsetProtocol.ScalarRequest(database.Partition)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Reader, SqlOffsetProtocol.Scalar(database.Partition)), ErrorCode.PermissionDenied);

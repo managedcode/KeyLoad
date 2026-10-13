@@ -11,5 +11,6 @@ internal sealed class GraphVertexPublicWholeFlowTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         await GraphVertexPublicFlow.Run(fixture, deadline.Token);
+        await GraphCrossAuthorityR41Trial.RunAsync(fixture, deadline.Token);
     }
 }

@@ -18,6 +18,8 @@ internal static class SqlBetweenSymmetricRf3Repair
         var before = await SqlBetweenSymmetricRf3Image.ReadAsync(root, dirty, token);
         await SqlBetweenSymmetricRf3Refusals.RejectAsync(fixture, dirty,
             SqlBetweenSymmetricRf3Cases.All[SqlBetweenSymmetricRf3State.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
+        await SqlBetweenSymmetricRf3Refusals.RejectAsync(fixture, dirty,
+            SqlBetweenSymmetricRf3Cases.AsymmetricFault, ErrorCode.Validation, token);
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricRf3Image.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresRf3State.Partition,
             [new PutDocument(SqlNullOrderingRf3Protocol.Collection, SqlBetweenSymmetricRf3State.Low,

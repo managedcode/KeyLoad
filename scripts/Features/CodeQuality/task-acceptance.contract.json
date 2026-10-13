@@ -6543,241 +6543,195 @@
           "cases": [
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "ConfiguredHandlerUsesFrozenNativeTransportDurations",
-              "instanceName": "ConfiguredHandlerUsesFrozenNativeTransportDurations",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "GenuineNativeSignUsesCopiedCredentialAndReplayIsRejected",
+              "instanceName": "GenuineNativeSignUsesCopiedCredentialAndReplayIsRejected",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Nonce)",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Version)",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": [
-                "System.String"
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
               ]
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Signature)",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Caller)",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": [
-                "System.String"
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
               ]
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "DuplicateAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Time)",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(CallerAddress)",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": [
-                "System.String"
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
               ]
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "GenuineSignUsesCopiedCredentialAndReplayIsRejected",
-              "instanceName": "GenuineSignUsesCopiedCredentialAndReplayIsRejected",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Destination)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(DestinationAddress)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Nonce)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Expiry)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(Signature)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MissingCaller)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MissingCallerAddress)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MissingDestination)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MissingDestinationAddress)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MissingSignature)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(DuplicateSignature)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(OversizedCaller)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "RejectedNativeRequestDoesNotConsumeNonceAdmission",
+              "instanceName": "RejectedNativeRequestDoesNotConsumeNonceAdmission(MalformedSignature)",
+              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
+              "parameterTypeFullNames": [
+                "KeyLoad.RecoveryTests.PeerDiscoveryNativeMutation"
+              ]
+            },
+            {
+              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "OutboundNativeContractErrorsAreTypedBeforeTransport",
+              "instanceName": "OutboundNativeContractErrorsAreTypedBeforeTransport",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "InvalidConstructorConfigurationIsTyped",
-              "instanceName": "InvalidConstructorConfigurationIsTyped",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "OriginalNativeExpiryUsesTheConfiguredRpcDeadline",
+              "instanceName": "OriginalNativeExpiryUsesTheConfiguredRpcDeadline",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": []
             },
             {
               "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "MalformedSignatureAndEmptyNonceDoNotConsumeCapacity",
-              "instanceName": "MalformedSignatureAndEmptyNonceDoNotConsumeCapacity",
+              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests(PeerDiscoveryNativeCluster)",
+              "methodName": "InvalidNativeCredentialAndReplayConfigurationRefuseBeforeAdmission",
+              "instanceName": "InvalidNativeCredentialAndReplayConfigurationRefuseBeforeAdmission",
               "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
               "parameterTypeFullNames": []
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "MissingAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "MissingAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Nonce)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "System.String"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "MissingAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "MissingAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Signature)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "System.String"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "MissingAuthenticationHeadersDoNotConsumeCapacity",
-              "instanceName": "MissingAuthenticationHeadersDoNotConsumeCapacity(X-KeyLoad-Time)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "System.String"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "OutboundDiscoveryContractErrorsAreTypedBeforeTransport",
-              "instanceName": "OutboundDiscoveryContractErrorsAreTypedBeforeTransport",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": []
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RealHandlerUsesBoundedSocketsAndDisablesRedirects",
-              "instanceName": "RealHandlerUsesBoundedSocketsAndDisablesRedirects",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": []
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(ContentType)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(FramedBody)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Method)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Nonce)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Path)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(PathBase)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Query)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(RawPath)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Recipient)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Signature)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(Time)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(TransferEncoding)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
-            },
-            {
-              "className": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "nativeReportClassName": "KeyLoad.RecoveryTests.PeerDiscoverySecurityTests",
-              "methodName": "RejectedRequestDoesNotConsumeNonceAdmission",
-              "instanceName": "RejectedRequestDoesNotConsumeNonceAdmission(UnframedBody)",
-              "sourcePath": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/PeerDiscoverySecurityTests.cs",
-              "parameterTypeFullNames": [
-                "KeyLoad.RecoveryTests.PeerDiscoveryMutation"
-              ]
             }
           ]
         },

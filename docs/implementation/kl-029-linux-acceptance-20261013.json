@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "task": "KL-029",
+  "auditedAtUtc": "2026-10-13T15:22:21.166942+00:00",
+  "sourceCommit": "7e94024c4b891011fa7095c37b05bd775d17ff4f",
+  "runId": 38409507544,
+  "attempt": 1,
+  "jobId": 115337802386,
+  "jobConclusion": "success",
+  "jobUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38409507544/job/115337802386",
+  "artifactId": 11824475195,
+  "artifactUrl": "https://github.com/managedcode/KeyLoad/actions/runs/38409507544/artifacts/11824475195",
+  "artifactSha256": "974c69bfc7d16529acba459f1f54945e1118985f3f595eb1a42b027d4eae8f38",
+  "acceptanceReceiptSha256": "af736583b7ca316efd277ab4966a1767e34c2465cc23db7839e7d2dfd44b2a4d",
+  "executionManifestSha256": "d71fa041c50fd881adc3f1ff27e8e6f045bc37bfa270f36401de3172e7ade19e",
+  "contractSha256": "55764045ebb81f957eaa913f5fdfe55735b6962b571cec0cd6a6f0686ea1bb52",
+  "originalArchitectureCriteria": [
+    {
+      "criterion": "Projection deletion and canonical replay return expected literal results",
+      "passedNativeUids": [
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRemovalTests.1.1.RemovedNativeProjectionRebuildsOnlyCurrentLiteralRowsAndHealthyWritesRemainVisible.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalLifecycleTests.1.1.ActualJournalSeedThenNativeUpdateDeleteAndColdRestoreRetainExactCheckpoint.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).2.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).3.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).4.1.0"
+      ]
+    },
+    {
+      "criterion": "A crash at checkpoint cannot conceal missing updates",
+      "passedNativeUids": [
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).1.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).2.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).3.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).4.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).5.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).6.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).7.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).8.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).9.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).10.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).1.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).2.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).3.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).4.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).5.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).6.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).7.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).8.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3LeaderLossTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart.1.1.0"
+      ]
+    },
+    {
+      "criterion": "Stale revisions cannot resurrect",
+      "passedNativeUids": [
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRemovalTests.1.1.RemovedNativeProjectionRebuildsOnlyCurrentLiteralRowsAndHealthyWritesRemainVisible.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalLifecycleTests.1.1.ActualJournalSeedThenNativeUpdateDeleteAndColdRestoreRetainExactCheckpoint.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).2.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).3.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).4.1.0"
+      ]
+    }
+  ],
+  "verifiedOriginals": [
+    {
+      "path": "scripts/Features/CodeQuality/task-acceptance.contract.json",
+      "sha256": "55764045ebb81f957eaa913f5fdfe55735b6962b571cec0cd6a6f0686ea1bb52",
+      "length": 460649
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/discovery.stdout.txt",
+      "sha256": "0b6e5163245bc142c2b1ac8949d1da1fbe37e7b72ac48485f3684b83d6fda26d",
+      "length": 20571
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/discovery.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/execution.process.json",
+      "sha256": "fe3ae29a8f70c8f7a4c74e22d8b1527adc84cce64c9abba0802e0a702d861cfd",
+      "length": 6774
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/execution.stdout.txt",
+      "sha256": "d0165d488c03adbb78565a19cc9988af8b84bd56dd45ad2905750bd88baf2ddb",
+      "length": 5487
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/execution.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/results/KeyLoad.RecoveryTests_net10.0_x64.trx",
+      "sha256": "ebc9801c63df66716f1791611f4ad294b5d9ceacf8ed3791931091e125cca89f",
+      "length": 27595
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/discovery.process.json",
+      "sha256": "0f55a2fd696ee519a32fc6528ba0f3d5ddf02ec25064a251be7b43ab28d718ac",
+      "length": 22675
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/native-image-before.json",
+      "sha256": "f298eaf17517eec9689ae64ff93a1eb913f3a20506e44aff31ef58d9ac28fa83",
+      "length": 1163625
+    },
+    {
+      "path": "TestResults/task-acceptance/functional-coverage.test-image.rf3.json",
+      "sha256": "d0524d5a245e6a44b31e1bc9815853724077c2f399cbf2f5a173416050bde782",
+      "length": 1163626
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/discovery.process.json",
+      "sha256": "4de987a55a9d31d0d0ce72fd7a1513cae0430fe791a270cefd78482b9411d940",
+      "length": 11154
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/discovery.stdout.txt",
+      "sha256": "cb639fbcbb10490aa74bcb8cc6efcf69703661a18d9d6e4d85bca6c09d09eaed",
+      "length": 9645
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/discovery.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/execution.process.json",
+      "sha256": "eeb3975235bc2b59d761b7b3c55d2f93ef9083c4d61a490ac605462132dab7b2",
+      "length": 4336
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/execution.stdout.txt",
+      "sha256": "de1539a2273a93aab4e836c6769c8ac1fb8e4f0effde752dcb9ea17087d400a0",
+      "length": 3185
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/native-image-after.json",
+      "sha256": "f298eaf17517eec9689ae64ff93a1eb913f3a20506e44aff31ef58d9ac28fa83",
+      "length": 1163625
+    },
+    {
+      "path": "TestResults/task-acceptance/functional-coverage.test-image.recovery.json",
+      "sha256": "5de0a2945ebf802a3500d3931ea2c6f25c08d76a60891ba33f1602043763f1a7",
+      "length": 175095
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/native-image-after.json",
+      "sha256": "64e946546dbd2d0b302d07899c947ea95686c86c512a877556a728e51ecf7f99",
+      "length": 175094
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/recovery/native-image-before.json",
+      "sha256": "64e946546dbd2d0b302d07899c947ea95686c86c512a877556a728e51ecf7f99",
+      "length": 175094
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/execution-manifest.json",
+      "sha256": "d71fa041c50fd881adc3f1ff27e8e6f045bc37bfa270f36401de3172e7ade19e",
+      "length": 7771
+    },
+    {
+      "path": "TestResults/task-acceptance/functional-coverage.production-source-manifest.json",
+      "sha256": "f09b1e76e2cfac5cb584d369244ce131cab0ddb00495cc5c3524cca5f8c3b433",
+      "length": 2441690
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/source-verify.process.json",
+      "sha256": "6afc3b3c27cb72b1f386b111227ddfebb683d3b02ac295424f66748099713a3c",
+      "length": 680
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/source-verify.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/source-verify.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/native-image-before.json",
+      "sha256": "b023519e9ca386d939d9f509fbe11c9ea00903b328c118d8b280d6a8cce51187",
+      "length": 1764204
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/native-image-after.json",
+      "sha256": "b023519e9ca386d939d9f509fbe11c9ea00903b328c118d8b280d6a8cce51187",
+      "length": 1764204
+    },
+    {
+      "path": "TestResults/task-acceptance/functional-coverage.test-image.unit.json",
+      "sha256": "246e4133beb64d287cf3db92fb8f9220a3b0c734b0931b3a28f7e9b22d1cc70e",
+      "length": 1764205
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/discovery.process.json",
+      "sha256": "d757446ba880c768e4fa5a27c180d938bb121da73fbaeb2bd841bc15f46b0baf",
+      "length": 59737
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/discovery.stdout.txt",
+      "sha256": "83bba2f1d5ca64d6f7b79e7b08f2dc94bd04c4a805892a8d98007a78d45b1bcc",
+      "length": 54256
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/discovery.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/execution.process.json",
+      "sha256": "c592dff5ea91aa4fa29984ec4106a4ae70553bf3f0e736d247bf4f1e30abc07a",
+      "length": 16875
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/execution.stdout.txt",
+      "sha256": "1ec404e905041c5641f76df0a8925493e56bbf6c2138f37d1b6b6f59e842dd16",
+      "length": 13787
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/execution.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/unit/results/KeyLoad.UnitTests_net10.0_x64.trx",
+      "sha256": "13215dcf2f0aa5af379c7001d8e91222d3884b134825dd164b6ce391bd386a7a",
+      "length": 80219
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/execution.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0
+    },
+    {
+      "path": "TestResults/task-acceptance/kl-029-normal/rf3/results/KeyLoad.IntegrationTests_net10.0_x64.trx",
+      "sha256": "73a2b82d28617f7f65d6163f0ae9970c385545e53c91754d48cfd030594978ed",
+      "length": 14437
+    }
+  ],
+  "gitSourceAndBuildInputCount": 8411,
+  "lanes": [
+    {
+      "suite": "unit",
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "nativeParallelLimit": 50,
+      "trxSha256": "13215dcf2f0aa5af379c7001d8e91222d3884b134825dd164b6ce391bd386a7a",
+      "tunitReportSha256": "208194d07f3941b8e986add368d037961b79f278134258efb084c14d49cbb06e",
+      "imageManifestSha256": "b023519e9ca386d939d9f509fbe11c9ea00903b328c118d8b280d6a8cce51187",
+      "dllSha256": "cdfaba3b17bfa40e0816664fdef54b97a837ef263a6ab6d034af339cc5519013",
+      "pdbSha256": "69784c10b5c4666327d5a6d0ec48735c79aa5608d3d1ee0b844f267003506db5",
+      "mvid": "25ba9bc6-e49e-466c-be1d-64bff9d22572",
+      "pdbGuid": "5591f2b2-317d-4185-8ec5-ddd72d938da3",
+      "nativeUids": [
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests.1.1.ReplaceWithoutBackupPreservesNativeReplaceSemantics.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests.1.1.ReplaceWithOwnedBackupPreservesPreviousDestination.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamProviderTests.1.1.OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests.1.1.ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationCapacityTests.1.1.RestartPreflightsAllThreeLeavesBeforeAnyRetirement.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextSelectedGenerationTests.1.1.MaintainedBilingualGenerationRejectsRealUpdateDeleteUntilExplicitRestoreThenReturnsLiteralRows.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalIntentCorruptionTests.1.1.DamagedDurableOriginalIntentRejectsThenExactRepairReplaysOriginalCheckpointAndLiteralColdPages.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests.1.1.NativeFileCountAcceptsExactBoundAndRejectsExcessWithoutRemovingFiles.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests.1.1.NativeDiskLimitAcceptsExactSparseLengthAndRejectsOneByteExcess.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests.1.1.ManifestMetadataAcceptsExactByteLimitAndRejectsOneByteLess.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests.1.1.PostingReadBudgetAcceptsExactPostingWorkAndRejectsOneByteLess.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionBoundsTests.1.1.RecordMetadataReadBudgetAcceptsExactBytesAndRejectsOneByteLess.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests.1.1.RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(System.Boolean).1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextWaitForIndexTests.1.1.RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy(System.Boolean).2.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(System.Int32, System.Nullable`1[System.Int32], System.Int64).1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(System.Int32, System.Nullable`1[System.Int32], System.Int64).2.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(System.Int32, System.Nullable`1[System.Int32], System.Int64).3.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(System.Int32, System.Nullable`1[System.Int32], System.Int64).4.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.ConfiguredCapPreservesNativeUnbufferedAndSmallerCallerRequests(System.Int32, System.Nullable`1[System.Int32], System.Int64).5.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(System.Int32).1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextFileStreamBufferPolicyTests.1.1.InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(System.Int32).2.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextAsyncProjectionTests.1.1.AcFts007AsyncNativeSearchPublishesReusesAndReplacesFromCanonicalCuts.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests.1.1.NativeGenerationPreservesUnicodeCorpusScoresTiesAndHybridRanks.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests.1.1.DeliberateTokenHashCollisionsCannotChangeCanonicalResults(System.UInt64).1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionParityTests.1.1.DeliberateTokenHashCollisionsCannotChangeCanonicalResults(System.UInt64).2.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionScopeTests.1.1.TrustedInternalSchemaScopeMismatchCannotReuseTheCurrentGeneration.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextBilingualLifecycleTests.1.1.Kl028LiteralUkrainianEnglishDeleteReplayAndNativeReopenPreserveAuthorizedResults.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRemovalTests.1.1.RemovedNativeProjectionRebuildsOnlyCurrentLiteralRowsAndHealthyWritesRemainVisible.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests.1.1.RestartRebuildsFromCanonicalStoreUsingRecognizedNativeZoneTreeFiles.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests.1.1.CorruptManifestIsRejectedAndPreservedForDiagnosis.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests.1.1.UnknownProjectionEntryIsRejectedAndPreserved.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionRestartTests.1.1.LinkedNativeEntryIsRejectedWithoutFollowingOrRemovingIt.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionDisposalTests.1.1.ConcurrentDisposeDrainsBorrowedNativeLeaseAndPreservesSearchAfterReopen.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests.1.1.ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(System.Boolean).1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextWaitObservedWorkTests.1.1.ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(System.Boolean).2.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalLifecycleTests.1.1.ActualJournalSeedThenNativeUpdateDeleteAndColdRestoreRetainExactCheckpoint.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextSelectedShutdownTests.1.1.ShutdownClosesNewAdmissionAndJoinsActualNativeReaderBeforeColdOwnerReturnsSameLiteralPage.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests.1.1.UntrackedPlausibleNativeEntryFailsAndPreservesGenerationAndBytes.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests.1.1.MalformedPendingManifestFailsClosedAndPreservesEveryGenerationEntry.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionOwnershipTests.1.1.UnknownRootEntryPreflightPreservesRecognizedGenerationBeforeAnyRetirement.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests.1.1.PublishedReplacementKeepsOldNativeReaderUntilItsLastLeaseSettles.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests.1.1.FailedRetirementKeepsItsOwnerAndAllowsJoinedShutdownRetry.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests.1.1.LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests.1.1.AggregateCensusCanRunWhileASecondNativeGenerationIsPausedBetweenPostings.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextGenerationLifetimeTests.1.1.InvalidatedCurrentCanRebuildWhileItsRetiredNativeLeaseRemainsBorrowed.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests.1.1.ExactDirectoryCountPassesAndExcessPreservesManifestAndCanonicalCut.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests.1.1.ExactDirectoryDepthPassesAndNextLevelIsRejectedWithoutDeletion.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionFilesystemBoundsTests.1.1.LinkedAncestorIsRejectedBeforeCreatingMissingRootOrTouchingItsTarget.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalExpiryTests.1.1.OriginalUnacknowledgedPageNaturallyExpiresWithoutRenewalThenFreshConsumerBuildReturnsLiteralHealthy.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests.1.1.AcFts007PreCancelledAsyncSearchCreatesNoReservationOrNativeGeneration.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextAsyncAdmissionTests.1.1.AcFts007NativePostingPauseKeepsAdmissionUntilCancellationCleanupJoins.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionAuthorityTests.1.1.PersistedFieldAndRowPolicyRemainAuthoritativeAcrossNativeReuseAndMutation.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextIncrementalCorruptionTests.1.1.DamagedNativeManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests.1.1.SaturationAndCancellationReleaseNativeLeaseForHealthySearch.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionLeaseTests.1.1.RecordAndTokenBudgetFailuresPreservePositionAndReleaseLease.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextProjectionSettlementTests.1.1.CancellationAndUntrackedNativeFileAreBothRetainedDuringSettlement.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextSelectedCancellationTests.1.1.CancellationAfterActualMaintainedPostingReadJoinsOriginalLeaseWithoutPartialThenReadsLiteralHealthy.1.1.0",
+        "KeyLoad.UnitTests.Features.Search.NativeTextOrderedStageCancellationTests.1.1.SuccessfulNativeBeginThenCanceledLaterReadRetainsStoreAndHealthyBilingualResult.1.1.0"
+      ]
+    },
+    {
+      "suite": "recovery",
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "nativeParallelLimit": 50,
+      "trxSha256": "ebc9801c63df66716f1791611f4ad294b5d9ceacf8ed3791931091e125cca89f",
+      "tunitReportSha256": "e23de6ef9048ec6e51b861551695087e7c259cc83479078c2a58f02058f596e5",
+      "imageManifestSha256": "64e946546dbd2d0b302d07899c947ea95686c86c512a877556a728e51ecf7f99",
+      "dllSha256": "68f348c1889564e9ceb230c94fb856d995fe5eff742bcf80757aef471f39d6fc",
+      "pdbSha256": "00814648ac8a8fa4a804ca4364896007b01ea6bc44cad56d1b39ff7e5cd928ff",
+      "mvid": "933ff06f-59c9-4d91-87fc-8c0e96e5f201",
+      "pdbGuid": "67b402df-c561-4682-ace8-710ec04fe700",
+      "nativeUids": [
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).1.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).2.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).3.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).4.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).5.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).6.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).7.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).8.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).9.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextProjectionProcessRecoveryTests.1.1.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch(KeyLoad.Server.Features.Search.NativeTextFaultStage, System.Boolean).10.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).1.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).2.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).3.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).4.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).5.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).6.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).7.1.0",
+        "KeyLoad.RecoveryTests.Features.Search.NativeTextIncrementalProcessRecoveryTests.1.1.AcFtsInc009DurableIncrementalReplaySurvivesRealPostingInventoryAndPublicationCuts(KeyLoad.Server.Features.Search.NativeTextFaultStage).8.1.0"
+      ]
+    },
+    {
+      "suite": "rf3",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "nativeParallelLimit": 50,
+      "trxSha256": "73a2b82d28617f7f65d6163f0ae9970c385545e53c91754d48cfd030594978ed",
+      "tunitReportSha256": "98e2caa269d9b8bc6ddde300084a76816cbf5d3a87b383d58aad1e27e29ef78a",
+      "imageManifestSha256": "f298eaf17517eec9689ae64ff93a1eb913f3a20506e44aff31ef58d9ac28fa83",
+      "dllSha256": "e4e0c576da83a5c676e14c41693723e235a5cf27374c853b6d6c275b242ae66e",
+      "pdbSha256": "7c98e06b7b79637abc6098e74f630ae11ded90989c605631173f399e52e13a74",
+      "mvid": "b8752f3f-6ca6-48c1-b8b6-e10bc0e19aac",
+      "pdbGuid": "473ff458-937e-4fba-b9be-f2fd953f363c",
+      "nativeUids": [
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3LeaderLossTests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextWaitRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcFts001ActualSdkAndOfficialMcpMatchIndependentTextAndHybridOracle.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcFts002PersistedRowFieldRedactionFreshnessAndRevocationMatchBothClients.1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).2.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).3.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).4.1.0",
+        "KeyLoad.IntegrationTests.Features.Search.NativeTextAsyncRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.AcFts007AwaitedNativeSearchPreservesRf3ResultsPolicyAndHealth.1.1.0"
+      ]
+    }
+  ],
+  "passed": 85,
+  "failed": 0,
+  "skipped": 0,
+  "nativeUidTrxUnionAndSourcePdbBindingVerified": true,
+  "preparedBeforeAfterImagesEqual": true,
+  "nativeProcessReadersExitJoinedDisposed": true,
+  "callerHardwareIntrinsicsDisabled": false,
+  "serverHardwareIntrinsicsDisabled": false,
+  "serverImage": {
+    "schemaVersion": 1,
+    "sourceRevision": "7e94024c4b891011fa7095c37b05bd775d17ff4f",
+    "github": {
+      "runId": "38409507544",
+      "attempt": "1",
+      "repository": "managedcode/KeyLoad",
+      "ref": "refs/heads/main"
+    },
+    "bases": {
+      "sdk": "mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317",
+      "runtime": "mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4",
+      "registry": "registry:3.1.2@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8"
+    },
+    "images": {
+      "server": {
+        "reference": "127.0.0.1:5000/keyload/server:7e94024c4b891011fa7095c37b05bd775d17ff4f-38409507544-1@sha256:ca3f5be789a6518fe1df95f56c42cebbba3b9d83b464719fcc6645873586cb20",
+        "manifestDigest": "sha256:ca3f5be789a6518fe1df95f56c42cebbba3b9d83b464719fcc6645873586cb20",
+        "registryDigest": "sha256:ca3f5be789a6518fe1df95f56c42cebbba3b9d83b464719fcc6645873586cb20",
+        "manifestFile": "server-manifest.json",
+        "revisionLabel": "7e94024c4b891011fa7095c37b05bd775d17ff4f",
+        "configId": "sha256:a808ecdb87cf4ce342f8ade109b6e69ac32e848c9f87d52038f9d8aa8d001134"
+      }
+    }
+  },
+  "originalAspireRestarts": [
+    {
+      "path": "artifacts/qualification/rf3-container-restart-explicit-text-maintenance-cold-owner-node1.json",
+      "sha256": "54bc9c3ae48ee7171fc03ddb3c203e2ad257bafeca1d4c48b66a235e5de66fc1",
+      "scenario": "explicit-text-maintenance-cold-owner",
+      "resourceName": "node1"
+    },
+    {
+      "path": "artifacts/qualification/rf3-container-restart-explicit-text-maintenance-cold-owner-node3.json",
+      "sha256": "1321b098360b6260028279a7663c96498ca3232b2e1a261001357f2576562faa",
+      "scenario": "explicit-text-maintenance-cold-owner",
+      "resourceName": "node3"
+    },
+    {
+      "path": "artifacts/qualification/rf3-container-restart-explicit-text-maintenance-cold-owner-node2.json",
+      "sha256": "e8949e50446aef7a6e3d5a1a2ce006715a448a2a8c2397431b91307ddf17cb01",
+      "scenario": "explicit-text-maintenance-cold-owner",
+      "resourceName": "node2"
+    },
+    {
+      "path": "artifacts/qualification/rf3-container-restart-native-text-leader-loss-node2.json",
+      "sha256": "92feaf993319cb228e4652d8fc29c52d8af8bd5261cbb8f62ad8c7ebab030ec6",
+      "scenario": "native-text-leader-loss",
+      "resourceName": "node2"
+    }
+  ],
+  "registryCleanup": {
+    "cleanup": {
+      "containerName": "keyload-images-38409507544-1",
+      "owned": true,
+      "found": true,
+      "removed": true,
+      "exitCode": null,
+      "result": "success",
+      "outputTruncated": true
+    }
+  },
+  "allAcceptanceClosed": true,
+  "acceptanceScope": "Original architecture KL-029 task criteria; no full-product/full-suite/coverage/performance/endurance/power-loss promotion.",
+  "laterSourceBoundary": "These successful Linux originals qualify 7e94024c only. Current R41 shared routing/SQL/model edits require their own current coherent build and suites.",
+  "remainingMandatoryGates": [
+    "Complete current-source solution build and full native TUnit/recovery/Aspire RF3 suites",
+    "Current full functional coverage",
+    "Broader provider and Search acceptance, matched resources/performance/endurance and power-loss qualification"
+  ],
+  "originalFailuresRetained": true
+}

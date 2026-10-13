@@ -116,6 +116,7 @@ public sealed class SqlParser
         }
         else if (cursor.Current.Kind == SqlTokenKind.Identifier && !cursor.Is(SqlSyntax.Where) && !cursor.Is(SqlSyntax.Order)
             && !cursor.Is(SqlSyntax.Limit) && !cursor.Is(SqlSyntax.Offset) && !cursor.Is(SqlSyntax.Fetch)
+            && !cursor.Is(SqlSyntax.Join)
             && (!cursor.Is(SqlSyntax.Inner) || !cursor.IsNext(SqlSyntax.Join)))
         {
             alias = cursor.Identifier();
@@ -132,6 +133,26 @@ public sealed class SqlParser
         return false;
     }
 
+    private bool ReadDirection()
+    {
+        if (!cursor.Eat(SqlSyntax.Using))
+        {
+            var descending = cursor.Eat(SqlSyntax.Desc);
+            if (!descending)
+            { cursor.Eat(SqlSyntax.Asc); }
+            return descending;
+        }
+        if (cursor.Eat(SqlSyntax.Less))
+        { return false; }
+        if (cursor.Eat(SqlSyntax.Greater))
+        { return true; }
+        if (cursor.Current.Quoted || cursor.Current.Kind is SqlTokenKind.End or SqlTokenKind.String
+            or SqlTokenKind.Number or SqlTokenKind.Parameter || cursor.Is(SqlSyntax.Nulls)
+            || cursor.Is(SqlSyntax.Limit) || cursor.Is(SqlSyntax.Offset) || cursor.Is(SqlSyntax.Fetch))
+        { throw SqlSyntax.Invalid(); }
+        throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
+    }
+
     private List<Ordering> ReadOrder(InnerJoinClause? join)
     {
         var order = new List<Ordering>();
@@ -143,11 +164,7 @@ public sealed class SqlParser
                 var raw = cursor.Path();
                 var field = join is null ? SqlJoinSyntax.BoundPath(JsonData.Path(raw.ToArray()), alias)
                     : SqlJoinSyntax.BoundOrderPath(raw, alias);
-                var descending = cursor.Eat(SqlSyntax.Desc);
-                if (!descending)
-                {
-                    cursor.Eat(SqlSyntax.Asc);
-                }
+                var descending = ReadDirection();
                 var nullsFirst = ReadNullPlacement();
                 order.Add(new(field, descending, nullsFirst));
             } while (cursor.Eat(SqlSyntax.Comma));

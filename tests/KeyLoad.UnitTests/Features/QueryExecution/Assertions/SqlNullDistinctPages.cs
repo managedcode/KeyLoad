@@ -9,6 +9,9 @@ internal static class SqlNullDistinctPages
     {
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
         await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.Profile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.NullSynonymProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.PositiveProfile)).IsTrue();
+        await Assert.That(engine.Capabilities.ReadProfiles.Contains(SqlNullDistinctCases.LeadingProfile)).IsTrue();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
         var identity = JsonDefaults.Serialize(store.Identity);

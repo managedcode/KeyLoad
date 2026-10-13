@@ -9,10 +9,11 @@ internal static class SqlProjectionAliases
         SqlSyntax.Explain, SqlSyntax.Select, SqlSyntax.All, SqlSyntax.From, SqlSyntax.Inner,
         SqlSyntax.Join, SqlSyntax.On, SqlSyntax.Events, SqlSyntax.TopicEvents, SqlSyntax.QueueMessages,
         SqlSyntax.As, SqlSyntax.Where, SqlSyntax.Order, SqlSyntax.By, SqlSyntax.Desc, SqlSyntax.Asc,
+        SqlSyntax.Using,
         SqlSyntax.Limit, SqlSyntax.Offset, SqlSyntax.Row, SqlSyntax.Rows, SqlSyntax.Fetch,
         SqlSyntax.First, SqlSyntax.Next, SqlSyntax.Only, SqlSyntax.With, SqlSyntax.Nulls,
-        SqlSyntax.Last, SqlSyntax.Not, SqlSyntax.Is, SqlSyntax.Distinct, SqlSyntax.Missing,
-        SqlSyntax.Null, SqlSyntax.In, SqlSyntax.Between, SqlSyntax.Symmetric, SqlSyntax.And,
+        SqlSyntax.Last, SqlSyntax.Not, SqlSyntax.Is, SqlSyntax.IsNull, SqlSyntax.NotNull, SqlSyntax.Distinct, SqlSyntax.Missing,
+        SqlSyntax.Null, SqlSyntax.In, SqlSyntax.Between, SqlSyntax.Symmetric, SqlSyntax.Asymmetric, SqlSyntax.And,
         SqlSyntax.Or, SqlSyntax.True, SqlSyntax.False, SqlSyntax.Unknown
     }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 

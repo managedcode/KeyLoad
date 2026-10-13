@@ -7,6 +7,10 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal sealed class EventingArtifactStateTests
 {
     [Test]
+    public async Task RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners()
+        => await CatalogArchiveRetryFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+
+    [Test]
     public async Task OldCursorAndLeasesStayFencedAfterAuthorizedResumeTwoColdAndHealthyDelivery()
         => await RestoreResumedTokenFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 

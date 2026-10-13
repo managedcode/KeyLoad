@@ -77,7 +77,7 @@ That's what we're building: **one place for context, one place for the work that
 
 | Plan tasks | Accepted | In progress |
 |---|---|---|
-| **105** | **19** | **86** |
+| **105** | **20** | **85** |
 
 ```mermaid
 flowchart LR
@@ -111,9 +111,11 @@ Native remote graph operations, ASP.NET authentication, Event JOIN and composed-
 | **RAM & SIMD** | Bounded caches and CPU vectorization target lower memory/latency | ◐ In progress | [Comparable Linux measurements](docs/implementation/memory-performance.md) |
 | **Production** | Qualified database and operator guidance | ○ Gated | Full SIMD-enabled unit, recovery, RF3, coverage, performance, endurance and power-loss gates |
 
+KL‑029 now satisfies its original projection rebuild, checkpoint recovery and stale-revision criteria on Linux at `7e94024c`: **58 Unit + 18 real process recovery + 9 Aspire RF3 cases passed, zero failed or skipped**. The [original acceptance audit](docs/implementation/kl-029-linux-acceptance-20261013.json) binds source, native UIDs, TRX, DLL/PDB, images and joined processes. Current shared changes still require fresh complete qualification.
+
 Full product functional coverage remains **unqualified**. A focused local run measured **25.73% lines / 19.63% branches** across 13 reported production modules; its 147 functional cases included four failures. Runner controls and load tests contributed no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
-The latest [development checkpoint](docs/implementation/stage64-r40-development-20261013.json) has clean build and formatting checks. Functional and recovery failures, RF3 and complete Linux qualification remain open.
+The latest [development checkpoint](docs/implementation/stage64-r41-development-20261013.json) has clean build and formatting checks: unit **234/240**, process recovery **11/13**, no skips. Eight failures, fresh RF3 and complete Linux qualification remain open.
 
 [Task tracker](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 

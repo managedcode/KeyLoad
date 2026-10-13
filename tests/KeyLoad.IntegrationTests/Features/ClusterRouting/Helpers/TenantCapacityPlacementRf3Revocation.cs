@@ -38,6 +38,8 @@ internal static class TenantCapacityPlacementRf3Revocation
             wave, seed, caller, original, persistId, originalRows: null, token);
         await TenantCapacityPlacementRf3Authorization.ConfigureAsync(sourceRoot, targetRoot,
             seed.Partition.TenantId, administrator: false, RevokedEpoch, credential, token);
+        await TenantCapacityPlacementRf3ReadAuthorityAssertions.DeniedAsync(caller,
+            new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), original, token);
         await TenantCapacityPlacementRf3RevocationAssertions.RefuseAsync(caller, id, request,
             ErrorCode.PermissionDenied, KeyLoad.Orleans.GrainRoutingProtocol.AdministrationRequired,
             TenantCapacityPlacementRf3RevocationAssertions.McpPermissionDenied, token);
@@ -45,6 +47,8 @@ internal static class TenantCapacityPlacementRf3Revocation
         bytes = await TenantCapacityPlacementRf3RevocationCold.PendingAsync(wave, seed, caller, original, persistId, bytes, token);
         await TenantCapacityPlacementRf3Authorization.ConfigureAsync(sourceRoot, targetRoot,
             seed.Partition.TenantId, administrator: true, RepairedEpoch, credential, token);
+        await TenantCapacityPlacementRf3ReadAuthorityAssertions.EpochFenceAsync(caller,
+            new(seed.Partition.TenantId, seed.Partition.DatabaseId, state.Control), state.HealthyPolicy, original, token);
         await TenantCapacityPlacementRf3RevocationAssertions.RefuseAsync(caller, id, request,
             ErrorCode.TokenInvalidated, TenantPlacementPolicyProtocol.ScopeMismatch,
             TenantCapacityPlacementRf3RevocationAssertions.McpEpochInvalidated, token);

@@ -6,6 +6,8 @@ internal sealed record SqlBetweenSymmetricCase(string Clause, Predicate Predicat
 internal static class SqlBetweenSymmetricCases
 {
     internal const string Profile = "SQL.BetweenSymmetric.v1";
+    internal const string AsymmetricFault = "score BETWEEN ASYMMETRIC 2 AND 1";
+    internal const string AsymmetricHealthy = "score BETWEEN ASYMMETRIC 1 AND 2";
     internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";
     internal const string Tail = " ORDER BY label ASC LIMIT 5";
     private static readonly FieldOperand Score = new("/score");
@@ -21,6 +23,12 @@ internal static class SqlBetweenSymmetricCases
         new("score BETWEEN SYMMETRIC 1 AND 1", Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
         new("score NOT BETWEEN SYMMETRIC 1 AND 1", new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
         new("score BETWEEN 2 AND 1", Reverse, []),
+        new(AsymmetricFault, Reverse, []),
+        new(AsymmetricHealthy, Both, ["high", "low"]),
+        new("score NOT BETWEEN ASYMMETRIC 2 AND 1", new Negation(Reverse), ["high", "low"]),
+        new("score BETWEEN ASYMMETRIC 1 AND 1", Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
+        new("score NOT BETWEEN ASYMMETRIC 1 AND 1", new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
+        new("score BETWEEN ASYMMETRIC NULL AND 2", Range(ValueOperand.Create(null), ValueOperand.Create(2)), []),
         new("score NOT BETWEEN 2 AND 1", new Negation(Reverse), ["high", "low"]),
         new("score BETWEEN SYMMETRIC 2 AND 1 OR label = 'missing'", new Logical(Both, "OR", new Comparison(Label, "=", ValueOperand.Create("missing"))), ["high", "low", "missing"]),
         new("score BETWEEN SYMMETRIC NULL AND 2", new Logical(Range(ValueOperand.Create(null), ValueOperand.Create(2)), "OR", Range(ValueOperand.Create(2), ValueOperand.Create(null))), []),

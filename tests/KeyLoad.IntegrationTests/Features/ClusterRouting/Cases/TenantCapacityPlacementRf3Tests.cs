@@ -4,6 +4,42 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class TenantCapacityPlacementRf3Tests
 {
     [Test]
+    public async Task OriginalSignedPlanPolicyCasRefusalRetainsFailedGuidThenFreshIntentMovesAndSurvivesDirtyAndHealthyColdCuts()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3PolicyRevisionScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task OriginalOccupiedDedicatedOwnerRefusesCapacityPlanThenSiblingRepairRestoresSameTenantPlacementAndColdReplay()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3OccupiedScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task OriginalPendingIntentIdCollisionRetainsBothScopedOutcomesThenFreshIntentMovesAndSurvivesColdReplay()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3IntentCollisionScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task OriginalSixtyFiveDistinctPartitionsRefuseBeforeCapacityCollectionThenHealthyIntentMovesAndReplaysAcrossColdCuts()
+    {
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        await TenantCapacityPlacementRf3BoundedSelectionScenario.RunAsync(linked.Token).ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task OriginalPendingIntentSurvivesAdminRevocationButEpochRepairRequiresFreshIntentAndTwoColdReplays()
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline);
